@@ -28,6 +28,7 @@ import ContactBlockEditor from '@/components/dashboard/block-editors/ContactBloc
 import SocialBlockEditor from '@/components/dashboard/block-editors/SocialBlockEditor'
 import GalleryBlockEditor from '@/components/dashboard/block-editors/GalleryBlockEditor'
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
+import type { BlockItem } from '@/components/editor/BlocksRailSortable'
 
 type CardBlock = {
   id: string
@@ -85,6 +86,13 @@ export default function ThemePageClient({ card, blocks }: Props) {
   if (!next || next.type !== 'decorations') {
     setActiveDecoId(null)
   }
+}
+function ensureCardBlocks(next: BlockItem[]) {
+  return next.map((b) => ({
+    ...(b as any),
+    settings: (b as any).settings ?? {},
+    style: (b as any).style ?? {},
+  }))
 }
 
 
@@ -270,9 +278,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
               onSelect={selectBlock}
               onToggle={toggleBlockEnabled}
               onReorder={(next) => {
-                setSaveStatus('dirty')
-                setLocalBlocks(next)
-              }}
+  setSaveStatus('dirty')
+  setLocalBlocks(ensureCardBlocks(next) as any)
+}}
+
             />
           </div>
 
@@ -346,18 +355,17 @@ export default function ThemePageClient({ card, blocks }: Props) {
               >
                 <div
                   style={{
-                    borderRadius: 28,
-                    background: '#fff',
-                    overflow: 'auto',
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    height: 680,
-                    background:
-  cardBg.mode === 'solid'
-    ? cardBg.color
-    : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
+  borderRadius: 28,
+  overflow: 'auto',
+  border: '1px solid rgba(0,0,0,0.08)',
+  height: 680,
+  background:
+    cardBg.mode === 'solid'
+      ? cardBg.color
+      : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
+  opacity: cardBg.opacity ?? 1,
+}}
 
-                    opacity: cardBg.opacity ?? 1,
-                  }}
                 >
                   <div id="card-preview-root" style={{ height: '100%' }}>
                     <ThemeProvider theme={localTheme}>

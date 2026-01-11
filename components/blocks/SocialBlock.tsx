@@ -12,8 +12,8 @@ import {
   FaSnapchat,
   FaReddit,
   FaTumblr,
-  FaTiktok,
 } from 'react-icons/fa'
+import { FaTiktok } from 'react-icons/fa6'
 import { SiTelegram } from 'react-icons/si'
 
 const ICONS_MAP: Record<string, React.ElementType> = {
@@ -30,6 +30,7 @@ const ICONS_MAP: Record<string, React.ElementType> = {
   tumblr: FaTumblr,
   tiktok: FaTiktok,
 }
+
 
 export type SocialChannel = keyof typeof ICONS_MAP
 
@@ -55,6 +56,7 @@ export type SocialSettings = {
 export type SocialStyle = {
   iconSizePx?: number
   container?: {
+    enabled?: boolean
     bgColor?: string
     radius?: number
     padding?: number
@@ -92,7 +94,6 @@ function containerStyleFromJson(style: SocialStyle['container']): React.CSSPrope
     justifyContent: 'center',
   }
 }
-
 
 function ensureUid(item: any, index: number) {
   if (item?.uid && typeof item.uid === 'string') return item.uid

@@ -6,12 +6,14 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from 
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { BlockIcon } from '@/components/editor/BlockIcon'
 
-type BlockItem = {
+export type BlockItem = {
   id: string
   type: string
   title?: string
   enabled: boolean
   order: number
+  settings?: any
+  style?: any
 }
 
 export default function BlocksRailSortable({
@@ -92,6 +94,18 @@ function SortableRow({
   return (
     <div ref={setNodeRef} style={style}>
       <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: 2,
+          top: 6,
+          bottom: 6,
+          width: 3,
+          borderRadius: 999,
+          background: active ? '#111827' : 'transparent',
+        }}
+      />
+      <div
         style={{
           width: '100%',
           padding: 6,
@@ -104,22 +118,7 @@ function SortableRow({
           position: 'relative',
         }}
       >
-        {/* Accent bar */}
-        <div
-          aria-hidden
-          style={{
-            position: 'absolute',
-            left: 2,
-            top: 6,
-            bottom: 6,
-            width: 3,
-            borderRadius: 999,
-            background: active ? '#111827' : 'transparent',
-          }}
-        />
-
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-          {/* DRAG HANDLE (mais visível) */}
           <button
             type="button"
             {...attributes}
@@ -146,8 +145,6 @@ function SortableRow({
           >
             ⇅
           </button>
-
-          {/* SELECT */}
           <button
             type="button"
             onClick={(e) => {
@@ -174,7 +171,6 @@ function SortableRow({
             <div style={{ flex: '0 0 auto' }}>
               <BlockIcon type={block.type} size={22} />
             </div>
-
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
@@ -192,8 +188,6 @@ function SortableRow({
             </div>
           </button>
         </div>
-
-        {/* VISIBILIDADE */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '0 0 auto' }}>
           <button
             type="button"

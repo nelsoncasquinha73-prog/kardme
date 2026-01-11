@@ -16,21 +16,24 @@ type Props = {
   onChange: (settings: ProfileSettings) => void
 }
 
+type LayoutWithAlign = {
+  lineGap?: number
+  align?: 'left' | 'center' | 'right'
+}
 
 function normalize(input: Partial<ProfileSettings>): ProfileSettings {
   return {
     enabled: input.enabled ?? true,
 
-layout: {
-  lineGap: input.layout?.lineGap ?? 8,
-},
 
-layout: {
-  lineGap: input.layout?.lineGap ?? 10,
-  align: input.layout?.align ?? 'center',
-},
 
-    avatar: {
+    layout: {
+      lineGap: input.layout?.lineGap ?? 10,
+      align: (input.layout && 'align' in input.layout ? input.layout.align : 'center') as 'left' | 'center' | 'right',
+    } as LayoutWithAlign,
+
+
+  avatar: {
       enabled: input.avatar?.enabled ?? true,
       image: input.avatar?.image ?? '',
       shape: input.avatar?.shape ?? 'circle',
@@ -136,7 +139,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   function openEyedropperFor(target: 'name' | 'profession' | 'company') {
     openPicker({
       mode: 'eyedropper' as any,
-      onPick: (hex) => {
+      onPick: (hex: string) => {
         patch((d) => {
           d[target].color = hex
         })
@@ -147,7 +150,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   function openEyedropperBorder() {
     openPicker({
       mode: 'eyedropper' as any,
-      onPick: (hex) => {
+      onPick: (hex: string) => {
         patch((d) => {
           d.avatar!.borderColor = hex
         })
@@ -160,10 +163,12 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     try {
       const { publicUrl } = await uploadCardImage({ cardId, file, kind: 'avatar' })
       patch((d) => {
-        d.avatar = d.avatar || ({} as any)
-        d.avatar.enabled = true
-        d.avatar.image = publicUrl
-      })
+  d.avatar = d.avatar || ({} as any)
+  d.avatar!.enabled = true
+  d.avatar!.image = publicUrl
+})
+
+
     } catch (err: any) {
       console.error(err)
       alert(err?.message || 'Erro no upload do avatar')
@@ -379,9 +384,9 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             className="h-7 rounded-xl border border-black/10 px-2"
             onClick={() =>
               patch((d) => {
-                d.offset = d.offset || ({ y: 0 } as any)
-                d.offset.y = 0
-              })
+  d.offset = d.offset || ({ y: 0 } as any)
+  d.offset!.y = 0
+})
             }
             title="Reset"
           >
@@ -395,9 +400,11 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             className="h-7 w-7 rounded-xl border border-black/10"
             onClick={(e) =>
               patch((d) => {
-                d.offset = d.offset || ({ y: 0 } as any)
-                d.offset.y = (d.offset.y ?? 0) - stepFromEvent(e)
-              })
+  const off = (d.offset ?? { y: 0 }) as any
+  off.y = (off.y ?? 0) - stepFromEvent(e)
+  d.offset = off
+})
+
             }
             title="Subir (Shift = 10px)"
           >
@@ -409,9 +416,11 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             className="h-7 w-7 rounded-xl border border-black/10"
             onClick={(e) =>
               patch((d) => {
-                d.offset = d.offset || ({ y: 0 } as any)
-                d.offset.y = (d.offset.y ?? 0) + stepFromEvent(e)
-              })
+  const off = (d.offset ?? { y: 0 }) as any
+  off.y = (off.y ?? 0) + stepFromEvent(e)
+  d.offset = off
+})
+
             }
             title="Descer (Shift = 10px)"
           >
@@ -439,9 +448,11 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     value={local.layout?.lineGap ?? 10}
     onChange={(e) =>
       patch((d) => {
-        d.layout = d.layout || ({} as any)
-        d.layout.lineGap = Number(e.target.value)
-      })
+  const layout = d.layout || ({} as any)
+  layout.lineGap = Number(e.target.value)
+  d.layout = layout
+})
+
     }
   />
 
@@ -464,15 +475,19 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           onColor={(hex) => patch((d) => (d.name.color = hex))}
           onFontFamily={(ff) =>
             patch((d) => {
-              d.name.style = d.name.style || ({} as any)
-              d.name.style.fontFamily = ff || undefined
-            })
+  const style = d.name.style || ({} as any)
+  style.fontFamily = ff || undefined
+  d.name.style = style
+})
+
           }
           onBold={(b) =>
             patch((d) => {
-              d.name.style = d.name.style || ({} as any)
-              d.name.style.fontWeight = b ? 700 : 400
-            })
+  const style = d.name.style || ({} as any)
+  style.fontWeight = b ? 700 : 400
+  d.name.style = style
+})
+
           }
           onSize={(s) => patch((d) => (d.name.size = s as any))}
           onEyedropper={() => openEyedropperFor('name')}
@@ -481,7 +496,8 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   <span className="text-sm">Alinhamento</span>
 
   <Segmented
-    value={local.layout?.align ?? 'center'}
+    value={((local.layout as any)?.align) ?? 'center'}
+
     options={[
       { key: 'left', label: 'Esq' },
       { key: 'center', label: 'Centro' },
@@ -489,9 +505,11 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     ]}
     onChange={(k) =>
       patch((d) => {
-        d.layout = d.layout || ({} as any)
-        d.layout.align = k as any
-      })
+  const layout = d.layout || ({} as any)
+  layout.align = k as any
+  d.layout = layout
+})
+
     }
   />
 </div>
@@ -514,15 +532,19 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           onColor={(hex) => patch((d) => (d.profession.color = hex))}
           onFontFamily={(ff) =>
             patch((d) => {
-              d.profession.style = d.profession.style || ({} as any)
-              d.profession.style.fontFamily = ff || undefined
-            })
+  const style = d.profession.style || ({} as any)
+  style.fontFamily = ff || undefined
+  d.profession.style = style
+})
+
           }
           onBold={(b) =>
             patch((d) => {
-              d.profession.style = d.profession.style || ({} as any)
-              d.profession.style.fontWeight = b ? 700 : 400
-            })
+  const style = d.profession.style || ({} as any)
+  style.fontWeight = b ? 700 : 400
+  d.profession.style = style
+})
+
           }
           onSize={(s) => patch((d) => (d.profession.size = s as any))}
           onEyedropper={() => openEyedropperFor('profession')}
@@ -559,16 +581,19 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             patch((d) => {
               d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
               d.company.style
-              d.company.style = d.company.style || ({} as any)
-              d.company.style.fontFamily = ff || undefined
-            })
+              const style = d.company.style || ({} as any)
+  style.fontFamily = ff || undefined
+  d.company.style = style
+})
           }
           onBold={(b) =>
             patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.style = d.company.style || ({} as any)
-              d.company.style.fontWeight = b ? 700 : 400
-            })
+  d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+  const style = d.company.style || ({} as any)
+  style.fontWeight = b ? 700 : 400
+  d.company.style = style
+})
+
           }
           onSize={(s) =>
             patch((d) => {

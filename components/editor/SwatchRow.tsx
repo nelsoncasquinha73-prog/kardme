@@ -27,6 +27,7 @@ type Props = {
   onEyedropper: () => void
   colors?: string[]
   size?: number
+  disabled?: boolean
 }
 
 export default function SwatchRow({
@@ -35,6 +36,7 @@ export default function SwatchRow({
   onEyedropper,
   colors = BASE_COLORS,
   size = 16,
+  disabled = false,
 }: Props) {
   return (
     <div
@@ -45,6 +47,9 @@ export default function SwatchRow({
         overflowY: 'hidden',
         paddingBottom: 2,
         WebkitOverflowScrolling: 'touch',
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? 'none' : undefined,
+        userSelect: disabled ? 'none' : undefined,
       }}
     >
       {colors.map((c) => (
@@ -55,6 +60,7 @@ export default function SwatchRow({
           onPointerDown={stop}
           onMouseDown={stop}
           onClick={(e) => {
+            if (disabled) return
             stop(e)
             onChange(c)
           }}
@@ -65,8 +71,10 @@ export default function SwatchRow({
             background: c,
             border: c === value ? '2px solid black' : '1px solid rgba(0,0,0,0.2)',
             flex: '0 0 auto',
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
           title={c}
+          disabled={disabled}
         />
       ))}
 
@@ -76,6 +84,7 @@ export default function SwatchRow({
         onPointerDown={stop}
         onMouseDown={stop}
         onClick={(e) => {
+          if (disabled) return
           stop(e)
           onEyedropper()
         }}
@@ -83,11 +92,12 @@ export default function SwatchRow({
         style={{
           marginLeft: 6,
           fontSize: 13,
-          cursor: 'crosshair',
+          cursor: disabled ? 'not-allowed' : 'crosshair',
           position: 'relative',
           zIndex: 3,
           flex: '0 0 auto',
         }}
+        disabled={disabled}
       >
         🖊️
       </button>

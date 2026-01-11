@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 
 type ColorPickerModalCanvaProps = {
   open: boolean
@@ -9,6 +9,7 @@ type ColorPickerModalCanvaProps = {
   documentColors: string[] // cores extraídas do tema e blocos
   brandKitColors: string[] // cores guardadas no kit de marca
   onOpenEyedropper: () => void
+  disabled?: boolean
 }
 
 export default function ColorPickerModalCanva({
@@ -18,6 +19,7 @@ export default function ColorPickerModalCanva({
   documentColors,
   brandKitColors,
   onOpenEyedropper,
+  disabled = false,
 }: ColorPickerModalCanvaProps) {
   const [search, setSearch] = useState('')
 
@@ -36,6 +38,22 @@ export default function ColorPickerModalCanva({
 
   if (!open) return null
 
+  // Estilo para desativar interações quando disabled
+  const disabledStyle: React.CSSProperties = disabled
+    ? { opacity: 0.5, pointerEvents: 'none', userSelect: 'none' }
+    : {}
+
+  // Handlers que respeitam disabled
+  function handlePick(hex: string) {
+    if (disabled) return
+    onPick(hex)
+  }
+
+  function handleOpenEyedropper() {
+    if (disabled) return
+    onOpenEyedropper()
+  }
+
   return (
     <div
       style={{
@@ -46,6 +64,7 @@ export default function ColorPickerModalCanva({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999,
+        ...disabledStyle,
       }}
       onClick={onClose}
     >
@@ -75,22 +94,24 @@ export default function ColorPickerModalCanva({
             border: '1px solid #ccc',
             fontSize: 14,
           }}
+          disabled={disabled}
         />
 
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: 14, fontWeight: 'bold' }}>Cores do documento</h3>
             <button
-              onClick={onOpenEyedropper}
+              onClick={handleOpenEyedropper}
               style={{
                 border: 'none',
                 background: 'none',
-                cursor: 'pointer',
+                cursor: disabled ? 'not-allowed' : 'pointer',
                 fontSize: 18,
                 lineHeight: 1,
                 padding: 0,
               }}
               title="Conta-gotas"
+              disabled={disabled}
             >
               🎯
             </button>
@@ -99,16 +120,17 @@ export default function ColorPickerModalCanva({
             {filteredDocumentColors.map((hex) => (
               <button
                 key={hex}
-                onClick={() => onPick(hex)}
+                onClick={() => handlePick(hex)}
                 style={{
                   backgroundColor: hex,
                   width: 32,
                   height: 32,
                   borderRadius: 8,
                   border: '1px solid #ccc',
-                  cursor: 'pointer',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
                 }}
                 title={hex}
+                disabled={disabled}
               />
             ))}
             {filteredDocumentColors.length === 0 && <p style={{ fontSize: 12, color: '#999' }}>Nenhuma cor</p>}
@@ -121,16 +143,17 @@ export default function ColorPickerModalCanva({
             {filteredBrandColors.map((hex) => (
               <button
                 key={hex}
-                onClick={() => onPick(hex)}
+                onClick={() => handlePick(hex)}
                 style={{
                   backgroundColor: hex,
                   width: 32,
                   height: 32,
                   borderRadius: 8,
                   border: '1px solid #ccc',
-                  cursor: 'pointer',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
                 }}
                 title={hex}
+                disabled={disabled}
               />
             ))}
             {filteredBrandColors.length === 0 && <p style={{ fontSize: 12, color: '#999' }}>Nenhuma cor</p>}
@@ -150,6 +173,7 @@ export default function ColorPickerModalCanva({
             cursor: 'pointer',
             fontSize: 14,
           }}
+          disabled={disabled}
         >
           Fechar
         </button>

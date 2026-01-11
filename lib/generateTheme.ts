@@ -1,12 +1,12 @@
 // lib/generateTheme.ts
 
-type Theme = {
+export type Theme = {
   primary: string
-  bg: string
-  card: string
-  text: string
-  muted: string
   accent: string
+  background: string
+  surface: string
+  text: string
+  mutedText: string
 }
 
 /* ───────────────────────────────
@@ -31,27 +31,19 @@ function rgbToHex(r: number, g: number, b: number) {
   return (
     '#' +
     [r, g, b]
-      .map(x => clamp(x).toString(16).padStart(2, '0'))
+      .map((x) => clamp(x).toString(16).padStart(2, '0'))
       .join('')
   )
 }
 
 function darken(hex: string, amount: number) {
   const { r, g, b } = hexToRgb(hex)
-  return rgbToHex(
-    r * (1 - amount),
-    g * (1 - amount),
-    b * (1 - amount)
-  )
+  return rgbToHex(r * (1 - amount), g * (1 - amount), b * (1 - amount))
 }
 
 function lighten(hex: string, amount: number) {
   const { r, g, b } = hexToRgb(hex)
-  return rgbToHex(
-    r + (255 - r) * amount,
-    g + (255 - g) * amount,
-    b + (255 - b) * amount
-  )
+  return rgbToHex(r + (255 - r) * amount, g + (255 - g) * amount, b + (255 - b) * amount)
 }
 
 /* ───────────────────────────────
@@ -63,10 +55,10 @@ export function generateTheme(primary: string): Theme {
 
   return {
     primary: safePrimary,
-    bg: darken(safePrimary, 0.85),       // fundo geral
-    card: darken(safePrimary, 0.75),     // cards
-    text: '#FFFFFF',                     // texto principal
-    muted: '#9CA3AF',                    // texto secundário
-    accent: lighten(safePrimary, 0.25),  // destaque suave
+    background: darken(safePrimary, 0.85), // fundo geral
+    surface: darken(safePrimary, 0.75), // cards/surface
+    text: '#FFFFFF', // texto principal
+    mutedText: '#9CA3AF', // texto secundário
+    accent: lighten(safePrimary, 0.25), // destaque suave
   }
 }

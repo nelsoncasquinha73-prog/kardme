@@ -51,9 +51,10 @@ function mapGoogleFont(ff?: string) {
   }
 }
 
-function radiusFor(style?: ProfileSettings['background']['style']) {
-  if (style === 'pill') return 999
-  if (style === 'rounded') return 24
+// Recebe o "style" do background (string) e devolve radius
+function radiusFor(bgStyle?: string) {
+  if (bgStyle === 'pill') return 999
+  if (bgStyle === 'rounded') return 24
   return 0
 }
 
@@ -89,9 +90,13 @@ export default function ProfileBlock({
   const showProfession = settings.profession?.enabled && settings.profession.text?.trim()
   const showCompany = settings.company?.enabled && settings.company.text?.trim()
 
-  const align = settings.layout?.align ?? 'center'
-  const justify =
-    align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
+  // O teu tipo ProfileSettings.layout atualmente não declara "align".
+  // Então lemos de forma segura via any, com fallback.
+  const alignRaw = (settings as any)?.layout?.align
+  const align: 'left' | 'center' | 'right' =
+    alignRaw === 'left' || alignRaw === 'right' || alignRaw === 'center' ? alignRaw : 'center'
+
+  const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
 
   const avatarUrl = settings.avatar?.image
   const avatarEnabled = settings.avatar?.enabled === true && isHttpUrl(avatarUrl)
@@ -118,7 +123,7 @@ export default function ProfileBlock({
 
   const extraTopPadding = avatarEnabled && dock === 'overlap' ? avatarSizePx / 2 + 10 : 0
 
-  const lineGap = settings.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
+  const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
   return (
     <section

@@ -149,7 +149,7 @@ function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<Butt
     shadow: s.shadow ?? d.shadow ?? false,
     textColor: s.textColor ?? d.textColor ?? '#111827',
 
-    fontFamily: s.fontFamily ?? d.fontFamily ?? undefined,
+    fontFamily: s.fontFamily ?? d.fontFamily ?? '',
     fontWeight: s.fontWeight ?? d.fontWeight ?? 800,
     labelFontSize: s.labelFontSize ?? d.labelFontSize ?? 13,
 

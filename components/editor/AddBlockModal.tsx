@@ -5,6 +5,9 @@ type BlockItem = {
   type: string
   title?: string
   enabled: boolean
+  order?: number
+  settings?: any
+  style?: any
 }
 
 export default function AddBlockModal({

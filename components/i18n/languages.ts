@@ -13,7 +13,9 @@ export type Language = {
   label: string
   dir: 'ltr' | 'rtl'
   countries?: string[]
+  native?: string
 }
+
 
 export const LANGUAGES: Language[] = [
   { code: 'en', label: 'English', dir: 'ltr', countries: ['US', 'GB'] },
@@ -25,3 +27,5 @@ export const LANGUAGES: Language[] = [
   { code: 'it', label: 'Italiano', dir: 'ltr', countries: ['IT'] },
   { code: 'ar', label: 'العربية', dir: 'rtl', countries: ['AE', 'SA'] },
 ]
+
+

@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
 
 type Props = {
+  cardId: string // adiciona esta prop para receber o cardId
   block: {
     id: string
     type: string
@@ -17,6 +18,7 @@ type Props = {
 }
 
 export default function EditBlockModal({
+  cardId, // recebe o cardId aqui
   block,
   onClose,
   onSaved,
@@ -42,6 +44,7 @@ export default function EditBlockModal({
       case 'header':
         return (
           <HeaderBlockEditor
+            cardId={cardId} // passa o cardId aqui
             settings={settings}
             onChange={setSettings}
           />

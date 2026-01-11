@@ -13,6 +13,8 @@ import {
   detectLanguageByIP,
 } from './detectLanguage'
 
+export type { Language }
+
 type LanguageContextType = {
   language: Language
   setLanguage: (code: LanguageCode) => void
