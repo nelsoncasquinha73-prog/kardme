@@ -2,7 +2,7 @@
 
 import { Theme } from '@/lib/defaultTheme'
 import { defaultTheme } from '@/lib/defaultTheme'
-import { HeaderBlock } from '@/components/blocks/HeaderBlock'
+import HeaderBlock from '@/components/blocks/HeaderBlock'
 
 type BookingAction = {
   type: 'link' | 'whatsapp'

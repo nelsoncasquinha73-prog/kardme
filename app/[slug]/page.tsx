@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { supabaseServer } from '@/lib/supabaseServer'
 
 // 🔹 BLOCKS
-import { HeaderBlock } from '@/components/blocks/HeaderBlock'
+import HeaderBlock from '@/components/blocks/HeaderBlock'
 import ProfileBlock from '@/components/blocks/ProfileBlock'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
 import ContactBlock from '@/components/blocks/ContactBlock'

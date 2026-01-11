@@ -1,7 +1,7 @@
 import React from 'react'
 import type { ProfileSettings, ProfileTextLine } from '@/components/blocks/types/profile'
 import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
-import { HeaderBlock } from '@/components/blocks/HeaderBlock'
+import HeaderBlock from '@/components/blocks/HeaderBlock'
 
 const SIZE_MAP = {
   sm: { name: 22, sub: 14, avatar: 72 },

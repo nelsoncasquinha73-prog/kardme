@@ -1,5 +1,3 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -9,10 +7,6 @@ const nextConfig = {
       'apkfamihczgzyxplksua.supabase.co',
       'apkfamihczgzyxplksua.storage.supabase.co',
     ],
-  },
-  webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname);
-    return config;
   },
 };
 

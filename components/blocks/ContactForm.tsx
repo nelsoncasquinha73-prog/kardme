@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { HeaderBlock } from '@/components/blocks/HeaderBlock'
+import HeaderBlock from '@/components/blocks/HeaderBlock'
 
 type ContactFormProps = {
   cardId: string
