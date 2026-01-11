@@ -1,0 +1,826 @@
+'use client'
+
+import React from 'react'
+import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import SwatchRow from '@/components/editor/SwatchRow'
+import { FONT_OPTIONS } from '@/lib/fontes'
+import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+
+type ContactChannel = 'phone' | 'email' | 'whatsapp' | 'telegram'
+
+type ContactItem = {
+  enabled?: boolean
+  label?: string
+  value?: string
+}
+
+type ButtonGradient = {
+  from?: string
+  to?: string
+  angle?: number
+}
+
+type ButtonStyle = {
+  sizePx?: number
+  radius?: number
+
+  bgColor?: string
+  bgMode?: 'solid' | 'gradient'
+  bgGradient?: ButtonGradient
+
+  borderEnabled?: boolean
+  borderWidth?: number
+  borderColor?: string
+
+  iconColor?: string
+  shadow?: boolean
+  textColor?: string
+
+  fontFamily?: string
+  fontWeight?: number
+  labelFontSize?: number
+
+  paddingY?: number
+  paddingX?: number
+
+  iconScale?: number
+}
+
+type ContactSettings = {
+  heading?: string
+  layout?: {
+    direction?: 'row' | 'column'
+    align?: 'left' | 'center' | 'right'
+    gapPx?: number
+  }
+  items?: Partial<Record<ContactChannel, ContactItem>>
+}
+
+type ContactStyle = {
+  offsetY?: number
+
+  showLabel?: boolean
+  uniformButtons?: boolean
+  uniformWidthPx?: number
+  uniformHeightPx?: number
+  uniformContentAlign?: 'left' | 'center'
+headingFontSize?: number
+
+  container?: {
+    bgColor?: string
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
+
+  buttonDefaults?: ButtonStyle
+  buttons?: Partial<Record<ContactChannel, ButtonStyle>>
+
+  headingFontFamily?: string
+  headingFontWeight?: number
+  headingColor?: string
+  headingBold?: boolean
+  headingAlign?: 'left' | 'center' | 'right'
+}
+
+type Props = {
+  settings: ContactSettings
+  style?: ContactStyle
+  onChangeSettings: (s: ContactSettings) => void
+  onChangeStyle: (s: ContactStyle) => void
+}
+
+const CHANNELS: Array<{ key: ContactChannel; title: string; placeholder: string }> = [
+  { key: 'phone', title: 'Telemóvel', placeholder: '+351 9xx xxx xxx' },
+  { key: 'email', title: 'Email', placeholder: 'nome@dominio.pt' },
+  { key: 'whatsapp', title: 'WhatsApp', placeholder: '+351 9xx xxx xxx' },
+  { key: 'telegram', title: 'Telegram', placeholder: '@username' },
+]
+
+export default function ContactBlockEditor({
+  settings,
+  style,
+  onChangeSettings,
+  onChangeStyle,
+}: Props) {
+  const { openPicker } = useColorPicker()
+  const s = settings || {}
+  const st = style || {}
+
+  const layout = s.layout || {}
+  const items = s.items || {}
+
+  const container = st.container || {}
+  const btnDefaults = st.buttonDefaults || {}
+  const btns = st.buttons || {}
+
+  const pick = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+
+  const setSettings = (patch: Partial<ContactSettings>) => onChangeSettings({ ...s, ...patch })
+  const setLayout = (patch: Partial<NonNullable<ContactSettings['layout']>>) =>
+    setSettings({ layout: { ...layout, ...patch } })
+
+  const setItem = (ch: ContactChannel, patch: Partial<ContactItem>) => {
+    setSettings({
+      items: {
+        ...items,
+        [ch]: {
+          ...(items[ch] || {}),
+          ...patch,
+        },
+      },
+    })
+  }
+
+  const setStyle = (patch: Partial<ContactStyle>) => onChangeStyle({ ...st, ...patch })
+  const setContainer = (patch: Partial<NonNullable<ContactStyle['container']>>) =>
+    setStyle({ container: { ...container, ...patch } })
+
+  const setBtnDefaults = (patch: Partial<ButtonStyle>) =>
+    setStyle({ buttonDefaults: { ...btnDefaults, ...patch } })
+
+  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) =>
+    setStyle({
+      buttons: {
+        ...btns,
+        [ch]: {
+          ...(btns[ch] || {}),
+          ...patch,
+        },
+      },
+    })
+
+  const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
+  const borderEnabled = (container.borderWidth ?? 0) > 0
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Section title="Conteúdo">
+        <Row label="Título">
+          <input
+            value={s.heading ?? 'Contacto'}
+            onChange={(e) => setSettings({ heading: e.target.value })}
+            style={input}
+            placeholder="Contacto"
+          />
+        </Row>
+
+        <Row label="Alinhamento do título">
+          <select
+            value={st.headingAlign ?? 'left'}
+            onChange={(e) => setStyle({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
+            style={select}
+          >
+            <option value="left">Esquerda</option>
+            <option value="center">Centro</option>
+            <option value="right">Direita</option>
+          </select>
+        </Row>
+
+        <Row label="Cor do título">
+          <SwatchRow
+            value={st.headingColor ?? '#111827'}
+            onChange={(hex) => setStyle({ headingColor: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ headingColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Negrito">
+          <Toggle
+            active={st.headingBold !== false}
+            onClick={() => setStyle({ headingBold: !(st.headingBold !== false) })}
+          />
+        </Row>
+
+        <Row label="Fonte do título">
+          <select
+            value={st.headingFontFamily ?? ''}
+            onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })}
+            style={select}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Peso do título">
+          <select
+            value={String(st.headingFontWeight ?? 900)}
+            onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })}
+            style={select}
+          >
+            <option value="400">Normal (400)</option>
+            <option value="600">Semi (600)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+<Row label="Tamanho do título (px)">
+  <input
+    type="number"
+    min={10}
+    max={32}
+    value={st.headingFontSize ?? 13}
+    onChange={(e) => setStyle({ headingFontSize: Number(e.target.value) })}
+    style={input}
+  />
+</Row>
+
+        {CHANNELS.map((cdef) => {
+          const it = items[cdef.key] || {}
+          return (
+            <div
+              key={cdef.key}
+              style={{
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 14,
+                padding: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: 13 }}>{cdef.title}</strong>
+                <Toggle
+                  active={it.enabled !== false}
+                  onClick={() => setItem(cdef.key, { enabled: it.enabled === false })}
+                />
+              </div>
+
+              <input
+                value={it.value ?? ''}
+                onChange={(e) => setItem(cdef.key, { value: e.target.value })}
+                placeholder={cdef.placeholder}
+                style={input}
+              />
+
+              <Row label="Label">
+                <input
+                  value={it.label ?? ''}
+                  onChange={(e) => setItem(cdef.key, { label: e.target.value })}
+                  placeholder={`Ex: \${cdef.title}`}
+                  style={input}
+                />
+              </Row>
+            </div>
+          )
+        })}
+      </Section>
+
+      <Section title="Layout dos botões">
+        <Row label="Mostrar texto nos botões">
+          <Toggle
+            active={st.showLabel !== false}
+            onClick={() => setStyle({ showLabel: !(st.showLabel !== false) })}
+          />
+        </Row>
+
+        <Row label="Botões com tamanho uniforme">
+          <Toggle
+            active={st.uniformButtons === true}
+            onClick={() => setStyle({ uniformButtons: !(st.uniformButtons === true) })}
+          />
+        </Row>
+
+        {st.uniformButtons === true && (
+          <>
+            <Row label="Largura fixa dos botões (px)">
+              <input
+                type="number"
+                min={44}
+                max={400}
+                value={st.uniformWidthPx ?? 160}
+                onChange={(e) => setStyle({ uniformWidthPx: Number(e.target.value) })}
+                style={input}
+              />
+            </Row>
+
+            <Row label="Altura fixa dos botões (px)">
+              <input
+                type="number"
+                min={24}
+                max={120}
+                value={st.uniformHeightPx ?? 52}
+                onChange={(e) => setStyle({ uniformHeightPx: Number(e.target.value) })}
+                style={input}
+              />
+            </Row>
+
+            <Row label="Alinhamento do conteúdo">
+              <select
+                value={st.uniformContentAlign ?? 'center'}
+                onChange={(e) => setStyle({ uniformContentAlign: e.target.value as 'left' | 'center' })}
+                style={select}
+              >
+                <option value="left">Esquerda</option>
+                <option value="center">Centro</option>
+              </select>
+            </Row>
+          </>
+        )}
+      </Section>
+
+      <Section title="Aparência do bloco">
+        <Row label="Fundo">
+          <Toggle
+            active={bgEnabled}
+            onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })}
+          />
+        </Row>
+
+        {bgEnabled && (
+          <Row label="Cor fundo">
+            <SwatchRow
+              value={container.bgColor ?? '#ffffff'}
+              onChange={(hex) => setContainer({ bgColor: hex })}
+              onEyedropper={() => pick((hex) => setContainer({ bgColor: hex }))}
+            />
+          </Row>
+        )}
+
+        <Row label="Sombra">
+          <Toggle
+            active={container.shadow === true}
+            onClick={() => setContainer({ shadow: !(container.shadow === true) })}
+          />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle
+            active={borderEnabled}
+            onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })}
+          />
+        </Row>
+
+        {borderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={container.borderWidth ?? 1}
+                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
+              />
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
+            </Row>
+
+            <Row label="Cor borda">
+              <SwatchRow
+                value={container.borderColor ?? '#e5e7eb'}
+                onChange={(hex) => setContainer({ borderColor: hex })}
+                onEyedropper={() => pick((hex) => setContainer({ borderColor: hex }))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Raio">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={container.radius ?? 14}
+            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{container.radius ?? 14}px</span>
+        </Row>
+
+        <Row label="Padding">
+          <input
+            type="range"
+            min={0}
+            max={28}
+            step={1}
+            value={container.padding ?? 16}
+            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{container.padding ?? 16}px</span>
+        </Row>
+      </Section>
+
+      <Section title="Estilos dos botões (defaults)">
+        <Row label="Tamanho">
+          <input
+            type="range"
+            min={24}
+            max={64}
+            step={1}
+            value={btnDefaults.sizePx ?? 44}
+            onChange={(e) => setBtnDefaults({ sizePx: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{btnDefaults.sizePx ?? 44}px</span>
+        </Row>
+
+        <Row label="Raio">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btnDefaults.radius ?? 14}
+            onChange={(e) => setBtnDefaults({ radius: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{btnDefaults.radius ?? 14}px</span>
+        </Row>
+
+        <Row label="Modo Fundo">
+          <select
+            value={btnDefaults.bgMode ?? 'solid'}
+            onChange={(e) => setBtnDefaults({ bgMode: e.target.value as 'solid' | 'gradient' })}
+            style={select}
+          >
+            <option value="solid">Sólido</option>
+            <option value="gradient">Degradê</option>
+          </select>
+        </Row>
+
+        {btnDefaults.bgMode === 'gradient' && (
+          <>
+            <Row label="Cor Degradê (from)">
+              <SwatchRow
+                value={btnDefaults.bgGradient?.from ?? '#111827'}
+                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })}
+                onEyedropper={() =>
+                  pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))
+                }
+              />
+            </Row>
+
+            <Row label="Cor Degradê (to)">
+              <SwatchRow
+                value={btnDefaults.bgGradient?.to ?? '#374151'}
+                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })}
+                onEyedropper={() =>
+                  pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))
+                }
+              />
+            </Row>
+
+            <Row label="Ângulo (deg)">
+              <input
+                type="number"
+                min={0}
+                max={360}
+                value={btnDefaults.bgGradient?.angle ?? 135}
+                onChange={(e) =>
+                  setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })
+                }
+                style={{ width: 70, fontSize: 14, padding: 6, borderRadius: 8 }}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Fundo">
+          <SwatchRow
+            value={btnDefaults.bgColor ?? '#ffffff'}
+            onChange={(hex) => setBtnDefaults({ bgColor: hex })}
+            onEyedropper={() => pick((hex) => setBtnDefaults({ bgColor: hex }))}
+            disabled={btnDefaults.bgMode === 'gradient'}
+          />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle
+            active={(btnDefaults.borderEnabled ?? true) === true}
+            onClick={() => setBtnDefaults({ borderEnabled: !(btnDefaults.borderEnabled ?? true) })}
+          />
+        </Row>
+
+        {(btnDefaults.borderEnabled ?? true) && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={btnDefaults.borderWidth ?? 1}
+                onChange={(e) => setBtnDefaults({ borderWidth: Number(e.target.value) })}
+              />
+              <span style={rightNum}>{btnDefaults.borderWidth ?? 1}px</span>
+            </Row>
+
+            <Row label="Cor borda">
+              <SwatchRow
+                value={btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'}
+                onChange={(hex) => setBtnDefaults({ borderColor: hex })}
+                onEyedropper={() => pick((hex) => setBtnDefaults({ borderColor: hex }))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Ícone">
+          <SwatchRow
+            value={btnDefaults.iconColor ?? '#111827'}
+            onChange={(hex) => setBtnDefaults({ iconColor: hex })}
+            onEyedropper={() => pick((hex) => setBtnDefaults({ iconColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Texto">
+          <SwatchRow
+            value={btnDefaults.textColor ?? '#111827'}
+            onChange={(hex) => setBtnDefaults({ textColor: hex })}
+            onEyedropper={() => pick((hex) => setBtnDefaults({ textColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Fonte">
+          <select
+            value={btnDefaults.fontFamily ?? ''}
+            onChange={(e) => setBtnDefaults({ fontFamily: e.target.value || undefined })}
+            style={select}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Peso do texto">
+          <select
+            value={String(btnDefaults.fontWeight ?? 800)}
+            onChange={(e) => setBtnDefaults({ fontWeight: Number(e.target.value) })}
+            style={select}
+          >
+            <option value="400">Normal (400)</option>
+                       <option value="600">Semi (600)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+
+        <Row label="Tamanho do texto (px)">
+          <input
+            type="number"
+            min={8}
+            max={36}
+            value={btnDefaults.labelFontSize ?? 13}
+            onChange={(e) => setBtnDefaults({ labelFontSize: Number(e.target.value) })}
+            style={input}
+          />
+        </Row>
+
+        <Row label="Escala do ícone">
+          <input
+            type="range"
+            min={0.4}
+            max={0.9}
+            step={0.01}
+            value={btnDefaults.iconScale ?? 0.58}
+            onChange={(e) => setBtnDefaults({ iconScale: Number(e.target.value) })}
+            style={{ width: 140 }}
+          />
+          <span style={rightNum}>{(btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
+        </Row>
+
+        <Row label="Padding Y">
+          <input
+            type="range"
+            min={0}
+            max={24}
+            step={1}
+            value={btnDefaults.paddingY ?? 10}
+            onChange={(e) => setBtnDefaults({ paddingY: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{btnDefaults.paddingY ?? 10}px</span>
+        </Row>
+
+        <Row label="Padding X">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btnDefaults.paddingX ?? 12}
+            onChange={(e) => setBtnDefaults({ paddingX: Number(e.target.value) })}
+          />
+          <span style={rightNum}>{btnDefaults.paddingX ?? 12}px</span>
+        </Row>
+      </Section>
+
+      <Section title="Estilos por botão (override)">
+        {CHANNELS.map(({ key, title }) => {
+          const b = btns[key] || {}
+          const bBorderEnabled = (b.borderEnabled ?? btnDefaults.borderEnabled ?? true) === true
+          const bBgMode = (b.bgMode ?? btnDefaults.bgMode ?? 'solid') as 'solid' | 'gradient'
+
+          return (
+            <div
+              key={key}
+              style={{
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 14,
+                padding: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              <strong style={{ fontSize: 13 }}>{title}</strong>
+
+              <Row label="Modo Fundo">
+                <select
+                  value={bBgMode}
+                  onChange={(e) => setBtn(key, { bgMode: e.target.value as 'solid' | 'gradient' })}
+                  style={select}
+                >
+                  <option value="solid">Sólido</option>
+                  <option value="gradient">Degradê</option>
+                </select>
+              </Row>
+
+              {bBgMode === 'gradient' && (
+                <>
+                  <Row label="Cor Degradê (from)">
+                    <SwatchRow
+                      value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'}
+                      onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })}
+                      onEyedropper={() =>
+                        pick((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))
+                      }
+                    />
+                  </Row>
+
+                  <Row label="Cor Degradê (to)">
+                    <SwatchRow
+                      value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'}
+                      onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })}
+                      onEyedropper={() =>
+                        pick((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))
+                      }
+                    />
+                  </Row>
+
+                  <Row label="Ângulo (deg)">
+                    <input
+                      type="number"
+                      min={0}
+                      max={360}
+                      value={b.bgGradient?.angle ?? btnDefaults.bgGradient?.angle ?? 135}
+                      onChange={(e) =>
+                        setBtn(key, { bgGradient: { ...(b.bgGradient || {}), angle: Number(e.target.value) } })
+                      }
+                      style={{ width: 70, fontSize: 14, padding: 6, borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)' }}
+                    />
+                  </Row>
+                </>
+              )}
+
+              <Row label="Fundo">
+                <SwatchRow
+                  value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'}
+                  onChange={(hex) => setBtn(key, { bgColor: hex })}
+                  onEyedropper={() => pick((hex) => setBtn(key, { bgColor: hex }))}
+                  disabled={bBgMode === 'gradient'}
+                />
+              </Row>
+
+              <Row label="Borda">
+                <Toggle active={bBorderEnabled} onClick={() => setBtn(key, { borderEnabled: !bBorderEnabled })} />
+              </Row>
+
+              {bBorderEnabled && (
+                <>
+                  <Row label="Espessura">
+                    <input
+                      type="range"
+                      min={1}
+                      max={6}
+                      step={1}
+                      value={b.borderWidth ?? btnDefaults.borderWidth ?? 1}
+                      onChange={(e) => setBtn(key, { borderWidth: Number(e.target.value) })}
+                    />
+                    <span style={rightNum}>{b.borderWidth ?? btnDefaults.borderWidth ?? 1}px</span>
+                  </Row>
+
+                  <Row label="Cor borda">
+                    <SwatchRow
+                      value={b.borderColor ?? btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'}
+                      onChange={(hex) => setBtn(key, { borderColor: hex })}
+                      onEyedropper={() => pick((hex) => setBtn(key, { borderColor: hex }))}
+                    />
+                  </Row>
+                </>
+              )}
+
+              <Row label="Ícone">
+                <SwatchRow
+                  value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'}
+                  onChange={(hex) => setBtn(key, { iconColor: hex })}
+                  onEyedropper={() => pick((hex) => setBtn(key, { iconColor: hex }))}
+                />
+              </Row>
+
+              <Row label="Texto">
+                <SwatchRow
+                  value={b.textColor ?? btnDefaults.textColor ?? '#111827'}
+                  onChange={(hex) => setBtn(key, { textColor: hex })}
+                  onEyedropper={() => pick((hex) => setBtn(key, { textColor: hex }))}
+                />
+              </Row>
+
+              <Row label="Fonte">
+                <select
+                  value={b.fontFamily ?? btnDefaults.fontFamily ?? ''}
+                  onChange={(e) => setBtn(key, { fontFamily: e.target.value || undefined })}
+                  style={select}
+                >
+                  <option value="">Padrão</option>
+                  {FONT_OPTIONS.map((o) => (
+                    <option key={o.label} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </Row>
+
+              <Row label="Peso do texto">
+                <select
+                  value={String(b.fontWeight ?? btnDefaults.fontWeight ?? 800)}
+                  onChange={(e) => setBtn(key, { fontWeight: Number(e.target.value) })}
+                  style={select}
+                >
+                  <option value="400">Normal (400)</option>
+                  <option value="600">Semi (600)</option>
+                  <option value="700">Bold (700)</option>
+                  <option value="800">Extra (800)</option>
+                  <option value="900">Black (900)</option>
+                </select>
+              </Row>
+
+              <Row label="Tamanho do texto (px)">
+                <input
+                  type="number"
+                  min={8}
+                  max={36}
+                  value={b.labelFontSize ?? btnDefaults.labelFontSize ?? 13}
+                  onChange={(e) => setBtn(key, { labelFontSize: Number(e.target.value) })}
+                  style={input}
+                />
+              </Row>
+
+              <Row label="Escala do ícone">
+                <input
+                  type="range"
+                  min={0.4}
+                  max={0.9}
+                  step={0.01}
+                  value={b.iconScale ?? btnDefaults.iconScale ?? 0.58}
+                  onChange={(e) => setBtn(key, { iconScale: Number(e.target.value) })}
+                  style={{ width: 140 }}
+                />
+                <span style={rightNum}>{(b.iconScale ?? btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
+              </Row>
+
+              <Row label="Padding Y">
+                <input
+                  type="range"
+                  min={0}
+                  max={24}
+                  step={1}
+                  value={b.paddingY ?? btnDefaults.paddingY ?? 10}
+                  onChange={(e) => setBtn(key, { paddingY: Number(e.target.value) })}
+                />
+                <span style={rightNum}>{b.paddingY ?? btnDefaults.paddingY ?? 10}px</span>
+              </Row>
+
+              <Row label="Padding X">
+                <input
+                  type="range"
+                  min={0}
+                  max={32}
+                  step={1}
+                  value={b.paddingX ?? btnDefaults.paddingX ?? 12}
+                  onChange={(e) => setBtn(key, { paddingX: Number(e.target.value) })}
+                />
+                <span style={rightNum}>{b.paddingX ?? btnDefaults.paddingX ?? 12}px</span>
+              </Row>
+
+              <Row label="Sombra">
+                <Toggle active={b.shadow === true} onClick={() => setBtn(key, { shadow: !(b.shadow === true) })} />
+              </Row>
+            </div>
+          )
+        })}
+      </Section>
+    </div>
+  )
+}

@@ -1,0 +1,332 @@
+'use client'
+
+import React from 'react'
+import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import SwatchRow from '@/components/editor/SwatchRow'
+import { FONT_OPTIONS } from '@/lib/fontes'
+
+type BioSettings = {
+  text: string
+}
+
+type BioStyle = {
+  offsetY?: number
+
+  textColor?: string
+  fontFamily?: string // agora vai guardar var(--font-...)
+  bold?: boolean
+  fontSize?: number
+  lineHeight?: number
+  align?: 'left' | 'center' | 'right'
+
+  container?: {
+    bgColor?: string
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
+}
+
+type Props = {
+  settings: BioSettings
+  style?: BioStyle
+  onChangeSettings: (s: BioSettings) => void
+  onChangeStyle: (s: BioStyle) => void
+}
+
+export default function BioBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
+  const { openPicker } = useColorPicker()
+
+  const s: BioStyle = style || {}
+  const c = s.container || {}
+
+  const pick = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+
+  const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => {
+    onChangeStyle({
+      ...s,
+      container: {
+        ...c,
+        ...patch,
+      },
+    })
+  }
+
+  const setStyle = (patch: Partial<BioStyle>) => onChangeStyle({ ...s, ...patch })
+
+  const bgEnabled = (c.bgColor ?? 'transparent') !== 'transparent'
+  const borderEnabled = (c.borderWidth ?? 0) > 0
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Section title="Texto">
+        <label style={{ fontSize: 12, opacity: 0.7 }}>Bio</label>
+        <textarea
+          value={settings.text || ''}
+          onChange={(e) => onChangeSettings({ text: e.target.value })}
+          rows={6}
+          style={{
+            width: '100%',
+            fontSize: 14,
+            padding: 10,
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            outline: 'none',
+            resize: 'vertical',
+          }}
+        />
+
+        <Row label="Alinhamento">
+          <Button onClick={() => setStyle({ align: 'left' })} active={s.align === 'left'}>
+            Esquerda
+          </Button>
+          <Button onClick={() => setStyle({ align: 'center' })} active={(s.align ?? 'center') === 'center'}>
+            Centro
+          </Button>
+          <Button onClick={() => setStyle({ align: 'right' })} active={s.align === 'right'}>
+            Direita
+          </Button>
+        </Row>
+
+        <Row label="Fonte">
+          <select
+            value={s.fontFamily ?? ''}
+            onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })}
+            style={{ fontSize: 14, padding: 6, borderRadius: 6 }}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Negrito">
+          <Toggle active={s.bold === true} onClick={() => setStyle({ bold: !(s.bold === true) })} />
+        </Row>
+
+        <Row label="Cor do texto">
+          <SwatchRow
+            value={s.textColor ?? '#111827'}
+            onChange={(hex) => setStyle({ textColor: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ textColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Tamanho">
+          <input
+            type="range"
+            min={12}
+            max={22}
+            step={1}
+            value={s.fontSize ?? 15}
+            onChange={(e) => setStyle({ fontSize: Number(e.target.value) })}
+          />
+          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{s.fontSize ?? 15}px</span>
+        </Row>
+
+        <Row label="Linha">
+          <input
+            type="range"
+            min={1.1}
+            max={2.2}
+            step={0.05}
+            value={s.lineHeight ?? 1.6}
+            onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })}
+          />
+          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>
+            {(s.lineHeight ?? 1.6).toFixed(2)}
+          </span>
+        </Row>
+      </Section>
+
+      <Section title="Bloco (fundo, borda, sombra)">
+        <Row label="Fundo">
+          <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
+        </Row>
+
+        {bgEnabled && (
+          <Row label="Cor fundo">
+            <SwatchRow
+              value={c.bgColor ?? '#ffffff'}
+              onChange={(hex) => setContainer({ bgColor: hex })}
+              onEyedropper={() => pick((hex) => setContainer({ bgColor: hex }))}
+            />
+          </Row>
+        )}
+
+        <Row label="Sombra">
+          <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !(c.shadow === true) })} />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
+        </Row>
+
+        {borderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={c.borderWidth ?? 1}
+                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
+              />
+              <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>
+                {c.borderWidth ?? 1}px
+              </span>
+            </Row>
+
+            <Row label="Cor borda">
+              <SwatchRow
+                value={c.borderColor ?? '#e5e7eb'}
+                onChange={(hex) => setContainer({ borderColor: hex })}
+                onEyedropper={() => pick((hex) => setContainer({ borderColor: hex }))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Raio">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={c.radius ?? 18}
+            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
+          />
+          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.radius ?? 18}px</span>
+        </Row>
+
+        <Row label="Padding">
+          <input
+            type="range"
+            min={0}
+            max={28}
+            step={1}
+            value={c.padding ?? 16}
+            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
+          />
+          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.padding ?? 16}px</span>
+        </Row>
+      </Section>
+
+      <Section title="Posição">
+        <Row label="Mover (Y)">
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) - 4 })} style={miniBtn}>
+              ⬆️
+            </button>
+            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) + 4 })} style={miniBtn}>
+              ⬇️
+            </button>
+            <button type="button" onClick={() => setStyle({ offsetY: 0 })} style={miniBtn}>
+              Reset
+            </button>
+            <span style={{ fontSize: 12, opacity: 0.7, width: 70, textAlign: 'right' }}>
+              {s.offsetY ?? 0}px
+            </span>
+          </div>
+        </Row>
+      </Section>
+    </div>
+  )
+}
+
+function Section({ title, children }: any) {
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        padding: 14,
+        border: '1px solid rgba(0,0,0,0.08)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+      }}
+    >
+      <strong style={{ fontSize: 13 }}>{title}</strong>
+      {children}
+    </div>
+  )
+}
+
+function Row({ label, children }: any) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{children}</div>
+    </div>
+  )
+}
+
+function Button({ children, onClick, active }: any) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '8px 10px',
+        borderRadius: 12,
+        border: '1px solid rgba(0,0,0,0.12)',
+        background: active ? 'rgba(0,0,0,0.06)' : '#fff',
+        cursor: 'pointer',
+        fontWeight: 800,
+        fontSize: 12,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function Toggle({ active, onClick }: any) {
+  return (
+    <button
+      type="button"
+      onPointerDown={(e) => {
+        e.preventDefault()
+      }}
+      onClick={() => onClick?.()}
+      style={{
+        width: 46,
+        height: 26,
+        borderRadius: 999,
+        background: active ? 'var(--color-primary)' : '#e5e7eb',
+        position: 'relative',
+        border: 'none',
+        cursor: 'pointer',
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 3,
+          left: active ? 22 : 4,
+          width: 20,
+          height: 20,
+          borderRadius: '50%',
+          background: '#fff',
+        }}
+      />
+    </button>
+  )
+}
+
+const miniBtn: React.CSSProperties = {
+  padding: '6px 8px',
+  borderRadius: 10,
+  border: '1px solid rgba(0,0,0,0.12)',
+  background: '#fff',
+  cursor: 'pointer',
+  fontWeight: 800,
+  fontSize: 12,
+}
