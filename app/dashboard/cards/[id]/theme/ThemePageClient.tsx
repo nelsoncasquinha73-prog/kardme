@@ -29,6 +29,7 @@ import SocialBlockEditor from '@/components/dashboard/block-editors/SocialBlockE
 import GalleryBlockEditor from '@/components/dashboard/block-editors/GalleryBlockEditor'
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
+import PublishToggle from './PublishToggle' // ajusta o caminho conforme localização real
 
 type CardBlock = {
   id: string
@@ -87,11 +88,15 @@ export default function ThemePageClient({ card, blocks }: Props) {
     setActiveDecoId(null)
   }
 }
-function ensureCardBlocks(next: BlockItem[]) {
+function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
   return next.map((b) => ({
-    ...(b as any),
+    id: b.id,
+    type: b.type,
+    enabled: b.enabled ?? true,
+    order: b.order ?? 0,
     settings: (b as any).settings ?? {},
     style: (b as any).style ?? {},
+    title: (b as any).title,
   }))
 }
 
@@ -279,7 +284,7 @@ function ensureCardBlocks(next: BlockItem[]) {
               onToggle={toggleBlockEnabled}
               onReorder={(next) => {
   setSaveStatus('dirty')
-  setLocalBlocks(ensureCardBlocks(next) as any)
+  setLocalBlocks(ensureCardBlocks(next))
 }}
 
             />
@@ -606,6 +611,12 @@ function ensureCardBlocks(next: BlockItem[]) {
               background: '#fff',
             }}
           >
+            {activeBlock && (
+  <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+    <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+  </div>
+)}
+
             <button
               onClick={saveChanges}
               style={{
