@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/config'
 
-const url = (SUPABASE_URL || '').trim()
-const key = (SUPABASE_SERVICE_ROLE_KEY || '').trim()
+if (!SUPABASE_URL) {
+  throw new Error('SUPABASE_URL is required')
+}
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required')
+}
 
-// fallback hard para o build nunca morrer
-const safeUrl = url.length ? url : 'http://localhost:54321'
-const safeKey = key.length ? key : 'dummy-key'
-
-export const supabaseServer = createClient(safeUrl, safeKey, {
+export const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 })
