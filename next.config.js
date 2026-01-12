@@ -8,6 +8,6 @@ const nextConfig = {
       'apkfamihczgzyxplksua.storage.supabase.co',
     ],
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
