@@ -1,22 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabaseServer'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+
+const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false },
+})
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+})
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { templateId, slug, userId } = await request.json()
+    const { templateId, slug: rawSlug } = await request.json()
 
     if (!templateId) {
       return NextResponse.json({ success: false, error: 'templateId é obrigatório' }, { status: 400 })
     }
-    if (!slug) {
+    if (!rawSlug) {
       return NextResponse.json({ success: false, error: 'slug é obrigatório' }, { status: 400 })
     }
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'userId é obrigatório' }, { status: 400 })
+
+    const slug = slugify(rawSlug)
+    if (!slug) {
+      return NextResponse.json({ success: false, error: 'Slug inválido' }, { status: 400 })
     }
 
-    // 1) Buscar template
-    const { data: template, error: templateError } = await supabaseServer
+    const accessToken = request.cookies.get('sb-access-token')?.value
+    if (!accessToken) {
+      return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
+    }
+
+    supabaseAuth.setAuth(accessToken)
+    const { data: userData, error: userError } = await supabaseAuth.auth.getUser()
+    if (userError || !userData.user) {
+      return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const userId = userData.user.id
+
+    // Validar slug único
+    const { data: existing } = await supabaseAdmin
+      .from('cards')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (existing?.id) {
+      return NextResponse.json({ success: false, error: 'Slug já existe' }, { status: 409 })
+    }
+
+    // Buscar template
+    const { data: template, error: templateError } = await supabaseAdmin
       .from('cards')
       .select('*')
       .eq('id', templateId)
@@ -27,17 +75,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Template não encontrado' }, { status: 404 })
     }
 
-    // 2) Criar novo cartão
-    const { data: newCard, error: insertError } = await supabaseServer
+    // Criar novo cartão referenciando o template (sem copiar blocos)
+    const { data: newCard, error: insertError } = await supabaseAdmin
       .from('cards')
       .insert({
-  user_id: userId,
-  slug,
-  is_template: false,
-  published: false,
-  theme: template.theme,
-  title: template.title ?? null,
-})
+        user_id: userId,
+        slug,
+        is_template: false,
+        published: false,
+        theme: template.theme,
+        title: template.title ?? null,
+        template_id: template.id,
+      })
       .select()
       .single()
 
@@ -46,28 +95,6 @@ export async function POST(request: NextRequest) {
         { success: false, error: insertError?.message || 'Erro ao criar cartão' },
         { status: 500 }
       )
-    }
-
-    // 3) Copiar blocos
-    const { data: blocks, error: blocksError } = await supabaseServer
-      .from('card_blocks')
-      .select('*')
-      .eq('card_id', templateId)
-
-    if (blocksError) {
-      return NextResponse.json({ success: false, error: blocksError.message }, { status: 500 })
-    }
-
-    const newBlocks = (blocks ?? []).map(({ id, created_at, updated_at, ...rest }: any) => ({
-      ...rest,
-      card_id: newCard.id,
-    }))
-
-    if (newBlocks.length) {
-      const { error: insertBlocksError } = await supabaseServer.from('card_blocks').insert(newBlocks)
-      if (insertBlocksError) {
-        return NextResponse.json({ success: false, error: insertBlocksError.message }, { status: 500 })
-      }
     }
 
     return NextResponse.json({ success: true, card: newCard })
