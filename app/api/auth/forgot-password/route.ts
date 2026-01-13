@@ -9,20 +9,22 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const { email } = await request.json()
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Email inválido' }, { status: 400 })
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
-})
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.kardme.com'
+    const redirectTo = `${siteUrl}/reset-password`
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json({ message: 'Password reset email sent' })
-  } catch (err) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  } catch {
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }
