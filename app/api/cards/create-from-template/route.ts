@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false },
-})
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { persistSession: false },
-})
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function slugify(input: string) {
   return input
@@ -27,10 +18,10 @@ export async function POST(request: NextRequest) {
   try {
     const { templateId, slug: rawSlug } = await request.json()
 
-    if (!templateId) {
+    if (!templateId || typeof templateId !== 'string') {
       return NextResponse.json({ success: false, error: 'templateId é obrigatório' }, { status: 400 })
     }
-    if (!rawSlug) {
+    if (!rawSlug || typeof rawSlug !== 'string') {
       return NextResponse.json({ success: false, error: 'slug é obrigatório' }, { status: 400 })
     }
 
@@ -39,20 +30,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Slug inválido' }, { status: 400 })
     }
 
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    if (!supabaseUrl || !serviceRole) {
+      return NextResponse.json({ success: false, error: 'Env vars do Supabase em falta' }, { status: 500 })
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceRole, {
+      auth: { persistSession: false },
+    })
+
+    // 1) Ler utilizador autenticado a partir do cookie (access token)
     const accessToken = request.cookies.get('sb-access-token')?.value
     if (!accessToken) {
       return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
     }
 
-    supabaseAuth.setAuth(accessToken)
-    const { data: userData, error: userError } = await supabaseAuth.auth.getUser()
-    if (userError || !userData.user) {
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(accessToken)
+    if (userError || !userData?.user) {
       return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
     }
-
     const userId = userData.user.id
 
-    // Validar slug único
+    // 2) Validar slug único
     const { data: existing } = await supabaseAdmin
       .from('cards')
       .select('id')
@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Slug já existe' }, { status: 409 })
     }
 
-    // Buscar template
+    // 3) Buscar template
     const { data: template, error: templateError } = await supabaseAdmin
       .from('cards')
-      .select('*')
+      .select('id, theme, title')
       .eq('id', templateId)
       .eq('is_template', true)
       .single()
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Template não encontrado' }, { status: 404 })
     }
 
-    // Criar novo cartão referenciando o template (sem copiar blocos)
+    // 4) Criar novo cartão (SEM copiar blocos)
     const { data: newCard, error: insertError } = await supabaseAdmin
       .from('cards')
       .insert({
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, card: newCard })
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: (error as Error).message || 'Erro interno' },
       { status: 500 }
     )
   }
