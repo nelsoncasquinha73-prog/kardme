@@ -9,12 +9,23 @@ import { LanguageProvider } from '@/components/language/LanguageProvider'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+const RESERVED_SLUGS = new Set([
+  'reset-password',
+  'forgot-password',
+  'login',
+  'dashboard',
+  'api',
+  'templates',
+])
+
 type Props = {
   params: Promise<{ slug: string }>
 }
 
 export default async function CardPage({ params }: Props) {
   const { slug } = await params
+
+  if (RESERVED_SLUGS.has(slug)) notFound()
 
   const { data: card, error } = await supabaseServer
     .from('cards')
