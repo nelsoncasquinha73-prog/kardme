@@ -54,4 +54,17 @@ export default function ForgotPasswordPage() {
             padding: 12,
             borderRadius: 10,
             border: 'none',
-            background
+            background: '#111',
+            color: '#fff',
+            cursor: loading ? 'default' : 'pointer',
+          }}
+        >
+          {loading ? 'A enviar...' : 'Enviar email'}
+        </button>
+
+        {ok && <p style={{ color: 'green' }}>{ok}</p>}
+        {err && <p style={{ color: 'crimson' }}>{err}</p>}
+      </form>
+    </div>
+  )
+}
