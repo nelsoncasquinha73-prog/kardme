@@ -13,9 +13,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const { data, error } = await supabase.auth.api.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
-    })
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
+})
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
