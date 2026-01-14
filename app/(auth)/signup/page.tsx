@@ -36,7 +36,6 @@ const translations: Record<string, typeof baseTranslations> = {
     successMessage: 'Conta criada! Verifica o email para confirmar.',
   },
   en: baseTranslations,
-  // outros idiomas podem ser adicionados aqui
 }
 
 export default function SignupPage() {
@@ -77,19 +76,19 @@ export default function SignupPage() {
 
       const userId = data?.user?.id
       if (userId) {
+        // Só faz UPDATE, não INSERT/UPSERT
         const { error: profileErr } = await supabase
           .from('profiles')
-          .upsert(
-            {
-              id: userId,
-              nome: firstName.trim(),
-              apelido: lastName.trim(),
-              phone: phone.trim(),
-              email: email.trim(),
-            },
-            { onConflict: 'id' }
-          )
-        if (profileErr) throw profileErr
+          .update({
+            nome: firstName.trim(),
+            apelido: lastName.trim(),
+            phone: phone.trim(),
+          })
+          .eq('id', userId)
+
+        if (profileErr) {
+          console.warn('Falha ao atualizar perfil (pode ser por sessão ainda não ativa):', profileErr)
+        }
       }
 
       setOk(t.successMessage)
