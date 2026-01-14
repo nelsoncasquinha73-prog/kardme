@@ -8,9 +8,15 @@ import '@/styles/plugins/bootstrap-select.min.css'
 import '@/styles/plugins/prism.css'
 import '@/styles/style.css'
 
+import { LanguageProvider } from '@/components/language/LanguageProvider'
+
 // opcional (se ainda quiseres overrides)
 // import '@/styles/auth-overrides.css'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  return <div className="auth-scope">{children}</div>
+  return (
+    <LanguageProvider>
+      <div className="auth-scope">{children}</div>
+    </LanguageProvider>
+  )
 }

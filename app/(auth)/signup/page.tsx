@@ -1,4 +1,5 @@
 'use client'
+
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -7,8 +8,19 @@ import SignupForm from '@/components/auth/SignupForm'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
-// Exemplo simples de traduções PT/EN
-const translations = {
+const baseTranslations = {
+  nameLabel: 'Name',
+  phoneLabel: 'Phone',
+  emailLabel: 'Email',
+  passwordLabel: 'Create password',
+  confirmPasswordLabel: 'Confirm password',
+  submitButton: 'Sign Up',
+  passwordsMismatchError: 'Passwords do not match',
+  phoneInvalidError: 'Invalid phone (min 9 digits)',
+  successMessage: 'Account created! Check your email to confirm.',
+}
+
+const translations: Record<string, typeof baseTranslations> = {
   pt: {
     nameLabel: 'Nome',
     phoneLabel: 'Telemóvel',
@@ -20,16 +32,22 @@ const translations = {
     phoneInvalidError: 'Telemóvel inválido (mínimo 9 dígitos)',
     successMessage: 'Conta criada! Verifica o email para confirmar.',
   },
-  en: {
-    nameLabel: 'Name',
-    phoneLabel: 'Phone',
+  en: baseTranslations,
+  es: baseTranslations,
+  fr: baseTranslations,
+  de: baseTranslations,
+  it: baseTranslations,
+  ar: baseTranslations,
+  'pt-br': {
+    nameLabel: 'Nome',
+    phoneLabel: 'Telefone',
     emailLabel: 'Email',
-    passwordLabel: 'Create password',
-    confirmPasswordLabel: 'Confirm password',
-    submitButton: 'Sign Up',
-    passwordsMismatchError: 'Passwords do not match',
-    phoneInvalidError: 'Invalid phone (min 9 digits)',
-    successMessage: 'Account created! Check your email to confirm.',
+    passwordLabel: 'Criar senha',
+    confirmPasswordLabel: 'Confirmar senha',
+    submitButton: 'Criar conta',
+    passwordsMismatchError: 'Senhas não coincidem',
+    phoneInvalidError: 'Telefone inválido (mínimo 9 dígitos)',
+    successMessage: 'Conta criada! Verifique o email para confirmar.',
   },
 }
 
@@ -38,14 +56,9 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [ok, setOk] = useState<string | null>(null)
-const { language } = useLanguage()
-const lang = language || 'pt' // fallback para português
-const t = translations[lang] || translations.pt
 
-  // Aqui deves obter o idioma atual do contexto i18n
-  // Exemplo fixo PT para já, substitui pelo teu hook useLanguage() ou semelhante
-  const lang = 'pt'
-  const t = translations[lang]
+  const { lang } = useLanguage()
+  const t = translations[lang] || translations.pt
 
   const onSubmit = async ({
     name,
