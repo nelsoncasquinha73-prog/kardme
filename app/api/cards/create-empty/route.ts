@@ -16,11 +16,8 @@ function slugify(input: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { templateId, slug: rawSlug } = await request.json()
+    const { slug: rawSlug } = await request.json()
 
-    if (!templateId || typeof templateId !== 'string') {
-      return NextResponse.json({ success: false, error: 'templateId é obrigatório' }, { status: 400 })
-    }
     if (!rawSlug || typeof rawSlug !== 'string') {
       return NextResponse.json({ success: false, error: 'slug é obrigatório' }, { status: 400 })
     }
@@ -40,7 +37,6 @@ export async function POST(request: NextRequest) {
       auth: { persistSession: false },
     })
 
-    // Auth via Authorization header
     const authHeader = request.headers.get('authorization') || ''
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
     if (!token) {
@@ -53,7 +49,6 @@ export async function POST(request: NextRequest) {
     }
     const userId = userData.user.id
 
-    // Validar slug único
     const { data: existing } = await supabaseAdmin
       .from('cards')
       .select('id')
@@ -64,19 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Slug já existe' }, { status: 409 })
     }
 
-    // Buscar template
-    const { data: template, error: templateError } = await supabaseAdmin
-      .from('cards')
-      .select('id, theme, title')
-      .eq('id', templateId)
-      .eq('is_template', true)
-      .single()
-
-    if (templateError || !template) {
-      return NextResponse.json({ success: false, error: 'Template não encontrado' }, { status: 404 })
-    }
-
-    // Criar novo cartão
+    // Cartão vazio: theme default (podes ajustar depois)
     const { data: newCard, error: insertError } = await supabaseAdmin
       .from('cards')
       .insert({
@@ -84,9 +67,9 @@ export async function POST(request: NextRequest) {
         slug,
         is_template: false,
         published: false,
-        theme: template.theme,
-        title: template.title ?? null,
-        template_id: template.id,
+        theme: {},
+        title: null,
+        template_id: null,
       })
       .select()
       .single()
