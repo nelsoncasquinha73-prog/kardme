@@ -17,9 +17,6 @@ export async function GET() {
     config_SUPABASE_URL: SUPABASE_URL,
     config_SUPABASE_URL_host: SUPABASE_URL ? hostFromUrl(SUPABASE_URL) : null,
 
-    env_SUPABASE_URL: process.env.SUPABASE_URL || null,
-    env_SUPABASE_URL_host: process.env.SUPABASE_URL ? hostFromUrl(process.env.SUPABASE_URL) : null,
-
     env_NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || null,
     env_NEXT_PUBLIC_SUPABASE_URL_host: process.env.NEXT_PUBLIC_SUPABASE_URL
       ? hostFromUrl(process.env.NEXT_PUBLIC_SUPABASE_URL)

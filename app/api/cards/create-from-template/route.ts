@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Slug inválido' }, { status: 400 })
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
     const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
     if (!supabaseUrl || !serviceRole) {
       return NextResponse.json({ success: false, error: 'Env vars do Supabase em falta' }, { status: 500 })
