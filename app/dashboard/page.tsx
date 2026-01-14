@@ -56,27 +56,31 @@ export default function DashboardPage() {
     loadCards()
   }, [])
 
-  if (loading) return <p>A carregar cartões…</p>
+  if (loading) return <p style={{ color: '#000' }}>A carregar cartões…</p>
 
   return (
-    <div>
-      <h1>Os meus cartões</h1>
+    <div style={{ color: '#000', padding: '1rem' }}>
+      <h1 style={{ color: '#000' }}>Os meus cartões</h1>
 
-      <Link href="/dashboard/cards/new">+ Criar cartão</Link>
+      <Link href="/dashboard/cards/new" style={{ color: '#000', textDecoration: 'underline' }}>
+        + Criar cartão
+      </Link>
 
       {error && <p style={{ color: 'crimson', marginTop: 12 }}>{error}</p>}
 
       {!error && cards.length === 0 && (
         <div style={{ marginTop: 16 }}>
           <p>Ainda não tens cartões.</p>
-          <Link href="/dashboard/templates">Escolher um template</Link>
+          <Link href="/dashboard/templates" style={{ color: '#000', textDecoration: 'underline' }}>
+            Escolher um template
+          </Link>
         </div>
       )}
 
       {cards.length > 0 && (
-        <ul style={{ marginTop: 20 }}>
+        <ul style={{ marginTop: 20, color: '#000' }}>
           {cards.map((card) => (
-            <li key={card.id}>
+            <li key={card.id} style={{ marginBottom: '1rem' }}>
               <strong>{card.name}</strong>
               <br />
               {card.job} {card.company && `· ${card.company}`}
