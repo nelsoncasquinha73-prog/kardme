@@ -45,7 +45,8 @@ export default function TemplatesPage() {
       const res = await fetch('/api/cards/create-from-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId, slug, userId: authData.user.id }),
+        body: JSON.stringify({ templateId, slug }),
+
       })
 
       const json = await res.json()
