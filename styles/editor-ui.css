@@ -104,3 +104,40 @@
   background: var(--color-border);
   margin: var(--s-4) 0;
 }
+.dashboard-scope main,
+.dashboard-scope header,
+.dashboard-scope main p,
+.dashboard-scope main span,
+.dashboard-scope main small,
+.dashboard-scope main li,
+.dashboard-scope main a,
+.dashboard-scope main h1,
+.dashboard-scope main h2,
+.dashboard-scope main h3,
+.dashboard-scope main h4,
+.dashboard-scope main h5,
+.dashboard-scope main h6,
+.dashboard-scope main label {
+  color: #e0e7ff !important; /* tom claro azul */
+}
+
+.dashboard-scope main a {
+  color: #7abfff !important; /* azul claro para links */
+  text-decoration: underline;
+}
+
+.dashboard-scope header {
+  border-bottom: 1px solid #234a8a;
+  background: #122a6a;
+}
+
+.dashboard-scope aside {
+  background: #0b0b1a;
+  color: #cbd5e1;
+}
+.dashboard-scope button.btn {
+  background-color: #000814; /* preto azulado */
+  color: #e0e7ff;
+  border: 1px solid #3b82f6; /* azul */
+  box-shadow: 0 0 8px #3b82f6aa;
+}
