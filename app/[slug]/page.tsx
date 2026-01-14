@@ -6,6 +6,8 @@ import CardRenderer from '@/components/card/CardRenderer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
+import '@/styles/card-preview.css'  // Importa o CSS scoped
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -48,10 +50,12 @@ export default async function CardPage({ params }: Props) {
   const blocks = blocksData ?? []
 
   return (
-    <LanguageProvider>
-      <ThemeProvider theme={card.theme}>
-        <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
-      </ThemeProvider>
-    </LanguageProvider>
+    <div className="card-preview"> {/* Wrapper com classe para scoping CSS */}
+      <LanguageProvider>
+        <ThemeProvider theme={card.theme}>
+          <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
+        </ThemeProvider>
+      </LanguageProvider>
+    </div>
   )
 }

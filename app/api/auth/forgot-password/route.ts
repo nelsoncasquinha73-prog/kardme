@@ -1,30 +1,33 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { email } = await request.json()
+    const { email } = await req.json()
 
     if (!email || typeof email !== 'string') {
       return NextResponse.json({ error: 'Email inválido' }, { status: 400 })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.kardme.com'
-    const redirectTo = `${siteUrl}/reset-password`
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/reset-password`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseServiceRoleKey,
+        Authorization: `Bearer ${supabaseServiceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    })
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+    if (!response.ok) {
+      const errorData = await response.json()
+      return NextResponse.json({ error: errorData.msg || 'Erro no reset de password' }, { status: 400 })
     }
 
-    return NextResponse.json({ ok: true })
-  } catch {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return NextResponse.json({ message: 'Email de recuperação enviado' })
+  } catch (e) {
+    return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
   }
 }

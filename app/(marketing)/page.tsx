@@ -1,6 +1,8 @@
+import "@/styles/landing-page.css";
+
 export default function Home() {
   return (
-    <main>
+    <main className="landing-page">
 
       {/* Start Slider Area */}
       <div

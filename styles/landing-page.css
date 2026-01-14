@@ -1,0 +1,6 @@
+.landing-page {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image: var(--grad-surface);
+}

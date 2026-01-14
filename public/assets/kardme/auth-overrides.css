@@ -1,0 +1,33 @@
+/* 1) Reset agressivo só dentro do auth para o template ganhar */
+.auth-scope {
+  all: initial;
+  display: block;
+}
+
+/* 2) Reativar o básico que o browser precisa */
+.auth-scope * {
+  box-sizing: border-box;
+}
+
+.auth-scope a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.auth-scope button,
+.auth-scope input {
+  font: inherit;
+}
+
+/* 3) Evitar imagens gigantes */
+.auth-scope img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 4) Fix específico para os ícones dos botões sociais */
+.auth-scope .social-btn-grp .btn-default .icon-left img {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain !important;
+}

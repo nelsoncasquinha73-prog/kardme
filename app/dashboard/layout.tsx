@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import '@/styles/editor-ui.css'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -24,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="editor-ui" style={{ display: 'flex', minHeight: '100vh' }}>
       <aside style={{ width: 260, background: '#0b0b0f', color: '#fff', padding: 24 }}>
         <h2 style={{ marginBottom: 30 }}>Kardme</h2>
 
@@ -55,7 +56,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }}
         >
           <strong>Dashboard</strong>
-          <button onClick={logout}>Logout</button>
+          <button className="btn" onClick={logout}>Logout</button>
         </header>
 
         <main style={{ padding: 24 }}>{children}</main>

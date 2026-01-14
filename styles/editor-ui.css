@@ -1,0 +1,106 @@
+.editor-ui {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+.editor-ui .panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+}
+
+.editor-ui .panelHeader {
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.editor-ui .panelBody {
+  padding: var(--s-4);
+}
+
+.editor-ui .label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.editor-ui .row {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+}
+
+.editor-ui .input,
+.editor-ui input,
+.editor-ui select,
+.editor-ui textarea {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  color: var(--color-text);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  height: 34px;
+  outline: none;
+  transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+}
+
+.editor-ui textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 10px;
+}
+
+.editor-ui .input:focus,
+.editor-ui input:focus,
+.editor-ui select:focus,
+.editor-ui textarea:focus {
+  border-color: rgba(128,90,245,0.65);
+  box-shadow: var(--focus);
+  background: rgba(255,255,255,0.05);
+}
+
+.editor-ui .input::placeholder,
+.editor-ui input::placeholder,
+.editor-ui textarea::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+.editor-ui .btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+
+.editor-ui .btn:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--color-border-strong);
+}
+
+.editor-ui .btnPrimary {
+  border: 0;
+  background: var(--grad-primary);
+  color: #0B0D12;
+}
+
+.editor-ui .btnPrimary:hover {
+  transform: translateY(-1px);
+}
+
+.editor-ui .divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--s-4) 0;
+}

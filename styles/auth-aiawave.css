@@ -1,0 +1,17 @@
+@import url("/assets/css/vendor/bootstrap.min.css");
+@import url("/assets/css/plugins/fontawesome-all.min.css");
+@import url("/assets/css/plugins/feature.css");
+@import url("/assets/css/plugins/animation.css");
+@import url("/assets/css/plugins/slick.css");
+@import url("/assets/css/plugins/slick-theme.css");
+@import url("/assets/css/plugins/bootstrap-select.min.css");
+@import url("/assets/css/plugins/prism.css");
+@import url("/assets/css/style.css");
+
+/* CSS do template (a partir de /public/assets/...) */
+.auth-scope {
+  min-height: 100vh;
+}
+
+/* Pequenos ajustes para Next */
+.auth-scope a { text-decoration: none; }

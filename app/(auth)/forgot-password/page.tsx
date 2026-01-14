@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -34,7 +35,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: '40px auto', padding: 16 }}>
+    <main className="page-wrapper auth-scope" style={{ maxWidth: 420, margin: '40px auto', padding: 16 }}>
       <h1>Recuperar password</h1>
 
       <form onSubmit={onSubmit} style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
@@ -65,6 +66,12 @@ export default function ForgotPasswordPage() {
         {ok && <p style={{ color: 'green' }}>{ok}</p>}
         {err && <p style={{ color: 'crimson' }}>{err}</p>}
       </form>
-    </div>
+
+      <div style={{ marginTop: 20 }}>
+        <Link href="/login">
+          <a>Voltar ao login</a>
+        </Link>
+      </div>
+    </main>
   )
 }
