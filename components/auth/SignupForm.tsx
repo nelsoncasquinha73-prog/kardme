@@ -1,22 +1,29 @@
 'use client'
 
-import React, { useState } from 'react'
-import PasswordInput from '@/components/ui/PasswordInput'
+import { useState } from 'react'
+import PhoneInput from 'react-phone-input-2'
 
-type Props = {
-  t: {
-    nameLabel: string
-    phoneLabel: string
-    emailLabel: string
-    passwordLabel: string
-    confirmPasswordLabel: string
-    submitButton: string
-    passwordsMismatchError: string
-    phoneInvalidError: string
-    successMessage: string
-  }
-  onSubmit: (data: {
-    name: string
+type T = {
+  firstNameLabel: string
+  lastNameLabel: string
+  phoneLabel: string
+  emailLabel: string
+  passwordLabel: string
+  confirmPasswordLabel: string
+  submitButton: string
+}
+
+export default function SignupForm({
+  t,
+  onSubmit,
+  loading,
+  error,
+  ok,
+}: {
+  t: T
+  onSubmit: (payload: {
+    firstName: string
+    lastName: string
     phone: string
     email: string
     password: string
@@ -25,51 +32,84 @@ type Props = {
   loading: boolean
   error: string | null
   ok: string | null
-}
-
-export default function SignupForm({ t, onSubmit, loading, error, ok }: Props) {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+}) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('') // react-phone-input-2 devolve digits (ex: "3519xxxxxxx")
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await onSubmit({ name, phone, email, password, confirmPassword })
-  }
-
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        onSubmit({ firstName, lastName, phone, email, password, confirmPassword })
+      }}
+    >
       <div className="input-section">
         <div className="icon">
-          <i className="feather-user" />
+          <i className="fa-regular fa-user" />
         </div>
         <input
           type="text"
-          placeholder={t.nameLabel}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          placeholder={t.firstNameLabel}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
           required
         />
       </div>
 
       <div className="input-section">
         <div className="icon">
-          <i className="fa-sharp fa-regular fa-phone" />
+          <i className="fa-regular fa-user" />
         </div>
         <input
-          type="tel"
-          placeholder={t.phoneLabel}
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          type="text"
+          placeholder={t.lastNameLabel}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
           required
         />
+      </div>
+
+      <div className="input-section">
+        <div className="icon">
+          <i className="fa-regular fa-phone" />
+        </div>
+
+        {/* Bandeira + indicativo */}
+        <div style={{ width: '100%' }}>
+          <PhoneInput
+            country={'pt'}
+            value={phone}
+            onChange={(v) => setPhone(v)}
+            enableSearch
+            inputProps={{ required: true, name: 'phone' }}
+            inputStyle={{
+              width: '100%',
+              background: 'transparent',
+              color: 'inherit',
+              border: 'none',
+              outline: 'none',
+              height: 48,
+            }}
+            buttonStyle={{
+              background: 'transparent',
+              border: 'none',
+            }}
+            dropdownStyle={{
+              background: '#111',
+              color: '#fff',
+            }}
+            placeholder={t.phoneLabel}
+          />
+        </div>
       </div>
 
       <div className="input-section mail-section">
         <div className="icon">
-          <i className="fa-sharp fa-regular fa-envelope" />
+          <i className="fa-regular fa-envelope" />
         </div>
         <input
           type="email"
@@ -82,34 +122,34 @@ export default function SignupForm({ t, onSubmit, loading, error, ok }: Props) {
 
       <div className="input-section password-section">
         <div className="icon">
-          <i className="fa-sharp fa-regular fa-lock" />
+          <i className="fa-regular fa-lock" />
         </div>
-
-        <PasswordInput
-          value={password}
-          onChange={setPassword}
+        <input
+          type="password"
           placeholder={t.passwordLabel}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
-          autoComplete="new-password"
+          minLength={6}
         />
       </div>
 
       <div className="input-section password-section">
         <div className="icon">
-          <i className="fa-sharp fa-regular fa-lock" />
+          <i className="fa-regular fa-lock" />
         </div>
-
-        <PasswordInput
-          value={confirmPassword}
-          onChange={setConfirmPassword}
+        <input
+          type="password"
           placeholder={t.confirmPasswordLabel}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          autoComplete="new-password"
+          minLength={6}
         />
       </div>
 
       <button type="submit" className="btn-default" disabled={loading}>
-        {loading ? '...' : t.submitButton}
+        {loading ? 'A criar...' : t.submitButton}
       </button>
 
       {ok && <p style={{ color: 'green', marginTop: 10, fontSize: 14 }}>{ok}</p>}

@@ -4,12 +4,14 @@ import { useLanguage } from '@/components/language/LanguageProvider'
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/auth/ThemeSwitcher'
-import SignupForm from '@/components/auth/SignupForm'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 
 const baseTranslations = {
-  nameLabel: 'Name',
+  firstNameLabel: 'First name',
+  lastNameLabel: 'Last name',
   phoneLabel: 'Phone',
   emailLabel: 'Email',
   passwordLabel: 'Create password',
@@ -22,7 +24,8 @@ const baseTranslations = {
 
 const translations: Record<string, typeof baseTranslations> = {
   pt: {
-    nameLabel: 'Nome',
+    firstNameLabel: 'Nome',
+    lastNameLabel: 'Apelido',
     phoneLabel: 'Telemóvel',
     emailLabel: 'Email',
     passwordLabel: 'Criar password',
@@ -33,46 +36,26 @@ const translations: Record<string, typeof baseTranslations> = {
     successMessage: 'Conta criada! Verifica o email para confirmar.',
   },
   en: baseTranslations,
-  es: baseTranslations,
-  fr: baseTranslations,
-  de: baseTranslations,
-  it: baseTranslations,
-  ar: baseTranslations,
-  'pt-br': {
-    nameLabel: 'Nome',
-    phoneLabel: 'Telefone',
-    emailLabel: 'Email',
-    passwordLabel: 'Criar senha',
-    confirmPasswordLabel: 'Confirmar senha',
-    submitButton: 'Criar conta',
-    passwordsMismatchError: 'Senhas não coincidem',
-    phoneInvalidError: 'Telefone inválido (mínimo 9 dígitos)',
-    successMessage: 'Conta criada! Verifique o email para confirmar.',
-  },
+  // outros idiomas podem ser adicionados aqui
 }
 
 export default function SignupPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('351') // Portugal como default
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [ok, setOk] = useState<string | null>(null)
 
   const { lang } = useLanguage()
   const t = translations[lang] || translations.pt
 
-  const onSubmit = async ({
-    name,
-    phone,
-    email,
-    password,
-    confirmPassword,
-  }: {
-    name: string
-    phone: string
-    email: string
-    password: string
-    confirmPassword: string
-  }) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setError(null)
     setOk(null)
     setLoading(true)
@@ -97,7 +80,13 @@ export default function SignupPage() {
         const { error: profileErr } = await supabase
           .from('profiles')
           .upsert(
-            { id: userId, full_name: name, phone: phone.trim() },
+            {
+              id: userId,
+              nome: firstName.trim(),
+              apelido: lastName.trim(),
+              phone: phone.trim(),
+              email: email.trim(),
+            },
             { onConflict: 'id' }
           )
         if (profileErr) throw profileErr
@@ -146,14 +135,86 @@ export default function SignupPage() {
 
                   <div className="signup-box-bottom">
                     <div className="signup-box-content">
-                      <SignupForm t={t} onSubmit={onSubmit} loading={loading} error={error} ok={ok} />
+                      <form onSubmit={onSubmit}>
+                        <div className="input-section">
+                          <input
+                            type="text"
+                            placeholder={t.firstNameLabel}
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="input-section">
+                          <input
+                            type="text"
+                            placeholder={t.lastNameLabel}
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="input-section">
+                          <PhoneInput
+                            country={'pt'}
+                            value={phone}
+                            onChange={setPhone}
+                            enableSearch
+                            inputProps={{
+                              name: 'phone',
+                              required: true,
+                              autoFocus: false,
+                            }}
+                            placeholder={t.phoneLabel}
+                            inputStyle={{ width: '100%' }}
+                            buttonStyle={{ background: 'transparent', border: 'none' }}
+                            dropdownStyle={{ background: '#111', color: '#fff' }}
+                          />
+                        </div>
+                        <div className="input-section mail-section">
+                          <input
+                            type="email"
+                            placeholder={t.emailLabel}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="input-section password-section">
+                          <input
+                            type="password"
+                            placeholder={t.passwordLabel}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            minLength={6}
+                          />
+                        </div>
+                        <div className="input-section password-section">
+                          <input
+                            type="password"
+                            placeholder={t.confirmPasswordLabel}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            minLength={6}
+                          />
+                        </div>
+
+                        <button type="submit" className="btn-default" disabled={loading}>
+                          {loading ? 'A criar...' : t.submitButton}
+                        </button>
+
+                        {ok && <p style={{ color: 'green', marginTop: 10, fontSize: 14 }}>{ok}</p>}
+                        {error && <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>{error}</p>}
+                      </form>
                     </div>
 
                     <div className="signup-box-footer">
                       <div className="bottom-text">
-                        Do you have an account?
-                        <Link className="btn-read-more ml--5" href="/login">
-                          <span>Sign In</span>
+                        Já tens conta?{' '}
+                        <Link href="/login" className="btn-read-more">
+                          Entrar
                         </Link>
                       </div>
                     </div>
@@ -181,8 +242,7 @@ export default function SignupPage() {
 
                       <div className="content">
                         <p className="description">
-                          Rainbow-Themes is now a crucial component of our work! We made it simple to collaborate across
-                          departments by grouping our work
+                          Rainbow-Themes é agora uma componente crucial do nosso trabalho! Facilitamos a colaboração entre departamentos agrupando o nosso trabalho.
                         </p>
 
                         <div className="bottom-content">
@@ -203,10 +263,6 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
-
-        <Link className="close-button" href="/" aria-label="Fechar">
-          <i className="fa-sharp fa-regular fa-x" />
-        </Link>
       </main>
     </>
   )
