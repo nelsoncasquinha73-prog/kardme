@@ -141,3 +141,40 @@
   border: 1px solid #3b82f6; /* azul */
   box-shadow: 0 0 8px #3b82f6aa;
 }
+/* =========================================================
+   DASHBOARD THEME (scope: .dashboard-scope)
+   ========================================================= */
+
+.dashboard-scope {
+  /* fundo geral do dashboard (conteúdo) */
+}
+
+.dashboard-scope header {
+  background: #122a6a;
+  border-bottom: 1px solid #234a8a;
+}
+
+.dashboard-scope main {
+  background: #0a1e3f;
+  min-height: calc(100vh - 60px);
+}
+
+/* texto no conteúdo */
+.dashboard-scope header,
+.dashboard-scope header *,
+.dashboard-scope main,
+.dashboard-scope main * {
+  color: #e0e7ff !important;
+}
+
+/* links */
+.dashboard-scope main a {
+  color: #7abfff !important;
+  text-decoration: underline;
+}
+
+/* sidebar mantém-se escura e texto claro */
+.dashboard-scope aside,
+.dashboard-scope aside * {
+  color: #fff !important;
+}

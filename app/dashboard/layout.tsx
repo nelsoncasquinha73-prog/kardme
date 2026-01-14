@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   return (
-    <div className="editor-ui" style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="editor-ui dashboard-scope" style={{ display: 'flex', minHeight: '100vh' }}>
       <aside style={{ width: 260, background: '#0b0b0f', color: '#fff', padding: 24 }}>
         <h2 style={{ marginBottom: 30 }}>Kardme</h2>
 
@@ -44,8 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
       </aside>
 
-      <div style={{ flex: 1, background: '#f7f7f9' }}>
-        <strong>Dashboard (v2)</strong>
+      <div style={{ flex: 1 }}>
 
         <header
           style={{
