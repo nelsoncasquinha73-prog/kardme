@@ -4,21 +4,18 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import CardPreview from '@/components/theme/CardPreview'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { supabase } from '@/lib/supabaseClient'
-// Blocks Editors
+import CardPublicLink from '@/components/dashboard/CardPublicLink'
 import BioBlockEditor from '@/components/dashboard/block-editors/BioBlockEditor'
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
 import ProfileBlockEditor from '@/components/dashboard/block-editors/ProfileBlockEditor'
 import InfoUtilitiesBlockEditor from '@/components/dashboard/block-editors/InfoUtilitiesBlockEditor'
 import ServicesBlockEditor from '@/components/dashboard/block-editors/ServicesBlockEditor'
 import LeadFormBlockEditor from '@/components/dashboard/block-editors/LeadFormBlockEditor'
-// Blocks Components
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 import ServicesBlock from '@/components/blocks/ServicesBlock'
 import LeadFormBlock from '@/components/blocks/LeadFormBlock'
-// Editor UI
 import BlocksRailSortable from '@/components/editor/BlocksRailSortable'
 import AddBlockModal from '@/components/editor/AddBlockModal'
-// Color Picker Context
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 import EmbedBlock from '@/components/blocks/EmbedBlock'
 import EmbedBlockEditor from '@/components/dashboard/block-editors/EmbedBlockEditor'
@@ -29,7 +26,7 @@ import SocialBlockEditor from '@/components/dashboard/block-editors/SocialBlockE
 import GalleryBlockEditor from '@/components/dashboard/block-editors/GalleryBlockEditor'
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
-import PublishToggle from './PublishToggle' // ajusta o caminho conforme localização real
+import PublishToggle from './PublishToggle'
 
 type CardBlock = {
   id: string
@@ -40,13 +37,16 @@ type CardBlock = {
   style: any
   title?: string
 }
+
 type CardBg =
   | { mode: 'solid'; color: string; opacity?: number }
   | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
+
 type Props = {
   card: any
   blocks: CardBlock[]
 }
+
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
 
 export default function ThemePageClient({ card, blocks }: Props) {
@@ -80,26 +80,31 @@ export default function ThemePageClient({ card, blocks }: Props) {
     [localBlocks, activeBlockId]
   )
 
- function selectBlock(id: string) {
-  setActiveBlockId(id)
+  function selectBlock(id: string) {
+    setActiveBlockId(id)
 
-  const next = localBlocks.find((b) => b.id === id) || null
-  if (!next || next.type !== 'decorations') {
-    setActiveDecoId(null)
+    const next = localBlocks.find((b) => b.id === id) || null
+    if (!next || next.type !== 'decorations') {
+      setActiveDecoId(null)
+    }
   }
-}
-function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
-  return next.map((b) => ({
-    id: b.id,
-    type: b.type,
-    enabled: b.enabled ?? true,
-    order: b.order ?? 0,
-    settings: (b as any).settings ?? {},
-    style: (b as any).style ?? {},
-    title: (b as any).title,
-  }))
-}
 
+  function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
+    return next.map((b) => ({
+      id: b.id,
+      type: b.type,
+      enabled: b.enabled ?? true,
+      order: b.order ?? 0,
+      settings: (b as any).settings ?? {},
+      style: (b as any).style ?? {},
+      title: (b as any).title,
+    }))
+  }
+
+function toggleBlockEnabled(id: string, enabled: boolean) {
+  setSaveStatus('dirty')
+  setLocalBlocks(prev => prev.map(b => (b.id === id ? { ...b, enabled } : b)))
+}
 
   function updateActiveSettings(nextSettings: any) {
     if (!activeBlock) return
@@ -109,48 +114,77 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
     )
   }
 
-  async function setSafePadding(next: number) {
-    const nextTheme = structuredClone(localTheme || {})
-    nextTheme.layout = nextTheme.layout || {}
-    nextTheme.layout.safePadding = next
-    setLocalTheme(nextTheme)
-    setSaveStatus('dirty')
+  async function saveChanges() {
+    setSaveStatus('saving')
 
-    const { error } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
-    if (error) {
-      console.error(error)
-      setSaveStatus('error')
+    for (const block of localBlocks) {
+      const { error } = await supabase
+        .from('card_blocks')
+        .update({
+          settings: block.settings,
+          style: block.style,
+          enabled: block.enabled,
+          order: block.order,
+        })
+        .eq('id', block.id)
+
+      if (error) {
+        console.error(error)
+        setSaveStatus('error')
+        alert('Erro ao guardar alterações ❌')
+        return
+      }
     }
+
+    setSaveStatus('saved')
+    window.setTimeout(() => setSaveStatus('idle'), 1200)
+    alert('Alterações guardadas com sucesso ✅')
   }
+  const statusLabel =
+    saveStatus === 'saving'
+      ? 'A guardar…'
+      : saveStatus === 'saved'
+      ? 'Guardado ✅'
+      : saveStatus === 'error'
+      ? 'Erro ao guardar ❌'
+      : saveStatus === 'dirty'
+      ? 'Alterações por guardar…'
+      : ''
 
-  async function updateCardBackground(nextBg: CardBg) {
-    const nextTheme = structuredClone(localTheme || {})
-    nextTheme.background = nextBg
-    setLocalTheme(nextTheme)
-    setCardBg(nextBg)
-    setSaveStatus('dirty')
+  // Slug editing states
+  const [slugEdit, setSlugEdit] = useState(card.slug)
+  const [slugSaving, setSlugSaving] = useState(false)
+  const [slugError, setSlugError] = useState<string | null>(null)
 
-    const { error } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
-    if (error) {
-      console.error(error)
-      setSaveStatus('error')
-    }
-  }
+  async function saveSlug() {
+    if (!slugEdit || slugEdit === card.slug) return
 
-  function toggleBlockEnabled(id: string, enabled: boolean) {
-    setSaveStatus('dirty')
-    setLocalBlocks(prev => prev.map(b => (b.id === id ? { ...b, enabled } : b)))
-  }
+    setSlugSaving(true)
+    setSlugError(null)
 
-  async function enableBlock(id: string) {
-    setSaveStatus('dirty')
-    setLocalBlocks(prev => prev.map(b => (b.id === id ? { ...b, enabled: true } : b)))
-    setActiveBlockId(id)
-    setAddOpen(false)
-    const { error } = await supabase.from('card_blocks').update({ enabled: true }).eq('id', id)
-    if (error) {
-      console.error(error)
-      setSaveStatus('error')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData?.session?.access_token
+      if (!accessToken) throw new Error('Sessão inválida')
+
+      const res = await fetch('/api/cards/update-slug', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ cardId: card.id, newSlugRaw: slugEdit }),
+      })
+
+      const json = await res.json()
+      if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
+
+      setSlugEdit(json.newSlug)
+      alert('Slug atualizado com sucesso ✅')
+    } catch (e: any) {
+      setSlugError(e.message || 'Erro ao guardar slug')
+    } finally {
+      setSlugSaving(false)
     }
   }
 
@@ -182,43 +216,6 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
     }
   }, [activeBlock?.id, activeBlock?.settings, activeBlock?.style, saveStatus])
 
-  async function saveChanges() {
-    setSaveStatus('saving')
-    for (const block of localBlocks) {
-      const { error } = await supabase
-        .from('card_blocks')
-        .update({
-          settings: block.settings,
-          style: block.style,
-          enabled: block.enabled,
-          order: block.order,
-        })
-        .eq('id', block.id)
-
-      if (error) {
-        console.error(error)
-        setSaveStatus('error')
-        alert('Erro ao guardar alterações ❌')
-        return
-      }
-    }
-
-    setSaveStatus('saved')
-    window.setTimeout(() => setSaveStatus('idle'), 1200)
-    alert('Alterações guardadas com sucesso ✅')
-  }
-
-  const statusLabel =
-    saveStatus === 'saving'
-      ? 'A guardar…'
-      : saveStatus === 'saved'
-      ? 'Guardado ✅'
-      : saveStatus === 'error'
-      ? 'Erro ao guardar ❌'
-      : saveStatus === 'dirty'
-      ? 'Alterações por guardar…'
-      : ''
-
   return (
     <ColorPickerProvider>
       <div
@@ -242,6 +239,7 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
+            color: '#111827',
           }}
         >
           <div
@@ -254,11 +252,9 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
               gap: 10,
             }}
           >
-            <div>
-              <strong style={{ fontSize: 13 }}>Blocos</strong>
-              <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
-                {card?.title || 'Cartão'} · {enabledBlocksSorted.length} ativos
-              </div>
+            <strong style={{ fontSize: 13, color: '#111827' }}>Blocos</strong>
+            <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6, color: '#111827' }}>
+              {card?.title || 'Cartão'} · {enabledBlocksSorted.length} ativos
             </div>
             <button
               onClick={() => setAddOpen(true)}
@@ -270,6 +266,7 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
                 background: '#fff',
                 cursor: 'pointer',
                 fontWeight: 800,
+                color: '#111827',
               }}
             >
               + Adicionar
@@ -283,10 +280,9 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
               onSelect={selectBlock}
               onToggle={toggleBlockEnabled}
               onReorder={(next) => {
-  setSaveStatus('dirty')
-  setLocalBlocks(ensureCardBlocks(next))
-}}
-
+                setSaveStatus('dirty')
+                setLocalBlocks(ensureCardBlocks(next))
+              }}
             />
           </div>
 
@@ -302,6 +298,7 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
                 fontWeight: 800,
                 cursor: 'pointer',
                 opacity: saveStatus === 'saving' ? 0.7 : 1,
+                color: '#111827',
               }}
               disabled={saveStatus === 'saving'}
             >
@@ -309,7 +306,7 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
             </button>
 
             {statusLabel && (
-              <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65 }}>{statusLabel}</div>
+              <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65, color: '#111827' }}>{statusLabel}</div>
             )}
           </div>
         </aside>
@@ -352,44 +349,34 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
 
               <div
                 style={{
-                  borderRadius: 36,
-                  padding: 6,
-                  background: 'transparent',
-                  border: 'none',
+                  borderRadius: 28,
+                  overflow: 'auto',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  height: 680,
+                  background:
+                    cardBg.mode === 'solid'
+                      ? cardBg.color
+                      : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
+                  opacity: cardBg.opacity ?? 1,
                 }}
               >
-                <div
-                  style={{
-  borderRadius: 28,
-  overflow: 'auto',
-  border: '1px solid rgba(0,0,0,0.08)',
-  height: 680,
-  background:
-    cardBg.mode === 'solid'
-      ? cardBg.color
-      : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
-  opacity: cardBg.opacity ?? 1,
-}}
-
-                >
-                  <div id="card-preview-root" style={{ height: '100%' }}>
-                    <ThemeProvider theme={localTheme}>
-                      <CardPreview
-                        card={{ ...card, theme: localTheme }}
-                        blocks={enabledBlocksSorted}
-                        activeBlockId={activeBlockId || undefined}
-                        onSelectBlock={(b: any) => selectBlock(b.id)}
-                        activeDecoId={activeDecoId}
-                        onSelectDeco={setActiveDecoId}
-                        showTranslations={false}
-                        fullBleed
-                      />
-                    </ThemeProvider>
-                  </div>
+                <div id="card-preview-root" style={{ height: '100%' }}>
+                  <ThemeProvider theme={localTheme}>
+                    <CardPreview
+                      card={{ ...card, theme: localTheme }}
+                      blocks={enabledBlocksSorted}
+                      activeBlockId={activeBlockId || undefined}
+                      onSelectBlock={(b: any) => selectBlock(b.id)}
+                      activeDecoId={activeDecoId}
+                      onSelectDeco={setActiveDecoId}
+                      showTranslations={false}
+                      fullBleed
+                    />
+                  </ThemeProvider>
                 </div>
               </div>
             </div>
-            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.55 }}>
+            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.55, color: '#111827' }}>
               Dica: arrasta blocos à esquerda para reordenar.
             </div>
           </div>
@@ -399,6 +386,7 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
         <aside
           style={{
             background: '#fff',
+            color: '#111827',
             borderRadius: 18,
             boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
             overflow: 'hidden',
@@ -417,55 +405,96 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
               gap: 12,
             }}
           >
-            <strong style={{ fontSize: 14 }}>Editor</strong>
+            <strong style={{ fontSize: 14, color: '#111827' }}>Editor</strong>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {activeBlock && (
-                <span style={{ fontSize: 12, opacity: 0.6 }}>Bloco: {activeBlock.type}</span>
+                <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>Bloco: {activeBlock.type}</span>
               )}
             </div>
           </div>
 
+          {/* Campo para editar slug */}
+          <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <label style={{ fontWeight: 700, fontSize: 12, opacity: 0.7, color: '#111827' }}>
+              Editar slug (link do cartão)
+            </label>
+            <input
+              type="text"
+              value={slugEdit}
+              onChange={(e) => setSlugEdit(e.target.value)}
+              disabled={slugSaving}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                borderRadius: 6,
+                border: '1px solid rgba(0,0,0,0.15)',
+                marginTop: 4,
+                fontSize: 14,
+                color: '#111827',
+              }}
+            />
+            {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
+            <button
+              onClick={saveSlug}
+              disabled={slugSaving || slugEdit === card.slug}
+              style={{
+                marginTop: 6,
+                padding: '8px 12px',
+                borderRadius: 8,
+                backgroundColor: '#111827',
+                color: '#fff',
+                fontWeight: 'bold',
+                cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {slugSaving ? 'A guardar…' : 'Guardar slug'}
+            </button>
+          </div>
+
+          {/* Link público do cartão (sempre visível) */}
+          <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            {card?.slug ? <CardPublicLink slug={card.slug} /> : null}
+          </div>
+
           <div style={{ padding: 12, overflow: 'auto' }}>
             {!activeBlock && (
-              <p style={{ fontSize: 14, opacity: 0.7, marginBottom: 14 }}>
-                Seleciona um bloco à esquerda (ou no preview) para editar.
+              <p style={{ fontSize: 13, opacity: 0.5, paddingTop: 20, textAlign: 'center' }}>
+                Seleciona um bloco à esquerda para editar.
               </p>
             )}
 
             {activeBlock?.type === 'header' && (
-              <HeaderBlockEditor
-                cardId={card.id}
-                settings={activeBlock.settings || {}}
-                onChange={updateActiveSettings}
-                cardBg={cardBg}
-                onChangeCardBg={updateCardBackground}
-              />
-            )}
+  <HeaderBlockEditor
+    cardId={card.id}
+    settings={activeBlock.settings || {}}
+    onChange={(nextSettings) => updateActiveSettings(nextSettings)}
+    cardBg={cardBg}
+    onChangeCardBg={(nextBg) => {
+      // mantém o teu update de background do cartão (se já tinhas)
+      setCardBg(nextBg)
+
+      const nextTheme = structuredClone(localTheme || {})
+      nextTheme.background = nextBg
+      setLocalTheme(nextTheme)
+
+      setSaveStatus('dirty')
+      supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
+    }}
+  />
+)}
+
 
             {activeBlock?.type === 'profile' && (
-              <ProfileBlockEditor
-                cardId={card.id}
-                settings={activeBlock.settings || {}}
-                onChange={updateActiveSettings}
-              />
-            )}
+  <ProfileBlockEditor
+    cardId={card.id}
+    settings={activeBlock.settings || {}}
+    onChange={(nextSettings) => updateActiveSettings(nextSettings)}
+  />
+)}
 
             {activeBlock?.type === 'bio' && (
               <BioBlockEditor
-                settings={activeBlock.settings || { text: '' }}
-                style={activeBlock.style || {}}
-                onChangeSettings={(s) => updateActiveSettings(s)}
-                onChangeStyle={(style) =>
-                  setLocalBlocks((prev) =>
-                    prev.map((b) => (b.id === activeBlock.id ? { ...b, style } : b))
-                  )
-                }
-              />
-            )}
-
-            {activeBlock?.type === 'contact' && (
-              <ContactBlockEditor
                 settings={activeBlock.settings || {}}
                 style={activeBlock.style || {}}
                 onChangeSettings={updateActiveSettings}
@@ -476,6 +505,19 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
                 }
               />
             )}
+
+            {activeBlock?.type === 'contact' && (
+  <ContactBlockEditor
+    settings={activeBlock.settings || {}}
+    onChangeSettings={updateActiveSettings}
+    onChangeStyle={(style) =>
+      setLocalBlocks((prev) =>
+        prev.map((b) => (b.id === activeBlock.id ? { ...b, style } : b))
+      )
+    }
+  />
+)}
+
 
             {activeBlock?.type === 'social' && (
               <SocialBlockEditor
@@ -515,8 +557,6 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
                 }
               />
             )}
-
-            ... // (continua do teu ficheiro, a partir do lead_form)
 
             {activeBlock?.type === 'lead_form' && (
               <LeadFormBlockEditor
@@ -612,10 +652,10 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
             }}
           >
             {activeBlock && (
-  <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-    <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
-  </div>
-)}
+              <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+              </div>
+            )}
 
             <button
               onClick={saveChanges}
@@ -644,12 +684,16 @@ function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
 
         <AddBlockModal
           open={addOpen}
-          blocks={allBlocksSorted}
+          cardId={card.id}
+          existingBlocks={allBlocksSorted}
           onClose={() => setAddOpen(false)}
-          onEnable={enableBlock}
+          onCreated={(newBlock) => {
+            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {} }])
+            setActiveBlockId(newBlock.id)
+            setSaveStatus('idle')
+          }}
         />
       </div>
     </ColorPickerProvider>
   )
 }
-
