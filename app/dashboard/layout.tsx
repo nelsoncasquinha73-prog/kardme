@@ -45,6 +45,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       <div style={{ flex: 1, background: '#f7f7f9' }}>
+        <strong>Dashboard (v2)</strong>
+
         <header
           style={{
             padding: '16px 24px',
