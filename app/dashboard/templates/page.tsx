@@ -188,7 +188,7 @@ export default function TemplatesPage() {
             opacity: loading ? 0.7 : 1,
           }}
         >
-          {loading ? 'A criar…' : mode === 'template' ? 'Criar a partir do template' : 'Criar do zero'}
+          {loading ? 'A criar…' : 'Criar cartão'}
         </button>
 
         {error && <div style={{ color: '#ffb4b4', fontWeight: 800 }}>{error}</div>}

@@ -1,29 +1,101 @@
 'use client'
 
-type BlockItem = {
+import { useMemo, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+
+type CatalogItem = {
+  type: string
+  title: string
+  description?: string
+  defaultSettings?: any
+  defaultStyle?: any
+}
+
+type CardBlock = {
   id: string
   type: string
-  title?: string
   enabled: boolean
-  order?: number
-  settings?: any
-  style?: any
+  order: number
+  settings: any
+  style: any
+  title?: string
 }
 
 export default function AddBlockModal({
   open,
-  blocks,
+  cardId,
+  existingBlocks,
   onClose,
-  onEnable,
+  onCreated,
 }: {
   open: boolean
-  blocks: BlockItem[]
+  cardId: string
+  existingBlocks: { id: string; type: string; enabled: boolean; order: number }[]
   onClose: () => void
-  onEnable: (id: string) => void
+  onCreated: (block: CardBlock) => void
 }) {
+  const [creatingType, setCreatingType] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const catalog: CatalogItem[] = useMemo(
+    () => [
+      { type: 'header', title: 'Header', description: 'Capa, avatar e topo do cartão', defaultSettings: {}, defaultStyle: {} },
+      { type: 'profile', title: 'Perfil', description: 'Nome, cargo, empresa, avatar', defaultSettings: {}, defaultStyle: {} },
+      { type: 'bio', title: 'Bio', description: 'Texto curto / apresentação', defaultSettings: { text: '' }, defaultStyle: {} },
+      { type: 'contact', title: 'Contacto', description: 'Telefone, email, WhatsApp, etc.', defaultSettings: {}, defaultStyle: {} },
+      { type: 'social', title: 'Redes sociais', description: 'Links sociais e botões', defaultSettings: {}, defaultStyle: {} },
+      { type: 'gallery', title: 'Galeria', description: 'Imagens / carrossel', defaultSettings: {}, defaultStyle: {} },
+      { type: 'services', title: 'Serviços', description: 'Lista de serviços', defaultSettings: {}, defaultStyle: {} },
+      { type: 'info_utilities', title: 'Info & Utilidades', description: 'Menus, WiFi, horários rápidos', defaultSettings: {}, defaultStyle: {} },
+      { type: 'lead_form', title: 'Formulário lead', description: 'Captura de leads', defaultSettings: {}, defaultStyle: {} },
+      { type: 'embed', title: 'Embed', description: 'Iframe / widgets externos', defaultSettings: {}, defaultStyle: {} },
+      { type: 'decorations', title: 'Decorações', description: 'PNG/SVG decorativos', defaultSettings: {}, defaultStyle: {} },
+      { type: 'business_hours', title: 'Horário', description: 'Horário de funcionamento', defaultSettings: {}, defaultStyle: {} },
+    ],
+    []
+  )
+
+  const existingTypes = useMemo(() => new Set(existingBlocks.map(b => b.type)), [existingBlocks])
+
+  // Para já, não deixo duplicar alguns blocos “base” (ajusta como quiseres)
+  const isSingleInstance = (type: string) => ['header', 'profile'].includes(type)
+
+  const available = useMemo(() => {
+    return catalog.filter(item => !(isSingleInstance(item.type) && existingTypes.has(item.type)))
+  }, [catalog, existingTypes])
+
   if (!open) return null
 
-  const disabled = blocks.filter(b => !b.enabled)
+  async function createBlock(item: CatalogItem) {
+    setError(null)
+    setCreatingType(item.type)
+
+    try {
+      const maxOrder = existingBlocks.reduce((acc, b) => Math.max(acc, b.order ?? 0), 0)
+      const nextOrder = Number.isFinite(maxOrder) ? maxOrder + 1 : existingBlocks.length
+
+      const payload = {
+        card_id: cardId,
+        type: item.type,
+        enabled: true,
+        order: nextOrder,
+        settings: item.defaultSettings ?? {},
+        style: item.defaultStyle ?? {},
+        title: item.title,
+      }
+
+      const { data, error } = await supabase.from('card_blocks').insert(payload).select('*').single()
+      if (error) throw error
+      if (!data) throw new Error('Falha ao criar bloco')
+
+      onCreated(data as CardBlock)
+      onClose()
+    } catch (e: any) {
+      setError(e?.message || 'Erro ao criar bloco')
+    } finally {
+      setCreatingType(null)
+    }
+  }
 
   return (
     <div
@@ -41,7 +113,7 @@ export default function AddBlockModal({
       <div
         onMouseDown={e => e.stopPropagation()}
         style={{
-          width: 520,
+          width: 560,
           maxWidth: '100%',
           background: '#fff',
           borderRadius: 18,
@@ -75,35 +147,34 @@ export default function AddBlockModal({
         </div>
 
         <div style={{ padding: 14 }}>
-          {disabled.length === 0 ? (
-            <p style={{ fontSize: 14, opacity: 0.7 }}>Já tens todos os blocos ativos ✅</p>
-          ) : (
-            <>
-              <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 12 }}>
-                Seleciona um bloco para ativar.
-              </p>
+          <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 12 }}>
+            Escolhe um bloco para adicionar ao cartão.
+          </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {disabled.map(b => (
-                  <button
-                    key={b.id}
-                    onClick={() => onEnable(b.id)}
-                    style={{
-                      textAlign: 'left',
-                      padding: 12,
-                      borderRadius: 14,
-                      border: '1px solid rgba(0,0,0,0.10)',
-                      background: '#fff',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div style={{ fontWeight: 800, fontSize: 13 }}>{b.title || b.type}</div>
-                    <div style={{ fontSize: 12, opacity: 0.6 }}>{b.type}</div>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          {error && <p style={{ color: '#b91c1c', fontSize: 13, marginBottom: 10 }}>{error}</p>}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {available.map(item => (
+              <button
+                key={item.type}
+                onClick={() => createBlock(item)}
+                disabled={creatingType === item.type}
+                style={{
+                  textAlign: 'left',
+                  padding: 12,
+                  borderRadius: 14,
+                  border: '1px solid rgba(0,0,0,0.10)',
+                  background: '#fff',
+                  cursor: creatingType === item.type ? 'not-allowed' : 'pointer',
+                  opacity: creatingType === item.type ? 0.7 : 1,
+                }}
+              >
+                <div style={{ fontWeight: 900, fontSize: 13 }}>{item.title}</div>
+                <div style={{ fontSize: 12, opacity: 0.65 }}>{item.description || item.type}</div>
+                <div style={{ fontSize: 11, opacity: 0.5, marginTop: 6 }}>{item.type}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div
