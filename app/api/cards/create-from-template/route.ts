@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createServerClient } from '@supabase/ssr'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -39,16 +38,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Env vars do Supabase em falta' }, { status: 500 })
     }
 
-    // 1) Ler user autenticado via cookies do request (SSR)
-    const supabaseAuth = createServerClient(supabaseUrl, anonKey, {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {
-          // Nesta route não precisamos de setar cookies
-        },
-      },
+    // Extrair token do cookie
+    const cookie = request.headers.get('cookie') || ''
+    const match = cookie.match(/sb-access-token=([^;]+)/)
+    const accessToken = match ? decodeURIComponent(match[1]) : null
+
+    if (!accessToken) {
+      return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
+    }
+
+    // Cliente anon para auth.getUser com token
+    const supabaseAuth = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
     })
 
     const { data: userData, error: userError } = await supabaseAuth.auth.getUser()
@@ -57,12 +58,12 @@ export async function POST(request: NextRequest) {
     }
     const userId = userData.user.id
 
-    // 2) Admin client (Service Role) para inserir sem RLS chatear
+    // Cliente admin com Service Role
     const supabaseAdmin = createClient(supabaseUrl, serviceRole, {
       auth: { persistSession: false },
     })
 
-    // 3) Validar slug único
+    // Validar slug único
     const { data: existing } = await supabaseAdmin
       .from('cards')
       .select('id')
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Slug já existe' }, { status: 409 })
     }
 
-    // 4) Buscar template
+    // Buscar template
     const { data: template, error: templateError } = await supabaseAdmin
       .from('cards')
       .select('id, theme, title')
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Template não encontrado' }, { status: 404 })
     }
 
-    // 5) Criar novo cartão
+    // Criar novo cartão
     const { data: newCard, error: insertError } = await supabaseAdmin
       .from('cards')
       .insert({
