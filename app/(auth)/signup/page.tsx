@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/auth/ThemeSwitcher'
+import PasswordInput from '@/components/ui/PasswordInput'
 
 export default function SignupPage() {
   const [name, setName] = useState('')
@@ -112,12 +113,13 @@ export default function SignupPage() {
                           <div className="icon">
                             <i className="fa-sharp fa-regular fa-lock" />
                           </div>
-                          <input
-                            type="password"
-                            placeholder="Create Password"
+
+                          <PasswordInput
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={setPassword}
+                            placeholder="Create Password"
                             required
+                            autoComplete="new-password"
                           />
                         </div>
 
@@ -125,12 +127,13 @@ export default function SignupPage() {
                           <div className="icon">
                             <i className="fa-sharp fa-regular fa-lock" />
                           </div>
-                          <input
-                            type="password"
-                            placeholder="Confirm Password"
+
+                          <PasswordInput
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={setConfirmPassword}
+                            placeholder="Confirm Password"
                             required
+                            autoComplete="new-password"
                           />
                         </div>
 
@@ -144,11 +147,7 @@ export default function SignupPage() {
                           Sign Up
                         </button>
 
-                        {error && (
-                          <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>
-                            {error}
-                          </p>
-                        )}
+                        {error && <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>{error}</p>}
                       </form>
                     </div>
 
@@ -175,11 +174,21 @@ export default function SignupPage() {
                       </div>
 
                       <div className="rating">
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
                       </div>
 
                       <div className="content">

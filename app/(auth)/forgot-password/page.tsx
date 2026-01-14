@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           type="email"
           placeholder="o-teu-email@exemplo.com"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
           style={{ padding: 12, borderRadius: 10, border: '1px solid #ddd' }}
         />
@@ -68,9 +68,7 @@ export default function ForgotPasswordPage() {
       </form>
 
       <div style={{ marginTop: 20 }}>
-        <Link href="/login">
-          <a>Voltar ao login</a>
-        </Link>
+        <Link href="/login">Voltar ao login</Link>
       </div>
     </main>
   )

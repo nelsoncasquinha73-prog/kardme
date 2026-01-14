@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ThemeSwitcher from '@/components/auth/ThemeSwitcher'
 import { supabase } from '@/lib/supabaseClient'
+import PasswordInput from '@/components/ui/PasswordInput'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -110,12 +111,14 @@ export default function LoginPage() {
                           <div className="icon">
                             <i className="fa-sharp fa-regular fa-lock" />
                           </div>
-                          <input
-                            type="password"
-                            placeholder="Password"
+
+                          {/* Password com “olho” */}
+                          <PasswordInput
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={setPassword}
+                            placeholder="Password"
                             required
+                            autoComplete="current-password"
                           />
                         </div>
 
@@ -129,11 +132,7 @@ export default function LoginPage() {
                           {loading ? 'A entrar...' : 'Sign In'}
                         </button>
 
-                        {error && (
-                          <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>
-                            {error}
-                          </p>
-                        )}
+                        {error && <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>{error}</p>}
                       </form>
                     </div>
 
@@ -160,11 +159,21 @@ export default function LoginPage() {
                       </div>
 
                       <div className="rating">
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
-                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
+                        <a href="#rating">
+                          <i className="fa-sharp fa-solid fa-star" />
+                        </a>
                       </div>
 
                       <div className="content">

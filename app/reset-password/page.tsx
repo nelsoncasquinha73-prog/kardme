@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import PasswordInput from '@/components/ui/PasswordInput'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -45,14 +46,13 @@ export default function ResetPasswordPage() {
       <h1>Definir nova password</h1>
 
       <form onSubmit={onSubmit} style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
-        <input
-          type="password"
-          placeholder="Nova password"
+        <PasswordInput
           value={password}
-          onChange={e => setPassword(e.target.value)}
-          minLength={6}
+          onChange={setPassword}
+          placeholder="Nova password"
           required
-          style={{ padding: 12, borderRadius: 10, border: '1px solid #ddd' }}
+          inputClassName=""
+          minLength={6}
         />
 
         <button
