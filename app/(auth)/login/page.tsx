@@ -39,7 +39,7 @@ export default function LoginPage() {
     <>
       <ThemeSwitcher />
 
-      <main className="page-wrapper auth-scope">
+      <main className="page-wrapper auth-scope login-page">
         <div id="my_switcher" className="my_switcher">
           <ul>
             <li>
@@ -104,6 +104,7 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            className="input-black-bg"
                           />
                         </div>
 
@@ -112,13 +113,13 @@ export default function LoginPage() {
                             <i className="fa-sharp fa-regular fa-lock" />
                           </div>
 
-                          {/* Password com “olho” */}
                           <PasswordInput
                             value={password}
                             onChange={setPassword}
                             placeholder="Password"
                             required
                             autoComplete="current-password"
+                            inputClassName="input-black-bg"
                           />
                         </div>
 

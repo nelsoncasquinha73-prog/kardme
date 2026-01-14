@@ -23669,3 +23669,32 @@ iframe {
   color: var(--color-primary);
 }
 /*# sourceMappingURL=../maps/style.css.map */
+.signup-area .input-section input,
+.signup-area .input-section input[type="password"],
+.signup-area .input-section input[type="email"],
+.signup-area .input-section input[type="text"] {
+  background-color: #111 !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  border-radius: 6px !important;
+  padding: 12px !important;
+}
+/* Auth inputs (login/signup/forgot/reset) */
+.page-wrapper.auth-scope .sign-up-box .signup-box-bottom .signup-box-content form input {
+  background-color: #111 !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+/* Inputs auth (login, signup, forgot, reset) */
+.sign-up-box .signup-box-bottom .signup-box-content form input {
+  background-color: #111 !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 6px !important;
+  padding: 10px 15px 10px 50px !important; /* espaço para ícone */
+}
+
+/* Placeholder mais legível */
+.sign-up-box .signup-box-bottom .signup-box-content form input::placeholder {
+  color: rgba(255, 255, 255, 0.55) !important;
+}

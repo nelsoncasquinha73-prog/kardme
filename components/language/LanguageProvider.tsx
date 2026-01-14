@@ -1,12 +1,14 @@
 'use client'
 
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react'
+
+import { detectLanguageByIP } from '@/components/i18n/detectLanguage'
 
 export type Language =
   | 'en'
@@ -25,8 +27,7 @@ type LanguageContextType = {
   dir: 'ltr' | 'rtl'
 }
 
-const LanguageContext =
-  createContext<LanguageContextType | null>(null)
+const LanguageContext = createContext<LanguageContextType | null>(null)
 
 /* ───────────── DICIONÁRIOS BASE ───────────── */
 
@@ -152,6 +153,13 @@ const DICTS: Record<Language, Record<string, string>> = {
   },
 }
 
+const SUPPORTED_LANGS = Object.keys(DICTS) as Language[]
+const DEFAULT_LANG: Language = 'en'
+
+function isSupported(l: any): l is Language {
+  return SUPPORTED_LANGS.includes(l)
+}
+
 /* ───────────── PROVIDER ───────────── */
 
 export function LanguageProvider({
@@ -161,24 +169,70 @@ export function LanguageProvider({
   children: React.ReactNode
   initialLang?: Language
 }) {
-  const [lang, setLangState] = useState<Language>(
-    initialLang || 'en'
-  )
+  const [lang, setLangState] = useState<Language>(initialLang || DEFAULT_LANG)
 
   // RTL automático
   const dir: 'ltr' | 'rtl' = lang === 'ar' ? 'rtl' : 'ltr'
 
   function setLang(l: Language) {
-    setLangState(l)
-    localStorage.setItem('kardme_lang', l)
+    const next = isSupported(l) ? l : DEFAULT_LANG
+    setLangState(next)
+    try {
+      localStorage.setItem('kardme_lang', next)
+    } catch {}
   }
 
-  // prioridade: localStorage > initialLang
+  // prioridade: localStorage > IP detect > fallback EN
   useEffect(() => {
-    const stored = localStorage.getItem(
-      'kardme_lang'
-    ) as Language | null
-    if (stored) setLangState(stored)
+    let cancelled = false
+
+    const normalizeLangCode = (code: string): Language => {
+ 
+  const c = code.toLowerCase()
+  if (c === 'pt-br' || c === 'pt_br') return 'pt-br'
+  if (c.startsWith('pt')) return 'pt'
+  if (c.startsWith('es')) return 'es'
+  if (c.startsWith('fr')) return 'fr'
+  if (c.startsWith('de')) return 'de'
+  if (c.startsWith('it')) return 'it'
+  if (c.startsWith('ar')) return 'ar'
+  if (c.startsWith('en')) return 'en'
+  return 'en' // fallback
+}
+
+    const stored = (() => {
+      try {
+        return localStorage.getItem('kardme_lang') as Language | null
+      } catch {
+        return null
+      }
+    })()
+
+    if (stored && isSupported(stored)) {
+      setLangState(stored)
+      return
+    }
+
+    ;(async () => {
+      try {
+        const ipLang = await detectLanguageByIP()
+        // detectLanguageByIP devolve LanguageCode do outro módulo; normalizamos para o nosso tipo
+        const candidate = normalizeLangCode(ipLang)
+        const next = isSupported(candidate) ? candidate : DEFAULT_LANG
+        if (!cancelled) {
+          setLangState(next)
+          try {
+            localStorage.setItem('kardme_lang', next)
+          } catch {}
+        }
+      } catch {
+        if (!cancelled) setLangState(DEFAULT_LANG)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const value = useMemo(
@@ -186,10 +240,7 @@ export function LanguageProvider({
       lang,
       setLang,
       dir,
-      t: (key: string) =>
-        DICTS[lang]?.[key] ??
-        DICTS.en[key] ??
-        key,
+      t: (key: string) => DICTS[lang]?.[key] ?? DICTS.en[key] ?? key,
     }),
     [lang]
   )
@@ -208,9 +259,7 @@ export function LanguageProvider({
 export function useLanguage() {
   const ctx = useContext(LanguageContext)
   if (!ctx) {
-    throw new Error(
-      'useLanguage must be used inside LanguageProvider'
-    )
+    throw new Error('useLanguage must be used inside LanguageProvider')
   }
   return ctx
 }

@@ -1,29 +1,102 @@
 'use client'
-
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/auth/ThemeSwitcher'
-import PasswordInput from '@/components/ui/PasswordInput'
+import SignupForm from '@/components/auth/SignupForm'
+import { supabase } from '@/lib/supabaseClient'
+import { useRouter } from 'next/navigation'
+
+// Exemplo simples de traduções PT/EN
+const translations = {
+  pt: {
+    nameLabel: 'Nome',
+    phoneLabel: 'Telemóvel',
+    emailLabel: 'Email',
+    passwordLabel: 'Criar password',
+    confirmPasswordLabel: 'Confirmar password',
+    submitButton: 'Criar conta',
+    passwordsMismatchError: 'Passwords não coincidem',
+    phoneInvalidError: 'Telemóvel inválido (mínimo 9 dígitos)',
+    successMessage: 'Conta criada! Verifica o email para confirmar.',
+  },
+  en: {
+    nameLabel: 'Name',
+    phoneLabel: 'Phone',
+    emailLabel: 'Email',
+    passwordLabel: 'Create password',
+    confirmPasswordLabel: 'Confirm password',
+    submitButton: 'Sign Up',
+    passwordsMismatchError: 'Passwords do not match',
+    phoneInvalidError: 'Invalid phone (min 9 digits)',
+    successMessage: 'Account created! Check your email to confirm.',
+  },
+}
 
 export default function SignupPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ok, setOk] = useState<string | null>(null)
+const { language } = useLanguage()
+const lang = language || 'pt' // fallback para português
+const t = translations[lang] || translations.pt
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  // Aqui deves obter o idioma atual do contexto i18n
+  // Exemplo fixo PT para já, substitui pelo teu hook useLanguage() ou semelhante
+  const lang = 'pt'
+  const t = translations[lang]
+
+  const onSubmit = async ({
+    name,
+    phone,
+    email,
+    password,
+    confirmPassword,
+  }: {
+    name: string
+    phone: string
+    email: string
+    password: string
+    confirmPassword: string
+  }) => {
     setError(null)
+    setOk(null)
+    setLoading(true)
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
+    try {
+      if (password !== confirmPassword) throw new Error(t.passwordsMismatchError)
+
+      const digits = phone.replace(/\D/g, '')
+      if (digits.length < 9) throw new Error(t.phoneInvalidError)
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
+        },
+      })
+      if (error) throw error
+
+      const userId = data?.user?.id
+      if (userId) {
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .upsert(
+            { id: userId, full_name: name, phone: phone.trim() },
+            { onConflict: 'id' }
+          )
+        if (profileErr) throw profileErr
+      }
+
+      setOk(t.successMessage)
+      router.push('/welcome')
+    } catch (e: any) {
+      setError(e?.message || 'Erro ao criar conta')
+    } finally {
+      setLoading(false)
     }
-
-    // Aqui podes adicionar a lógica de signup com Supabase ou outro backend
-    alert('Signup submit (implementar lógica)')
   }
 
   return (
@@ -60,95 +133,7 @@ export default function SignupPage() {
 
                   <div className="signup-box-bottom">
                     <div className="signup-box-content">
-                      <div className="social-btn-grp">
-                        <button className="btn-default btn-border" type="button" disabled>
-                          <span className="icon-left">
-                            <img src="/assets/images/sign-up/google.png" alt="Google Icon" />
-                          </span>
-                          Login with Google
-                        </button>
-
-                        <button className="btn-default btn-border" type="button" disabled>
-                          <span className="icon-left">
-                            <img src="/assets/images/sign-up/facebook.png" alt="Facebook Icon" />
-                          </span>
-                          Login with Facebook
-                        </button>
-                      </div>
-
-                      <div className="text-social-area">
-                        <hr />
-                        <span>Or continue with</span>
-                        <hr />
-                      </div>
-
-                      <form onSubmit={handleSubmit}>
-                        <div className="input-section">
-                          <div className="icon">
-                            <i className="feather-user" />
-                          </div>
-                          <input
-                            type="text"
-                            placeholder="Enter Your Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                          />
-                        </div>
-
-                        <div className="input-section mail-section">
-                          <div className="icon">
-                            <i className="fa-sharp fa-regular fa-envelope" />
-                          </div>
-                          <input
-                            type="email"
-                            placeholder="Enter email address"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-
-                        <div className="input-section password-section">
-                          <div className="icon">
-                            <i className="fa-sharp fa-regular fa-lock" />
-                          </div>
-
-                          <PasswordInput
-                            value={password}
-                            onChange={setPassword}
-                            placeholder="Create Password"
-                            required
-                            autoComplete="new-password"
-                          />
-                        </div>
-
-                        <div className="input-section password-section">
-                          <div className="icon">
-                            <i className="fa-sharp fa-regular fa-lock" />
-                          </div>
-
-                          <PasswordInput
-                            value={confirmPassword}
-                            onChange={setConfirmPassword}
-                            placeholder="Confirm Password"
-                            required
-                            autoComplete="new-password"
-                          />
-                        </div>
-
-                        <div className="forget-text">
-                          <Link className="btn-read-more" href="/forgot-password">
-                            <span>Forgot password</span>
-                          </Link>
-                        </div>
-
-                        <button type="submit" className="btn-default" disabled={loading}>
-                          Sign Up
-                        </button>
-
-                        {error && <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>{error}</p>}
-                      </form>
+                      <SignupForm t={t} onSubmit={onSubmit} loading={loading} error={error} ok={ok} />
                     </div>
 
                     <div className="signup-box-footer">
@@ -174,21 +159,11 @@ export default function SignupPage() {
                       </div>
 
                       <div className="rating">
-                        <a href="#rating">
-                          <i className="fa-sharp fa-solid fa-star" />
-                        </a>
-                        <a href="#rating">
-                          <i className="fa-sharp fa-solid fa-star" />
-                        </a>
-                        <a href="#rating">
-                          <i className="fa-sharp fa-solid fa-star" />
-                        </a>
-                        <a href="#rating">
-                          <i className="fa-sharp fa-solid fa-star" />
-                        </a>
-                        <a href="#rating">
-                          <i className="fa-sharp fa-solid fa-star" />
-                        </a>
+                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
+                        <a href="#rating"><i className="fa-sharp fa-solid fa-star" /></a>
                       </div>
 
                       <div className="content">
@@ -211,11 +186,12 @@ export default function SignupPage() {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
 
-        <Link className="close-button" href="/">
+        <Link className="close-button" href="/" aria-label="Fechar">
           <i className="fa-sharp fa-regular fa-x" />
         </Link>
       </main>

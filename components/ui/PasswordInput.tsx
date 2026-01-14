@@ -41,7 +41,7 @@ export default function PasswordInput({
         </label>
       ) : null}
 
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', width: '100%' }}>
         <input
           id={id}
           name={name}
@@ -56,7 +56,8 @@ export default function PasswordInput({
           className={inputClassName}
           style={{
             width: '100%',
-            paddingRight: 44,
+            paddingRight: 44, // espaço para o olho
+            boxSizing: 'border-box',
           }}
         />
 
@@ -67,18 +68,18 @@ export default function PasswordInput({
           title={show ? 'Ocultar password' : 'Mostrar password'}
           style={{
             position: 'absolute',
-            right: 10,
+            right: 12,
             top: '50%',
             transform: 'translateY(-50%)',
             background: 'transparent',
             border: 'none',
-            padding: 6,
+            padding: 0,
             cursor: 'pointer',
-            color: 'inherit',
-            opacity: 0.85,
+            opacity: 0.9,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            lineHeight: 0,
           }}
         >
           {show ? <FiEyeOff size={18} /> : <FiEye size={18} />}
