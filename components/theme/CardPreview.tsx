@@ -1,5 +1,5 @@
 'use client'
-
+import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 import React from 'react'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
 // ... outros imports ...
