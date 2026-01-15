@@ -38,7 +38,7 @@ type Props = {
   onSelectDeco?: (id: string | null) => void
   showTranslations?: boolean
   fullBleed?: boolean
-  cardBg?: any // Adicionado para receber fundo do cartão
+  cardBg?: any
 }
 
 function toPx(v: any) {
@@ -89,15 +89,31 @@ export default function CardPreview({
   const mainPadX = 16
   const headerBleedX = cardPadX + mainPadX
 
+  // Define variável CSS para o fundo do cartão
+  const bg = cardBg ?? card?.theme?.background
+
+  const bgCss =
+    bg?.mode === 'solid'
+      ? bg.color
+      : bg?.mode === 'gradient'
+      ? `linear-gradient(${bg.angle ?? 180}deg, ${bg.from}, ${bg.to})`
+      : 'transparent'
+
+  const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
+
   return (
     <div
       style={{
         minHeight: 'auto',
-        background: fullBleed ? 'transparent' : 'var(--color-bg)',
         padding: 0,
         borderRadius: fullBleed ? 0 : 24,
         width: '100%',
-      }}
+        background: fullBleed ? 'transparent' : 'var(--color-bg)',
+        opacity: fullBleed ? bgOpacity : 1,
+
+        // Define a variável CSS para o background
+        '--card-bg': bgCss,
+      } as React.CSSProperties}
     >
       {showTranslations && (
         <div
@@ -123,7 +139,7 @@ export default function CardPreview({
         <div
           style={{
             position: 'relative',
-            background: 'transparent', // transparente para deixar fundo global aparecer
+            background: 'transparent',
             borderRadius: fullBleed ? 0 : 32,
             padding: fullBleed ? 0 : '24px 20px 32px',
             display: 'flex',

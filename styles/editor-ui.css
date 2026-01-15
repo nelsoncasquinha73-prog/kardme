@@ -245,3 +245,7 @@
   color: #6b7280;
   opacity: 1;
 }
+.editor-scope main,
+.editor-scope #preview-scroll {
+  background: transparent !important;
+}
