@@ -1,8 +1,20 @@
 'use client'
-import LanguageSwitcher from '@/components/language/LanguageSwitcher'
+
 import React from 'react'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
-// ... outros imports ...
+import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
+import EmbedBlock from '@/components/blocks/EmbedBlock'
+import ProfileBlock from '@/components/blocks/ProfileBlock'
+import GalleryBlock from '@/components/blocks/GalleryBlock'
+import ContactBlock from '@/components/blocks/ContactBlock'
+import LeadFormBlock from '@/components/blocks/LeadFormBlock'
+import SocialBlock from '@/components/blocks/SocialBlock'
+import DecorationBlock from '@/components/blocks/DecorationBlock'
+import BioBlock from '@/components/blocks/BioBlock'
+import ServicesBlock from '@/components/blocks/ServicesBlock'
+import LanguageSwitcher from '@/components/language/LanguageSwitcher'
+import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
+import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 
 type Card = {
   id: string
