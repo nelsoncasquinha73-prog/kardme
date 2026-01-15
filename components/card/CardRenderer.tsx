@@ -47,6 +47,8 @@ function blockOuterSpacingFromJson(style: any): React.CSSProperties {
 }
 
 export default function CardRenderer({ card, blocks, showTranslations = true, fullBleed = false }: Props) {
+  const headerBlock = blocks?.find((b) => b.type === 'header')
+
   const bg = card.theme?.background
 
   const bgCss =
