@@ -46,28 +46,27 @@ function blockOuterSpacingFromJson(style: any): React.CSSProperties {
   }
 }
 
-export default function CardRenderer({
-  card,
-  blocks,
-  showTranslations = true,
-  fullBleed = false,
-}: Props) {
-  const headerBlock = blocks?.find((b) => b.type === 'header')
-  const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
+export default function CardRenderer({ card, blocks, showTranslations = true, fullBleed = false }: Props) {
+  const bg = card.theme?.background
 
-  const safe = Number(card?.theme?.layout?.safePadding ?? 10)
-  const cardPadX = fullBleed ? 0 : 20
-  const mainPadX = 16
-  const headerBleedX = cardPadX + mainPadX
+  const bgCss =
+    bg?.mode === 'solid'
+      ? bg.color
+      : bg?.mode === 'gradient'
+      ? `linear-gradient(${bg.angle ?? 180}deg, ${bg.from}, ${bg.to})`
+      : 'transparent'
+
+  const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
 
   return (
     <div
       style={{
         minHeight: 'auto',
-        background: fullBleed ? 'transparent' : 'var(--color-bg)',
         padding: 0,
         borderRadius: fullBleed ? 0 : 24,
         width: '100%',
+        background: bgCss,
+        opacity: bgOpacity,
       }}
     >
       {showTranslations && (
