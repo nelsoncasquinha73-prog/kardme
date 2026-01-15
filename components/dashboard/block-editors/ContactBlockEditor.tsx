@@ -400,13 +400,17 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           <>
             <Row label="Espessura">
               <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={container.borderWidth ?? 1}
-                onChange={(e) => setContainer({ borderWidth: clampNum(e.target.value, 1) })}
-              />
+  type="range"
+  min={1}
+  max={6}
+  step={1}
+  value={container.borderWidth ?? 1}
+  onChange={(e) => {
+    console.log('borderWidth onChange:', e.target.value)
+    setContainer({ borderWidth: clampNum(e.target.value, 1) })
+  }}
+/>
+
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
 

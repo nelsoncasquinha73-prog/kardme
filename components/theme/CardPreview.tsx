@@ -205,9 +205,8 @@ export default function CardPreview({
                 marginLeft: -headerBleedX,
                 marginRight: -headerBleedX,
               }}
-              onMouseDown={(e) => {
-                if (shouldIgnoreBlockSelect(e)) return
-                e.stopPropagation()
+              onPointerDownCapture={(e) => {
+                if (shouldIgnoreBlockSelect(e as any)) return
                 onSelectBlock?.(headerBlock)
               }}
             >
@@ -270,14 +269,8 @@ export default function CardPreview({
 
                 const commonWrapProps = {
                   style: wrapStyle,
-                  onPointerDown: (e: React.PointerEvent) => {
+                  onPointerDownCapture: (e: React.PointerEvent) => {
                     if (shouldIgnoreBlockSelect(e as any)) return
-                    e.stopPropagation()
-                    onSelectBlock?.(block)
-                  },
-                  onMouseDown: (e: React.MouseEvent) => {
-                    if (shouldIgnoreBlockSelect(e)) return
-                    e.stopPropagation()
                     onSelectBlock?.(block)
                   },
                 }
