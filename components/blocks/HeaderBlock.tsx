@@ -39,6 +39,8 @@ export type HeaderSettings = {
     avatarDock?: 'overlap' | 'inline'
     widthMode?: 'full' | 'fixed' | 'custom'
     customWidthPx?: number
+    headerBgEnabled?: boolean
+    headerBgColor?: string
   }
 }
 
@@ -69,6 +71,9 @@ export default function HeaderBlock({
   const safeSettings: HeaderSettings = settings ?? {}
   const layout = safeSettings.layout ?? {}
 
+  const headerBgEnabled = (layout as any)?.headerBgEnabled === true
+  const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
+
   const showCover = layout.showCover !== false
   const height = typeof layout.height === 'number' ? layout.height : 220
 
@@ -86,7 +91,7 @@ export default function HeaderBlock({
   const coverFadeHeightPx = typeof layout.coverFadeHeightPx === 'number' ? layout.coverFadeHeightPx : 140
 
   const bgCss = cardBgToCss(cardBg)
-  const fadeTargetBase = cardBgToFadeTarget(cardBg)
+  const fadeTargetBase = headerBgEnabled ? headerBgColor : cardBgToFadeTarget(cardBg)
   const fadeTargetOpacity = typeof cardBg?.opacity === 'number' ? clamp(cardBg.opacity, 0, 1) : 1
 
   const fadeTarget = fadeTargetBase.startsWith('rgba')
@@ -141,7 +146,7 @@ export default function HeaderBlock({
         position: 'relative',
         width: '100%',
         height,
-        background: bgCss,
+        background: headerBgEnabled ? headerBgColor : bgCss,
         overflow: 'hidden',
       }}
     >

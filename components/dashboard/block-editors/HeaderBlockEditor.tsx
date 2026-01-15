@@ -78,22 +78,28 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const overlayColor = (layout as any)?.overlayColor ?? '#000000'
   const overlayGradient = (layout as any)?.overlayGradient === true
 
-  // NOVO: fade para baixo (liga cover ao fundo)
+  // Fade para baixo
   const coverFadeEnabled = (layout as any)?.coverFadeEnabled === true
   const coverFadeStrength = typeof (layout as any)?.coverFadeStrength === 'number' ? (layout as any).coverFadeStrength : 50 // 0-100
   const coverFadeHeightPx = typeof (layout as any)?.coverFadeHeightPx === 'number' ? (layout as any).coverFadeHeightPx : 120
 
-  // Por defeito, tenta usar a cor do fundo do cartão (se existir). Senão branco.
+  // Fundo do header (bloco) - NOVO
+  const headerBgEnabled = (layout as any)?.headerBgEnabled === true
+  const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
+
+  // Por defeito, tenta usar a cor do fundo do header (se ativo), senão a cor do fundo do cartão.
   const fallbackFadeColor =
-    cardBg?.mode === 'solid'
-      ? cardBg.color
-      : cardBg?.mode === 'gradient'
-        ? cardBg.to
-        : '#ffffff'
+    headerBgEnabled
+      ? headerBgColor
+      : cardBg?.mode === 'solid'
+        ? cardBg.color
+        : cardBg?.mode === 'gradient'
+          ? cardBg.to
+          : '#ffffff'
 
   const coverFadeColor = (layout as any)?.coverFadeColor ?? fallbackFadeColor
 
-  // NOVO: badge settings
+  // Badge settings
   const badge = (layout as any)?.badge ?? {}
   const badgeEnabled = badge?.enabled === true
   const badgePos: BadgePos = badge?.position ?? 'top-right'
@@ -121,10 +127,14 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
     pick((hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any))
   }
 
+  function openEyedropperHeaderBg() {
+    pick((hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any))
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* NOVO: Fundo global do cartão */}
-      {cardBg && onChangeCardBg && (
+      {/* Fundo global do cartão */}
+      {cardBg && onChangeCardBg ? (
         <Section title="Fundo do cartão (global)">
           <Row label="Tipo">
             <Button
@@ -138,13 +148,14 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             >
               Cor sólida
             </Button>
+
             <Button
               onClick={() =>
                 onChangeCardBg({
                   mode: 'gradient',
                   from: cardBg.mode === 'gradient' ? cardBg.from : '#ffffff',
                   to: cardBg.mode === 'gradient' ? cardBg.to : '#f3f4f6',
-                  angle: cardBg.mode === 'gradient' ? cardBg.angle ?? 180 : 180,
+                  angle: cardBg.mode === 'gradient' ? (cardBg.angle ?? 180) : 180,
                   opacity: cardBg.opacity ?? 1,
                 })
               }
@@ -158,9 +169,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <SwatchRow
                 value={cardBg.color}
                 onChange={(hex) => onChangeCardBg({ ...cardBg, color: hex })}
-                onEyedropper={() => {
-                  pick((hex) => onChangeCardBg({ ...cardBg, color: hex }))
-                }}
+                onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, color: hex }))}
               />
             </Row>
           ) : (
@@ -169,20 +178,18 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <SwatchRow
                   value={cardBg.from}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, from: hex })}
-                  onEyedropper={() => {
-                    pick((hex) => onChangeCardBg({ ...cardBg, from: hex }))
-                  }}
+                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, from: hex }))}
                 />
               </Row>
+
               <Row label="Para">
                 <SwatchRow
                   value={cardBg.to}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, to: hex })}
-                  onEyedropper={() => {
-                    pick((hex) => onChangeCardBg({ ...cardBg, to: hex }))
-                  }}
+                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, to: hex }))}
                 />
               </Row>
+
               <Row label="Ângulo">
                 <input
                   type="number"
@@ -207,9 +214,32 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             />
           </Row>
         </Section>
-      )}
+      ) : null}
 
-      {/* Restante UI do HeaderBlockEditor */}
+      {/* NOVO: Fundo do header (bloco) */}
+      <Section title="Fundo do header (bloco)">
+        <Row label="Ativar">
+          <Toggle
+            active={headerBgEnabled}
+            onClick={() => setLayout({ ...(layout as any), headerBgEnabled: !headerBgEnabled } as any)}
+          />
+        </Row>
+
+        {headerBgEnabled ? (
+          <Row label="Cor">
+            <SwatchRow
+              value={headerBgColor}
+              onChange={(hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any)}
+              onEyedropper={openEyedropperHeaderBg}
+            />
+          </Row>
+        ) : (
+          <div style={{ fontSize: 12, opacity: 0.7 }}>
+            Ativa para definir uma cor base do header (fica por trás do cover).
+          </div>
+        )}
+      </Section>
+
       <Section title="Visibilidade">
         <Row label="Cover">
           <Toggle active={layout?.showCover !== false} onClick={toggleCover} />
@@ -301,7 +331,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
-            {/* NOVO: Fade para baixo */}
             <Row label="Fade para baixo (subtil)">
               <Toggle
                 active={coverFadeEnabled}
@@ -388,7 +417,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               type="number"
               min={200}
               max={1920}
-              value={layout.customWidthPx ?? 720}
+              value={(layout as any).customWidthPx ?? 720}
               onChange={(e) => setLayout({ customWidthPx: Number(e.target.value) })}
               style={{ width: 90 }}
             />
@@ -396,7 +425,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         )}
       </Section>
 
-      {/* NOVO: Badge */}
       <Section title="Badge (marca/logo)">
         <Row label="Ativar">
           <Toggle
@@ -446,7 +474,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </select>
             </Row>
 
-            <Row label="Tamanho (px)">
+                        <Row label="Tamanho (px)">
               <input
                 type="number"
                 min={16}
@@ -492,7 +520,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             {badgeBgEnabled ? (
               <Row label="Cor do fundo">
-                                <SwatchRow
+                <SwatchRow
                   value={badgeBgColor}
                   onChange={(hex) =>
                     setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)
@@ -615,3 +643,4 @@ function Toggle({ active, onClick }: any) {
     </button>
   )
 }
+
