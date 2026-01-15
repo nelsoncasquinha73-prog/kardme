@@ -48,7 +48,6 @@ export default function ThemePageClientCenter({
         display: 'grid',
         placeItems: 'start center',
         padding: '12px 0 40px',
-        // IMPORTANT: isolar do fundo azul do dashboard
         background: 'transparent',
       }}
     >
@@ -59,10 +58,7 @@ export default function ThemePageClientCenter({
             width: 360,
             borderRadius: 44,
             padding: 3,
-
-            // ✅ Canvas neutro para o mockup (não herdar o azul do dashboard)
-            background: '#ffffff',
-
+            background: '#ffffff', // Canvas branco para isolar fundo do dashboard
             boxShadow: '0 22px 70px rgba(0,0,0,0.28)',
             border: '1px solid rgba(0,0,0,0.06)',
             position: 'relative',
@@ -84,7 +80,7 @@ export default function ThemePageClientCenter({
               borderRadius: 28,
               overflow: 'auto',
               border: '1px solid rgba(0,0,0,0.08)',
-              height: 680,
+              minHeight: 680, // use minHeight para crescer com conteúdo
               background:
                 cardBg.mode === 'solid'
                   ? cardBg.color
@@ -92,7 +88,7 @@ export default function ThemePageClientCenter({
               opacity: cardBg.opacity ?? 1,
             }}
           >
-            <div id="card-preview-root" style={{ height: '100%' }}>
+            <div id="card-preview-root" style={{ minHeight: '100%' }}>
               <ThemeProvider theme={theme}>
                 <CardPreview
                   card={{ ...card, theme }}
@@ -103,6 +99,7 @@ export default function ThemePageClientCenter({
                   onSelectDeco={onSelectDeco}
                   showTranslations={false}
                   fullBleed
+                  cardBg={cardBg} // Passa cardBg para CardPreview
                 />
               </ThemeProvider>
             </div>

@@ -2,19 +2,7 @@
 
 import React from 'react'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
-import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
-import EmbedBlock from '@/components/blocks/EmbedBlock'
-import ProfileBlock from '@/components/blocks/ProfileBlock'
-import GalleryBlock from '@/components/blocks/GalleryBlock'
-import ContactBlock from '@/components/blocks/ContactBlock'
-import LeadFormBlock from '@/components/blocks/LeadFormBlock'
-import SocialBlock from '@/components/blocks/SocialBlock'
-import DecorationBlock from '@/components/blocks/DecorationBlock'
-import BioBlock from '@/components/blocks/BioBlock'
-import ServicesBlock from '@/components/blocks/ServicesBlock'
-import LanguageSwitcher from '@/components/language/LanguageSwitcher'
-import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
-import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
+// ... outros imports ...
 
 type Card = {
   id: string
@@ -38,6 +26,7 @@ type Props = {
   onSelectDeco?: (id: string | null) => void
   showTranslations?: boolean
   fullBleed?: boolean
+  cardBg?: any // Adicionado para receber fundo do cartão
 }
 
 function toPx(v: any) {
@@ -78,6 +67,7 @@ export default function CardPreview({
   onSelectDeco,
   showTranslations = true,
   fullBleed = false,
+  cardBg,
 }: Props) {
   const headerBlock = blocks?.find((b) => b.type === 'header')
   const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
@@ -121,7 +111,7 @@ export default function CardPreview({
         <div
           style={{
             position: 'relative',
-            background: 'transparent', // Alterado para transparente para deixar fundo global aparecer
+            background: 'transparent', // transparente para deixar fundo global aparecer
             borderRadius: fullBleed ? 0 : 32,
             padding: fullBleed ? 0 : '24px 20px 32px',
             display: 'flex',
@@ -205,7 +195,7 @@ export default function CardPreview({
                 />
               ) : null}
 
-              <HeaderBlock settings={headerBlock.settings} cardBg={card.theme?.background} />
+              <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
             </div>
           ) : null}
 
