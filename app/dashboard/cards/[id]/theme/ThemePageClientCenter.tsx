@@ -48,6 +48,8 @@ export default function ThemePageClientCenter({
         display: 'grid',
         placeItems: 'start center',
         padding: '12px 0 40px',
+        // IMPORTANT: isolar do fundo azul do dashboard
+        background: 'transparent',
       }}
     >
       <div style={{ width: '100%', maxWidth: 420, display: 'grid', placeItems: 'center' }}>
@@ -57,9 +59,12 @@ export default function ThemePageClientCenter({
             width: 360,
             borderRadius: 44,
             padding: 3,
-            background: 'linear-gradient(180deg, #0B1220 0%, #111827 100%)',
+
+            // ✅ Canvas neutro para o mockup (não herdar o azul do dashboard)
+            background: '#ffffff',
+
             boxShadow: '0 22px 70px rgba(0,0,0,0.28)',
-            border: '1px solid rgba(255,255,255,0.03)',
+            border: '1px solid rgba(0,0,0,0.06)',
             position: 'relative',
           }}
         >
@@ -75,20 +80,18 @@ export default function ThemePageClientCenter({
           />
 
           <div
-  style={{
-    borderRadius: 28,
-    overflow: 'auto',
-    border: '1px solid rgba(0,0,0,0.08)',
-    height: 680,
-    background:
-      cardBg.mode === 'solid'
-        ? cardBg.color
-        : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
-    opacity: cardBg.opacity ?? 1,
-    outline: '2px dashed red', // só para debug
-  }}
->
-
+            style={{
+              borderRadius: 28,
+              overflow: 'auto',
+              border: '1px solid rgba(0,0,0,0.08)',
+              height: 680,
+              background:
+                cardBg.mode === 'solid'
+                  ? cardBg.color
+                  : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
+              opacity: cardBg.opacity ?? 1,
+            }}
+          >
             <div id="card-preview-root" style={{ height: '100%' }}>
               <ThemeProvider theme={theme}>
                 <CardPreview
@@ -105,6 +108,7 @@ export default function ThemePageClientCenter({
             </div>
           </div>
         </div>
+
         <div style={{ marginTop: 10, fontSize: 12, opacity: 0.55, color: '#111827' }}>
           Dica: arrasta blocos à esquerda para reordenar.
         </div>
