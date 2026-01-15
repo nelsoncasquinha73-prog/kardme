@@ -1,3 +1,69 @@
+/* =========================================================
+   EDITOR UI (scope: .editor-scope)
+   Nota: isto serve para o editor do cartão (ThemePageClient)
+   e NÃO deve afetar o resto do dashboard.
+   ========================================================= */
+
+.editor-scope {
+  font-family: var(--font-sans);
+  color: #111827;
+}
+
+/* Painéis brancos (left/right) */
+.editor-scope aside {
+  background: #fff;
+  color: #374151;
+}
+
+/* Centro (preview) não força cor global */
+.editor-scope main {
+  color: inherit;
+}
+
+/* Inputs/labels no editor */
+.editor-scope label {
+  color: #111827;
+}
+
+.editor-scope input,
+.editor-scope select,
+.editor-scope textarea {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.editor-scope input:focus,
+.editor-scope select:focus,
+.editor-scope textarea:focus {
+  border-color: rgba(128,90,245,0.65);
+  box-shadow: 0 0 0 3px rgba(128,90,245,0.18);
+}
+
+.editor-scope input::placeholder,
+.editor-scope textarea::placeholder {
+  color: rgba(17,24,39,0.45);
+}
+
+/* Botões no editor (defaults) */
+.editor-scope button {
+  font-family: var(--font-sans);
+}
+
+.editor-scope button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =========================================================
+   EDITOR UI (legacy scope: .editor-ui) - mantém o que já tinhas
+   ========================================================= */
+
 .editor-ui {
   font-family: var(--font-sans);
   color: var(--color-text);
@@ -107,9 +173,11 @@
 
 /* =========================================================
    DASHBOARD THEME (scope: .dashboard-scope)
+   Importante: NÃO forçar cores em main *.
+   O dashboard pode ser escuro, mas os painéis/“cards” brancos
+   dentro dele devem conseguir definir a sua própria cor.
    ========================================================= */
 
-/* Fundo geral do dashboard (conteúdo) */
 .dashboard-scope {
 }
 
@@ -120,52 +188,38 @@
   color: #e0e7ff;
 }
 
-/* Links no header e conteúdo */
+/* Links no header */
 .dashboard-scope header a {
   color: #7abfff;
   text-decoration: underline;
 }
 
-/* Conteúdo principal com fundo azul escuro e texto escuro para legibilidade */
+/* Conteúdo principal do dashboard (fundo escuro) */
 .dashboard-scope main {
   background: #0a1e3f;
   min-height: calc(100vh - 60px);
-  color: #111827 !important;
+  color: #e0e7ff; /* texto claro por defeito no dashboard */
 }
 
-/* Texto dos elementos dentro do main sem usar !important para evitar sobreposição */
-.dashboard-scope main p,
-.dashboard-scope main span,
-.dashboard-scope main small,
-.dashboard-scope main li,
-.dashboard-scope main a,
-.dashboard-scope main h1,
-.dashboard-scope main h2,
-.dashboard-scope main h3,
-.dashboard-scope main h4,
-.dashboard-scope main h5,
-.dashboard-scope main h6,
-.dashboard-scope main label {
-  color: #111827;
-}
+/* NÃO aplicar cor a todos os elementos do main.
+   Isto é o que estava a partir o editor/modais/painéis brancos. */
 
 /* Links no conteúdo principal */
 .dashboard-scope main a {
-  color: #3b82f6;
+  color: #7abfff;
   text-decoration: underline;
 }
 
 /* Sidebar com fundo escuro e texto claro */
 .dashboard-scope aside {
   background: #0b0b1a;
-  color: #f9fafb !important;
+  color: #f9fafb;
 }
 
-/* Botões com fundo preto azulado e texto azul claro */
+/* Botões com classe .btn (se existirem no dashboard) */
 .dashboard-scope button.btn {
-  background-color: #000814; /* preto azulado */
-  color: #374151; /* texto cinza escuro */
-  border: 1px solid #3b82f6; /* azul */
+  background-color: #000814;
+  color: #e0e7ff;
+  border: 1px solid #3b82f6;
   box-shadow: 0 0 8px #3b82f6aa;
 }
-
