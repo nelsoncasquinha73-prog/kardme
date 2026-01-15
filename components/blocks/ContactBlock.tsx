@@ -62,7 +62,8 @@ type ContactStyle = {
   uniformWidthPx?: number
   uniformHeightPx?: number
   uniformContentAlign?: 'left' | 'center'
-headingFontSize?: number
+
+  headingFontSize?: number
 
   container?: {
     bgColor?: string
@@ -324,7 +325,12 @@ export default function ContactBlock({ settings, style }: Props) {
                 background: bg,
                 border: bs.borderWidth > 0 ? `${bs.borderWidth}px solid ${bs.borderColor}` : 'none',
                 boxShadow: bs.shadow ? '0 10px 26px rgba(0,0,0,0.16)' : 'none',
+
+                cursor: 'pointer', // garante que o cursor é pointer nos botões
+                userSelect: 'none', // evita seleção acidental do texto do botão
+                transition: 'background-color 0.3s ease, box-shadow 0.3s ease', // suaviza hover
               }}
+              onMouseDown={(e) => e.preventDefault()} // evita foco indesejado ao clicar
             >
               <span
                 style={{

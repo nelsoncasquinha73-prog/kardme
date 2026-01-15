@@ -64,7 +64,8 @@ type ContactStyle = {
   uniformWidthPx?: number
   uniformHeightPx?: number
   uniformContentAlign?: 'left' | 'center'
-headingFontSize?: number
+
+  headingFontSize?: number
 
   container?: {
     bgColor?: string
@@ -99,12 +100,12 @@ const CHANNELS: Array<{ key: ContactChannel; title: string; placeholder: string 
   { key: 'telegram', title: 'Telegram', placeholder: '@username' },
 ]
 
-export default function ContactBlockEditor({
-  settings,
-  style,
-  onChangeSettings,
-  onChangeStyle,
-}: Props) {
+function clampNum(v: any, fallback: number) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
+export default function ContactBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
   const s = settings || {}
   const st = style || {}
@@ -155,6 +156,9 @@ export default function ContactBlockEditor({
   const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (container.borderWidth ?? 0) > 0
 
+  const defaultsBorderEnabled = (btnDefaults.borderEnabled ?? true) === true
+  const defaultsBgMode = (btnDefaults.bgMode ?? 'solid') as 'solid' | 'gradient'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Section title="Conteúdo">
@@ -188,10 +192,7 @@ export default function ContactBlockEditor({
         </Row>
 
         <Row label="Negrito">
-          <Toggle
-            active={st.headingBold !== false}
-            onClick={() => setStyle({ headingBold: !(st.headingBold !== false) })}
-          />
+          <Toggle active={st.headingBold !== false} onClick={() => setStyle({ headingBold: st.headingBold === false })} />
         </Row>
 
         <Row label="Fonte do título">
@@ -212,7 +213,7 @@ export default function ContactBlockEditor({
         <Row label="Peso do título">
           <select
             value={String(st.headingFontWeight ?? 900)}
-            onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })}
+            onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })}
             style={select}
           >
             <option value="400">Normal (400)</option>
@@ -222,19 +223,59 @@ export default function ContactBlockEditor({
             <option value="900">Black (900)</option>
           </select>
         </Row>
-<Row label="Tamanho do título (px)">
-  <input
-    type="number"
-    min={10}
-    max={32}
-    value={st.headingFontSize ?? 13}
-    onChange={(e) => setStyle({ headingFontSize: Number(e.target.value) })}
-    style={input}
-  />
-</Row>
+
+        <Row label="Tamanho do título (px)">
+          <input
+            type="number"
+            min={10}
+            max={32}
+            value={st.headingFontSize ?? 13}
+            onChange={(e) => setStyle({ headingFontSize: clampNum(e.target.value, 13) })}
+            style={input}
+          />
+        </Row>
+
+        <Section title="Layout (alinhamento e espaçamento)">
+          <Row label="Direção">
+            <select
+              value={layout.direction ?? 'row'}
+              onChange={(e) => setLayout({ direction: e.target.value as 'row' | 'column' })}
+              style={select}
+            >
+              <option value="row">Linha</option>
+              <option value="column">Coluna</option>
+            </select>
+          </Row>
+
+          <Row label="Alinhamento">
+            <select
+              value={layout.align ?? 'center'}
+              onChange={(e) => setLayout({ align: e.target.value as 'left' | 'center' | 'right' })}
+              style={select}
+            >
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select>
+          </Row>
+
+          <Row label="Espaço entre botões (px)">
+            <input
+              type="range"
+              min={0}
+              max={28}
+              step={1}
+              value={layout.gapPx ?? 10}
+              onChange={(e) => setLayout({ gapPx: clampNum(e.target.value, 10) })}
+            />
+            <span style={rightNum}>{layout.gapPx ?? 10}px</span>
+          </Row>
+        </Section>
 
         {CHANNELS.map((cdef) => {
           const it = items[cdef.key] || {}
+          const isEnabled = it.enabled !== false
+
           return (
             <div
               key={cdef.key}
@@ -249,18 +290,18 @@ export default function ContactBlockEditor({
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <strong style={{ fontSize: 13 }}>{cdef.title}</strong>
-                <Toggle
-                  active={it.enabled !== false}
-                  onClick={() => setItem(cdef.key, { enabled: it.enabled === false })}
-                />
+                <Toggle active={isEnabled} onClick={() => setItem(cdef.key, { enabled: !isEnabled })} />
               </div>
 
-              <input
-                value={it.value ?? ''}
-                onChange={(e) => setItem(cdef.key, { value: e.target.value })}
-                placeholder={cdef.placeholder}
-                style={input}
-              />
+              <Row label="Valor">
+                <input
+                  value={it.value ?? ''}
+                  onChange={(e) => setItem(cdef.key, { value: e.target.value })}
+                  placeholder={cdef.placeholder}
+                  style={input}
+                  disabled={!isEnabled}
+                />
+              </Row>
 
               <Row label="Label">
                 <input
@@ -268,6 +309,7 @@ export default function ContactBlockEditor({
                   onChange={(e) => setItem(cdef.key, { label: e.target.value })}
                   placeholder={`Ex: \${cdef.title}`}
                   style={input}
+                  disabled={!isEnabled}
                 />
               </Row>
             </div>
@@ -277,17 +319,11 @@ export default function ContactBlockEditor({
 
       <Section title="Layout dos botões">
         <Row label="Mostrar texto nos botões">
-          <Toggle
-            active={st.showLabel !== false}
-            onClick={() => setStyle({ showLabel: !(st.showLabel !== false) })}
-          />
+          <Toggle active={st.showLabel !== false} onClick={() => setStyle({ showLabel: st.showLabel === false })} />
         </Row>
 
         <Row label="Botões com tamanho uniforme">
-          <Toggle
-            active={st.uniformButtons === true}
-            onClick={() => setStyle({ uniformButtons: !(st.uniformButtons === true) })}
-          />
+          <Toggle active={st.uniformButtons === true} onClick={() => setStyle({ uniformButtons: !(st.uniformButtons === true) })} />
         </Row>
 
         {st.uniformButtons === true && (
@@ -298,7 +334,7 @@ export default function ContactBlockEditor({
                 min={44}
                 max={400}
                 value={st.uniformWidthPx ?? 160}
-                onChange={(e) => setStyle({ uniformWidthPx: Number(e.target.value) })}
+                onChange={(e) => setStyle({ uniformWidthPx: clampNum(e.target.value, 160) })}
                 style={input}
               />
             </Row>
@@ -309,7 +345,7 @@ export default function ContactBlockEditor({
                 min={24}
                 max={120}
                 value={st.uniformHeightPx ?? 52}
-                onChange={(e) => setStyle({ uniformHeightPx: Number(e.target.value) })}
+                onChange={(e) => setStyle({ uniformHeightPx: clampNum(e.target.value, 52) })}
                 style={input}
               />
             </Row>
@@ -330,10 +366,7 @@ export default function ContactBlockEditor({
 
       <Section title="Aparência do bloco">
         <Row label="Fundo">
-          <Toggle
-            active={bgEnabled}
-            onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })}
-          />
+          <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
         </Row>
 
         {bgEnabled && (
@@ -347,17 +380,11 @@ export default function ContactBlockEditor({
         )}
 
         <Row label="Sombra">
-          <Toggle
-            active={container.shadow === true}
-            onClick={() => setContainer({ shadow: !(container.shadow === true) })}
-          />
+          <Toggle active={container.shadow === true} onClick={() => setContainer({ shadow: !(container.shadow === true) })} />
         </Row>
 
         <Row label="Borda">
-          <Toggle
-            active={borderEnabled}
-            onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })}
-          />
+          <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
         </Row>
 
         {borderEnabled && (
@@ -369,7 +396,7 @@ export default function ContactBlockEditor({
                 max={6}
                 step={1}
                 value={container.borderWidth ?? 1}
-                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
+                onChange={(e) => setContainer({ borderWidth: clampNum(e.target.value, 1) })}
               />
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
@@ -391,7 +418,7 @@ export default function ContactBlockEditor({
             max={32}
             step={1}
             value={container.radius ?? 14}
-            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
+            onChange={(e) => setContainer({ radius: clampNum(e.target.value, 14) })}
           />
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
@@ -403,7 +430,7 @@ export default function ContactBlockEditor({
             max={28}
             step={1}
             value={container.padding ?? 16}
-            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
+            onChange={(e) => setContainer({ padding: clampNum(e.target.value, 16) })}
           />
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
@@ -417,7 +444,7 @@ export default function ContactBlockEditor({
             max={64}
             step={1}
             value={btnDefaults.sizePx ?? 44}
-            onChange={(e) => setBtnDefaults({ sizePx: Number(e.target.value) })}
+            onChange={(e) => setBtnDefaults({ sizePx: clampNum(e.target.value, 44) })}
           />
           <span style={rightNum}>{btnDefaults.sizePx ?? 44}px</span>
         </Row>
@@ -429,14 +456,14 @@ export default function ContactBlockEditor({
             max={32}
             step={1}
             value={btnDefaults.radius ?? 14}
-            onChange={(e) => setBtnDefaults({ radius: Number(e.target.value) })}
+            onChange={(e) => setBtnDefaults({ radius: clampNum(e.target.value, 14) })}
           />
           <span style={rightNum}>{btnDefaults.radius ?? 14}px</span>
         </Row>
 
         <Row label="Modo Fundo">
           <select
-            value={btnDefaults.bgMode ?? 'solid'}
+            value={defaultsBgMode}
             onChange={(e) => setBtnDefaults({ bgMode: e.target.value as 'solid' | 'gradient' })}
             style={select}
           >
@@ -445,25 +472,21 @@ export default function ContactBlockEditor({
           </select>
         </Row>
 
-        {btnDefaults.bgMode === 'gradient' && (
+        {defaultsBgMode === 'gradient' && (
           <>
             <Row label="Cor Degradê (from)">
               <SwatchRow
                 value={btnDefaults.bgGradient?.from ?? '#111827'}
                 onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })}
-                onEyedropper={() =>
-                  pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))
-                }
+                onEyedropper={() => pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))}
               />
             </Row>
 
             <Row label="Cor Degradê (to)">
               <SwatchRow
                 value={btnDefaults.bgGradient?.to ?? '#374151'}
-                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })}
-                onEyedropper={() =>
-                  pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))
-                }
+                                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })}
+                onEyedropper={() => pick((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))}
               />
             </Row>
 
@@ -473,10 +496,8 @@ export default function ContactBlockEditor({
                 min={0}
                 max={360}
                 value={btnDefaults.bgGradient?.angle ?? 135}
-                onChange={(e) =>
-                  setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })
-                }
-                style={{ width: 70, fontSize: 14, padding: 6, borderRadius: 8 }}
+                onChange={(e) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })}
+                style={{ width: 70, fontSize: 14, padding: 6, borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)' }}
               />
             </Row>
           </>
@@ -487,18 +508,18 @@ export default function ContactBlockEditor({
             value={btnDefaults.bgColor ?? '#ffffff'}
             onChange={(hex) => setBtnDefaults({ bgColor: hex })}
             onEyedropper={() => pick((hex) => setBtnDefaults({ bgColor: hex }))}
-            disabled={btnDefaults.bgMode === 'gradient'}
+            disabled={defaultsBgMode === 'gradient'}
           />
         </Row>
 
         <Row label="Borda">
           <Toggle
-            active={(btnDefaults.borderEnabled ?? true) === true}
-            onClick={() => setBtnDefaults({ borderEnabled: !(btnDefaults.borderEnabled ?? true) })}
+            active={defaultsBorderEnabled}
+            onClick={() => setBtnDefaults({ borderEnabled: !defaultsBorderEnabled })}
           />
         </Row>
 
-        {(btnDefaults.borderEnabled ?? true) && (
+        {defaultsBorderEnabled && (
           <>
             <Row label="Espessura">
               <input
@@ -507,7 +528,7 @@ export default function ContactBlockEditor({
                 max={6}
                 step={1}
                 value={btnDefaults.borderWidth ?? 1}
-                onChange={(e) => setBtnDefaults({ borderWidth: Number(e.target.value) })}
+                onChange={(e) => setBtnDefaults({ borderWidth: clampNum(e.target.value, 1) })}
               />
               <span style={rightNum}>{btnDefaults.borderWidth ?? 1}px</span>
             </Row>
@@ -560,7 +581,7 @@ export default function ContactBlockEditor({
             style={select}
           >
             <option value="400">Normal (400)</option>
-                       <option value="600">Semi (600)</option>
+            <option value="600">Semi (600)</option>
             <option value="700">Bold (700)</option>
             <option value="800">Extra (800)</option>
             <option value="900">Black (900)</option>
@@ -573,7 +594,7 @@ export default function ContactBlockEditor({
             min={8}
             max={36}
             value={btnDefaults.labelFontSize ?? 13}
-            onChange={(e) => setBtnDefaults({ labelFontSize: Number(e.target.value) })}
+            onChange={(e) => setBtnDefaults({ labelFontSize: clampNum(e.target.value, 13) })}
             style={input}
           />
         </Row>
@@ -824,3 +845,4 @@ export default function ContactBlockEditor({
     </div>
   )
 }
+
