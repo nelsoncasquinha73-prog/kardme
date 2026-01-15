@@ -1,7 +1,5 @@
 'use client'
 
-'use client'
-
 import { useRef, useState } from 'react'
 import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import { uploadCardImage } from '@/lib/uploadCardImage'
@@ -125,8 +123,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {cardBg && onChangeCardBg ? (
-        <Section title="Fundo do cartão">
+      {/* NOVO: Fundo global do cartão */}
+      {cardBg && onChangeCardBg && (
+        <Section title="Fundo do cartão (global)">
           <Row label="Tipo">
             <Button
               onClick={() =>
@@ -137,16 +136,15 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 })
               }
             >
-              Cor
+              Cor sólida
             </Button>
-
             <Button
               onClick={() =>
                 onChangeCardBg({
                   mode: 'gradient',
                   from: cardBg.mode === 'gradient' ? cardBg.from : '#ffffff',
                   to: cardBg.mode === 'gradient' ? cardBg.to : '#f3f4f6',
-                  angle: cardBg.mode === 'gradient' ? (cardBg.angle ?? 180) : 180,
+                  angle: cardBg.mode === 'gradient' ? cardBg.angle ?? 180 : 180,
                   opacity: cardBg.opacity ?? 1,
                 })
               }
@@ -160,7 +158,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <SwatchRow
                 value={cardBg.color}
                 onChange={(hex) => onChangeCardBg({ ...cardBg, color: hex })}
-                onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, color: hex }))}
+                onEyedropper={() => {
+                  pick((hex) => onChangeCardBg({ ...cardBg, color: hex }))
+                }}
               />
             </Row>
           ) : (
@@ -169,18 +169,20 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <SwatchRow
                   value={cardBg.from}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, from: hex })}
-                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, from: hex }))}
+                  onEyedropper={() => {
+                    pick((hex) => onChangeCardBg({ ...cardBg, from: hex }))
+                  }}
                 />
               </Row>
-
               <Row label="Para">
                 <SwatchRow
                   value={cardBg.to}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, to: hex })}
-                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, to: hex }))}
+                  onEyedropper={() => {
+                    pick((hex) => onChangeCardBg({ ...cardBg, to: hex }))
+                  }}
                 />
               </Row>
-
               <Row label="Ângulo">
                 <input
                   type="number"
@@ -205,8 +207,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             />
           </Row>
         </Section>
-      ) : null}
+      )}
 
+      {/* Restante UI do HeaderBlockEditor */}
       <Section title="Visibilidade">
         <Row label="Cover">
           <Toggle active={layout?.showCover !== false} onClick={toggleCover} />
@@ -467,7 +470,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
-                       <Row label="Offset Y (px)">
+            <Row label="Offset Y (px)">
               <input
                 type="number"
                 value={badgeOffsetY}
@@ -489,7 +492,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             {badgeBgEnabled ? (
               <Row label="Cor do fundo">
-                <SwatchRow
+                                <SwatchRow
                   value={badgeBgColor}
                   onChange={(hex) =>
                     setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)

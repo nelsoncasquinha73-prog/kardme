@@ -223,3 +223,25 @@
   border: 1px solid #3b82f6;
   box-shadow: 0 0 8px #3b82f6aa;
 }
+/* Forçar legibilidade de controlos (botões/menus) dentro do editor */
+.editor-scope button,
+.editor-scope [role="button"],
+.editor-scope select,
+.editor-scope option,
+.editor-scope input,
+.editor-scope textarea {
+  color: #111827;
+}
+
+/* Ícones dentro de botões (react-icons herdam currentColor) */
+.editor-scope button svg,
+.editor-scope [role="button"] svg {
+  color: #111827;
+}
+
+/* Se houver texto “muted” com opacity demasiado baixo */
+.editor-scope .muted,
+.editor-scope [data-muted="true"] {
+  color: #6b7280;
+  opacity: 1;
+}
