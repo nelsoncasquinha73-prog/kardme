@@ -48,6 +48,12 @@ function blockOuterSpacingFromJson(style: any): React.CSSProperties {
 
 export default function CardRenderer({ card, blocks, showTranslations = true, fullBleed = false }: Props) {
   const headerBlock = blocks?.find((b) => b.type === 'header')
+  const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
+
+  const safe = Number(card?.theme?.layout?.safePadding ?? 10)
+  const cardPadX = fullBleed ? 0 : 20
+  const mainPadX = 16
+  const headerBleedX = cardPadX + mainPadX
 
   const bg = card.theme?.background
 
