@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useMemo, useState } from 'react'
 import EyedropperLoupeOverlay from './EyedropperLoupeOverlay'
 
-type PickerMode = 'eyedropper'
+type PickerMode = 'modal' | 'eyedropper'
 
 type PickerState = {
   active: boolean
@@ -18,18 +18,18 @@ type Ctx = {
 }
 
 const ColorPickerContext = createContext<Ctx>({
-  picker: { active: false, mode: 'eyedropper' },
+  picker: { active: false, mode: 'modal' },
   openPicker: () => {},
   closePicker: () => {},
 })
 
 export function ColorPickerProvider({ children }: { children: React.ReactNode }) {
-  const [picker, setPicker] = useState<PickerState>({ active: false, mode: 'eyedropper' })
+  const [picker, setPicker] = useState<PickerState>({ active: false, mode: 'modal' })
 
   const openPicker: Ctx['openPicker'] = (opts) => {
     setPicker({
       active: true,
-      mode: 'eyedropper',
+      mode: opts.mode ?? 'modal',
       onPick: opts.onPick,
     })
   }
@@ -42,7 +42,7 @@ export function ColorPickerProvider({ children }: { children: React.ReactNode })
 
   return (
     <ColorPickerContext.Provider value={value}>
-      {picker.active && <EyedropperLoupeOverlay />}
+      {picker.active && picker.mode === 'eyedropper' && <EyedropperLoupeOverlay />}
       {children}
     </ColorPickerContext.Provider>
   )

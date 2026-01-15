@@ -117,7 +117,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   const btnDefaults = st.buttonDefaults || {}
   const btns = st.buttons || {}
 
-  const pick = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  const pick = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
   const setSettings = (patch: Partial<ContactSettings>) => onChangeSettings({ ...s, ...patch })
   const setLayout = (patch: Partial<NonNullable<ContactSettings['layout']>>) =>
