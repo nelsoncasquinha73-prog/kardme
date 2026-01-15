@@ -46,7 +46,6 @@ function toPx(v: any) {
   return v
 }
 
-// Apenas margem externa para wrapper
 function blockOuterSpacingFromJson(style: any): React.CSSProperties {
   const s = style || {}
   return {
@@ -122,7 +121,7 @@ export default function CardPreview({
         <div
           style={{
             position: 'relative',
-            background: fullBleed ? 'transparent' : 'var(--color-surface)',
+            background: 'transparent', // Alterado para transparente para deixar fundo global aparecer
             borderRadius: fullBleed ? 0 : 32,
             padding: fullBleed ? 0 : '24px 20px 32px',
             display: 'flex',
