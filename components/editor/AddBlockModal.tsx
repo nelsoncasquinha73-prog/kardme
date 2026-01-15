@@ -57,7 +57,6 @@ export default function AddBlockModal({
 
   const existingTypes = useMemo(() => new Set(existingBlocks.map(b => b.type)), [existingBlocks])
 
-  // Para já, não deixo duplicar alguns blocos “base” (ajusta como quiseres)
   const isSingleInstance = (type: string) => ['header', 'profile'].includes(type)
 
   const available = useMemo(() => {
@@ -119,7 +118,7 @@ export default function AddBlockModal({
           borderRadius: 18,
           boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
           overflow: 'hidden',
-          color: '#111827',
+          color: '#111827', // texto escuro para legibilidade
         }}
       >
         <div
@@ -141,6 +140,7 @@ export default function AddBlockModal({
               border: '1px solid rgba(0,0,0,0.12)',
               background: '#fff',
               cursor: 'pointer',
+              color: '#111827',
             }}
           >
             Fechar
@@ -168,12 +168,12 @@ export default function AddBlockModal({
                   background: '#fff',
                   cursor: creatingType === item.type ? 'not-allowed' : 'pointer',
                   opacity: creatingType === item.type ? 0.7 : 1,
+                  color: '#111827',
                 }}
               >
                 <div style={{ fontWeight: 900, fontSize: 13, color: '#111827' }}>{item.title}</div>
-<div style={{ fontSize: 12, color: '#6b7280' }}>{item.description || item.type}</div>
-<div style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>{item.type}</div>
-
+                <div style={{ fontSize: 12, color: '#6b7280' }}>{item.description || item.type}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>{item.type}</div>
               </button>
             ))}
           </div>
@@ -198,6 +198,7 @@ export default function AddBlockModal({
               background: '#fff',
               cursor: 'pointer',
               fontWeight: 800,
+              color: '#111827',
             }}
           >
             Fechar
