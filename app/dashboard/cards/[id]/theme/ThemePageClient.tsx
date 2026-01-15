@@ -386,7 +386,7 @@ function toggleBlockEnabled(id: string, enabled: boolean) {
         <aside
           style={{
             background: '#fff',
-            color: '#111827',
+            color: '#374151',
             borderRadius: 18,
             boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
             overflow: 'hidden',
@@ -443,7 +443,7 @@ function toggleBlockEnabled(id: string, enabled: boolean) {
                 padding: '8px 12px',
                 borderRadius: 8,
                 backgroundColor: '#111827',
-                color: '#fff',
+                color: '#374151',
                 fontWeight: 'bold',
                 cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
               }}
