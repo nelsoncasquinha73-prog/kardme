@@ -104,8 +104,36 @@
   background: var(--color-border);
   margin: var(--s-4) 0;
 }
-.dashboard-scope main,
-.dashboard-scope header,
+
+/* =========================================================
+   DASHBOARD THEME (scope: .dashboard-scope)
+   ========================================================= */
+
+/* Fundo geral do dashboard (conteúdo) */
+.dashboard-scope {
+}
+
+/* Header com cor azul escura e texto claro */
+.dashboard-scope header {
+  background: #122a6a;
+  border-bottom: 1px solid #234a8a;
+  color: #e0e7ff;
+}
+
+/* Links no header e conteúdo */
+.dashboard-scope header a {
+  color: #7abfff;
+  text-decoration: underline;
+}
+
+/* Conteúdo principal com fundo azul escuro e texto escuro para legibilidade */
+.dashboard-scope main {
+  background: #0a1e3f;
+  min-height: calc(100vh - 60px);
+  color: #111827 !important;
+}
+
+/* Texto dos elementos dentro do main sem usar !important para evitar sobreposição */
 .dashboard-scope main p,
 .dashboard-scope main span,
 .dashboard-scope main small,
@@ -118,63 +146,25 @@
 .dashboard-scope main h5,
 .dashboard-scope main h6,
 .dashboard-scope main label {
-  color: #e0e7ff !important; /* tom claro azul */
+  color: #111827;
 }
 
+/* Links no conteúdo principal */
 .dashboard-scope main a {
-  color: #7abfff !important; /* azul claro para links */
+  color: #3b82f6;
   text-decoration: underline;
 }
 
-.dashboard-scope header {
-  border-bottom: 1px solid #234a8a;
-  background: #122a6a;
-}
-
+/* Sidebar com fundo escuro e texto claro */
 .dashboard-scope aside {
   background: #0b0b1a;
-  color: #cbd5e1;
+  color: #f9fafb !important;
 }
+
+/* Botões com fundo preto azulado e texto azul claro */
 .dashboard-scope button.btn {
-  background-color: #000814; /* preto azulado */
-  color: #e0e7ff;
-  border: 1px solid #3b82f6; /* azul */
+  background-color: #000814;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
   box-shadow: 0 0 8px #3b82f6aa;
-}
-/* =========================================================
-   DASHBOARD THEME (scope: .dashboard-scope)
-   ========================================================= */
-
-.dashboard-scope {
-  /* fundo geral do dashboard (conteúdo) */
-}
-
-.dashboard-scope header {
-  background: #122a6a;
-  border-bottom: 1px solid #234a8a;
-}
-
-.dashboard-scope main {
-  background: #0a1e3f;
-  min-height: calc(100vh - 60px);
-}
-
-/* texto no conteúdo */
-.dashboard-scope header,
-.dashboard-scope header *,
-.dashboard-scope main,
-.dashboard-scope main * {
-  color: #e0e7ff !important;
-}
-
-/* links */
-.dashboard-scope main a {
-  color: #7abfff !important;
-  text-decoration: underline;
-}
-
-/* sidebar mantém-se escura e texto claro */
-.dashboard-scope aside,
-.dashboard-scope aside * {
-  color: #fff !important;
 }
