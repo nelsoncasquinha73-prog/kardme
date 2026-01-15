@@ -118,7 +118,7 @@ export default function AddBlockModal({
           borderRadius: 18,
           boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
           overflow: 'hidden',
-          color: '#111827 !important', // força cor escura para todo o texto no modal
+          color: '#374151!important', // força cor escura para todo o texto no modal
         }}
       >
         <div
@@ -140,7 +140,7 @@ export default function AddBlockModal({
               border: '1px solid rgba(0,0,0,0.12)',
               background: '#fff',
               cursor: 'pointer',
-              color: '#111827',
+              color: '#374151',
             }}
           >
             Fechar
@@ -168,7 +168,7 @@ export default function AddBlockModal({
                   background: '#fff',
                   cursor: creatingType === item.type ? 'not-allowed' : 'pointer',
                   opacity: creatingType === item.type ? 0.7 : 1,
-                  color: '#111827',
+                  color: '#374151',
                 }}
               >
                 <div style={{ fontWeight: 900, fontSize: 13, color: '#111827' }}>{item.title}</div>
@@ -198,7 +198,7 @@ export default function AddBlockModal({
               background: '#fff',
               cursor: 'pointer',
               fontWeight: 800,
-              color: '#111827',
+              color: '#374151',
             }}
           >
             Fechar

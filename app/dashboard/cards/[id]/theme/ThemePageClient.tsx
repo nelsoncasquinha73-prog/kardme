@@ -239,7 +239,7 @@ function toggleBlockEnabled(id: string, enabled: boolean) {
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
-            color: '#111827',
+            color: '#374151',
           }}
         >
           <div
@@ -431,7 +431,7 @@ function toggleBlockEnabled(id: string, enabled: boolean) {
                 border: '1px solid rgba(0,0,0,0.15)',
                 marginTop: 4,
                 fontSize: 14,
-                color: '#111827',
+                color: '#374151',
               }}
             />
             {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
