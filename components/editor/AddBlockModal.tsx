@@ -119,6 +119,7 @@ export default function AddBlockModal({
           borderRadius: 18,
           boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
           overflow: 'hidden',
+          color: '#111827',
         }}
       >
         <div
@@ -130,7 +131,7 @@ export default function AddBlockModal({
             borderBottom: '1px solid rgba(0,0,0,0.08)',
           }}
         >
-          <strong style={{ fontSize: 14 }}>Adicionar bloco</strong>
+          <strong style={{ fontSize: 14, color: '#111827' }}>Adicionar bloco</strong>
           <button
             onClick={onClose}
             style={{
@@ -147,7 +148,7 @@ export default function AddBlockModal({
         </div>
 
         <div style={{ padding: 14 }}>
-          <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 12 }}>
+          <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 12 }}>
             Escolhe um bloco para adicionar ao cartão.
           </p>
 
@@ -169,9 +170,10 @@ export default function AddBlockModal({
                   opacity: creatingType === item.type ? 0.7 : 1,
                 }}
               >
-                <div style={{ fontWeight: 900, fontSize: 13 }}>{item.title}</div>
-                <div style={{ fontSize: 12, opacity: 0.65 }}>{item.description || item.type}</div>
-                <div style={{ fontSize: 11, opacity: 0.5, marginTop: 6 }}>{item.type}</div>
+                <div style={{ fontWeight: 900, fontSize: 13, color: '#111827' }}>{item.title}</div>
+<div style={{ fontSize: 12, color: '#6b7280' }}>{item.description || item.type}</div>
+<div style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>{item.type}</div>
+
               </button>
             ))}
           </div>
