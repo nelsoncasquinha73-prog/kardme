@@ -75,18 +75,20 @@ export default function ThemePageClientCenter({
           />
 
           <div
-            style={{
-              borderRadius: 28,
-              overflow: 'auto',
-              border: '1px solid rgba(0,0,0,0.08)',
-              height: 680,
-              background:
-                cardBg.mode === 'solid'
-                  ? cardBg.color
-                  : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
-              opacity: cardBg.opacity ?? 1,
-            }}
-          >
+  style={{
+    borderRadius: 28,
+    overflow: 'auto',
+    border: '1px solid rgba(0,0,0,0.08)',
+    height: 680,
+    background:
+      cardBg.mode === 'solid'
+        ? cardBg.color
+        : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
+    opacity: cardBg.opacity ?? 1,
+    outline: '2px dashed red', // só para debug
+  }}
+>
+
             <div id="card-preview-root" style={{ height: '100%' }}>
               <ThemeProvider theme={theme}>
                 <CardPreview

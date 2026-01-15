@@ -33,13 +33,19 @@ type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
 export default function ThemePageClient({ card, blocks }: Props) {
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
   const [activeDecoId, setActiveDecoId] = useState<string | null>(null)
+
   const [localBlocks, setLocalBlocks] = useState<CardBlock[]>(
-    blocks.map(b => ({ ...b, style: b.style ?? {} }))
+    blocks.map((b) => ({ ...b, style: b.style ?? {}, settings: b.settings ?? {} }))
   )
+
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const debounceRef = useRef<number | null>(null)
   const [addOpen, setAddOpen] = useState(false)
-  const [localTheme, setLocalTheme] = useState<any>(card?.theme ?? {})
+
+  // Theme (fonte única)
+  const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
+
+  // cardBg (derivado do theme, mas mantemos em state para UX)
   const [cardBg, setCardBg] = useState<CardBg>(() => {
     const bg = card?.theme?.background
     if (bg) return bg
@@ -47,17 +53,14 @@ export default function ThemePageClient({ card, blocks }: Props) {
   })
 
   const enabledBlocksSorted = useMemo(
-    () => localBlocks.filter(b => b.enabled).sort((a, b) => a.order - b.order),
+    () => localBlocks.filter((b) => b.enabled).sort((a, b) => a.order - b.order),
     [localBlocks]
   )
 
-  const allBlocksSorted = useMemo(
-    () => [...localBlocks].sort((a, b) => a.order - b.order),
-    [localBlocks]
-  )
+  const allBlocksSorted = useMemo(() => [...localBlocks].sort((a, b) => a.order - b.order), [localBlocks])
 
   const activeBlock = useMemo(
-    () => localBlocks.find(b => b.id === activeBlockId) || null,
+    () => localBlocks.find((b) => b.id === activeBlockId) || null,
     [localBlocks, activeBlockId]
   )
 
@@ -71,81 +74,75 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
-  return next.map((b) => ({
-    id: b.id,
-    type: b.type,
-    enabled: b.enabled ?? true,
-    order: b.order ?? 0,
-    settings: (b.settings ?? {}) as any, // garante que não é undefined
-    style: (b.style ?? {}) as any,
-    title: b.title,
-  }))
-}
-
+    return next.map((b) => ({
+      id: b.id,
+      type: b.type,
+      enabled: b.enabled ?? true,
+      order: b.order ?? 0,
+      settings: (b.settings ?? {}) as any,
+      style: (b.style ?? {}) as any,
+      title: b.title,
+    }))
+  }
 
   function toggleBlockEnabled(id: string, enabled: boolean) {
     setSaveStatus('dirty')
-    setLocalBlocks(prev => prev.map(b => (b.id === id ? { ...b, enabled } : b)))
+    setLocalBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, enabled } : b)))
   }
 
   function updateActiveSettings(nextSettings: any) {
     if (!activeBlock) return
     setSaveStatus('dirty')
-    setLocalBlocks(prev =>
-      prev.map(b => (b.id === activeBlock.id ? { ...b, settings: nextSettings } : b))
-    )
+    setLocalBlocks((prev) => prev.map((b) => (b.id === activeBlock.id ? { ...b, settings: nextSettings } : b)))
   }
 
   function updateActiveStyle(nextStyle: any) {
     if (!activeBlock) return
     setSaveStatus('dirty')
-    setLocalBlocks(prev =>
-      prev.map(b => (b.id === activeBlock.id ? { ...b, style: nextStyle } : b))
-    )
+    setLocalBlocks((prev) => prev.map((b) => (b.id === activeBlock.id ? { ...b, style: nextStyle } : b)))
   }
 
   async function saveChanges() {
-  setSaveStatus('saving')
+    setSaveStatus('saving')
 
-  for (const block of localBlocks) {
-    const { error } = await supabase
-      .from('card_blocks')
-      .update({
-        settings: block.settings,
-        style: block.style,
-        enabled: block.enabled,
-        order: block.order,
-      })
-      .eq('id', block.id)
+    // 1) Guardar blocos
+    for (const block of localBlocks) {
+      const { error } = await supabase
+        .from('card_blocks')
+        .update({
+          settings: block.settings,
+          style: block.style,
+          enabled: block.enabled,
+          order: block.order,
+        })
+        .eq('id', block.id)
 
-    if (error) {
-      console.error(error)
+      if (error) {
+        console.error(error)
+        setSaveStatus('error')
+        alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
+        return
+      }
+    }
+
+    // 2) Guardar theme (fonte única)
+    const nextTheme = structuredClone(localTheme || {})
+    nextTheme.background = cardBg
+
+    const { error: themeError } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
+
+    if (themeError) {
+      console.error(themeError)
       setSaveStatus('error')
-      alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
+      alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
       return
     }
+
+    setLocalTheme(nextTheme)
+    setSaveStatus('saved')
+    window.setTimeout(() => setSaveStatus('idle'), 1200)
+    alert('Alterações guardadas com sucesso ✅')
   }
-
-  // Save theme separately, com await e check
-  const nextTheme = structuredClone(localTheme || {})
-  nextTheme.background = cardBg
-  const { error: themeError } = await supabase
-    .from('cards')
-    .update({ theme: nextTheme })
-    .eq('id', card.id)
-
-  if (themeError) {
-    console.error(themeError)
-    setSaveStatus('error')
-    alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
-    return
-  }
-
-  setSaveStatus('saved')
-  window.setTimeout(() => setSaveStatus('idle'), 1200)
-  alert('Alterações guardadas com sucesso ✅')
-}
-
 
   // Slug editing states
   const [slugEdit, setSlugEdit] = useState(card.slug)
@@ -184,6 +181,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
     }
   }
 
+  // Autosave só do bloco ativo (não mexe no theme)
   useEffect(() => {
     if (!activeBlock) return
     if (saveStatus !== 'dirty') return
@@ -260,6 +258,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           onSelectDeco={setActiveDecoId}
           cardBg={cardBg}
           onChangeCardBg={(nextBg) => {
+            // só estado + dirty (guardar no botão)
             setCardBg(nextBg)
 
             const nextTheme = structuredClone(localTheme || {})
@@ -267,7 +266,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
             setLocalTheme(nextTheme)
 
             setSaveStatus('dirty')
-            supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
           }}
           onChangeSettings={updateActiveSettings}
           onChangeStyle={updateActiveStyle}
@@ -286,7 +284,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           existingBlocks={allBlocksSorted}
           onClose={() => setAddOpen(false)}
           onCreated={(newBlock) => {
-            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {} }])
+            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
             setActiveBlockId(newBlock.id)
             setSaveStatus('idle')
           }}
