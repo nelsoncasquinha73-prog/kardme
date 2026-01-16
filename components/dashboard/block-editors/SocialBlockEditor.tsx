@@ -1,64 +1,44 @@
+// components/dashboard/block-editors/SocialBlockEditor.tsx
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 
 type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
-
-type SocialItem = {
-  enabled?: boolean
-  label?: string
-  url?: string
-}
-
-type ButtonGradient = {
-  from?: string
-  to?: string
-  angle?: number
-}
+type SocialItem = { enabled?: boolean; label?: string; url?: string }
+type ButtonGradient = { from?: string; to?: string; angle?: number }
 
 type ButtonStyle = {
   sizePx?: number
   radius?: number
-
   bgColor?: string
   bgMode?: 'solid' | 'gradient'
   bgGradient?: ButtonGradient
-
   borderEnabled?: boolean
   borderWidth?: number
   borderColor?: string
-
   iconColor?: string
   shadow?: boolean
   textColor?: string
-
   fontFamily?: string
   fontWeight?: number
   labelFontSize?: number
-
   paddingY?: number
   paddingX?: number
-
   iconScale?: number
 }
 
 type SocialSettings = {
   heading?: string
-  layout?: {
-    direction?: 'row' | 'column'
-    align?: 'left' | 'center' | 'right'
-    gapPx?: number
-  }
+  layout?: { direction?: 'row' | 'column'; align?: 'left' | 'center' | 'right'; gapPx?: number }
   items?: Partial<Record<SocialChannel, SocialItem>>
 }
 
 type SocialStyle = {
   offsetY?: number
-
   showLabel?: boolean
   uniformButtons?: boolean
   uniformWidthPx?: number
@@ -66,45 +46,41 @@ type SocialStyle = {
   uniformContentAlign?: 'left' | 'center'
 
   headingFontSize?: number
-
-  container?: {
-    bgColor?: string
-    radius?: number
-    padding?: number
-    shadow?: boolean
-    borderWidth?: number
-    borderColor?: string
-  }
-
-  buttonDefaults?: ButtonStyle
-  buttons?: Partial<Record<SocialChannel, ButtonStyle>>
-
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
+
+  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
+
+  buttonDefaults?: ButtonStyle
+
+  // NOVO
+  brandColors?: boolean
+  brandMode?: 'bg' | 'icon'
 }
 
-type CombinedState = {
-  settings: SocialSettings
-  style: SocialStyle
-}
+type CombinedState = { settings: SocialSettings; style: SocialStyle }
+type Props = { settings: SocialSettings; style?: SocialStyle; onChange: (next: CombinedState) => void }
 
-type Props = {
-  settings: SocialSettings
-  style?: SocialStyle
-  onChange: (next: CombinedState) => void
-}
-
-function stop(e: React.PointerEvent | React.MouseEvent) {
-  e.stopPropagation?.()
-}
-
+const CHANNELS: Array<{ key: SocialChannel; title: string; placeholder: string }> = [
+  { key: 'facebook', title: 'Facebook', placeholder: 'https://facebook.com/...' },
+  { key: 'instagram', title: 'Instagram', placeholder: 'https://instagram.com/...' },
+  { key: 'linkedin', title: 'LinkedIn', placeholder: 'https://linkedin.com/in/...' },
+  { key: 'tiktok', title: 'TikTok', placeholder: 'https://tiktok.com/@...' },
+  { key: 'youtube', title: 'YouTube', placeholder: 'https://youtube.com/@...' },
+  { key: 'website', title: 'Website', placeholder: 'https://teusite.com' },
+]
 
 function clampNum(v: any, fallback: number) {
   const n = Number(v)
   return Number.isFinite(n) ? n : fallback
+}
+
+function stop(e: React.PointerEvent | React.MouseEvent) {
+  e.preventDefault?.()
+  e.stopPropagation?.()
 }
 
 function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialStyle): CombinedState {
@@ -125,7 +101,14 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
     uniformWidthPx: inputStyle?.uniformWidthPx ?? 160,
     uniformHeightPx: inputStyle?.uniformHeightPx ?? 52,
     uniformContentAlign: inputStyle?.uniformContentAlign ?? 'center',
+
     headingFontSize: inputStyle?.headingFontSize ?? 13,
+    headingFontFamily: inputStyle?.headingFontFamily ?? '',
+    headingFontWeight: inputStyle?.headingFontWeight ?? 900,
+    headingColor: inputStyle?.headingColor ?? '#111827',
+    headingBold: inputStyle?.headingBold ?? true,
+    headingAlign: inputStyle?.headingAlign ?? 'left',
+
     container: {
       bgColor: inputStyle?.container?.bgColor ?? 'transparent',
       radius: inputStyle?.container?.radius ?? 14,
@@ -134,6 +117,7 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
       borderWidth: inputStyle?.container?.borderWidth ?? 0,
       borderColor: inputStyle?.container?.borderColor ?? 'rgba(0,0,0,0.08)',
     },
+
     buttonDefaults: {
       sizePx: inputStyle?.buttonDefaults?.sizePx ?? 44,
       radius: inputStyle?.buttonDefaults?.radius ?? 14,
@@ -153,12 +137,9 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
       paddingX: inputStyle?.buttonDefaults?.paddingX ?? 12,
       iconScale: inputStyle?.buttonDefaults?.iconScale ?? 0.58,
     },
-    buttons: inputStyle?.buttons || {},
-    headingFontFamily: inputStyle?.headingFontFamily ?? '',
-    headingFontWeight: inputStyle?.headingFontWeight ?? 900,
-    headingColor: inputStyle?.headingColor ?? '#111827',
-    headingBold: inputStyle?.headingBold ?? true,
-    headingAlign: inputStyle?.headingAlign ?? 'left',
+
+    brandColors: inputStyle?.brandColors ?? false,
+    brandMode: inputStyle?.brandMode ?? 'bg',
   }
 
   return { settings, style }
@@ -166,12 +147,9 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
 
 export default function SocialBlockEditor({ settings, style, onChange }: Props) {
   const { openPicker } = useColorPicker()
-
   const [local, setLocal] = useState<CombinedState>(() => normalizeCombined(settings, style))
 
-  React.useEffect(() => {
-    setLocal(normalizeCombined(settings, style))
-  }, [settings, style])
+  React.useEffect(() => setLocal(normalizeCombined(settings, style)), [settings, style])
 
   function patch(fn: (d: CombinedState) => void) {
     const next = structuredClone(local)
@@ -180,21 +158,26 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
     onChange(next)
   }
 
-  const setSettings = (patchSettings: Partial<SocialSettings>) =>
-    patch((d) => Object.assign(d.settings, patchSettings))
+  const s = local.settings
+  const st = local.style
+  const layout = s.layout || {}
+  const container = st.container || {}
+  const btn = st.buttonDefaults || {}
 
-  const setStylePatch = (patchStyle: Partial<SocialStyle>) =>
-    patch((d) => Object.assign(d.style, patchStyle))
+  const pick = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
-  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
+  const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
+  const borderEnabled = (container.borderWidth ?? 0) > 0
+  const defaultsBorderEnabled = btn.borderEnabled ?? true
+  const defaultsBgMode = (btn.bgMode ?? 'solid') as 'solid' | 'gradient'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Section title="Conteúdo">
         <Row label="Título">
           <input
-            value={local.settings.heading ?? 'Redes Sociais'}
-            onChange={(e) => setSettings({ heading: e.target.value })}
+            value={s.heading ?? 'Redes Sociais'}
+            onChange={(e) => patch((d) => (d.settings.heading = e.target.value))}
             style={input}
             placeholder="Redes Sociais"
             data-no-block-select="1"
@@ -205,8 +188,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         <Row label="Alinhamento do título">
           <select
-            value={local.style.headingAlign ?? 'left'}
-            onChange={(e) => setStylePatch({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
+            value={st.headingAlign ?? 'left'}
+            onChange={(e) => patch((d) => (d.style.headingAlign = e.target.value as any))}
             style={select}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -220,23 +203,20 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         <Row label="Cor do título">
           <SwatchRow
-            value={local.style.headingColor ?? '#111827'}
-            onChange={(hex) => setStylePatch({ headingColor: hex })}
-            onEyedropper={() => openPicker({ mode: 'eyedropper', onPick: (hex) => setStylePatch({ headingColor: hex }) })}
+            value={st.headingColor ?? '#111827'}
+            onChange={(hex) => patch((d) => (d.style.headingColor = hex))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.headingColor = hex)))}
           />
         </Row>
 
         <Row label="Negrito">
-          <Toggle
-            active={local.style.headingBold ?? true}
-            onClick={() => setStylePatch({ headingBold: !(local.style.headingBold ?? true) })}
-          />
+          <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
         </Row>
 
         <Row label="Fonte do título">
           <select
-            value={local.style.headingFontFamily ?? ''}
-            onChange={(e) => setStylePatch({ headingFontFamily: e.target.value || undefined })}
+            value={st.headingFontFamily ?? ''}
+            onChange={(e) => patch((d) => (d.style.headingFontFamily = e.target.value || ''))}
             style={select}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -253,8 +233,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         <Row label="Peso do título">
           <select
-            value={String(local.style.headingFontWeight ?? 900)}
-            onChange={(e) => setStylePatch({ headingFontWeight: clampNum(e.target.value, 900) })}
+            value={String(st.headingFontWeight ?? 900)}
+            onChange={(e) => patch((d) => (d.style.headingFontWeight = clampNum(e.target.value, 900)))}
             style={select}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -273,12 +253,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             type="number"
             min={10}
             max={32}
-            value={local.style.headingFontSize ?? 13}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === '') return setStylePatch({ headingFontSize: undefined })
-              setStylePatch({ headingFontSize: Math.max(10, Math.min(32, Number(v))) })
-            }}
+            value={st.headingFontSize ?? 13}
+            onChange={(e) => patch((d) => (d.style.headingFontSize = Math.max(10, Math.min(32, Number(e.target.value)))))}
             style={input}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -290,8 +266,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
       <Section title="Layout (alinhamento e espaçamento)">
         <Row label="Direção">
           <select
-            value={local.settings.layout?.direction ?? 'row'}
-            onChange={(e) => setSettings({ layout: { ...local.settings.layout, direction: e.target.value as 'row' | 'column' } })}
+            value={layout.direction ?? 'row'}
+            onChange={(e) => patch((d) => (d.settings.layout = { ...layout, direction: e.target.value as any }))}
             style={select}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -304,8 +280,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         <Row label="Alinhamento">
           <select
-            value={local.settings.layout?.align ?? 'center'}
-            onChange={(e) => setSettings({ layout: { ...local.settings.layout, align: e.target.value as 'left' | 'center' | 'right' } })}
+            value={layout.align ?? 'center'}
+            onChange={(e) => patch((d) => (d.settings.layout = { ...layout, align: e.target.value as any }))}
             style={select}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -323,141 +299,132 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             min={0}
             max={28}
             step={1}
-            value={local.settings.layout?.gapPx ?? 10}
-            onChange={(e) => setSettings({ layout: { ...local.settings.layout, gapPx: clampNum(e.target.value, 10) } })}
+            value={layout.gapPx ?? 10}
+            onChange={(e) => patch((d) => (d.settings.layout = { ...layout, gapPx: clampNum(e.target.value, 10) }))}
             data-no-block-select="1"
             onPointerDown={stop}
             onMouseDown={stop}
           />
-          <span style={rightNum}>{local.settings.layout?.gapPx ?? 10}px</span>
+          <span style={rightNum}>{layout.gapPx ?? 10}px</span>
         </Row>
       </Section>
 
-      <Section title="Mostrar texto nos botões">
-        <Toggle
-          active={local.style.showLabel ?? true}
-          onClick={() => setStylePatch({ showLabel: !(local.style.showLabel ?? true) })}
-        />
-      </Section>
-      <Section title="Botões com tamanho uniforme">
-        <Toggle
-          active={local.style.uniformButtons ?? false}
-          onClick={() => setStylePatch({ uniformButtons: !(local.style.uniformButtons ?? false) })}
-        />
-      </Section>
+      <Section title="Botões">
+        <Row label="Mostrar texto nos botões">
+          <Toggle active={st.showLabel ?? true} onClick={() => patch((d) => (d.style.showLabel = !(st.showLabel ?? true)))} />
+        </Row>
 
-      {local.style.uniformButtons && (
-        <>
-          <Row label="Largura fixa dos botões (px)">
-            <input
-              type="number"
-              min={44}
-              max={400}
-              value={local.style.uniformWidthPx ?? 160}
-              onChange={(e) => setStylePatch({ uniformWidthPx: clampNum(e.target.value, 160) })}
-              style={input}
-              data-no-block-select="1"
-              onPointerDown={stop}
-              onMouseDown={stop}
-            />
-          </Row>
+        <Row label="Botões com tamanho uniforme">
+          <Toggle
+            active={st.uniformButtons ?? false}
+            onClick={() => patch((d) => (d.style.uniformButtons = !(st.uniformButtons ?? false)))}
+          />
+        </Row>
 
-          <Row label="Altura fixa dos botões (px)">
-            <input
-              type="number"
-              min={24}
-              max={120}
-              value={local.style.uniformHeightPx ?? 52}
-              onChange={(e) => setStylePatch({ uniformHeightPx: clampNum(e.target.value, 52) })}
-              style={input}
-              data-no-block-select="1"
-              onPointerDown={stop}
-              onMouseDown={stop}
-            />
-          </Row>
+        {st.uniformButtons && (
+          <>
+            <Row label="Largura fixa (px)">
+              <input
+                type="number"
+                min={44}
+                max={400}
+                value={st.uniformWidthPx ?? 160}
+                onChange={(e) => patch((d) => (d.style.uniformWidthPx = clampNum(e.target.value, 160)))}
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
 
-          <Row label="Alinhamento do conteúdo">
+            <Row label="Altura fixa (px)">
+              <input
+                type="number"
+                min={24}
+                max={120}
+                value={st.uniformHeightPx ?? 52}
+                onChange={(e) => patch((d) => (d.style.uniformHeightPx = clampNum(e.target.value, 52)))}
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
+
+            <Row label="Alinhamento do conteúdo">
+              <select
+                value={st.uniformContentAlign ?? 'center'}
+                onChange={(e) => patch((d) => (d.style.uniformContentAlign = e.target.value as any))}
+                style={select}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              >
+                <option value="left">Esquerda</option>
+                <option value="center">Centro</option>
+              </select>
+            </Row>
+          </>
+        )}
+
+        <Row label="Cores de marca">
+          <Toggle active={st.brandColors ?? false} onClick={() => patch((d) => (d.style.brandColors = !(st.brandColors ?? false)))} />
+        </Row>
+
+        {st.brandColors && (
+          <Row label="Modo">
             <select
-              value={local.style.uniformContentAlign ?? 'center'}
-              onChange={(e) => setStylePatch({ uniformContentAlign: e.target.value as 'left' | 'center' })}
+              value={st.brandMode ?? 'bg'}
+              onChange={(e) => patch((d) => (d.style.brandMode = e.target.value as any))}
               style={select}
               data-no-block-select="1"
               onPointerDown={stop}
               onMouseDown={stop}
             >
-              <option value="left">Esquerda</option>
-              <option value="center">Centro</option>
+              <option value="bg">Fundo (ícone branco)</option>
+              <option value="icon">Só ícone (fundo neutro)</option>
             </select>
           </Row>
-        </>
-      )}
+        )}
+      </Section>
 
       <Section title="Aparência do bloco">
         <Row label="Fundo">
           <Toggle
-            active={(local.style.container?.bgColor ?? 'transparent') !== 'transparent'}
+            active={bgEnabled}
             onClick={() =>
-              setStylePatch({
-                container: {
-                  ...local.style.container,
-                  bgColor:
-                    (local.style.container?.bgColor ?? 'transparent') !== 'transparent'
-                      ? 'transparent'
-                      : '#ffffff',
-                },
+              patch((d) => {
+                d.style.container = { ...container, bgColor: bgEnabled ? 'transparent' : '#ffffff' }
               })
             }
           />
         </Row>
 
-        {(local.style.container?.bgColor ?? 'transparent') !== 'transparent' && (
+        {bgEnabled && (
           <Row label="Cor fundo">
             <SwatchRow
-              value={local.style.container?.bgColor ?? '#ffffff'}
-              onChange={(hex) =>
-                setStylePatch({
-                  container: { ...local.style.container, bgColor: hex },
-                })
-              }
-              onEyedropper={() =>
-                openPicker({
-                  mode: 'eyedropper',
-                  onPick: (hex) =>
-                    setStylePatch({
-                      container: { ...local.style.container, bgColor: hex },
-                    }),
-                })
-              }
+              value={container.bgColor ?? '#ffffff'}
+              onChange={(hex) => patch((d) => (d.style.container = { ...container, bgColor: hex }))}
+              onEyedropper={() => pick((hex) => patch((d) => (d.style.container = { ...container, bgColor: hex })))}
             />
           </Row>
         )}
 
         <Row label="Sombra">
           <Toggle
-            active={local.style.container?.shadow ?? false}
-            onClick={() =>
-              setStylePatch({
-                container: { ...local.style.container, shadow: !(local.style.container?.shadow ?? false) },
-              })
-            }
+            active={container.shadow ?? false}
+            onClick={() => patch((d) => (d.style.container = { ...container, shadow: !(container.shadow ?? false) }))}
           />
         </Row>
 
         <Row label="Borda">
           <Toggle
-            active={(local.style.container?.borderWidth ?? 0) > 0}
-            onClick={() =>
-              setStylePatch({
-                container: {
-                  ...local.style.container,
-                  borderWidth: (local.style.container?.borderWidth ?? 0) > 0 ? 0 : 1,
-                },
-              })
-            }
+            active={borderEnabled}
+            onClick={() => patch((d) => (d.style.container = { ...container, borderWidth: borderEnabled ? 0 : 1 }))}
           />
         </Row>
 
-        {(local.style.container?.borderWidth ?? 0) > 0 && (
+        {borderEnabled && (
           <>
             <Row label="Espessura">
               <input
@@ -465,36 +432,20 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 min={1}
                 max={6}
                 step={1}
-                value={local.style.container?.borderWidth ?? 1}
-                onChange={(e) =>
-                  setStylePatch({
-                    container: { ...local.style.container, borderWidth: clampNum(e.target.value, 1) },
-                  })
-                }
+                value={container.borderWidth ?? 1}
+                onChange={(e) => patch((d) => (d.style.container = { ...container, borderWidth: clampNum(e.target.value, 1) }))}
                 data-no-block-select="1"
                 onPointerDown={stop}
                 onMouseDown={stop}
               />
-              <span style={rightNum}>{local.style.container?.borderWidth ?? 1}px</span>
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
 
             <Row label="Cor borda">
               <SwatchRow
-                value={local.style.container?.borderColor ?? 'rgba(0,0,0,0.08)'}
-                onChange={(hex) =>
-                  setStylePatch({
-                    container: { ...local.style.container, borderColor: hex },
-                  })
-                }
-                onEyedropper={() =>
-                  openPicker({
-                    mode: 'eyedropper',
-                    onPick: (hex) =>
-                      setStylePatch({
-                        container: { ...local.style.container, borderColor: hex },
-                      }),
-                  })
-                }
+                value={container.borderColor ?? 'rgba(0,0,0,0.08)'}
+                onChange={(hex) => patch((d) => (d.style.container = { ...container, borderColor: hex }))}
+                onEyedropper={() => pick((hex) => patch((d) => (d.style.container = { ...container, borderColor: hex })))}
               />
             </Row>
           </>
@@ -506,17 +457,13 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             min={0}
             max={32}
             step={1}
-            value={local.style.container?.radius ?? 14}
-            onChange={(e) =>
-              setStylePatch({
-                container: { ...local.style.container, radius: clampNum(e.target.value, 14) },
-              })
-            }
+            value={container.radius ?? 14}
+            onChange={(e) => patch((d) => (d.style.container = { ...container, radius: clampNum(e.target.value, 14) }))}
             data-no-block-select="1"
             onPointerDown={stop}
             onMouseDown={stop}
           />
-          <span style={rightNum}>{local.style.container?.radius ?? 14}px</span>
+          <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
 
         <Row label="Padding">
@@ -525,26 +472,261 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             min={0}
             max={28}
             step={1}
-            value={local.style.container?.padding ?? 16}
-            onChange={(e) =>
-              setStylePatch({
-                container: { ...local.style.container, padding: clampNum(e.target.value, 16) },
-              })
-            }
+            value={container.padding ?? 16}
+            onChange={(e) => patch((d) => (d.style.container = { ...container, padding: clampNum(e.target.value, 16) }))}
             data-no-block-select="1"
             onPointerDown={stop}
             onMouseDown={stop}
           />
-          <span style={rightNum}>{local.style.container?.padding ?? 16}px</span>
+          <span style={rightNum}>{container.padding ?? 16}px</span>
+        </Row>
+      </Section>
+
+      <Section title="Estilos dos botões (defaults)">
+        <Row label="Tamanho">
+          <input
+            type="range"
+            min={24}
+            max={64}
+            step={1}
+            value={btn.sizePx ?? 44}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, sizePx: clampNum(e.target.value, 44) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.sizePx ?? 44}px</span>
+        </Row>
+
+        <Row label="Raio">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btn.radius ?? 14}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, radius: clampNum(e.target.value, 14) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.radius ?? 14}px</span>
+        </Row>
+
+        <Row label="Modo Fundo">
+          <select
+            value={defaultsBgMode}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgMode: e.target.value as any }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="solid">Sólido</option>
+            <option value="gradient">Degradê</option>
+          </select>
+        </Row>
+
+        {defaultsBgMode === 'gradient' && (
+          <>
+            <Row label="Degradê (from)">
+              <SwatchRow
+                value={btn.bgGradient?.from ?? '#111827'}
+                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))}
+                onEyedropper={() =>
+                  pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } })))
+                }
+              />
+            </Row>
+
+            <Row label="Degradê (to)">
+              <SwatchRow
+                value={btn.bgGradient?.to ?? '#374151'}
+                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))}
+                onEyedropper={() =>
+                  pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } })))
+                }
+              />
+            </Row>
+
+            <Row label="Ângulo">
+              <input
+                type="number"
+                min={0}
+                max={360}
+                value={btn.bgGradient?.angle ?? 135}
+                onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), angle: Number(e.target.value) } }))}
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Fundo">
+          <SwatchRow
+            value={btn.bgColor ?? '#ffffff'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex })))}
+            disabled={defaultsBgMode === 'gradient'}
+          />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle active={defaultsBorderEnabled} onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, borderEnabled: !defaultsBorderEnabled }))} />
+        </Row>
+
+        {defaultsBorderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={btn.borderWidth ?? 1}
+                onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, borderWidth: clampNum(e.target.value, 1) }))}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+              <span style={rightNum}>{btn.borderWidth ?? 1}px</span>
+            </Row>
+
+            <Row label="Cor borda">
+              <SwatchRow
+                value={btn.borderColor ?? 'rgba(0,0,0,0.10)'}
+                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex }))}
+                onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex })))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Ícone">
+          <SwatchRow
+            value={btn.iconColor ?? '#111827'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex })))}
+          />
+        </Row>
+
+        <Row label="Texto">
+          <SwatchRow
+            value={btn.textColor ?? '#111827'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))}
+          />
+        </Row>
+
+        <Row label="Fonte">
+          <select
+            value={btn.fontFamily ?? ''}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: e.target.value || '' }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Peso do texto">
+          <select
+            value={String(btn.fontWeight ?? 800)}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontWeight: clampNum(e.target.value, 800) }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="400">Normal (400)</option>
+            <option value="600">Semi (600)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+
+        <Row label="Tamanho do texto (px)">
+          <input
+            type="number"
+            min={8}
+            max={36}
+            value={btn.labelFontSize ?? 13}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, labelFontSize: Math.max(8, Math.min(36, Number(e.target.value))) }))}
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+        </Row>
+
+        <Row label="Escala do ícone">
+          <input
+            type="range"
+            min={0.4}
+            max={0.9}
+            step={0.01}
+            value={btn.iconScale ?? 0.58}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, iconScale: Number(e.target.value) }))}
+            style={{ width: 140 }}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{(btn.iconScale ?? 0.58).toFixed(2)}</span>
+        </Row>
+
+        <Row label="Padding Y">
+          <input
+            type="range"
+            min={0}
+            max={24}
+            step={1}
+            value={btn.paddingY ?? 10}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingY: clampNum(e.target.value, 10) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.paddingY ?? 10}px</span>
+        </Row>
+
+        <Row label="Padding X">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btn.paddingX ?? 12}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingX: clampNum(e.target.value, 12) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.paddingX ?? 12}px</span>
+        </Row>
+
+        <Row label="Sombra">
+          <Toggle active={btn.shadow ?? false} onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, shadow: !(btn.shadow ?? false) }))} />
         </Row>
       </Section>
 
       <Section title="Links (por rede)">
-        {channels.map((ch) => {
-          const item = local.settings.items?.[ch] || {}
+        {CHANNELS.map((c) => {
+          const item = s.items?.[c.key] || {}
           return (
             <div
-              key={ch}
+              key={c.key}
               style={{
                 border: '1px solid rgba(0,0,0,0.08)',
                 borderRadius: 14,
@@ -554,7 +736,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 gap: 10,
               }}
             >
-              <strong style={{ fontSize: 13 }}>{ch.charAt(0).toUpperCase() + ch.slice(1)}</strong>
+              <strong style={{ fontSize: 13 }}>{c.title}</strong>
 
               <Row label="Ativo">
                 <Toggle
@@ -562,8 +744,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   onClick={() =>
                     patch((d) => {
                       d.settings.items = d.settings.items || {}
-                      const current = d.settings.items[ch] || {}
-                      d.settings.items[ch] = { ...current, enabled: !(current.enabled ?? false) }
+                      const cur = d.settings.items[c.key] || {}
+                      d.settings.items[c.key] = { ...cur, enabled: !(cur.enabled ?? false) }
                     })
                   }
                 />
@@ -575,8 +757,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   onChange={(e) =>
                     patch((d) => {
                       d.settings.items = d.settings.items || {}
-                      const current = d.settings.items[ch] || {}
-                      d.settings.items[ch] = { ...current, label: e.target.value }
+                      const cur = d.settings.items[c.key] || {}
+                      d.settings.items[c.key] = { ...cur, label: e.target.value }
                     })
                   }
                   style={input}
@@ -593,12 +775,12 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   onChange={(e) =>
                     patch((d) => {
                       d.settings.items = d.settings.items || {}
-                      const current = d.settings.items[ch] || {}
-                      d.settings.items[ch] = { ...current, url: e.target.value, enabled: true }
+                      const cur = d.settings.items[c.key] || {}
+                      d.settings.items[c.key] = { ...cur, url: e.target.value, enabled: true }
                     })
                   }
                   style={input}
-                  placeholder="https://..."
+                  placeholder={c.placeholder}
                   data-no-block-select="1"
                   onPointerDown={stop}
                   onMouseDown={stop}

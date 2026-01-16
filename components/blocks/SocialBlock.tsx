@@ -1,3 +1,4 @@
+// components/blocks/SocialBlock.tsx
 'use client'
 
 import React from 'react'
@@ -11,35 +12,25 @@ type SocialItem = {
   url?: string
 }
 
-type ButtonGradient = {
-  from?: string
-  to?: string
-  angle?: number
-}
+type ButtonGradient = { from?: string; to?: string; angle?: number }
 
 type ButtonStyle = {
   sizePx?: number
   radius?: number
-
   bgColor?: string
   bgMode?: 'solid' | 'gradient'
   bgGradient?: ButtonGradient
-
   borderEnabled?: boolean
   borderWidth?: number
   borderColor?: string
-
   iconColor?: string
   shadow?: boolean
   textColor?: string
-
   fontFamily?: string
   fontWeight?: number
   labelFontSize?: number
-
   paddingY?: number
   paddingX?: number
-
   iconScale?: number
 }
 
@@ -76,17 +67,19 @@ type SocialStyle = {
   buttonDefaults?: ButtonStyle
   buttons?: Partial<Record<SocialChannel, ButtonStyle>>
 
+  // título
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
+
+  // NOVO: cores de marca
+  brandColors?: boolean
+  brandMode?: 'bg' | 'icon' // bg = fundo, icon = só ícone
 }
 
-type Props = {
-  settings: SocialSettings
-  style?: SocialStyle
-}
+type Props = { settings: SocialSettings; style?: SocialStyle }
 
 const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   facebook: FaFacebookF,
@@ -95,6 +88,16 @@ const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   tiktok: FaTiktok,
   youtube: FaYoutube,
   website: FaGlobe,
+}
+
+// cores “brand”
+const BRAND: Record<SocialChannel, { bg: string; icon: string; text: string }> = {
+  facebook: { bg: '#1877F2', icon: '#ffffff', text: '#ffffff' },
+  instagram: { bg: '#E1306C', icon: '#ffffff', text: '#ffffff' },
+  linkedin: { bg: '#0A66C2', icon: '#ffffff', text: '#ffffff' },
+  tiktok: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
+  youtube: { bg: '#FF0000', icon: '#ffffff', text: '#ffffff' },
+  website: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
 }
 
 function isNonEmpty(v?: string) {
@@ -111,7 +114,6 @@ function sanitizeUrl(raw: string) {
 function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<ButtonStyle> {
   const d = defaults || {}
   const s = specific || {}
-
   const borderEnabled = s.borderEnabled ?? d.borderEnabled ?? true
 
   return {
@@ -195,7 +197,6 @@ export default function SocialBlock({ settings, style }: Props) {
   const hasBg = bg !== 'transparent' && bg !== 'rgba(0,0,0,0)'
   const hasShadow = container.shadow === true
   const hasBorder = (container.borderWidth ?? 0) > 0
-
   const effectiveBg = hasShadow && !hasBg ? 'rgba(255,255,255,0.92)' : bg
 
   const wrapStyle: React.CSSProperties = {
@@ -233,6 +234,9 @@ export default function SocialBlock({ settings, style }: Props) {
   const uniformHeightPx = st.uniformHeightPx ?? computeUniformHeightPx(showLabel, firstBs.sizePx)
   const uniformContentAlign: 'left' | 'center' = st.uniformContentAlign ?? 'center'
 
+  const brandOn = st.brandColors === true
+  const brandMode = st.brandMode ?? 'bg'
+
   return (
     <section style={wrapStyle}>
       {isNonEmpty(s.heading) && (
@@ -262,7 +266,20 @@ export default function SocialBlock({ settings, style }: Props) {
         }}
       >
         {visible.map(({ ch, item, href }) => {
-          const bs = mergeBtn(st.buttonDefaults, st.buttons?.[ch])
+          const base = mergeBtn(st.buttonDefaults, st.buttons?.[ch])
+
+          // aplica cores de marca por cima do default (sem rebentar a tua configuração)
+          const bs = brandOn
+            ? (() => {
+                const b = BRAND[ch]
+                if (brandMode === 'icon') {
+                  return { ...base, iconColor: b.bg, textColor: b.bg }
+                }
+                // bg
+                return { ...base, bgMode: 'solid' as const, bgColor: b.bg, iconColor: b.icon, textColor: b.text, borderEnabled: false, borderWidth: 0 }
+              })()
+            : base
+
           const label = item.label || defaultLabel(ch)
           const Icon = ICONS_MAP[ch]
 
@@ -321,7 +338,7 @@ export default function SocialBlock({ settings, style }: Props) {
                   style={{
                     fontWeight: bs.fontWeight ?? 800,
                     fontSize: bs.labelFontSize ?? 13,
-                    opacity: 0.9,
+                    opacity: 0.95,
                     color: bs.textColor,
                     fontFamily: bs.fontFamily || undefined,
                     lineHeight: 1.1,
