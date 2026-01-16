@@ -1,7 +1,7 @@
 // components/dashboard/block-editors/SocialBlockEditor.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
@@ -52,11 +52,18 @@ type SocialStyle = {
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
 
-  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
+  container?: {
+    bgColor?: string
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
 
   buttonDefaults?: ButtonStyle
 
-  // NOVO
+  // brand
   brandColors?: boolean
   brandMode?: 'bg' | 'icon'
 }
@@ -78,20 +85,20 @@ function clampNum(v: any, fallback: number) {
   return Number.isFinite(n) ? n : fallback
 }
 
+// ⚠️ IMPORTANT: NÃO usar preventDefault aqui (mata foco/colar em inputs)
 function stop(e: React.PointerEvent | React.MouseEvent) {
-  e.preventDefault?.()
   e.stopPropagation?.()
 }
 
 function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialStyle): CombinedState {
   const settings: SocialSettings = {
-    heading: inputSettings.heading ?? 'Redes Sociais',
+    heading: inputSettings?.heading ?? 'Redes Sociais',
     layout: {
-      direction: inputSettings.layout?.direction ?? 'row',
-      align: inputSettings.layout?.align ?? 'center',
-      gapPx: inputSettings.layout?.gapPx ?? 10,
+      direction: inputSettings?.layout?.direction ?? 'row',
+      align: inputSettings?.layout?.align ?? 'center',
+      gapPx: inputSettings?.layout?.gapPx ?? 10,
     },
-    items: inputSettings.items || {},
+    items: inputSettings?.items || {},
   }
 
   const style: SocialStyle = {
@@ -147,15 +154,50 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
 
 export default function SocialBlockEditor({ settings, style, onChange }: Props) {
   const { openPicker } = useColorPicker()
-  const [local, setLocal] = useState<CombinedState>(() => normalizeCombined(settings, style))
 
-  React.useEffect(() => setLocal(normalizeCombined(settings, style)), [settings, style])
+  const isEditingRef = useRef(false)
+  const lastIncomingKeyRef = useRef<string>('')
+
+  const incomingKey = JSON.stringify({ settings: settings || {}, style: style || {} })
+  const [local, setLocal] = useState<CombinedState>(() => {
+    lastIncomingKeyRef.current = incomingKey
+    return normalizeCombined(settings, style)
+  })
+
+  // Sync seguro: só atualiza local quando NÃO estás a editar
+  React.useEffect(() => {
+    if (incomingKey === lastIncomingKeyRef.current) return
+    lastIncomingKeyRef.current = incomingKey
+
+    if (isEditingRef.current) return
+    setLocal(normalizeCombined(settings, style))
+  }, [incomingKey, settings, style])
+
+  const markEditing = () => {
+    isEditingRef.current = true
+  }
+  const unmarkEditing = () => {
+    // pequeno “delay” para evitar blur -> autosave -> sync durante clique
+    window.setTimeout(() => {
+      isEditingRef.current = false
+    }, 250)
+  }
+
+  const editProps = {
+    onFocus: markEditing,
+    onBlur: unmarkEditing,
+    'data-no-block-select': '1',
+    onPointerDown: stop,
+    onMouseDown: stop,
+  } as const
 
   function patch(fn: (d: CombinedState) => void) {
-    const next = structuredClone(local)
-    fn(next)
-    setLocal(next)
-    onChange(next)
+    setLocal((prev) => {
+      const next = structuredClone(prev)
+      fn(next)
+      onChange(next)
+      return next
+    })
   }
 
   const s = local.settings
@@ -180,9 +222,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             onChange={(e) => patch((d) => (d.settings.heading = e.target.value))}
             style={input}
             placeholder="Redes Sociais"
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           />
         </Row>
 
@@ -191,9 +231,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={st.headingAlign ?? 'left'}
             onChange={(e) => patch((d) => (d.style.headingAlign = e.target.value as any))}
             style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           >
             <option value="left">Esquerda</option>
             <option value="center">Centro</option>
@@ -218,9 +256,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={st.headingFontFamily ?? ''}
             onChange={(e) => patch((d) => (d.style.headingFontFamily = e.target.value || ''))}
             style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           >
             <option value="">Padrão</option>
             {FONT_OPTIONS.map((o) => (
@@ -236,9 +272,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={String(st.headingFontWeight ?? 900)}
             onChange={(e) => patch((d) => (d.style.headingFontWeight = clampNum(e.target.value, 900)))}
             style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           >
             <option value="400">Normal (400)</option>
             <option value="600">Semi (600)</option>
@@ -256,9 +290,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={st.headingFontSize ?? 13}
             onChange={(e) => patch((d) => (d.style.headingFontSize = Math.max(10, Math.min(32, Number(e.target.value)))))}
             style={input}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           />
         </Row>
       </Section>
@@ -269,9 +301,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={layout.direction ?? 'row'}
             onChange={(e) => patch((d) => (d.settings.layout = { ...layout, direction: e.target.value as any }))}
             style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           >
             <option value="row">Linha</option>
             <option value="column">Coluna</option>
@@ -283,9 +313,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             value={layout.align ?? 'center'}
             onChange={(e) => patch((d) => (d.settings.layout = { ...layout, align: e.target.value as any }))}
             style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           >
             <option value="left">Esquerda</option>
             <option value="center">Centro</option>
@@ -301,9 +329,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             step={1}
             value={layout.gapPx ?? 10}
             onChange={(e) => patch((d) => (d.settings.layout = { ...layout, gapPx: clampNum(e.target.value, 10) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           />
           <span style={rightNum}>{layout.gapPx ?? 10}px</span>
         </Row>
@@ -315,10 +341,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
 
         <Row label="Botões com tamanho uniforme">
-          <Toggle
-            active={st.uniformButtons ?? false}
-            onClick={() => patch((d) => (d.style.uniformButtons = !(st.uniformButtons ?? false)))}
-          />
+          <Toggle active={st.uniformButtons ?? false} onClick={() => patch((d) => (d.style.uniformButtons = !(st.uniformButtons ?? false)))} />
         </Row>
 
         {st.uniformButtons && (
@@ -331,9 +354,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 value={st.uniformWidthPx ?? 160}
                 onChange={(e) => patch((d) => (d.style.uniformWidthPx = clampNum(e.target.value, 160)))}
                 style={input}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
+                {...editProps}
               />
             </Row>
 
@@ -345,9 +366,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 value={st.uniformHeightPx ?? 52}
                 onChange={(e) => patch((d) => (d.style.uniformHeightPx = clampNum(e.target.value, 52)))}
                 style={input}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
+                {...editProps}
               />
             </Row>
 
@@ -356,9 +375,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 value={st.uniformContentAlign ?? 'center'}
                 onChange={(e) => patch((d) => (d.style.uniformContentAlign = e.target.value as any))}
                 style={select}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
+                {...editProps}
               >
                 <option value="left">Esquerda</option>
                 <option value="center">Centro</option>
@@ -377,9 +394,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
               value={st.brandMode ?? 'bg'}
               onChange={(e) => patch((d) => (d.style.brandMode = e.target.value as any))}
               style={select}
-              data-no-block-select="1"
-              onPointerDown={stop}
-              onMouseDown={stop}
+              {...editProps}
             >
               <option value="bg">Fundo (ícone branco)</option>
               <option value="icon">Só ícone (fundo neutro)</option>
@@ -411,17 +426,11 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         )}
 
         <Row label="Sombra">
-          <Toggle
-            active={container.shadow ?? false}
-            onClick={() => patch((d) => (d.style.container = { ...container, shadow: !(container.shadow ?? false) }))}
-          />
+          <Toggle active={container.shadow ?? false} onClick={() => patch((d) => (d.style.container = { ...container, shadow: !(container.shadow ?? false) }))} />
         </Row>
 
         <Row label="Borda">
-          <Toggle
-            active={borderEnabled}
-            onClick={() => patch((d) => (d.style.container = { ...container, borderWidth: borderEnabled ? 0 : 1 }))}
-          />
+          <Toggle active={borderEnabled} onClick={() => patch((d) => (d.style.container = { ...container, borderWidth: borderEnabled ? 0 : 1 }))} />
         </Row>
 
         {borderEnabled && (
@@ -434,9 +443,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 step={1}
                 value={container.borderWidth ?? 1}
                 onChange={(e) => patch((d) => (d.style.container = { ...container, borderWidth: clampNum(e.target.value, 1) }))}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
+                {...editProps}
               />
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
@@ -459,9 +466,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             step={1}
             value={container.radius ?? 14}
             onChange={(e) => patch((d) => (d.style.container = { ...container, radius: clampNum(e.target.value, 14) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           />
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
@@ -474,250 +479,9 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             step={1}
             value={container.padding ?? 16}
             onChange={(e) => patch((d) => (d.style.container = { ...container, padding: clampNum(e.target.value, 16) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
+            {...editProps}
           />
           <span style={rightNum}>{container.padding ?? 16}px</span>
-        </Row>
-      </Section>
-
-      <Section title="Estilos dos botões (defaults)">
-        <Row label="Tamanho">
-          <input
-            type="range"
-            min={24}
-            max={64}
-            step={1}
-            value={btn.sizePx ?? 44}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, sizePx: clampNum(e.target.value, 44) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-          <span style={rightNum}>{btn.sizePx ?? 44}px</span>
-        </Row>
-
-        <Row label="Raio">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={btn.radius ?? 14}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, radius: clampNum(e.target.value, 14) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-          <span style={rightNum}>{btn.radius ?? 14}px</span>
-        </Row>
-
-        <Row label="Modo Fundo">
-          <select
-            value={defaultsBgMode}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgMode: e.target.value as any }))}
-            style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          >
-            <option value="solid">Sólido</option>
-            <option value="gradient">Degradê</option>
-          </select>
-        </Row>
-
-        {defaultsBgMode === 'gradient' && (
-          <>
-            <Row label="Degradê (from)">
-              <SwatchRow
-                value={btn.bgGradient?.from ?? '#111827'}
-                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))}
-                onEyedropper={() =>
-                  pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } })))
-                }
-              />
-            </Row>
-
-            <Row label="Degradê (to)">
-              <SwatchRow
-                value={btn.bgGradient?.to ?? '#374151'}
-                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))}
-                onEyedropper={() =>
-                  pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } })))
-                }
-              />
-            </Row>
-
-            <Row label="Ângulo">
-              <input
-                type="number"
-                min={0}
-                max={360}
-                value={btn.bgGradient?.angle ?? 135}
-                onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), angle: Number(e.target.value) } }))}
-                style={input}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
-              />
-            </Row>
-          </>
-        )}
-
-        <Row label="Fundo">
-          <SwatchRow
-            value={btn.bgColor ?? '#ffffff'}
-            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex }))}
-            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex })))}
-            disabled={defaultsBgMode === 'gradient'}
-          />
-        </Row>
-
-        <Row label="Borda">
-          <Toggle active={defaultsBorderEnabled} onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, borderEnabled: !defaultsBorderEnabled }))} />
-        </Row>
-
-        {defaultsBorderEnabled && (
-          <>
-            <Row label="Espessura">
-              <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={btn.borderWidth ?? 1}
-                onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, borderWidth: clampNum(e.target.value, 1) }))}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
-              />
-              <span style={rightNum}>{btn.borderWidth ?? 1}px</span>
-            </Row>
-
-            <Row label="Cor borda">
-              <SwatchRow
-                value={btn.borderColor ?? 'rgba(0,0,0,0.10)'}
-                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex }))}
-                onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex })))}
-              />
-            </Row>
-          </>
-        )}
-
-        <Row label="Ícone">
-          <SwatchRow
-            value={btn.iconColor ?? '#111827'}
-            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex }))}
-            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex })))}
-          />
-        </Row>
-
-        <Row label="Texto">
-          <SwatchRow
-            value={btn.textColor ?? '#111827'}
-            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))}
-            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))}
-          />
-        </Row>
-
-        <Row label="Fonte">
-          <select
-            value={btn.fontFamily ?? ''}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: e.target.value || '' }))}
-            style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          >
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </Row>
-
-        <Row label="Peso do texto">
-          <select
-            value={String(btn.fontWeight ?? 800)}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontWeight: clampNum(e.target.value, 800) }))}
-            style={select}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          >
-            <option value="400">Normal (400)</option>
-            <option value="600">Semi (600)</option>
-            <option value="700">Bold (700)</option>
-            <option value="800">Extra (800)</option>
-            <option value="900">Black (900)</option>
-          </select>
-        </Row>
-
-        <Row label="Tamanho do texto (px)">
-          <input
-            type="number"
-            min={8}
-            max={36}
-            value={btn.labelFontSize ?? 13}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, labelFontSize: Math.max(8, Math.min(36, Number(e.target.value))) }))}
-            style={input}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-        </Row>
-
-        <Row label="Escala do ícone">
-          <input
-            type="range"
-            min={0.4}
-            max={0.9}
-            step={0.01}
-            value={btn.iconScale ?? 0.58}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, iconScale: Number(e.target.value) }))}
-            style={{ width: 140 }}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-          <span style={rightNum}>{(btn.iconScale ?? 0.58).toFixed(2)}</span>
-        </Row>
-
-        <Row label="Padding Y">
-          <input
-            type="range"
-            min={0}
-            max={24}
-            step={1}
-            value={btn.paddingY ?? 10}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingY: clampNum(e.target.value, 10) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-          <span style={rightNum}>{btn.paddingY ?? 10}px</span>
-        </Row>
-
-        <Row label="Padding X">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={btn.paddingX ?? 12}
-            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingX: clampNum(e.target.value, 12) }))}
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-          />
-          <span style={rightNum}>{btn.paddingX ?? 12}px</span>
-        </Row>
-
-        <Row label="Sombra">
-          <Toggle active={btn.shadow ?? false} onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, shadow: !(btn.shadow ?? false) }))} />
         </Row>
       </Section>
 
@@ -735,6 +499,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                 flexDirection: 'column',
                 gap: 10,
               }}
+              onPointerDown={stop}
+              onMouseDown={stop}
             >
               <strong style={{ fontSize: 13 }}>{c.title}</strong>
 
@@ -763,9 +529,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   }
                   style={input}
                   placeholder="Ex: Instagram"
-                  data-no-block-select="1"
-                  onPointerDown={stop}
-                  onMouseDown={stop}
+                  {...editProps}
                 />
               </Row>
 
@@ -781,9 +545,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   }
                   style={input}
                   placeholder={c.placeholder}
-                  data-no-block-select="1"
-                  onPointerDown={stop}
-                  onMouseDown={stop}
+                  {...editProps}
                 />
               </Row>
             </div>

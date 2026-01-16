@@ -41,7 +41,8 @@ type SocialSettings = {
     align?: 'left' | 'center' | 'right'
     gapPx?: number
   }
-  items?: Partial<Record<SocialChannel, SocialItem>>
+  // aceitamos object OU array antigo
+  items?: Partial<Record<SocialChannel, SocialItem>> | Array<{ id: SocialChannel; enabled?: boolean; label?: string; url?: string }>
 }
 
 type SocialStyle = {
@@ -67,16 +68,14 @@ type SocialStyle = {
   buttonDefaults?: ButtonStyle
   buttons?: Partial<Record<SocialChannel, ButtonStyle>>
 
-  // título
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
 
-  // NOVO: cores de marca
   brandColors?: boolean
-  brandMode?: 'bg' | 'icon' // bg = fundo, icon = só ícone
+  brandMode?: 'bg' | 'icon'
 }
 
 type Props = { settings: SocialSettings; style?: SocialStyle }
@@ -90,7 +89,6 @@ const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   website: FaGlobe,
 }
 
-// cores “brand”
 const BRAND: Record<SocialChannel, { bg: string; icon: string; text: string }> = {
   facebook: { bg: '#1877F2', icon: '#ffffff', text: '#ffffff' },
   instagram: { bg: '#E1306C', icon: '#ffffff', text: '#ffffff' },
@@ -119,26 +117,20 @@ function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<Butt
   return {
     sizePx: s.sizePx ?? d.sizePx ?? 44,
     radius: s.radius ?? d.radius ?? 14,
-
     bgColor: s.bgColor ?? d.bgColor ?? '#ffffff',
     bgMode: s.bgMode ?? d.bgMode ?? 'solid',
     bgGradient: s.bgGradient ?? d.bgGradient ?? { from: '#111827', to: '#374151', angle: 135 },
-
     borderEnabled,
     borderWidth: borderEnabled ? (s.borderWidth ?? d.borderWidth ?? 1) : 0,
     borderColor: s.borderColor ?? d.borderColor ?? 'rgba(0,0,0,0.10)',
-
     iconColor: s.iconColor ?? d.iconColor ?? '#111827',
     shadow: s.shadow ?? d.shadow ?? false,
     textColor: s.textColor ?? d.textColor ?? '#111827',
-
     fontFamily: s.fontFamily ?? d.fontFamily ?? '',
     fontWeight: s.fontWeight ?? d.fontWeight ?? 800,
     labelFontSize: s.labelFontSize ?? d.labelFontSize ?? 13,
-
     paddingY: s.paddingY ?? d.paddingY ?? 10,
     paddingX: s.paddingX ?? d.paddingX ?? 12,
-
     iconScale: s.iconScale ?? d.iconScale ?? 0.58,
   }
 }
@@ -180,6 +172,19 @@ function defaultLabel(ch: SocialChannel) {
   }
 }
 
+function normalizeItems(items: SocialSettings['items']): Partial<Record<SocialChannel, SocialItem>> {
+  if (!items) return {}
+  if (Array.isArray(items)) {
+    const obj: Partial<Record<SocialChannel, SocialItem>> = {}
+    for (const it of items) {
+      if (!it?.id) continue
+      obj[it.id] = { enabled: it.enabled, label: it.label, url: it.url }
+    }
+    return obj
+  }
+  return items as any
+}
+
 export default function SocialBlock({ settings, style }: Props) {
   const s = settings || {}
   const st = style || {}
@@ -212,7 +217,7 @@ export default function SocialBlock({ settings, style }: Props) {
 
   const justifyContent = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
 
-  const items = s.items || {}
+  const items = normalizeItems(s.items)
   const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
 
   const visible = channels
@@ -242,7 +247,7 @@ export default function SocialBlock({ settings, style }: Props) {
       {isNonEmpty(s.heading) && (
         <div
           style={{
-            fontWeight: st.headingBold === false ? 500 : (st.headingFontWeight ?? 900),
+            fontWeight: st.headingBold === false ? 500 : st.headingFontWeight ?? 900,
             fontSize: st.headingFontSize ?? 13,
             opacity: 0.75,
             marginBottom: 10,
@@ -268,21 +273,16 @@ export default function SocialBlock({ settings, style }: Props) {
         {visible.map(({ ch, item, href }) => {
           const base = mergeBtn(st.buttonDefaults, st.buttons?.[ch])
 
-          // aplica cores de marca por cima do default (sem rebentar a tua configuração)
           const bs = brandOn
             ? (() => {
                 const b = BRAND[ch]
-                if (brandMode === 'icon') {
-                  return { ...base, iconColor: b.bg, textColor: b.bg }
-                }
-                // bg
+                if (brandMode === 'icon') return { ...base, iconColor: b.bg, textColor: b.bg }
                 return { ...base, bgMode: 'solid' as const, bgColor: b.bg, iconColor: b.icon, textColor: b.text, borderEnabled: false, borderWidth: 0 }
               })()
             : base
 
           const label = item.label || defaultLabel(ch)
           const Icon = ICONS_MAP[ch]
-
           const bgBtn = buttonBackground(bs)
 
           const contentJustify = showLabel
