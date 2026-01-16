@@ -79,9 +79,9 @@ function clampNum(v: any, fallback: number) {
 }
 
 function stop(e: React.PointerEvent | React.MouseEvent) {
-  e.preventDefault?.()
   e.stopPropagation?.()
 }
+
 
 function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialStyle): CombinedState {
   const settings: SocialSettings = {
