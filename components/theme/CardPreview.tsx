@@ -31,6 +31,8 @@ type Props = {
   cardBg?: any
 }
 
+type BlockType = keyof typeof blockRegistry
+
 function toPx(v: any) {
   if (v === null || v === undefined || v === '') return undefined
   if (typeof v === 'number') return `${v}px`
@@ -284,13 +286,14 @@ export default function CardPreview({
                   />
                 ) : null
 
-                const PreviewComponent = blockRegistry[block.type]
+                const PreviewComponent = blockRegistry[block.type as BlockType]
                 if (!PreviewComponent) return null
 
                 return (
                   <div key={block.id} {...commonWrapProps}>
                     {Highlight}
-                    <PreviewComponent settings={block.settings} style={block.style} />
+                    <PreviewComponent cardId={card.id} settings={block.settings} style={block.style} />
+
                   </div>
                 )
               })}

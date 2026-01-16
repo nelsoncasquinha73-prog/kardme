@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+
 
 type ContactChannel = 'phone' | 'email' | 'whatsapp' | 'telegram'
 
@@ -174,6 +175,14 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   // Estado local para evitar re-renders e perda de foco
   const [localSettings, setLocalSettings] = useState<ContactSettings>(() => normalizeContactSettings(settings))
   const [localStyle, setLocalStyle] = useState<ContactStyle>(() => normalizeContactStyle(style))
+
+  useEffect(() => {
+  setLocalSettings(normalizeContactSettings(settings))
+}, [settings])
+
+useEffect(() => {
+  setLocalStyle(normalizeContactStyle(style))
+}, [style])
 
   // Patch imutável para settings
   function patchSettings(fn: (s: ContactSettings) => void) {
