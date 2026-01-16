@@ -13,6 +13,7 @@ type GalleryItem = {
 }
 
 type GallerySettings = {
+  heading?: string
   items: GalleryItem[]
   layout?: {
     containerMode?: 'full' | 'moldura' | 'autoadapter'
@@ -21,13 +22,17 @@ type GallerySettings = {
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
 
-    // autoplay
     autoplay?: boolean
     autoplayIntervalMs?: number
   }
 }
 
 type GalleryStyle = {
+  headingAlign?: 'left' | 'center' | 'right'
+  headingFontSize?: number
+  headingColor?: string
+  headingBold?: boolean
+
   container?: {
     enabled?: boolean
     bgColor?: string
@@ -68,8 +73,9 @@ export default function GalleryBlockEditor({
   const [isUploading, setIsUploading] = useState(false)
 
   const setSettings = (patch: Partial<GallerySettings>) => onChangeSettings({ ...s, ...patch })
+  const setStyle = (patch: Partial<GalleryStyle>) => onChangeStyle({ ...st, ...patch })
   const setContainer = (patch: Partial<GalleryStyle['container']>) =>
-    onChangeStyle({ container: { ...container, ...patch } })
+    onChangeStyle({ ...st, container: { ...container, ...patch } })
 
   const addItems = (urls: string[]) => {
     const newItems: GalleryItem[] = urls.map((url) => ({
@@ -124,7 +130,7 @@ export default function GalleryBlockEditor({
 
       if (uploadedUrls.length > 0) {
         addItems(uploadedUrls)
-        onBlurFlushSave?.() // 1 flush no fim ✅
+        onBlurFlushSave?.()
       }
 
       if (failures.length > 0) {
@@ -138,6 +144,82 @@ export default function GalleryBlockEditor({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* TITULO */}
+      <section
+        style={{
+          background: '#fff',
+          borderRadius: 16,
+          padding: 14,
+          border: '1px solid rgba(0,0,0,0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <strong style={{ fontSize: 13, marginBottom: 10 }}>Título</strong>
+
+        <label style={{ fontSize: 12, fontWeight: 600 }}>Texto</label>
+        <input
+          type="text"
+          value={s.heading ?? ''}
+          placeholder="Ex: Galeria"
+          onChange={(e) => setSettings({ heading: e.target.value })}
+          onBlur={() => onBlurFlushSave?.()}
+          style={input}
+        />
+
+        <label style={{ fontSize: 12, fontWeight: 600 }}>Alinhamento</label>
+        <select
+          value={st.headingAlign ?? 'left'}
+          onChange={(e) => setStyle({ headingAlign: e.target.value as any })}
+          onBlur={() => onBlurFlushSave?.()}
+          style={input}
+        >
+          <option value="left">Esquerda</option>
+          <option value="center">Centro</option>
+          <option value="right">Direita</option>
+        </select>
+
+        <label style={{ fontSize: 12, fontWeight: 600 }}>Tamanho (px)</label>
+        <input
+          type="number"
+          min={10}
+          max={28}
+          value={st.headingFontSize ?? 13}
+          onChange={(e) => setStyle({ headingFontSize: Number(e.target.value) })}
+          onBlur={() => onBlurFlushSave?.()}
+          style={input}
+        />
+
+        <label style={{ fontSize: 12, fontWeight: 600 }}>
+          <input
+            type="checkbox"
+            checked={st.headingBold !== false}
+            onChange={(e) => setStyle({ headingBold: e.target.checked })}
+            onBlur={() => onBlurFlushSave?.()}
+            style={{ marginRight: 8 }}
+          />
+          Negrito
+        </label>
+
+        <label style={{ fontSize: 12, fontWeight: 600 }}>Cor do título</label>
+        <SwatchRow
+          value={st.headingColor ?? '#111827'}
+          onChange={(hex) => {
+            setStyle({ headingColor: hex })
+            onBlurFlushSave?.()
+          }}
+          onEyedropper={() =>
+            openPicker({
+              onPick: (hex) => {
+                setStyle({ headingColor: hex })
+                onBlurFlushSave?.()
+              },
+            })
+          }
+        />
+      </section>
+
       {/* IMAGENS */}
       <section
         style={{
@@ -161,9 +243,7 @@ export default function GalleryBlockEditor({
             onChange={onFileChange}
             disabled={isUploading}
           />
-          {isUploading && (
-            <div style={{ fontSize: 12, opacity: 0.7 }}>A fazer upload…</div>
-          )}
+          {isUploading && <div style={{ fontSize: 12, opacity: 0.7 }}>A fazer upload…</div>}
         </div>
 
         {(s.items || []).map((it) => (
@@ -261,9 +341,7 @@ export default function GalleryBlockEditor({
           min={0}
           max={48}
           value={s.layout?.gapPx ?? 12}
-          onChange={(e) =>
-            setSettings({ layout: { ...(s.layout || {}), gapPx: Number(e.target.value) } })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), gapPx: Number(e.target.value) } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         />

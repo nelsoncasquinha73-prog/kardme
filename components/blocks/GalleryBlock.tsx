@@ -14,6 +14,7 @@ type GalleryItem = {
 }
 
 type GallerySettings = {
+  heading?: string
   items: GalleryItem[]
   layout?: {
     containerMode?: 'full' | 'moldura' | 'autoadapter'
@@ -28,6 +29,13 @@ type GallerySettings = {
 }
 
 type GalleryStyle = {
+  headingFontSize?: number
+  headingFontFamily?: string
+  headingFontWeight?: number
+  headingColor?: string
+  headingBold?: boolean
+  headingAlign?: 'left' | 'center' | 'right'
+
   container?: {
     bgColor?: string
     radius?: number
@@ -42,6 +50,10 @@ type GalleryStyle = {
 type Props = {
   settings: GallerySettings
   style?: GalleryStyle
+}
+
+function isNonEmpty(v?: string) {
+  return typeof v === 'string' && v.trim().length > 0
 }
 
 function containerStyleFromJson(style: GalleryStyle['container']): React.CSSProperties {
@@ -83,16 +95,11 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   if (visibleItems.length === 0) return null
 
-  // plugin (não chamamos play/stop em useEffect para evitar crash no refresh)
   const autoplay = useRef(
     Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
   )
 
-  // só ativa plugin se autoplay ON e houver +1 imagem
-  const plugins =
-    autoplayEnabled && visibleItems.length > 1
-      ? [autoplay.current]
-      : []
+  const plugins = autoplayEnabled && visibleItems.length > 1 ? [autoplay.current] : []
 
   const [emblaRef] = useEmblaCarousel(
     {
@@ -117,7 +124,23 @@ export default function GalleryBlock({ settings, style }: Props) {
   }
 
   return (
-    <>
+    <section>
+      {isNonEmpty(s.heading) && (
+        <div
+          style={{
+            fontWeight: st.headingBold === false ? 500 : (st.headingFontWeight ?? 900),
+            fontSize: st.headingFontSize ?? 13,
+            opacity: 0.75,
+            marginBottom: 10,
+            fontFamily: st.headingFontFamily || undefined,
+            color: st.headingColor ?? '#111827',
+            textAlign: st.headingAlign ?? 'left',
+          }}
+        >
+          {s.heading}
+        </div>
+      )}
+
       <div style={viewportStyle} ref={emblaRef}>
         <div
           style={{
@@ -129,13 +152,7 @@ export default function GalleryBlock({ settings, style }: Props) {
           }}
         >
           {visibleItems.map((item, i) => (
-            <div
-              key={item.uid}
-              style={{
-                flex: '0 0 auto',
-                width: itemWidthPx,
-              }}
-            >
+            <div key={item.uid} style={{ flex: '0 0 auto', width: itemWidthPx }}>
               <div
                 style={{
                   cursor: 'pointer',
@@ -146,10 +163,7 @@ export default function GalleryBlock({ settings, style }: Props) {
                   width: itemWidthPx,
                   height: itemHeightPx,
                 }}
-                onClick={() => {
-  setLightboxIndex(i)
-}}
-
+                onClick={() => setLightboxIndex(i)}
               >
                 <img
                   src={item.url}
@@ -185,14 +199,11 @@ export default function GalleryBlock({ settings, style }: Props) {
         <Lightbox
           items={visibleItems}
           currentIndex={lightboxIndex}
-          onClose={() => {
-  setLightboxIndex(null)
-  // retoma autoplay quando fecha (se aplicável)}}
-}}
+          onClose={() => setLightboxIndex(null)}
           onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
-    </>
+    </section>
   )
 }
 
