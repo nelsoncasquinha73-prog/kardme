@@ -1,50 +1,61 @@
-// components/blocks/SocialBlock.tsx
 'use client'
 
 import React from 'react'
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok, FaYoutube, FaGlobe } from 'react-icons/fa'
 
-type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
+export type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
 
-type SocialItem = {
+export type SocialItem = {
+  uid: string
+  id?: SocialChannel | null
   enabled?: boolean
-  label?: string
   url?: string
+  label?: string
 }
 
-type ButtonGradient = { from?: string; to?: string; angle?: number }
+type ButtonGradient = {
+  from?: string
+  to?: string
+  angle?: number
+}
 
 type ButtonStyle = {
   sizePx?: number
   radius?: number
+
   bgColor?: string
   bgMode?: 'solid' | 'gradient'
   bgGradient?: ButtonGradient
+
   borderEnabled?: boolean
   borderWidth?: number
   borderColor?: string
+
   iconColor?: string
   shadow?: boolean
   textColor?: string
+
   fontFamily?: string
   fontWeight?: number
   labelFontSize?: number
+
   paddingY?: number
   paddingX?: number
+
   iconScale?: number
 }
 
-type SocialSettings = {
+export type SocialSettings = {
   heading?: string
   layout?: {
     direction?: 'row' | 'column'
     align?: 'left' | 'center' | 'right'
     gapPx?: number
   }
-  items?: Partial<Record<SocialChannel, SocialItem>>
+  items?: SocialItem[] // ✅ mantém compatibilidade (array)
 }
 
-type SocialStyle = {
+export type SocialStyle = {
   offsetY?: number
 
   showLabel?: boolean
@@ -67,19 +78,17 @@ type SocialStyle = {
   buttonDefaults?: ButtonStyle
   buttons?: Partial<Record<SocialChannel, ButtonStyle>>
 
-  // título
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
-
-  // NOVO: cores de marca
-  brandColors?: boolean
-  brandMode?: 'bg' | 'icon' // bg = fundo, icon = só ícone
 }
 
-type Props = { settings: SocialSettings; style?: SocialStyle }
+type Props = {
+  settings: SocialSettings
+  style?: SocialStyle
+}
 
 const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   facebook: FaFacebookF,
@@ -90,30 +99,40 @@ const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   website: FaGlobe,
 }
 
-// cores “brand”
-const BRAND: Record<SocialChannel, { bg: string; icon: string; text: string }> = {
-  facebook: { bg: '#1877F2', icon: '#ffffff', text: '#ffffff' },
-  instagram: { bg: '#E1306C', icon: '#ffffff', text: '#ffffff' },
-  linkedin: { bg: '#0A66C2', icon: '#ffffff', text: '#ffffff' },
-  tiktok: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
-  youtube: { bg: '#FF0000', icon: '#ffffff', text: '#ffffff' },
-  website: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
-}
+const CHANNELS: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
 
 function isNonEmpty(v?: string) {
   return typeof v === 'string' && v.trim().length > 0
 }
 
 function sanitizeUrl(raw: string) {
-  const v = raw.trim()
+  const v = (raw || '').trim()
   if (!v) return null
   if (!/^https?:\/\//i.test(v)) return `https://${v}`
   return v
 }
 
+function defaultLabel(ch: SocialChannel) {
+  switch (ch) {
+    case 'facebook':
+      return 'Facebook'
+    case 'instagram':
+      return 'Instagram'
+    case 'linkedin':
+      return 'LinkedIn'
+    case 'tiktok':
+      return 'TikTok'
+    case 'youtube':
+      return 'YouTube'
+    case 'website':
+      return 'Website'
+  }
+}
+
 function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<ButtonStyle> {
   const d = defaults || {}
   const s = specific || {}
+
   const borderEnabled = s.borderEnabled ?? d.borderEnabled ?? true
 
   return {
@@ -163,21 +182,10 @@ function computeUniformHeightPx(showLabel: boolean, sizePx: number) {
   return 52
 }
 
-function defaultLabel(ch: SocialChannel) {
-  switch (ch) {
-    case 'facebook':
-      return 'Facebook'
-    case 'instagram':
-      return 'Instagram'
-    case 'linkedin':
-      return 'LinkedIn'
-    case 'tiktok':
-      return 'TikTok'
-    case 'youtube':
-      return 'YouTube'
-    case 'website':
-      return 'Website'
-  }
+function itemByChannel(items: SocialItem[] | undefined, ch: SocialChannel): SocialItem | null {
+  const arr = items || []
+  // procura por id=canal, senão por uid igual ao canal
+  return (arr.find((x) => x?.id === ch) || arr.find((x) => x?.uid === ch) || null) as any
 }
 
 export default function SocialBlock({ settings, style }: Props) {
@@ -197,6 +205,7 @@ export default function SocialBlock({ settings, style }: Props) {
   const hasBg = bg !== 'transparent' && bg !== 'rgba(0,0,0,0)'
   const hasShadow = container.shadow === true
   const hasBorder = (container.borderWidth ?? 0) > 0
+
   const effectiveBg = hasShadow && !hasBg ? 'rgba(255,255,255,0.92)' : bg
 
   const wrapStyle: React.CSSProperties = {
@@ -212,12 +221,10 @@ export default function SocialBlock({ settings, style }: Props) {
 
   const justifyContent = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
 
-  const items = s.items || {}
-  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
-
-  const visible = channels
+  // ✅ visible baseado no array
+  const visible = CHANNELS
     .map((ch) => {
-      const item = items[ch]
+      const item = itemByChannel(s.items, ch)
       if (!item) return null
       if (item.enabled === false) return null
       if (!isNonEmpty(item.url)) return null
@@ -233,9 +240,6 @@ export default function SocialBlock({ settings, style }: Props) {
   const uniformWidthPx = st.uniformWidthPx ?? computeUniformWidthPx(showLabel, firstBs.sizePx)
   const uniformHeightPx = st.uniformHeightPx ?? computeUniformHeightPx(showLabel, firstBs.sizePx)
   const uniformContentAlign: 'left' | 'center' = st.uniformContentAlign ?? 'center'
-
-  const brandOn = st.brandColors === true
-  const brandMode = st.brandMode ?? 'bg'
 
   return (
     <section style={wrapStyle}>
@@ -266,20 +270,7 @@ export default function SocialBlock({ settings, style }: Props) {
         }}
       >
         {visible.map(({ ch, item, href }) => {
-          const base = mergeBtn(st.buttonDefaults, st.buttons?.[ch])
-
-          // aplica cores de marca por cima do default (sem rebentar a tua configuração)
-          const bs = brandOn
-            ? (() => {
-                const b = BRAND[ch]
-                if (brandMode === 'icon') {
-                  return { ...base, iconColor: b.bg, textColor: b.bg }
-                }
-                // bg
-                return { ...base, bgMode: 'solid' as const, bgColor: b.bg, iconColor: b.icon, textColor: b.text, borderEnabled: false, borderWidth: 0 }
-              })()
-            : base
-
+          const bs = mergeBtn(st.buttonDefaults, st.buttons?.[ch])
           const label = item.label || defaultLabel(ch)
           const Icon = ICONS_MAP[ch]
 
@@ -297,7 +288,7 @@ export default function SocialBlock({ settings, style }: Props) {
 
           return (
             <a
-              key={ch}
+              key={item.uid || ch}
               href={href}
               target="_blank"
               rel="noreferrer"
@@ -338,7 +329,7 @@ export default function SocialBlock({ settings, style }: Props) {
                   style={{
                     fontWeight: bs.fontWeight ?? 800,
                     fontSize: bs.labelFontSize ?? 13,
-                    opacity: 0.95,
+                    opacity: 0.9,
                     color: bs.textColor,
                     fontFamily: bs.fontFamily || undefined,
                     lineHeight: 1.1,
