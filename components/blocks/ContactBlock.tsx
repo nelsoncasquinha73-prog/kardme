@@ -326,11 +326,11 @@ export default function ContactBlock({ settings, style }: Props) {
                 border: bs.borderWidth > 0 ? `${bs.borderWidth}px solid ${bs.borderColor}` : 'none',
                 boxShadow: bs.shadow ? '0 10px 26px rgba(0,0,0,0.16)' : 'none',
 
-                cursor: 'pointer', // garante que o cursor é pointer nos botões
-                userSelect: 'none', // evita seleção acidental do texto do botão
-                transition: 'background-color 0.3s ease, box-shadow 0.3s ease', // suaviza hover
+                cursor: 'pointer',
+                userSelect: 'none',
+                transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
               }}
-              onMouseDown={(e) => e.preventDefault()} // evita foco indesejado ao clicar
+              onMouseDown={(e) => e.preventDefault()}
             >
               <span
                 style={{
