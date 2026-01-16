@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
@@ -100,60 +100,134 @@ const CHANNELS: Array<{ key: ContactChannel; title: string; placeholder: string 
   { key: 'telegram', title: 'Telegram', placeholder: '@username' },
 ]
 
+function stop(e: React.PointerEvent | React.MouseEvent) {
+  e.preventDefault?.()
+  e.stopPropagation?.()
+}
+
 function clampNum(v: any, fallback: number) {
   const n = Number(v)
   return Number.isFinite(n) ? n : fallback
 }
 
+function normalizeContactSettings(input: Partial<ContactSettings>): ContactSettings {
+  return {
+    heading: input.heading ?? 'Contacto',
+    layout: {
+      direction: input.layout?.direction ?? 'row',
+      align: input.layout?.align ?? 'center',
+      gapPx: input.layout?.gapPx ?? 10,
+    },
+    items: input.items || {},
+  }
+}
+
+function normalizeContactStyle(input?: Partial<ContactStyle>): ContactStyle {
+  input = input || {}
+  return {
+    offsetY: input.offsetY ?? 0,
+    showLabel: input.showLabel ?? true,
+    uniformButtons: input.uniformButtons ?? false,
+    uniformWidthPx: input.uniformWidthPx ?? 160,
+    uniformHeightPx: input.uniformHeightPx ?? 52,
+    uniformContentAlign: input.uniformContentAlign ?? 'center',
+    headingFontSize: input.headingFontSize ?? 13,
+    container: {
+      bgColor: input.container?.bgColor ?? 'transparent',
+      radius: input.container?.radius ?? 14,
+      padding: input.container?.padding ?? 16,
+      shadow: input.container?.shadow ?? false,
+      borderWidth: input.container?.borderWidth ?? 0,
+      borderColor: input.container?.borderColor ?? 'rgba(0,0,0,0.08)',
+    },
+    buttonDefaults: {
+      sizePx: input.buttonDefaults?.sizePx ?? 44,
+      radius: input.buttonDefaults?.radius ?? 14,
+      bgColor: input.buttonDefaults?.bgColor ?? '#ffffff',
+      bgMode: input.buttonDefaults?.bgMode ?? 'solid',
+      bgGradient: input.buttonDefaults?.bgGradient ?? { from: '#111827', to: '#374151', angle: 135 },
+      borderEnabled: input.buttonDefaults?.borderEnabled ?? true,
+      borderWidth: input.buttonDefaults?.borderWidth ?? 1,
+      borderColor: input.buttonDefaults?.borderColor ?? 'rgba(0,0,0,0.10)',
+      iconColor: input.buttonDefaults?.iconColor ?? '#111827',
+      shadow: input.buttonDefaults?.shadow ?? false,
+      textColor: input.buttonDefaults?.textColor ?? '#111827',
+      fontFamily: input.buttonDefaults?.fontFamily ?? '',
+      fontWeight: input.buttonDefaults?.fontWeight ?? 800,
+      labelFontSize: input.buttonDefaults?.labelFontSize ?? 13,
+      paddingY: input.buttonDefaults?.paddingY ?? 10,
+      paddingX: input.buttonDefaults?.paddingX ?? 12,
+      iconScale: input.buttonDefaults?.iconScale ?? 0.58,
+    },
+    buttons: input.buttons || {},
+    headingFontFamily: input.headingFontFamily ?? '',
+    headingFontWeight: input.headingFontWeight ?? 900,
+    headingColor: input.headingColor ?? '#111827',
+    headingBold: input.headingBold ?? true,
+    headingAlign: input.headingAlign ?? 'left',
+  }
+}
+
 export default function ContactBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
-  const s = settings || {}
-  const st = style || {}
+
+  // Estado local para evitar re-renders e perda de foco
+  const [localSettings, setLocalSettings] = useState<ContactSettings>(() => normalizeContactSettings(settings))
+  const [localStyle, setLocalStyle] = useState<ContactStyle>(() => normalizeContactStyle(style))
+
+  // Patch imutável para settings
+  function patchSettings(fn: (s: ContactSettings) => void) {
+    const next = structuredClone(localSettings)
+    fn(next)
+    setLocalSettings(next)
+    onChangeSettings(next)
+  }
+
+  // Patch imutável para style
+  function patchStyle(fn: (s: ContactStyle) => void) {
+    const next = structuredClone(localStyle)
+    fn(next)
+    setLocalStyle(next)
+    onChangeStyle(next)
+  }
+
+  const s = localSettings
+  const st = localStyle
 
   const layout = s.layout || {}
   const items = s.items || {}
-
   const container = st.container || {}
   const btnDefaults = st.buttonDefaults || {}
   const btns = st.buttons || {}
 
   const pick = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
-  const setSettings = (patch: Partial<ContactSettings>) => onChangeSettings({ ...s, ...patch })
+  // Funções para atualizar settings e style
+  const setSettings = (patch: Partial<ContactSettings>) => patchSettings((s) => Object.assign(s, patch))
   const setLayout = (patch: Partial<NonNullable<ContactSettings['layout']>>) =>
-    setSettings({ layout: { ...layout, ...patch } })
-
-  const setItem = (ch: ContactChannel, patch: Partial<ContactItem>) => {
-    setSettings({
-      items: {
-        ...items,
-        [ch]: {
-          ...(items[ch] || {}),
-          ...patch,
-        },
-      },
+    patchSettings((s) => {
+      s.layout = { ...s.layout, ...patch }
     })
-  }
+  const setItem = (ch: string, patch: Partial<ContactItem>) =>
+    patchSettings((s) => {
+      s.items = { ...s.items }
+      s.items[ch] = { ...s.items[ch], ...patch }
+    })
 
-  const setStyle = (patch: Partial<ContactStyle>) => onChangeStyle({ ...st, ...patch })
+  const setStyle = (patch: Partial<ContactStyle>) => patchStyle((s) => Object.assign(s, patch))
   const setContainer = (patch: Partial<NonNullable<ContactStyle['container']>>) =>
-    setStyle({ container: { ...container, ...patch } })
-
+    patchStyle((s) => {
+      s.container = { ...s.container, ...patch }
+    })
   const setBtnDefaults = (patch: Partial<ButtonStyle>) =>
-    setStyle({ buttonDefaults: { ...btnDefaults, ...patch } })
-
-  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) =>
-    setStyle({
-      buttons: {
-        ...btns,
-        [ch]: {
-          ...(btns[ch] || {}),
-          ...patch,
-        },
-      },
+    patchStyle((s) => {
+      s.buttonDefaults = { ...s.buttonDefaults, ...patch }
+    })
+  const setBtn = (ch: string, patch: Partial<ButtonStyle>) =>
+    patchStyle((s) => {
+      s.buttons = { ...s.buttons, [ch]: { ...(s.buttons?.[ch] || {}), ...patch } }
     })
 
-  // Booleans explícitos para evitar undefined e bugs
   const headingBold = st.headingBold ?? true
   const showLabel = st.showLabel ?? true
   const uniformButtons = st.uniformButtons ?? false
@@ -173,6 +247,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             onChange={(e) => setSettings({ heading: e.target.value })}
             style={input}
             placeholder="Contacto"
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
         </Row>
 
@@ -181,6 +258,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={st.headingAlign ?? 'left'}
             onChange={(e) => setStyle({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="left">Esquerda</option>
             <option value="center">Centro</option>
@@ -205,6 +285,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={st.headingFontFamily ?? ''}
             onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="">Padrão</option>
             {FONT_OPTIONS.map((o) => (
@@ -220,6 +303,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={String(st.headingFontWeight ?? 900)}
             onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="400">Normal (400)</option>
             <option value="600">Semi (600)</option>
@@ -241,6 +327,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               setStyle({ headingFontSize: Math.max(10, Math.min(32, Number(v))) })
             }}
             style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
         </Row>
 
@@ -250,6 +339,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               value={layout.direction ?? 'row'}
               onChange={(e) => setLayout({ direction: e.target.value as 'row' | 'column' })}
               style={select}
+              data-no-block-select="1"
+              onPointerDown={stop}
+              onMouseDown={stop}
             >
               <option value="row">Linha</option>
               <option value="column">Coluna</option>
@@ -261,6 +353,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               value={layout.align ?? 'center'}
               onChange={(e) => setLayout({ align: e.target.value as 'left' | 'center' | 'right' })}
               style={select}
+              data-no-block-select="1"
+              onPointerDown={stop}
+              onMouseDown={stop}
             >
               <option value="left">Esquerda</option>
               <option value="center">Centro</option>
@@ -276,6 +371,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               step={1}
               value={layout.gapPx ?? 10}
               onChange={(e) => setLayout({ gapPx: clampNum(e.target.value, 10) })}
+              data-no-block-select="1"
+              onPointerDown={stop}
+              onMouseDown={stop}
             />
             <span style={rightNum}>{layout.gapPx ?? 10}px</span>
           </Row>
@@ -309,6 +407,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   placeholder={cdef.placeholder}
                   style={input}
                   disabled={!isEnabled}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
               </Row>
 
@@ -319,6 +420,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   placeholder={`Ex: \${cdef.title}`}
                   style={input}
                   disabled={!isEnabled}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
               </Row>
             </div>
@@ -345,6 +449,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                 value={st.uniformWidthPx ?? 160}
                 onChange={(e) => setStyle({ uniformWidthPx: clampNum(e.target.value, 160) })}
                 style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
               />
             </Row>
 
@@ -356,6 +463,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                 value={st.uniformHeightPx ?? 52}
                 onChange={(e) => setStyle({ uniformHeightPx: clampNum(e.target.value, 52) })}
                 style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
               />
             </Row>
 
@@ -364,6 +474,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                 value={st.uniformContentAlign ?? 'center'}
                 onChange={(e) => setStyle({ uniformContentAlign: e.target.value as 'left' | 'center' })}
                 style={select}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
               >
                 <option value="left">Esquerda</option>
                 <option value="center">Centro</option>
@@ -400,17 +513,16 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           <>
             <Row label="Espessura">
               <input
-  type="range"
-  min={1}
-  max={6}
-  step={1}
-  value={container.borderWidth ?? 1}
-  onChange={(e) => {
-    console.log('borderWidth onChange:', e.target.value)
-    setContainer({ borderWidth: clampNum(e.target.value, 1) })
-  }}
-/>
-
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={container.borderWidth ?? 1}
+                onChange={(e) => setContainer({ borderWidth: clampNum(e.target.value, 1) })}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
 
@@ -432,6 +544,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={container.radius ?? 14}
             onChange={(e) => setContainer({ radius: clampNum(e.target.value, 14) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
@@ -444,6 +559,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={container.padding ?? 16}
             onChange={(e) => setContainer({ padding: clampNum(e.target.value, 16) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
@@ -458,6 +576,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={btnDefaults.sizePx ?? 44}
             onChange={(e) => setBtnDefaults({ sizePx: clampNum(e.target.value, 44) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{btnDefaults.sizePx ?? 44}px</span>
         </Row>
@@ -470,6 +591,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={btnDefaults.radius ?? 14}
             onChange={(e) => setBtnDefaults({ radius: clampNum(e.target.value, 14) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{btnDefaults.radius ?? 14}px</span>
         </Row>
@@ -479,6 +603,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={defaultsBgMode}
             onChange={(e) => setBtnDefaults({ bgMode: e.target.value as 'solid' | 'gradient' })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="solid">Sólido</option>
             <option value="gradient">Degradê</option>
@@ -511,6 +638,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                 value={btnDefaults.bgGradient?.angle ?? 135}
                 onChange={(e) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })}
                 style={{ width: 70, fontSize: 14, padding: 6, borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)' }}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
               />
             </Row>
           </>
@@ -532,13 +662,16 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
         {defaultsBorderEnabled && (
           <>
             <Row label="Espessura">
-                            <input
+              <input
                 type="range"
                 min={1}
                 max={6}
                 step={1}
                 value={btnDefaults.borderWidth ?? 1}
                 onChange={(e) => setBtnDefaults({ borderWidth: clampNum(e.target.value, 1) })}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
               />
               <span style={rightNum}>{btnDefaults.borderWidth ?? 1}px</span>
             </Row>
@@ -574,6 +707,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={btnDefaults.fontFamily ?? ''}
             onChange={(e) => setBtnDefaults({ fontFamily: e.target.value || undefined })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="">Padrão</option>
             {FONT_OPTIONS.map((o) => (
@@ -589,6 +725,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={String(btnDefaults.fontWeight ?? 800)}
             onChange={(e) => setBtnDefaults({ fontWeight: clampNum(e.target.value, 800) })}
             style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           >
             <option value="400">Normal (400)</option>
             <option value="600">Semi (600)</option>
@@ -610,6 +749,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               setBtnDefaults({ labelFontSize: Math.max(8, Math.min(36, Number(v))) })
             }}
             style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
         </Row>
 
@@ -622,6 +764,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             value={btnDefaults.iconScale ?? 0.58}
             onChange={(e) => setBtnDefaults({ iconScale: Number(e.target.value) })}
             style={{ width: 140 }}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{(btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
         </Row>
@@ -634,6 +779,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={btnDefaults.paddingY ?? 10}
             onChange={(e) => setBtnDefaults({ paddingY: clampNum(e.target.value, 10) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{btnDefaults.paddingY ?? 10}px</span>
         </Row>
@@ -646,15 +794,15 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             step={1}
             value={btnDefaults.paddingX ?? 12}
             onChange={(e) => setBtnDefaults({ paddingX: clampNum(e.target.value, 12) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
           />
           <span style={rightNum}>{btnDefaults.paddingX ?? 12}px</span>
         </Row>
 
         <Row label="Sombra">
-          <Toggle
-            active={btnDefaults.shadow ?? false}
-            onClick={() => setBtnDefaults({ shadow: !(btnDefaults.shadow ?? false) })}
-          />
+          <Toggle active={btnDefaults.shadow ?? false} onClick={() => setBtnDefaults({ shadow: !(btnDefaults.shadow ?? false) })} />
         </Row>
       </Section>
 
@@ -684,6 +832,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   value={bBgMode}
                   onChange={(e) => setBtn(key, { bgMode: e.target.value as 'solid' | 'gradient' })}
                   style={select}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 >
                   <option value="solid">Sólido</option>
                   <option value="gradient">Degradê</option>
@@ -722,6 +873,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                         borderRadius: 8,
                         border: '1px solid rgba(0,0,0,0.12)',
                       }}
+                      data-no-block-select="1"
+                      onPointerDown={stop}
+                      onMouseDown={stop}
                     />
                   </Row>
                 </>
@@ -750,6 +904,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                       step={1}
                       value={b.borderWidth ?? btnDefaults.borderWidth ?? 1}
                       onChange={(e) => setBtn(key, { borderWidth: clampNum(e.target.value, 1) })}
+                      data-no-block-select="1"
+                      onPointerDown={stop}
+                      onMouseDown={stop}
                     />
                     <span style={rightNum}>{b.borderWidth ?? btnDefaults.borderWidth ?? 1}px</span>
                   </Row>
@@ -785,6 +942,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   value={b.fontFamily ?? btnDefaults.fontFamily ?? ''}
                   onChange={(e) => setBtn(key, { fontFamily: e.target.value || undefined })}
                   style={select}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 >
                   <option value="">Padrão</option>
                   {FONT_OPTIONS.map((o) => (
@@ -800,6 +960,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   value={String(b.fontWeight ?? btnDefaults.fontWeight ?? 800)}
                   onChange={(e) => setBtn(key, { fontWeight: clampNum(e.target.value, 800) })}
                   style={select}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 >
                   <option value="400">Normal (400)</option>
                   <option value="600">Semi (600)</option>
@@ -818,9 +981,12 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   onChange={(e) => {
                     const v = e.target.value
                     if (v === '') return setBtn(key, { labelFontSize: undefined })
-                    setBtn(key, { labelFontSize: Math.max(8, Math.min(36, Number(v))) })
+                                        setBtn(key, { labelFontSize: Math.max(8, Math.min(36, Number(v))) })
                   }}
                   style={input}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
               </Row>
 
@@ -833,6 +999,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   value={b.iconScale ?? btnDefaults.iconScale ?? 0.58}
                   onChange={(e) => setBtn(key, { iconScale: Number(e.target.value) })}
                   style={{ width: 140 }}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
                 <span style={rightNum}>{(b.iconScale ?? btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
               </Row>
@@ -845,6 +1014,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   step={1}
                   value={b.paddingY ?? btnDefaults.paddingY ?? 10}
                   onChange={(e) => setBtn(key, { paddingY: clampNum(e.target.value, 10) })}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
                 <span style={rightNum}>{b.paddingY ?? btnDefaults.paddingY ?? 10}px</span>
               </Row>
@@ -857,6 +1029,9 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   step={1}
                   value={b.paddingX ?? btnDefaults.paddingX ?? 12}
                   onChange={(e) => setBtn(key, { paddingX: clampNum(e.target.value, 12) })}
+                  data-no-block-select="1"
+                  onPointerDown={stop}
+                  onMouseDown={stop}
                 />
                 <span style={rightNum}>{b.paddingX ?? btnDefaults.paddingX ?? 12}px</span>
               </Row>
