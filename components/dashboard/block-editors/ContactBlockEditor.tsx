@@ -102,7 +102,6 @@ const CHANNELS: Array<{ key: ContactChannel; title: string; placeholder: string 
 ]
 
 function stop(e: React.PointerEvent | React.MouseEvent) {
-  e.preventDefault?.()
   e.stopPropagation?.()
 }
 
