@@ -2,7 +2,9 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
-import Autoplay from 'embla-carousel-autoplay'
+import AutoplayImport from 'embla-carousel-autoplay'
+
+const Autoplay = (AutoplayImport as any)?.default ?? AutoplayImport
 
 type GalleryItem = {
   uid: string
@@ -81,34 +83,26 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   if (visibleItems.length === 0) return null
 
-  // Autoplay plugin (pausa quando user interage / hover)
+  // plugin (não chamamos play/stop em useEffect para evitar crash no refresh)
   const autoplay = useRef(
     Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
   )
 
-  // se autoplay estiver OFF, não passamos plugin
-  const [emblaRef, emblaApi] = useEmblaCarousel(
+  // só ativa plugin se autoplay ON e houver +1 imagem
+  const plugins =
+    autoplayEnabled && visibleItems.length > 1
+      ? [autoplay.current]
+      : []
+
+  const [emblaRef] = useEmblaCarousel(
     {
       loop: visibleItems.length > 1,
       align: 'center',
       dragFree: false,
       containScroll: 'trimSnaps',
     },
-    autoplayEnabled ? [autoplay.current] : []
+    plugins
   )
-
-  // atualizar delay quando mexes nas settings
-  useEffect(() => {
-    if (!autoplayEnabled) return
-    autoplay.current?.options && (autoplay.current.options.delay = autoplayIntervalMs)
-  }, [autoplayEnabled, autoplayIntervalMs])
-
-  // quando abre lightbox, para autoplay
-  useEffect(() => {
-    if (!emblaApi) return
-    if (lightboxIndex !== null) autoplay.current?.stop?.()
-    else if (autoplayEnabled) autoplay.current?.play?.()
-  }, [emblaApi, lightboxIndex, autoplayEnabled])
 
   const viewportStyle: React.CSSProperties = {
     ...containerStyle,
@@ -152,7 +146,11 @@ export default function GalleryBlock({ settings, style }: Props) {
                   width: itemWidthPx,
                   height: itemHeightPx,
                 }}
-                onClick={() => setLightboxIndex(i)}
+                onClick={() => {
+                  // pausa autoplay antes de abrir popup (evita crashes e melhora UX)
+                  autoplay.current?.stop?.()
+                  setLightboxIndex(i)
+                }}
               >
                 <img
                   src={item.url}
@@ -188,7 +186,11 @@ export default function GalleryBlock({ settings, style }: Props) {
         <Lightbox
           items={visibleItems}
           currentIndex={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
+          onClose={() => {
+            setLightboxIndex(null)
+            // retoma autoplay quando fecha (se aplicável)
+            if (autoplayEnabled && visibleItems.length > 1) autoplay.current?.play?.()
+          }}
           onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
@@ -196,7 +198,7 @@ export default function GalleryBlock({ settings, style }: Props) {
   )
 }
 
-/* ===== Lightbox (teu) ===== */
+/* ===== Lightbox ===== */
 
 type LightboxProps = {
   items: GalleryItem[]
@@ -214,7 +216,6 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
 
   useEffect(() => setZoom(1), [currentIndex])
 
-  // teclas (ESC/Setas)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -223,9 +224,9 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex])
 
-  // swipe no lightbox (simples e eficaz)
   const startXRef = useRef<number | null>(null)
 
   return (
