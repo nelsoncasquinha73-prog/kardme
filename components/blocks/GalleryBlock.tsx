@@ -22,19 +22,18 @@ type GallerySettings = {
     itemWidthPx?: number
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
-
     autoplay?: boolean
     autoplayIntervalMs?: number
   }
 }
 
 type GalleryStyle = {
+  headingAlign?: 'left' | 'center' | 'right'
   headingFontSize?: number
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
-  headingAlign?: 'left' | 'center' | 'right'
 
   container?: {
     bgColor?: string
@@ -172,7 +171,8 @@ export default function GalleryBlock({ settings, style }: Props) {
                   loading="lazy"
                   draggable={false}
                 />
-                {item.caption && (
+
+                {isNonEmpty(item.caption) && (
                   <div
                     style={{
                       position: 'absolute',
@@ -218,13 +218,18 @@ type LightboxProps = {
 
 function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
   const item = items[currentIndex]
+
   const prev = () => onNavigate((currentIndex - 1 + items.length) % items.length)
   const next = () => onNavigate((currentIndex + 1) % items.length)
 
+  // Zoom simples: click alterna entre 1x e 2x
   const [zoom, setZoom] = useState<1 | 2>(1)
 
-  useEffect(() => setZoom(1), [currentIndex])
+  useEffect(() => {
+    setZoom(1)
+  }, [currentIndex])
 
+  // teclas (ESC/Setas)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -236,6 +241,7 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex])
 
+  // swipe no lightbox
   const startXRef = useRef<number | null>(null)
 
   return (
@@ -292,7 +298,7 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           />
         </div>
 
-        {item.caption && (
+        {isNonEmpty(item.caption) && (
           <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>
             {item.caption}
           </div>
@@ -301,9 +307,11 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
         <button onClick={prev} style={navBtnLeft} aria-label="Imagem anterior">
           ‹
         </button>
+
         <button onClick={next} style={navBtnRight} aria-label="Próxima imagem">
           ›
         </button>
+
         <button onClick={onClose} style={closeBtn} aria-label="Fechar">
           ×
         </button>

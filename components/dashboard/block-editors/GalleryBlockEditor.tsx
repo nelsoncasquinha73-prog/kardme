@@ -21,7 +21,6 @@ type GallerySettings = {
     itemWidthPx?: number
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
-
     autoplay?: boolean
     autoplayIntervalMs?: number
   }
@@ -30,6 +29,8 @@ type GallerySettings = {
 type GalleryStyle = {
   headingAlign?: 'left' | 'center' | 'right'
   headingFontSize?: number
+  headingFontFamily?: string
+  headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
 
@@ -54,6 +55,16 @@ type Props = {
 
 function generateUid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+const CARD: React.CSSProperties = {
+  background: '#fff',
+  borderRadius: 16,
+  padding: 14,
+  border: '1px solid rgba(0,0,0,0.08)',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 12,
 }
 
 export default function GalleryBlockEditor({
@@ -145,20 +156,10 @@ export default function GalleryBlockEditor({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* TITULO */}
-      <section
-        style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 14,
-          border: '1px solid rgba(0,0,0,0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        <strong style={{ fontSize: 13, marginBottom: 10 }}>Título</strong>
+      <section style={CARD}>
+        <strong style={{ fontSize: 13, marginBottom: 6 }}>Título</strong>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Texto</label>
+        <label style={label}>Texto</label>
         <input
           type="text"
           value={s.heading ?? ''}
@@ -168,7 +169,7 @@ export default function GalleryBlockEditor({
           style={input}
         />
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Alinhamento</label>
+        <label style={label}>Alinhamento</label>
         <select
           value={st.headingAlign ?? 'left'}
           onChange={(e) => setStyle({ headingAlign: e.target.value as any })}
@@ -180,7 +181,7 @@ export default function GalleryBlockEditor({
           <option value="right">Direita</option>
         </select>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Tamanho (px)</label>
+        <label style={label}>Tamanho (px)</label>
         <input
           type="number"
           min={10}
@@ -191,7 +192,29 @@ export default function GalleryBlockEditor({
           style={input}
         />
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>
+        <label style={label}>Fonte (font-family)</label>
+        <input
+          type="text"
+          placeholder="Ex: Inter, Poppins, Roboto"
+          value={st.headingFontFamily ?? ''}
+          onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })}
+          onBlur={() => onBlurFlushSave?.()}
+          style={input}
+        />
+
+        <label style={label}>Peso da fonte</label>
+        <input
+          type="number"
+          min={100}
+          max={900}
+          step={100}
+          value={st.headingFontWeight ?? 900}
+          onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })}
+          onBlur={() => onBlurFlushSave?.()}
+          style={input}
+        />
+
+        <label style={label}>
           <input
             type="checkbox"
             checked={st.headingBold !== false}
@@ -202,7 +225,7 @@ export default function GalleryBlockEditor({
           Negrito
         </label>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Cor do título</label>
+        <label style={label}>Cor do título</label>
         <SwatchRow
           value={st.headingColor ?? '#111827'}
           onChange={(hex) => {
@@ -221,18 +244,8 @@ export default function GalleryBlockEditor({
       </section>
 
       {/* IMAGENS */}
-      <section
-        style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 14,
-          border: '1px solid rgba(0,0,0,0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        <strong style={{ fontSize: 13, marginBottom: 10 }}>Imagens</strong>
+      <section style={CARD}>
+        <strong style={{ fontSize: 13, marginBottom: 6 }}>Imagens</strong>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <input
@@ -283,7 +296,7 @@ export default function GalleryBlockEditor({
               </button>
             </div>
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Legenda</label>
+            <label style={label}>Legenda</label>
             <input
               type="text"
               value={it.caption || ''}
@@ -293,7 +306,7 @@ export default function GalleryBlockEditor({
               style={input}
             />
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>
+            <label style={label}>
               Ativo
               <input
                 type="checkbox"
@@ -307,26 +320,14 @@ export default function GalleryBlockEditor({
         ))}
       </section>
 
-      {/* LAYOUT */}
-      <section
-        style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 14,
-          border: '1px solid rgba(0,0,0,0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        <strong style={{ fontSize: 13, marginBottom: 10 }}>Layout</strong>
+      {/* LAYOUT + AUTOPLAY + MOLDURA */}
+      <section style={CARD}>
+        <strong style={{ fontSize: 13, marginBottom: 6 }}>Layout</strong>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Modo do container</label>
+        <label style={label}>Modo do container</label>
         <select
           value={s.layout?.containerMode ?? 'full'}
-          onChange={(e) =>
-            setSettings({ layout: { ...(s.layout || {}), containerMode: e.target.value as any } })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), containerMode: e.target.value as any } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         >
@@ -335,7 +336,7 @@ export default function GalleryBlockEditor({
           <option value="autoadapter">Auto Adapter</option>
         </select>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Gap (px)</label>
+        <label style={label}>Gap (px)</label>
         <input
           type="number"
           min={0}
@@ -346,38 +347,32 @@ export default function GalleryBlockEditor({
           style={input}
         />
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Largura (px) - só Auto Adapter</label>
+        <label style={label}>Largura (px) - só Auto Adapter</label>
         <input
           type="number"
           min={40}
           max={600}
           value={s.layout?.itemWidthPx ?? 180}
-          onChange={(e) =>
-            setSettings({ layout: { ...(s.layout || {}), itemWidthPx: Number(e.target.value) } })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), itemWidthPx: Number(e.target.value) } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         />
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Altura (px) - só Auto Adapter</label>
+        <label style={label}>Altura (px) - só Auto Adapter</label>
         <input
           type="number"
           min={40}
           max={600}
           value={s.layout?.itemHeightPx ?? 120}
-          onChange={(e) =>
-            setSettings({ layout: { ...(s.layout || {}), itemHeightPx: Number(e.target.value) } })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), itemHeightPx: Number(e.target.value) } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         />
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Object Fit - só Auto Adapter</label>
+        <label style={label}>Object Fit - só Auto Adapter</label>
         <select
           value={s.layout?.objectFit ?? 'cover'}
-          onChange={(e) =>
-            setSettings({ layout: { ...(s.layout || {}), objectFit: e.target.value as any } })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), objectFit: e.target.value as any } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         >
@@ -385,42 +380,34 @@ export default function GalleryBlockEditor({
           <option value="contain">Contain</option>
         </select>
 
-        {/* AUTOPLAY */}
         <strong style={{ fontSize: 13, marginTop: 10 }}>Autoplay</strong>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>
+        <label style={label}>
           <input
             type="checkbox"
             checked={s.layout?.autoplay !== false}
-            onChange={(e) =>
-              setSettings({ layout: { ...(s.layout || {}), autoplay: e.target.checked } })
-            }
+            onChange={(e) => setSettings({ layout: { ...(s.layout || {}), autoplay: e.target.checked } })}
             onBlur={() => onBlurFlushSave?.()}
             style={{ marginRight: 8 }}
           />
           Ativar autoplay
         </label>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>Intervalo (ms)</label>
+        <label style={label}>Intervalo (ms)</label>
         <input
           type="number"
           min={800}
           max={15000}
           step={100}
           value={s.layout?.autoplayIntervalMs ?? 3500}
-          onChange={(e) =>
-            setSettings({
-              layout: { ...(s.layout || {}), autoplayIntervalMs: Number(e.target.value) },
-            })
-          }
+          onChange={(e) => setSettings({ layout: { ...(s.layout || {}), autoplayIntervalMs: Number(e.target.value) } })}
           onBlur={() => onBlurFlushSave?.()}
           style={input}
         />
 
-        {/* CONTAINER (MOLDURA) */}
         <strong style={{ fontSize: 13, marginTop: 10 }}>Container (Moldura)</strong>
 
-        <label style={{ fontSize: 12, fontWeight: 600 }}>
+        <label style={label}>
           <input
             type="checkbox"
             checked={container.enabled !== false}
@@ -433,7 +420,7 @@ export default function GalleryBlockEditor({
 
         {container.enabled !== false && (
           <>
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Cor do fundo</label>
+            <label style={label}>Cor do fundo</label>
             <SwatchRow
               value={container.bgColor ?? 'transparent'}
               onChange={(hex) => {
@@ -450,7 +437,7 @@ export default function GalleryBlockEditor({
               }
             />
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Raio (border-radius)</label>
+            <label style={label}>Raio (border-radius)</label>
             <input
               type="range"
               min={0}
@@ -462,7 +449,7 @@ export default function GalleryBlockEditor({
             />
             <span style={{ fontSize: 12, opacity: 0.7 }}>{container.radius ?? 14}px</span>
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Padding (px)</label>
+            <label style={label}>Padding (px)</label>
             <input
               type="range"
               min={0}
@@ -474,7 +461,7 @@ export default function GalleryBlockEditor({
             />
             <span style={{ fontSize: 12, opacity: 0.7 }}>{container.padding ?? 8}px</span>
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Borda (px)</label>
+            <label style={label}>Borda (px)</label>
             <input
               type="range"
               min={0}
@@ -486,7 +473,7 @@ export default function GalleryBlockEditor({
             />
             <span style={{ fontSize: 12, opacity: 0.7 }}>{container.borderWidth ?? 1}px</span>
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>Cor da borda</label>
+            <label style={label}>Cor da borda</label>
             <SwatchRow
               value={container.borderColor ?? 'rgba(0,0,0,0.12)'}
               onChange={(hex) => {
@@ -503,7 +490,7 @@ export default function GalleryBlockEditor({
               }
             />
 
-            <label style={{ fontSize: 12, fontWeight: 600 }}>
+            <label style={label}>
               <input
                 type="checkbox"
                 checked={container.shadow === true}
@@ -518,6 +505,11 @@ export default function GalleryBlockEditor({
       </section>
     </div>
   )
+}
+
+const label: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
 }
 
 const input: React.CSSProperties = {
