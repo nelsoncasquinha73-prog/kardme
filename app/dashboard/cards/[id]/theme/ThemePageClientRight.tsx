@@ -174,12 +174,14 @@ export default function ThemePageClientRight({
         )}
 
         {activeBlock?.type === 'contact' && (
-          <ContactBlockEditor
-            settings={activeBlock.settings || {}}
-            onChangeSettings={onChangeSettings}
-            onChangeStyle={onChangeStyle}
-          />
-        )}
+  <ContactBlockEditor
+    settings={activeBlock.settings || {}}
+    style={activeBlock.style || {}}
+    onChangeSettings={onChangeSettings}
+    onChangeStyle={onChangeStyle}
+  />
+)}
+
 
         {activeBlock?.type === 'social' && (
           <SocialBlockEditor
