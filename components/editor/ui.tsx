@@ -12,6 +12,7 @@ export function Section({ title, children }: { title: string; children: React.Re
         flexDirection: 'column',
         gap: 12,
       }}
+      data-no-block-select="1"
     >
       <strong style={{ fontSize: 13 }}>{title}</strong>
       {children}
@@ -21,7 +22,10 @@ export function Section({ title, children }: { title: string; children: React.Re
 
 export function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+    <div
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}
+      data-no-block-select="1"
+    >
       <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{children}</div>
     </div>
@@ -42,6 +46,8 @@ export function Toggle({ active, onClick }: { active: boolean; onClick: () => vo
         border: 'none',
         cursor: 'pointer',
       }}
+      data-no-block-select="1"
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <span
         style={{
@@ -65,6 +71,8 @@ export const input: React.CSSProperties = {
   borderRadius: 8,
   border: '1px solid rgba(0,0,0,0.12)',
   outline: 'none',
+  // Evita que o input seja capturado para seleção de bloco
+  pointerEvents: 'auto',
 }
 
 export const select: React.CSSProperties = {
@@ -73,6 +81,7 @@ export const select: React.CSSProperties = {
   borderRadius: 8,
   width: 160,
   border: '1px solid rgba(0,0,0,0.12)',
+  pointerEvents: 'auto',
 }
 
 export const rightNum: React.CSSProperties = {
@@ -80,4 +89,5 @@ export const rightNum: React.CSSProperties = {
   textAlign: 'right',
   fontSize: 12,
   opacity: 0.7,
+  pointerEvents: 'auto',
 }
