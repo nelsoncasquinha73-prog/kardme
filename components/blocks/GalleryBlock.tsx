@@ -147,10 +147,9 @@ export default function GalleryBlock({ settings, style }: Props) {
                   height: itemHeightPx,
                 }}
                 onClick={() => {
-                  // pausa autoplay antes de abrir popup (evita crashes e melhora UX)
-                  autoplay.current?.stop?.()
-                  setLightboxIndex(i)
-                }}
+  setLightboxIndex(i)
+}}
+
               >
                 <img
                   src={item.url}
@@ -187,10 +186,9 @@ export default function GalleryBlock({ settings, style }: Props) {
           items={visibleItems}
           currentIndex={lightboxIndex}
           onClose={() => {
-            setLightboxIndex(null)
-            // retoma autoplay quando fecha (se aplicável)
-            if (autoplayEnabled && visibleItems.length > 1) autoplay.current?.play?.()
-          }}
+  setLightboxIndex(null)
+  // retoma autoplay quando fecha (se aplicável)}}
+}}
           onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
