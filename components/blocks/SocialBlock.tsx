@@ -1,4 +1,3 @@
-// components/blocks/SocialBlock.tsx
 'use client'
 
 import React from 'react'
@@ -6,11 +5,8 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok, FaYoutube, FaGlobe } 
 
 type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
 
-type SocialItem = {
-  enabled?: boolean
-  label?: string
-  url?: string
-}
+type SocialItemObj = { enabled?: boolean; label?: string; url?: string }
+type SocialItemArray = { uid?: string; id?: SocialChannel | null; enabled?: boolean; label?: string; url?: string }
 
 type ButtonGradient = { from?: string; to?: string; angle?: number }
 
@@ -36,18 +32,13 @@ type ButtonStyle = {
 
 type SocialSettings = {
   heading?: string
-  layout?: {
-    direction?: 'row' | 'column'
-    align?: 'left' | 'center' | 'right'
-    gapPx?: number
-  }
-  // aceitamos object OU array antigo
-  items?: Partial<Record<SocialChannel, SocialItem>> | Array<{ id: SocialChannel; enabled?: boolean; label?: string; url?: string }>
+  layout?: { direction?: 'row' | 'column'; align?: 'left' | 'center' | 'right'; gapPx?: number }
+  // pode vir como object (novo) ou array (antigo)
+  items?: Partial<Record<SocialChannel, SocialItemObj>> | SocialItemArray[]
 }
 
 type SocialStyle = {
   offsetY?: number
-
   showLabel?: boolean
   uniformButtons?: boolean
   uniformWidthPx?: number
@@ -56,14 +47,7 @@ type SocialStyle = {
 
   headingFontSize?: number
 
-  container?: {
-    bgColor?: string
-    radius?: number
-    padding?: number
-    shadow?: boolean
-    borderWidth?: number
-    borderColor?: string
-  }
+  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
 
   buttonDefaults?: ButtonStyle
   buttons?: Partial<Record<SocialChannel, ButtonStyle>>
@@ -149,7 +133,6 @@ function computeUniformWidthPx(showLabel: boolean, sizePx: number) {
   if (!showLabel) return Math.max(44, sizePx + 24)
   return 160
 }
-
 function computeUniformHeightPx(showLabel: boolean, sizePx: number) {
   if (!showLabel) return Math.max(44, sizePx + 20)
   return 52
@@ -157,32 +140,46 @@ function computeUniformHeightPx(showLabel: boolean, sizePx: number) {
 
 function defaultLabel(ch: SocialChannel) {
   switch (ch) {
-    case 'facebook':
-      return 'Facebook'
-    case 'instagram':
-      return 'Instagram'
-    case 'linkedin':
-      return 'LinkedIn'
-    case 'tiktok':
-      return 'TikTok'
-    case 'youtube':
-      return 'YouTube'
-    case 'website':
-      return 'Website'
+    case 'facebook': return 'Facebook'
+    case 'instagram': return 'Instagram'
+    case 'linkedin': return 'LinkedIn'
+    case 'tiktok': return 'TikTok'
+    case 'youtube': return 'YouTube'
+    case 'website': return 'Website'
   }
 }
 
-function normalizeItems(items: SocialSettings['items']): Partial<Record<SocialChannel, SocialItem>> {
-  if (!items) return {}
+function normalizeItems(items: SocialSettings['items']): Array<{ ch: SocialChannel; item: SocialItemObj; href: string }> {
+  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
+  if (!items) return []
+
+  // formato antigo: array
   if (Array.isArray(items)) {
-    const obj: Partial<Record<SocialChannel, SocialItem>> = {}
-    for (const it of items) {
-      if (!it?.id) continue
-      obj[it.id] = { enabled: it.enabled, label: it.label, url: it.url }
-    }
-    return obj
+    return items
+      .map((it) => {
+        const ch = it.id ?? null
+        if (!ch) return null
+        if (it.enabled === false) return null
+        if (!isNonEmpty(it.url)) return null
+        const href = sanitizeUrl(it.url!)
+        if (!href) return null
+        return { ch, item: { enabled: it.enabled, label: it.label, url: it.url }, href }
+      })
+      .filter(Boolean) as any
   }
-  return items as any
+
+  // formato novo: object
+  return channels
+    .map((ch) => {
+      const item = (items as any)[ch] as SocialItemObj | undefined
+      if (!item) return null
+      if (item.enabled === false) return null
+      if (!isNonEmpty(item.url)) return null
+      const href = sanitizeUrl(item.url!)
+      if (!href) return null
+      return { ch, item, href }
+    })
+    .filter(Boolean) as any
 }
 
 export default function SocialBlock({ settings, style }: Props) {
@@ -217,21 +214,7 @@ export default function SocialBlock({ settings, style }: Props) {
 
   const justifyContent = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
 
-  const items = normalizeItems(s.items)
-  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
-
-  const visible = channels
-    .map((ch) => {
-      const item = items[ch]
-      if (!item) return null
-      if (item.enabled === false) return null
-      if (!isNonEmpty(item.url)) return null
-      const href = sanitizeUrl(item.url!)
-      if (!href) return null
-      return { ch, item, href }
-    })
-    .filter(Boolean) as Array<{ ch: SocialChannel; item: SocialItem; href: string }>
-
+  const visible = normalizeItems(s.items)
   if (visible.length === 0) return null
 
   const firstBs = mergeBtn(st.buttonDefaults, st.buttons?.[visible[0].ch])
@@ -247,7 +230,7 @@ export default function SocialBlock({ settings, style }: Props) {
       {isNonEmpty(s.heading) && (
         <div
           style={{
-            fontWeight: st.headingBold === false ? 500 : st.headingFontWeight ?? 900,
+            fontWeight: st.headingBold === false ? 500 : (st.headingFontWeight ?? 900),
             fontSize: st.headingFontSize ?? 13,
             opacity: 0.75,
             marginBottom: 10,
@@ -276,7 +259,9 @@ export default function SocialBlock({ settings, style }: Props) {
           const bs = brandOn
             ? (() => {
                 const b = BRAND[ch]
-                if (brandMode === 'icon') return { ...base, iconColor: b.bg, textColor: b.bg }
+                if (brandMode === 'icon') {
+                  return { ...base, iconColor: b.bg, textColor: b.bg }
+                }
                 return { ...base, bgMode: 'solid' as const, bgColor: b.bg, iconColor: b.icon, textColor: b.text, borderEnabled: false, borderWidth: 0 }
               })()
             : base

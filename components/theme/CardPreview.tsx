@@ -292,16 +292,17 @@ export default function CardPreview({
                     {Highlight}
 
                     {block.type === 'contact' ? (
-                      <ContactBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'social' ? (
-                      <SocialBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'services' ? (
-                      <ServicesBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'lead_form' ? (
-                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-                    ) : block.type === 'business_hours' ? (
-                      <BusinessHoursBlock settings={block.settings} style={block.style} />
-                    ) : null}
+  <ContactBlock settings={block.settings} style={block.style} />
+) : block.type === 'social' ? (
+  <SocialBlock settings={block.settings} style={block.style} />
+) : block.type === 'services' ? (
+  <ServicesBlock settings={block.settings} style={block.style} />
+) : block.type === 'lead_form' ? (
+  <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+) : block.type === 'business_hours' ? (
+  <BusinessHoursBlock settings={block.settings} style={block.style} />
+) : null}
+
                   </div>
                 )
               })}

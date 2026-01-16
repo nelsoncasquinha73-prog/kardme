@@ -45,6 +45,16 @@ type Props = {
   slugSaving: boolean
   slugError: string | null
   saveSlug: () => void
+
+  // ✅ NEW: avisar o ThemePageClient quando estás a editar inputs
+  onEditingChange: (isEditing: boolean) => void
+}
+
+function isFormEl(el: HTMLElement | null) {
+  if (!el) return false
+  if (el.matches('input, textarea, select')) return true
+  if (el.closest('input, textarea, select')) return true
+  return false
 }
 
 export default function ThemePageClientRight({
@@ -63,6 +73,7 @@ export default function ThemePageClientRight({
   slugSaving,
   slugError,
   saveSlug,
+  onEditingChange,
 }: Props) {
   return (
     <aside
@@ -75,6 +86,14 @@ export default function ThemePageClientRight({
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
+      }}
+      onFocusCapture={(e) => {
+        const el = e.target as HTMLElement | null
+        if (isFormEl(el)) onEditingChange(true)
+      }}
+      onBlurCapture={(e) => {
+        const el = e.target as HTMLElement | null
+        if (isFormEl(el)) onEditingChange(false)
       }}
     >
       <div

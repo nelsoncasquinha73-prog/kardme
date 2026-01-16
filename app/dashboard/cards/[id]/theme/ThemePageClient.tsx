@@ -42,6 +42,12 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const debounceRef = useRef<number | null>(null)
   const [addOpen, setAddOpen] = useState(false)
 
+  // ✅ NEW: "lock" para pausar autosave enquanto o user está a escrever num input
+  const isEditingRef = useRef(false)
+  function setIsEditing(v: boolean) {
+    isEditingRef.current = v
+  }
+
   // Theme (fonte única)
   const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
 
@@ -181,10 +187,12 @@ export default function ThemePageClient({ card, blocks }: Props) {
     }
   }
 
-  // Autosave só do bloco ativo (não mexe no theme)
+  // ✅ Autosave só do bloco ativo (pausa enquanto estás a editar inputs)
   useEffect(() => {
     if (!activeBlock) return
     if (saveStatus !== 'dirty') return
+    if (isEditingRef.current) return // 👈 pause autosave enquanto o user está a escrever
+
     if (debounceRef.current) window.clearTimeout(debounceRef.current)
 
     debounceRef.current = window.setTimeout(async () => {
@@ -203,7 +211,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
       setSaveStatus('saved')
       window.setTimeout(() => setSaveStatus('idle'), 1200)
-    }, 600)
+    }, 1200) // 👈 aumentei o debounce (ajuda MUITO em inputs)
 
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current)
@@ -276,6 +284,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           slugSaving={slugSaving}
           slugError={slugError}
           saveSlug={saveSlug}
+          onEditingChange={setIsEditing}  // ✅ NEW
         />
 
         <AddBlockModal
@@ -284,7 +293,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
           existingBlocks={allBlocksSorted}
           onClose={() => setAddOpen(false)}
           onCreated={(newBlock) => {
-            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
+            setLocalBlocks((prev) => [
+              ...prev,
+              { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} },
+            ])
             setActiveBlockId(newBlock.id)
             setSaveStatus('idle')
           }}
