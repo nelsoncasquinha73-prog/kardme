@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
 
 type GalleryItem = {
   uid: string
@@ -18,9 +20,8 @@ type GallerySettings = {
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
 
-    // autoplay
     autoplay?: boolean
-    autoplayIntervalMs?: number // ex: 3500
+    autoplayIntervalMs?: number
   }
 }
 
@@ -68,15 +69,10 @@ export default function GalleryBlock({ settings, style }: Props) {
   const itemHeightPx = s.layout?.itemHeightPx ?? (containerMode === 'autoadapter' ? 120 : 160)
   const objectFit = s.layout?.objectFit ?? 'cover'
 
-  const autoplay = s.layout?.autoplay !== false // default ON
+  const autoplayEnabled = s.layout?.autoplay !== false // default ON
   const autoplayIntervalMs = s.layout?.autoplayIntervalMs ?? 3500
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
-  const [isHovering, setIsHovering] = useState(false)
-  const [isUserInteracting, setIsUserInteracting] = useState(false)
-
-  const scrollerRef = useRef<HTMLDivElement | null>(null)
-  const interactionTimeoutRef = useRef<number | null>(null)
 
   const visibleItems = useMemo(
     () => (s.items || []).filter((item) => item.enabled !== false && item.url),
@@ -85,122 +81,107 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   if (visibleItems.length === 0) return null
 
-  // Helpers: calcula o "passo" de scroll (largura do item + gap)
-  const stepPx = itemWidthPx + gapPx
+  // Autoplay plugin (pausa quando user interage / hover)
+  const autoplay = useRef(
+    Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
+  )
 
-  function markUserInteracting() {
-    setIsUserInteracting(true)
-    if (interactionTimeoutRef.current) window.clearTimeout(interactionTimeoutRef.current)
-    interactionTimeoutRef.current = window.setTimeout(() => {
-      setIsUserInteracting(false)
-    }, 1200) // após 1.2s sem interação, volta a autoplay
+  // se autoplay estiver OFF, não passamos plugin
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: visibleItems.length > 1,
+      align: 'center',
+      dragFree: false,
+      containScroll: 'trimSnaps',
+    },
+    autoplayEnabled ? [autoplay.current] : []
+  )
+
+  // atualizar delay quando mexes nas settings
+  useEffect(() => {
+    if (!autoplayEnabled) return
+    autoplay.current?.options && (autoplay.current.options.delay = autoplayIntervalMs)
+  }, [autoplayEnabled, autoplayIntervalMs])
+
+  // quando abre lightbox, para autoplay
+  useEffect(() => {
+    if (!emblaApi) return
+    if (lightboxIndex !== null) autoplay.current?.stop?.()
+    else if (autoplayEnabled) autoplay.current?.play?.()
+  }, [emblaApi, lightboxIndex, autoplayEnabled])
+
+  const viewportStyle: React.CSSProperties = {
+    ...containerStyle,
+    overflow: 'hidden',
+
+    padding: containerMode === 'full' ? 0 : containerStyle.padding,
+    borderRadius: containerMode === 'full' ? 0 : containerStyle.borderRadius,
+    boxShadow: containerMode === 'full' ? 'none' : containerStyle.boxShadow,
+    borderStyle: containerMode === 'full' ? 'none' : containerStyle.borderStyle,
+    borderWidth: containerMode === 'full' ? 0 : containerStyle.borderWidth,
+    borderColor: containerMode === 'full' ? 'transparent' : containerStyle.borderColor,
   }
-
-  useEffect(() => {
-    if (!autoplay) return
-    if (isHovering) return
-    if (isUserInteracting) return
-    if (lightboxIndex !== null) return // não mexer com lightbox aberto
-    if (!scrollerRef.current) return
-    if (visibleItems.length <= 1) return
-
-    const el = scrollerRef.current
-
-    const id = window.setInterval(() => {
-      // Se alguém começou a interagir entretanto, não força scroll
-      if (isHovering || isUserInteracting || lightboxIndex !== null) return
-      if (!el) return
-
-      const maxScrollLeft = el.scrollWidth - el.clientWidth
-      const next = Math.min(el.scrollLeft + stepPx, maxScrollLeft)
-
-      // Se chegou ao fim, volta ao início suavemente
-      if (Math.abs(el.scrollLeft - maxScrollLeft) < 2) {
-        el.scrollTo({ left: 0, behavior: 'smooth' })
-        return
-      }
-
-      el.scrollTo({ left: next, behavior: 'smooth' })
-    }, autoplayIntervalMs)
-
-    return () => window.clearInterval(id)
-  }, [autoplay, autoplayIntervalMs, isHovering, isUserInteracting, lightboxIndex, stepPx, visibleItems.length])
-
-  useEffect(() => {
-    return () => {
-      if (interactionTimeoutRef.current) window.clearTimeout(interactionTimeoutRef.current)
-    }
-  }, [])
 
   return (
     <>
-      <div
-        ref={scrollerRef}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        onTouchStart={markUserInteracting}
-        onTouchMove={markUserInteracting}
-        onWheel={markUserInteracting}
-        onScroll={markUserInteracting}
-        style={{
-          ...containerStyle,
-          display: 'flex',
-          overflowX: 'auto',
-          gap: gapPx,
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-
-          padding: containerMode === 'full' ? 0 : containerStyle.padding,
-          borderRadius: containerMode === 'full' ? 0 : containerStyle.borderRadius,
-          boxShadow: containerMode === 'full' ? 'none' : containerStyle.boxShadow,
-          borderStyle: containerMode === 'full' ? 'none' : containerStyle.borderStyle,
-          borderWidth: containerMode === 'full' ? 0 : containerStyle.borderWidth,
-          borderColor: containerMode === 'full' ? 'transparent' : containerStyle.borderColor,
-        }}
-      >
-        {visibleItems.map((item, i) => (
-          <div
-            key={item.uid}
-            style={{
-              flex: '0 0 auto',
-              scrollSnapAlign: 'center',
-              cursor: 'pointer',
-              borderRadius: 12,
-              overflow: 'hidden',
-              position: 'relative',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-              width: itemWidthPx,
-              height: itemHeightPx,
-            }}
-            onClick={() => setLightboxIndex(i)}
-          >
-            <img
-              src={item.url}
-              alt={item.caption || `Imagem ${i + 1}`}
-              style={{ width: '100%', height: '100%', objectFit, display: 'block' }}
-              loading="lazy"
-              draggable={false}
-            />
-            {item.caption && (
+      <div style={viewportStyle} ref={emblaRef}>
+        <div
+          style={{
+            display: 'flex',
+            gap: gapPx,
+            paddingBottom: 2,
+            touchAction: 'pan-y',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          {visibleItems.map((item, i) => (
+            <div
+              key={item.uid}
+              style={{
+                flex: '0 0 auto',
+                width: itemWidthPx,
+              }}
+            >
               <div
                 style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  width: '100%',
-                  background: 'rgba(0,0,0,0.4)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  fontSize: 12,
-                  textAlign: 'center',
-                  userSelect: 'none',
+                  cursor: 'pointer',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                  width: itemWidthPx,
+                  height: itemHeightPx,
                 }}
+                onClick={() => setLightboxIndex(i)}
               >
-                {item.caption}
+                <img
+                  src={item.url}
+                  alt={item.caption || `Imagem ${i + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit, display: 'block' }}
+                  loading="lazy"
+                  draggable={false}
+                />
+                {item.caption && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      width: '100%',
+                      background: 'rgba(0,0,0,0.4)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      fontSize: 12,
+                      textAlign: 'center',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {item.caption}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {lightboxIndex !== null && (
@@ -215,6 +196,8 @@ export default function GalleryBlock({ settings, style }: Props) {
   )
 }
 
+/* ===== Lightbox (teu) ===== */
+
 type LightboxProps = {
   items: GalleryItem[]
   currentIndex: number
@@ -224,21 +207,40 @@ type LightboxProps = {
 
 function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
   const item = items[currentIndex]
-
   const prev = () => onNavigate((currentIndex - 1 + items.length) % items.length)
   const next = () => onNavigate((currentIndex + 1) % items.length)
 
-  // Zoom simples: click alterna entre 1x e 2x
   const [zoom, setZoom] = useState<1 | 2>(1)
 
+  useEffect(() => setZoom(1), [currentIndex])
+
+  // teclas (ESC/Setas)
   useEffect(() => {
-    // sempre que muda de imagem, reset zoom
-    setZoom(1)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') prev()
+      if (e.key === 'ArrowRight') next()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [currentIndex])
+
+  // swipe no lightbox (simples e eficaz)
+  const startXRef = useRef<number | null>(null)
 
   return (
     <div
       onClick={onClose}
+      onTouchStart={(e) => (startXRef.current = e.touches[0]?.clientX ?? null)}
+      onTouchEnd={(e) => {
+        const startX = startXRef.current
+        const endX = e.changedTouches[0]?.clientX ?? null
+        if (startX == null || endX == null) return
+        const dx = endX - startX
+        if (Math.abs(dx) < 40) return
+        if (dx > 0) prev()
+        else next()
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -263,14 +265,7 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           cursor: 'default',
         }}
       >
-        <div
-          style={{
-            maxWidth: '92vw',
-            maxHeight: '82vh',
-            overflow: 'auto',
-            borderRadius: 12,
-          }}
-        >
+        <div style={{ maxWidth: '92vw', maxHeight: '82vh', overflow: 'auto', borderRadius: 12 }}>
           <img
             src={item.url}
             alt={item.caption || `Imagem ${currentIndex + 1}`}
@@ -293,27 +288,13 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           </div>
         )}
 
-        <button
-          onClick={prev}
-          style={navBtnLeft}
-          aria-label="Imagem anterior"
-        >
+        <button onClick={prev} style={navBtnLeft} aria-label="Imagem anterior">
           ‹
         </button>
-
-        <button
-          onClick={next}
-          style={navBtnRight}
-          aria-label="Próxima imagem"
-        >
+        <button onClick={next} style={navBtnRight} aria-label="Próxima imagem">
           ›
         </button>
-
-        <button
-          onClick={onClose}
-          style={closeBtn}
-          aria-label="Fechar"
-        >
+        <button onClick={onClose} style={closeBtn} aria-label="Fechar">
           ×
         </button>
       </div>
@@ -338,11 +319,7 @@ const navBtnLeft: React.CSSProperties = {
   userSelect: 'none',
 }
 
-const navBtnRight: React.CSSProperties = {
-  ...navBtnLeft,
-  left: 'auto',
-  right: 8,
-}
+const navBtnRight: React.CSSProperties = { ...navBtnLeft, left: 'auto', right: 8 }
 
 const closeBtn: React.CSSProperties = {
   position: 'absolute',
