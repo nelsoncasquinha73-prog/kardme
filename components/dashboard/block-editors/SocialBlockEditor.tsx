@@ -34,6 +34,7 @@ type ButtonStyle = {
 type SocialSettings = {
   heading?: string
   layout?: { direction?: 'row' | 'column'; align?: 'left' | 'center' | 'right'; gapPx?: number }
+  // novo esperado
   items?: Partial<Record<SocialChannel, SocialItem>>
 }
 
@@ -52,18 +53,10 @@ type SocialStyle = {
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
 
-  container?: {
-    bgColor?: string
-    radius?: number
-    padding?: number
-    shadow?: boolean
-    borderWidth?: number
-    borderColor?: string
-  }
+  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
 
   buttonDefaults?: ButtonStyle
 
-  // cores de marca
   brandColors?: boolean
   brandMode?: 'bg' | 'icon'
 }
@@ -85,9 +78,45 @@ function clampNum(v: any, fallback: number) {
   return Number.isFinite(n) ? n : fallback
 }
 
-// ✅ IMPORTANTE: não usar preventDefault aqui (senão bloqueia focus/typing em alguns browsers)
 function stop(e: React.PointerEvent | React.MouseEvent) {
+  // NÃO faças preventDefault aqui, senão lixamos input/caret em alguns browsers
   e.stopPropagation?.()
+}
+
+function inferChannelFromUrl(url: string): SocialChannel | null {
+  const u = (url || '').toLowerCase()
+  if (u.includes('facebook.com')) return 'facebook'
+  if (u.includes('instagram.com')) return 'instagram'
+  if (u.includes('linkedin.com')) return 'linkedin'
+  if (u.includes('tiktok.com')) return 'tiktok'
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube'
+  return null
+}
+
+// 🔥 MIGRAÇÃO: se vier array antigo, converte para object
+function coerceItems(input: any): Partial<Record<SocialChannel, SocialItem>> {
+  if (!input) return {}
+
+  if (Array.isArray(input)) {
+    const out: Partial<Record<SocialChannel, SocialItem>> = {}
+    for (const it of input) {
+      const ch: SocialChannel | null =
+        (it?.id as SocialChannel) ||
+        inferChannelFromUrl(it?.url) ||
+        null
+
+      if (!ch) continue
+      out[ch] = {
+        enabled: it?.enabled ?? true,
+        label: it?.label ?? '',
+        url: it?.url ?? '',
+      }
+    }
+    return out
+  }
+
+  if (typeof input === 'object') return input
+  return {}
 }
 
 function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialStyle): CombinedState {
@@ -98,7 +127,7 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
       align: inputSettings.layout?.align ?? 'center',
       gapPx: inputSettings.layout?.gapPx ?? 10,
     },
-    items: inputSettings.items || {},
+    items: coerceItems((inputSettings as any).items),
   }
 
   const style: SocialStyle = {
@@ -161,6 +190,10 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
   function patch(fn: (d: CombinedState) => void) {
     const next = structuredClone(local)
     fn(next)
+
+    // ✅ garantia extra: items SEMPRE object (nunca array)
+    next.settings.items = coerceItems((next.settings as any).items)
+
     setLocal(next)
     onChange(next)
   }
@@ -264,9 +297,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             min={10}
             max={32}
             value={st.headingFontSize ?? 13}
-            onChange={(e) =>
-              patch((d) => (d.style.headingFontSize = Math.max(10, Math.min(32, Number(e.target.value)))))
-            }
+            onChange={(e) => patch((d) => (d.style.headingFontSize = Math.max(10, Math.min(32, Number(e.target.value)))))}
             style={input}
             data-no-block-select="1"
             onPointerDown={stop}
@@ -330,52 +361,6 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           <Toggle active={st.uniformButtons ?? false} onClick={() => patch((d) => (d.style.uniformButtons = !(st.uniformButtons ?? false)))} />
         </Row>
 
-        {st.uniformButtons && (
-          <>
-            <Row label="Largura fixa (px)">
-              <input
-                type="number"
-                min={44}
-                max={400}
-                value={st.uniformWidthPx ?? 160}
-                onChange={(e) => patch((d) => (d.style.uniformWidthPx = clampNum(e.target.value, 160)))}
-                style={input}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
-              />
-            </Row>
-
-            <Row label="Altura fixa (px)">
-              <input
-                type="number"
-                min={24}
-                max={120}
-                value={st.uniformHeightPx ?? 52}
-                onChange={(e) => patch((d) => (d.style.uniformHeightPx = clampNum(e.target.value, 52)))}
-                style={input}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
-              />
-            </Row>
-
-            <Row label="Alinhamento do conteúdo">
-              <select
-                value={st.uniformContentAlign ?? 'center'}
-                onChange={(e) => patch((d) => (d.style.uniformContentAlign = e.target.value as any))}
-                style={select}
-                data-no-block-select="1"
-                onPointerDown={stop}
-                onMouseDown={stop}
-              >
-                <option value="left">Esquerda</option>
-                <option value="center">Centro</option>
-              </select>
-            </Row>
-          </>
-        )}
-
         <Row label="Cores de marca">
           <Toggle active={st.brandColors ?? false} onClick={() => patch((d) => (d.style.brandColors = !(st.brandColors ?? false)))} />
         </Row>
@@ -399,7 +384,9 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
       <Section title="Links (por rede)">
         {CHANNELS.map((c) => {
-          const item = s.items?.[c.key] || {}
+          const itemsObj = coerceItems((s as any).items)
+          const item = itemsObj?.[c.key] || {}
+
           return (
             <div
               key={c.key}
@@ -419,9 +406,10 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   active={item.enabled ?? false}
                   onClick={() =>
                     patch((d) => {
-                      d.settings.items = d.settings.items || {}
-                      const cur = d.settings.items[c.key] || {}
-                      d.settings.items[c.key] = { ...cur, enabled: !(cur.enabled ?? false) }
+                      const obj = coerceItems((d.settings as any).items)
+                      const cur = obj[c.key] || {}
+                      obj[c.key] = { ...cur, enabled: !(cur.enabled ?? false) }
+                      d.settings.items = obj
                     })
                   }
                 />
@@ -432,9 +420,10 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   value={item.label ?? ''}
                   onChange={(e) =>
                     patch((d) => {
-                      d.settings.items = d.settings.items || {}
-                      const cur = d.settings.items[c.key] || {}
-                      d.settings.items[c.key] = { ...cur, label: e.target.value }
+                      const obj = coerceItems((d.settings as any).items)
+                      const cur = obj[c.key] || {}
+                      obj[c.key] = { ...cur, label: e.target.value }
+                      d.settings.items = obj
                     })
                   }
                   style={input}
@@ -450,9 +439,10 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
                   value={item.url ?? ''}
                   onChange={(e) =>
                     patch((d) => {
-                      d.settings.items = d.settings.items || {}
-                      const cur = d.settings.items[c.key] || {}
-                      d.settings.items[c.key] = { ...cur, url: e.target.value, enabled: true }
+                      const obj = coerceItems((d.settings as any).items)
+                      const cur = obj[c.key] || {}
+                      obj[c.key] = { ...cur, url: e.target.value, enabled: true }
+                      d.settings.items = obj
                     })
                   }
                   style={input}

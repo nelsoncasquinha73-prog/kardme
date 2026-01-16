@@ -1,3 +1,4 @@
+// components/blocks/SocialBlock.tsx
 'use client'
 
 import React from 'react'
@@ -5,8 +6,11 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok, FaYoutube, FaGlobe } 
 
 type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
 
-type SocialItemObj = { enabled?: boolean; label?: string; url?: string }
-type SocialItemArray = { uid?: string; id?: SocialChannel | null; enabled?: boolean; label?: string; url?: string }
+type SocialItem = {
+  enabled?: boolean
+  label?: string
+  url?: string
+}
 
 type ButtonGradient = { from?: string; to?: string; angle?: number }
 
@@ -32,13 +36,20 @@ type ButtonStyle = {
 
 type SocialSettings = {
   heading?: string
-  layout?: { direction?: 'row' | 'column'; align?: 'left' | 'center' | 'right'; gapPx?: number }
-  // pode vir como object (novo) ou array (antigo)
-  items?: Partial<Record<SocialChannel, SocialItemObj>> | SocialItemArray[]
+  layout?: {
+    direction?: 'row' | 'column'
+    align?: 'left' | 'center' | 'right'
+    gapPx?: number
+  }
+  // NOVO: object por rede
+  items?: Partial<Record<SocialChannel, SocialItem>>
+  // ANTIGO: array de items (vamos aceitar e migrar)
+  // items?: any
 }
 
 type SocialStyle = {
   offsetY?: number
+
   showLabel?: boolean
   uniformButtons?: boolean
   uniformWidthPx?: number
@@ -47,17 +58,26 @@ type SocialStyle = {
 
   headingFontSize?: number
 
-  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
+  container?: {
+    bgColor?: string
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
 
   buttonDefaults?: ButtonStyle
   buttons?: Partial<Record<SocialChannel, ButtonStyle>>
 
+  // título
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
 
+  // cores de marca
   brandColors?: boolean
   brandMode?: 'bg' | 'icon'
 }
@@ -87,10 +107,50 @@ function isNonEmpty(v?: string) {
 }
 
 function sanitizeUrl(raw: string) {
-  const v = raw.trim()
+  const v = (raw || '').trim()
   if (!v) return null
+
+  // permite @handle (instagram) -> converte para https://instagram.com/handle
+  if (v.startsWith('@')) return `https://instagram.com/${v.slice(1)}`
+
   if (!/^https?:\/\//i.test(v)) return `https://${v}`
   return v
+}
+
+function inferChannelFromUrl(url: string): SocialChannel | null {
+  const u = (url || '').toLowerCase()
+  if (u.includes('facebook.com')) return 'facebook'
+  if (u.includes('instagram.com')) return 'instagram'
+  if (u.includes('linkedin.com')) return 'linkedin'
+  if (u.includes('tiktok.com')) return 'tiktok'
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube'
+  return null
+}
+
+// 🔥 MIGRAÇÃO: aceita formato antigo (array) e converte para object
+function coerceItems(input: any): Partial<Record<SocialChannel, SocialItem>> {
+  if (!input) return {}
+
+  if (Array.isArray(input)) {
+    const out: Partial<Record<SocialChannel, SocialItem>> = {}
+    for (const it of input) {
+      const ch: SocialChannel | null =
+        (it?.id as SocialChannel) ||
+        inferChannelFromUrl(it?.url) ||
+        null
+
+      if (!ch) continue
+      out[ch] = {
+        enabled: it?.enabled ?? true,
+        label: it?.label ?? '',
+        url: it?.url ?? '',
+      }
+    }
+    return out
+  }
+
+  if (typeof input === 'object') return input
+  return {}
 }
 
 function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<ButtonStyle> {
@@ -101,20 +161,26 @@ function mergeBtn(defaults?: ButtonStyle, specific?: ButtonStyle): Required<Butt
   return {
     sizePx: s.sizePx ?? d.sizePx ?? 44,
     radius: s.radius ?? d.radius ?? 14,
+
     bgColor: s.bgColor ?? d.bgColor ?? '#ffffff',
     bgMode: s.bgMode ?? d.bgMode ?? 'solid',
     bgGradient: s.bgGradient ?? d.bgGradient ?? { from: '#111827', to: '#374151', angle: 135 },
+
     borderEnabled,
     borderWidth: borderEnabled ? (s.borderWidth ?? d.borderWidth ?? 1) : 0,
     borderColor: s.borderColor ?? d.borderColor ?? 'rgba(0,0,0,0.10)',
+
     iconColor: s.iconColor ?? d.iconColor ?? '#111827',
     shadow: s.shadow ?? d.shadow ?? false,
     textColor: s.textColor ?? d.textColor ?? '#111827',
+
     fontFamily: s.fontFamily ?? d.fontFamily ?? '',
     fontWeight: s.fontWeight ?? d.fontWeight ?? 800,
     labelFontSize: s.labelFontSize ?? d.labelFontSize ?? 13,
+
     paddingY: s.paddingY ?? d.paddingY ?? 10,
     paddingX: s.paddingX ?? d.paddingX ?? 12,
+
     iconScale: s.iconScale ?? d.iconScale ?? 0.58,
   }
 }
@@ -133,6 +199,7 @@ function computeUniformWidthPx(showLabel: boolean, sizePx: number) {
   if (!showLabel) return Math.max(44, sizePx + 24)
   return 160
 }
+
 function computeUniformHeightPx(showLabel: boolean, sizePx: number) {
   if (!showLabel) return Math.max(44, sizePx + 20)
   return 52
@@ -140,46 +207,19 @@ function computeUniformHeightPx(showLabel: boolean, sizePx: number) {
 
 function defaultLabel(ch: SocialChannel) {
   switch (ch) {
-    case 'facebook': return 'Facebook'
-    case 'instagram': return 'Instagram'
-    case 'linkedin': return 'LinkedIn'
-    case 'tiktok': return 'TikTok'
-    case 'youtube': return 'YouTube'
-    case 'website': return 'Website'
+    case 'facebook':
+      return 'Facebook'
+    case 'instagram':
+      return 'Instagram'
+    case 'linkedin':
+      return 'LinkedIn'
+    case 'tiktok':
+      return 'TikTok'
+    case 'youtube':
+      return 'YouTube'
+    case 'website':
+      return 'Website'
   }
-}
-
-function normalizeItems(items: SocialSettings['items']): Array<{ ch: SocialChannel; item: SocialItemObj; href: string }> {
-  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
-  if (!items) return []
-
-  // formato antigo: array
-  if (Array.isArray(items)) {
-    return items
-      .map((it) => {
-        const ch = it.id ?? null
-        if (!ch) return null
-        if (it.enabled === false) return null
-        if (!isNonEmpty(it.url)) return null
-        const href = sanitizeUrl(it.url!)
-        if (!href) return null
-        return { ch, item: { enabled: it.enabled, label: it.label, url: it.url }, href }
-      })
-      .filter(Boolean) as any
-  }
-
-  // formato novo: object
-  return channels
-    .map((ch) => {
-      const item = (items as any)[ch] as SocialItemObj | undefined
-      if (!item) return null
-      if (item.enabled === false) return null
-      if (!isNonEmpty(item.url)) return null
-      const href = sanitizeUrl(item.url!)
-      if (!href) return null
-      return { ch, item, href }
-    })
-    .filter(Boolean) as any
 }
 
 export default function SocialBlock({ settings, style }: Props) {
@@ -214,7 +254,22 @@ export default function SocialBlock({ settings, style }: Props) {
 
   const justifyContent = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
 
-  const visible = normalizeItems(s.items)
+  // ✅ sempre normalizado
+  const items = coerceItems((s as any).items)
+  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
+
+  const visible = channels
+    .map((ch) => {
+      const item = items[ch]
+      if (!item) return null
+      if (item.enabled === false) return null
+      if (!isNonEmpty(item.url)) return null
+      const href = sanitizeUrl(item.url!)
+      if (!href) return null
+      return { ch, item, href }
+    })
+    .filter(Boolean) as Array<{ ch: SocialChannel; item: SocialItem; href: string }>
+
   if (visible.length === 0) return null
 
   const firstBs = mergeBtn(st.buttonDefaults, st.buttons?.[visible[0].ch])
@@ -262,12 +317,21 @@ export default function SocialBlock({ settings, style }: Props) {
                 if (brandMode === 'icon') {
                   return { ...base, iconColor: b.bg, textColor: b.bg }
                 }
-                return { ...base, bgMode: 'solid' as const, bgColor: b.bg, iconColor: b.icon, textColor: b.text, borderEnabled: false, borderWidth: 0 }
+                return {
+                  ...base,
+                  bgMode: 'solid' as const,
+                  bgColor: b.bg,
+                  iconColor: b.icon,
+                  textColor: b.text,
+                  borderEnabled: false,
+                  borderWidth: 0,
+                }
               })()
             : base
 
           const label = item.label || defaultLabel(ch)
           const Icon = ICONS_MAP[ch]
+
           const bgBtn = buttonBackground(bs)
 
           const contentJustify = showLabel
