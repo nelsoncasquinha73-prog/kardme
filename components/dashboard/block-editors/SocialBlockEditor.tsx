@@ -34,7 +34,6 @@ type ButtonStyle = {
 type SocialSettings = {
   heading?: string
   layout?: { direction?: 'row' | 'column'; align?: 'left' | 'center' | 'right'; gapPx?: number }
-  // novo esperado
   items?: Partial<Record<SocialChannel, SocialItem>>
 }
 
@@ -53,7 +52,14 @@ type SocialStyle = {
   headingBold?: boolean
   headingAlign?: 'left' | 'center' | 'right'
 
-  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
+  container?: {
+    bgColor?: string
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
 
   buttonDefaults?: ButtonStyle
 
@@ -79,7 +85,6 @@ function clampNum(v: any, fallback: number) {
 }
 
 function stop(e: React.PointerEvent | React.MouseEvent) {
-  // NÃO faças preventDefault aqui, senão lixamos input/caret em alguns browsers
   e.stopPropagation?.()
 }
 
@@ -93,28 +98,18 @@ function inferChannelFromUrl(url: string): SocialChannel | null {
   return null
 }
 
-// 🔥 MIGRAÇÃO: se vier array antigo, converte para object
+// MIGRAÇÃO: se vier array antigo, converte para object
 function coerceItems(input: any): Partial<Record<SocialChannel, SocialItem>> {
   if (!input) return {}
-
   if (Array.isArray(input)) {
     const out: Partial<Record<SocialChannel, SocialItem>> = {}
     for (const it of input) {
-      const ch: SocialChannel | null =
-        (it?.id as SocialChannel) ||
-        inferChannelFromUrl(it?.url) ||
-        null
-
+      const ch: SocialChannel | null = (it?.id as SocialChannel) || inferChannelFromUrl(it?.url) || null
       if (!ch) continue
-      out[ch] = {
-        enabled: it?.enabled ?? true,
-        label: it?.label ?? '',
-        url: it?.url ?? '',
-      }
+      out[ch] = { enabled: it?.enabled ?? true, label: it?.label ?? '', url: it?.url ?? '' }
     }
     return out
   }
-
   if (typeof input === 'object') return input
   return {}
 }
@@ -190,10 +185,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
   function patch(fn: (d: CombinedState) => void) {
     const next = structuredClone(local)
     fn(next)
-
-    // ✅ garantia extra: items SEMPRE object (nunca array)
     next.settings.items = coerceItems((next.settings as any).items)
-
     setLocal(next)
     onChange(next)
   }
@@ -208,6 +200,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
   const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (container.borderWidth ?? 0) > 0
+
   const defaultsBorderEnabled = btn.borderEnabled ?? true
   const defaultsBgMode = (btn.bgMode ?? 'solid') as 'solid' | 'gradient'
 
@@ -250,10 +243,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
 
         <Row label="Negrito">
-          <Toggle
-            active={st.headingBold ?? true}
-            onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))}
-          />
+          <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
         </Row>
 
         <Row label="Fonte do título">
@@ -352,6 +342,100 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
       </Section>
 
+      <Section title="Aparência do bloco">
+        <Row label="Fundo">
+          <Toggle
+            active={bgEnabled}
+            onClick={() =>
+              patch((d) => {
+                d.style.container = { ...container, bgColor: bgEnabled ? 'transparent' : '#ffffff' }
+              })
+            }
+          />
+        </Row>
+
+        {bgEnabled && (
+          <Row label="Cor do fundo">
+            <SwatchRow
+              value={container.bgColor ?? '#ffffff'}
+              onChange={(hex) => patch((d) => (d.style.container = { ...container, bgColor: hex }))}
+              onEyedropper={() => pick((hex) => patch((d) => (d.style.container = { ...container, bgColor: hex })))}
+            />
+          </Row>
+        )}
+
+        <Row label="Sombra">
+          <Toggle
+            active={container.shadow ?? false}
+            onClick={() => patch((d) => (d.style.container = { ...container, shadow: !(container.shadow ?? false) }))}
+          />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle
+            active={borderEnabled}
+            onClick={() => patch((d) => (d.style.container = { ...container, borderWidth: borderEnabled ? 0 : 1 }))}
+          />
+        </Row>
+
+        {borderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={container.borderWidth ?? 1}
+                onChange={(e) => patch((d) => (d.style.container = { ...container, borderWidth: clampNum(e.target.value, 1) }))}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
+            </Row>
+
+            <Row label="Cor da borda">
+              <SwatchRow
+                value={container.borderColor ?? 'rgba(0,0,0,0.08)'}
+                onChange={(hex) => patch((d) => (d.style.container = { ...container, borderColor: hex }))}
+                onEyedropper={() => pick((hex) => patch((d) => (d.style.container = { ...container, borderColor: hex })))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Raio">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={container.radius ?? 14}
+            onChange={(e) => patch((d) => (d.style.container = { ...container, radius: clampNum(e.target.value, 14) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{container.radius ?? 14}px</span>
+        </Row>
+
+        <Row label="Padding">
+          <input
+            type="range"
+            min={0}
+            max={28}
+            step={1}
+            value={container.padding ?? 16}
+            onChange={(e) => patch((d) => (d.style.container = { ...container, padding: clampNum(e.target.value, 16) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{container.padding ?? 16}px</span>
+        </Row>
+      </Section>
+
       <Section title="Botões">
         <Row label="Mostrar texto nos botões">
           <Toggle active={st.showLabel ?? true} onClick={() => patch((d) => (d.style.showLabel = !(st.showLabel ?? true)))} />
@@ -360,6 +444,52 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         <Row label="Botões com tamanho uniforme">
           <Toggle active={st.uniformButtons ?? false} onClick={() => patch((d) => (d.style.uniformButtons = !(st.uniformButtons ?? false)))} />
         </Row>
+
+        {st.uniformButtons && (
+          <>
+            <Row label="Largura fixa (px)">
+              <input
+                type="number"
+                min={44}
+                max={400}
+                value={st.uniformWidthPx ?? 160}
+                onChange={(e) => patch((d) => (d.style.uniformWidthPx = clampNum(e.target.value, 160)))}
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
+
+            <Row label="Altura fixa (px)">
+              <input
+                type="number"
+                min={24}
+                max={120}
+                value={st.uniformHeightPx ?? 52}
+                onChange={(e) => patch((d) => (d.style.uniformHeightPx = clampNum(e.target.value, 52)))}
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
+
+            <Row label="Alinhamento do conteúdo">
+              <select
+                value={st.uniformContentAlign ?? 'center'}
+                onChange={(e) => patch((d) => (d.style.uniformContentAlign = e.target.value as any))}
+                style={select}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              >
+                <option value="left">Esquerda</option>
+                <option value="center">Centro</option>
+              </select>
+            </Row>
+          </>
+        )}
 
         <Row label="Cores de marca">
           <Toggle active={st.brandColors ?? false} onClick={() => patch((d) => (d.style.brandColors = !(st.brandColors ?? false)))} />
@@ -380,6 +510,260 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             </select>
           </Row>
         )}
+      </Section>
+
+      <Section title="Estilos dos botões (defaults)">
+        <Row label="Tamanho">
+          <input
+            type="range"
+            min={24}
+            max={64}
+            step={1}
+            value={btn.sizePx ?? 44}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, sizePx: clampNum(e.target.value, 44) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.sizePx ?? 44}px</span>
+        </Row>
+
+        <Row label="Raio (formato do botão)">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btn.radius ?? 14}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, radius: clampNum(e.target.value, 14) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.radius ?? 14}px</span>
+        </Row>
+
+        <Row label="Modo do fundo">
+          <select
+            value={defaultsBgMode}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgMode: e.target.value as any }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="solid">Sólido</option>
+            <option value="gradient">Degradê</option>
+          </select>
+        </Row>
+
+        {defaultsBgMode === 'gradient' && (
+          <>
+            <Row label="Degradê (from)">
+              <SwatchRow
+                value={btn.bgGradient?.from ?? '#111827'}
+                onChange={(hex) =>
+                  patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))
+                }
+                onEyedropper={() =>
+                  pick((hex) =>
+                    patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))
+                  )
+                }
+              />
+            </Row>
+
+            <Row label="Degradê (to)">
+              <SwatchRow
+                value={btn.bgGradient?.to ?? '#374151'}
+                onChange={(hex) =>
+                  patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))
+                }
+                onEyedropper={() =>
+                  pick((hex) =>
+                    patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))
+                  )
+                }
+              />
+            </Row>
+
+            <Row label="Ângulo">
+              <input
+                type="number"
+                min={0}
+                max={360}
+                value={btn.bgGradient?.angle ?? 135}
+                onChange={(e) =>
+                  patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), angle: Number(e.target.value) } }))
+                }
+                style={input}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Fundo">
+          <SwatchRow
+            value={btn.bgColor ?? '#ffffff'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex })))}
+            disabled={defaultsBgMode === 'gradient'}
+          />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle
+            active={defaultsBorderEnabled}
+            onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, borderEnabled: !defaultsBorderEnabled }))}
+          />
+        </Row>
+
+        {defaultsBorderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={btn.borderWidth ?? 1}
+                onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, borderWidth: clampNum(e.target.value, 1) }))}
+                data-no-block-select="1"
+                onPointerDown={stop}
+                onMouseDown={stop}
+              />
+              <span style={rightNum}>{btn.borderWidth ?? 1}px</span>
+            </Row>
+
+            <Row label="Cor da borda">
+              <SwatchRow
+                value={btn.borderColor ?? 'rgba(0,0,0,0.10)'}
+                onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex }))}
+                onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex })))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Cor do ícone">
+          <SwatchRow
+            value={btn.iconColor ?? '#111827'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex })))}
+          />
+        </Row>
+
+        <Row label="Cor do texto">
+          <SwatchRow
+            value={btn.textColor ?? '#111827'}
+            onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))}
+            onEyedropper={() => pick((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))}
+          />
+        </Row>
+
+        <Row label="Fonte">
+          <select
+            value={btn.fontFamily ?? ''}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: e.target.value || '' }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Peso do texto">
+          <select
+            value={String(btn.fontWeight ?? 800)}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontWeight: clampNum(e.target.value, 800) }))}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="400">Normal (400)</option>
+            <option value="600">Semi (600)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+
+        <Row label="Tamanho do texto (px)">
+          <input
+            type="number"
+            min={8}
+            max={36}
+            value={btn.labelFontSize ?? 13}
+            onChange={(e) =>
+              patch((d) => (d.style.buttonDefaults = { ...btn, labelFontSize: Math.max(8, Math.min(36, Number(e.target.value))) }))
+            }
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+        </Row>
+
+        <Row label="Escala do ícone">
+          <input
+            type="range"
+            min={0.4}
+            max={0.9}
+            step={0.01}
+            value={btn.iconScale ?? 0.58}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, iconScale: Number(e.target.value) }))}
+            style={{ width: 140 }}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{(btn.iconScale ?? 0.58).toFixed(2)}</span>
+        </Row>
+
+        <Row label="Padding Y">
+          <input
+            type="range"
+            min={0}
+            max={24}
+            step={1}
+            value={btn.paddingY ?? 10}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingY: clampNum(e.target.value, 10) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.paddingY ?? 10}px</span>
+        </Row>
+
+        <Row label="Padding X">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={btn.paddingX ?? 12}
+            onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, paddingX: clampNum(e.target.value, 12) }))}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>{btn.paddingX ?? 12}px</span>
+        </Row>
+
+        <Row label="Sombra do botão">
+          <Toggle active={btn.shadow ?? false} onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, shadow: !(btn.shadow ?? false) }))} />
+        </Row>
       </Section>
 
       <Section title="Links (por rede)">
