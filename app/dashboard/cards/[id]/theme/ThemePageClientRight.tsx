@@ -182,15 +182,16 @@ export default function ThemePageClientRight({
   />
 )}
 
-
-        {activeBlock?.type === 'social' && (
-          <SocialBlockEditor
-            settings={activeBlock.settings || {}}
-            style={activeBlock.style || {}}
-            onChangeSettings={onChangeSettings}
-            onChangeStyle={onChangeStyle}
-          />
-        )}
+{activeBlock?.type === 'social' && (
+  <SocialBlockEditor
+    settings={activeBlock.settings || {}}
+    style={activeBlock.style || {}}
+    onChange={({ settings, style }) => {
+      onChangeSettings(settings)
+      onChangeStyle(style)
+    }}
+  />
+)}
 
         {activeBlock?.type === 'gallery' && (
           <GalleryBlockEditor
