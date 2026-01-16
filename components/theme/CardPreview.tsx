@@ -1,20 +1,10 @@
 'use client'
 
 import React from 'react'
-import HeaderBlock from '@/components/blocks/HeaderBlock'
-import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
-import EmbedBlock from '@/components/blocks/EmbedBlock'
-import ProfileBlock from '@/components/blocks/ProfileBlock'
-import GalleryBlock from '@/components/blocks/GalleryBlock'
-import ContactBlock from '@/components/blocks/ContactBlock'
-import LeadFormBlock from '@/components/blocks/LeadFormBlock'
-import SocialBlock from '@/components/blocks/SocialBlock'
-import DecorationBlock from '@/components/blocks/DecorationBlock'
-import BioBlock from '@/components/blocks/BioBlock'
-import ServicesBlock from '@/components/blocks/ServicesBlock'
-import LanguageSwitcher from '@/components/language/LanguageSwitcher'
-import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
+import { blockRegistry } from '@/components/blocks/blockRegistry'
+
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
+import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 
 type Card = {
   id: string
@@ -148,11 +138,12 @@ export default function CardPreview({
             boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
           }}
         >
+          {/* Renderização dos blocos decorations com interação especial */}
           {blocks
             ?.filter((block) => block.type === 'decorations')
             .map((block) => {
               const isActive = activeBlockId === block.id
-
+              const DecorationComponent = blockRegistry.decorations
               return (
                 <div
                   key={block.id}
@@ -160,7 +151,7 @@ export default function CardPreview({
                     position: 'absolute',
                     inset: 0,
                     pointerEvents: isActive ? 'auto' : 'none',
-                    userSelect: isActive ? 'none' : 'none',
+                    userSelect: 'none',
                     zIndex: 10,
                   }}
                   onMouseDown={(e) => {
@@ -174,7 +165,7 @@ export default function CardPreview({
                     e.stopPropagation()
                   }}
                 >
-                  <DecorationBlock settings={block.settings} />
+                  <DecorationComponent settings={block.settings} style={block.style} />
 
                   {isActive && (
                     <DecorationOverlayInteractive
@@ -196,6 +187,7 @@ export default function CardPreview({
               )
             })}
 
+          {/* Renderização do bloco header */}
           {headerBlock ? (
             <div
               style={{
@@ -222,10 +214,15 @@ export default function CardPreview({
                 />
               ) : null}
 
-              <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
+              {(() => {
+                const HeaderComponent = blockRegistry.header
+                if (!HeaderComponent) return null
+                return <HeaderComponent settings={headerBlock.settings} cardBg={cardBg} />
+              })()}
             </div>
           ) : null}
 
+          {/* Renderização dos restantes blocos */}
           <div
             style={{
               display: 'flex',
@@ -287,90 +284,15 @@ export default function CardPreview({
                   />
                 ) : null
 
-                switch (block.type) {
-                  case 'profile':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
-                      </div>
-                    )
+                const PreviewComponent = blockRegistry[block.type]
+                if (!PreviewComponent) return null
 
-                  case 'gallery':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <GalleryBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'bio':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <BioBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'contact':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <ContactBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'info_utilities':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <InfoUtilitiesBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'social':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <SocialBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'services':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <ServicesBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'lead_form':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'embed':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <EmbedBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  case 'business_hours':
-                    return (
-                      <div key={block.id} {...commonWrapProps}>
-                        {Highlight}
-                        <BusinessHoursBlock settings={block.settings} style={block.style} />
-                      </div>
-                    )
-
-                  default:
-                    return null
-                }
+                return (
+                  <div key={block.id} {...commonWrapProps}>
+                    {Highlight}
+                    <PreviewComponent settings={block.settings} style={block.style} />
+                  </div>
+                )
               })}
           </div>
         </div>

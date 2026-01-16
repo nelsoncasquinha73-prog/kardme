@@ -208,7 +208,8 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
     patchSettings((s) => {
       s.layout = { ...s.layout, ...patch }
     })
-  const setItem = (ch: string, patch: Partial<ContactItem>) =>
+  const setItem = (ch: ContactChannel, patch: Partial<ContactItem>) =>
+
     patchSettings((s) => {
       s.items = { ...s.items }
       s.items[ch] = { ...s.items[ch], ...patch }
@@ -223,7 +224,8 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
     patchStyle((s) => {
       s.buttonDefaults = { ...s.buttonDefaults, ...patch }
     })
-  const setBtn = (ch: string, patch: Partial<ButtonStyle>) =>
+  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) =>
+
     patchStyle((s) => {
       s.buttons = { ...s.buttons, [ch]: { ...(s.buttons?.[ch] || {}), ...patch } }
     })
