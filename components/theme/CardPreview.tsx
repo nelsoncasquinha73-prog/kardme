@@ -1,7 +1,12 @@
 'use client'
 
 import React from 'react'
-import { blockRegistry } from '@/components/blocks/blockRegistry'
+import ContactBlock from '@/components/blocks/ContactBlock'
+import DecorationBlock from '@/components/blocks/DecorationBlock'
+import ServicesBlock from '@/components/blocks/ServicesBlock'
+import LeadFormBlock from '@/components/blocks/LeadFormBlock'
+import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
+import HeaderBlock from '@/components/blocks/HeaderBlock'
 
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
@@ -30,8 +35,6 @@ type Props = {
   fullBleed?: boolean
   cardBg?: any
 }
-
-type BlockType = keyof typeof blockRegistry
 
 function toPx(v: any) {
   if (v === null || v === undefined || v === '') return undefined
@@ -145,7 +148,6 @@ export default function CardPreview({
             ?.filter((block) => block.type === 'decorations')
             .map((block) => {
               const isActive = activeBlockId === block.id
-              const DecorationComponent = blockRegistry.decorations
               return (
                 <div
                   key={block.id}
@@ -167,7 +169,7 @@ export default function CardPreview({
                     e.stopPropagation()
                   }}
                 >
-                  <DecorationComponent settings={block.settings} style={block.style} />
+                  <DecorationBlock settings={block.settings} style={block.style} />
 
                   {isActive && (
                     <DecorationOverlayInteractive
@@ -216,11 +218,7 @@ export default function CardPreview({
                 />
               ) : null}
 
-              {(() => {
-                const HeaderComponent = blockRegistry.header
-                if (!HeaderComponent) return null
-                return <HeaderComponent settings={headerBlock.settings} cardBg={cardBg} />
-              })()}
+              <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
             </div>
           ) : null}
 
@@ -286,14 +284,19 @@ export default function CardPreview({
                   />
                 ) : null
 
-                const PreviewComponent = blockRegistry[block.type as BlockType]
-                if (!PreviewComponent) return null
-
                 return (
                   <div key={block.id} {...commonWrapProps}>
                     {Highlight}
-                    <PreviewComponent cardId={card.id} settings={block.settings} style={block.style} />
 
+                    {block.type === 'contact' ? (
+                      <ContactBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'services' ? (
+                      <ServicesBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'lead_form' ? (
+                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                    ) : block.type === 'business_hours' ? (
+                      <BusinessHoursBlock settings={block.settings} style={block.style} />
+                    ) : null}
                   </div>
                 )
               })}
