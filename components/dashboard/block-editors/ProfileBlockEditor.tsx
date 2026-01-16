@@ -6,6 +6,7 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
+import { Section } from '@/components/editor/ui'
 
 
 
@@ -675,25 +676,6 @@ function Segmented({
         )
       })}
     </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section
-      style={{
-        background: '#fff',
-        border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 14,
-        padding: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-    >
-      <h3 style={{ fontSize: 11, fontWeight: 800, opacity: 0.75, marginBottom: 2 }}>{title}</h3>
-      {children}
-    </section>
   )
 }
 
