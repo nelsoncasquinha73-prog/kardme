@@ -10,6 +10,7 @@ import HeaderBlock from '@/components/blocks/HeaderBlock'
 import SocialBlock from '@/components/blocks/SocialBlock'
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
+import GalleryBlock from '@/components/blocks/GalleryBlock'
 
 type Card = {
   id: string
@@ -301,6 +302,8 @@ export default function CardPreview({
   <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
 ) : block.type === 'business_hours' ? (
   <BusinessHoursBlock settings={block.settings} style={block.style} />
+) : block.type === 'gallery' ? (
+  <GalleryBlock settings={block.settings} style={block.style} />
 ) : null}
 
                   </div>
