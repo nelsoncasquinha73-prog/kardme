@@ -47,7 +47,7 @@ type Props = {
   saveSlug: () => void
 
   // ✅ NEW: avisar o ThemePageClient quando estás a editar inputs
-  onEditingChange: (isEditing: boolean) => void
+  onEditingChange?: (isEditing: boolean) => void
 }
 
 function isFormEl(el: HTMLElement | null) {
@@ -89,11 +89,11 @@ export default function ThemePageClientRight({
       }}
       onFocusCapture={(e) => {
         const el = e.target as HTMLElement | null
-        if (isFormEl(el)) onEditingChange(true)
+        if (isFormEl(el)) onEditingChange?.(true)
       }}
       onBlurCapture={(e) => {
         const el = e.target as HTMLElement | null
-        if (isFormEl(el)) onEditingChange(false)
+        if (isFormEl(el)) onEditingChange?.(false)
       }}
     >
       <div
