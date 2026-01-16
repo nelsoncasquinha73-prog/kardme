@@ -7,7 +7,7 @@ import ServicesBlock from '@/components/blocks/ServicesBlock'
 import LeadFormBlock from '@/components/blocks/LeadFormBlock'
 import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
-
+import SocialBlock from '@/components/blocks/SocialBlock'
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 
@@ -49,8 +49,8 @@ function blockOuterSpacingFromJson(style: any): React.CSSProperties {
   }
 }
 
-function shouldIgnoreBlockSelect(e: React.MouseEvent) {
-  const t = e.target as HTMLElement | null
+function shouldIgnoreBlockSelect(e: React.MouseEvent | React.PointerEvent) {
+  const t = (e.target as HTMLElement) || null
   if (!t) return false
 
   if (t.closest('[data-no-block-select="1"]')) return true
@@ -84,7 +84,6 @@ export default function CardPreview({
   const mainPadX = 16
   const headerBleedX = cardPadX + mainPadX
 
-  // Define variável CSS para o fundo do cartão
   const bg = cardBg ?? card?.theme?.background
 
   const bgCss =
@@ -98,17 +97,17 @@ export default function CardPreview({
 
   return (
     <div
-      style={{
-        minHeight: 'auto',
-        padding: 0,
-        borderRadius: fullBleed ? 0 : 24,
-        width: '100%',
-        background: fullBleed ? 'transparent' : 'var(--color-bg)',
-        opacity: fullBleed ? bgOpacity : 1,
-
-        // Define a variável CSS para o background
-        '--card-bg': bgCss,
-      } as React.CSSProperties}
+      style={
+        {
+          minHeight: 'auto',
+          padding: 0,
+          borderRadius: fullBleed ? 0 : 24,
+          width: '100%',
+          background: fullBleed ? 'transparent' : 'var(--color-bg)',
+          opacity: fullBleed ? bgOpacity : 1,
+          '--card-bg': bgCss,
+        } as React.CSSProperties
+      }
     >
       {showTranslations && (
         <div
@@ -143,7 +142,7 @@ export default function CardPreview({
             boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
           }}
         >
-          {/* Renderização dos blocos decorations com interação especial */}
+          {/* DECORATIONS */}
           {blocks
             ?.filter((block) => block.type === 'decorations')
             .map((block) => {
@@ -191,7 +190,7 @@ export default function CardPreview({
               )
             })}
 
-          {/* Renderização do bloco header */}
+          {/* HEADER */}
           {headerBlock ? (
             <div
               style={{
@@ -202,7 +201,7 @@ export default function CardPreview({
                 marginRight: -headerBleedX,
               }}
               onPointerDownCapture={(e) => {
-                if (shouldIgnoreBlockSelect(e as any)) return
+                if (shouldIgnoreBlockSelect(e)) return
                 onSelectBlock?.(headerBlock)
               }}
             >
@@ -222,7 +221,7 @@ export default function CardPreview({
             </div>
           ) : null}
 
-          {/* Renderização dos restantes blocos */}
+          {/* OUTROS BLOCOS */}
           <div
             style={{
               display: 'flex',
@@ -240,34 +239,20 @@ export default function CardPreview({
                 let z = 10
                 if (block.type === 'profile' && isOverlap) z = 12
 
-                const wrapperBase: React.CSSProperties = {
+                const wrapStyle: React.CSSProperties = {
                   position: 'relative',
                   zIndex: z,
                   borderRadius: 18,
                   cursor: onSelectBlock ? 'pointer' : 'default',
                   display: 'flex',
                   flexDirection: 'column',
-                }
-
-                const wrapStyle: React.CSSProperties = {
-                  ...wrapperBase,
                   ...blockOuterSpacingFromJson(block.style),
-                  ...(block.type === 'contact' && block.style?.headingAlign
-                    ? {
-                        alignItems:
-                          block.style.headingAlign === 'left'
-                            ? 'flex-start'
-                            : block.style.headingAlign === 'right'
-                            ? 'flex-end'
-                            : 'center',
-                      }
-                    : {}),
                 }
 
                 const commonWrapProps = {
                   style: wrapStyle,
                   onPointerDownCapture: (e: React.PointerEvent) => {
-                    if (shouldIgnoreBlockSelect(e as any)) return
+                    if (shouldIgnoreBlockSelect(e)) return
                     onSelectBlock?.(block)
                   },
                 }
@@ -290,6 +275,8 @@ export default function CardPreview({
 
                     {block.type === 'contact' ? (
                       <ContactBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'social' ? (
+                      <SocialBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'services' ? (
                       <ServicesBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'lead_form' ? (
