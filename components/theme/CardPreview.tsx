@@ -64,6 +64,18 @@ function shouldIgnoreBlockSelect(e: React.MouseEvent | React.PointerEvent) {
   return false
 }
 
+function mapAlignToJustify(align?: 'left' | 'center' | 'right') {
+  if (align === 'left') return 'flex-start'
+  if (align === 'right') return 'flex-end'
+  return 'center'
+}
+
+function mapHeadingAlignToItems(align?: 'left' | 'center' | 'right') {
+  if (align === 'left') return 'flex-start'
+  if (align === 'right') return 'flex-end'
+  return 'center'
+}
+
 export default function CardPreview({
   card,
   blocks,
@@ -239,6 +251,11 @@ export default function CardPreview({
                 let z = 10
                 if (block.type === 'profile' && isOverlap) z = 12
 
+                const alignItems =
+                  block.type === 'contact' || block.type === 'social'
+                    ? mapHeadingAlignToItems(block.style?.headingAlign)
+                    : undefined
+
                 const wrapStyle: React.CSSProperties = {
                   position: 'relative',
                   zIndex: z,
@@ -246,6 +263,7 @@ export default function CardPreview({
                   cursor: onSelectBlock ? 'pointer' : 'default',
                   display: 'flex',
                   flexDirection: 'column',
+                  alignItems,
                   ...blockOuterSpacingFromJson(block.style),
                 }
 

@@ -91,7 +91,9 @@ export default function ThemePageClientRight({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {activeBlock && (
-            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>Bloco: {activeBlock.type}</span>
+            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>
+              Bloco: {activeBlock.type}
+            </span>
           )}
         </div>
       </div>
@@ -101,6 +103,7 @@ export default function ThemePageClientRight({
         <label style={{ fontWeight: 700, fontSize: 12, opacity: 0.7, color: '#111827' }}>
           Editar slug (link do cartão)
         </label>
+
         <input
           type="text"
           value={slugEdit}
@@ -116,7 +119,9 @@ export default function ThemePageClientRight({
             color: '#374151',
           }}
         />
+
         {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
+
         <button
           onClick={saveSlug}
           disabled={slugSaving || slugEdit === card.slug}
@@ -125,9 +130,10 @@ export default function ThemePageClientRight({
             padding: '8px 12px',
             borderRadius: 8,
             backgroundColor: '#111827',
-            color: '#374151',
+            color: '#fff',
             fontWeight: 'bold',
             cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
+            opacity: slugSaving || slugEdit === card.slug ? 0.6 : 1,
           }}
         >
           {slugSaving ? 'A guardar…' : 'Guardar slug'}
@@ -174,24 +180,24 @@ export default function ThemePageClientRight({
         )}
 
         {activeBlock?.type === 'contact' && (
-  <ContactBlockEditor
-    settings={activeBlock.settings || {}}
-    style={activeBlock.style || {}}
-    onChangeSettings={onChangeSettings}
-    onChangeStyle={onChangeStyle}
-  />
-)}
+          <ContactBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
 
-{activeBlock?.type === 'social' && (
-  <SocialBlockEditor
-    settings={activeBlock.settings || {}}
-    style={activeBlock.style || {}}
-    onChange={({ settings, style }) => {
-      onChangeSettings(settings)
-      onChangeStyle(style)
-    }}
-  />
-)}
+        {activeBlock?.type === 'social' && (
+          <SocialBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChange={({ settings, style }) => {
+              onChangeSettings(settings)
+              onChangeStyle(style)
+            }}
+          />
+        )}
 
         {activeBlock?.type === 'gallery' && (
           <GalleryBlockEditor
