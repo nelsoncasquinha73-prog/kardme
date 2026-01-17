@@ -1,65 +1,32 @@
-import type { Metadata } from "next"
-import {
-  Geist,
-  Geist_Mono,
-  Inter,
-  Poppins,
-  Montserrat,
-  Roboto,
-  Open_Sans,
-  Lato,
-  Nunito,
-  Playfair_Display,
-  Dancing_Script,
-} from "next/font/google"
+import type { Metadata } from 'next'
 
-import "./globals.css"
-import "@/styles/tokens.css"
+import './globals.css'
+import '@/styles/tokens.css'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-})
+// Importa as fontes locais via @fontsource
+import '@fontsource/montserrat/400.css'
+import '@fontsource/montserrat/700.css'
+import '@fontsource/montserrat/900.css'
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-})
+import '@fontsource/nunito/400.css'
+import '@fontsource/nunito/700.css'
+import '@fontsource/nunito/900.css'
 
-// === Fonts para o editor (FONT_OPTIONS) ===
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+import '@fontsource/playfair-display/400.css'
+import '@fontsource/playfair-display/700.css'
+import '@fontsource/playfair-display/900.css'
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-poppins",
-})
-
-const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat" })
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"],
-  variable: "--font-roboto",
-})
-
-const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" })
-
-const lato = Lato({
-  subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  variable: "--font-lato",
-})
-
-const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" })
-
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
-
-const dancing = Dancing_Script({ subsets: ["latin"], variable: "--font-dancing" })
+import '@fontsource/poppins/300.css'
+import '@fontsource/poppins/400.css'
+import '@fontsource/poppins/500.css'
+import '@fontsource/poppins/600.css'
+import '@fontsource/poppins/700.css'
+import '@fontsource/poppins/800.css'
+import '@fontsource/poppins/900.css'
 
 export const metadata: Metadata = {
-  title: "Kardme",
-  description: "Cartões digitais inteligentes",
+  title: 'Kardme',
+  description: 'Cartões digitais inteligentes',
 }
 
 export default function RootLayout({
@@ -68,22 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html
-      lang="pt"
-      className={[
-        geistSans.variable,
-        geistMono.variable,
-        inter.variable,
-        poppins.variable,
-        montserrat.variable,
-        roboto.variable,
-        openSans.variable,
-        lato.variable,
-        nunito.variable,
-        playfair.variable,
-        dancing.variable,
-      ].join(" ")}
-    >
+    <html lang="pt">
       <body className="antialiased">{children}</body>
     </html>
   )

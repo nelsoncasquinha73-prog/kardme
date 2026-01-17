@@ -34,6 +34,7 @@ export type InfoItem = {
 
 export type InfoUtilitiesSettings = {
   heading?: string
+  layout?: 'grid' | 'list'
   items?: InfoItem[]
 }
 
@@ -72,6 +73,9 @@ export type InfoUtilitiesStyle = {
   rowBorderColor?: string
   rowRadiusPx?: number
 
+  // compat (o bloco usa isto)
+  rowBgColor?: string
+
   buttonBgColor?: string
   buttonTextColor?: string
   buttonBorderWidth?: number
@@ -88,7 +92,7 @@ type Props = {
 }
 
 function uid(prefix = 'info') {
-  return `\${prefix}-\${Date.now().toString(36)}-\${Math.random().toString(36).slice(2, 9)}`
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
 }
 
 export default function InfoUtilitiesBlockEditor({
@@ -104,6 +108,11 @@ export default function InfoUtilitiesBlockEditor({
 
   const updateSettings = (patch: Partial<InfoUtilitiesSettings>) => {
     onChangeSettings({ ...s, ...patch })
+  }
+
+  const updateStyle = (patch: Partial<InfoUtilitiesStyle>) => {
+    if (!onChangeStyle) return
+    onChangeStyle({ ...st, ...patch })
   }
 
   const addItem = (type: InfoItemType) => {
@@ -153,6 +162,7 @@ export default function InfoUtilitiesBlockEditor({
       const safeCardId = String(cardId || 'no-card').replace(/[^a-zA-Z0-9/_-]/g, '-')
       const safeTargetId = String(targetId).replace(/[^a-zA-Z0-9/_-]/g, '-')
       const path = `${safeCardId}/${safeTargetId}.${ext}`
+
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
         upsert: true,
         contentType: file.type,
@@ -162,13 +172,11 @@ export default function InfoUtilitiesBlockEditor({
 
       const { data } = supabase.storage.from(bucket).getPublicUrl(path)
       const publicUrl = data?.publicUrl
+      if (!publicUrl) throw new Error('Não foi possível obter o URL público da imagem.')
 
-      if (!publicUrl) {
-        throw new Error('Não foi possível obter o URL público da imagem.')
-      }
+      const current = items.find((i) => i.id === targetId)
 
       // Se o item estiver em modo "imagem", grava em iconImageSrc
-      const current = items.find((i) => i.id === targetId)
       if ((current?.iconMode ?? 'default') === 'image') {
         updateItem(targetId, { iconImageSrc: publicUrl })
       } else {
@@ -180,9 +188,6 @@ export default function InfoUtilitiesBlockEditor({
       alert(err?.message || 'Erro no upload da imagem.')
     }
   }
-
-  const bgEnabled = (st.container?.bgColor ?? 'transparent') !== 'transparent'
-  const borderEnabled = (st.container?.borderWidth ?? 0) > 0
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -202,6 +207,17 @@ export default function InfoUtilitiesBlockEditor({
             style={input}
             placeholder="Título do bloco"
           />
+        </Row>
+
+        <Row label="Layout">
+          <select
+            value={s.layout ?? 'grid'}
+            onChange={(e) => updateSettings({ layout: e.target.value as 'grid' | 'list' })}
+            style={select}
+          >
+            <option value="grid">Grelha</option>
+            <option value="list">Lista</option>
+          </select>
         </Row>
 
         <Row label="Adicionar item">
@@ -338,7 +354,6 @@ export default function InfoUtilitiesBlockEditor({
 
                 {iconMode === 'image' && hasIconImage ? (
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    {/* preview: uso img para evitar mais chatices com next/image em editor */}
                     <img
                       src={item.iconImageSrc}
                       alt=""
@@ -410,7 +425,6 @@ export default function InfoUtilitiesBlockEditor({
 
               {item.type === 'image_button' && (
                 <>
-                  {/* mantém o upload do botão (imageSrc) */}
                   <button type="button" onClick={() => pickFileFor(item.id)} style={{ marginBottom: 8 }}>
                     Upload de imagem
                   </button>
@@ -472,17 +486,15 @@ export default function InfoUtilitiesBlockEditor({
               )}
 
               {item.type === 'hours_text' && (
-                <>
-                  <label>
-                    <span>Texto do horário</span>
-                    <textarea
-                      value={item.value ?? ''}
-                      onChange={(e) => updateItem(item.id, { value: e.target.value })}
-                      style={{ ...input, height: 60, resize: 'vertical' }}
-                      placeholder="Ex: Segunda a Sexta, 09h às 18h"
-                    />
-                  </label>
-                </>
+                <label>
+                  <span>Texto do horário</span>
+                  <textarea
+                    value={item.value ?? ''}
+                    onChange={(e) => updateItem(item.id, { value: e.target.value })}
+                    style={{ ...input, height: 60, resize: 'vertical' }}
+                    placeholder="Ex: Segunda a Sexta, 09h às 18h"
+                  />
+                </label>
               )}
 
               {item.type === 'reviews_embed' && (
@@ -513,11 +525,11 @@ export default function InfoUtilitiesBlockEditor({
         })}
       </Section>
 
-      <Section title="Tipografia">
+      <Section title="Título">
         <Row label="Cor do título">
           <SwatchRow
             value={st.headingColor ?? '#111827'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, headingColor: hex })}
+            onChange={(hex) => updateStyle({ headingColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -526,36 +538,29 @@ export default function InfoUtilitiesBlockEditor({
           <input
             type="number"
             min={10}
-            max={32}
+            max={40}
             value={st.headingFontSize ?? 16}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, headingFontSize: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ headingFontSize: Number(e.target.value) })}
             style={input}
           />
         </Row>
 
-<Row label="Alinhamento do título">
-  <select
-    value={st.headingAlign ?? 'left'}
-    onChange={(e) =>
-      onChangeStyle &&
-      onChangeStyle({
-        ...st,
-        headingAlign: e.target.value as 'left' | 'center' | 'right',
-      })
-    }
-    style={select}
-  >
-    <option value="left">Esquerda</option>
-    <option value="center">Centro</option>
-    <option value="right">Direita</option>
-  </select>
-</Row>
-
+        <Row label="Alinhamento do título">
+          <select
+            value={st.headingAlign ?? 'left'}
+            onChange={(e) => updateStyle({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
+            style={select}
+          >
+            <option value="left">Esquerda</option>
+            <option value="center">Centro</option>
+            <option value="right">Direita</option>
+          </select>
+        </Row>
 
         <Row label="Fonte do título">
           <select
             value={st.headingFontFamily ?? ''}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, headingFontFamily: e.target.value || undefined })}
+            onChange={(e) => updateStyle({ headingFontFamily: e.target.value || undefined })}
             style={select}
           >
             <option value="">Padrão</option>
@@ -570,25 +575,40 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Negrito">
           <Toggle
             active={st.headingBold !== false}
-            onClick={() => onChangeStyle && onChangeStyle({ ...st, headingBold: !(st.headingBold !== false) })}
+            onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })}
           />
         </Row>
 
+        <Row label="Peso do título">
+          <select
+            value={String(st.headingFontWeight ?? 900)}
+            onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })}
+            style={select}
+          >
+            <option value="500">Medium (500)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+      </Section>
+
+      <Section title="Tipografia (texto)">
         <Row label="Cor do texto">
           <SwatchRow
             value={st.textColor ?? '#111827'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, textColor: hex })}
+            onChange={(hex) => updateStyle({ textColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
 
-           <Row label="Tamanho do texto (px)">
+        <Row label="Tamanho do texto (px)">
           <input
             type="number"
             min={10}
             max={22}
             value={st.textFontSize ?? 14}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, textFontSize: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ textFontSize: Number(e.target.value) })}
             style={input}
           />
         </Row>
@@ -596,7 +616,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Fonte do texto">
           <select
             value={st.textFontFamily ?? ''}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, textFontFamily: e.target.value || undefined })}
+            onChange={(e) => updateStyle({ textFontFamily: e.target.value || undefined })}
             style={select}
           >
             <option value="">Padrão</option>
@@ -611,7 +631,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Peso do texto">
           <select
             value={String(st.textFontWeight ?? 600)}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, textFontWeight: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })}
             style={select}
           >
             <option value="400">Normal (400)</option>
@@ -621,7 +641,9 @@ export default function InfoUtilitiesBlockEditor({
             <option value="900">Black (900)</option>
           </select>
         </Row>
+      </Section>
 
+      <Section title="Linhas e ícones">
         <Row label="Espaçamento entre linhas (px)">
           <input
             type="range"
@@ -629,7 +651,7 @@ export default function InfoUtilitiesBlockEditor({
             max={18}
             step={1}
             value={st.rowGapPx ?? 12}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, rowGapPx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ rowGapPx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.rowGapPx ?? 12}px</span>
         </Row>
@@ -641,7 +663,7 @@ export default function InfoUtilitiesBlockEditor({
             max={20}
             step={1}
             value={st.rowPaddingPx ?? 8}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, rowPaddingPx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ rowPaddingPx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.rowPaddingPx ?? 8}px</span>
         </Row>
@@ -653,7 +675,7 @@ export default function InfoUtilitiesBlockEditor({
             max={4}
             step={1}
             value={st.rowBorderWidth ?? 0}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, rowBorderWidth: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ rowBorderWidth: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.rowBorderWidth ?? 0}px</span>
         </Row>
@@ -661,7 +683,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Cor da borda das linhas">
           <SwatchRow
             value={st.rowBorderColor ?? '#e5e7eb'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, rowBorderColor: hex })}
+            onChange={(hex) => updateStyle({ rowBorderColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -673,7 +695,7 @@ export default function InfoUtilitiesBlockEditor({
             max={32}
             step={1}
             value={st.rowRadiusPx ?? 10}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, rowRadiusPx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ rowRadiusPx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.rowRadiusPx ?? 10}px</span>
         </Row>
@@ -685,7 +707,7 @@ export default function InfoUtilitiesBlockEditor({
             max={48}
             step={1}
             value={st.iconSizePx ?? 24}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, iconSizePx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ iconSizePx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.iconSizePx ?? 24}px</span>
         </Row>
@@ -693,7 +715,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Cor do ícone">
           <SwatchRow
             value={st.iconColor ?? '#111827'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, iconColor: hex })}
+            onChange={(hex) => updateStyle({ iconColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -701,7 +723,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Fundo do ícone">
           <SwatchRow
             value={st.iconBgColor ?? 'transparent'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, iconBgColor: hex })}
+            onChange={(hex) => updateStyle({ iconBgColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -713,15 +735,17 @@ export default function InfoUtilitiesBlockEditor({
             max={24}
             step={1}
             value={st.iconRadiusPx ?? 6}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, iconRadiusPx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ iconRadiusPx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.iconRadiusPx ?? 6}px</span>
         </Row>
+      </Section>
 
+      <Section title="Botões (se aplicável)">
         <Row label="Cor do texto do botão">
           <SwatchRow
             value={st.buttonTextColor ?? '#111827'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, buttonTextColor: hex })}
+            onChange={(hex) => updateStyle({ buttonTextColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -729,7 +753,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Fundo do botão">
           <SwatchRow
             value={st.buttonBgColor ?? '#f0f0f0'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, buttonBgColor: hex })}
+            onChange={(hex) => updateStyle({ buttonBgColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -741,7 +765,7 @@ export default function InfoUtilitiesBlockEditor({
             max={6}
             step={1}
             value={st.buttonBorderWidth ?? 0}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, buttonBorderWidth: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ buttonBorderWidth: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.buttonBorderWidth ?? 0}px</span>
         </Row>
@@ -749,7 +773,7 @@ export default function InfoUtilitiesBlockEditor({
         <Row label="Cor da borda do botão">
           <SwatchRow
             value={st.buttonBorderColor ?? '#e5e7eb'}
-            onChange={(hex) => onChangeStyle && onChangeStyle({ ...st, buttonBorderColor: hex })}
+            onChange={(hex) => updateStyle({ buttonBorderColor: hex })}
             onEyedropper={() => {}}
           />
         </Row>
@@ -761,7 +785,7 @@ export default function InfoUtilitiesBlockEditor({
             max={32}
             step={1}
             value={st.buttonRadiusPx ?? 10}
-            onChange={(e) => onChangeStyle && onChangeStyle({ ...st, buttonRadiusPx: Number(e.target.value) })}
+            onChange={(e) => updateStyle({ buttonRadiusPx: Number(e.target.value) })}
           />
           <span style={rightNum}>{st.buttonRadiusPx ?? 10}px</span>
         </Row>

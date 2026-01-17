@@ -25,13 +25,13 @@ export type InfoItem = {
   imageAlt?: string
   embedHtml?: string
 
-  // NEW: ícone custom por item
   iconMode?: 'default' | 'image'
   iconImageSrc?: string
 }
 
 export type InfoUtilitiesSettings = {
   heading?: string
+  layout?: 'grid' | 'list'
   items?: InfoItem[]
 }
 
@@ -70,7 +70,6 @@ export type InfoUtilitiesStyle = {
   rowBorderColor?: string
   rowRadiusPx?: number
 
-  // (no teu código usas isto mas não estava no type; mantenho por compat)
   rowBgColor?: string
 
   buttonBgColor?: string
@@ -107,7 +106,6 @@ export default function InfoUtilitiesBlock({
   settings: InfoUtilitiesSettings
   style?: InfoUtilitiesStyle
 }) {
-  // (não estás a usar o theme aqui, mas mantive o import como estava)
   useTheme()
 
   const s = settings || {}
@@ -122,27 +120,23 @@ export default function InfoUtilitiesBlock({
 
   const wrapStyle: React.CSSProperties = {
     marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
-
     backgroundColor: hasBg || hasShadow ? effectiveBg : 'transparent',
-
     borderRadius:
       hasBg || hasShadow || hasBorder
         ? (container.radius != null ? `${container.radius}px` : undefined)
         : undefined,
-
     padding:
       hasBg || hasShadow || hasBorder
         ? (container.padding != null ? `${container.padding}px` : '16px')
         : '0px',
-
     boxShadow: hasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
-
     borderStyle: hasBorder ? 'solid' : undefined,
     borderWidth: hasBorder ? `${container.borderWidth}px` : undefined,
     borderColor: hasBorder ? (container.borderColor ?? undefined) : undefined,
   }
 
   const heading = s.heading ?? 'Utilidades'
+  const layout = s.layout ?? 'grid'
   const items = s.items || []
 
   if (items.length === 0) return null
@@ -287,7 +281,7 @@ export default function InfoUtilitiesBlock({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gridTemplateColumns: layout === 'list' ? '1fr' : 'repeat(auto-fit, minmax(160px, 1fr))',
             gap: st.rowGapPx ?? 12,
           }}
         >

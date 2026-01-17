@@ -12,6 +12,7 @@ import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayI
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
 import ProfileBlock from '@/components/blocks/ProfileBlock'
+import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 
 type Card = {
   id: string
@@ -275,38 +276,38 @@ export default function CardPreview({
                   />
                 ) : null
 
-                return (
-                  <div
-                    key={block.id}
-                    style={wrapStyle}
-                    onPointerDownCapture={(e) => {
-                      if (shouldIgnoreBlockSelect(e)) return
-                      onSelectBlock?.(block)
-                    }}
-                  >
-                    {Highlight}
+    return (
+      <div
+        key={block.id}
+        style={wrapStyle}
+        onPointerDownCapture={(e) => {
+          if (shouldIgnoreBlockSelect(e)) return
+          onSelectBlock?.(block)
+        }}
+      >
+        {Highlight}
 
-                    {block.type === 'contact' ? (
-                      <ContactBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'social' ? (
-                      <SocialBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'services' ? (
-                      <ServicesBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'lead_form' ? (
-                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-                    ) : block.type === 'business_hours' ? (
-                      <BusinessHoursBlock settings={block.settings} style={block.style} />
-                    ) : block.type === 'profile' ? (
-                      <ProfileBlock
-  settings={block.settings}
-  headerSettings={headerBlock?.settings}
-/>
-                    ) : block.type === 'gallery' ? (
-                      <GalleryBlock settings={block.settings} style={block.style} />
-                    ) : null}
-                  </div>
-                )
-              })}
+        {block.type === 'contact' ? (
+          <ContactBlock settings={block.settings} style={block.style} />
+        ) : block.type === 'social' ? (
+          <SocialBlock settings={block.settings} style={block.style} />
+        ) : block.type === 'services' ? (
+          <ServicesBlock settings={block.settings} style={block.style} />
+        ) : block.type === 'lead_form' ? (
+          <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+        ) : block.type === 'business_hours' ? (
+          <BusinessHoursBlock settings={block.settings} style={block.style} />
+        ) : block.type === 'profile' ? (
+          <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
+        ) : block.type === 'gallery' ? (
+          <GalleryBlock settings={block.settings} style={block.style} />
+        ) : block.type === 'info_utilities' ? (  // <== adiciona este
+          <InfoUtilitiesBlock settings={block.settings} style={block.style} />
+        ) : null}
+      </div>
+    )
+  })}
+
           </div>
         </div>
       </main>
