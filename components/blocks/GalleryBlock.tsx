@@ -28,12 +28,13 @@ type GallerySettings = {
 }
 
 type GalleryStyle = {
-  headingAlign?: 'left' | 'center' | 'right'
-  headingFontSize?: number
+  // título (igual ao SocialBlock)
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
   headingBold?: boolean
+  headingAlign?: 'left' | 'center' | 'right'
+  headingFontSize?: number
 
   container?: {
     bgColor?: string
@@ -75,6 +76,7 @@ export default function GalleryBlock({ settings, style }: Props) {
   const st = style || {}
 
   const containerStyle = containerStyleFromJson(st.container)
+
   const gapPx = s.layout?.gapPx ?? 12
   const containerMode = s.layout?.containerMode ?? 'full'
 
@@ -113,7 +115,6 @@ export default function GalleryBlock({ settings, style }: Props) {
   const viewportStyle: React.CSSProperties = {
     ...containerStyle,
     overflow: 'hidden',
-
     padding: containerMode === 'full' ? 0 : containerStyle.padding,
     borderRadius: containerMode === 'full' ? 0 : containerStyle.borderRadius,
     boxShadow: containerMode === 'full' ? 'none' : containerStyle.boxShadow,
@@ -124,6 +125,7 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   return (
     <section>
+      {/* TÍTULO — igual ao SocialBlock */}
       {isNonEmpty(s.heading) && (
         <div
           style={{
@@ -140,6 +142,7 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       )}
 
+      {/* CARROSSEL */}
       <div style={viewportStyle} ref={emblaRef}>
         <div
           style={{
@@ -195,6 +198,7 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       </div>
 
+      {/* LIGHTBOX */}
       {lightboxIndex !== null && (
         <Lightbox
           items={visibleItems}
@@ -222,14 +226,10 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
   const prev = () => onNavigate((currentIndex - 1 + items.length) % items.length)
   const next = () => onNavigate((currentIndex + 1) % items.length)
 
-  // Zoom simples: click alterna entre 1x e 2x
   const [zoom, setZoom] = useState<1 | 2>(1)
 
-  useEffect(() => {
-    setZoom(1)
-  }, [currentIndex])
+  useEffect(() => setZoom(1), [currentIndex])
 
-  // teclas (ESC/Setas)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -241,7 +241,6 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex])
 
-  // swipe no lightbox
   const startXRef = useRef<number | null>(null)
 
   return (
@@ -298,7 +297,7 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           />
         </div>
 
-        {isNonEmpty(item.caption) && (
+        {item.caption && (
           <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>
             {item.caption}
           </div>

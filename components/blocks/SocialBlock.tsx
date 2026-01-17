@@ -134,11 +134,7 @@ function coerceItems(input: any): Partial<Record<SocialChannel, SocialItem>> {
   if (Array.isArray(input)) {
     const out: Partial<Record<SocialChannel, SocialItem>> = {}
     for (const it of input) {
-      const ch: SocialChannel | null =
-        (it?.id as SocialChannel) ||
-        inferChannelFromUrl(it?.url) ||
-        null
-
+      const ch: SocialChannel | null = (it?.id as SocialChannel) || inferChannelFromUrl(it?.url) || null
       if (!ch) continue
       out[ch] = {
         enabled: it?.enabled ?? true,
@@ -244,7 +240,8 @@ export default function SocialBlock({ settings, style }: Props) {
   const wrapStyle: React.CSSProperties = {
     marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
     backgroundColor: hasBg || hasShadow ? effectiveBg : 'transparent',
-    borderRadius: hasBg || hasShadow || hasBorder ? (container.radius != null ? `${container.radius}px` : undefined) : undefined,
+    borderRadius:
+      hasBg || hasShadow || hasBorder ? (container.radius != null ? `${container.radius}px` : undefined) : undefined,
     padding: hasBg || hasShadow || hasBorder ? (container.padding != null ? `${container.padding}px` : '16px') : '0px',
     boxShadow: hasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: hasBorder ? 'solid' : undefined,
