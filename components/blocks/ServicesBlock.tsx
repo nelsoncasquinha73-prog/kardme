@@ -156,7 +156,8 @@ export default function ServicesBlock({
   const buttonBorderColor = st.buttonBorderColor ?? 'transparent'
   const buttonRadius = st.buttonRadiusPx ?? 8
 
-  const imageAspectRatio = st.imageAspectRatio ?? 1.5
+  const imageAspectRatio = clamp(clampNum(st.imageAspectRatio, 1.5), 0.5, 3)
+
 
   if (items.length === 0) return null
 
@@ -473,6 +474,7 @@ function ServiceCard({
             position: 'relative',
             width: '100%',
             paddingTop: `\${100 / imageAspectRatio}%`,
+            minHeight: 160,
             overflow: 'hidden',
             borderTopLeftRadius: cardRadius,
             borderTopRightRadius: cardRadius,
