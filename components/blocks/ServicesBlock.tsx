@@ -79,6 +79,10 @@ export type ServicesStyle = {
   imageRadiusPx?: number
   imageAspectRatio?: number
 
+  // ✅ NOVO: foco/enquadramento da imagem (percentagens)
+  imagePosX?: number // 0..100 (50 = centro)
+  imagePosY?: number // 0..100 (50 = centro)
+
   // carrossel
   carouselCardWidthPx?: number // 260–360
   carouselGapPx?: number
@@ -89,13 +93,7 @@ export type ServicesStyle = {
   carouselArrowsIconColor?: string
 }
 
-export default function ServicesBlock({
-  settings,
-  style,
-}: {
-  settings: ServicesSettings
-  style?: ServicesStyle
-}) {
+export default function ServicesBlock({ settings, style }: { settings: ServicesSettings; style?: ServicesStyle }) {
   const s = settings || {}
   const st = style || {}
 
@@ -114,15 +112,11 @@ export default function ServicesBlock({
     backgroundColor: containerHasBg || containerHasShadow ? containerEffectiveBg : 'transparent',
     borderRadius:
       containerHasBg || containerHasShadow || containerHasBorder
-        ? container.radius != null
-          ? `${container.radius}px`
-          : undefined
+        ? (container.radius != null ? `${container.radius}px` : undefined)
         : undefined,
     padding:
       containerHasBg || containerHasShadow || containerHasBorder
-        ? container.padding != null
-          ? `${container.padding}px`
-          : '16px'
+        ? (container.padding != null ? `${container.padding}px` : '16px')
         : '0px',
     boxShadow: containerHasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: containerHasBorder ? 'solid' : undefined,
@@ -155,6 +149,11 @@ export default function ServicesBlock({
   const imageRadius = st.imageRadiusPx ?? 8
   const imageAspectRatio = st.imageAspectRatio ?? 1.5
 
+  // ✅ default centro
+  const imagePosX = clampNum(st.imagePosX, 50)
+  const imagePosY = clampNum(st.imagePosY, 50)
+  const objectPosition = `${clamp(imagePosX, 0, 100)}% ${clamp(imagePosY, 0, 100)}%`
+
   if (items.length === 0) return null
 
   // título igual ao SocialBlock
@@ -169,9 +168,8 @@ export default function ServicesBlock({
   const showArrows = s.carousel?.showArrows === true // default OFF
   const arrowsDesktopOnly = s.carousel?.arrowsDesktopOnly !== false // default ON
 
-  // IMPORTANT: clamp correto (tens um bug no clamp no teu ficheiro)
-  const cardWidthPx = clampNum(st.carouselCardWidthPx ?? 320, 260, 360)
-  const slideGapPx = st.carouselGapPx ?? colGap
+  const cardWidthPx = clamp(clampNum(st.carouselCardWidthPx, 320), 260, 360)
+  const carouselGapPx = st.carouselGapPx ?? colGap
   const sidePaddingPx = st.carouselSidePaddingPx ?? 8
 
   const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
@@ -261,43 +259,45 @@ export default function ServicesBlock({
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {/* container (SEM gap; gap fica por slide p/ ser homogéneo) */}
+            {/* container */}
             <div
               style={{
                 display: 'flex',
-                touchAction: 'pan-y',
-                marginLeft: -(slideGapPx + sidePaddingPx),
+                gap: carouselGapPx,
+                paddingLeft: sidePaddingPx,
+                paddingRight: sidePaddingPx,
                 paddingBottom: 2,
+                touchAction: 'pan-y',
               }}
             >
               {items.map((item) => (
                 <div
                   key={item.id}
                   style={{
-                    flex: `0 0 min(${cardWidthPx}px, 90%)`,
-                    paddingLeft: slideGapPx,
+                    flex: '0 0 auto',
+                    width: cardWidthPx,
+                    maxWidth: '90%',
                   }}
                 >
-                  <div style={{ paddingLeft: sidePaddingPx, paddingRight: sidePaddingPx }}>
-                    <ServiceCard
-                      item={item}
-                      st={st}
-                      cardRadius={cardRadius}
-                      cardBorderWidth={cardBorderWidth}
-                      cardBorderColor={cardBorderColor}
-                      cardShadow={cardShadow}
-                      cardHasBg={cardHasBg}
-                      cardBg={cardBg}
-                      buttonBg={buttonBg}
-                      buttonText={buttonText}
-                      buttonBorderWidth={buttonBorderWidth}
-                      buttonBorderColor={buttonBorderColor}
-                      buttonRadius={buttonRadius}
-                      imageRadius={imageRadius}
-                      imageAspectRatio={imageAspectRatio}
-                      onOpenModal={() => setModalOpen(item.id)}
-                    />
-                  </div>
+                  <ServiceCard
+                    item={item}
+                    st={st}
+                    cardRadius={cardRadius}
+                    cardBorderWidth={cardBorderWidth}
+                    cardBorderColor={cardBorderColor}
+                    cardShadow={cardShadow}
+                    cardHasBg={cardHasBg}
+                    cardBg={cardBg}
+                    buttonBg={buttonBg}
+                    buttonText={buttonText}
+                    buttonBorderWidth={buttonBorderWidth}
+                    buttonBorderColor={buttonBorderColor}
+                    buttonRadius={buttonRadius}
+                    imageRadius={imageRadius}
+                    imageAspectRatio={imageAspectRatio}
+                    objectPosition={objectPosition}
+                    onOpenModal={() => setModalOpen(item.id)}
+                  />
                 </div>
               ))}
             </div>
@@ -378,6 +378,7 @@ export default function ServicesBlock({
               buttonRadius={buttonRadius}
               imageRadius={imageRadius}
               imageAspectRatio={imageAspectRatio}
+              objectPosition={objectPosition}
               onOpenModal={() => setModalOpen(item.id)}
             />
           ))}
@@ -405,6 +406,7 @@ function ServiceCard({
   buttonRadius,
   imageRadius,
   imageAspectRatio,
+  objectPosition,
   onOpenModal,
 }: {
   item: ServiceItem
@@ -422,6 +424,7 @@ function ServiceCard({
   buttonRadius: number
   imageRadius: number
   imageAspectRatio: number
+  objectPosition: string
   onOpenModal: () => void
 }) {
   const textColor = st?.textColor ?? '#111827'
@@ -445,18 +448,20 @@ function ServiceCard({
             width: '100%',
             paddingTop: `${100 / imageAspectRatio}%`,
             overflow: 'hidden',
+            borderTopLeftRadius: cardRadius,
+            borderTopRightRadius: cardRadius,
           }}
         >
           <Image
-  src={item.imageSrc}
-  alt={item.imageAlt ?? item.title}
-  fill
-  style={{
-    objectFit: 'cover',
-    objectPosition: 'center center',
-    borderRadius: `${imageRadius}px`,
-  }}
-/>
+            src={item.imageSrc}
+            alt={item.imageAlt ?? item.title}
+            fill
+            style={{
+              objectFit: 'cover',
+              objectPosition, // ✅ AQUI
+              borderRadius: `${imageRadius}px`,
+            }}
+          />
         </div>
       )}
 
@@ -588,10 +593,13 @@ function Modal({ onClose, item, style }: { onClose: () => void; item: ServiceIte
   )
 }
 
-function clampNum(v: any, min: number, max: number) {
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function clampNum(v: any, fallback: number) {
   const n = Number(v)
-  const safe = Number.isFinite(n) ? n : min
-  return Math.max(min, Math.min(max, safe))
+  return Number.isFinite(n) ? n : fallback
 }
 
 function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSSProperties {
