@@ -443,25 +443,25 @@ function ServiceCard({
     >
       {item.imageSrc && (
         <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            paddingTop: `${100 / imageAspectRatio}%`,
-            overflow: 'hidden',
-            // ✅ o clip tem de estar no wrapper (não na imagem)
-            borderTopLeftRadius: cardRadius,
-            borderTopRightRadius: cardRadius,
-          }}
-        >
-          <Image
-            src={item.imageSrc}
-            alt={item.imageAlt ?? item.title}
-            fill
-            style={{
-              objectFit: 'cover',
-              objectPosition, // ✅ default centro e depois ajustável
-            }}
-          />
+  style={{
+    position: 'relative',
+    width: '100%',
+    paddingTop: `${100 / imageAspectRatio}%`,
+    overflow: 'hidden',
+    borderTopLeftRadius: cardRadius,
+    borderTopRightRadius: cardRadius,
+  }}
+>
+  <Image
+    src={item.imageSrc}
+    alt={item.imageAlt ?? item.title}
+    fill
+    style={{
+      objectFit: 'cover',
+      objectPosition: 'center center',
+    }}
+  />
+
           {/* (se quiseres manter arredondamento diferente nas imagens) */}
           {imageRadius !== undefined ? null : null}
         </div>
