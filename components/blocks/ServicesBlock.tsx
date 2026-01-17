@@ -447,7 +447,16 @@ function ServiceCard({
             overflow: 'hidden',
           }}
         >
-          <Image src={item.imageSrc} alt={item.imageAlt ?? item.title} fill style={{ objectFit: 'cover', borderRadius: `${imageRadius}px` }} />
+          <Image
+  src={item.imageSrc}
+  alt={item.imageAlt ?? item.title}
+  fill
+  style={{
+    objectFit: 'cover',
+    objectPosition: 'center center',
+    borderRadius: `${imageRadius}px`,
+  }}
+/>
         </div>
       )}
 
