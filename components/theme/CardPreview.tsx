@@ -11,6 +11,7 @@ import SocialBlock from '@/components/blocks/SocialBlock'
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
+import ProfileBlock from '@/components/blocks/ProfileBlock'
 
 type Card = {
   id: string
@@ -63,12 +64,6 @@ function shouldIgnoreBlockSelect(e: React.MouseEvent | React.PointerEvent) {
   if (t.closest('svg')) return true
 
   return false
-}
-
-function mapAlignToJustify(align?: 'left' | 'center' | 'right') {
-  if (align === 'left') return 'flex-start'
-  if (align === 'right') return 'flex-end'
-  return 'center'
 }
 
 function mapHeadingAlignToItems(align?: 'left' | 'center' | 'right') {
@@ -268,14 +263,6 @@ export default function CardPreview({
                   ...blockOuterSpacingFromJson(block.style),
                 }
 
-                const commonWrapProps = {
-                  style: wrapStyle,
-                  onPointerDownCapture: (e: React.PointerEvent) => {
-                    if (shouldIgnoreBlockSelect(e)) return
-                    onSelectBlock?.(block)
-                  },
-                }
-
                 const Highlight = selected ? (
                   <div
                     style={{
@@ -289,23 +276,34 @@ export default function CardPreview({
                 ) : null
 
                 return (
-                  <div key={block.id} {...commonWrapProps}>
+                  <div
+                    key={block.id}
+                    style={wrapStyle}
+                    onPointerDownCapture={(e) => {
+                      if (shouldIgnoreBlockSelect(e)) return
+                      onSelectBlock?.(block)
+                    }}
+                  >
                     {Highlight}
 
                     {block.type === 'contact' ? (
-  <ContactBlock settings={block.settings} style={block.style} />
-) : block.type === 'social' ? (
-  <SocialBlock settings={block.settings} style={block.style} />
-) : block.type === 'services' ? (
-  <ServicesBlock settings={block.settings} style={block.style} />
-) : block.type === 'lead_form' ? (
-  <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-) : block.type === 'business_hours' ? (
-  <BusinessHoursBlock settings={block.settings} style={block.style} />
-) : block.type === 'gallery' ? (
-  <GalleryBlock settings={block.settings} style={block.style} />
-) : null}
-
+                      <ContactBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'social' ? (
+                      <SocialBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'services' ? (
+                      <ServicesBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'lead_form' ? (
+                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                    ) : block.type === 'business_hours' ? (
+                      <BusinessHoursBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'profile' ? (
+                      <ProfileBlock
+  settings={block.settings}
+  headerSettings={headerBlock?.settings}
+/>
+                    ) : block.type === 'gallery' ? (
+                      <GalleryBlock settings={block.settings} style={block.style} />
+                    ) : null}
                   </div>
                 )
               })}
