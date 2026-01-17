@@ -1,4 +1,3 @@
-// components/blocks/ServicesBlock.tsx
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -116,23 +115,23 @@ export default function ServicesBlock({
     containerHasShadow && !containerHasBg ? 'rgba(255,255,255,0.92)' : containerBg
 
   const wrapStyle: React.CSSProperties = {
-    marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
+    marginTop: st.offsetY ? `\${st.offsetY}px` : undefined,
     backgroundColor: containerHasBg || containerHasShadow ? containerEffectiveBg : 'transparent',
     borderRadius:
       containerHasBg || containerHasShadow || containerHasBorder
         ? container.radius != null
-          ? `${container.radius}px`
+          ? `\${container.radius}px`
           : undefined
         : undefined,
     padding:
       containerHasBg || containerHasShadow || containerHasBorder
         ? container.padding != null
-          ? `${container.padding}px`
+          ? `\${container.padding}px`
           : '16px'
         : '0px',
     boxShadow: containerHasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: containerHasBorder ? 'solid' : undefined,
-    borderWidth: containerHasBorder ? `${container.borderWidth}px` : undefined,
+    borderWidth: containerHasBorder ? `\${container.borderWidth}px` : undefined,
     borderColor: containerHasBorder ? container.borderColor ?? undefined : undefined,
   }
 
@@ -168,7 +167,8 @@ export default function ServicesBlock({
   // ✅ foco imagem — default centro (50/50)
   const focusX = clampNum(st.imageFocusX, 50)
   const focusY = clampNum(st.imageFocusY, 50)
-  const objectPosition = `${clamp(focusX, 0, 100)}% ${clamp(focusY, 0, 100)}%`
+  const objectPosition = `\${clamp(focusX, 0, 100)}% \${clamp(focusY, 0, 100)}%`
+  console.log('ServiceCard objectPosition:', objectPosition)
 
   // ===== Carrossel (Embla) =====
   const autoplayEnabled = s.carousel?.autoplay !== false
@@ -180,7 +180,13 @@ export default function ServicesBlock({
 
   const cardWidthPx = clamp(clampNum(st.carouselCardWidthPx, 320), 240, 520)
   const carouselGapPx = clamp(clampNum(st.carouselGapPx, colGap), 0, 64)
-  const sidePaddingPx = clamp(clampNum(st.carouselSidePaddingPx, 12), 0, 64)
+
+  // Ajuste do side padding para centrar o card
+  const sidePaddingPx = clamp(
+    clampNum(st.carouselSidePaddingPx, Math.max(12, Math.round((360 - cardWidthPx) / 2))),
+    0,
+    80
+  )
 
   const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
   const dotsActiveColor = st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'
@@ -197,9 +203,9 @@ export default function ServicesBlock({
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: layout === 'carousel' && items.length > 1,
-      align: 'start',
+      align: 'center', // alterado para centrar
       dragFree: false,
-      containScroll: 'trimSnaps',
+      containScroll: 'keepSnaps', // alterado para keepSnaps
     },
     plugins
   )
@@ -283,7 +289,7 @@ export default function ServicesBlock({
                     flex: '0 0 auto',
                     paddingLeft: carouselGapPx,
                     width: cardWidthPx,
-                    maxWidth: '92%',
+                    // maxWidth removido para largura consistente
                   }}
                 >
                   <ServiceCard
@@ -350,7 +356,7 @@ export default function ServicesBlock({
                     key={i}
                     type="button"
                     onClick={() => goTo(i)}
-                    aria-label={`Ir para o item ${i + 1}`}
+                    aria-label={`Ir para o item \${i + 1}`}
                     style={{
                       width: 8,
                       height: 8,
@@ -374,7 +380,7 @@ export default function ServicesBlock({
             display: 'grid',
             gridTemplateColumns:
               layout === 'list' ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))',
-            gap: `${rowGap}px ${colGap}px`,
+            gap: `\${rowGap}px \${colGap}px`,
           }}
         >
           {items.map((item) => (
@@ -408,7 +414,6 @@ export default function ServicesBlock({
           style={st}
         />
       )}
-
     </section>
   )
 }
@@ -454,7 +459,7 @@ function ServiceCard({
     <div
       style={{
         borderRadius: cardRadius,
-        border: `${cardBorderWidth}px solid ${cardBorderColor}`,
+        border: `\${cardBorderWidth}px solid \${cardBorderColor}`,
         boxShadow: cardShadow ? '0 2px 8px rgba(0,0,0,0.1)' : undefined,
         overflow: 'hidden',
         backgroundColor: cardHasBg ? cardBg : 'transparent',
@@ -463,38 +468,35 @@ function ServiceCard({
       }}
     >
       {item.imageSrc && (
-  <div
-    style={{
-      position: 'relative',
-      width: '100%',
-      paddingTop: `${100 / imageAspectRatio}%`,
-      overflow: 'hidden',
-      borderTopLeftRadius: cardRadius,
-      borderTopRightRadius: cardRadius,
-    }}
-  >
-    <img
-  src={item.imageSrc}
-  alt={item.imageAlt ?? item.title}
-  loading="lazy"
-  draggable={false}
-  style={{
-    position: 'absolute',
-    inset: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    objectPosition, // ✅ usa o foco configurável (default 50/50)
-    display: 'block',
-  }}
-/>
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            paddingTop: `\${100 / imageAspectRatio}%`,
+            overflow: 'hidden',
+            borderTopLeftRadius: cardRadius,
+            borderTopRightRadius: cardRadius,
+          }}
+        >
+          <img
+            src={item.imageSrc}
+            alt={item.imageAlt ?? item.title}
+            loading="lazy"
+            draggable={false}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition,
+              display: 'block',
+            }}
+          />
+        </div>
+      )}
 
-  </div>
-)}
-
-
-
-      <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 170 }}>
         <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>
           {item.title}
         </h3>
@@ -530,7 +532,7 @@ function ServiceCard({
                   backgroundColor: buttonBg,
                   color: buttonText,
                   borderRadius: buttonRadius,
-                  border: `${buttonBorderWidth}px solid ${buttonBorderColor}`,
+                  border: `\${buttonBorderWidth}px solid \${buttonBorderColor}`,
                   textDecoration: 'none',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -540,7 +542,7 @@ function ServiceCard({
               </a>
             ) : item.actionType === 'modal' ? (
               <button
-                onClick={onOpenModal}
+                                onClick={onOpenModal}
                 style={{
                   padding: '8px 16px',
                   backgroundColor: buttonBg,
@@ -679,3 +681,4 @@ function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSS
     lineHeight: 1,
   }
 }
+
