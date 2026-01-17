@@ -1,10 +1,13 @@
+// components/dashboard/block-editors/ServicesBlockEditor.tsx
 'use client'
 
 import React, { useMemo, useRef, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
-import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+import { supabase } from '@/lib/supabaseClient'
+import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
+import { FONT_OPTIONS } from '@/lib/fontes'
+import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 
 export type ServiceItem = {
   id: string
@@ -25,11 +28,24 @@ export type ServiceItem = {
 export type ServicesSettings = {
   heading?: string
   layout?: 'grid' | 'list' | 'carousel'
+  carousel?: {
+    autoplay?: boolean
+    autoplayIntervalMs?: number
+  }
   items?: ServiceItem[]
 }
 
 export type ServicesStyle = {
   offsetY?: number
+
+  // título (igual ao SocialBlock)
+  headingFontFamily?: string
+  headingFontWeight?: number
+  headingColor?: string
+  headingBold?: boolean
+  headingAlign?: 'left' | 'center' | 'right'
+  headingFontSize?: number
+
   container?: {
     bgColor?: string // 'transparent' = OFF
     radius?: number
@@ -38,10 +54,7 @@ export type ServicesStyle = {
     borderWidth?: number
     borderColor?: string
   }
-  headingColor?: string
-  headingFontWeight?: number
-  headingFontSize?: number
-  headingAlign?: 'left' | 'center' | 'right'
+
   textColor?: string
   textFontWeight?: number
   textFontSize?: number
@@ -54,11 +67,13 @@ export type ServicesStyle = {
 
   rowGapPx?: number
   colGapPx?: number
+
   buttonBgColor?: string
   buttonTextColor?: string
   buttonBorderWidth?: number
   buttonBorderColor?: string
   buttonRadiusPx?: number
+
   imageRadiusPx?: number
   imageAspectRatio?: number
 }
@@ -77,11 +92,21 @@ function uid(prefix = 'service') {
 
 const safe = (v: string) => v.replace(/[^a-zA-Z0-9/_\-.]/g, '-')
 
+function clampNum(v: any, fallback: number) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
 function normalizeSettings(input: ServicesSettings): ServicesSettings {
+  const s = input || {}
   return {
-    heading: input.heading ?? 'Serviços e Produtos',
-    layout: input.layout ?? 'grid',
-    items: Array.isArray(input.items) ? input.items : [],
+    heading: s.heading ?? 'Serviços e Produtos',
+    layout: s.layout ?? 'grid',
+    carousel: {
+      autoplay: s.carousel?.autoplay ?? true,
+      autoplayIntervalMs: s.carousel?.autoplayIntervalMs ?? 3500,
+    },
+    items: Array.isArray(s.items) ? s.items : [],
   }
 }
 
@@ -89,6 +114,15 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
   const st = input || {}
   return {
     ...st,
+
+    // título defaults tipo SocialBlock
+    headingFontFamily: st.headingFontFamily ?? '',
+    headingFontWeight: st.headingFontWeight ?? 900,
+    headingColor: st.headingColor ?? '#111827',
+    headingBold: st.headingBold ?? true,
+    headingAlign: st.headingAlign ?? 'left',
+    headingFontSize: st.headingFontSize ?? 13,
+
     container: {
       bgColor: st.container?.bgColor ?? 'transparent',
       radius: st.container?.radius ?? 12,
@@ -97,17 +131,36 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
       borderWidth: st.container?.borderWidth ?? 0,
       borderColor: st.container?.borderColor ?? '#e5e7eb',
     },
+
     cardBgColor: st.cardBgColor ?? '#ffffff',
     cardShadow: st.cardShadow ?? true,
     cardRadiusPx: st.cardRadiusPx ?? 12,
     cardBorderColor: st.cardBorderColor ?? '#e5e7eb',
     cardBorderWidth: st.cardBorderWidth ?? 1,
+
+    rowGapPx: st.rowGapPx ?? 16,
+    colGapPx: st.colGapPx ?? 16,
+
+    buttonBgColor: st.buttonBgColor ?? '#0070f3',
+    buttonTextColor: st.buttonTextColor ?? '#ffffff',
+    buttonBorderWidth: st.buttonBorderWidth ?? 0,
+    buttonBorderColor: st.buttonBorderColor ?? 'transparent',
+    buttonRadiusPx: st.buttonRadiusPx ?? 8,
+
     imageRadiusPx: st.imageRadiusPx ?? 8,
     imageAspectRatio: st.imageAspectRatio ?? 1.5,
   }
 }
 
-export default function ServicesBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
+export default function ServicesBlockEditor({
+  cardId,
+  settings,
+  style,
+  onChangeSettings,
+  onChangeStyle,
+}: Props) {
+  const { openPicker } = useColorPicker()
+
   // 🔒 evita resets enquanto estás a escrever
   const isEditingRef = useRef(false)
   const editEvents = {
@@ -158,9 +211,7 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
     updateSettings({ items: [...items, newItem] })
   }
 
-  const removeItem = (id: string) => {
-    updateSettings({ items: items.filter((i) => i.id !== id) })
-  }
+  const removeItem = (id: string) => updateSettings({ items: items.filter((i) => i.id !== id) })
 
   const updateItem = (id: string, patch: Partial<ServiceItem>) => {
     updateSettings({ items: items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })
@@ -213,6 +264,11 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
     }
   }
 
+  const pick = (apply: (hex: string) => void) =>
+    openPicker({ mode: 'eyedropper', onPick: apply })
+
+  const headingBoldOn = st.headingBold ?? true
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
@@ -229,6 +285,81 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
           />
         </Row>
 
+        <Row label="Alinhamento do título">
+          <select
+            value={st.headingAlign ?? 'left'}
+            onChange={(e) => updateStyle({ headingAlign: e.target.value as any })}
+            style={select}
+            data-no-block-select="1"
+            {...editEvents}
+          >
+            <option value="left">Esquerda</option>
+            <option value="center">Centro</option>
+            <option value="right">Direita</option>
+          </select>
+        </Row>
+
+        <Row label="Cor do título">
+          <SwatchRow
+            value={st.headingColor ?? '#111827'}
+            onChange={(hex) => updateStyle({ headingColor: hex })}
+            onEyedropper={() => pick((hex) => updateStyle({ headingColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Negrito">
+          <Toggle
+            active={headingBoldOn}
+            onClick={() => updateStyle({ headingBold: !headingBoldOn })}
+          />
+        </Row>
+
+        <Row label="Fonte do título">
+          <select
+            value={st.headingFontFamily ?? ''}
+            onChange={(e) => updateStyle({ headingFontFamily: e.target.value || '' })}
+            style={select}
+            data-no-block-select="1"
+            {...editEvents}
+          >
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (
+              <option key={o.label} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+
+        <Row label="Peso do título">
+          <select
+            value={String(st.headingFontWeight ?? 900)}
+            onChange={(e) => updateStyle({ headingFontWeight: clampNum(e.target.value, 900) })}
+            style={select}
+            data-no-block-select="1"
+            {...editEvents}
+          >
+            <option value="400">Normal (400)</option>
+            <option value="600">Semi (600)</option>
+            <option value="700">Bold (700)</option>
+            <option value="800">Extra (800)</option>
+            <option value="900">Black (900)</option>
+          </select>
+        </Row>
+
+        <Row label="Tamanho do título (px)">
+          <input
+            type="number"
+            min={10}
+            max={32}
+            value={st.headingFontSize ?? 13}
+            onChange={(e) => updateStyle({ headingFontSize: Math.max(10, Math.min(32, Number(e.target.value))) })}
+            style={input}
+            data-no-block-select="1"
+            {...editEvents}
+          />
+        </Row>
+
         <Row label="Layout">
           <select
             value={s.layout ?? 'grid'}
@@ -239,8 +370,42 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
           >
             <option value="grid">Grelha</option>
             <option value="list">Lista</option>
+            <option value="carousel">Carrossel</option>
           </select>
         </Row>
+
+        {s.layout === 'carousel' && (
+          <>
+            <Row label="Autoplay">
+              <Toggle
+                active={s.carousel?.autoplay ?? true}
+                onClick={() =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), autoplay: !(s.carousel?.autoplay ?? true) },
+                  })
+                }
+              />
+            </Row>
+
+            <Row label="Intervalo autoplay (ms)">
+              <input
+                type="number"
+                min={800}
+                max={20000}
+                step={100}
+                value={s.carousel?.autoplayIntervalMs ?? 3500}
+                onChange={(e) =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), autoplayIntervalMs: Number(e.target.value) },
+                  })
+                }
+                style={input}
+                data-no-block-select="1"
+                {...editEvents}
+              />
+            </Row>
+          </>
+        )}
 
         <Row label="Adicionar item">
           <button
@@ -282,7 +447,14 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
-                style={{ cursor: 'pointer', color: '#e53e3e', border: 'none', background: 'none', fontWeight: 'bold', fontSize: 16 }}
+                style={{
+                  cursor: 'pointer',
+                  color: '#e53e3e',
+                  border: 'none',
+                  background: 'none',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                }}
                 title="Remover item"
                 data-no-block-select="1"
               >
@@ -371,13 +543,7 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
               </button>
 
               {item.imageSrc && (
-                <Image
-                  src={item.imageSrc}
-                  alt={item.imageAlt ?? ''}
-                  width={120}
-                  height={80}
-                  style={{ borderRadius: 8 }}
-                />
+                <Image src={item.imageSrc} alt={item.imageAlt ?? ''} width={120} height={80} style={{ borderRadius: 8 }} />
               )}
             </label>
 
@@ -456,7 +622,10 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
                     value={item.features?.join('\n') ?? ''}
                     onChange={(e) =>
                       updateItem(item.id, {
-                        features: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean),
+                        features: e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean),
                       })
                     }
                     style={{ ...input, height: 80, resize: 'vertical' }}
@@ -488,7 +657,7 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
             <SwatchRow
               value={st.container?.bgColor ?? '#ffffff'}
               onChange={(hex) => updateStyle({ container: { ...(st.container ?? {}), bgColor: hex } })}
-              onEyedropper={() => {}}
+              onEyedropper={() => pick((hex) => updateStyle({ container: { ...(st.container ?? {}), bgColor: hex } }))}
             />
           </Row>
         )}
@@ -541,7 +710,9 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
             <SwatchRow
               value={st.container?.borderColor ?? '#e5e7eb'}
               onChange={(hex) => updateStyle({ container: { ...(st.container ?? {}), borderColor: hex } })}
-              onEyedropper={() => {}}
+              onEyedropper={() =>
+                pick((hex) => updateStyle({ container: { ...(st.container ?? {}), borderColor: hex } }))
+              }
             />
           </Row>
         )}
@@ -559,7 +730,11 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
 
         {(st.cardBgColor ?? 'transparent') !== 'transparent' && (
           <Row label="Cor do fundo dos cartões">
-            <SwatchRow value={st.cardBgColor ?? '#ffffff'} onChange={(hex) => updateStyle({ cardBgColor: hex })} onEyedropper={() => {}} />
+            <SwatchRow
+              value={st.cardBgColor ?? '#ffffff'}
+              onChange={(hex) => updateStyle({ cardBgColor: hex })}
+              onEyedropper={() => pick((hex) => updateStyle({ cardBgColor: hex }))}
+            />
           </Row>
         )}
 
@@ -568,21 +743,46 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
         </Row>
 
         <Row label="Raio dos cartões (px)">
-          <input type="range" min={0} max={32} step={1} value={st.cardRadiusPx ?? 12} onChange={(e) => updateStyle({ cardRadiusPx: Number(e.target.value) })} />
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={st.cardRadiusPx ?? 12}
+            onChange={(e) => updateStyle({ cardRadiusPx: Number(e.target.value) })}
+          />
           <span style={rightNum}>{st.cardRadiusPx ?? 12}px</span>
         </Row>
 
         <Row label="Cor da borda dos cartões">
-          <SwatchRow value={st.cardBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ cardBorderColor: hex })} onEyedropper={() => {}} />
+          <SwatchRow
+            value={st.cardBorderColor ?? '#e5e7eb'}
+            onChange={(hex) => updateStyle({ cardBorderColor: hex })}
+            onEyedropper={() => pick((hex) => updateStyle({ cardBorderColor: hex }))}
+          />
         </Row>
 
         <Row label="Largura da borda dos cartões (px)">
-          <input type="range" min={0} max={4} step={1} value={st.cardBorderWidth ?? 1} onChange={(e) => updateStyle({ cardBorderWidth: Number(e.target.value) })} />
+          <input
+            type="range"
+            min={0}
+            max={4}
+            step={1}
+            value={st.cardBorderWidth ?? 1}
+            onChange={(e) => updateStyle({ cardBorderWidth: Number(e.target.value) })}
+          />
           <span style={rightNum}>{st.cardBorderWidth ?? 1}px</span>
         </Row>
 
         <Row label="Raio das imagens (px)">
-          <input type="range" min={0} max={32} step={1} value={st.imageRadiusPx ?? 8} onChange={(e) => updateStyle({ imageRadiusPx: Number(e.target.value) })} />
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={st.imageRadiusPx ?? 8}
+            onChange={(e) => updateStyle({ imageRadiusPx: Number(e.target.value) })}
+          />
           <span style={rightNum}>{st.imageRadiusPx ?? 8}px</span>
         </Row>
 
