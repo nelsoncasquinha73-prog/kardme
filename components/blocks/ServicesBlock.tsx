@@ -89,7 +89,13 @@ export type ServicesStyle = {
   carouselArrowsIconColor?: string
 }
 
-export default function ServicesBlock({ settings, style }: { settings: ServicesSettings; style?: ServicesStyle }) {
+export default function ServicesBlock({
+  settings,
+  style,
+}: {
+  settings: ServicesSettings
+  style?: ServicesStyle
+}) {
   const s = settings || {}
   const st = style || {}
 
@@ -108,11 +114,15 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
     backgroundColor: containerHasBg || containerHasShadow ? containerEffectiveBg : 'transparent',
     borderRadius:
       containerHasBg || containerHasShadow || containerHasBorder
-        ? (container.radius != null ? `${container.radius}px` : undefined)
+        ? container.radius != null
+          ? `${container.radius}px`
+          : undefined
         : undefined,
     padding:
       containerHasBg || containerHasShadow || containerHasBorder
-        ? (container.padding != null ? `${container.padding}px` : '16px')
+        ? container.padding != null
+          ? `${container.padding}px`
+          : '16px'
         : '0px',
     boxShadow: containerHasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: containerHasBorder ? 'solid' : undefined,
@@ -156,12 +166,13 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const autoplayIntervalMs = s.carousel?.autoplayIntervalMs ?? 3500
 
   const showDots = s.carousel?.showDots !== false // default ON
-  const showArrows = s.carousel?.showArrows === true // default OFF (para não poluir)
+  const showArrows = s.carousel?.showArrows === true // default OFF
   const arrowsDesktopOnly = s.carousel?.arrowsDesktopOnly !== false // default ON
 
-  const cardWidthPx = clamp(st.carouselCardWidthPx ?? 300, 260, 360)
-  const carouselGapPx = st.carouselGapPx ?? colGap
-  const sidePaddingPx = st.carouselSidePaddingPx ?? 12
+  // IMPORTANT: clamp correto (tens um bug no clamp no teu ficheiro)
+  const cardWidthPx = clampNum(st.carouselCardWidthPx ?? 320, 260, 360)
+  const slideGapPx = st.carouselGapPx ?? colGap
+  const sidePaddingPx = st.carouselSidePaddingPx ?? 8
 
   const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
   const dotsActiveColor = st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'
@@ -250,44 +261,43 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {/* container */}
+            {/* container (SEM gap; gap fica por slide p/ ser homogéneo) */}
             <div
               style={{
                 display: 'flex',
-                gap: carouselGapPx,
-                paddingLeft: sidePaddingPx,
-                paddingRight: sidePaddingPx,
-                paddingBottom: 2,
                 touchAction: 'pan-y',
+                marginLeft: -(slideGapPx + sidePaddingPx),
+                paddingBottom: 2,
               }}
             >
               {items.map((item) => (
                 <div
                   key={item.id}
                   style={{
-                    flex: '0 0 auto',
-                    width: cardWidthPx,
-                    maxWidth: '90%',
+                    flex: `0 0 min(${cardWidthPx}px, 90%)`,
+                    paddingLeft: slideGapPx,
                   }}
                 >
-                  <ServiceCard
-                    item={item}
-                    st={st}
-                    cardRadius={cardRadius}
-                    cardBorderWidth={cardBorderWidth}
-                    cardBorderColor={cardBorderColor}
-                    cardShadow={cardShadow}
-                    cardHasBg={cardHasBg}
-                    cardBg={cardBg}
-                    buttonBg={buttonBg}
-                    buttonText={buttonText}
-                    buttonBorderWidth={buttonBorderWidth}
-                    buttonBorderColor={buttonBorderColor}
-                    buttonRadius={buttonRadius}
-                    imageRadius={imageRadius}
-                    imageAspectRatio={imageAspectRatio}
-                    onOpenModal={() => setModalOpen(item.id)}
-                  />
+                  <div style={{ paddingLeft: sidePaddingPx, paddingRight: sidePaddingPx }}>
+                    <ServiceCard
+                      item={item}
+                      st={st}
+                      cardRadius={cardRadius}
+                      cardBorderWidth={cardBorderWidth}
+                      cardBorderColor={cardBorderColor}
+                      cardShadow={cardShadow}
+                      cardHasBg={cardHasBg}
+                      cardBg={cardBg}
+                      buttonBg={buttonBg}
+                      buttonText={buttonText}
+                      buttonBorderWidth={buttonBorderWidth}
+                      buttonBorderColor={buttonBorderColor}
+                      buttonRadius={buttonRadius}
+                      imageRadius={imageRadius}
+                      imageAspectRatio={imageAspectRatio}
+                      onOpenModal={() => setModalOpen(item.id)}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -296,22 +306,10 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
           {/* arrows (opcionais / desktop) */}
           {showArrowsNow && (
             <>
-              <button
-                type="button"
-                onClick={prev}
-                aria-label="Anterior"
-                style={arrowStyle('left', arrowsBg, arrowsIcon)}
-                data-no-block-select="1"
-              >
+              <button type="button" onClick={prev} aria-label="Anterior" style={arrowStyle('left', arrowsBg, arrowsIcon)} data-no-block-select="1">
                 ‹
               </button>
-              <button
-                type="button"
-                onClick={next}
-                aria-label="Seguinte"
-                style={arrowStyle('right', arrowsBg, arrowsIcon)}
-                data-no-block-select="1"
-              >
+              <button type="button" onClick={next} aria-label="Seguinte" style={arrowStyle('right', arrowsBg, arrowsIcon)} data-no-block-select="1">
                 ›
               </button>
             </>
@@ -386,9 +384,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
         </div>
       )}
 
-      {modalOpen && (
-        <Modal onClose={() => setModalOpen(null)} item={items.find((i) => i.id === modalOpen)!} style={st} />
-      )}
+      {modalOpen && <Modal onClose={() => setModalOpen(null)} item={items.find((i) => i.id === modalOpen)!} style={st} />}
     </section>
   )
 }
@@ -458,15 +454,11 @@ function ServiceCard({
       <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>{item.title}</h3>
 
-        {item.subtitle && (
-          <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>{item.subtitle}</div>
-        )}
+        {item.subtitle && <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>{item.subtitle}</div>}
 
         {item.price && <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16, color: textColor }}>{item.price}</div>}
 
-        {item.description && (
-          <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>{item.description}</p>
-        )}
+        {item.description && <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>{item.description}</p>}
 
         {item.actionType !== 'none' && (
           <div style={{ marginTop: 12 }}>
@@ -587,8 +579,10 @@ function Modal({ onClose, item, style }: { onClose: () => void; item: ServiceIte
   )
 }
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
+function clampNum(v: any, min: number, max: number) {
+  const n = Number(v)
+  const safe = Number.isFinite(n) ? n : min
+  return Math.max(min, Math.min(max, safe))
 }
 
 function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSSProperties {

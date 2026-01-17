@@ -81,7 +81,7 @@ export type ServicesStyle = {
   imageAspectRatio?: number
 
   // carrossel
-  carouselCardWidthPx?: number
+  carouselCardWidthPx?: number // 260–360
   carouselGapPx?: number
   carouselSidePaddingPx?: number
   carouselDotsColor?: string
@@ -107,6 +107,10 @@ const safe = (v: string) => v.replace(/[^a-zA-Z0-9/_\-.]/g, '-')
 function clampNum(v: any, fallback: number) {
   const n = Number(v)
   return Number.isFinite(n) ? n : fallback
+}
+
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v))
 }
 
 function normalizeSettings(input: ServicesSettings): ServicesSettings {
@@ -166,9 +170,9 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
     imageAspectRatio: st.imageAspectRatio ?? 1.5,
 
     // carrossel
-    carouselCardWidthPx: st.carouselCardWidthPx ?? 300,
-    carouselGapPx: st.carouselGapPx ?? (st.colGapPx ?? 16),
-    carouselSidePaddingPx: st.carouselSidePaddingPx ?? 12,
+    carouselCardWidthPx: clamp(st.carouselCardWidthPx ?? 320, 260, 360),
+    carouselGapPx: clamp(st.carouselGapPx ?? (st.colGapPx ?? 16), 0, 32),
+    carouselSidePaddingPx: clamp(st.carouselSidePaddingPx ?? 12, 0, 32),
     carouselDotsColor: st.carouselDotsColor ?? 'rgba(0,0,0,0.25)',
     carouselDotsActiveColor: st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)',
     carouselArrowsBg: st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)',
@@ -176,7 +180,13 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
   }
 }
 
-export default function ServicesBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
+export default function ServicesBlockEditor({
+  cardId,
+  settings,
+  style,
+  onChangeSettings,
+  onChangeStyle,
+}: Props) {
   const { openPicker } = useColorPicker()
 
   // 🔒 evita resets enquanto estás a escrever
@@ -186,8 +196,12 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
     onBlur: () => (isEditingRef.current = false),
   }
 
-  const [localSettings, setLocalSettings] = useState<ServicesSettings>(() => normalizeSettings(settings))
-  const [localStyle, setLocalStyle] = useState<ServicesStyle>(() => normalizeStyle(style))
+  const [localSettings, setLocalSettings] = useState<ServicesSettings>(() =>
+    normalizeSettings(settings)
+  )
+  const [localStyle, setLocalStyle] = useState<ServicesStyle>(() =>
+    normalizeStyle(style)
+  )
 
   React.useEffect(() => {
     if (isEditingRef.current) return
@@ -228,10 +242,13 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
     updateSettings({ items: [...items, newItem] })
   }
 
-  const removeItem = (id: string) => updateSettings({ items: items.filter((i) => i.id !== id) })
+  const removeItem = (id: string) =>
+    updateSettings({ items: items.filter((i) => i.id !== id) })
 
   const updateItem = (id: string, patch: Partial<ServiceItem>) => {
-    updateSettings({ items: items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })
+    updateSettings({
+      items: items.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+    })
   }
 
   // Upload image
@@ -281,13 +298,22 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
     }
   }
 
-  const pick = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
+  const pick = (apply: (hex: string) => void) =>
+    openPicker({ mode: 'eyedropper', onPick: apply })
 
   const headingBoldOn = st.headingBold ?? true
+  const layout = s.layout ?? 'grid'
+  const isCarousel = layout === 'carousel'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={onFileChange}
+        style={{ display: 'none' }}
+      />
 
       <Section title="Conteúdo">
         <Row label="Título">
@@ -324,7 +350,10 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
         </Row>
 
         <Row label="Negrito">
-          <Toggle active={headingBoldOn} onClick={() => updateStyle({ headingBold: !headingBoldOn })} />
+          <Toggle
+            active={headingBoldOn}
+            onClick={() => updateStyle({ headingBold: !headingBoldOn })}
+          />
         </Row>
 
         <Row label="Fonte do título">
@@ -366,7 +395,11 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
             min={10}
             max={32}
             value={st.headingFontSize ?? 13}
-            onChange={(e) => updateStyle({ headingFontSize: Math.max(10, Math.min(32, Number(e.target.value))) })}
+            onChange={(e) =>
+              updateStyle({
+                headingFontSize: clamp(Number(e.target.value), 10, 32),
+              })
+            }
             style={input}
             data-no-block-select="1"
             {...editEvents}
@@ -375,7 +408,7 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
 
         <Row label="Layout">
           <select
-            value={s.layout ?? 'grid'}
+            value={layout}
             onChange={(e) => updateSettings({ layout: e.target.value as any })}
             style={select}
             data-no-block-select="1"
@@ -387,140 +420,159 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
           </select>
         </Row>
 
-        {s.layout === 'carousel' && (
+        {isCarousel && (
           <>
-            <Section title="Carrossel">
-              <Row label="Largura do card (px)">
-                <input
-                  type="range"
-                  min={260}
-                  max={360}
-                  step={1}
-                  value={st.carouselCardWidthPx ?? 300}
-                  onChange={(e) => updateStyle({ carouselCardWidthPx: clampNum(e.target.value, 300) })}
-                  data-no-block-select="1"
-                />
-                <span style={rightNum}>{st.carouselCardWidthPx ?? 300}px</span>
-              </Row>
+            <Row label="Largura do card (px)">
+              <input
+                type="range"
+                min={260}
+                max={360}
+                step={1}
+                value={st.carouselCardWidthPx ?? 320}
+                onChange={(e) =>
+                  updateStyle({ carouselCardWidthPx: clampNum(e.target.value, 320) })
+                }
+                data-no-block-select="1"
+              />
+              <span style={rightNum}>{st.carouselCardWidthPx ?? 320}px</span>
+            </Row>
 
-              <Row label="Espaço entre cards (px)">
-                <input
-                  type="range"
-                  min={0}
-                  max={32}
-                  step={1}
-                  value={st.carouselGapPx ?? (st.colGapPx ?? 16)}
-                  onChange={(e) => updateStyle({ carouselGapPx: clampNum(e.target.value, 16) })}
-                  data-no-block-select="1"
-                />
-                <span style={rightNum}>{st.carouselGapPx ?? (st.colGapPx ?? 16)}px</span>
-              </Row>
+            <Row label="Espaço entre cards (px)">
+              <input
+                type="range"
+                min={0}
+                max={32}
+                step={1}
+                value={st.carouselGapPx ?? 16}
+                onChange={(e) => updateStyle({ carouselGapPx: clampNum(e.target.value, 16) })}
+                data-no-block-select="1"
+              />
+              <span style={rightNum}>{st.carouselGapPx ?? 16}px</span>
+            </Row>
 
-              <Row label="Padding lateral (px)">
-                <input
-                  type="range"
-                  min={0}
-                  max={32}
-                  step={1}
-                  value={st.carouselSidePaddingPx ?? 12}
-                  onChange={(e) => updateStyle({ carouselSidePaddingPx: clampNum(e.target.value, 12) })}
-                  data-no-block-select="1"
-                />
-                <span style={rightNum}>{st.carouselSidePaddingPx ?? 12}px</span>
-              </Row>
+            <Row label="Padding lateral (px)">
+              <input
+                type="range"
+                min={0}
+                max={32}
+                step={1}
+                value={st.carouselSidePaddingPx ?? 12}
+                onChange={(e) =>
+                  updateStyle({ carouselSidePaddingPx: clampNum(e.target.value, 12) })
+                }
+                data-no-block-select="1"
+              />
+              <span style={rightNum}>{st.carouselSidePaddingPx ?? 12}px</span>
+            </Row>
 
-              <Row label="Autoplay">
-                <Toggle
-                  active={s.carousel?.autoplay ?? true}
-                  onClick={() =>
-                    updateSettings({
-                      carousel: { ...(s.carousel || {}), autoplay: !(s.carousel?.autoplay ?? true) },
-                    })
-                  }
-                />
-              </Row>
+            <Row label="Autoplay">
+              <Toggle
+                active={s.carousel?.autoplay ?? true}
+                onClick={() =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), autoplay: !(s.carousel?.autoplay ?? true) },
+                  })
+                }
+              />
+            </Row>
 
-              <Row label="Intervalo autoplay (ms)">
-                <input
-                  type="number"
-                  min={800}
-                  max={20000}
-                  step={100}
-                  value={s.carousel?.autoplayIntervalMs ?? 3500}
-                  onChange={(e) =>
-                    updateSettings({
-                      carousel: { ...(s.carousel || {}), autoplayIntervalMs: Number(e.target.value) },
-                    })
-                  }
-                  style={input}
-                  data-no-block-select="1"
-                  {...editEvents}
-                />
-              </Row>
+            <Row label="Intervalo autoplay (ms)">
+              <input
+                type="number"
+                min={800}
+                max={20000}
+                step={100}
+                value={s.carousel?.autoplayIntervalMs ?? 3500}
+                onChange={(e) =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), autoplayIntervalMs: Number(e.target.value) },
+                  })
+                }
+                style={input}
+                data-no-block-select="1"
+                {...editEvents}
+              />
+            </Row>
 
-              <Row label="Indicadores (bolinhas)">
-                <Toggle
-                  active={s.carousel?.showDots ?? true}
-                  onClick={() => updateSettings({ carousel: { ...(s.carousel || {}), showDots: !(s.carousel?.showDots ?? true) } })}
-                />
-              </Row>
+            <Row label="Indicadores (bolinhas)">
+              <Toggle
+                active={s.carousel?.showDots ?? true}
+                onClick={() =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), showDots: !(s.carousel?.showDots ?? true) },
+                  })
+                }
+              />
+            </Row>
 
-              <Row label="Cor das bolinhas">
-                <SwatchRow
-                  value={st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'}
-                  onChange={(hex) => updateStyle({ carouselDotsColor: hex })}
-                  onEyedropper={() => pick((hex) => updateStyle({ carouselDotsColor: hex }))}
-                />
-              </Row>
+            {(s.carousel?.showDots ?? true) && (
+              <>
+                <Row label="Cor das bolinhas">
+                  <SwatchRow
+                    value={st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'}
+                    onChange={(hex) => updateStyle({ carouselDotsColor: hex })}
+                    onEyedropper={() => pick((hex) => updateStyle({ carouselDotsColor: hex }))}
+                  />
+                </Row>
 
-              <Row label="Cor da bolinha ativa">
-                <SwatchRow
-                  value={st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'}
-                  onChange={(hex) => updateStyle({ carouselDotsActiveColor: hex })}
-                  onEyedropper={() => pick((hex) => updateStyle({ carouselDotsActiveColor: hex }))}
-                />
-              </Row>
+                <Row label="Cor da bolinha ativa">
+                  <SwatchRow
+                    value={st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'}
+                    onChange={(hex) => updateStyle({ carouselDotsActiveColor: hex })}
+                    onEyedropper={() =>
+                      pick((hex) => updateStyle({ carouselDotsActiveColor: hex }))
+                    }
+                  />
+                </Row>
+              </>
+            )}
 
-              <Row label="Botões prev/next">
-                <Toggle
-                  active={s.carousel?.showArrows ?? false}
-                  onClick={() =>
-                    updateSettings({ carousel: { ...(s.carousel || {}), showArrows: !(s.carousel?.showArrows ?? false) } })
-                  }
-                />
-              </Row>
+            <Row label="Botões prev/next">
+              <Toggle
+                active={s.carousel?.showArrows ?? false}
+                onClick={() =>
+                  updateSettings({
+                    carousel: { ...(s.carousel || {}), showArrows: !(s.carousel?.showArrows ?? false) },
+                  })
+                }
+              />
+            </Row>
 
-              {s.carousel?.showArrows && (
-                <>
-                  <Row label="Só no desktop">
-                    <Toggle
-                      active={s.carousel?.arrowsDesktopOnly ?? true}
-                      onClick={() =>
-                        updateSettings({
-                          carousel: { ...(s.carousel || {}), arrowsDesktopOnly: !(s.carousel?.arrowsDesktopOnly ?? true) },
-                        })
-                      }
-                    />
-                  </Row>
+            {(s.carousel?.showArrows ?? false) && (
+              <>
+                <Row label="Só no desktop">
+                  <Toggle
+                    active={s.carousel?.arrowsDesktopOnly ?? true}
+                    onClick={() =>
+                      updateSettings({
+                        carousel: {
+                          ...(s.carousel || {}),
+                          arrowsDesktopOnly: !(s.carousel?.arrowsDesktopOnly ?? true),
+                        },
+                      })
+                    }
+                  />
+                </Row>
 
-                  <Row label="Fundo das setas">
-                    <SwatchRow
-                      value={st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'}
-                      onChange={(hex) => updateStyle({ carouselArrowsBg: hex })}
-                      onEyedropper={() => pick((hex) => updateStyle({ carouselArrowsBg: hex }))}
-                    />
-                  </Row>
+                <Row label="Fundo das setas">
+                  <SwatchRow
+                    value={st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'}
+                    onChange={(hex) => updateStyle({ carouselArrowsBg: hex })}
+                    onEyedropper={() => pick((hex) => updateStyle({ carouselArrowsBg: hex }))}
+                  />
+                </Row>
 
-                  <Row label="Cor do ícone das setas">
-                    <SwatchRow
-                      value={st.carouselArrowsIconColor ?? '#111827'}
-                      onChange={(hex) => updateStyle({ carouselArrowsIconColor: hex })}
-                      onEyedropper={() => pick((hex) => updateStyle({ carouselArrowsIconColor: hex }))}
-                    />
-                  </Row>
-                </>
-              )}
-            </Section>
+                <Row label="Cor do ícone das setas">
+                  <SwatchRow
+                    value={st.carouselArrowsIconColor ?? '#111827'}
+                    onChange={(hex) => updateStyle({ carouselArrowsIconColor: hex })}
+                    onEyedropper={() =>
+                      pick((hex) => updateStyle({ carouselArrowsIconColor: hex }))
+                    }
+                  />
+                </Row>
+              </>
+            )}
           </>
         )}
 
@@ -564,7 +616,14 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
-                style={{ cursor: 'pointer', color: '#e53e3e', border: 'none', background: 'none', fontWeight: 'bold', fontSize: 16 }}
+                style={{
+                  cursor: 'pointer',
+                  color: '#e53e3e',
+                  border: 'none',
+                  background: 'none',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                }}
                 title="Remover item"
                 data-no-block-select="1"
               >
@@ -573,7 +632,12 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
             </div>
 
             <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="checkbox" checked={item.enabled !== false} onChange={(e) => updateItem(item.id, { enabled: e.target.checked })} data-no-block-select="1" />
+              <input
+                type="checkbox"
+                checked={item.enabled !== false}
+                onChange={(e) => updateItem(item.id, { enabled: e.target.checked })}
+                data-no-block-select="1"
+              />
               Ativo
             </label>
 
@@ -647,7 +711,15 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
                 Upload de imagem
               </button>
 
-              {item.imageSrc && <Image src={item.imageSrc} alt={item.imageAlt ?? ''} width={120} height={80} style={{ borderRadius: 8 }} />}
+              {item.imageSrc && (
+                <Image
+                  src={item.imageSrc}
+                  alt={item.imageAlt ?? ''}
+                  width={120}
+                  height={80}
+                  style={{ borderRadius: 8 }}
+                />
+              )}
             </label>
 
             <label>
@@ -740,8 +812,8 @@ export default function ServicesBlockEditor({ cardId, settings, style, onChangeS
         ))}
       </Section>
 
-      {/* Mantive o teu bloco de Estilos como estava (top). */}
-      {/* Se quiseres, depois eu meto também: cor do texto, peso e tamanho, para ficar completo como os outros. */}
+      {/* Nota: mantivemos o teu "Estilos" noutro bloco do ficheiro anteriormente.
+          Se quiseres, cola-o abaixo desta secção e eu também te devolvo “limpo”. */}
     </div>
   )
 }
