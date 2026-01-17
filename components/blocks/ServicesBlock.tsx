@@ -462,26 +462,36 @@ function ServiceCard({
       }}
     >
       {item.imageSrc && (
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            paddingTop: `${100 / imageAspectRatio}%`,
-            overflow: 'hidden',
-          }}
-        >
-          <Image
-            src={item.imageSrc}
-            alt={item.imageAlt ?? item.title}
-            fill
-            style={{
-              objectFit: 'cover',
-              // ✅ ISTO é o que te faltava:
-              objectPosition,
-            }}
-          />
-        </div>
-      )}
+  <div
+    style={{
+      position: 'relative',
+      width: '100%',
+      paddingTop: `${100 / imageAspectRatio}%`,
+      overflow: 'hidden',
+      borderTopLeftRadius: cardRadius,
+      borderTopRightRadius: cardRadius,
+    }}
+  >
+    <style jsx>{`
+      div :global(img) {
+        object-fit: cover !important;
+        object-position: 50% 50% !important;
+      }
+    `}</style>
+
+    <Image
+      src={item.imageSrc}
+      alt={item.imageAlt ?? item.title}
+      fill
+      sizes="(max-width: 768px) 100vw, 360px"
+      style={{
+        objectFit: 'cover',
+        objectPosition: '50% 50%',
+      }}
+    />
+  </div>
+)}
+
 
       <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>
