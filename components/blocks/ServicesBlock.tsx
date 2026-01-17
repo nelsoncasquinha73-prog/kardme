@@ -1,7 +1,7 @@
 // components/blocks/ServicesBlock.tsx
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import AutoplayImport from 'embla-carousel-autoplay'
@@ -30,6 +30,9 @@ export type ServicesSettings = {
   carousel?: {
     autoplay?: boolean
     autoplayIntervalMs?: number
+    showDots?: boolean
+    showArrows?: boolean
+    arrowsDesktopOnly?: boolean
   }
   items?: ServiceItem[]
 }
@@ -75,6 +78,15 @@ export type ServicesStyle = {
 
   imageRadiusPx?: number
   imageAspectRatio?: number
+
+  // carrossel
+  carouselCardWidthPx?: number // 260–360
+  carouselGapPx?: number
+  carouselSidePaddingPx?: number
+  carouselDotsColor?: string
+  carouselDotsActiveColor?: string
+  carouselArrowsBg?: string
+  carouselArrowsIconColor?: string
 }
 
 export default function ServicesBlock({ settings, style }: { settings: ServicesSettings; style?: ServicesStyle }) {
@@ -83,9 +95,8 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
 
   const [modalOpen, setModalOpen] = useState<string | null>(null)
 
-  const container = st.container || {}
-
   // Container (bloco)
+  const container = st.container || {}
   const containerBg = container.bgColor ?? 'transparent'
   const containerHasBg = containerBg !== 'transparent' && containerBg !== 'rgba(0,0,0,0)'
   const containerHasShadow = container.shadow === true
@@ -144,21 +155,72 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const autoplayEnabled = s.carousel?.autoplay !== false // default ON
   const autoplayIntervalMs = s.carousel?.autoplayIntervalMs ?? 3500
 
-  const autoplay = useRef(
-    Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
-  )
+  const showDots = s.carousel?.showDots !== false // default ON
+  const showArrows = s.carousel?.showArrows === true // default OFF (para não poluir)
+  const arrowsDesktopOnly = s.carousel?.arrowsDesktopOnly !== false // default ON
 
+  const cardWidthPx = clamp(st.carouselCardWidthPx ?? 300, 260, 360)
+  const carouselGapPx = st.carouselGapPx ?? colGap
+  const sidePaddingPx = st.carouselSidePaddingPx ?? 12
+
+  const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
+  const dotsActiveColor = st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'
+
+  const arrowsBg = st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'
+  const arrowsIcon = st.carouselArrowsIconColor ?? '#111827'
+
+  const autoplay = useRef(Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true }))
   const plugins = layout === 'carousel' && autoplayEnabled && items.length > 1 ? [autoplay.current] : []
 
-  const [emblaRef] = useEmblaCarousel(
+  const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: layout === 'carousel' && items.length > 1,
-      align: 'center',
+      align: 'start',
       dragFree: false,
       containScroll: 'trimSnaps',
     },
     plugins
   )
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [snapCount, setSnapCount] = useState(0)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsDesktop(mq.matches)
+    update()
+    mq.addEventListener?.('change', update)
+    return () => mq.removeEventListener?.('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (!emblaApi) return
+
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap() || 0)
+    const onReInit = () => {
+      setSnapCount(emblaApi.scrollSnapList().length)
+      onSelect()
+    }
+
+    setSnapCount(emblaApi.scrollSnapList().length)
+    onSelect()
+
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onReInit)
+
+    return () => {
+      emblaApi.off('select', onSelect)
+      emblaApi.off('reInit', onReInit)
+    }
+  }, [emblaApi])
+
+  const canUseCarouselUi = layout === 'carousel' && items.length > 1
+  const showArrowsNow = canUseCarouselUi && showArrows && (!arrowsDesktopOnly || isDesktop)
+
+  const prev = () => emblaApi?.scrollPrev()
+  const next = () => emblaApi?.scrollNext()
+  const goTo = (idx: number) => emblaApi?.scrollTo(idx)
 
   return (
     <section style={wrapStyle}>
@@ -179,58 +241,124 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
       )}
 
       {layout === 'carousel' ? (
-        <div
-          ref={emblaRef}
-          style={{
-            overflow: 'hidden',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
+        <div style={{ position: 'relative' }}>
+          {/* viewport */}
           <div
+            ref={emblaRef}
             style={{
-              display: 'flex',
-              gap: colGap,
-              paddingBottom: 2,
-              touchAction: 'pan-y',
+              overflow: 'hidden',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {items.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  flex: '0 0 auto',
-                  width: 300, // bom em mobile (cardpreview 420)
-                  maxWidth: '88%',
-                }}
-              >
-                <ServiceCard
-                  item={item}
-                  st={st}
-                  cardRadius={cardRadius}
-                  cardBorderWidth={cardBorderWidth}
-                  cardBorderColor={cardBorderColor}
-                  cardShadow={cardShadow}
-                  cardHasBg={cardHasBg}
-                  cardBg={cardBg}
-                  buttonBg={buttonBg}
-                  buttonText={buttonText}
-                  buttonBorderWidth={buttonBorderWidth}
-                  buttonBorderColor={buttonBorderColor}
-                  buttonRadius={buttonRadius}
-                  imageRadius={imageRadius}
-                  imageAspectRatio={imageAspectRatio}
-                  onOpenModal={() => setModalOpen(item.id)}
-                />
-              </div>
-            ))}
+            {/* container */}
+            <div
+              style={{
+                display: 'flex',
+                gap: carouselGapPx,
+                paddingLeft: sidePaddingPx,
+                paddingRight: sidePaddingPx,
+                paddingBottom: 2,
+                touchAction: 'pan-y',
+              }}
+            >
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    flex: '0 0 auto',
+                    width: cardWidthPx,
+                    maxWidth: '90%',
+                  }}
+                >
+                  <ServiceCard
+                    item={item}
+                    st={st}
+                    cardRadius={cardRadius}
+                    cardBorderWidth={cardBorderWidth}
+                    cardBorderColor={cardBorderColor}
+                    cardShadow={cardShadow}
+                    cardHasBg={cardHasBg}
+                    cardBg={cardBg}
+                    buttonBg={buttonBg}
+                    buttonText={buttonText}
+                    buttonBorderWidth={buttonBorderWidth}
+                    buttonBorderColor={buttonBorderColor}
+                    buttonRadius={buttonRadius}
+                    imageRadius={imageRadius}
+                    imageAspectRatio={imageAspectRatio}
+                    onOpenModal={() => setModalOpen(item.id)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* arrows (opcionais / desktop) */}
+          {showArrowsNow && (
+            <>
+              <button
+                type="button"
+                onClick={prev}
+                aria-label="Anterior"
+                style={arrowStyle('left', arrowsBg, arrowsIcon)}
+                data-no-block-select="1"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={next}
+                aria-label="Seguinte"
+                style={arrowStyle('right', arrowsBg, arrowsIcon)}
+                data-no-block-select="1"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {/* dots */}
+          {canUseCarouselUi && showDots && snapCount > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 8,
+                marginTop: 10,
+                userSelect: 'none',
+              }}
+              data-no-block-select="1"
+            >
+              {Array.from({ length: snapCount }).map((_, i) => {
+                const active = i === selectedIndex
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => goTo(i)}
+                    aria-label={`Ir para o item ${i + 1}`}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 999,
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      backgroundColor: active ? dotsActiveColor : dotsColor,
+                      transform: active ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'transform 120ms ease, background-color 120ms ease',
+                    }}
+                  />
+                )
+              })}
+            </div>
+          )}
         </div>
       ) : (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns:
-              layout === 'list' ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))',
+            gridTemplateColumns: layout === 'list' ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))',
             gap: `${rowGap}px ${colGap}px`,
           }}
         >
@@ -259,11 +387,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
       )}
 
       {modalOpen && (
-        <Modal
-          onClose={() => setModalOpen(null)}
-          item={items.find((i) => i.id === modalOpen)!}
-          style={st}
-        />
+        <Modal onClose={() => setModalOpen(null)} item={items.find((i) => i.id === modalOpen)!} style={st} />
       )}
     </section>
   )
@@ -327,36 +451,21 @@ function ServiceCard({
             overflow: 'hidden',
           }}
         >
-          <Image
-            src={item.imageSrc}
-            alt={item.imageAlt ?? item.title}
-            fill
-            style={{ objectFit: 'cover', borderRadius: `${imageRadius}px` }}
-          />
+          <Image src={item.imageSrc} alt={item.imageAlt ?? item.title} fill style={{ objectFit: 'cover', borderRadius: `${imageRadius}px` }} />
         </div>
       )}
 
       <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>
-          {item.title}
-        </h3>
+        <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>{item.title}</h3>
 
         {item.subtitle && (
-          <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>
-            {item.subtitle}
-          </div>
+          <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>{item.subtitle}</div>
         )}
 
-        {item.price && (
-          <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16, color: textColor }}>
-            {item.price}
-          </div>
-        )}
+        {item.price && <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16, color: textColor }}>{item.price}</div>}
 
         {item.description && (
-          <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>
-            {item.description}
-          </p>
+          <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>{item.description}</p>
         )}
 
         {item.actionType !== 'none' && (
@@ -392,6 +501,7 @@ function ServiceCard({
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}
+                data-no-block-select="1"
               >
                 {item.actionLabel || 'Ver mais'}
               </button>
@@ -403,15 +513,7 @@ function ServiceCard({
   )
 }
 
-function Modal({
-  onClose,
-  item,
-  style,
-}: {
-  onClose: () => void
-  item: ServiceItem
-  style?: ServicesStyle
-}) {
+function Modal({ onClose, item, style }: { onClose: () => void; item: ServiceItem; style?: ServicesStyle }) {
   if (!item) return null
 
   const bg = style?.container?.bgColor ?? '#fff'
@@ -461,18 +563,14 @@ function Modal({
             color: textColor,
           }}
           aria-label="Fechar"
+          data-no-block-select="1"
         >
           ×
         </button>
 
         <h3 style={{ marginTop: 0, marginBottom: 8 }}>{item.title}</h3>
 
-        {item.price && (
-          <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: textColor }}>
-            {item.price}
-          </div>
-        )}
-
+        {item.price && <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: textColor }}>{item.price}</div>}
         {item.description && <p style={{ marginBottom: 12 }}>{item.description}</p>}
 
         {item.features && item.features.length > 0 && (
@@ -487,4 +585,30 @@ function Modal({
       </div>
     </div>
   )
+}
+
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSSProperties {
+  return {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    [side]: 6,
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    border: '1px solid rgba(0,0,0,0.10)',
+    background: bg,
+    color: icon,
+    display: 'grid',
+    placeItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+    boxShadow: '0 10px 26px rgba(0,0,0,0.10)',
+    fontSize: 22,
+    lineHeight: 1,
+  }
 }
