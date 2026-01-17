@@ -79,9 +79,9 @@ export type ServicesStyle = {
   imageRadiusPx?: number
   imageAspectRatio?: number
 
-  // ✅ NOVO: foco/enquadramento da imagem (percentagens)
-  imagePosX?: number // 0..100 (50 = centro)
-  imagePosY?: number // 0..100 (50 = centro)
+  // foco da imagem (0..100) — default centro
+  imageFocusX?: number
+  imageFocusY?: number
 
   // carrossel
   carouselCardWidthPx?: number // 260–360
@@ -126,7 +126,6 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
 
   const heading = s.heading ?? 'Serviços e Produtos'
   const items = useMemo(() => (s.items || []).filter((i) => i.enabled), [s.items])
-
   const layout = s.layout ?? 'grid'
 
   const cardRadius = st.cardRadiusPx ?? 12
@@ -149,10 +148,10 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const imageRadius = st.imageRadiusPx ?? 8
   const imageAspectRatio = st.imageAspectRatio ?? 1.5
 
-  // ✅ default centro
-  const imagePosX = clampNum(st.imagePosX, 50)
-  const imagePosY = clampNum(st.imagePosY, 50)
-  const objectPosition = `${clamp(imagePosX, 0, 100)}% ${clamp(imagePosY, 0, 100)}%`
+  // foco imagem — default centro
+  const focusX = clampNum(st.imageFocusX, 50)
+  const focusY = clampNum(st.imageFocusY, 50)
+  const objectPosition = `${clamp(focusX, 0, 100)}% ${clamp(focusY, 0, 100)}%`
 
   if (items.length === 0) return null
 
@@ -161,16 +160,16 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const headingBoldOn = st.headingBold !== false
 
   // ===== Carrossel (Embla) =====
-  const autoplayEnabled = s.carousel?.autoplay !== false // default ON
+  const autoplayEnabled = s.carousel?.autoplay !== false
   const autoplayIntervalMs = s.carousel?.autoplayIntervalMs ?? 3500
 
-  const showDots = s.carousel?.showDots !== false // default ON
-  const showArrows = s.carousel?.showArrows === true // default OFF
-  const arrowsDesktopOnly = s.carousel?.arrowsDesktopOnly !== false // default ON
+  const showDots = s.carousel?.showDots !== false
+  const showArrows = s.carousel?.showArrows === true
+  const arrowsDesktopOnly = s.carousel?.arrowsDesktopOnly !== false
 
-  const cardWidthPx = clamp(clampNum(st.carouselCardWidthPx, 320), 260, 360)
-  const carouselGapPx = st.carouselGapPx ?? colGap
-  const sidePaddingPx = st.carouselSidePaddingPx ?? 8
+  const cardWidthPx = clamp(clampNum(st.carouselCardWidthPx, 320), 240, 520)
+  const carouselGapPx = clamp(clampNum(st.carouselGapPx, colGap), 0, 64)
+  const sidePaddingPx = clamp(clampNum(st.carouselSidePaddingPx, 12), 0, 64)
 
   const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
   const dotsActiveColor = st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'
@@ -259,11 +258,11 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {/* container */}
+            {/* container (SEM gap — spacing embla-safe) */}
             <div
               style={{
                 display: 'flex',
-                gap: carouselGapPx,
+                marginLeft: -(carouselGapPx || 0), // compensa o padding dos slides
                 paddingLeft: sidePaddingPx,
                 paddingRight: sidePaddingPx,
                 paddingBottom: 2,
@@ -275,13 +274,15 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
                   key={item.id}
                   style={{
                     flex: '0 0 auto',
+                    paddingLeft: carouselGapPx, // ✅ spacing homogéneo
                     width: cardWidthPx,
-                    maxWidth: '90%',
+                    maxWidth: '92%',
                   }}
                 >
                   <ServiceCard
                     item={item}
                     st={st}
+                    objectPosition={objectPosition}
                     cardRadius={cardRadius}
                     cardBorderWidth={cardBorderWidth}
                     cardBorderColor={cardBorderColor}
@@ -295,7 +296,6 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
                     buttonRadius={buttonRadius}
                     imageRadius={imageRadius}
                     imageAspectRatio={imageAspectRatio}
-                    objectPosition={objectPosition}
                     onOpenModal={() => setModalOpen(item.id)}
                   />
                 </div>
@@ -365,6 +365,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
               key={item.id}
               item={item}
               st={st}
+              objectPosition={objectPosition}
               cardRadius={cardRadius}
               cardBorderWidth={cardBorderWidth}
               cardBorderColor={cardBorderColor}
@@ -378,7 +379,6 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
               buttonRadius={buttonRadius}
               imageRadius={imageRadius}
               imageAspectRatio={imageAspectRatio}
-              objectPosition={objectPosition}
               onOpenModal={() => setModalOpen(item.id)}
             />
           ))}
@@ -393,6 +393,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
 function ServiceCard({
   item,
   st,
+  objectPosition,
   cardRadius,
   cardBorderWidth,
   cardBorderColor,
@@ -406,11 +407,11 @@ function ServiceCard({
   buttonRadius,
   imageRadius,
   imageAspectRatio,
-  objectPosition,
   onOpenModal,
 }: {
   item: ServiceItem
   st?: ServicesStyle
+  objectPosition: string
   cardRadius: number
   cardBorderWidth: number
   cardBorderColor: string
@@ -424,7 +425,6 @@ function ServiceCard({
   buttonRadius: number
   imageRadius: number
   imageAspectRatio: number
-  objectPosition: string
   onOpenModal: () => void
 }) {
   const textColor = st?.textColor ?? '#111827'
@@ -448,6 +448,7 @@ function ServiceCard({
             width: '100%',
             paddingTop: `${100 / imageAspectRatio}%`,
             overflow: 'hidden',
+            // ✅ o clip tem de estar no wrapper (não na imagem)
             borderTopLeftRadius: cardRadius,
             borderTopRightRadius: cardRadius,
           }}
@@ -458,10 +459,11 @@ function ServiceCard({
             fill
             style={{
               objectFit: 'cover',
-              objectPosition, // ✅ AQUI
-              borderRadius: `${imageRadius}px`,
+              objectPosition, // ✅ default centro e depois ajustável
             }}
           />
+          {/* (se quiseres manter arredondamento diferente nas imagens) */}
+          {imageRadius !== undefined ? null : null}
         </div>
       )}
 
@@ -469,7 +471,6 @@ function ServiceCard({
         <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>{item.title}</h3>
 
         {item.subtitle && <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>{item.subtitle}</div>}
-
         {item.price && <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16, color: textColor }}>{item.price}</div>}
 
         {item.description && <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>{item.description}</p>}
