@@ -408,11 +408,6 @@ export default function ServicesBlock({
           style={st}
         />
       )}
-    <style jsx global>{`
-  img[data-services-img="1"] {
-    object-position: 50% 50% !important;
-  }
-`}</style>
 
     </section>
   )
@@ -478,25 +473,25 @@ function ServiceCard({
       borderTopRightRadius: cardRadius,
     }}
   >
-    <style jsx>{`
-      div :global(img) {
-        object-fit: cover !important;
-        object-position: 50% 50% !important;
-      }
-    `}</style>
-
-    <Image
+    <img
   src={item.imageSrc}
   alt={item.imageAlt ?? item.title}
-  fill
-  data-services-img="1"
+  loading="lazy"
+  draggable={false}
   style={{
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
     objectFit: 'cover',
+    objectPosition, // ✅ usa o foco configurável (default 50/50)
+    display: 'block',
   }}
 />
 
   </div>
 )}
+
 
 
       <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
