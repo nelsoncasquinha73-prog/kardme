@@ -71,10 +71,11 @@ export default function CardRenderer({ card, blocks, showTranslations = true, fu
       style={{
         minHeight: 'auto',
         padding: 0,
-        borderRadius: fullBleed ? 0 : 24,
+        borderRadius: 0,
         width: '100%',
-        background: bgCss,
+        background: 'transparent',
         opacity: bgOpacity,
+        boxShadow: 'none',
       }}
     >
       {showTranslations && (
@@ -101,13 +102,13 @@ export default function CardRenderer({ card, blocks, showTranslations = true, fu
         <div
           style={{
             position: 'relative',
-            background: fullBleed ? 'transparent' : 'var(--color-surface)',
-            borderRadius: fullBleed ? 0 : 32,
+            background: 'transparent',
+            borderRadius: 0,
             padding: fullBleed ? 0 : '24px 20px 32px',
             display: 'flex',
             flexDirection: 'column',
             gap: 40,
-            boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
+            boxShadow: 'none',
           }}
         >
           {/* DECORATIONS (overlay) */}
