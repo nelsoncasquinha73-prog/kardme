@@ -104,331 +104,212 @@ export default function CardPreview({
 
   const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
 
-  // Moldura (por fora) — bezel real em todos os lados
-  const phoneW = 420
-  const phoneH = 880
-  const phoneRadius = 56
-
-  // espessura do aro (frame) + bezel interno (onde assenta o ecrã)
-  const frameBorder = 10
-  const bezel = 16
-  const phonePadding = frameBorder + bezel
-
   return (
     <div
-      style={{
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '24px 0',
-      }}
+     style={
+  {
+    minHeight: 'auto',
+    padding: 0,
+    borderRadius: 0,
+    width: '100%',
+    background: bgCss,
+    opacity: bgOpacity,
+    ['--card-bg' as any]: bgCss,
+  } as React.CSSProperties
+}
     >
-      {/* PHONE FRAME (OUTER) */}
-      <div
-        style={{
-          width: phoneW,
-          height: phoneH,
-          borderRadius: phoneRadius,
-          background: '#0b0f19',
-          border: `${frameBorder}px solid rgba(255,255,255,0.10)`,
-          boxShadow: '0 30px 90px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.10)',
-          position: 'relative',
-          padding: phonePadding,
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Side shine */}
+      {showTranslations && (
         <div
           style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: phoneRadius,
-            pointerEvents: 'none',
-            background:
-              'linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.00) 60%)',
-            mixBlendMode: 'overlay',
-            opacity: 0.55,
-          }}
-        />
-
-        {/* Top bezel accent (mais fino) */}
-        <div
-          style={{
-            position: 'absolute',
-            top: frameBorder + 6,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 140,
-            height: 3,
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.10)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* Bottom bezel accent (mais fino) */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: frameBorder + 8,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 120,
-            height: 2,
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.08)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* Screen */}
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: phoneRadius - phonePadding,
-            background: bgCss,
-            overflow: 'hidden',
-            position: 'relative',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            padding: '0 16px 12px',
+            maxWidth: 420,
+            margin: '0 auto',
           }}
         >
-          {/* Notch (decorativo, não interfere no cartão) */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 10,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 190,
-              height: 30,
-              borderRadius: 18,
-              background: 'rgba(0,0,0,0.55)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-              zIndex: 50,
-              pointerEvents: 'none',
-            }}
-          />
+          <LanguageSwitcher />
+        </div>
+      )}
 
-          {/* CONTENT AREA (scroll) */}
+      <main
+        style={{
+          maxWidth: 420,
+          margin: '0 auto',
+          padding: '0 16px',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            background: 'transparent',
+            borderRadius: fullBleed ? 0 : 32,
+            padding: fullBleed ? 0 : '24px 20px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 40,
+            boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
+          }}
+        >
+          {/* DECORATIONS */}
+          {blocks
+            ?.filter((block) => block.type === 'decorations')
+            .map((block) => {
+              const isActive = activeBlockId === block.id
+              return (
+                <div
+                  key={block.id}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    pointerEvents: isActive ? 'auto' : 'none',
+                    userSelect: 'none',
+                    zIndex: 10,
+                  }}
+                  onMouseDown={(e) => {
+                    if (!isActive) return
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  onPointerDown={(e) => {
+                    if (!isActive) return
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                >
+                  <DecorationBlock settings={block.settings} style={block.style} />
+
+                  {isActive && (
+                    <DecorationOverlayInteractive
+                      settings={block.settings}
+                      activeDecoId={activeDecoId}
+                      onSelectDeco={(id) => onSelectDeco?.(id)}
+                      onPatchDeco={(id, patch) => {
+                        const prevDecos = (block.settings?.decorations ?? []) as any[]
+                        const nextDecos = prevDecos.map((d) => (d.id === id ? { ...d, ...patch } : d))
+
+                        onChangeBlockSettings?.(block.id, {
+                          ...(block.settings || {}),
+                          decorations: nextDecos,
+                        })
+                      }}
+                    />
+                  )}
+                </div>
+              )
+            })}
+
+          {/* HEADER */}
+          {headerBlock ? (
+            <div
+              style={{
+                position: 'relative',
+                zIndex: isOverlap ? 8 : 10,
+                cursor: onSelectBlock ? 'pointer' : 'default',
+                marginLeft: -headerBleedX,
+                marginRight: -headerBleedX,
+              }}
+              onPointerDownCapture={(e) => {
+                if (shouldIgnoreBlockSelect(e)) return
+                onSelectBlock?.(headerBlock)
+              }}
+            >
+              {activeBlockId === headerBlock.id ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: -6,
+                    borderRadius: 22,
+                    border: '2px solid var(--color-primary)',
+                    pointerEvents: 'none',
+                  }}
+                />
+              ) : null}
+
+              <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
+            </div>
+          ) : null}
+
+          {/* OUTROS BLOCOS */}
           <div
             style={{
-              width: '100%',
-              height: '100%',
-              overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 40,
+              paddingLeft: fullBleed ? safe : 0,
+              paddingRight: fullBleed ? safe : 0,
             }}
           >
-            {/* Mantém a lógica do “cartão” igual ao slug: maxWidth 420 + padding 16 */}
-            <div
-              style={
-                {
-                  minHeight: 'auto',
-                  padding: 0,
-                  borderRadius: 0,
-                  width: '100%',
-                  background: 'transparent',
-                  opacity: bgOpacity,
-                  '--card-bg': bgCss,
-                } as React.CSSProperties
-              }
-            >
-              {showTranslations && (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    padding: '0 16px 12px',
-                    maxWidth: 420,
-                    margin: '0 auto',
-                  }}
-                >
-                  <LanguageSwitcher />
-                </div>
-              )}
+            {blocks
+              ?.filter((b) => b.type !== 'decorations' && b.type !== 'header')
+              .map((block) => {
+                const selected = activeBlockId === block.id
 
-              <main
-                style={{
-                  maxWidth: 420,
-                  margin: '0 auto',
-                  padding: '0 16px',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'relative',
-                    background: 'transparent',
-                    borderRadius: fullBleed ? 0 : 32,
-                    padding: fullBleed ? 0 : '24px 20px 32px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 40,
-                    boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
-                  }}
-                >
-                  {/* DECORATIONS */}
-                  {blocks
-                    ?.filter((block) => block.type === 'decorations')
-                    .map((block) => {
-                      const isActive = activeBlockId === block.id
-                      return (
-                        <div
-                          key={block.id}
-                          style={{
-                            position: 'absolute',
-                            inset: 0,
-                            pointerEvents: isActive ? 'auto' : 'none',
-                            userSelect: 'none',
-                            zIndex: 10,
-                          }}
-                          onMouseDown={(e) => {
-                            if (!isActive) return
-                            e.preventDefault()
-                            e.stopPropagation()
-                          }}
-                          onPointerDown={(e) => {
-                            if (!isActive) return
-                            e.preventDefault()
-                            e.stopPropagation()
-                          }}
-                        >
-                          <DecorationBlock settings={block.settings} style={block.style} />
+                let z = 10
+                if (block.type === 'profile' && isOverlap) z = 12
 
-                          {isActive && (
-                            <DecorationOverlayInteractive
-                              settings={block.settings}
-                              activeDecoId={activeDecoId}
-                              onSelectDeco={(id) => onSelectDeco?.(id)}
-                              onPatchDeco={(id, patch) => {
-                                const prevDecos = (block.settings?.decorations ?? []) as any[]
-                                const nextDecos = prevDecos.map((d) => (d.id === id ? { ...d, ...patch } : d))
+                const alignItems =
+                  block.type === 'contact' || block.type === 'social'
+                    ? mapHeadingAlignToItems(block.style?.headingAlign)
+                    : undefined
 
-                                onChangeBlockSettings?.(block.id, {
-                                  ...(block.settings || {}),
-                                  decorations: nextDecos,
-                                })
-                              }}
-                            />
-                          )}
-                        </div>
-                      )
-                    })}
+                const wrapStyle: React.CSSProperties = {
+                  position: 'relative',
+                  zIndex: z,
+                  borderRadius: 18,
+                  cursor: onSelectBlock ? 'pointer' : 'default',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems,
+                  ...blockOuterSpacingFromJson(block.style),
+                }
 
-                  {/* HEADER */}
-                  {headerBlock ? (
-                    <div
-                      style={{
-                        position: 'relative',
-                        zIndex: isOverlap ? 8 : 10,
-                        cursor: onSelectBlock ? 'pointer' : 'default',
-                        marginLeft: -headerBleedX,
-                        marginRight: -headerBleedX,
-                      }}
-                      onPointerDownCapture={(e) => {
-                        if (shouldIgnoreBlockSelect(e)) return
-                        onSelectBlock?.(headerBlock)
-                      }}
-                    >
-                      {activeBlockId === headerBlock.id ? (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            inset: -6,
-                            borderRadius: 22,
-                            border: '2px solid var(--color-primary)',
-                            pointerEvents: 'none',
-                          }}
-                        />
-                      ) : null}
-
-                      <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
-                    </div>
-                  ) : null}
-
-                  {/* OUTROS BLOCOS */}
+                const Highlight = selected ? (
                   <div
                     style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 40,
-                      paddingLeft: fullBleed ? safe : 0,
-                      paddingRight: fullBleed ? safe : 0,
+                      position: 'absolute',
+                      inset: -6,
+                      borderRadius: 22,
+                      border: '2px solid var(--color-primary)',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                ) : null
+
+                return (
+                  <div
+                    key={block.id}
+                    style={wrapStyle}
+                    onPointerDownCapture={(e) => {
+                      if (shouldIgnoreBlockSelect(e)) return
+                      onSelectBlock?.(block)
                     }}
                   >
-                    {blocks
-                      ?.filter((b) => b.type !== 'decorations' && b.type !== 'header')
-                      .map((block) => {
-                        const selected = activeBlockId === block.id
+                    {Highlight}
 
-                        let z = 10
-                        if (block.type === 'profile' && isOverlap) z = 12
-
-                        const alignItems =
-                          block.type === 'contact' || block.type === 'social'
-                            ? mapHeadingAlignToItems(block.style?.headingAlign)
-                            : undefined
-
-                        const wrapStyle: React.CSSProperties = {
-                          position: 'relative',
-                          zIndex: z,
-                          borderRadius: 18,
-                          cursor: onSelectBlock ? 'pointer' : 'default',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems,
-                          ...blockOuterSpacingFromJson(block.style),
-                        }
-
-                        const Highlight = selected ? (
-                          <div
-                            style={{
-                              position: 'absolute',
-                              inset: -6,
-                              borderRadius: 22,
-                              border: '2px solid var(--color-primary)',
-                              pointerEvents: 'none',
-                            }}
-                          />
-                        ) : null
-
-                        return (
-                          <div
-                            key={block.id}
-                            style={wrapStyle}
-                            onPointerDownCapture={(e) => {
-                              if (shouldIgnoreBlockSelect(e)) return
-                              onSelectBlock?.(block)
-                            }}
-                          >
-                            {Highlight}
-
-                            {block.type === 'contact' ? (
-                              <ContactBlock settings={block.settings} style={block.style} />
-                            ) : block.type === 'social' ? (
-                              <SocialBlock settings={block.settings} style={block.style} />
-                            ) : block.type === 'services' ? (
-                              <ServicesBlock settings={block.settings} style={block.style} />
-                            ) : block.type === 'lead_form' ? (
-                              <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-                            ) : block.type === 'business_hours' ? (
-                              <BusinessHoursBlock settings={block.settings} style={block.style} />
-                            ) : block.type === 'profile' ? (
-                              <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
-                            ) : block.type === 'gallery' ? (
-                              <GalleryBlock settings={block.settings} style={block.style} />
-                            ) : block.type === 'info_utilities' ? (
-                              <InfoUtilitiesBlock settings={block.settings} style={block.style} />
-                            ) : null}
-                          </div>
-                        )
-                      })}
+                    {block.type === 'contact' ? (
+                      <ContactBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'social' ? (
+                      <SocialBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'services' ? (
+                      <ServicesBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'lead_form' ? (
+                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                    ) : block.type === 'business_hours' ? (
+                      <BusinessHoursBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'profile' ? (
+                      <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
+                    ) : block.type === 'gallery' ? (
+                      <GalleryBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'info_utilities' ? (
+                      <InfoUtilitiesBlock settings={block.settings} style={block.style} />
+                    ) : null}
                   </div>
-                </div>
-              </main>
-            </div>
+                )
+              })}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

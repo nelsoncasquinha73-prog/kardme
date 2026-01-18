@@ -1,6 +1,7 @@
 'use client'
 
 import CardPreview from '@/components/theme/CardPreview'
+import CardContainer from '@/components/ui/CardContainer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 
 type CardBlock = {
@@ -58,7 +59,7 @@ export default function ThemePageClientCenter({
             width: 360,
             borderRadius: 44,
             padding: 3,
-            background: '#ffffff', // Canvas branco para isolar fundo do dashboard
+            background: '#ffffff',
             boxShadow: '0 22px 70px rgba(0,0,0,0.28)',
             border: '1px solid rgba(0,0,0,0.06)',
             position: 'relative',
@@ -80,7 +81,7 @@ export default function ThemePageClientCenter({
               borderRadius: 28,
               overflow: 'auto',
               border: '1px solid rgba(0,0,0,0.08)',
-              minHeight: 680, // use minHeight para crescer com conteúdo
+              minHeight: 680,
               background:
                 cardBg.mode === 'solid'
                   ? cardBg.color
@@ -90,17 +91,19 @@ export default function ThemePageClientCenter({
           >
             <div id="card-preview-root" style={{ minHeight: '100%' }}>
               <ThemeProvider theme={theme}>
-                <CardPreview
-                  card={{ ...card, theme }}
-                  blocks={blocksEnabledSorted}
-                  activeBlockId={activeBlockId || undefined}
-                  onSelectBlock={(b: any) => onSelectBlock(b.id)}
-                  activeDecoId={activeDecoId}
-                  onSelectDeco={onSelectDeco}
-                  showTranslations={false}
-                  fullBleed
-                  cardBg={cardBg} // Passa cardBg para CardPreview
-                />
+                <CardContainer variant="flat" hover={false}>
+                  <CardPreview
+                    card={{ ...card, theme }}
+                    blocks={blocksEnabledSorted}
+                    activeBlockId={activeBlockId || undefined}
+                    onSelectBlock={(b: any) => onSelectBlock(b.id)}
+                    activeDecoId={activeDecoId}
+                    onSelectDeco={onSelectDeco}
+                    showTranslations={false}
+                    fullBleed
+                    cardBg={cardBg}
+                  />
+                </CardContainer>
               </ThemeProvider>
             </div>
           </div>
