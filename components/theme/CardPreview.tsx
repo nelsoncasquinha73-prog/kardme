@@ -133,10 +133,13 @@ export default function CardPreview({
       )}
 
       <main
+        className="cardMain"
         style={{
+          width: '100%',
           maxWidth: 420,
           margin: '0 auto',
           padding: '0 var(--page-pad-x, 16px)',
+          boxSizing: 'border-box',
         }}
       >
         <div
