@@ -22,10 +22,13 @@
 .card-preview .muted {
   color: rgba(0,0,0,0.6);
 }
+
+.card-preview {
+  --page-pad-x: 16px;
+}
+
 @media (max-width: 520px) {
-  .card-preview > div {
-    max-width: 100% !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+  .card-preview {
+    --page-pad-x: 8px;
   }
 }

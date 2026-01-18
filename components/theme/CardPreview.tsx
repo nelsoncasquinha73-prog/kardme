@@ -136,7 +136,7 @@ export default function CardPreview({
         style={{
           maxWidth: 420,
           margin: '0 auto',
-          padding: '0 16px',
+          padding: '0 var(--page-pad-x, 16px)',
         }}
       >
         <div
