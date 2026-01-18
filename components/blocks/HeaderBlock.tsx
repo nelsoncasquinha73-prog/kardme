@@ -140,14 +140,20 @@ export default function HeaderBlock({
 
   const coverSrc = safeSettings.coverImage
 
+  // Bleed horizontal para cover
+  const horizontalBleed = 16
+
   return (
     <div
       style={{
         position: 'relative',
-        width: '100%',
+        width: `calc(100% + ${horizontalBleed * 2}px)`,
+        left: `-${horizontalBleed}px`,
         height,
         background: headerBgEnabled ? headerBgColor : bgCss,
         overflow: 'hidden',
+        marginLeft: 0,
+        marginRight: 0,
       }}
     >
       {showCover && coverSrc ? (

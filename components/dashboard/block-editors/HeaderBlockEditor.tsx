@@ -80,10 +80,12 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
   // Fade para baixo
   const coverFadeEnabled = (layout as any)?.coverFadeEnabled === true
-  const coverFadeStrength = typeof (layout as any)?.coverFadeStrength === 'number' ? (layout as any).coverFadeStrength : 50 // 0-100
-  const coverFadeHeightPx = typeof (layout as any)?.coverFadeHeightPx === 'number' ? (layout as any).coverFadeHeightPx : 120
+  const coverFadeStrength =
+    typeof (layout as any)?.coverFadeStrength === 'number' ? (layout as any).coverFadeStrength : 50 // 0-100
+  const coverFadeHeightPx =
+    typeof (layout as any)?.coverFadeHeightPx === 'number' ? (layout as any).coverFadeHeightPx : 120
 
-  // Fundo do header (bloco) - NOVO
+  // Fundo do header (bloco)
   const headerBgEnabled = (layout as any)?.headerBgEnabled === true
   const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
 
@@ -98,6 +100,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           : '#ffffff'
 
   const coverFadeColor = (layout as any)?.coverFadeColor ?? fallbackFadeColor
+
+  // Layout (altura/largura)
+  const height = typeof (layout as any)?.height === 'number' ? (layout as any).height : 220
+  const widthMode = (layout as any)?.widthMode ?? 'full'
+  const customWidthPx = typeof (layout as any)?.customWidthPx === 'number' ? (layout as any).customWidthPx : 720
 
   // Badge settings
   const badge = (layout as any)?.badge ?? {}
@@ -216,7 +223,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         </Section>
       ) : null}
 
-      {/* NOVO: Fundo do header (bloco) */}
+      {/* Fundo do header (bloco) */}
       <Section title="Fundo do header (bloco)">
         <Row label="Ativar">
           <Toggle
@@ -261,7 +268,8 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         />
       </Section>
 
-      <Section title="Cover (moldura)">
+      {/* ✅ Cover + Layout agrupados */}
+      <Section title="Cover (moldura + layout)">
         <Row label="Modo">
           <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'full' } as any)}>Full</Button>
           <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'tile' } as any)}>Moldura</Button>
@@ -301,13 +309,25 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         ) : (
           <div style={{ fontSize: 12, opacity: 0.7 }}>Full: a cover ocupa a largura toda do cartão (edge-to-edge).</div>
         )}
-      </Section>
 
-      <Section title="Layout">
+        {/* Layout aqui dentro */}
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' }} />
+
         <Row label="Altura">
           <Button onClick={() => setLayout({ height: 180 })}>180</Button>
           <Button onClick={() => setLayout({ height: 220 })}>220</Button>
           <Button onClick={() => setLayout({ height: 260 })}>260</Button>
+        </Row>
+
+        <Row label="Altura (fine)">
+          <input
+            type="range"
+            min={120}
+            max={420}
+            step={5}
+            value={height}
+            onChange={(e) => setLayout({ height: Number(e.target.value) } as any)}
+          />
         </Row>
 
         <Row label="Overlay">
@@ -411,13 +431,13 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           <Button onClick={() => setLayout({ widthMode: 'custom' })}>Custom</Button>
         </Row>
 
-        {layout.widthMode === 'custom' && (
+        {widthMode === 'custom' && (
           <Row label="Largura (px)">
             <input
               type="number"
               min={200}
               max={1920}
-              value={(layout as any).customWidthPx ?? 720}
+              value={customWidthPx}
               onChange={(e) => setLayout({ customWidthPx: Number(e.target.value) })}
               style={{ width: 90 }}
             />
@@ -457,6 +477,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 value={settings.badgeImage ?? ''}
                 onChange={(e) => onChange({ ...settings, badgeImage: e.target.value })}
                 style={{ width: 260 }}
+               
                 placeholder="https://..."
               />
             </Row>
@@ -474,7 +495,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </select>
             </Row>
 
-                        <Row label="Tamanho (px)">
+            <Row label="Tamanho (px)">
               <input
                 type="number"
                 min={16}
@@ -643,4 +664,3 @@ function Toggle({ active, onClick }: any) {
     </button>
   )
 }
-

@@ -32,6 +32,7 @@ function bgToCss(bg: CardBg | undefined | null) {
   const bgOpacity = typeof bg.opacity === 'number' ? bg.opacity : 1
   return { bgCss, bgOpacity }
 }
+
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
 
@@ -46,10 +47,11 @@ export async function generateMetadata({ params }: Props) {
   const color =
     bg?.mode === 'solid'
       ? (bg.color ?? '#000000')
-      : (bg?.from ?? '#000000') // para gradiente usa a cor "from" como aproximação
+      : (bg?.from ?? '#000000')
 
   return {
     themeColor: color,
+    colorScheme: 'dark',
   }
 }
 
@@ -80,7 +82,6 @@ export default async function CardPage({ params }: Props) {
 
   const { bgCss, bgOpacity } = bgToCss(card.theme?.background)
 
-  // aplica opacidade só ao background (sem “lavar” o conteúdo)
   const pageBg =
     bgOpacity >= 1 ? bgCss : `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)), ${bgCss}`
 
