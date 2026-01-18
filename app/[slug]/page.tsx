@@ -89,13 +89,16 @@ export default async function CardPage({ params }: Props) {
     justifyContent: 'center',
     alignItems: 'flex-start',
     boxSizing: 'border-box',
+
     paddingTop: 12,
-    paddingLeft: 'max(16px, env(safe-area-inset-left))',
-    paddingRight: 'max(16px, env(safe-area-inset-right))',
+    paddingLeft: 'max(8px, env(safe-area-inset-left))', // reduzido para 8px
+    paddingRight: 'max(8px, env(safe-area-inset-right))', // reduzido para 8px
     paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
+
     background: 'transparent',
   }}
 >
+
   <div style={{ width: '100%', maxWidth: 480, boxSizing: 'border-box' }}>
     <LanguageProvider>
       <ThemeProvider theme={card.theme}>
