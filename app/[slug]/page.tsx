@@ -91,8 +91,8 @@ export default async function CardPage({ params }: Props) {
     boxSizing: 'border-box',
 
     paddingTop: 12,
-    paddingLeft: 'max(2px, env(safe-area-inset-left))', // reduzido para 8px
-    paddingRight: 'max(2px, env(safe-area-inset-right))', // reduzido para 8px
+    paddingLeft: 'max(3px, env(safe-area-inset-left))', // reduzido para 8px
+    paddingRight: 'max(3px, env(safe-area-inset-right))', // reduzido para 8px
     paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
 
     background: 'transparent',
@@ -101,7 +101,7 @@ export default async function CardPage({ params }: Props) {
 
   <div
   className="cardShell"
-  style={{ width: '100%', maxWidth: 'var(--shell-max, 480px)', boxSizing: 'border-box' }}
+  style={{ width: '100%', maxWidth: 'var(--shell-max, 520px)', boxSizing: 'border-box' }}
 >
 
     <LanguageProvider>

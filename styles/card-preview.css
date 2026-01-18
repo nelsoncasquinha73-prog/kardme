@@ -33,7 +33,7 @@
     max-width: 100% !important; /* largura total */
     width: 100% !important;
     margin: 0 !important; /* remove centrar */
-    padding-left: 0 !important; /* remove padding lateral */
-    padding-right: 0 !important;
+    padding-left: 3 !important; /* remove padding lateral */
+    padding-right: 3 !important;
   }
 }
