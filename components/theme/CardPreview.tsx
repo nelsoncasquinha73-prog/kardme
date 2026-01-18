@@ -190,7 +190,6 @@ export default function CardPreview({
             background: bgCss,
             overflow: 'hidden',
             position: 'relative',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
           }}
         >
           {/* Notch (decorativo, não interfere no cartão) */}
@@ -220,6 +219,7 @@ export default function CardPreview({
               background: 'transparent',
             }}
           >
+            {/* Mantém a lógica do “cartão” igual ao slug: maxWidth 420 + padding 16 */}
             <div
               style={
                 {
