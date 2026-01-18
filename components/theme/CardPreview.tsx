@@ -241,7 +241,7 @@ export default function CardPreview({
             }}
           >
             {blocks
-              ?.filter((b) => block.type !== 'decorations' && b.type !== 'header')
+              ?.filter((b) => b.type !== 'decorations' && b.type !== 'header')
               .map((block) => {
                 const selected = activeBlockId === block.id
 
