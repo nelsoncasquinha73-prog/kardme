@@ -104,17 +104,15 @@ export default function CardPreview({
 
   const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
 
-  // Moldura (por fora) - largura 420px para alinhar com slug
   // Moldura (por fora) — bezel real em todos os lados
-const phoneW = 420
-const phoneH = 880
-const phoneRadius = 56
+  const phoneW = 420
+  const phoneH = 880
+  const phoneRadius = 56
 
-// espessura do aro (frame) + bezel interno (onde assenta o ecrã)
-const frameBorder = 10
-const bezel = 16
-const phonePadding = frameBorder + bezel
-
+  // espessura do aro (frame) + bezel interno (onde assenta o ecrã)
+  const frameBorder = 10
+  const bezel = 16
+  const phonePadding = frameBorder + bezel
 
   return (
     <div
@@ -132,8 +130,8 @@ const phonePadding = frameBorder + bezel
           height: phoneH,
           borderRadius: phoneRadius,
           background: '#0b0f19',
-          boxShadow:
-            '0 30px 90px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.06)',
+          border: `${frameBorder}px solid rgba(255,255,255,0.10)`,
+          boxShadow: '0 30px 90px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.10)',
           position: 'relative',
           padding: phonePadding,
           boxSizing: 'border-box',
@@ -153,15 +151,46 @@ const phonePadding = frameBorder + bezel
           }}
         />
 
+        {/* Top bezel accent (mais fino) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: frameBorder + 6,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 140,
+            height: 3,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.10)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Bottom bezel accent (mais fino) */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: frameBorder + 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 120,
+            height: 2,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.08)',
+            pointerEvents: 'none',
+          }}
+        />
+
         {/* Screen */}
         <div
           style={{
             width: '100%',
             height: '100%',
-            borderRadius: phoneRadius - bezel,
+            borderRadius: phoneRadius - phonePadding,
             background: bgCss,
             overflow: 'hidden',
             position: 'relative',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
           }}
         >
           {/* Notch (decorativo, não interfere no cartão) */}
@@ -191,7 +220,6 @@ const phonePadding = frameBorder + bezel
               background: 'transparent',
             }}
           >
-            {/* Mantém a lógica do “cartão” igual ao slug: maxWidth 420 + padding 16 */}
             <div
               style={
                 {
