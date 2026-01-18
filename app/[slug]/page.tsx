@@ -1,8 +1,10 @@
+'use client'
+
 import React from 'react'
 import { notFound } from 'next/navigation'
 import { supabaseServer } from '@/lib/supabaseServer'
 
-import CardRenderer from '@/components/card/CardRenderer'
+import CardPreview from '@/components/theme/CardPreview'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
@@ -85,6 +87,14 @@ export default async function CardPage({ params }: Props) {
   const pageBg =
     bgOpacity >= 1 ? bgCss : `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)), ${bgCss}`
 
+  // Moldura do telemóvel (igual ao preview)
+  const phoneW = 420
+  const phoneH = 880
+  const phoneRadius = 56
+  const frameBorder = 10
+  const bezel = 16
+  const phonePadding = frameBorder + bezel
+
   return (
     <div
       className="card-preview"
@@ -103,41 +113,87 @@ export default async function CardPage({ params }: Props) {
         background: pageBg,
       }}
     >
-      <div style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box' }}>
-  <div
-    style={{
-      width: 420,
-      borderRadius: 44,
-      padding: 3,
-      background: '#ffffff',
-      boxShadow: '0 22px 70px rgba(0,0,0,0.28)',
-      border: '1px solid rgba(0,0,0,0.06)',
-      position: 'relative',
-      margin: '0 auto',
-    }}
-  >
-    <div
-      style={{
-        borderRadius: 28,
-        overflow: 'auto',
-        border: '1px solid rgba(0,0,0,0.08)',
-        minHeight: 680,
-        background:
-          card.theme.background.mode === 'solid'
-            ? card.theme.background.color
-            : `linear-gradient(${card.theme.background.angle ?? 180}deg, ${card.theme.background.from}, ${card.theme.background.to})`,
-        opacity: card.theme.background.opacity ?? 1,
-      }}
-    >
-      <LanguageProvider>
-        <ThemeProvider theme={card.theme}>
-          <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
-        </ThemeProvider>
-      </LanguageProvider>
-    </div>
-  </div>
-</div>
+      <div
+        style={{
+          width: phoneW,
+          height: phoneH,
+          borderRadius: phoneRadius,
+          background: '#0b0f19',
+          border: `${frameBorder}px solid rgba(255,255,255,0.10)`,
+          boxShadow: '0 30px 90px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.10)',
+          position: 'relative',
+          padding: phonePadding,
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Side shine */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: phoneRadius,
+            pointerEvents: 'none',
+            background:
+              'linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.00) 60%)',
+            mixBlendMode: 'overlay',
+            opacity: 0.55,
+          }}
+        />
 
+        {/* Top bezel accent */}
+        <div
+          style={{
+            position: 'absolute',
+            top: frameBorder + 6,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 140,
+            height: 3,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.10)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Bottom bezel accent */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: frameBorder + 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 120,
+            height: 2,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.08)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Screen */}
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: phoneRadius - phonePadding,
+            background: bgCss,
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <LanguageProvider>
+            <ThemeProvider theme={card.theme}>
+              <CardPreview
+                card={card}
+                blocks={blocks}
+                showTranslations={false}
+                fullBleed
+                cardBg={card.theme.background}
+              />
+            </ThemeProvider>
+          </LanguageProvider>
+        </div>
+      </div>
     </div>
   )
 }

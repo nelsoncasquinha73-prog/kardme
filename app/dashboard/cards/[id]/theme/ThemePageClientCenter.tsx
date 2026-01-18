@@ -56,7 +56,7 @@ export default function ThemePageClientCenter({
         <div
           id="preview-hitbox"
           style={{
-            width: 360,
+            width: 420,
             borderRadius: 44,
             padding: 3,
             background: '#ffffff',

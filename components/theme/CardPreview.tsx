@@ -106,17 +106,17 @@ export default function CardPreview({
 
   return (
     <div
-     style={
-  {
-    minHeight: 'auto',
-    padding: 0,
-    borderRadius: 0,
-    width: '100%',
-    background: bgCss,
-    opacity: bgOpacity,
-    ['--card-bg' as any]: bgCss,
-  } as React.CSSProperties
-}
+      style={
+        {
+          minHeight: 'auto',
+          padding: 0,
+          borderRadius: 0,
+          width: '100%',
+          background: bgCss,
+          opacity: bgOpacity,
+          ['--card-bg' as any]: bgCss,
+        } as React.CSSProperties
+      }
     >
       {showTranslations && (
         <div
@@ -241,7 +241,7 @@ export default function CardPreview({
             }}
           >
             {blocks
-              ?.filter((b) => b.type !== 'decorations' && b.type !== 'header')
+              ?.filter((b) => block.type !== 'decorations' && b.type !== 'header')
               .map((block) => {
                 const selected = activeBlockId === block.id
 
