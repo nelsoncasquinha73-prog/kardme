@@ -104,12 +104,40 @@ export default async function CardPage({ params }: Props) {
       }}
     >
       <div style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box' }}>
-        <LanguageProvider>
-          <ThemeProvider theme={card.theme}>
-            <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
-          </ThemeProvider>
-        </LanguageProvider>
-      </div>
+  <div
+    style={{
+      width: 420,
+      borderRadius: 44,
+      padding: 3,
+      background: '#ffffff',
+      boxShadow: '0 22px 70px rgba(0,0,0,0.28)',
+      border: '1px solid rgba(0,0,0,0.06)',
+      position: 'relative',
+      margin: '0 auto',
+    }}
+  >
+    <div
+      style={{
+        borderRadius: 28,
+        overflow: 'auto',
+        border: '1px solid rgba(0,0,0,0.08)',
+        minHeight: 680,
+        background:
+          card.theme.background.mode === 'solid'
+            ? card.theme.background.color
+            : `linear-gradient(${card.theme.background.angle ?? 180}deg, ${card.theme.background.from}, ${card.theme.background.to})`,
+        opacity: card.theme.background.opacity ?? 1,
+      }}
+    >
+      <LanguageProvider>
+        <ThemeProvider theme={card.theme}>
+          <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
+        </ThemeProvider>
+      </LanguageProvider>
+    </div>
+  </div>
+</div>
+
     </div>
   )
 }
