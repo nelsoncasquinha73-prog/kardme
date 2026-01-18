@@ -105,11 +105,16 @@ export default function CardPreview({
   const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
 
   // Moldura (por fora) - largura 420px para alinhar com slug
-  const phoneW = 420
-  const phoneH = 880
-  const phoneRadius = 52
-  const bezel = 14
-  const phonePadding = bezel
+  // Moldura (por fora) — bezel real em todos os lados
+const phoneW = 420
+const phoneH = 880
+const phoneRadius = 56
+
+// espessura do aro (frame) + bezel interno (onde assenta o ecrã)
+const frameBorder = 10
+const bezel = 16
+const phonePadding = frameBorder + bezel
+
 
   return (
     <div
