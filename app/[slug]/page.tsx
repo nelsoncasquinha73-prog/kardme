@@ -64,19 +64,43 @@ export default async function CardPage({ params }: Props) {
     <div
       className="card-preview"
       style={{
-        // ✅ fundo global do cartão no público
+        // fundo global do cartão no público
         background: bgCss,
         opacity: bgOpacity,
 
-        // ✅ garantir que cobre a página toda
-        minHeight: '100vh',
+        // altura viewport estável no mobile
+        minHeight: '100dvh',
+
+        // padding para testar margens
+        padding: '16px 16px 24px',
+
+        // centra e cola ao topo
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+
+        // DEBUG VISUAL (remover depois)
+        border: '4px solid red',
+        backgroundColor: 'rgba(255, 0, 0, 0.06)',
+        boxSizing: 'border-box',
       }}
     >
-      <LanguageProvider>
-        <ThemeProvider theme={card.theme}>
-          <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
-        </ThemeProvider>
-      </LanguageProvider>
+      {/* DEBUG: também marcamos o wrapper do cartão */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          border: '3px solid lime',
+          backgroundColor: 'rgba(0, 255, 0, 0.06)',
+          boxSizing: 'border-box',
+        }}
+      >
+        <LanguageProvider>
+          <ThemeProvider theme={card.theme}>
+            <CardRenderer card={card} blocks={blocks} showTranslations={false} fullBleed={false} />
+          </ThemeProvider>
+        </LanguageProvider>
+      </div>
     </div>
   )
 }

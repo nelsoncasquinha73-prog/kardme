@@ -19,6 +19,13 @@
   --font-dancing: 'Dancing Script', cursive;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: transparent;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
