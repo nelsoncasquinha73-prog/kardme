@@ -91,8 +91,8 @@ export default async function CardPage({ params }: Props) {
     boxSizing: 'border-box',
 
     paddingTop: 12,
-    paddingLeft: 'max(8px, env(safe-area-inset-left))', // reduzido para 8px
-    paddingRight: 'max(8px, env(safe-area-inset-right))', // reduzido para 8px
+    paddingLeft: 'max(5px, env(safe-area-inset-left))', // reduzido para 8px
+    paddingRight: 'max(5px, env(safe-area-inset-right))', // reduzido para 8px
     paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
 
     background: 'transparent',
