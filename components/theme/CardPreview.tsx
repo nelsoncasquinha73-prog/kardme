@@ -104,9 +104,9 @@ export default function CardPreview({
 
   const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
 
-  // Moldura (por fora) - não mexe no interior do cartão
-  const phoneW = 375
-  const phoneH = 812
+  // Moldura (por fora) - largura 420px para alinhar com slug
+  const phoneW = 420
+  const phoneH = 880
   const phoneRadius = 52
   const bezel = 14
   const phonePadding = bezel
@@ -154,7 +154,7 @@ export default function CardPreview({
             width: '100%',
             height: '100%',
             borderRadius: phoneRadius - bezel,
-            background: '#000',
+            background: bgCss,
             overflow: 'hidden',
             position: 'relative',
           }}
@@ -183,7 +183,7 @@ export default function CardPreview({
               height: '100%',
               overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
-              background: fullBleed ? 'transparent' : 'var(--color-bg)',
+              background: 'transparent',
             }}
           >
             {/* Mantém a lógica do “cartão” igual ao slug: maxWidth 420 + padding 16 */}
@@ -194,8 +194,8 @@ export default function CardPreview({
                   padding: 0,
                   borderRadius: 0,
                   width: '100%',
-                  background: fullBleed ? 'transparent' : 'var(--color-bg)',
-                  opacity: fullBleed ? bgOpacity : 1,
+                  background: 'transparent',
+                  opacity: bgOpacity,
                   '--card-bg': bgCss,
                 } as React.CSSProperties
               }
