@@ -96,7 +96,7 @@ export default async function CardPage({ params }: Props) {
     background: 'transparent',
   }}
 >
-  <div style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box' }}>
+  <div style={{ width: '100%', maxWidth: 480, boxSizing: 'border-box' }}>
     <LanguageProvider>
       <ThemeProvider theme={card.theme}>
         <CardPreview
