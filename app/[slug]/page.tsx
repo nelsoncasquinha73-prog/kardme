@@ -80,118 +80,36 @@ export default async function CardPage({ params }: Props) {
 
   const blocks = blocksData ?? []
 
-  const { bgCss, bgOpacity } = bgToCss(card.theme?.background)
-
-  const pageBg =
-    bgOpacity >= 1 ? bgCss : `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)), ${bgCss}`
-
-  // Moldura do telemóvel (igual ao preview)
-  const phoneW = 420
-  const phoneH = 880
-  const phoneRadius = 56
-  const frameBorder = 10
-  const bezel = 16
-  const phonePadding = frameBorder + bezel
-
   return (
     <div
-      className="card-preview"
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        boxSizing: 'border-box',
-
-        paddingTop: 12,
-        paddingLeft: 'max(16px, env(safe-area-inset-left))',
-        paddingRight: 'max(16px, env(safe-area-inset-right))',
-        paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
-
-        background: pageBg,
-      }}
-    >
-      <div
-        style={{
-          width: phoneW,
-          height: phoneH,
-          borderRadius: phoneRadius,
-          background: '#0b0f19',
-          border: `${frameBorder}px solid rgba(255,255,255,0.10)`,
-          boxShadow: '0 30px 90px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.10)',
-          position: 'relative',
-          padding: phonePadding,
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Side shine */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: phoneRadius,
-            pointerEvents: 'none',
-            background:
-              'linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.00) 60%)',
-            mixBlendMode: 'overlay',
-            opacity: 0.55,
-          }}
+  className="card-preview"
+  style={{
+    minHeight: '100dvh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    boxSizing: 'border-box',
+    paddingTop: 12,
+    paddingLeft: 'max(16px, env(safe-area-inset-left))',
+    paddingRight: 'max(16px, env(safe-area-inset-right))',
+    paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
+    background: 'transparent',
+  }}
+>
+  <div style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box' }}>
+    <LanguageProvider>
+      <ThemeProvider theme={card.theme}>
+        <CardPreview
+          card={card}
+          blocks={blocks}
+          showTranslations={false}
+          fullBleed={true}
+          cardBg={card.theme.background}
         />
+      </ThemeProvider>
+    </LanguageProvider>
+  </div>
+</div>
 
-        {/* Top bezel accent */}
-        <div
-          style={{
-            position: 'absolute',
-            top: frameBorder + 6,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 140,
-            height: 3,
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.10)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* Bottom bezel accent */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: frameBorder + 8,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 120,
-            height: 2,
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.08)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* Screen */}
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: phoneRadius - phonePadding,
-            background: bgCss,
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-          <LanguageProvider>
-            <ThemeProvider theme={card.theme}>
-              <CardPreview
-                card={card}
-                blocks={blocks}
-                showTranslations={false}
-                fullBleed
-                cardBg={card.theme.background}
-              />
-            </ThemeProvider>
-          </LanguageProvider>
-        </div>
-      </div>
-    </div>
   )
 }
