@@ -32,6 +32,26 @@ function bgToCss(bg: CardBg | undefined | null) {
   const bgOpacity = typeof bg.opacity === 'number' ? bg.opacity : 1
   return { bgCss, bgOpacity }
 }
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params
+
+  const { data: card } = await supabaseServer
+    .from('cards')
+    .select('theme')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single()
+
+  const bg = card?.theme?.background
+  const color =
+    bg?.mode === 'solid'
+      ? (bg.color ?? '#000000')
+      : (bg?.from ?? '#000000') // para gradiente usa a cor "from" como aproximação
+
+  return {
+    themeColor: color,
+  }
+}
 
 export default async function CardPage({ params }: Props) {
   const { slug } = await params
@@ -60,18 +80,26 @@ export default async function CardPage({ params }: Props) {
 
   const { bgCss, bgOpacity } = bgToCss(card.theme?.background)
 
+  // aplica opacidade só ao background (sem “lavar” o conteúdo)
+  const pageBg =
+    bgOpacity >= 1 ? bgCss : `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)), ${bgCss}`
+
   return (
     <div
       className="card-preview"
       style={{
-        background: bgCss,
-        opacity: bgOpacity,
         minHeight: '100dvh',
-        padding: '16px 16px 24px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
         boxSizing: 'border-box',
+
+        paddingTop: 12,
+        paddingLeft: 'max(16px, env(safe-area-inset-left))',
+        paddingRight: 'max(16px, env(safe-area-inset-right))',
+        paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
+
+        background: pageBg,
       }}
     >
       <div style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box' }}>
