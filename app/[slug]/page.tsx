@@ -12,7 +12,7 @@ import '@/styles/card-frame.css'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// Ajuda iOS (safe-area) e evita comportamentos estranhos
+// Ajuda iOS (safe-area)
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -91,15 +91,8 @@ export default async function CardPage({ params }: Props) {
 
   return (
     <MobileCardFrame background={bgCss}>
-      {/* 
-        IMPORTANTE:
-        - o CardPreview continua "desenhado" como no editor
-        - no mobile fazemos scale para caber (via CSS .cardScaleWrap)
-      */}
-      <div
-        className="cardScaleWrap"
-        style={{ opacity: bgOpacity }}
-      >
+      {/* NÃO meter cardScaleWrap aqui — o MobileCardFrame já trata do scale */}
+      <div style={{ opacity: bgOpacity }}>
         <LanguageProvider>
           <ThemeProvider theme={card.theme}>
             <CardPreview
