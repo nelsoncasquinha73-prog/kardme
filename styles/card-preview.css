@@ -27,13 +27,15 @@
 
 @media (max-width: 520px) {
   .card-preview {
-    --page-pad-x: 0px; /* padding interno zero em mobile */
+    padding-left: max(8px, env(safe-area-inset-left)) !important;
+    padding-right: max(8px, env(safe-area-inset-right)) !important;
   }
   .card-preview .cardMain {
-    max-width: 100% !important; /* largura total */
+    max-width: 100% !important;
     width: 100% !important;
-    margin: 0 !important; /* remove centrar */
-    padding-left: 3 !important; /* remove padding lateral */
-    padding-right: 3 !important;
+    margin: 0 auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
+
