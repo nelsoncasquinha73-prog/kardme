@@ -88,13 +88,7 @@ export default function CardPreview({
   const headerBlock = blocks?.find((b) => b.type === 'header')
   const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
 
-  // ✅ FullBleed = zero padding real (como pediste)
-  const safe = fullBleed ? 0 : Number(card?.theme?.layout?.safePadding ?? 10)
-
-  // ✅ Quando é fullBleed, não queremos “bleed math”
-  const cardPadX = fullBleed ? 0 : 20
-  const mainPadX = fullBleed ? 0 : 16
-  const headerBleedX = cardPadX + mainPadX
+  const safe = Number(card?.theme?.layout?.safePadding ?? 10)
 
   const bg = cardBg ?? card?.theme?.background
 
@@ -126,9 +120,9 @@ export default function CardPreview({
           style={{
             display: 'flex',
             justifyContent: 'flex-end',
-            padding: fullBleed ? 0 : '0 16px 12px',
-            maxWidth: fullBleed ? '100%' : 420,
-            margin: fullBleed ? 0 : '0 auto',
+            padding: '0 16px 12px',
+            maxWidth: 'var(--card-max, 420px)',
+            margin: '0 auto',
           }}
         >
           <LanguageSwitcher />
@@ -136,16 +130,15 @@ export default function CardPreview({
       )}
 
       <main
-  className="cardMain"
-  style={{
-    width: '100%',
-    maxWidth: fullBleed ? '100%' : 420,
-    margin: fullBleed ? 0 : '0 auto',
-    padding: 0, // ⚠️ nunca padding externo em fullBleed
-    boxSizing: 'border-box',
-  }}
->
-
+        className="cardMain"
+        style={{
+          width: '100%',
+          maxWidth: 'var(--card-max, 420px)',
+          margin: '0 auto',
+          padding: 0,
+          boxSizing: 'border-box',
+        }}
+      >
         <div
           style={{
             position: 'relative',
@@ -213,9 +206,8 @@ export default function CardPreview({
                 position: 'relative',
                 zIndex: isOverlap ? 8 : 10,
                 cursor: onSelectBlock ? 'pointer' : 'default',
-                // ✅ FullBleed = sem bleed (senão cria offsets diferentes do slug)
-                marginLeft: fullBleed ? 0 : -headerBleedX,
-                marginRight: fullBleed ? 0 : -headerBleedX,
+                marginLeft: fullBleed ? 0 : -36,
+                marginRight: fullBleed ? 0 : -36,
               }}
               onPointerDownCapture={(e) => {
                 if (shouldIgnoreBlockSelect(e)) return
@@ -244,7 +236,6 @@ export default function CardPreview({
               display: 'flex',
               flexDirection: 'column',
               gap: 40,
-              // ✅ FullBleed = zero espaço (como pediste)
               paddingLeft: fullBleed ? 0 : safe,
               paddingRight: fullBleed ? 0 : safe,
             }}
