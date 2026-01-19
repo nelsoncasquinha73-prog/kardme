@@ -41,14 +41,18 @@ html, body {
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
+  background: transparent !important;
 }
+
 @media (max-width: 520px) {
   .cardShell {
     margin-left: auto !important;
     margin-right: auto !important;
   }
+}
+html, body {
+  background: transparent !important;
 }
 

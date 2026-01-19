@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useColorPicker } from './ColorPickerContext'
 import html2canvas from 'html2canvas'
 
@@ -9,11 +9,6 @@ type Pos = { x: number; y: number }
 function rgbToHex(r: number, g: number, b: number) {
   const toHex = (n: number) => n.toString(16).padStart(2, '0')
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
-}
-
-function stop(e: any) {
-  e.preventDefault?.()
-  e.stopPropagation?.()
 }
 
 export default function EyedropperLoupeOverlay() {
@@ -29,7 +24,7 @@ export default function EyedropperLoupeOverlay() {
   const [hex, setHex] = useState('#FFFFFF')
   const [ready, setReady] = useState(false)
 
-  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+  const dpr = useMemo(() => (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1), [])
 
   function getPreviewEl() {
     return document.getElementById('preview-hitbox')
@@ -108,7 +103,7 @@ export default function EyedropperLoupeOverlay() {
 
       setReady(true)
 
-      // desenha a lupa no ponto atual (ou centro do preview)
+      // centro por defeito
       const p = pos ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
       setPos(p)
 
@@ -127,11 +122,8 @@ export default function EyedropperLoupeOverlay() {
       }, 90)
     }
 
-    // ao ativar: posiciona logo a lupa no centro do preview
     const rect = updateRect()
-    if (rect) {
-      setPos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
-    }
+    if (rect) setPos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
 
     capturePreview()
 
@@ -188,14 +180,12 @@ export default function EyedropperLoupeOverlay() {
     const size = out.width // 72
     const zoom = 10
 
-    // amostra um quadrado ímpar (centrado) e faz zoom para preencher 72x72
     const sample = Math.round(size / zoom)
     const sampleSize = Math.max(9, sample % 2 === 0 ? sample + 1 : sample)
 
     let sx = local.lx - Math.floor(sampleSize / 2)
     let sy = local.ly - Math.floor(sampleSize / 2)
 
-    // clamp para não sair fora
     sx = Math.max(0, Math.min(sx, src.width - sampleSize))
     sy = Math.max(0, Math.min(sy, src.height - sampleSize))
 
@@ -203,20 +193,14 @@ export default function EyedropperLoupeOverlay() {
     ctx.imageSmoothingEnabled = false
     ctx.drawImage(src, sx, sy, sampleSize, sampleSize, 0, 0, size, size)
 
-    // “pixel box” no centro (o que manda na cor)
     ctx.strokeStyle = 'rgba(255,255,255,0.95)'
     ctx.lineWidth = 2
     const box = zoom
     ctx.strokeRect(size / 2 - box / 2, size / 2 - box / 2, box, box)
   }
 
-  function onMove(e: React.MouseEvent) {
-    stop(e)
-
-    const x = e.clientX
-    const y = e.clientY
+  function updateFromClient(x: number, y: number) {
     setPos({ x, y })
-
     if (!ready) return
 
     const sp = getSamplePoint(x, y)
@@ -228,34 +212,38 @@ export default function EyedropperLoupeOverlay() {
     if (p) setHex(rgbToHex(p.r, p.g, p.b))
   }
 
-  function onClick(e: React.MouseEvent) {
-    stop(e)
+  function pickAtClient(x: number, y: number) {
     if (!ready) return
 
-    const sp = getSamplePoint(e.clientX, e.clientY)
+    const sp = getSamplePoint(x, y)
     if (!sp) return
 
     const p = getPixelCss(sp.x, sp.y)
-    if (p) picker.onPick?.(rgbToHex(p.r, p.g, p.b))
-    else picker.onPick?.(hex)
-
+    picker.onPick?.(p ? rgbToHex(p.r, p.g, p.b) : hex)
     closePicker()
   }
 
   return (
     <>
-      {/* overlay fullscreen: a lupa segue o cursor em todo o ecrã */}
+      {/* overlay fullscreen */}
       <div
         data-no-block-select="1"
-        onPointerDown={(e) => {
+        onPointerMove={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          closePicker()
+          updateFromClient(e.clientX, e.clientY)
         }}
-        onMouseMove={onMove}
-        onClick={(e) => {
+        onPointerUp={(e) => {
+          e.preventDefault()
           e.stopPropagation()
-          onClick(e)
+          pickAtClient(e.clientX, e.clientY)
+        }}
+        onPointerDown={(e) => {
+          // IMPORTANTÍSSIMO: NÃO fechar aqui.
+          // Se fechares aqui, nunca chega ao "pick".
+          e.preventDefault()
+          e.stopPropagation()
+          updateFromClient(e.clientX, e.clientY)
         }}
         style={{
           position: 'fixed',
@@ -263,10 +251,11 @@ export default function EyedropperLoupeOverlay() {
           cursor: 'crosshair',
           zIndex: 9999,
           background: 'transparent',
+          touchAction: 'none',
         }}
       />
 
-      {/* lupa redonda a seguir o cursor */}
+      {/* lupa */}
       {pos && (
         <div
           data-no-block-select="1"
@@ -286,16 +275,7 @@ export default function EyedropperLoupeOverlay() {
             opacity: ready ? 1 : 0.75,
           }}
         >
-          <canvas
-            ref={loupeCanvasRef}
-            width={72}
-            height={72}
-            style={{
-              display: 'block',
-              width: 72,
-              height: 72,
-            }}
-          />
+          <canvas ref={loupeCanvasRef} width={72} height={72} style={{ display: 'block', width: 72, height: 72 }} />
         </div>
       )}
 

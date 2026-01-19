@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
 import '@/styles/tokens.css'
@@ -27,6 +27,28 @@ import '@fontsource/poppins/900.css'
 export const metadata: Metadata = {
   title: 'Kardme',
   description: 'Cartões digitais inteligentes',
+
+  // PWA
+  manifest: '/manifest.webmanifest',
+
+  // iOS “Adicionar ao ecrã principal”
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Kardme',
+  },
+
+  // (Opcional mas recomendado)
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
