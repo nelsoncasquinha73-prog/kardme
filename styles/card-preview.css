@@ -1,41 +1,31 @@
-.card-preview {
-  font-family: var(--font-sans);
-  color: #111;
+.card-preview{
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+
+  /* Desktop: pode ter respiro */
+  padding-top: 12px;
+  padding-left: max(8px, env(safe-area-inset-left));
+  padding-right: max(8px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 
-.card-preview .cardSurface {
-  border-radius: 18px;
-  overflow: hidden;
-  background: var(--card-bg, transparent);
-  box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+.cardShell{
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.card-preview .titleGradient {
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.card-preview .muted {
-  color: rgba(0,0,0,0.6);
-}
-
-.card-preview {
-  --page-pad-x: 16px;
-}
-
-@media (max-width: 520px) {
-  .card-preview {
-    padding-left: max(8px, env(safe-area-inset-left)) !important;
-    padding-right: max(8px, env(safe-area-inset-right)) !important;
+/* MOBILE: SEM espaço nenhum */
+@media (max-width: 520px){
+  .card-preview{
+    padding: 0 !important;
   }
-  .card-preview .cardMain {
+  .cardShell{
     max-width: 100% !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 }
-

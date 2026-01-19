@@ -79,44 +79,29 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
+  const { bgCss, bgOpacity } = bgToCss(card?.theme?.background)
 
   return (
     <div
-  className="card-preview"
-  style={{
-    minHeight: '100dvh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    boxSizing: 'border-box',
-
-    paddingTop: 12,
-    paddingLeft: 'max(8px, env(safe-area-inset-left))', // reduzido para 8px
-    paddingRight: 'max(8px, env(safe-area-inset-right))', // reduzido para 8px
-    paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
-
-    background: 'transparent',
-  }}
->
-
-  <div
-  className="cardShell"
-  style={{ width: '100%', maxWidth: 'var(--shell-max, 520px)', boxSizing: 'border-box' }}
->
-
-    <LanguageProvider>
-      <ThemeProvider theme={card.theme}>
-        <CardPreview
-          card={card}
-          blocks={blocks}
-          showTranslations={false}
-          fullBleed={true}
-          cardBg={card.theme.background}
-        />
-      </ThemeProvider>
-    </LanguageProvider>
-  </div>
-</div>
-
+      className="card-preview"
+      style={{
+        background: bgCss,
+        opacity: bgOpacity,
+      }}
+    >
+      <div className="cardShell">
+        <LanguageProvider>
+          <ThemeProvider theme={card.theme}>
+            <CardPreview
+              card={card}
+              blocks={blocks}
+              showTranslations={false}
+              fullBleed={true}
+              cardBg={card.theme?.background}
+            />
+          </ThemeProvider>
+        </LanguageProvider>
+      </div>
+    </div>
   )
 }

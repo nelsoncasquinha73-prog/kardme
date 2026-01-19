@@ -45,3 +45,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
 }
+@media (max-width: 520px) {
+  .cardShell {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
