@@ -20,7 +20,7 @@
 
 .cardFrameShell{
   width: 100%;
-  max-width: 420px; /* EXACTAMENTE igual ao preview */
+  max-width: 420px; /* igual ao preview */
   margin-inline: auto;
   box-sizing: border-box;
   display: block;
@@ -28,9 +28,11 @@
 
 /* Wrapper que mantém o “design size” do preview */
 .cardScaleWrap{
-  width: 420px; /* design base */
+  width: 420px;            /* design base */
   margin: 0 auto;
   transform-origin: top center;
+  /* desktop: sem scale */
+  transform: none;
 }
 
 /* ===============================
@@ -38,20 +40,19 @@
    =============================== */
 
 @media (max-width: 520px){
-
   .cardFrameRoot{
     padding: 0 !important; /* sem espaços laterais */
     align-items: flex-start;
   }
 
   .cardFrameShell{
-    width: 100%;
     max-width: 100%;
+    width: 100%;
     margin-inline: auto !important;
   }
 
   .cardScaleWrap{
-    /* fica sempre ligeiramente mais pequeno para bater com o preview */
+    /* fica ligeiramente mais pequeno para “bater” com o preview */
     transform: scale(clamp(0.78, calc(100vw / 420), 0.92));
   }
 }
