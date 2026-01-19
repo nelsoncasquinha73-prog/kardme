@@ -7,8 +7,17 @@ import MobileCardFrame from '@/components/theme/MobileCardFrame'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
+import '@/styles/card-frame.css'
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+// Ajuda iOS (safe-area) e evita comportamentos estranhos
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+} as const
 
 const RESERVED_SLUGS = new Set(['reset-password', 'forgot-password', 'login', 'dashboard', 'api', 'templates'])
 
@@ -78,21 +87,31 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const { bgCss } = bgToCss(card?.theme?.background)
+  const { bgCss, bgOpacity } = bgToCss(card?.theme?.background)
 
   return (
-    <LanguageProvider>
-      <ThemeProvider theme={card.theme}>
-        <MobileCardFrame background={bgCss}>
-          <CardPreview
-            card={card}
-            blocks={blocks}
-            showTranslations={false}
-            fullBleed={true}
-            cardBg={card.theme?.background}
-          />
-        </MobileCardFrame>
-      </ThemeProvider>
-    </LanguageProvider>
+    <MobileCardFrame background={bgCss}>
+      {/* 
+        IMPORTANTE:
+        - o CardPreview continua "desenhado" como no editor
+        - no mobile fazemos scale para caber (via CSS .cardScaleWrap)
+      */}
+      <div
+        className="cardScaleWrap"
+        style={{ opacity: bgOpacity }}
+      >
+        <LanguageProvider>
+          <ThemeProvider theme={card.theme}>
+            <CardPreview
+              card={card}
+              blocks={blocks}
+              showTranslations={false}
+              fullBleed={true}
+              cardBg={card.theme?.background}
+            />
+          </ThemeProvider>
+        </LanguageProvider>
+      </div>
+    </MobileCardFrame>
   )
 }

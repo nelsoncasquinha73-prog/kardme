@@ -1,12 +1,17 @@
+/* ===============================
+   CARD FRAME – BASE (DESKTOP)
+   =============================== */
+
 .cardFrameRoot{
   min-height: 100dvh;
   width: 100%;
-  overflow-x: hidden;               /* <-- evita drift do Safari */
+  overflow-x: hidden; /* evita drift lateral no Safari iOS */
   display: flex;
   justify-content: center;
   align-items: flex-start;
   box-sizing: border-box;
 
+  /* desktop / preview */
   padding-top: 12px;
   padding-left: max(8px, env(safe-area-inset-left));
   padding-right: max(8px, env(safe-area-inset-right));
@@ -15,19 +20,41 @@
 
 .cardFrameShell{
   width: 100%;
-  max-width: 420px;                 /* igual ao preview */
+  max-width: 420px;        /* EXACTAMENTE igual ao preview */
+  margin-inline: auto;
   box-sizing: border-box;
-
-  margin-inline: auto;              /* <-- melhor que margin-left/right no iOS */
   display: block;
 }
 
-/* MOBILE: sem espaço, mas continua centrado */
+/* Wrapper que mantém o “design size” do preview */
+.cardScaleWrap{
+  width: 420px;            /* design base */
+  margin: 0 auto;
+  transform-origin: top center;
+}
+
+/* ===============================
+   MOBILE – EDGE TO EDGE + SCALE
+   =============================== */
+
 @media (max-width: 520px){
+
   .cardFrameRoot{
-    padding: 0 !important;
+    padding: 0 !important;          /* sem espaços laterais */
+    align-items: flex-start;
   }
+
   .cardFrameShell{
+    max-width: 100%;
+    width: 100%;
     margin-inline: auto !important;
+  }
+
+  .cardScaleWrap{
+    /* escala suave para caber no ecrã
+       evita zoom excessivo nos ícones */
+    transform: scale(
+      clamp(0.75, calc(100vw / 420), 0.92)
+    );
   }
 }
