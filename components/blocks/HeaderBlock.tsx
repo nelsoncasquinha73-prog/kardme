@@ -61,6 +61,13 @@ function cardBgToFadeTarget(bg?: CardBg): string {
   return bg.to
 }
 
+// converte "rgb(r,g,b)" em "rgba(r,g,b,a)" com a opacidade pedida
+function rgbToRgba(rgb: string, a: number) {
+  const m = rgb.match(/^rgb\((.+)\)$/)
+  if (!m) return rgb
+  return `rgba(${m[1]}, ${a})`
+}
+
 export default function HeaderBlock({
   settings,
   cardBg,
@@ -94,11 +101,10 @@ export default function HeaderBlock({
   const fadeTargetBase = headerBgEnabled ? headerBgColor : cardBgToFadeTarget(cardBg)
   const fadeTargetOpacity = typeof cardBg?.opacity === 'number' ? clamp(cardBg.opacity, 0, 1) : 1
 
-  const fadeTarget = fadeTargetBase.startsWith('rgba')
-    ? fadeTargetBase // já tem opacidade
-    : fadeTargetOpacity < 1
-    ? fadeTargetBase.replace(/rgb$(.+)$/, `rgba($1, ${fadeTargetOpacity})`)
-    : fadeTargetBase
+  const fadeTarget =
+    fadeTargetOpacity < 1 && fadeTargetBase.startsWith('rgb(') && !fadeTargetBase.startsWith('rgba(')
+      ? rgbToRgba(fadeTargetBase, fadeTargetOpacity)
+      : fadeTargetBase
 
   const badge = layout.badge ?? {}
   const badgeEnabled = badge.enabled === true && !!safeSettings.badgeImage

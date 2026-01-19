@@ -81,7 +81,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   // Fade para baixo
   const coverFadeEnabled = (layout as any)?.coverFadeEnabled === true
   const coverFadeStrength =
-    typeof (layout as any)?.coverFadeStrength === 'number' ? (layout as any).coverFadeStrength : 50 // 0-100
+    typeof (layout as any)?.coverFadeStrength === 'number' ? (layout as any).coverFadeStrength : 50
   const coverFadeHeightPx =
     typeof (layout as any)?.coverFadeHeightPx === 'number' ? (layout as any).coverFadeHeightPx : 120
 
@@ -89,7 +89,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const headerBgEnabled = (layout as any)?.headerBgEnabled === true
   const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
 
-  // Por defeito, tenta usar a cor do fundo do header (se ativo), senão a cor do fundo do cartão.
+  // fallback para a cor do fade
   const fallbackFadeColor =
     headerBgEnabled
       ? headerBgColor
@@ -118,24 +118,28 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const badgeRadiusPx = typeof badge?.radiusPx === 'number' ? badge.radiusPx : 12
   const badgeShadow = badge?.shadow === true
 
-  const pick = (apply: (hex: string) => void) => {
-    openPicker({ onPick: apply })
+  // ✅ ESTE É O FIX: abrir sempre em modo eyedropper
+  const pickEyedropper = (apply: (hex: string) => void) => {
+    openPicker({
+      mode: 'eyedropper',
+      onPick: apply,
+    })
   }
 
   function openEyedropperOverlay() {
-    pick((hex) => setLayout({ ...(layout as any), overlayColor: hex } as any))
+    pickEyedropper((hex) => setLayout({ ...(layout as any), overlayColor: hex } as any))
   }
 
   function openEyedropperFade() {
-    pick((hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any))
+    pickEyedropper((hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any))
   }
 
   function openEyedropperBadgeBg() {
-    pick((hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any))
+    pickEyedropper((hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any))
   }
 
   function openEyedropperHeaderBg() {
-    pick((hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any))
+    pickEyedropper((hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any))
   }
 
   return (
@@ -176,7 +180,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <SwatchRow
                 value={cardBg.color}
                 onChange={(hex) => onChangeCardBg({ ...cardBg, color: hex })}
-                onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, color: hex }))}
+                onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, color: hex }))}
               />
             </Row>
           ) : (
@@ -185,7 +189,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <SwatchRow
                   value={cardBg.from}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, from: hex })}
-                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, from: hex }))}
+                  onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, from: hex }))}
                 />
               </Row>
 
@@ -193,7 +197,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <SwatchRow
                   value={cardBg.to}
                   onChange={(hex) => onChangeCardBg({ ...cardBg, to: hex })}
-                  onEyedropper={() => pick((hex) => onChangeCardBg({ ...cardBg, to: hex }))}
+                  onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, to: hex }))}
                 />
               </Row>
 
@@ -268,17 +272,16 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         />
       </Section>
 
-      {/* ✅ Cover + Layout agrupados */}
       <Section title="Cover (moldura + layout)">
         <Row label="Modo">
           <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'full' } as any)}>Full</Button>
           <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'tile' } as any)}>Moldura</Button>
-          <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'auto' } as any)}>Auto (adaptar)</Button>
+          <Button onClick={() => setLayout({ ...(layout as any), coverMode: 'auto' } as any)}>Auto</Button>
         </Row>
 
         {(layout as any)?.coverMode === 'auto' && (
           <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
-            Auto mostra a imagem inteira e preenche o fundo com blur (ideal para imagens da net).
+            Auto mostra a imagem inteira e preenche o fundo com blur.
           </div>
         )}
 
@@ -307,10 +310,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </Row>
           </>
         ) : (
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Full: a cover ocupa a largura toda do cartão (edge-to-edge).</div>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>Full: a cover ocupa a largura toda do cartão.</div>
         )}
 
-        {/* Layout aqui dentro */}
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' }} />
 
         <Row label="Altura">
@@ -331,7 +333,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         </Row>
 
         <Row label="Overlay">
-          <Toggle active={overlayEnabled} onClick={() => setLayout({ overlay: !overlayEnabled })} />
+          <Toggle active={overlayEnabled} onClick={() => setLayout({ overlay: !overlayEnabled } as any)} />
         </Row>
 
         {overlayEnabled ? (
@@ -344,14 +346,14 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
-            <Row label="Degradê (ligar ao fundo)">
+            <Row label="Degradê">
               <Toggle
                 active={overlayGradient}
                 onClick={() => setLayout({ ...(layout as any), overlayGradient: !overlayGradient } as any)}
               />
             </Row>
 
-            <Row label="Fade para baixo (subtil)">
+            <Row label="Fade para baixo">
               <Toggle
                 active={coverFadeEnabled}
                 onClick={() => setLayout({ ...(layout as any), coverFadeEnabled: !coverFadeEnabled } as any)}
@@ -366,14 +368,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                     onChange={(hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any)}
                     onEyedropper={openEyedropperFade}
                   />
-                </Row>
-
-                <Row label="Intensidade">
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Button onClick={() => setLayout({ ...(layout as any), coverFadeStrength: 35 } as any)}>35%</Button>
-                    <Button onClick={() => setLayout({ ...(layout as any), coverFadeStrength: 50 } as any)}>50%</Button>
-                    <Button onClick={() => setLayout({ ...(layout as any), coverFadeStrength: 65 } as any)}>65%</Button>
-                  </div>
                 </Row>
 
                 <Row label="Intensidade (fine)">
@@ -404,14 +398,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </>
             )}
 
-            <Row label="Opacidade">
-              <div style={{ display: 'flex', gap: 10 }}>
-                <Button onClick={() => setLayout({ overlayOpacity: 0.15 })}>15%</Button>
-                <Button onClick={() => setLayout({ overlayOpacity: 0.25 })}>25%</Button>
-                <Button onClick={() => setLayout({ overlayOpacity: 0.35 })}>35%</Button>
-              </div>
-            </Row>
-
             <Row label="Opacidade (fine)">
               <input
                 type="range"
@@ -419,16 +405,16 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 max={0.8}
                 step={0.05}
                 value={overlayOpacity}
-                onChange={(e) => setLayout({ overlayOpacity: Number(e.target.value) })}
+                onChange={(e) => setLayout({ overlayOpacity: Number(e.target.value) } as any)}
               />
             </Row>
           </>
         ) : null}
 
         <Row label="Largura">
-          <Button onClick={() => setLayout({ widthMode: 'full' })}>Full</Button>
-          <Button onClick={() => setLayout({ widthMode: 'fixed' })}>Fixa</Button>
-          <Button onClick={() => setLayout({ widthMode: 'custom' })}>Custom</Button>
+          <Button onClick={() => setLayout({ widthMode: 'full' } as any)}>Full</Button>
+          <Button onClick={() => setLayout({ widthMode: 'fixed' } as any)}>Fixa</Button>
+          <Button onClick={() => setLayout({ widthMode: 'custom' } as any)}>Custom</Button>
         </Row>
 
         {widthMode === 'custom' && (
@@ -438,7 +424,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               min={200}
               max={1920}
               value={customWidthPx}
-              onChange={(e) => setLayout({ customWidthPx: Number(e.target.value) })}
+              onChange={(e) => setLayout({ customWidthPx: Number(e.target.value) } as any)}
               style={{ width: 90 }}
             />
           </Row>
@@ -456,9 +442,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         {badgeEnabled ? (
           <>
             <Row label="Upload">
-              <Button onClick={() => badgeRef.current?.click()}>
-                {uploadingBadge ? 'A enviar...' : '📷 Upload badge'}
-              </Button>
+              <Button onClick={() => badgeRef.current?.click()}>{uploadingBadge ? 'A enviar...' : '📷 Upload badge'}</Button>
 
               <input
                 ref={badgeRef}
@@ -477,7 +461,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 value={settings.badgeImage ?? ''}
                 onChange={(e) => onChange({ ...settings, badgeImage: e.target.value })}
                 style={{ width: 260 }}
-               
                 placeholder="https://..."
               />
             </Row>
@@ -533,9 +516,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             <Row label="Fundo (pill)">
               <Toggle
                 active={badgeBgEnabled}
-                onClick={() =>
-                  setLayout({ ...(layout as any), badge: { ...badge, bgEnabled: !badgeBgEnabled } } as any)
-                }
+                onClick={() => setLayout({ ...(layout as any), badge: { ...badge, bgEnabled: !badgeBgEnabled } } as any)}
               />
             </Row>
 
@@ -543,9 +524,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <Row label="Cor do fundo">
                 <SwatchRow
                   value={badgeBgColor}
-                  onChange={(hex) =>
-                    setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)
-                  }
+                  onChange={(hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)}
                   onEyedropper={openEyedropperBadgeBg}
                 />
               </Row>
@@ -567,9 +546,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             <Row label="Sombra">
               <Toggle
                 active={badgeShadow}
-                onClick={() =>
-                  setLayout({ ...(layout as any), badge: { ...badge, shadow: !badgeShadow } } as any)
-                }
+                onClick={() => setLayout({ ...(layout as any), badge: { ...badge, shadow: !badgeShadow } } as any)}
               />
             </Row>
           </>
@@ -582,8 +559,8 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
       <Section title="Avatar (layout)">
         <Row label="Posição">
-          <Button onClick={() => setLayout({ avatarDock: 'overlap' })}>Overlap</Button>
-          <Button onClick={() => setLayout({ avatarDock: 'inline' })}>Inline</Button>
+          <Button onClick={() => setLayout({ avatarDock: 'overlap' } as any)}>Overlap</Button>
+          <Button onClick={() => setLayout({ avatarDock: 'inline' } as any)}>Inline</Button>
         </Row>
       </Section>
     </div>

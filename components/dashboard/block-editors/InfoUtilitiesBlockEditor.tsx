@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
+import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 export type InfoItemType =
   | 'address'
@@ -102,9 +103,18 @@ export default function InfoUtilitiesBlockEditor({
   onChangeSettings,
   onChangeStyle,
 }: Props) {
+  const { openPicker } = useColorPicker()
+
   const s = settings || {}
   const st = style || {}
   const items = useMemo(() => s.items || [], [s.items])
+
+  // ✅ helper: abre SEMPRE o eyedropper com lupa
+  const pickEyedropper = (apply: (hex: string) => void) =>
+    openPicker({
+      mode: 'eyedropper',
+      onPick: apply,
+    })
 
   const updateSettings = (patch: Partial<InfoUtilitiesSettings>) => {
     onChangeSettings({ ...s, ...patch })
@@ -191,13 +201,7 @@ export default function InfoUtilitiesBlockEditor({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={onFileChange}
-        style={{ display: 'none' }}
-      />
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
 
       <Section title="Conteúdo">
         <Row label="Título">
@@ -365,9 +369,7 @@ export default function InfoUtilitiesBlockEditor({
                         border: '1px solid rgba(0,0,0,0.08)',
                       }}
                     />
-                    <div style={{ fontSize: 12, opacity: 0.7, wordBreak: 'break-all' }}>
-                      {item.iconImageSrc}
-                    </div>
+                    <div style={{ fontSize: 12, opacity: 0.7, wordBreak: 'break-all' }}>{item.iconImageSrc}</div>
                   </div>
                 ) : null}
               </div>
@@ -530,7 +532,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.headingColor ?? '#111827'}
             onChange={(hex) => updateStyle({ headingColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))}
           />
         </Row>
 
@@ -598,7 +600,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.textColor ?? '#111827'}
             onChange={(hex) => updateStyle({ textColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))}
           />
         </Row>
 
@@ -684,7 +686,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.rowBorderColor ?? '#e5e7eb'}
             onChange={(hex) => updateStyle({ rowBorderColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))}
           />
         </Row>
 
@@ -716,7 +718,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.iconColor ?? '#111827'}
             onChange={(hex) => updateStyle({ iconColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))}
           />
         </Row>
 
@@ -724,7 +726,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.iconBgColor ?? 'transparent'}
             onChange={(hex) => updateStyle({ iconBgColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))}
           />
         </Row>
 
@@ -746,7 +748,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.buttonTextColor ?? '#111827'}
             onChange={(hex) => updateStyle({ buttonTextColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))}
           />
         </Row>
 
@@ -754,7 +756,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.buttonBgColor ?? '#f0f0f0'}
             onChange={(hex) => updateStyle({ buttonBgColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))}
           />
         </Row>
 
@@ -774,7 +776,7 @@ export default function InfoUtilitiesBlockEditor({
           <SwatchRow
             value={st.buttonBorderColor ?? '#e5e7eb'}
             onChange={(hex) => updateStyle({ buttonBorderColor: hex })}
-            onEyedropper={() => {}}
+            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))}
           />
         </Row>
 

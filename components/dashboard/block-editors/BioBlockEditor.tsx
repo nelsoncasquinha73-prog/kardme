@@ -13,7 +13,7 @@ type BioStyle = {
   offsetY?: number
 
   textColor?: string
-  fontFamily?: string // agora vai guardar var(--font-...)
+  fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
@@ -42,7 +42,12 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const s: BioStyle = style || {}
   const c = s.container || {}
 
-  const pick = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  // ✅ FIX: abrir SEMPRE a lupa
+  const pickEyedropper = (apply: (hex: string) => void) =>
+    openPicker({
+      mode: 'eyedropper',
+      onPick: apply,
+    })
 
   const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => {
     onChangeStyle({
@@ -113,7 +118,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           <SwatchRow
             value={s.textColor ?? '#111827'}
             onChange={(hex) => setStyle({ textColor: hex })}
-            onEyedropper={() => pick((hex) => setStyle({ textColor: hex }))}
+            onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))}
           />
         </Row>
 
@@ -154,7 +159,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
             <SwatchRow
               value={c.bgColor ?? '#ffffff'}
               onChange={(hex) => setContainer({ bgColor: hex })}
-              onEyedropper={() => pick((hex) => setContainer({ bgColor: hex }))}
+              onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))}
             />
           </Row>
         )}
@@ -187,7 +192,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
               <SwatchRow
                 value={c.borderColor ?? '#e5e7eb'}
                 onChange={(hex) => setContainer({ borderColor: hex })}
-                onEyedropper={() => pick((hex) => setContainer({ borderColor: hex }))}
+                onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))}
               />
             </Row>
           </>
