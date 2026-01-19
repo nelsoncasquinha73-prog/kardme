@@ -9,9 +9,7 @@ type Props = {
 export default function MobileCardFrame({ children, background }: Props) {
   return (
     <div className="cardFrameRoot" style={{ background: background ?? 'transparent' }}>
-      <div className="cardFrameShell">
-        <div className="cardScaleWrap">{children}</div>
-      </div>
+      <div className="cardFrameShell">{children}</div>
     </div>
   )
 }

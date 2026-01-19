@@ -5,7 +5,7 @@
 .cardFrameRoot{
   min-height: 100dvh;
   width: 100%;
-  overflow-x: hidden; /* evita drift lateral no Safari iOS */
+  overflow-x: hidden; /* ok manter, mas sem scale/420px lá dentro */
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -26,33 +26,18 @@
   display: block;
 }
 
-/* Wrapper que mantém o “design size” do preview */
-.cardScaleWrap{
-  width: 420px;            /* design base */
-  margin: 0 auto;
-  transform-origin: top center;
-  /* desktop: sem scale */
-  transform: none;
-}
-
 /* ===============================
-   MOBILE – EDGE TO EDGE + SCALE
+   MOBILE – EDGE TO EDGE
    =============================== */
 
 @media (max-width: 520px){
   .cardFrameRoot{
-    padding: 0 !important; /* sem espaços laterais */
-    align-items: flex-start;
+    padding: 0 !important;
   }
 
   .cardFrameShell{
     max-width: 100%;
     width: 100%;
-    margin-inline: auto !important;
-  }
-
-  .cardScaleWrap{
-    /* fica ligeiramente mais pequeno para “bater” com o preview */
-    transform: scale(clamp(0.78, calc(100vw / 420), 0.92));
+    margin-inline: 0;
   }
 }

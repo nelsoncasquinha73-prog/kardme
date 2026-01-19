@@ -8,11 +8,11 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 import '@/styles/card-frame.css'
+import '@/styles/card-preview.css'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// Ajuda iOS (safe-area)
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -87,24 +87,21 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const { bgCss, bgOpacity } = bgToCss(card?.theme?.background)
+  const { bgCss } = bgToCss(card?.theme?.background)
 
   return (
     <MobileCardFrame background={bgCss}>
-      {/* NÃO meter cardScaleWrap aqui — o MobileCardFrame já trata do scale */}
-      <div style={{ opacity: bgOpacity }}>
-        <LanguageProvider>
-          <ThemeProvider theme={card.theme}>
-            <CardPreview
-              card={card}
-              blocks={blocks}
-              showTranslations={false}
-              fullBleed={true}
-              cardBg={card.theme?.background}
-            />
-          </ThemeProvider>
-        </LanguageProvider>
-      </div>
+      <LanguageProvider>
+        <ThemeProvider theme={card.theme}>
+          <CardPreview
+            card={card}
+            blocks={blocks}
+            showTranslations={false}
+            fullBleed={true}
+            cardBg={card.theme?.background}
+          />
+        </ThemeProvider>
+      </LanguageProvider>
     </MobileCardFrame>
   )
 }
