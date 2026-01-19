@@ -50,3 +50,18 @@
     max-width: 100% !important;
   }
 }
+@media (max-width: 520px) {
+  .cardShell {
+    position: relative !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* e garante que o main volta a centrar */
+  .card-preview .cardMain {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
