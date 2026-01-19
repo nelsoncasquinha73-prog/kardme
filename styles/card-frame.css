@@ -1,0 +1,31 @@
+.cardFrameRoot{
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding-top: 12px;
+  padding-left: max(8px, env(safe-area-inset-left));
+  padding-right: max(8px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.cardFrameShell{
+  width: 100%;
+  max-width: 420px; /* igual ao preview */
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* MOBILE: edge-to-edge */
+@media (max-width: 520px){
+  .cardFrameRoot{
+    padding: 0 !important;
+    align-items: stretch;
+  }
+  .cardFrameShell{
+    max-width: 100vw;
+    width: 100vw;
+    margin: 0;
+  }
+}

@@ -135,18 +135,17 @@ export default function CardPreview({
         </div>
       )}
 
-      {/* ✅ O “palco” tem de ser igual ao slug no mobile:
-          fullBleed => 100% + padding 0 + sem maxWidth */}
       <main
-        className="cardMain"
-        style={{
-          width: '100%',
-          maxWidth: fullBleed ? '100%' : 420,
-          margin: fullBleed ? 0 : '0 auto',
-          padding: fullBleed ? 0 : '0 var(--page-pad-x, 16px)',
-          boxSizing: 'border-box',
-        }}
-      >
+  className="cardMain"
+  style={{
+    width: '100%',
+    maxWidth: fullBleed ? '100%' : 420,
+    margin: fullBleed ? 0 : '0 auto',
+    padding: 0, // ⚠️ nunca padding externo em fullBleed
+    boxSizing: 'border-box',
+  }}
+>
+
         <div
           style={{
             position: 'relative',

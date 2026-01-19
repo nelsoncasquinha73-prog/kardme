@@ -3,10 +3,9 @@ import { notFound } from 'next/navigation'
 import { supabaseServer } from '@/lib/supabaseServer'
 
 import CardPreview from '@/components/theme/CardPreview'
+import MobileCardFrame from '@/components/theme/MobileCardFrame'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
-
-import '@/styles/card-preview.css'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -79,19 +78,10 @@ export default async function CardPage({ params }: Props) {
   const { bgCss, bgOpacity } = bgToCss(card?.theme?.background)
 
   return (
-    <div
-      className="card-preview"
-      style={
-        {
-          // background + opacity só para o FUNDO (via ::before no CSS)
-          ['--slug-bg' as any]: bgCss,
-          ['--slug-bg-opacity' as any]: String(bgOpacity),
-        } as React.CSSProperties
-      }
-    >
-      <div className="cardShell">
-        <LanguageProvider>
-          <ThemeProvider theme={card.theme}>
+    <LanguageProvider>
+      <ThemeProvider theme={card.theme}>
+        <MobileCardFrame background={bgCss}>
+          <div style={{ width: '100%', opacity: bgOpacity }}>
             <CardPreview
               card={card}
               blocks={blocks}
@@ -99,9 +89,9 @@ export default async function CardPage({ params }: Props) {
               fullBleed={true}
               cardBg={card.theme?.background}
             />
-          </ThemeProvider>
-        </LanguageProvider>
-      </div>
-    </div>
+          </div>
+        </MobileCardFrame>
+      </ThemeProvider>
+    </LanguageProvider>
   )
 }
