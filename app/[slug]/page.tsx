@@ -32,31 +32,8 @@ function bgToCss(bg: CardBg | undefined | null) {
   return { bgCss, bgOpacity }
 }
 
-export async function generateMetadata({ params }: Props) {
-  const { slug } = await params
-
-  const { data: card } = await supabaseServer
-    .from('cards')
-    .select('theme')
-    .eq('slug', slug)
-    .eq('published', true)
-    .single()
-
-  const bg = card?.theme?.background
-  const color =
-    bg?.mode === 'solid'
-      ? (bg.color ?? '#000000')
-      : (bg?.from ?? '#000000')
-
-  return {
-    themeColor: color,
-    colorScheme: 'dark',
-  }
-}
-
 export default async function CardPage({ params }: Props) {
   const { slug } = await params
-
   if (RESERVED_SLUGS.has(slug)) notFound()
 
   const { data: card, error } = await supabaseServer
@@ -89,7 +66,7 @@ export default async function CardPage({ params }: Props) {
               card={card}
               blocks={blocks}
               showTranslations={false}
-              fullBleed={true}
+              fullBleed={false}
               cardBg={card.theme?.background}
             />
           </ThemeProvider>

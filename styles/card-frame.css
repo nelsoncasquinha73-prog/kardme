@@ -17,15 +17,9 @@
   box-sizing: border-box;
 }
 
-/* MOBILE: edge-to-edge */
+/* MOBILE: mantém o mesmo palco do preview (420), só tira o padding */
 @media (max-width: 520px){
   .cardFrameRoot{
     padding: 0 !important;
-    align-items: stretch;
-  }
-  .cardFrameShell{
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
   }
 }
