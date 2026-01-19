@@ -88,7 +88,7 @@ export default function CardPreview({
   const headerBlock = blocks?.find((b) => b.type === 'header')
   const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
 
-  const safe = Number(card?.theme?.layout?.safePadding ?? 10)
+  const safe = fullBleed ? 0 : Number(card?.theme?.layout?.safePadding ?? 10)
 
   const bg = cardBg ?? card?.theme?.background
 
