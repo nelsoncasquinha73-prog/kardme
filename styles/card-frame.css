@@ -1,9 +1,12 @@
 .cardFrameRoot{
   min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;               /* <-- evita drift do Safari */
   display: flex;
   justify-content: center;
   align-items: flex-start;
   box-sizing: border-box;
+
   padding-top: 12px;
   padding-left: max(8px, env(safe-area-inset-left));
   padding-right: max(8px, env(safe-area-inset-right));
@@ -12,14 +15,19 @@
 
 .cardFrameShell{
   width: 100%;
-  max-width: 420px; /* igual ao preview */
-  margin: 0 auto;
+  max-width: 420px;                 /* igual ao preview */
   box-sizing: border-box;
+
+  margin-inline: auto;              /* <-- melhor que margin-left/right no iOS */
+  display: block;
 }
 
-/* MOBILE: mantém o mesmo palco do preview (420), só tira o padding */
+/* MOBILE: sem espaço, mas continua centrado */
 @media (max-width: 520px){
   .cardFrameRoot{
     padding: 0 !important;
+  }
+  .cardFrameShell{
+    margin-inline: auto !important;
   }
 }
