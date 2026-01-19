@@ -10,21 +10,42 @@
   padding-left: max(8px, env(safe-area-inset-left));
   padding-right: max(8px, env(safe-area-inset-right));
   padding-bottom: max(24px, env(safe-area-inset-bottom));
+
+  /* fundo do slug via CSS vars */
+  position: relative;
+  background: transparent;
+}
+
+/* Fundo com opacidade SEM afetar o conteúdo */
+.card-preview::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--slug-bg, transparent);
+  opacity: var(--slug-bg-opacity, 1);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .cardShell{
+  position: relative;
+  z-index: 1;
+
   width: 100%;
-  max-width: 480px;
+  /* para bater com o preview */
+  max-width: 420px;
+
   box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* MOBILE: SEM espaço nenhum */
+/* MOBILE: SEM espaço nenhum (full-bleed real) */
 @media (max-width: 520px){
   .card-preview{
     padding: 0 !important;
   }
+
   .cardShell{
     max-width: 100% !important;
   }

@@ -44,10 +44,7 @@ export async function generateMetadata({ params }: Props) {
     .single()
 
   const bg = card?.theme?.background
-  const color =
-    bg?.mode === 'solid'
-      ? (bg.color ?? '#000000')
-      : (bg?.from ?? '#000000')
+  const color = bg?.mode === 'solid' ? (bg.color ?? '#000000') : (bg?.from ?? '#000000')
 
   return {
     themeColor: color,
@@ -84,10 +81,13 @@ export default async function CardPage({ params }: Props) {
   return (
     <div
       className="card-preview"
-      style={{
-        background: bgCss,
-        opacity: bgOpacity,
-      }}
+      style={
+        {
+          // background + opacity só para o FUNDO (via ::before no CSS)
+          ['--slug-bg' as any]: bgCss,
+          ['--slug-bg-opacity' as any]: String(bgOpacity),
+        } as React.CSSProperties
+      }
     >
       <div className="cardShell">
         <LanguageProvider>
