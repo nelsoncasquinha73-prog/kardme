@@ -811,6 +811,92 @@ export default function ServicesBlockEditor({
           </div>
         ))}
       </Section>
+{/* ================== ESTILOS DO CARD ================== */}
+<Section title="Estilos do card">
+  <Row label="Fundo do card">
+    <Toggle
+      active={(st.cardBgColor ?? '#ffffff') !== 'transparent'}
+      onClick={() =>
+        updateStyle({
+          cardBgColor:
+            (st.cardBgColor ?? '#ffffff') !== 'transparent'
+              ? 'transparent'
+              : '#ffffff',
+        })
+      }
+    />
+  </Row>
+
+  {(st.cardBgColor ?? '#ffffff') !== 'transparent' && (
+    <Row label="Cor do fundo">
+      <SwatchRow
+        value={st.cardBgColor ?? '#ffffff'}
+        onChange={(hex) => updateStyle({ cardBgColor: hex })}
+        onEyedropper={() => pick((hex) => updateStyle({ cardBgColor: hex }))}
+      />
+    </Row>
+  )}
+
+  <Row label="Sombra do card">
+    <Toggle
+      active={st.cardShadow ?? true}
+      onClick={() => updateStyle({ cardShadow: !(st.cardShadow ?? true) })}
+    />
+  </Row>
+
+  <Row label="Raio do card (px)">
+    <input
+      type="range"
+      min={0}
+      max={32}
+      step={1}
+      value={st.cardRadiusPx ?? 12}
+      onChange={(e) =>
+        updateStyle({ cardRadiusPx: clampNum(e.target.value, 12) })
+      }
+    />
+    <span style={rightNum}>{st.cardRadiusPx ?? 12}px</span>
+  </Row>
+
+  <Row label="Borda do card">
+    <Toggle
+      active={(st.cardBorderWidth ?? 1) > 0}
+      onClick={() =>
+        updateStyle({
+          cardBorderWidth: (st.cardBorderWidth ?? 1) > 0 ? 0 : 1,
+        })
+      }
+    />
+  </Row>
+
+  {(st.cardBorderWidth ?? 1) > 0 && (
+    <>
+      <Row label="Espessura da borda (px)">
+        <input
+          type="range"
+          min={1}
+          max={6}
+          step={1}
+          value={st.cardBorderWidth ?? 1}
+          onChange={(e) =>
+            updateStyle({ cardBorderWidth: clampNum(e.target.value, 1) })
+          }
+        />
+        <span style={rightNum}>{st.cardBorderWidth ?? 1}px</span>
+      </Row>
+
+      <Row label="Cor da borda">
+        <SwatchRow
+          value={st.cardBorderColor ?? '#e5e7eb'}
+          onChange={(hex) => updateStyle({ cardBorderColor: hex })}
+          onEyedropper={() =>
+            pick((hex) => updateStyle({ cardBorderColor: hex }))
+          }
+        />
+      </Row>
+    </>
+  )}
+</Section>
 
       {/* Nota: mantivemos o teu "Estilos" noutro bloco do ficheiro anteriormente.
           Se quiseres, cola-o abaixo desta secção e eu também te devolvo “limpo”. */}

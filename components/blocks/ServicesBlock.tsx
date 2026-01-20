@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import AutoplayImport from 'embla-carousel-autoplay'
 
@@ -39,7 +38,7 @@ export type ServicesSettings = {
 export type ServicesStyle = {
   offsetY?: number
 
-  // título (igual ao SocialBlock)
+  // título do bloco
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
@@ -47,6 +46,7 @@ export type ServicesStyle = {
   headingAlign?: 'left' | 'center' | 'right'
   headingFontSize?: number
 
+  // container do bloco
   container?: {
     bgColor?: string // 'transparent' => OFF
     radius?: number
@@ -56,10 +56,28 @@ export type ServicesStyle = {
     borderColor?: string
   }
 
-  textColor?: string
+  // tipografia base (para texto)
+  textFontFamily?: string
   textFontWeight?: number
   textFontSize?: number
 
+  // cores específicas
+  titleColor?: string
+  subtitleColor?: string
+  priceColor?: string
+  descriptionColor?: string
+
+  // tipografia específica (opcional)
+  titleFontWeight?: number
+  titleFontSize?: number
+  subtitleFontWeight?: number
+  subtitleFontSize?: number
+  priceFontWeight?: number
+  priceFontSize?: number
+  descriptionFontWeight?: number
+  descriptionFontSize?: number
+
+  // card
   cardRadiusPx?: number
   cardBorderWidth?: number
   cardBorderColor?: string
@@ -78,12 +96,21 @@ export type ServicesStyle = {
   imageRadiusPx?: number
   imageAspectRatio?: number
 
-  // foco da imagem (0..100) — default centro
   imageFocusX?: number
   imageFocusY?: number
 
+  // ✅ NOVO: caixa do texto (dentro do card)
+  contentBox?: {
+    bgColor?: string // 'transparent' => OFF
+    radius?: number
+    padding?: number
+    shadow?: boolean
+    borderWidth?: number
+    borderColor?: string
+  }
+
   // carrossel
-  carouselCardWidthPx?: number // 260–360
+  carouselCardWidthPx?: number
   carouselGapPx?: number
   carouselSidePaddingPx?: number
   carouselDotsColor?: string
@@ -92,53 +119,36 @@ export type ServicesStyle = {
   carouselArrowsIconColor?: string
 }
 
-export default function ServicesBlock({
-  settings,
-  style,
-}: {
-  settings: ServicesSettings
-  style?: ServicesStyle
-}) {
+export default function ServicesBlock({ settings, style }: { settings: ServicesSettings; style?: ServicesStyle }) {
   const s = settings || {}
   const st = style || {}
-
   const [modalOpen, setModalOpen] = useState<string | null>(null)
 
   // Container (bloco)
   const container = st.container || {}
   const containerBg = container.bgColor ?? 'transparent'
-  const containerHasBg =
-    containerBg !== 'transparent' && containerBg !== 'rgba(0,0,0,0)'
+  const containerHasBg = containerBg !== 'transparent' && containerBg !== 'rgba(0,0,0,0)'
   const containerHasShadow = container.shadow === true
   const containerHasBorder = (container.borderWidth ?? 0) > 0
-  const containerEffectiveBg =
-    containerHasShadow && !containerHasBg ? 'rgba(255,255,255,0.92)' : containerBg
+  const containerEffectiveBg = containerHasShadow && !containerHasBg ? 'rgba(255,255,255,0.92)' : containerBg
 
   const wrapStyle: React.CSSProperties = {
-    marginTop: st.offsetY ? `\${st.offsetY}px` : undefined,
+    marginTop: typeof st.offsetY === 'number' ? `${st.offsetY}px` : undefined,
     backgroundColor: containerHasBg || containerHasShadow ? containerEffectiveBg : 'transparent',
-    borderRadius:
-      containerHasBg || containerHasShadow || containerHasBorder
-        ? container.radius != null
-          ? `\${container.radius}px`
-          : undefined
-        : undefined,
-    padding:
-      containerHasBg || containerHasShadow || containerHasBorder
-        ? container.padding != null
-          ? `\${container.padding}px`
-          : '16px'
-        : '0px',
+    borderRadius: containerHasBg || containerHasShadow || containerHasBorder ? (container.radius != null ? `${container.radius}px` : undefined) : undefined,
+    padding: containerHasBg || containerHasShadow || containerHasBorder ? (container.padding != null ? `${container.padding}px` : '16px') : '0px',
     boxShadow: containerHasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: containerHasBorder ? 'solid' : undefined,
-    borderWidth: containerHasBorder ? `\${container.borderWidth}px` : undefined,
+    borderWidth: containerHasBorder ? `${container.borderWidth}px` : undefined,
     borderColor: containerHasBorder ? container.borderColor ?? undefined : undefined,
   }
 
   const heading = s.heading ?? 'Serviços e Produtos'
   const items = useMemo(() => (s.items || []).filter((i) => i.enabled), [s.items])
   const layout = s.layout ?? 'grid'
+  if (items.length === 0) return null
 
+  // Card base
   const cardRadius = st.cardRadiusPx ?? 12
   const cardBorderWidth = st.cardBorderWidth ?? 1
   const cardBorderColor = st.cardBorderColor ?? '#e5e7eb'
@@ -157,19 +167,12 @@ export default function ServicesBlock({
   const buttonRadius = st.buttonRadiusPx ?? 8
 
   const imageAspectRatio = clamp(clampNum(st.imageAspectRatio, 1.5), 0.5, 3)
+  const imageRadius = st.imageRadiusPx ?? 10
 
-
-  if (items.length === 0) return null
-
-  // título igual ao SocialBlock
-  const hasHeading = typeof heading === 'string' && heading.trim().length > 0
-  const headingBoldOn = st.headingBold !== false
-
-  // ✅ foco imagem — default centro (50/50)
-  const focusX = clampNum(st.imageFocusX, 50)
-  const focusY = clampNum(st.imageFocusY, 50)
-  const objectPosition = `\${clamp(focusX, 0, 100)}% \${clamp(focusY, 0, 100)}%`
-  console.log('ServiceCard objectPosition:', objectPosition)
+  // foco imagem
+  const focusX = clamp(clampNum(st.imageFocusX, 50), 0, 100)
+  const focusY = clamp(clampNum(st.imageFocusY, 50), 0, 100)
+  const objectPosition = `${focusX}% ${focusY}%`
 
   // ===== Carrossel (Embla) =====
   const autoplayEnabled = s.carousel?.autoplay !== false
@@ -182,7 +185,6 @@ export default function ServicesBlock({
   const cardWidthPx = clamp(clampNum(st.carouselCardWidthPx, 320), 240, 520)
   const carouselGapPx = clamp(clampNum(st.carouselGapPx, colGap), 0, 64)
 
-  // Ajuste do side padding para centrar o card
   const sidePaddingPx = clamp(
     clampNum(st.carouselSidePaddingPx, Math.max(12, Math.round((360 - cardWidthPx) / 2))),
     0,
@@ -195,18 +197,15 @@ export default function ServicesBlock({
   const arrowsBg = st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'
   const arrowsIcon = st.carouselArrowsIconColor ?? '#111827'
 
-  const autoplay = useRef(
-    Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
-  )
-  const plugins =
-    layout === 'carousel' && autoplayEnabled && items.length > 1 ? [autoplay.current] : []
+  const autoplay = useRef(Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true }))
+  const plugins = layout === 'carousel' && autoplayEnabled && items.length > 1 ? [autoplay.current] : []
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: layout === 'carousel' && items.length > 1,
-      align: 'center', // alterado para centrar
+      align: 'center',
       dragFree: false,
-      containScroll: 'keepSnaps', // alterado para keepSnaps
+      containScroll: 'keepSnaps',
     },
     plugins
   )
@@ -251,6 +250,9 @@ export default function ServicesBlock({
   const next = () => emblaApi?.scrollNext()
   const goTo = (idx: number) => emblaApi?.scrollTo(idx)
 
+  const hasHeading = typeof heading === 'string' && heading.trim().length > 0
+  const headingBoldOn = st.headingBold !== false
+
   return (
     <section style={wrapStyle}>
       {hasHeading && (
@@ -272,7 +274,6 @@ export default function ServicesBlock({
       {layout === 'carousel' ? (
         <div style={{ position: 'relative' }}>
           <div ref={emblaRef} style={{ overflow: 'hidden', WebkitTapHighlightColor: 'transparent' }}>
-            {/* container (SEM gap — spacing embla-safe) */}
             <div
               style={{
                 display: 'flex',
@@ -284,15 +285,7 @@ export default function ServicesBlock({
               }}
             >
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    flex: '0 0 auto',
-                    paddingLeft: carouselGapPx,
-                    width: cardWidthPx,
-                    // maxWidth removido para largura consistente
-                  }}
-                >
+                <div key={item.id} style={{ flex: '0 0 auto', paddingLeft: carouselGapPx, width: cardWidthPx }}>
                   <ServiceCard
                     item={item}
                     st={st}
@@ -309,6 +302,7 @@ export default function ServicesBlock({
                     buttonBorderColor={buttonBorderColor}
                     buttonRadius={buttonRadius}
                     imageAspectRatio={imageAspectRatio}
+                    imageRadius={imageRadius}
                     onOpenModal={() => setModalOpen(item.id)}
                   />
                 </div>
@@ -318,38 +312,17 @@ export default function ServicesBlock({
 
           {showArrowsNow && (
             <>
-              <button
-                type="button"
-                onClick={prev}
-                aria-label="Anterior"
-                style={arrowStyle('left', arrowsBg, arrowsIcon)}
-                data-no-block-select="1"
-              >
+              <button type="button" onClick={prev} aria-label="Anterior" style={arrowStyle('left', arrowsBg, arrowsIcon)} data-no-block-select="1">
                 ‹
               </button>
-              <button
-                type="button"
-                onClick={next}
-                aria-label="Seguinte"
-                style={arrowStyle('right', arrowsBg, arrowsIcon)}
-                data-no-block-select="1"
-              >
+              <button type="button" onClick={next} aria-label="Seguinte" style={arrowStyle('right', arrowsBg, arrowsIcon)} data-no-block-select="1">
                 ›
               </button>
             </>
           )}
 
           {canUseCarouselUi && showDots && snapCount > 1 && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 8,
-                marginTop: 10,
-                userSelect: 'none',
-              }}
-              data-no-block-select="1"
-            >
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 10, userSelect: 'none' }} data-no-block-select="1">
               {Array.from({ length: snapCount }).map((_, i) => {
                 const active = i === selectedIndex
                 return (
@@ -357,7 +330,7 @@ export default function ServicesBlock({
                     key={i}
                     type="button"
                     onClick={() => goTo(i)}
-                    aria-label={`Ir para o item \${i + 1}`}
+                    aria-label={`Ir para o item ${i + 1}`}
                     style={{
                       width: 8,
                       height: 8,
@@ -379,9 +352,8 @@ export default function ServicesBlock({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns:
-              layout === 'list' ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))',
-            gap: `\${rowGap}px \${colGap}px`,
+            gridTemplateColumns: layout === 'list' ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))',
+            gap: `${rowGap}px ${colGap}px`,
           }}
         >
           {items.map((item) => (
@@ -402,6 +374,7 @@ export default function ServicesBlock({
               buttonBorderColor={buttonBorderColor}
               buttonRadius={buttonRadius}
               imageAspectRatio={imageAspectRatio}
+              imageRadius={imageRadius}
               onOpenModal={() => setModalOpen(item.id)}
             />
           ))}
@@ -409,11 +382,7 @@ export default function ServicesBlock({
       )}
 
       {modalOpen && (
-        <Modal
-          onClose={() => setModalOpen(null)}
-          item={items.find((i) => i.id === modalOpen)!}
-          style={st}
-        />
+        <Modal onClose={() => setModalOpen(null)} item={items.find((i) => i.id === modalOpen)!} style={st} />
       )}
     </section>
   )
@@ -435,6 +404,7 @@ function ServiceCard({
   buttonBorderColor,
   buttonRadius,
   imageAspectRatio,
+  imageRadius,
   onOpenModal,
 }: {
   item: ServiceItem
@@ -452,16 +422,52 @@ function ServiceCard({
   buttonBorderColor: string
   buttonRadius: number
   imageAspectRatio: number
+  imageRadius: number
   onOpenModal: () => void
 }) {
-  const textColor = st?.textColor ?? '#111827'
+  const baseFont = st?.textFontFamily || undefined
+
+  const titleColor = st?.titleColor ?? st?.textColor ?? '#111827'
+  const subtitleColor = st?.subtitleColor ?? st?.textColor ?? '#4b5563'
+  const priceColor = st?.priceColor ?? st?.textColor ?? '#111827'
+  const descColor = st?.descriptionColor ?? st?.textColor ?? '#374151'
+
+  const titleWeight = st?.titleFontWeight ?? 800
+  const titleSize = st?.titleFontSize ?? 18
+
+  const subtitleWeight = st?.subtitleFontWeight ?? (st?.textFontWeight ?? 600)
+  const subtitleSize = st?.subtitleFontSize ?? 14
+
+  const priceWeight = st?.priceFontWeight ?? 800
+  const priceSize = st?.priceFontSize ?? 16
+
+  const descWeight = st?.descriptionFontWeight ?? (st?.textFontWeight ?? 500)
+  const descSize = st?.descriptionFontSize ?? (st?.textFontSize ?? 14)
+
+  // ✅ content box (texto dentro do card)
+  const cb = st?.contentBox || {}
+  const cbBg = cb.bgColor ?? 'transparent'
+  const cbHasBg = cbBg !== 'transparent' && cbBg !== 'rgba(0,0,0,0)'
+  const cbHasShadow = cb.shadow === true
+  const cbHasBorder = (cb.borderWidth ?? 0) > 0
+  const cbEffectiveBg = cbHasShadow && !cbHasBg ? 'rgba(255,255,255,0.92)' : cbBg
+
+  const contentBoxStyle: React.CSSProperties = {
+    padding: cb.padding != null ? `${cb.padding}px` : '16px',
+    backgroundColor: cbHasBg || cbHasShadow ? cbEffectiveBg : 'transparent',
+    borderRadius: cb.radius != null ? `${cb.radius}px` : undefined,
+    boxShadow: cbHasShadow ? '0 10px 24px rgba(0,0,0,0.12)' : undefined,
+    borderStyle: cbHasBorder ? 'solid' : undefined,
+    borderWidth: cbHasBorder ? `${cb.borderWidth}px` : undefined,
+    borderColor: cbHasBorder ? cb.borderColor ?? undefined : undefined,
+  }
 
   return (
     <div
       style={{
         borderRadius: cardRadius,
-        border: `\${cardBorderWidth}px solid \${cardBorderColor}`,
-        boxShadow: cardShadow ? '0 2px 8px rgba(0,0,0,0.1)' : undefined,
+        border: `${cardBorderWidth}px solid ${cardBorderColor}`,
+        boxShadow: cardShadow ? '0 2px 10px rgba(0,0,0,0.10)' : undefined,
         overflow: 'hidden',
         backgroundColor: cardHasBg ? cardBg : 'transparent',
         display: 'flex',
@@ -473,7 +479,7 @@ function ServiceCard({
           style={{
             position: 'relative',
             width: '100%',
-            paddingTop: `\${100 / imageAspectRatio}%`,
+            paddingTop: `${100 / imageAspectRatio}%`,
             minHeight: 160,
             overflow: 'hidden',
             borderTopLeftRadius: cardRadius,
@@ -493,94 +499,100 @@ function ServiceCard({
               objectFit: 'cover',
               objectPosition,
               display: 'block',
+              borderRadius: imageRadius ? `${imageRadius}px` : undefined,
             }}
           />
         </div>
       )}
 
-      <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 170 }}>
-        <h3 style={{ margin: 0, fontWeight: 700, fontSize: 18, color: textColor }}>
-          {item.title}
-        </h3>
+      <div style={{ padding: 12, flex: 1 }}>
+        <div style={{ ...contentBoxStyle, minHeight: 170, display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ margin: 0, fontWeight: titleWeight, fontSize: titleSize, color: titleColor, fontFamily: baseFont }}>
+            {item.title}
+          </h3>
 
-        {item.subtitle && (
-          <div style={{ fontSize: 14, color: st?.textColor ?? '#555', marginTop: 4, fontWeight: 500 }}>
-            {item.subtitle}
-          </div>
-        )}
+          {item.subtitle && (
+            <div
+              style={{
+                fontSize: subtitleSize,
+                color: subtitleColor,
+                marginTop: 4,
+                fontWeight: subtitleWeight,
+                fontFamily: baseFont,
+              }}
+            >
+              {item.subtitle}
+            </div>
+          )}
 
-        {item.price && (
-          <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16, color: textColor }}>
-            {item.price}
-          </div>
-        )}
+          {item.price && (
+            <div style={{ marginTop: 6, fontWeight: priceWeight, fontSize: priceSize, color: priceColor, fontFamily: baseFont }}>
+              {item.price}
+            </div>
+          )}
 
-        {item.description && (
-          <p style={{ marginTop: 8, fontSize: 14, color: st?.textColor ?? '#444', flexGrow: 1 }}>
-            {item.description}
-          </p>
-        )}
+          {item.description && (
+            <p style={{ marginTop: 8, fontSize: descSize, color: descColor, fontWeight: descWeight, flexGrow: 1, fontFamily: baseFont }}>
+              {item.description}
+            </p>
+          )}
 
-        {item.actionType !== 'none' && (
-          <div style={{ marginTop: 12 }}>
-            {item.actionType === 'link' && item.actionUrl ? (
-              <a
-                href={item.actionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  padding: '8px 16px',
-                  backgroundColor: buttonBg,
-                  color: buttonText,
-                  borderRadius: buttonRadius,
-                  border: `\${buttonBorderWidth}px solid \${buttonBorderColor}`,
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                {item.actionLabel || 'Ver mais'}
-              </a>
-            ) : item.actionType === 'modal' ? (
-              <button
-                                onClick={onOpenModal}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: buttonBg,
-                  color: buttonText,
-                  borderRadius: buttonRadius,
-                  border: `${buttonBorderWidth}px solid ${buttonBorderColor}`,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-                data-no-block-select="1"
-              >
-                {item.actionLabel || 'Ver mais'}
-              </button>
-            ) : null}
-          </div>
-        )}
+          {item.actionType !== 'none' && (
+            <div style={{ marginTop: 12 }}>
+              {item.actionType === 'link' && item.actionUrl ? (
+                <a
+                  href={item.actionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    padding: '8px 16px',
+                    backgroundColor: buttonBg,
+                    color: buttonText,
+                    borderRadius: buttonRadius,
+                    border: `${buttonBorderWidth}px solid ${buttonBorderColor}`,
+                    textDecoration: 'none',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: baseFont,
+                  }}
+                >
+                  {item.actionLabel || 'Ver mais'}
+                </a>
+              ) : item.actionType === 'modal' ? (
+                <button
+                  onClick={onOpenModal}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: buttonBg,
+                    color: buttonText,
+                    borderRadius: buttonRadius,
+                    border: `${buttonBorderWidth}px solid ${buttonBorderColor}`,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    fontFamily: baseFont,
+                  }}
+                  data-no-block-select="1"
+                >
+                  {item.actionLabel || 'Ver mais'}
+                </button>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function Modal({
-  onClose,
-  item,
-  style,
-}: {
-  onClose: () => void
-  item: ServiceItem
-  style?: ServicesStyle
-}) {
+function Modal({ onClose, item, style }: { onClose: () => void; item: ServiceItem; style?: ServicesStyle }) {
   if (!item) return null
 
   const bg = style?.container?.bgColor ?? '#fff'
   const radius = style?.container?.radius ?? 12
   const padding = style?.container?.padding ?? 24
   const textColor = style?.textColor ?? '#111827'
+  const fontFamily = style?.textFontFamily || undefined
 
   return (
     <div
@@ -609,6 +621,7 @@ function Modal({
           color: textColor,
           boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
           position: 'relative',
+          fontFamily,
         }}
       >
         <button
@@ -683,4 +696,3 @@ function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSS
     lineHeight: 1,
   }
 }
-
