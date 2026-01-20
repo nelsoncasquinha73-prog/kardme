@@ -20,6 +20,7 @@ type GallerySettings = {
   layout?: {
     containerMode?: 'full' | 'moldura' | 'autoadapter'
     gapPx?: number
+    sidePaddingPx?: number
     itemWidthPx?: number
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
@@ -29,7 +30,6 @@ type GallerySettings = {
 }
 
 type GalleryStyle = {
-  // título (igual ao SocialBlockEditor)
   headingFontSize?: number
   headingFontFamily?: string
   headingFontWeight?: number
@@ -84,11 +84,6 @@ export default function GalleryBlockEditor({
   const container = st.container || {}
 
   const pick = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
-
-  const setSettings = (patch: Partial<GallerySettings>) => {
-    onChangeSettings({ ...s, ...patch })
-    onBlurFlushSave?.()
-  }
 
   const setStyle = (patch: Partial<GalleryStyle>) => {
     onChangeStyle({ ...st, ...patch })
@@ -151,7 +146,6 @@ export default function GalleryBlockEditor({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* CONTEÚDO — título igual ao Social */}
       <Section title="Conteúdo">
         <Row label="Título">
           <input
@@ -190,10 +184,7 @@ export default function GalleryBlockEditor({
         </Row>
 
         <Row label="Negrito">
-          <Toggle
-            active={st.headingBold ?? true}
-            onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })}
-          />
+          <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
         </Row>
 
         <Row label="Fonte do título">
@@ -246,7 +237,6 @@ export default function GalleryBlockEditor({
         </Row>
       </Section>
 
-      {/* IMAGENS */}
       <Section title="Imagens">
         <Row label="Upload">
           <input
@@ -326,7 +316,6 @@ export default function GalleryBlockEditor({
         ))}
       </Section>
 
-      {/* LAYOUT */}
       <Section title="Layout">
         <Row label="Modo do container">
           <select
@@ -343,19 +332,37 @@ export default function GalleryBlockEditor({
           </select>
         </Row>
 
-        <Row label="Gap (px)">
+        <Row label="Gap entre fotos (px)">
           <input
             type="range"
             min={0}
-            max={48}
+            max={64}
             step={1}
-            value={layout.gapPx ?? 12}
-            onChange={(e) => setLayout({ gapPx: clampNum(e.target.value, 12) })}
+            value={layout.gapPx ?? 16}
+            onChange={(e) => setLayout({ gapPx: clampNum(e.target.value, 16) })}
             data-no-block-select="1"
             onPointerDown={stop}
             onMouseDown={stop}
           />
-          <span style={rightNum}>{layout.gapPx ?? 12}px</span>
+          <span style={rightNum}>{layout.gapPx ?? 16}px</span>
+        </Row>
+
+        {/* ✅ NOVO */}
+        <Row label="Respiro lateral (px)">
+          <input
+            type="range"
+            min={0}
+            max={64}
+            step={1}
+            value={layout.sidePaddingPx ?? (layout.containerMode === 'full' ? 0 : 16)}
+            onChange={(e) => setLayout({ sidePaddingPx: clampNum(e.target.value, 16) })}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          />
+          <span style={rightNum}>
+            {layout.sidePaddingPx ?? (layout.containerMode === 'full' ? 0 : 16)}px
+          </span>
         </Row>
 
         <Row label="Largura (px) - só Auto Adapter">
@@ -401,10 +408,12 @@ export default function GalleryBlockEditor({
         </Row>
       </Section>
 
-      {/* AUTOPLAY */}
       <Section title="Autoplay">
         <Row label="Ativar autoplay">
-          <Toggle active={layout.autoplay !== false} onClick={() => setLayout({ autoplay: !(layout.autoplay !== false) })} />
+          <Toggle
+            active={layout.autoplay !== false}
+            onClick={() => setLayout({ autoplay: !(layout.autoplay !== false) })}
+          />
         </Row>
 
         <Row label="Intervalo (ms)">
@@ -423,7 +432,6 @@ export default function GalleryBlockEditor({
         </Row>
       </Section>
 
-      {/* APARÊNCIA DO BLOCO (MOLDURA) */}
       <Section title="Aparência do bloco">
         <Row label="Fundo">
           <Toggle
@@ -448,7 +456,10 @@ export default function GalleryBlockEditor({
         )}
 
         <Row label="Sombra">
-          <Toggle active={container.shadow ?? false} onClick={() => setContainer({ shadow: !(container.shadow ?? false) })} />
+          <Toggle
+            active={container.shadow ?? false}
+            onClick={() => setContainer({ shadow: !(container.shadow ?? false) })}
+          />
         </Row>
 
         <Row label="Borda">
@@ -500,7 +511,7 @@ export default function GalleryBlockEditor({
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
 
-        <Row label="Padding">
+        <Row label="Padding (moldura)">
           <input
             type="range"
             min={0}

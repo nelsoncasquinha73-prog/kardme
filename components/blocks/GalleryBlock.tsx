@@ -19,6 +19,7 @@ type GallerySettings = {
   layout?: {
     containerMode?: 'full' | 'moldura' | 'autoadapter'
     gapPx?: number
+    sidePaddingPx?: number
     itemWidthPx?: number
     itemHeightPx?: number
     objectFit?: 'cover' | 'contain'
@@ -28,7 +29,6 @@ type GallerySettings = {
 }
 
 type GalleryStyle = {
-  // título (igual ao SocialBlock)
   headingFontFamily?: string
   headingFontWeight?: number
   headingColor?: string
@@ -63,7 +63,7 @@ function containerStyleFromJson(style: GalleryStyle['container']): React.CSSProp
   return {
     backgroundColor: enabled ? (s.bgColor ?? 'transparent') : 'transparent',
     borderRadius: s.radius != null ? `${s.radius}px` : undefined,
-    padding: s.padding != null ? `${s.padding}px` : '8px',
+    padding: s.padding != null ? `${s.padding}px` : '16px',
     boxShadow: s.shadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
     borderStyle: s.borderWidth ? 'solid' : undefined,
     borderWidth: s.borderWidth ? `${s.borderWidth}px` : undefined,
@@ -77,8 +77,18 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   const containerStyle = containerStyleFromJson(st.container)
 
-  const gapPx = s.layout?.gapPx ?? 12
   const containerMode = s.layout?.containerMode ?? 'full'
+
+  // ✅ melhor defaults (um bocadinho mais bonito)
+  const gapPx = s.layout?.gapPx ?? 16
+
+  // ✅ NOVO: respiro lateral do carrossel (onde realmente funciona)
+  const sidePaddingPx =
+    typeof s.layout?.sidePaddingPx === 'number'
+      ? s.layout.sidePaddingPx
+      : containerMode === 'full'
+        ? 0
+        : 16
 
   const itemWidthPx = s.layout?.itemWidthPx ?? (containerMode === 'autoadapter' ? 180 : 240)
   const itemHeightPx = s.layout?.itemHeightPx ?? (containerMode === 'autoadapter' ? 120 : 160)
@@ -112,6 +122,8 @@ export default function GalleryBlock({ settings, style }: Props) {
     plugins
   )
 
+  // ✅ IMPORTANTE: não meter padding no viewport (Embla fica esquisito)
+  // O “padding” da moldura continua no containerStyle, mas o scroll do carrossel usa padding no TRACK.
   const viewportStyle: React.CSSProperties = {
     ...containerStyle,
     overflow: 'hidden',
@@ -125,7 +137,6 @@ export default function GalleryBlock({ settings, style }: Props) {
 
   return (
     <section>
-      {/* TÍTULO — igual ao SocialBlock */}
       {isNonEmpty(s.heading) && (
         <div
           style={{
@@ -142,12 +153,16 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       )}
 
-      {/* CARROSSEL */}
       <div style={viewportStyle} ref={emblaRef}>
         <div
           style={{
             display: 'flex',
             gap: gapPx,
+
+            // ✅ NOVO: respiro lateral (primeira/última foto não colam)
+            paddingLeft: sidePaddingPx,
+            paddingRight: sidePaddingPx,
+
             paddingBottom: 2,
             touchAction: 'pan-y',
             WebkitTapHighlightColor: 'transparent',
@@ -198,7 +213,6 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       </div>
 
-      {/* LIGHTBOX */}
       {lightboxIndex !== null && (
         <Lightbox
           items={visibleItems}
