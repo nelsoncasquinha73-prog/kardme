@@ -427,10 +427,12 @@ function ServiceCard({
 }) {
   const baseFont = st?.textFontFamily || undefined
 
-  const titleColor = st?.titleColor ?? st?.textColor ?? '#111827'
-  const subtitleColor = st?.subtitleColor ?? st?.textColor ?? '#4b5563'
-  const priceColor = st?.priceColor ?? st?.textColor ?? '#111827'
-  const descColor = st?.descriptionColor ?? st?.textColor ?? '#374151'
+ const titleColor = st?.titleColor ?? '#111827'
+const subtitleColor = st?.subtitleColor ?? '#4b5563'
+const priceColor = st?.priceColor ?? '#111827'
+const descColor = st?.descriptionColor ?? '#374151'
+
+
 
   const titleWeight = st?.titleFontWeight ?? 800
   const titleSize = st?.titleFontSize ?? 18
