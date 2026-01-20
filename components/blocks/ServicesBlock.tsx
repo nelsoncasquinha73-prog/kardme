@@ -593,7 +593,7 @@ function Modal({ onClose, item, style }: { onClose: () => void; item: ServiceIte
   const bg = style?.container?.bgColor ?? '#fff'
   const radius = style?.container?.radius ?? 12
   const padding = style?.container?.padding ?? 24
-  const textColor = style?.textColor ?? '#111827'
+  const textColor = '#111827'
   const fontFamily = style?.textFontFamily || undefined
 
   return (
