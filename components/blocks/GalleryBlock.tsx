@@ -72,17 +72,14 @@ function containerStyleFromJson(style: GalleryStyle['container']): React.CSSProp
 }
 
 export default function GalleryBlock({ settings, style }: Props) {
-  const s = settings || { items: [] }
+  const s = settings || ({ items: [] } as any)
   const st = style || {}
 
   const containerStyle = containerStyleFromJson(st.container)
-
   const containerMode = s.layout?.containerMode ?? 'full'
 
-  // ✅ melhor defaults (um bocadinho mais bonito)
   const gapPx = s.layout?.gapPx ?? 16
 
-  // ✅ NOVO: respiro lateral do carrossel (onde realmente funciona)
   const sidePaddingPx =
     typeof s.layout?.sidePaddingPx === 'number'
       ? s.layout.sidePaddingPx
@@ -94,23 +91,25 @@ export default function GalleryBlock({ settings, style }: Props) {
   const itemHeightPx = s.layout?.itemHeightPx ?? (containerMode === 'autoadapter' ? 120 : 160)
   const objectFit = s.layout?.objectFit ?? 'cover'
 
-  const autoplayEnabled = s.layout?.autoplay !== false // default ON
+  const autoplayEnabled = s.layout?.autoplay !== false
   const autoplayIntervalMs = s.layout?.autoplayIntervalMs ?? 3500
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
-  const visibleItems = useMemo(
-    () => (s.items || []).filter((item) => item.enabled !== false && item.url),
-    [s.items]
-  )
+  const visibleItems = useMemo(() => {
+    const arr = Array.isArray(s.items) ? s.items : []
+    return arr.filter((item) => item && item.enabled !== false && item.url)
+  }, [s.items])
 
   if (visibleItems.length === 0) return null
 
-  const autoplay = useRef(
-    Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
-  )
+  // ✅ Autoplay plugin só quando faz sentido (e não rebenta se for undefined)
+  const autoplay = useRef<any>(null)
+  if (!autoplay.current && typeof Autoplay === 'function') {
+    autoplay.current = Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
+  }
 
-  const plugins = autoplayEnabled && visibleItems.length > 1 ? [autoplay.current] : []
+  const plugins = autoplayEnabled && visibleItems.length > 1 && autoplay.current ? [autoplay.current] : []
 
   const [emblaRef] = useEmblaCarousel(
     {
@@ -122,8 +121,7 @@ export default function GalleryBlock({ settings, style }: Props) {
     plugins
   )
 
-  // ✅ IMPORTANTE: não meter padding no viewport (Embla fica esquisito)
-  // O “padding” da moldura continua no containerStyle, mas o scroll do carrossel usa padding no TRACK.
+  // ✅ viewport sem padding (Embla gosta assim)
   const viewportStyle: React.CSSProperties = {
     ...containerStyle,
     overflow: 'hidden',
@@ -158,11 +156,8 @@ export default function GalleryBlock({ settings, style }: Props) {
           style={{
             display: 'flex',
             gap: gapPx,
-
-            // ✅ NOVO: respiro lateral (primeira/última foto não colam)
             paddingLeft: sidePaddingPx,
             paddingRight: sidePaddingPx,
-
             paddingBottom: 2,
             touchAction: 'pan-y',
             WebkitTapHighlightColor: 'transparent',
@@ -213,14 +208,14 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       </div>
 
-      {lightboxIndex !== null && (
+      {lightboxIndex !== null ? (
         <Lightbox
           items={visibleItems}
-          currentIndex={lightboxIndex}
+          currentIndex={Math.max(0, Math.min(visibleItems.length - 1, lightboxIndex))}
           onClose={() => setLightboxIndex(null)}
           onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
-      )}
+      ) : null}
     </section>
   )
 }
@@ -235,13 +230,19 @@ type LightboxProps = {
 }
 
 function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
-  const item = items[currentIndex]
+  const safeItems = Array.isArray(items) ? items : []
+  const item = safeItems[currentIndex]
 
-  const prev = () => onNavigate((currentIndex - 1 + items.length) % items.length)
-  const next = () => onNavigate((currentIndex + 1) % items.length)
+  // ✅ se por alguma razão estiver vazio, fecha
+  useEffect(() => {
+    if (!item) onClose()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, safeItems.length])
+
+  const prev = () => onNavigate((currentIndex - 1 + safeItems.length) % safeItems.length)
+  const next = () => onNavigate((currentIndex + 1) % safeItems.length)
 
   const [zoom, setZoom] = useState<1 | 2>(1)
-
   useEffect(() => setZoom(1), [currentIndex])
 
   useEffect(() => {
@@ -253,9 +254,11 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex])
+  }, [currentIndex, safeItems.length])
 
   const startXRef = useRef<number | null>(null)
+
+  if (!item) return null
 
   return (
     <div
@@ -311,11 +314,9 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           />
         </div>
 
-        {item.caption && (
-          <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>
-            {item.caption}
-          </div>
-        )}
+        {item.caption ? (
+          <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>{item.caption}</div>
+        ) : null}
 
         <button onClick={prev} style={navBtnLeft} aria-label="Imagem anterior">
           ‹

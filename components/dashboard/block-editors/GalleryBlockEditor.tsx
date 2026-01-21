@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
@@ -77,8 +77,9 @@ export default function GalleryBlockEditor({
   onBlurFlushSave,
 }: Props) {
   const { openPicker } = useColorPicker()
+  const [uploading, setUploading] = useState(false)
 
-  const s = settings || { items: [] }
+  const s = settings || ({ items: [] } as any)
   const st = style || {}
   const layout = s.layout || {}
   const container = st.container || {}
@@ -101,47 +102,67 @@ export default function GalleryBlockEditor({
   }
 
   const updateItem = (uid: string, patch: Partial<GalleryItem>) => {
-    const next = (s.items || []).map((it) => (it.uid === uid ? { ...it, ...patch } : it))
+    const prev = Array.isArray(s.items) ? s.items : []
+    const next = prev.map((it) => (it.uid === uid ? { ...it, ...patch } : it))
     onChangeSettings({ ...s, items: next })
   }
 
   const removeItem = (uid: string) => {
-    onChangeSettings({ ...s, items: (s.items || []).filter((it) => it.uid !== uid) })
+    const prev = Array.isArray(s.items) ? s.items : []
+    onChangeSettings({ ...s, items: prev.filter((it) => it.uid !== uid) })
     onBlurFlushSave?.()
   }
 
-  async function uploadFile(file: File) {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
-    const fileName = `${generateUid()}.${ext}`
-    const filePath = `gallery/${fileName}`
+  async function uploadFileSafe(file: File): Promise<string | null> {
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+      const fileName = `${generateUid()}.${ext}`
+      const filePath = `gallery/${fileName}`
 
-    const { error } = await supabase.storage.from('card-assets').upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    })
+      const { error } = await supabase.storage.from('card-assets').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
 
-    if (error) {
-      alert('Erro no upload: ' + error.message)
+      if (error) {
+        console.error('Supabase upload error:', error)
+        return null
+      }
+
+      const { data } = supabase.storage.from('card-assets').getPublicUrl(filePath)
+      return data?.publicUrl ?? null
+    } catch (e) {
+      console.error('Upload threw:', e)
       return null
     }
-
-    const { data } = supabase.storage.from('card-assets').getPublicUrl(filePath)
-    return data.publicUrl
   }
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return
+    const files = e.target.files ? Array.from(e.target.files) : []
+    if (files.length === 0) return
 
-    for (const file of Array.from(e.target.files)) {
-      const url = await uploadFile(file)
-      if (!url) continue
+    setUploading(true)
+    try {
+      // ✅ acumula para não depender de "s" stale dentro do loop
+      let nextItems = Array.isArray(s.items) ? [...s.items] : []
 
-      const newItem: GalleryItem = { uid: generateUid(), url, enabled: true }
-      onChangeSettings({ ...s, items: [...(s.items || []), newItem] })
+      for (const file of files) {
+        const url = await uploadFileSafe(file)
+        if (!url) {
+          alert('Erro ao enviar uma das imagens. Vê a consola para detalhes.')
+          continue
+        }
+
+        const newItem: GalleryItem = { uid: generateUid(), url, enabled: true }
+        nextItems = [...nextItems, newItem]
+      }
+
+      onChangeSettings({ ...s, items: nextItems })
       onBlurFlushSave?.()
+    } finally {
+      setUploading(false)
+      e.currentTarget.value = ''
     }
-
-    e.currentTarget.value = ''
   }
 
   return (
@@ -244,13 +265,16 @@ export default function GalleryBlockEditor({
             accept="image/*"
             multiple
             onChange={onFileChange}
+            disabled={uploading}
             data-no-block-select="1"
             onPointerDown={stop}
             onMouseDown={stop}
           />
         </Row>
 
-        {(s.items || []).map((it) => (
+        {uploading ? <div style={{ fontSize: 12, opacity: 0.7 }}>A enviar imagens…</div> : null}
+
+        {(Array.isArray(s.items) ? s.items : []).map((it) => (
           <div
             key={it.uid}
             style={{
@@ -347,7 +371,6 @@ export default function GalleryBlockEditor({
           <span style={rightNum}>{layout.gapPx ?? 16}px</span>
         </Row>
 
-        {/* ✅ NOVO */}
         <Row label="Respiro lateral (px)">
           <input
             type="range"
@@ -360,9 +383,7 @@ export default function GalleryBlockEditor({
             onPointerDown={stop}
             onMouseDown={stop}
           />
-          <span style={rightNum}>
-            {layout.sidePaddingPx ?? (layout.containerMode === 'full' ? 0 : 16)}px
-          </span>
+          <span style={rightNum}>{layout.sidePaddingPx ?? (layout.containerMode === 'full' ? 0 : 16)}px</span>
         </Row>
 
         <Row label="Largura (px) - só Auto Adapter">
@@ -410,10 +431,7 @@ export default function GalleryBlockEditor({
 
       <Section title="Autoplay">
         <Row label="Ativar autoplay">
-          <Toggle
-            active={layout.autoplay !== false}
-            onClick={() => setLayout({ autoplay: !(layout.autoplay !== false) })}
-          />
+          <Toggle active={layout.autoplay !== false} onClick={() => setLayout({ autoplay: !(layout.autoplay !== false) })} />
         </Row>
 
         <Row label="Intervalo (ms)">
@@ -456,17 +474,11 @@ export default function GalleryBlockEditor({
         )}
 
         <Row label="Sombra">
-          <Toggle
-            active={container.shadow ?? false}
-            onClick={() => setContainer({ shadow: !(container.shadow ?? false) })}
-          />
+          <Toggle active={container.shadow ?? false} onClick={() => setContainer({ shadow: !(container.shadow ?? false) })} />
         </Row>
 
         <Row label="Borda">
-          <Toggle
-            active={(container.borderWidth ?? 0) > 0}
-            onClick={() => setContainer({ borderWidth: (container.borderWidth ?? 0) > 0 ? 0 : 1 })}
-          />
+          <Toggle active={(container.borderWidth ?? 0) > 0} onClick={() => setContainer({ borderWidth: (container.borderWidth ?? 0) > 0 ? 0 : 1 })} />
         </Row>
 
         {(container.borderWidth ?? 0) > 0 && (
