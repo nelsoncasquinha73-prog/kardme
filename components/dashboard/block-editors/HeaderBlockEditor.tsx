@@ -290,58 +290,6 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           </div>
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
-{/* Personalizar preset (recolor rápido) */}
-<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-  <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Personalizar preset (rápido)</div>
-
-  <Row label="Cor A">
-    <SwatchRow
-      value={recolorA}
-      onChange={(hex) => setRecolorA(hex)}
-      onEyedropper={() => pickEyedropper((hex) => setRecolorA(hex))}
-    />
-  </Row>
-
-  <Row label="Cor B">
-    <SwatchRow
-      value={recolorB}
-      onChange={(hex) => setRecolorB(hex)}
-      onEyedropper={() => pickEyedropper((hex) => setRecolorB(hex))}
-    />
-  </Row>
-
-  <Button
-    onClick={() => {
-      // garante base gradient
-      const base =
-        v1.base.kind === 'gradient'
-          ? v1.base
-          : {
-              kind: 'gradient' as const,
-              angle: 180,
-              stops: [
-                { color: '#ffffff', pos: 0 },
-                { color: '#f3f4f6', pos: 100 },
-              ],
-            }
-
-    const nextStops = bg_recolorStops(base.stops, recolorA, recolorB)
-
-      onChangeCardBg?.({
-        ...v1,
-        base: { ...base, kind: 'gradient', stops: nextStops },
-      } as CardBg)
-    }}
-  >
-    Aplicar cores ao preset
-  </Button>
-
-  <div style={{ fontSize: 11, opacity: 0.6 }}>
-    Troca as cores do gradiente mantendo o “look” do preset (posições/stops).
-  </div>
-</div>
-
-<div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
 
           {/* Tipo base */}
           <Row label="Tipo">
