@@ -325,7 +325,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               ],
             }
 
-      const nextStops = bg_recolorStops(base.stops, recolorA, recolorB)
+    const nextStops = bg_recolorStops(base.stops, recolorA, recolorB)
 
       onChangeCardBg?.({
         ...v1,
@@ -795,16 +795,6 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
       </Section>
     </div>
   )
-}
-function bg_hexToRgb(hex: string) {
-  const h = hex.replace('#', '').trim()
-  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
-  const n = parseInt(full, 16)
-  return {
-    r: (n >> 16) & 255,
-    g: (n >> 8) & 255,
-    b: n & 255,
-  }
 }
 
 // =======================
