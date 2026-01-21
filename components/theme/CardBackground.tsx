@@ -33,7 +33,6 @@ function clamp(n: number, a: number, b: number) {
 }
 
 function svgNoiseDataUri(opts: { baseFrequency: number; seed: number; colorA: string; colorB: string }) {
-  // Noise “real” (feTurbulence) em SVG data-uri (funciona bem em browsers modernos)
   const { baseFrequency, seed, colorA, colorB } = opts
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
@@ -71,23 +70,21 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
   const baseSize = clamp(140 - density * 110, 18, 140) / scale
   const blurPx = softness * 1.2
 
-  // Defaults
   let backgroundImage: string | undefined
   let backgroundSize: string | undefined
   let backgroundRepeat: string | undefined
 
   if (kind === 'dots') {
-    // Pontinhos: radial-gradient repetido
-    // Pontos mais suaves com blur via filter no layer
-    backgroundImage = `radial-gradient(circle at 1px 1px, ${colorA} 0, ${colorA} 1.2px, transparent 1.8px)`
+    // ✅ Pontinhos uniformes (sem offset) — cobre sempre o cartão todo
+    backgroundImage = `radial-gradient(circle, ${colorA} 0, ${colorA} 1.2px, transparent 1.8px)`
     backgroundSize = `${baseSize}px ${baseSize}px`
     backgroundRepeat = 'repeat'
   } else if (kind === 'diagonal') {
+    // Aqui o ângulo faz sentido no próprio gradient (não no layer)
     backgroundImage = `repeating-linear-gradient(${angle}deg, ${colorA} 0, ${colorA} 2px, transparent 2px, transparent ${baseSize}px)`
     backgroundSize = undefined
     backgroundRepeat = 'repeat'
   } else if (kind === 'grid') {
-    // Grelha: duas linhas perpendiculares
     backgroundImage = `
       linear-gradient(${colorA} 1px, transparent 1px),
       linear-gradient(90deg, ${colorA} 1px, transparent 1px)
@@ -99,12 +96,10 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
     backgroundSize = `320px 320px`
     backgroundRepeat = 'repeat'
   } else if (kind === 'silk') {
-    // Silk: noise mais “lento” + sensação de tecido
     backgroundImage = svgNoiseDataUri({ baseFrequency: 0.35 / baseSize, seed: 11, colorA, colorB })
     backgroundSize = `360px 360px`
     backgroundRepeat = 'repeat'
   } else if (kind === 'marble') {
-    // Marble: noise mais “dramático”
     backgroundImage = svgNoiseDataUri({ baseFrequency: 0.22 / baseSize, seed: 19, colorA, colorB })
     backgroundSize = `420px 420px`
     backgroundRepeat = 'repeat'
@@ -119,8 +114,9 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
     opacity,
     pointerEvents: 'none',
     mixBlendMode: blendMode === 'normal' ? 'normal' : (blendMode as any),
-    transform: `rotate(${angle}deg)`,
-    transformOrigin: 'center',
+    // ✅ IMPORTANTE: não rodar o layer (era isto que cortava o padrão e criava a “faixa”)
+    transform: undefined,
+    transformOrigin: undefined,
     filter: blurPx > 0 ? `blur(${blurPx}px)` : undefined,
   }
 }
