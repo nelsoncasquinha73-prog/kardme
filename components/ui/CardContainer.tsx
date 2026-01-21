@@ -17,14 +17,22 @@ export default function CardContainer({
 }: Props) {
   const isFlat = variant === 'flat'
 
+  // “Glass” por cima do background do cartão
+  const glassBg = 'rgba(255,255,255,0.72)' // ajusta para 0.60–0.85 conforme gostares
+
   return (
     <div
       style={{
-        background: isFlat ? 'transparent' : 'var(--color-surface)',
+        background: isFlat ? 'transparent' : glassBg,
         borderRadius: isFlat ? 0 : 20,
         padding: isFlat ? 0 : padding,
         boxShadow: isFlat ? 'none' : '0 8px 24px rgba(0,0,0,0.06)',
         transition: hover ? 'transform 0.25s ease, box-shadow 0.25s ease' : undefined,
+
+        // ✅ deixa ver os patterns e dá look “premium”
+        backdropFilter: isFlat ? undefined : 'blur(10px) saturate(1.05)',
+        WebkitBackdropFilter: isFlat ? undefined : 'blur(10px) saturate(1.05)',
+        border: isFlat ? undefined : '1px solid rgba(255,255,255,0.35)',
       }}
       onMouseEnter={(e) => {
         if (!hover || isFlat) return
