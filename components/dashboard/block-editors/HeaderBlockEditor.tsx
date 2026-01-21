@@ -34,6 +34,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
   // ✅ normalizamos sempre para v1 para editar sem dores
   const v1 = migrateCardBg(cardBg as any)
+const [recolorA, setRecolorA] = useState('#d8c08a')
+const [recolorB, setRecolorB] = useState('#2b2b2b')
+const [patternA, setPatternA] = useState('#ffffff')
+const [patternB, setPatternB] = useState('#000000')
+
 
   // ✅ base gradient “segura” para TS + UI
   const gBase =
@@ -172,6 +177,80 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* Fundo global do cartão */}
       {cardBg && onChangeCardBg ? (
         <Section title="Fundo do cartão (global)">
+          {/* Personalizar preset (recolor rápido) */}
+<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+  <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Personalizar preset (rápido)</div>
+
+  <Row label="Cor A">
+    <SwatchRow
+      value={recolorA}
+      onChange={(hex) => setRecolorA(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setRecolorA(hex))}
+    />
+  </Row>
+
+  <Row label="Cor B">
+    <SwatchRow
+      value={recolorB}
+      onChange={(hex) => setRecolorB(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setRecolorB(hex))}
+    />
+  </Row>
+
+  <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+
+  <Row label="Pattern A">
+    <SwatchRow
+      value={patternA}
+      onChange={(hex) => setPatternA(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setPatternA(hex))}
+    />
+  </Row>
+
+  <Row label="Pattern B">
+    <SwatchRow
+      value={patternB}
+      onChange={(hex) => setPatternB(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setPatternB(hex))}
+    />
+  </Row>
+
+  <Button
+    onClick={() => {
+      // garante base gradient (se estiver solid, converte)
+      const base =
+        v1.base.kind === 'gradient'
+          ? v1.base
+          : {
+              kind: 'gradient' as const,
+              angle: 180,
+              stops: [
+                { color: '#ffffff', pos: 0 },
+                { color: '#f3f4f6', pos: 100 },
+              ],
+            }
+
+      const nextStops = bg_recolorStops(base.stops, recolorA, recolorB)
+const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
+
+
+      onChangeCardBg?.({
+        ...v1,
+        base: { ...base, kind: 'gradient', stops: nextStops },
+        overlays: nextOverlays,
+      } as CardBg)
+    }}
+  >
+    Aplicar cores ao preset
+  </Button>
+
+  <div style={{ fontSize: 11, opacity: 0.6 }}>
+    Recolore o gradiente (Cor A/B) e também os patterns (Pattern A/B).
+  </div>
+</div>
+
+<div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+
           {/* Presets premium */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {CARD_BG_PRESETS.map((p) => {
@@ -211,6 +290,58 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           </div>
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+{/* Personalizar preset (recolor rápido) */}
+<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+  <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Personalizar preset (rápido)</div>
+
+  <Row label="Cor A">
+    <SwatchRow
+      value={recolorA}
+      onChange={(hex) => setRecolorA(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setRecolorA(hex))}
+    />
+  </Row>
+
+  <Row label="Cor B">
+    <SwatchRow
+      value={recolorB}
+      onChange={(hex) => setRecolorB(hex)}
+      onEyedropper={() => pickEyedropper((hex) => setRecolorB(hex))}
+    />
+  </Row>
+
+  <Button
+    onClick={() => {
+      // garante base gradient
+      const base =
+        v1.base.kind === 'gradient'
+          ? v1.base
+          : {
+              kind: 'gradient' as const,
+              angle: 180,
+              stops: [
+                { color: '#ffffff', pos: 0 },
+                { color: '#f3f4f6', pos: 100 },
+              ],
+            }
+
+      const nextStops = bg_recolorStops(base.stops, recolorA, recolorB)
+
+      onChangeCardBg?.({
+        ...v1,
+        base: { ...base, kind: 'gradient', stops: nextStops },
+      } as CardBg)
+    }}
+  >
+    Aplicar cores ao preset
+  </Button>
+
+  <div style={{ fontSize: 11, opacity: 0.6 }}>
+    Troca as cores do gradiente mantendo o “look” do preset (posições/stops).
+  </div>
+</div>
+
+<div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
 
           {/* Tipo base */}
           <Row label="Tipo">
@@ -665,6 +796,66 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
     </div>
   )
 }
+function bg_hexToRgb(hex: string) {
+  const h = hex.replace('#', '').trim()
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
+  const n = parseInt(full, 16)
+  return {
+    r: (n >> 16) & 255,
+    g: (n >> 8) & 255,
+    b: n & 255,
+  }
+}
+
+// =======================
+// BG recolor helpers (single source)
+// =======================
+
+function bg_hexToRgb(hex: string) {
+  const h = hex.replace('#', '').trim()
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
+  const n = parseInt(full, 16)
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+}
+
+function bg_rgbToHex(r: number, g: number, b: number) {
+  const to = (v: number) =>
+    Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+  return `#${to(r)}${to(g)}${to(b)}`
+}
+
+function bg_lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t
+}
+
+/** Recolore os stops mantendo posições (CorA no 0% → CorB no 100%) */
+function bg_recolorStops(stops: { color: string; pos?: number }[], colorA: string, colorB: string) {
+  const A = bg_hexToRgb(colorA)
+  const B = bg_hexToRgb(colorB)
+
+  return (stops || []).map((s) => {
+    const p = typeof s.pos === 'number' ? s.pos : 0
+    const t = Math.max(0, Math.min(1, p / 100))
+    return {
+      ...s,
+      color: bg_rgbToHex(
+        bg_lerp(A.r, B.r, t),
+        bg_lerp(A.g, B.g, t),
+        bg_lerp(A.b, B.b, t)
+      ),
+    }
+  })
+}
+
+/** Aplica Pattern A/B em overlays que suportem colorA/colorB */
+function bg_recolorOverlays(overlays: any[] | undefined, patternA: string, patternB: string) {
+  return (overlays || []).map((ov) => ({
+    ...ov,
+    colorA: patternA,
+    colorB: patternB,
+  }))
+}
+
 
 function Section({ title, children }: any) {
   return (
