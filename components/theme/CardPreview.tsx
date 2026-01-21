@@ -14,6 +14,7 @@ import GalleryBlock from '@/components/blocks/GalleryBlock'
 import ProfileBlock from '@/components/blocks/ProfileBlock'
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 import CardBackground from '@/components/theme/CardBackground'
+import BioBlock from '@/components/blocks/BioBlock'
 
 type Card = {
   id: string
@@ -292,6 +293,8 @@ export default function CardPreview({
                       <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
                     ) : block.type === 'gallery' ? (
                       <GalleryBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'bio' ? (
+  <BioBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'info_utilities' ? (
                       <InfoUtilitiesBlock settings={block.settings} style={block.style} />
                     ) : null}
