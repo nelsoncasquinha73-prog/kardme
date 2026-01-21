@@ -12,10 +12,35 @@ type LeadFormSettings = {
     message?: boolean
   }
   buttonLabel?: string
+
+  // ✅ labels (para aparecer no preview/slug)
+  labels?: {
+    name?: string
+    email?: string
+    phone?: string
+    message?: string
+  }
+
+  // ✅ placeholders (opcional)
+  placeholders?: {
+    name?: string
+    email?: string
+    phone?: string
+    message?: string
+  }
 }
 
 type LeadFormStyle = {
+  heading?: {
+    fontFamily?: string
+    fontWeight?: number
+    color?: string
+    align?: 'left' | 'center' | 'right'
+    fontSize?: number
+  }
+
   container?: {
+    enabled?: boolean
     bgColor?: string
     radius?: number
     padding?: number
@@ -23,12 +48,36 @@ type LeadFormStyle = {
     borderColor?: string
     shadow?: boolean
   }
+
+  inputs?: {
+    bgColor?: string
+    textColor?: string
+    borderColor?: string
+    radius?: number
+    fontSize?: number
+    paddingY?: number
+    paddingX?: number
+    labelColor?: string
+    labelSize?: number
+  }
+
+  button?: {
+    bgColor?: string
+    textColor?: string
+    radius?: number
+    height?: number
+    fontWeight?: number
+  }
 }
 
 type Props = {
   cardId: string
   settings?: LeadFormSettings
   style?: LeadFormStyle
+}
+
+function isNonEmpty(v?: string) {
+  return typeof v === 'string' && v.trim().length > 0
 }
 
 export default function LeadFormBlock({ cardId, settings, style }: Props) {
@@ -45,12 +94,28 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     [s.fields]
   )
 
+  const labels = {
+    name: s.labels?.name ?? 'Nome',
+    email: s.labels?.email ?? 'Email',
+    phone: s.labels?.phone ?? 'Telefone',
+    message: s.labels?.message ?? 'Mensagem',
+  }
+
+  const placeholders = {
+    name: s.placeholders?.name ?? 'Escreve o teu nome',
+    email: s.placeholders?.email ?? 'Escreve o teu email',
+    phone: s.placeholders?.phone ?? 'Opcional',
+    message: s.placeholders?.message ?? 'Como posso ajudar?',
+  }
+
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  const containerEnabled = st.container?.enabled !== false
+
   const containerStyle: React.CSSProperties = {
-    background: st.container?.bgColor ?? 'transparent',
+    background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
     borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
     padding: st.container?.padding != null ? `${st.container.padding}px` : '12px',
     border:
@@ -58,10 +123,45 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
         ? `${st.container?.borderWidth}px solid ${st.container?.borderColor ?? 'rgba(0,0,0,0.12)'}`
         : '1px solid rgba(0,0,0,0.08)',
     boxShadow: st.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
-
-    // ✅ MUITO IMPORTANTE: garantir que não fica "bandeira"
     position: 'relative',
     width: '100%',
+  }
+
+  const headingStyle: React.CSSProperties = {
+    fontFamily: st.heading?.fontFamily || undefined,
+    fontWeight: st.heading?.fontWeight ?? 900,
+    color: st.heading?.color ?? '#111827',
+    textAlign: st.heading?.align ?? 'left',
+    fontSize: st.heading?.fontSize ?? 14,
+  }
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: st.inputs?.labelSize ?? 12,
+    color: st.inputs?.labelColor ?? 'rgba(17,24,39,0.75)',
+    fontWeight: 700,
+    marginBottom: 6,
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    fontSize: st.inputs?.fontSize ?? 14,
+    padding: `${st.inputs?.paddingY ?? 10}px ${st.inputs?.paddingX ?? 12}px`,
+    borderRadius: st.inputs?.radius ?? 12,
+    border: `1px solid ${st.inputs?.borderColor ?? 'rgba(0,0,0,0.14)'}`,
+    outline: 'none',
+    background: st.inputs?.bgColor ?? '#fff',
+    color: st.inputs?.textColor ?? '#111827',
+  }
+
+  const btnStyle: React.CSSProperties = {
+    height: st.button?.height ?? 44,
+    borderRadius: st.button?.radius ?? 14,
+    border: 'none',
+    background: st.button?.bgColor ?? 'var(--color-primary)',
+    color: st.button?.textColor ?? '#fff',
+    fontWeight: st.button?.fontWeight ?? 800,
+    cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+    opacity: status === 'sending' ? 0.8 : 1,
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -93,56 +193,72 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
 
   return (
     <div style={containerStyle}>
-      {(s.title || s.description) && (
+      {(isNonEmpty(s.title) || isNonEmpty(s.description)) && (
         <div style={{ marginBottom: 10 }}>
-          {s.title && <strong style={{ display: 'block', fontSize: 14 }}>{s.title}</strong>}
-          {s.description && <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>{s.description}</div>}
+          {isNonEmpty(s.title) && <div style={{ ...headingStyle, display: 'block' }}>{s.title}</div>}
+          {isNonEmpty(s.description) && (
+            <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textAlign: headingStyle.textAlign as any }}>
+              {s.description}
+            </div>
+          )}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {fields.name && (
-          <input
-            type="text"
-            placeholder="Nome"
-            value={formData.name}
-            onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-            required
-            style={input}
-          />
+          <div>
+            <div style={labelStyle}>{labels.name}</div>
+            <input
+              type="text"
+              placeholder={placeholders.name}
+              value={formData.name}
+              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              required
+              style={inputStyle}
+            />
+          </div>
         )}
 
         {fields.email && (
-          <input
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-            required
-            style={input}
-          />
+          <div>
+            <div style={labelStyle}>{labels.email}</div>
+            <input
+              type="email"
+              placeholder={placeholders.email}
+              value={formData.email}
+              onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+              required
+              style={inputStyle}
+            />
+          </div>
         )}
 
         {fields.phone && (
-          <input
-            type="tel"
-            placeholder="Telefone"
-            value={formData.phone}
-            onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-            style={input}
-          />
+          <div>
+            <div style={labelStyle}>{labels.phone}</div>
+            <input
+              type="tel"
+              placeholder={placeholders.phone}
+              value={formData.phone}
+              onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+              style={inputStyle}
+            />
+          </div>
         )}
 
         {fields.message && (
-          <textarea
-            placeholder="Mensagem"
-            value={formData.message}
-            onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
-            style={{ ...input, minHeight: 84, resize: 'vertical' }}
-          />
+          <div>
+            <div style={labelStyle}>{labels.message}</div>
+            <textarea
+              placeholder={placeholders.message}
+              value={formData.message}
+              onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
+              style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
+            />
+          </div>
         )}
 
-        <button type="submit" disabled={status === 'sending'} style={btn}>
+        <button type="submit" disabled={status === 'sending'} style={btnStyle}>
           {status === 'sending' ? 'A enviar…' : s.buttonLabel ?? 'Enviar'}
         </button>
 
@@ -151,24 +267,4 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       </form>
     </div>
   )
-}
-
-const input: React.CSSProperties = {
-  width: '100%',
-  fontSize: 14,
-  padding: '10px 12px',
-  borderRadius: 12,
-  border: '1px solid rgba(0,0,0,0.14)',
-  outline: 'none',
-  background: '#fff',
-}
-
-const btn: React.CSSProperties = {
-  height: 44,
-  borderRadius: 14,
-  border: 'none',
-  background: 'var(--color-primary)',
-  color: '#fff',
-  fontWeight: 800,
-  cursor: 'pointer',
 }
