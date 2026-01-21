@@ -74,7 +74,6 @@ export default function CardRenderer({ card, blocks, showTranslations = true, fu
         borderRadius: 0,
         width: '100%',
         background: 'transparent',
-        opacity: bgOpacity,
         boxShadow: 'none',
       }}
     >
