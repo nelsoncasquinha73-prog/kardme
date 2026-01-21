@@ -11,11 +11,13 @@
   align-items: flex-start;
   box-sizing: border-box;
 
-  /* Safe-area + respiro (funciona em desktop e mobile) */
+  /* Safe-area só vertical + respiro */
   padding-top: max(12px, env(safe-area-inset-top));
-  padding-left: max(12px, env(safe-area-inset-left));
-  padding-right: max(12px, env(safe-area-inset-right));
   padding-bottom: max(16px, env(safe-area-inset-bottom));
+
+  /* Laterais: sem safe-area (para não estreitar) */
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .cardFrameShell{
@@ -27,16 +29,15 @@
 }
 
 /* ===============================
-   MOBILE – EDGE TO EDGE (mas com safe-area)
+   MOBILE – EDGE TO EDGE (safe só vertical)
    =============================== */
 
 @media (max-width: 520px){
   .cardFrameRoot{
-    /* mantém edge-to-edge, mas nunca 0 por causa da notch/home bar */
     padding-top: max(10px, env(safe-area-inset-top));
-    padding-left: max(10px, env(safe-area-inset-left));
-    padding-right: max(10px, env(safe-area-inset-right));
     padding-bottom: max(14px, env(safe-area-inset-bottom));
+    padding-left: 0px;
+    padding-right: 0px;
   }
 
   .cardFrameShell{
