@@ -13,6 +13,7 @@ import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
 import ProfileBlock from '@/components/blocks/ProfileBlock'
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
+import CardBackground from '@/components/theme/CardBackground'
 
 type Card = {
   id: string
@@ -92,29 +93,19 @@ export default function CardPreview({
 
   const bg = cardBg ?? card?.theme?.background
 
-  const bgCss =
-    bg?.mode === 'solid'
-      ? bg.color
-      : bg?.mode === 'gradient'
-      ? `linear-gradient(${bg.angle ?? 180}deg, ${bg.from}, ${bg.to})`
-      : 'transparent'
-
-  const bgOpacity = typeof bg?.opacity === 'number' ? bg.opacity : 1
-
   return (
-    <div
+    <CardBackground
+      bg={bg}
       style={
         {
           minHeight: 'auto',
           padding: 0,
           borderRadius: 0,
           width: '100%',
-          background: bgCss,
-          opacity: bgOpacity,
-          ['--card-bg' as any]: bgCss,
         } as React.CSSProperties
       }
     >
+
       {showTranslations && (
         <div
           style={{
@@ -226,7 +217,7 @@ export default function CardPreview({
                 />
               ) : null}
 
-              <HeaderBlock settings={headerBlock.settings} cardBg={cardBg} />
+              <HeaderBlock settings={headerBlock.settings} cardBg={bg} />
             </div>
           ) : null}
 
@@ -310,6 +301,6 @@ export default function CardPreview({
           </div>
         </div>
       </main>
-    </div>
+    </CardBackground>
   )
 }
