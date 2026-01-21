@@ -171,6 +171,83 @@ const [patternB, setPatternB] = useState('#000000')
   function openEyedropperHeaderBg() {
     pickEyedropper((hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any))
   }
+  // =======================
+  // Effects (overlays) UI → grava em v1.overlays
+  // =======================
+
+  const currentOverlay = (v1.overlays?.[0] ?? null) as any
+  const effectsEnabled = !!currentOverlay
+
+  const currentKind: string = currentOverlay?.kind ?? 'none'
+  const currentOpacity: number = typeof currentOverlay?.opacity === 'number' ? currentOverlay.opacity : 0.25
+  const currentDensity: number = typeof currentOverlay?.density === 'number' ? currentOverlay.density : 0.55
+  const currentScale: number = typeof currentOverlay?.scale === 'number' ? currentOverlay.scale : 1
+  const currentSoftness: number = typeof currentOverlay?.softness === 'number' ? currentOverlay.softness : 0.5
+  const currentBlendMode: string = currentOverlay?.blendMode ?? 'soft-light'
+
+  function setOverlays(next: any[] | undefined) {
+    onChangeCardBg?.({
+      ...v1,
+      overlays: next ?? [],
+    } as CardBg)
+  }
+
+  function toggleEffects() {
+    if (effectsEnabled) {
+      setOverlays([])
+      return
+    }
+
+    // default: dots premium suave
+    setOverlays([
+      {
+        kind: 'dots',
+        opacity: 0.25,
+        density: 0.6,
+        scale: 1,
+        softness: 0.5,
+        angle: 45,
+        blendMode: 'soft-light',
+        colorA: patternA,
+        colorB: patternB,
+      },
+    ])
+  }
+
+  function setEffectKind(kind: string) {
+    if (kind === 'none') {
+      setOverlays([])
+      return
+    }
+
+    const base = currentOverlay
+      ? { ...currentOverlay }
+      : {
+          opacity: 0.25,
+          density: 0.6,
+          scale: 1,
+          softness: 0.5,
+          angle: 45,
+          blendMode: 'soft-light',
+          colorA: patternA,
+          colorB: patternB,
+        }
+
+    setOverlays([
+      {
+        ...base,
+        kind,
+        // garantir que as cores do pattern acompanham
+        colorA: patternA,
+        colorB: patternB,
+      },
+    ])
+  }
+
+  function patchOverlay(patch: any) {
+    if (!effectsEnabled) return
+    setOverlays([{ ...(currentOverlay || {}), ...patch }])
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -250,6 +327,115 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 </div>
 
 <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+          <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '10px 0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Efeitos (patterns)</div>
+
+            <Row label="Ativar efeitos">
+              <Toggle active={effectsEnabled} onClick={toggleEffects} />
+            </Row>
+
+            <Row label="Tipo">
+              <select
+                value={effectsEnabled ? currentKind : 'none'}
+                onChange={(e) => setEffectKind(e.target.value)}
+                style={{
+                  width: 190,
+                  padding: '8px 10px',
+                  borderRadius: 12,
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  background: '#fff',
+                  fontWeight: 700,
+                }}
+              >
+                <option value="none">Nenhum</option>
+                <option value="dots">Pontinhos</option>
+                <option value="noise">Noise</option>
+                <option value="diagonal">Linhas diagonais</option>
+                <option value="grid">Grelha</option>
+                <option value="silk">Silk (premium)</option>
+                <option value="marble">Marble</option>
+              </select>
+            </Row>
+
+            {effectsEnabled ? (
+              <>
+                <Row label="Blend">
+                  <select
+                    value={currentBlendMode}
+                    onChange={(e) => patchOverlay({ blendMode: e.target.value })}
+                    style={{
+                      width: 190,
+                      padding: '8px 10px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(0,0,0,0.12)',
+                      background: '#fff',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <option value="soft-light">soft-light (recomendado)</option>
+                    <option value="overlay">overlay</option>
+                    <option value="multiply">multiply</option>
+                    <option value="screen">screen</option>
+                    <option value="normal">normal</option>
+                  </select>
+                </Row>
+
+                <Row label="Intensidade">
+                  <input
+                    type="range"
+                    min={0}
+                    max={0.8}
+                    step={0.05}
+                    value={currentOpacity}
+                    onChange={(e) => patchOverlay({ opacity: Number(e.target.value) })}
+                  />
+                </Row>
+
+                <Row label="Densidade">
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={currentDensity}
+                    onChange={(e) => patchOverlay({ density: Number(e.target.value) })}
+                  />
+                </Row>
+
+                <Row label="Escala">
+                  <input
+                    type="range"
+                    min={0.5}
+                    max={2}
+                    step={0.1}
+                    value={currentScale}
+                    onChange={(e) => patchOverlay({ scale: Number(e.target.value) })}
+                  />
+                </Row>
+
+                <Row label="Softness">
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={currentSoftness}
+                    onChange={(e) => patchOverlay({ softness: Number(e.target.value) })}
+                  />
+                </Row>
+
+                <div style={{ fontSize: 11, opacity: 0.6 }}>
+                  Dica: “Pontinhos” + blend <b>soft-light</b> fica muito parecido ao exemplo da concorrência.
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 11, opacity: 0.6 }}>
+                Liga os efeitos para veres “pontinhos”, “noise”, etc. (usa as tuas Pattern A/B).
+              </div>
+            )}
+          </div>
 
           {/* Presets premium */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
