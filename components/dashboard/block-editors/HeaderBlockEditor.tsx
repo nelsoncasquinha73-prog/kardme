@@ -5,10 +5,10 @@ import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
-
-type CardBg =
-  | { mode: 'solid'; color: string; opacity?: number }
-  | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
+import type { CardBg } from '@/lib/cardBg'
+import { CARD_BG_PRESETS } from '@/lib/bgPresets'
+import { bgToStyle } from '@/lib/bgToCss'
+import { migrateCardBg } from '@/lib/cardBg'
 
 type BadgePos = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
@@ -31,6 +31,22 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const { openPicker } = useColorPicker()
 
   const layout = settings.layout ?? {}
+
+  // ✅ normalizamos sempre para v1 para editar sem dores
+  const v1 = migrateCardBg(cardBg as any)
+
+  // ✅ base gradient “segura” para TS + UI
+  const gBase =
+    v1.base.kind === 'gradient'
+      ? v1.base
+      : {
+          kind: 'gradient' as const,
+          angle: 180,
+          stops: [
+            { color: '#ffffff', pos: 0 },
+            { color: '#f3f4f6', pos: 100 },
+          ],
+        }
 
   const setLayout = (patch: Partial<HeaderSettings['layout']>) =>
     onChange({
@@ -90,14 +106,23 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
 
   // fallback para a cor do fade
-  const fallbackFadeColor =
-    headerBgEnabled
-      ? headerBgColor
-      : cardBg?.mode === 'solid'
-        ? cardBg.color
-        : cardBg?.mode === 'gradient'
-          ? cardBg.to
-          : '#ffffff'
+  const fallbackFadeColor = (() => {
+    if (headerBgEnabled) return headerBgColor
+    if (!cardBg) return '#ffffff'
+
+    // v1
+    if ((cardBg as any).version === 1) {
+      const b = (cardBg as any).base
+      if (b?.kind === 'solid') return b.color ?? '#ffffff'
+      if (b?.kind === 'gradient') return (b.stops?.[b.stops.length - 1]?.color ?? '#ffffff')
+      return '#ffffff'
+    }
+
+    // legacy
+    if ((cardBg as any).mode === 'solid') return (cardBg as any).color ?? '#ffffff'
+    if ((cardBg as any).mode === 'gradient') return (cardBg as any).to ?? '#ffffff'
+    return '#ffffff'
+  })()
 
   const coverFadeColor = (layout as any)?.coverFadeColor ?? fallbackFadeColor
 
@@ -118,7 +143,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const badgeRadiusPx = typeof badge?.radiusPx === 'number' ? badge.radiusPx : 12
   const badgeShadow = badge?.shadow === true
 
-  // ✅ ESTE É O FIX: abrir sempre em modo eyedropper
+  // ✅ abrir sempre em eyedropper
   const pickEyedropper = (apply: (hex: string) => void) => {
     openPicker({
       mode: 'eyedropper',
@@ -147,14 +172,56 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* Fundo global do cartão */}
       {cardBg && onChangeCardBg ? (
         <Section title="Fundo do cartão (global)">
+          {/* Presets premium */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {CARD_BG_PRESETS.map((p) => {
+              const { style } = bgToStyle(p.bg as any)
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onChangeCardBg(p.bg as CardBg)}
+                  style={{
+                    borderRadius: 14,
+                    border: '1px solid rgba(0,0,0,0.10)',
+                    padding: 10,
+                    cursor: 'pointer',
+                    background: '#fff',
+                    textAlign: 'left',
+                    display: 'flex',
+                    gap: 10,
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      border: '1px solid rgba(0,0,0,0.10)',
+                      ...style,
+                    }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div style={{ fontWeight: 900, fontSize: 12 }}>{p.name}</div>
+                    <div style={{ fontSize: 11, opacity: 0.6 }}>Preset premium</div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+
+          {/* Tipo base */}
           <Row label="Tipo">
             <Button
               onClick={() =>
                 onChangeCardBg({
-                  mode: 'solid',
-                  color: cardBg.mode === 'solid' ? cardBg.color : '#ffffff',
-                  opacity: cardBg.opacity ?? 1,
-                })
+                  version: 1,
+                  opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
+                  base: { kind: 'solid', color: v1.base.kind === 'solid' ? v1.base.color : '#ffffff' },
+                  overlays: v1.overlays ?? [],
+                } as CardBg)
               }
             >
               Cor sólida
@@ -163,41 +230,69 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             <Button
               onClick={() =>
                 onChangeCardBg({
-                  mode: 'gradient',
-                  from: cardBg.mode === 'gradient' ? cardBg.from : '#ffffff',
-                  to: cardBg.mode === 'gradient' ? cardBg.to : '#f3f4f6',
-                  angle: cardBg.mode === 'gradient' ? (cardBg.angle ?? 180) : 180,
-                  opacity: cardBg.opacity ?? 1,
-                })
+                  version: 1,
+                  opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
+                  base: gBase,
+                  overlays: v1.overlays ?? [],
+                } as CardBg)
               }
             >
               Degradê
             </Button>
           </Row>
 
-          {cardBg.mode === 'solid' ? (
+          {/* Editor de cores */}
+          {v1.base.kind === 'solid' ? (
             <Row label="Cor">
               <SwatchRow
-                value={cardBg.color}
-                onChange={(hex) => onChangeCardBg({ ...cardBg, color: hex })}
-                onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, color: hex }))}
+                value={v1.base.color ?? '#ffffff'}
+                onChange={(hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } } as CardBg)}
+                onEyedropper={() =>
+                  pickEyedropper((hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } } as CardBg))
+                }
               />
             </Row>
           ) : (
             <>
               <Row label="De">
                 <SwatchRow
-                  value={cardBg.from}
-                  onChange={(hex) => onChangeCardBg({ ...cardBg, from: hex })}
-                  onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, from: hex }))}
+                  value={gBase.stops?.[0]?.color ?? '#ffffff'}
+                  onChange={(hex) => {
+                    const stops = [...(gBase.stops ?? [])]
+                    if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
+                    stops[0] = { ...stops[0], color: hex }
+                    onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                  }}
+                  onEyedropper={() =>
+                    pickEyedropper((hex) => {
+                      const stops = [...(gBase.stops ?? [])]
+                      if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
+                      stops[0] = { ...stops[0], color: hex }
+                      onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                    })
+                  }
                 />
               </Row>
 
               <Row label="Para">
                 <SwatchRow
-                  value={cardBg.to}
-                  onChange={(hex) => onChangeCardBg({ ...cardBg, to: hex })}
-                  onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...cardBg, to: hex }))}
+                  value={gBase.stops?.[gBase.stops.length - 1]?.color ?? '#f3f4f6'}
+                  onChange={(hex) => {
+                    const stops = [...(gBase.stops ?? [])]
+                    if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
+                    const last = stops.length - 1
+                    stops[last] = { ...stops[last], color: hex }
+                    onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                  }}
+                  onEyedropper={() =>
+                    pickEyedropper((hex) => {
+                      const stops = [...(gBase.stops ?? [])]
+                      if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
+                      const last = stops.length - 1
+                      stops[last] = { ...stops[last], color: hex }
+                      onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                    })
+                  }
                 />
               </Row>
 
@@ -206,22 +301,24 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   type="number"
                   min={0}
                   max={360}
-                  value={cardBg.angle ?? 180}
-                  onChange={(e) => onChangeCardBg({ ...cardBg, angle: Number(e.target.value) })}
+                  value={typeof gBase.angle === 'number' ? gBase.angle : 180}
+                  onChange={(e) =>
+                    onChangeCardBg({ ...v1, base: { ...gBase, angle: Number(e.target.value) } } as CardBg)
+                  }
                   style={{ width: 90 }}
                 />
               </Row>
             </>
           )}
 
-          <Row label="Opacidade">
+          <Row label="Intensidade">
             <input
               type="range"
               min={0}
               max={1}
               step={0.05}
-              value={cardBg.opacity ?? 1}
-              onChange={(e) => onChangeCardBg({ ...cardBg, opacity: Number(e.target.value) })}
+              value={typeof v1.opacity === 'number' ? v1.opacity : 1}
+              onChange={(e) => onChangeCardBg({ ...v1, opacity: Number(e.target.value) } as CardBg)}
             />
           </Row>
         </Section>
@@ -442,7 +539,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         {badgeEnabled ? (
           <>
             <Row label="Upload">
-              <Button onClick={() => badgeRef.current?.click()}>{uploadingBadge ? 'A enviar...' : '📷 Upload badge'}</Button>
+              <Button onClick={() => badgeRef.current?.click()}>
+                {uploadingBadge ? 'A enviar...' : '📷 Upload badge'}
+              </Button>
 
               <input
                 ref={badgeRef}
@@ -468,7 +567,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             <Row label="Posição">
               <select
                 value={badgePos}
-                onChange={(e) => setLayout({ ...(layout as any), badge: { ...badge, position: e.target.value } } as any)}
+                onChange={(e) =>
+                  setLayout({ ...(layout as any), badge: { ...badge, position: e.target.value } } as any)
+                }
                 style={{ width: 170 }}
               >
                 <option value="top-left">Topo esquerdo</option>
@@ -551,9 +652,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </Row>
           </>
         ) : (
-          <div style={{ fontSize: 12, opacity: 0.7 }}>
-            Liga para colocar uma marca/logo por cima do header.
-          </div>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>Liga para colocar uma marca/logo por cima do header.</div>
         )}
       </Section>
 

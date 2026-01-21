@@ -6,7 +6,8 @@ import CardPreview from '@/components/theme/CardPreview'
 import MobileCardFrame from '@/components/theme/MobileCardFrame'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
-
+import type { CardBg } from '@/lib/cardBg'
+import { bgToCssString } from '@/lib/bgToCss'
 import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
 
@@ -25,20 +26,8 @@ type Props = {
   params: Promise<{ slug: string }>
 }
 
-type CardBg =
-  | { mode: 'solid'; color: string; opacity?: number }
-  | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
-
 function bgToCss(bg: CardBg | undefined | null) {
-  if (!bg) return { bgCss: 'transparent', bgOpacity: 1 }
-
-  const bgCss =
-    bg.mode === 'solid'
-      ? bg.color
-      : `linear-gradient(${bg.angle ?? 180}deg, ${bg.from}, ${bg.to})`
-
-  const bgOpacity = typeof bg.opacity === 'number' ? bg.opacity : 1
-  return { bgCss, bgOpacity }
+  return bgToCssString(bg) ?? 'transparent'
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -51,11 +40,24 @@ export async function generateMetadata({ params }: Props) {
     .eq('published', true)
     .single()
 
-  const bg = card?.theme?.background
-  const color =
-    bg?.mode === 'solid'
-      ? (bg.color ?? '#000000')
-      : (bg?.from ?? '#000000')
+    const bg = card?.theme?.background as CardBg | undefined
+
+  const color = (() => {
+    if (!bg) return '#000000'
+
+    // v1
+    if ((bg as any).version === 1) {
+      const base = (bg as any).base
+      if (base?.kind === 'solid') return base.color ?? '#000000'
+      if (base?.kind === 'gradient') return (base.stops?.[0]?.color ?? '#000000')
+      return '#000000'
+    }
+
+    // legacy
+    if ((bg as any).mode === 'solid') return (bg as any).color ?? '#000000'
+    if ((bg as any).mode === 'gradient') return (bg as any).from ?? '#000000'
+    return '#000000'
+  })()
 
   return {
     themeColor: color,
@@ -87,7 +89,7 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const { bgCss } = bgToCss(card?.theme?.background)
+  const bgCss = bgToCss(card?.theme?.background)
 
   return (
     <MobileCardFrame background={bgCss}>

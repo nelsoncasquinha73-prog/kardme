@@ -3,6 +3,7 @@
 import CardPreview from '@/components/theme/CardPreview'
 import CardContainer from '@/components/ui/CardContainer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import type { CardBg } from '@/lib/cardBg'
 
 type CardBlock = {
   id: string
@@ -13,10 +14,6 @@ type CardBlock = {
   style: any
   title?: string
 }
-
-type CardBg =
-  | { mode: 'solid'; color: string; opacity?: number }
-  | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
 
 type Props = {
   card: any

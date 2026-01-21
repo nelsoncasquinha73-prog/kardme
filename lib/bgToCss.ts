@@ -1,5 +1,7 @@
+import type React from 'react'
 import type { CardBg, CardBgV1, PatternOverlay } from '@/lib/cardBg'
 import { migrateCardBg } from '@/lib/cardBg'
+
 
 function clamp(n: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, n))
@@ -155,4 +157,41 @@ export function bgToStyle(bg: CardBg | null | undefined): {
       : `linear-gradient(${(v1.base.angle ?? 180)}deg, ${stopsToCss(v1.base.stops)})`
 
   return { style, opacity, cssStringForOutside }
+}
+
+/**
+ * Devolve uma string CSS de background (single string) para casos como frames/metadata.
+ * - Para v1 (layers), devolve a "base" (solid/gradient) como fallback consistente.
+ * - Para legacy, devolve o solid/linear-gradient normal.
+ */
+export function bgToCssString(bg?: CardBg | null): string | null {
+  if (!bg) return null
+
+  // v1
+  if ((bg as any).version === 1) {
+    const base = (bg as any).base
+    if (!base) return null
+
+    if (base.kind === 'solid') return base.color ?? null
+
+    if (base.kind === 'gradient') {
+      const angle = typeof base.angle === 'number' ? base.angle : 180
+      const stops = Array.isArray(base.stops) ? base.stops : []
+      if (!stops.length) return null
+      const parts = stops.map((s: any) => `${s.color} ${s.pos}%`)
+      return `linear-gradient(${angle}deg, ${parts.join(', ')})`
+    }
+
+    return null
+  }
+
+  // legacy
+  const mode = (bg as any).mode
+  if (mode === 'solid') return (bg as any).color ?? null
+  if (mode === 'gradient') {
+    const angle = typeof (bg as any).angle === 'number' ? (bg as any).angle : 180
+    return `linear-gradient(${angle}deg, ${(bg as any).from}, ${(bg as any).to})`
+  }
+
+  return null
 }
