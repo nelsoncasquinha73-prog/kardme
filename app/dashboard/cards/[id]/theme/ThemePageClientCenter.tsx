@@ -83,13 +83,10 @@ export default function ThemePageClientCenter({
     overflow: 'hidden', // ✅ importante para o html2canvas
     border: '1px solid rgba(0,0,0,0.08)',
     minHeight: 680,
-    background:
-      cardBg.mode === 'solid'
-        ? cardBg.color
-        : `linear-gradient(${cardBg.angle ?? 180}deg, ${cardBg.from}, ${cardBg.to})`,
-    opacity: cardBg.opacity ?? 1,
+    background: 'transparent',
   }}
 >
+
 
             <div id="card-preview-root" style={{ minHeight: '100%' }}>
               <ThemeProvider theme={theme}>
