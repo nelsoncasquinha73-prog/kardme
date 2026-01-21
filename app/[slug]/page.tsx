@@ -99,7 +99,7 @@ export default async function CardPage({ params }: Props) {
             card={card}
             blocks={blocks}
             showTranslations={false}
-            fullBleed={true}
+            fullBleed={false}
             cardBg={card.theme?.background}
           />
         </ThemeProvider>
