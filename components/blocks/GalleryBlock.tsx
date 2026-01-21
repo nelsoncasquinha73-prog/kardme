@@ -101,19 +101,19 @@ export default function GalleryBlock({ settings, style }: Props) {
     return arr.filter((item) => item && item.enabled !== false && item.url)
   }, [s.items])
 
-  if (visibleItems.length === 0) return null
+  const loop = visibleItems.length > 1
 
-  // ✅ Autoplay plugin só quando faz sentido (e não rebenta se for undefined)
+  // ✅ Autoplay (safe)
   const autoplay = useRef<any>(null)
   if (!autoplay.current && typeof Autoplay === 'function') {
     autoplay.current = Autoplay({ delay: autoplayIntervalMs, stopOnInteraction: true, stopOnMouseEnter: true })
   }
+  const plugins = autoplayEnabled && loop && autoplay.current ? [autoplay.current] : []
 
-  const plugins = autoplayEnabled && visibleItems.length > 1 && autoplay.current ? [autoplay.current] : []
-
+  // ✅ IMPORTANTÍSSIMO: hook é sempre chamado (nunca pode ficar depois de um return condicional)
   const [emblaRef] = useEmblaCarousel(
     {
-      loop: visibleItems.length > 1,
+      loop,
       align: 'center',
       dragFree: false,
       containScroll: 'trimSnaps',
@@ -121,7 +121,9 @@ export default function GalleryBlock({ settings, style }: Props) {
     plugins
   )
 
-  // ✅ viewport sem padding (Embla gosta assim)
+  // ✅ agora sim: se não há items, não renderiza (mas hooks já foram chamados)
+  if (visibleItems.length === 0) return null
+
   const viewportStyle: React.CSSProperties = {
     ...containerStyle,
     overflow: 'hidden',
@@ -208,14 +210,14 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       </div>
 
-      {lightboxIndex !== null ? (
+      {lightboxIndex !== null && (
         <Lightbox
           items={visibleItems}
           currentIndex={Math.max(0, Math.min(visibleItems.length - 1, lightboxIndex))}
           onClose={() => setLightboxIndex(null)}
           onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
-      ) : null}
+      )}
     </section>
   )
 }
@@ -233,7 +235,6 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
   const safeItems = Array.isArray(items) ? items : []
   const item = safeItems[currentIndex]
 
-  // ✅ se por alguma razão estiver vazio, fecha
   useEffect(() => {
     if (!item) onClose()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,7 +258,6 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
   }, [currentIndex, safeItems.length])
 
   const startXRef = useRef<number | null>(null)
-
   if (!item) return null
 
   return (
@@ -314,9 +314,11 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           />
         </div>
 
-        {item.caption ? (
-          <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>{item.caption}</div>
-        ) : null}
+        {item.caption && (
+          <div style={{ marginTop: 10, color: 'white', fontSize: 14, textAlign: 'center' }}>
+            {item.caption}
+          </div>
+        )}
 
         <button onClick={prev} style={navBtnLeft} aria-label="Imagem anterior">
           ‹
