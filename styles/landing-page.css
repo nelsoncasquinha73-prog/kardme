@@ -240,23 +240,6 @@
   font-size: 13px;
 }
 
-/* SPACING ADJUSTMENTS */
-.landing-page .slider-area {
-  padding: 40px 0 !important;
-}
-
-.landing-page .feature-area .row {
-  row-gap: 40px;
-}
-
-.landing-page .padding-top-80 {
-  padding-top: 60px !important;
-}
-
-.landing-page .padding-bottom-80 {
-  padding-bottom: 60px !important;
-}
-
 /* HERO TEXT - Readable in all states */
 .landing-page .heroGrid h1,
 .landing-page .heroGrid .title {
@@ -274,9 +257,22 @@
 .landing-page .heroGrid .description {
   text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
-/* Reduce gap between HERO and Showcase section */
+
+/* SPACING ADJUSTMENTS */
 .landing-page .slider-area {
-  padding-bottom: 20px !important; /* antes estava 40px */
+  padding: 40px 0 20px 0 !important;
+}
+
+.landing-page .feature-area .row {
+  row-gap: 40px;
+}
+
+.landing-page .padding-top-80 {
+  padding-top: 60px !important;
+}
+
+.landing-page .padding-bottom-80 {
+  padding-bottom: 60px !important;
 }
 
 .landing-page .section-title-area,
@@ -294,7 +290,6 @@
   padding-bottom: 30px !important;
 }
 
-/* If the showcase block has its own top margin */
 .landing-page .showcase {
   padding-top: 8px;
 }
