@@ -31,10 +31,10 @@ export default function Home() {
         style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}
       >
         <div className="heroOrbs" aria-hidden="true">
-  <span className="orb orb1" />
-  <span className="orb orb2" />
-  <span className="orb orb3" />
-</div>
+          <span className="orb orb1" />
+          <span className="orb orb2" />
+          <span className="orb orb3" />
+        </div>
 
         <div className="container">
           <div className="row justify-content-center">
@@ -50,10 +50,13 @@ export default function Home() {
                   O teu primeiro impacto nunca mais vai ser &quot;só mais um&quot;.
                 </p>
 
-                <div className="form-group" style={{ marginTop: 18 }}>
+                {/* CTA CARD (no HERO) */}
+                <div className="heroCtaCard">
+                  <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
                   <Link className="btn-default" href="/signup">
                     Quero o meu cartão premium
                   </Link>
+                  <p className="heroCtaMicro">Sem cartão de crédito. Começa grátis.</p>
                 </div>
               </div>
             </div>
@@ -277,13 +280,6 @@ export default function Home() {
       </section>
 
       <section className="cta-area cta-style-1 padding-top-80 padding-bottom-80">
-        <div className="heroCtaCard">
-  <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
-  <Link className="btn-default" href="/signup">
-    Quero o meu cartão premium
-  </Link>
-  <p className="heroCtaMicro">Sem cartão de crédito. Começa grátis.</p>
-</div>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
