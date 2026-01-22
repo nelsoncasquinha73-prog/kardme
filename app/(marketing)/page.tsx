@@ -26,29 +26,29 @@ export default function Home() {
       </nav>
 
       {/* HERO SECTION */}
-      <div className="slider-area slider-style-1 variation-default heroGrid">
+      <div className="slider-area slider-style-1 variation-default heroGrid" style={{ padding: '40px 0 0 0', margin: 0 }}>
         <div className="heroOrbs" aria-hidden="true">
           <span className="orb orb1" />
           <span className="orb orb2" />
           <span className="orb orb3" />
         </div>
 
-        <div className="container">
+        <div className="container" style={{ padding: 0, margin: 0 }}>
           <div className="row justify-content-center">
             <div className="col-lg-12">
-              <div className="inner text-center">
-                <h1 className="title display-one">
+              <div className="inner text-center" style={{ padding: '20px 0', margin: 0 }}>
+                <h1 className="title display-one" style={{ marginBottom: 12 }}>
                   Um <span className="theme-gradient">cartão digital</span> <br /> com efeito{' '}
                   <span className="theme-gradient">wow</span>
                 </h1>
 
-                <p className="description">
+                <p className="description" style={{ marginBottom: 16 }}>
                   Escolhe um template premium, personaliza ao teu estilo e partilha como um pro. <br />
                   O teu primeiro impacto nunca mais vai ser &quot;só mais um&quot;.
                 </p>
 
                 {/* CTA CARD */}
-                <div className="heroCtaCard">
+                <div className="heroCtaCard" style={{ marginTop: 16, marginBottom: 0 }}>
                   <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
                   <Link className="btn-default" href="/signup">
                     Quero o meu cartão premium
@@ -67,7 +67,7 @@ export default function Home() {
       </div>
 
       {/* SHOWCASE SECTION */}
-      <section className="showcase-section">
+      <section className="showcase-section" style={{ paddingTop: 30 }}>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
