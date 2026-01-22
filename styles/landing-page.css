@@ -453,3 +453,37 @@
     margin-bottom: 20px;
   }
 }
+/* ===== AGGRESSIVE FIX: REMOVE HERO BOTTOM GAP ===== */
+.landing-page .slider-area.heroGrid {
+  padding: 40px 0 0 0 !important;
+  margin: 0 !important;
+  min-height: auto !important;
+}
+
+.landing-page .slider-area.heroGrid .container {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.landing-page .slider-area.heroGrid .inner {
+  padding: 20px 0 !important;
+  margin: 0 !important;
+}
+
+.landing-page .slider-area.heroGrid .title {
+  margin-bottom: 12px !important;
+}
+
+.landing-page .slider-area.heroGrid .description {
+  margin-bottom: 16px !important;
+}
+
+.landing-page .heroCtaCard {
+  margin-top: 16px !important;
+  margin-bottom: 0 !important;
+}
+
+.landing-page .showcase-section {
+  padding-top: 30px !important;
+  margin-top: 0 !important;
+}
