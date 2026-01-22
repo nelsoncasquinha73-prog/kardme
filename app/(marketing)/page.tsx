@@ -7,7 +7,6 @@ import KardmeShowcase from '@/components/KardmeShowcase'
 export default function Home() {
   return (
     <main className="landing-page">
-      {/* NAVBAR */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-transparent" style={{ paddingTop: 20, paddingBottom: 20 }}>
         <div className="container">
           <Link className="navbar-brand" href="/">
@@ -20,60 +19,42 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO (texto apenas) */}
-      <div className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape" data-black-overlay="1">
+      <div className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape" data-black-overlay="1" style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-12">
-              <div className="inner text-center" style={{ paddingTop: 60, paddingBottom: 40 }}>
-                <h1 className="title display-one">
-                  O teu cartão digital
-                  <br />
-                  <span className="theme-gradient">inteligente</span>
-                </h1>
-
-                <p className="description">
-                  Cria, partilha e gere o teu cartão digital profissional
-                  <br />
-                  num só link, em segundos.
-                </p>
-
+              <div className="inner text-center">
+                <h1 className="title display-one">O teu cartão digital <br /> <span className="theme-gradient">inteligente</span></h1>
+                <p className="description">Cria, partilha e gere o teu cartão digital profissional <br /> num só link, em segundos.</p>
                 <div className="form-group" style={{ marginTop: 18 }}>
-                  <Link className="btn-default" href="/signup">
-                    Criar cartão grátis
-                  </Link>
+                  <Link className="btn-default" href="/signup">Criar cartão grátis</Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
         <div className="bg-shape">
           <img className="bg-shape-one" src="/assets/images/bg/bg-shape-four.png" alt="Bg Shape" />
           <img className="bg-shape-two" src="/assets/images/bg/bg-shape-five.png" alt="Bg Shape" />
         </div>
       </div>
 
+      <section style={{ background: 'var(--color-bg)', padding: '60px 20px' }}>
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center" style={{ marginBottom: 40 }}>
+              <h2 className="section-title">Vê como funciona</h2>
+              <p className="section-description">Exemplos de cartões digitais criados em Kardme</p>
+            </div>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-lg-6">
+              <KardmeShowcase />
+            </div>
+          </div>
+        </div>
+      </section>
 
- {/* SHOWCASE */}
- <section style={{ background: 'var(--color-bg)', padding: '60px 20px' }}>
-   <div className="container">
-     <div className="row justify-content-center">
-       <div className="col-lg-8 text-center" style={{ marginBottom: 40 }}>
-         <h2 className="section-title">Vê como funciona</h2>
-         <p className="section-description">Exemplos de cartões digitais criados em Kardme</p>
-       </div>
-     </div>
-     <div className="row justify-content-center">
-       <div className="col-lg-6">
-         <KardmeShowcase />
-       </div>
-     </div>
-   </div>
- </section>
-
-
-      {/* COMO FUNCIONA */}
       <section className="service-area service-style-1 padding-top-80 padding-bottom-80">
         <div className="container">
           <div className="row justify-content-center">
@@ -85,27 +66,21 @@ export default function Home() {
           <div className="row padding-top-50">
             <div className="col-lg-4 col-md-6">
               <div className="service-item service-item-1">
-                <div className="service-icon">
-                  <i className="fas fa-cube"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-cube"></i></div>
                 <h3>Escolhe um template</h3>
                 <p>Seleciona um design premium já pronto para o teu setor</p>
               </div>
             </div>
             <div className="col-lg-4 col-md-6">
               <div className="service-item service-item-1">
-                <div className="service-icon">
-                  <i className="fas fa-edit"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-edit"></i></div>
                 <h3>Personaliza</h3>
                 <p>Adiciona a tua foto, dados e informações de contacto</p>
               </div>
             </div>
             <div className="col-lg-4 col-md-6">
               <div className="service-item service-item-1">
-                <div className="service-icon">
-                  <i className="fas fa-share-alt"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-share-alt"></i></div>
                 <h3>Partilha</h3>
                 <p>Envia o link (e mais tarde NFC) e começa a receber contactos</p>
               </div>
@@ -114,7 +89,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="feature-area feature-style-1 padding-top-80 padding-bottom-80">
         <div className="container">
           <div className="row justify-content-center">
@@ -126,36 +100,28 @@ export default function Home() {
           <div className="row padding-top-50">
             <div className="col-lg-6 col-md-6">
               <div className="feature-item">
-                <div className="feature-icon">
-                  <i className="fas fa-zap"></i>
-                </div>
+                <div className="feature-icon"><i className="fas fa-zap"></i></div>
                 <h3>Rápido & Simples</h3>
                 <p>Cria em menos de 1 minuto, sem conhecimentos técnicos</p>
               </div>
             </div>
             <div className="col-lg-6 col-md-6">
               <div className="feature-item">
-                <div className="feature-icon">
-                  <i className="fas fa-palette"></i>
-                </div>
+                <div className="feature-icon"><i className="fas fa-palette"></i></div>
                 <h3>Totalmente customizável</h3>
                 <p>Cores, fontes, layout — tudo à tua medida</p>
               </div>
             </div>
             <div className="col-lg-6 col-md-6">
               <div className="feature-item">
-                <div className="feature-icon">
-                  <i className="fas fa-mobile-alt"></i>
-                </div>
+                <div className="feature-icon"><i className="fas fa-mobile-alt"></i></div>
                 <h3>Mobile First</h3>
                 <p>Perfeito em qualquer dispositivo, sempre</p>
               </div>
             </div>
             <div className="col-lg-6 col-md-6">
               <div className="feature-item">
-                <div className="feature-icon">
-                  <i className="fas fa-chart-line"></i>
-                </div>
+                <div className="feature-icon"><i className="fas fa-chart-line"></i></div>
                 <h3>Analytics & Leads</h3>
                 <p>Vê quantas pessoas viram e clicaram no teu cartão</p>
               </div>
@@ -164,7 +130,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING */}
       <section className="pricing-area pricing-style-1 padding-top-80 padding-bottom-80">
         <div className="container">
           <div className="row justify-content-center">
@@ -178,10 +143,7 @@ export default function Home() {
               <div className="pricing-item pricing-item-1">
                 <h3 className="pricing-title">Grátis</h3>
                 <p className="pricing-subtitle">Para começar</p>
-                <div className="pricing-price">
-                  <span className="price">€0</span>
-                  <span className="period">/mês</span>
-                </div>
+                <div className="pricing-price"><span className="price">€0</span><span className="period">/mês</span></div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> 1 cartão digital</li>
                   <li><i className="fas fa-check"></i> Templates básicos</li>
@@ -191,16 +153,12 @@ export default function Home() {
                 <Link href="/signup" className="btn btn-outline">Começar</Link>
               </div>
             </div>
-
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-1 pricing-item-featured">
                 <div className="pricing-badge">Mais popular</div>
                 <h3 className="pricing-title">Pro</h3>
                 <p className="pricing-subtitle">Para profissionais</p>
-                <div className="pricing-price">
-                  <span className="price">€9.99</span>
-                  <span className="period">/mês</span>
-                </div>
+                <div className="pricing-price"><span className="price">€9.99</span><span className="period">/mês</span></div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> Cartões ilimitados</li>
                   <li><i className="fas fa-check"></i> Todos os templates</li>
@@ -210,14 +168,11 @@ export default function Home() {
                 <Link href="/signup" className="btn btn-primary">Começar</Link>
               </div>
             </div>
-
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-1">
                 <h3 className="pricing-title">Enterprise</h3>
                 <p className="pricing-subtitle">Para equipas</p>
-                <div className="pricing-price">
-                  <span className="price">Contactar</span>
-                </div>
+                <div className="pricing-price"><span className="price">Contactar</span></div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> Tudo do Pro</li>
                   <li><i className="fas fa-check"></i> Cartões NFC</li>
@@ -231,16 +186,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
       <section className="cta-area cta-style-1 padding-top-80 padding-bottom-80">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2>Pronto para começar?</h2>
               <p>Cria o teu cartão digital em menos de 1 minuto</p>
-              <Link href="/signup" className="btn btn-primary btn-lg">
-                Criar cartão grátis →
-              </Link>
+              <Link href="/signup" className="btn btn-primary btn-lg">Criar cartão grátis →</Link>
             </div>
           </div>
         </div>
