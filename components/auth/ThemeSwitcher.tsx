@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 type ThemeMode = 'light' | 'dark'
 
 function applyTheme(theme: ThemeMode) {
-  // muitos templates usam html[data-theme=...] ou classes no html/body
   const html = document.documentElement
   const body = document.body
 
@@ -37,7 +36,7 @@ export default function ThemeSwitcher() {
   if (!mounted) return null
 
   return (
-    <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 9999 }}>
+    <div id="theme-switcher" style={{ position: 'fixed', top: 12, left: 12, zIndex: 9999 }}>
       <button
         type="button"
         onClick={() => setAndPersist('light')}

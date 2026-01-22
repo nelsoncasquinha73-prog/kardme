@@ -19,7 +19,10 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape" data-black-overlay="1" style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}>
+      <div
+  className="slider-area slider-style-1 variation-default heroGrid"
+  style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}
+>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-12">
