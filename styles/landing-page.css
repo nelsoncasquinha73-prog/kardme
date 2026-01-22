@@ -305,3 +305,4 @@ main.landing-page ~ #theme-switcher {
 .landing-page .heroGrid .description {
   text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
+.landingRoot { min-height: 100vh; }

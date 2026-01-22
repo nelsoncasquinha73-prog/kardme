@@ -1,5 +1,5 @@
 import '@/styles/landing-page.css'
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return <div className="landingRoot">{children}</div>
 }
