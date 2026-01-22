@@ -274,3 +274,27 @@
 .landing-page .heroGrid .description {
   text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
+/* Reduce gap between HERO and Showcase section */
+.landing-page .slider-area {
+  padding-bottom: 20px !important; /* antes estava 40px */
+}
+
+.landing-page .section-title-area,
+.landing-page .section-title,
+.landing-page .section-title-wrapper {
+  margin-bottom: 18px !important;
+}
+
+.landing-page .feature-area,
+.landing-page .service-area,
+.landing-page .rn-section-gap,
+.landing-page .rn-section-gapTop,
+.landing-page .rn-section-gapBottom {
+  padding-top: 30px !important;
+  padding-bottom: 30px !important;
+}
+
+/* If the showcase block has its own top margin */
+.landing-page .showcase {
+  padding-top: 8px;
+}
