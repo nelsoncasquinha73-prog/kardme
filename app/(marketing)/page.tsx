@@ -1,6 +1,5 @@
 'use client'
 
-import '@/styles/landing-page.css'
 import Link from 'next/link'
 import KardmeShowcase from '@/components/KardmeShowcase'
 
