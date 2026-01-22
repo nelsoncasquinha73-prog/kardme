@@ -531,3 +531,22 @@
 .landing-page .bg-shape {
   display: none !important;
 }
+/* ===== HERO: FORCE CENTER ===== */
+.landing-page .slider-area.heroGrid .inner {
+  text-align: center !important;
+  max-width: 980px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.landing-page .slider-area.heroGrid .title,
+.landing-page .slider-area.heroGrid .description {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+
+.landing-page .slider-area.heroGrid .heroCtaCard {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
