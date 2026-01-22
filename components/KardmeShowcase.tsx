@@ -12,8 +12,7 @@ export default function KardmeShowcase() {
     { id: 1, image: '/assets/kardme/cards/card-1.png', title: 'Cartão 1' },
     { id: 2, image: '/assets/kardme/cards/card-2.png', title: 'Cartão 2' },
     { id: 3, image: '/assets/kardme/cards/card-3.png', title: 'Cartão 3' },
-    { id: 4, image: '/assets/kardme/cards/card-4.png', title: 'Cartão 4' },
-    { id: 5, image: '/assets/kardme/cards/card-5.png', title: 'Cartão 5' },
+   
   ]
 
   return (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/styles/tokens.css'
 
 // Importa as fontes locais via @fontsource
