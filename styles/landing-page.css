@@ -1,3 +1,4 @@
+/* KardmeShowcase Styles */
 .showcase {
   display: flex;
   justify-content: center;
@@ -142,6 +143,7 @@
   }
 }
 
+/* Landing Page Hero Grid */
 .landing-page .heroGrid {
   position: relative;
   overflow: hidden;
@@ -161,27 +163,21 @@
   z-index: 2;
 }
 
-/* Ocultar theme switcher na página de marketing */
+/* Hide theme switcher on marketing page */
 .landing-page ~ #theme-switcher,
 #theme-switcher {
   display: none !important;
 }
 
-/* Se o theme-switcher for sibling do main, oculta */
 main.landing-page ~ #theme-switcher {
   display: none !important;
 }
 
-/* Hide theme switcher on marketing page */
 .landing-page {
   position: relative;
 }
 
-.landing-page ~ #theme-switcher {
-  display: none !important;
-}
-
-/* HERO WOW LAYERS */
+/* HERO WOW LAYERS - Floating Orbs */
 .landing-page .heroOrbs {
   position: absolute;
   inset: 0;
@@ -199,29 +195,30 @@ main.landing-page ~ #theme-switcher {
   background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.9), rgba(124, 58, 237, 0.15) 60%, transparent 70%);
 }
 
-.landing-page .heroOrbs .orb1 { 
+.landing-page .heroOrbs .orb1 {
   width: 240px;
   height: 240px;
-  top: 60px; 
-  left: 5%; 
+  top: 60px;
+  left: 5%;
 }
 
-.landing-page .heroOrbs .orb2 { 
+.landing-page .heroOrbs .orb2 {
   width: 280px;
   height: 280px;
-  top: 100px; 
-  right: 8%; 
+  top: 100px;
+  right: 8%;
   opacity: 0.8;
 }
 
-.landing-page .heroOrbs .orb3 { 
+.landing-page .heroOrbs .orb3 {
   width: 180px;
   height: 180px;
-  bottom: 40px; 
-  left: 15%; 
+  bottom: 40px;
+  left: 15%;
   opacity: 0.7;
 }
 
+/* Hero CTA Card */
 .landing-page .heroCtaCard {
   margin: 22px auto 0;
   max-width: 580px;
