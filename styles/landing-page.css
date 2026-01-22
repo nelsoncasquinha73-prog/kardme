@@ -147,18 +147,18 @@
 .landing-page .heroGrid {
   position: relative;
   overflow: hidden;
+  background: radial-gradient(1200px 700px at 50% 80%, rgba(255,255,255,0.10), rgba(0,0,0,0.0) 55%),
+              radial-gradient(900px 500px at 50% 20%, rgba(168, 85, 247, 0.10), rgba(0,0,0,0.0) 60%),
+              #0b0b12;
 }
 
 .landing-page .heroGrid::after {
   content: "";
   position: absolute;
   inset: 0;
-  /* vinheta leve, sem “lavar” o hero */
-  background:
-    radial-gradient(900px 520px at 50% 35%, rgba(0,0,0,0.00), rgba(0,0,0,0.55));
+  background: radial-gradient(900px 520px at 50% 35%, rgba(0,0,0,0.00), rgba(0,0,0,0.55));
   pointer-events: none;
 }
-
 
 .landing-page .heroGrid .container,
 .landing-page .heroGrid .inner {
@@ -167,12 +167,7 @@
 }
 
 /* Hide theme switcher on marketing page */
-.landing-page ~ #theme-switcher,
 #theme-switcher {
-  display: none !important;
-}
-
-main.landing-page ~ #theme-switcher {
   display: none !important;
 }
 
@@ -247,22 +242,6 @@ main.landing-page ~ #theme-switcher {
 
 /* SPACING ADJUSTMENTS */
 .landing-page .slider-area {
-  padding: 40px 20px !important;
-}
-
-.landing-page .feature-area .row {
-  row-gap: 40px;
-}
-
-.landing-page .padding-top-80 {
-  padding-top: 60px !important;
-}
-
-.landing-page .padding-bottom-80 {
-  padding-bottom: 60px !important;
-}
-/* ===== Kardme Landing - Spacing (safe overrides) ===== */
-.landing-page .slider-area {
   padding: 40px 0 !important;
 }
 
@@ -277,18 +256,8 @@ main.landing-page ~ #theme-switcher {
 .landing-page .padding-bottom-80 {
   padding-bottom: 60px !important;
 }
-.landing-page .heroGrid {
-  background:
-    radial-gradient(1200px 700px at 50% 80%, rgba(255,255,255,0.10), rgba(0,0,0,0.0) 55%),
-    radial-gradient(900px 500px at 50% 20%, rgba(168, 85, 247, 0.10), rgba(0,0,0,0.0) 60%),
-    #0b0b12;
-}
-/* ===== HERO: force readable text even before theme init ===== */
-.landing-page .heroGrid,
-.landing-page .heroGrid * {
-  color: rgba(255,255,255,0.92);
-}
 
+/* HERO TEXT - Readable in all states */
 .landing-page .heroGrid h1,
 .landing-page .heroGrid .title {
   color: #ffffff !important;
@@ -305,4 +274,3 @@ main.landing-page ~ #theme-switcher {
 .landing-page .heroGrid .description {
   text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
-.landingRoot { min-height: 100vh; }
