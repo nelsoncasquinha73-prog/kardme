@@ -31,6 +31,12 @@ export default function Home() {
         className="slider-area slider-style-1 variation-default heroGrid"
         style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}
       >
+        <div className="heroOrbs" aria-hidden="true">
+  <span className="orb orb1" />
+  <span className="orb orb2" />
+  <span className="orb orb3" />
+</div>
+
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-12">
@@ -272,14 +278,23 @@ export default function Home() {
       </section>
 
       <section className="cta-area cta-style-1 padding-top-80 padding-bottom-80">
+        <div className="heroCtaCard">
+  <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
+  <Link className="btn-default" href="/signup">
+    Quero o meu cartão premium
+  </Link>
+  <p className="heroCtaMicro">Sem cartão de crédito. Começa grátis.</p>
+</div>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2>Pronto para começar?</h2>
-              <p>Cria o teu cartão digital em menos de 1 minuto</p>
-              <Link href="/signup" className="btn btn-primary btn-lg">
-                Criar cartão grátis →
-              </Link>
+              <h2 className="section-title">Pronto para começar?</h2>
+              <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
+              <div className="form-group" style={{ marginTop: 18 }}>
+                <Link className="btn-default" href="/signup">
+                  Quero o meu cartão premium
+                </Link>
+              </div>
             </div>
           </div>
         </div>

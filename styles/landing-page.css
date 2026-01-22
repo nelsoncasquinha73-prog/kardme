@@ -313,3 +313,47 @@ main.landing-page ~ #theme-switcher {
 .landing-page ~ #theme-switcher {
   display: none !important;
 }
+/* HERO WOW LAYERS */
+.landing-page .heroOrbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-page .heroOrbs .orb {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.9;
+  background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.9), rgba(124, 58, 237, 0.15) 60%, transparent 70%);
+}
+
+.landing-page .heroOrbs .orb1 { top: 90px; left: 10%; transform: rotate(12deg); }
+.landing-page .heroOrbs .orb2 { top: 140px; right: 12%; width: 220px; height: 220px; opacity: 0.75; }
+.landing-page .heroOrbs .orb3 { bottom: 60px; left: 18%; width: 140px; height: 140px; opacity: 0.6; }
+
+.landing-page .heroCtaCard {
+  margin: 22px auto 0;
+  max-width: 520px;
+  padding: 18px 18px;
+  border-radius: 16px;
+  background: rgba(17, 17, 24, 0.55);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  backdrop-filter: blur(10px);
+}
+
+.landing-page .heroCtaHint {
+  margin: 0 0 10px;
+  color: rgba(255,255,255,0.75);
+  font-size: 14px;
+}
+
+.landing-page .heroCtaMicro {
+  margin: 10px 0 0;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+}
