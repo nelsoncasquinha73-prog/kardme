@@ -15,7 +15,7 @@ import ServicesBlockEditor from '@/components/dashboard/block-editors/ServicesBl
 import DecorationBlockEditor from '@/components/dashboard/block-editors/DecorationBlockEditor'
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import type { CardBg } from '@/lib/cardBg'
-import FreesTextBlockEditor from '@/components/dashboard/block-editors/FreesTextBlockEditor'
+import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreesTextBlockEditor'
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 
 type CardBlock = {
@@ -282,7 +282,7 @@ export default function ThemePageClientRight({
           />
         )}
 {activeBlock?.type === 'free_text' && (
-  <FreesTextBlockEditor
+  <FreeTextBlockEditor
     settings={activeBlock.settings || { text: '' }}
     style={activeBlock.style || {}}
     onChangeSettings={onChangeSettings}
