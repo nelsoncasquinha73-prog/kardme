@@ -258,3 +258,19 @@ main.landing-page ~ #theme-switcher {
 .landing-page .padding-bottom-80 {
   padding-bottom: 60px !important;
 }
+/* ===== Kardme Landing - Spacing (safe overrides) ===== */
+.landing-page .slider-area {
+  padding: 40px 0 !important;
+}
+
+.landing-page .feature-area .row {
+  row-gap: 40px;
+}
+
+.landing-page .padding-top-80 {
+  padding-top: 60px !important;
+}
+
+.landing-page .padding-bottom-80 {
+  padding-bottom: 60px !important;
+}
