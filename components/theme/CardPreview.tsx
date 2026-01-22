@@ -15,6 +15,8 @@ import ProfileBlock from '@/components/blocks/ProfileBlock'
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 import CardBackground from '@/components/theme/CardBackground'
 import BioBlock from '@/components/blocks/BioBlock'
+import FreeTextBlock from '@/components/blocks/FreeTextBlock'
+import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
 
 type Card = {
   id: string
@@ -294,7 +296,11 @@ export default function CardPreview({
                     ) : block.type === 'gallery' ? (
                       <GalleryBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'bio' ? (
-  <BioBlock settings={block.settings} style={block.style} />
+                      <BioBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'free_text' ? (
+                      <FreeTextBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'cta_buttons' ? (
+                      <CTAButtonsBlock cardId={card.id} settings={block.settings} style={block.style} />
                     ) : block.type === 'info_utilities' ? (
                       <InfoUtilitiesBlock settings={block.settings} style={block.style} />
                     ) : null}

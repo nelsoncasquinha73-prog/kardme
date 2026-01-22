@@ -51,6 +51,8 @@ export default function AddBlockModal({
       { type: 'embed', title: 'Embed', description: 'Iframe / widgets externos', defaultSettings: {}, defaultStyle: {} },
       { type: 'decorations', title: 'Decorações', description: 'PNG/SVG decorativos', defaultSettings: {}, defaultStyle: {} },
       { type: 'business_hours', title: 'Horário', description: 'Horário de funcionamento', defaultSettings: {}, defaultStyle: {} },
+      { type: 'free_text', title: 'Texto livre', description: 'Texto extra, notas legais ou mensagens personalizadas', defaultSettings: { text: '' }, defaultStyle: {} },
+      { type: 'cta_buttons', title: 'Botões/CTA', description: 'Botões com link para ações rápidas', defaultSettings: { buttons: [], layout: 'stack', align: 'center', gapPx: 10 }, defaultStyle: {} },
     ],
     []
   )
@@ -118,7 +120,7 @@ export default function AddBlockModal({
           borderRadius: 18,
           boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
           overflow: 'hidden',
-          color: '#374151!important', // força cor escura para todo o texto no modal
+          color: '#374151!important',
         }}
       >
         <div

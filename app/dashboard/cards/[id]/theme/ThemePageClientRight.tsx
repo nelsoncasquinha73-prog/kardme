@@ -15,6 +15,8 @@ import ServicesBlockEditor from '@/components/dashboard/block-editors/ServicesBl
 import DecorationBlockEditor from '@/components/dashboard/block-editors/DecorationBlockEditor'
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import type { CardBg } from '@/lib/cardBg'
+import FreesTextBlockEditor from '@/components/dashboard/block-editors/FreesTextBlockEditor'
+import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 
 type CardBlock = {
   id: string
@@ -279,6 +281,24 @@ export default function ThemePageClientRight({
             onChangeStyle={onChangeStyle}
           />
         )}
+{activeBlock?.type === 'free_text' && (
+  <FreesTextBlockEditor
+    settings={activeBlock.settings || { text: '' }}
+    style={activeBlock.style || {}}
+    onChangeSettings={onChangeSettings}
+    onChangeStyle={onChangeStyle}
+  />
+)}
+
+{activeBlock?.type === 'cta_buttons' && (
+  <CTAButtonsBlockEditor
+    cardId={card.id}
+    settings={activeBlock.settings || { buttons: [] }}
+    style={activeBlock.style || {}}
+    onChangeSettings={onChangeSettings}
+    onChangeStyle={onChangeStyle}
+  />
+)}
 
         {activeBlock &&
           ![
@@ -294,6 +314,8 @@ export default function ThemePageClientRight({
             'services',
             'decorations',
             'business_hours',
+            'free_text',
+            'cta_buttons',
           ].includes(activeBlock.type) && (
             <p style={{ fontSize: 14, opacity: 0.65 }}>
               Editor ainda não disponível para: <b>{activeBlock.type}</b>
