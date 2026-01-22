@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import '@/styles/dashboard.css'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
 
@@ -56,39 +57,68 @@ export default function DashboardPage() {
     loadCards()
   }, [])
 
-  if (loading) return <p style={{ color: '#000' }}>A carregar cartões…</p>
+  const hasCards = cards.length > 0
+
+  const subtitle = useMemo(() => {
+    if (loading) return 'A carregar…'
+    if (error) return 'Não foi possível carregar os teus cartões.'
+    if (!hasCards) return 'Cria o teu primeiro cartão e partilha num só link.'
+    return `${cards.length} cartão(ões) na tua conta`
+  }, [loading, error, hasCards, cards.length])
+
+  if (loading) return <p style={{ padding: 24 }}>A carregar cartões…</p>
 
   return (
-    <div style={{ color: '#000', padding: '1rem' }}>
-      <h1 style={{ color: '#000' }}>Os meus cartões</h1>
+    <div className="dashboard-wrap">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <p className="dashboard-subtitle">{subtitle}</p>
+        </div>
 
-      <Link href="/dashboard/cards/new" style={{ color: '#000', textDecoration: 'underline' }}>
-        + Criar cartão
-      </Link>
-
-      {error && <p style={{ color: 'crimson', marginTop: 12 }}>{error}</p>}
-
-      {!error && cards.length === 0 && (
-        <div style={{ marginTop: 16 }}>
-          <p>Ainda não tens cartões.</p>
-          <Link href="/dashboard/templates" style={{ color: '#000', textDecoration: 'underline' }}>
-            Escolher um template
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Link className="btn-secondary" href="/dashboard/templates">
+            Ver templates
           </Link>
+          <Link className="btn-primary" href="/dashboard/cards/new">
+            + Criar cartão
+          </Link>
+        </div>
+      </div>
+
+      {error && <div className="error">{error}</div>}
+
+      {!error && !hasCards && (
+        <div className="empty">
+          <p className="empty-title">Cria o teu primeiro cartão em 60 segundos</p>
+          <p className="empty-desc">
+            Escolhe um template premium, adiciona os teus dados e partilha o link.  
+            Mais tarde podes ativar NFC, analytics e leads.
+          </p>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Link className="btn-primary" href="/dashboard/cards/new">
+              Criar cartão grátis
+            </Link>
+            <Link className="btn-secondary" href="/dashboard/templates">
+              Escolher template
+            </Link>
+          </div>
         </div>
       )}
 
-      {cards.length > 0 && (
-        <ul style={{ marginTop: 20, color: '#000' }}>
+      {hasCards && (
+        <div className="cards-grid">
           {cards.map((card) => (
-            <li key={card.id} style={{ marginBottom: '1rem' }}>
-              <strong>{card.name}</strong>
-              <br />
-              {card.job} {card.company && `· ${card.company}`}
-              <br />
-              <small>kardme.com/{card.slug}</small>
-            </li>
+            <Link key={card.id} className="card-tile" href={`/dashboard/cards/${card.id}/theme`}>
+              <p className="card-name">{card.name}</p>
+              <p className="card-meta">
+                {(card.job || '—')}{card.company ? ` · ${card.company}` : ''}
+              </p>
+              <div className="card-link">kardme.com/{card.slug}</div>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

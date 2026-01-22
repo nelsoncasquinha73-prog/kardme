@@ -1,18 +1,28 @@
-import "@/styles/landing-page.css";
+'use client'
+
+import "@/styles/landing-page.css"
+import Link from 'next/link'
 
 export default function Home() {
   return (
     <main className="landing-page">
+      {/* NAVBAR */}
+      <nav className="navbar navbar-expand-lg navbar-dark bg-transparent" style={{ paddingTop: 20, paddingBottom: 20 }}>
+        <div className="container">
+          <Link className="navbar-brand" href="/">
+            <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
+          </Link>
+          <div className="navbar-nav ms-auto">
+            <Link className="nav-link" href="/signin">Entrar</Link>
+            <Link className="btn btn-primary ms-3" href="/signup">Criar grátis</Link>
+          </div>
+        </div>
+      </nav>
 
-      {/* Start Slider Area */}
-      <div
-        className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape"
-        data-black-overlay="1"
-      >
+      {/* HERO */}
+      <div className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape" data-black-overlay="1">
         <div className="container">
           <div className="row justify-content-center">
-
-            {/* TEXTO */}
             <div className="col-lg-12">
               <div className="inner text-center mt--140">
                 <h1 className="title display-one">
@@ -20,70 +30,209 @@ export default function Home() {
                   <br />
                   <span className="theme-gradient">inteligente</span>
                 </h1>
-
                 <p className="description">
                   Cria, partilha e gere o teu cartão digital profissional
                   <br />
                   num só link, em segundos.
                 </p>
-
                 <div className="form-group">
-                  <a className="btn-default" href="/signup">
+                  <Link className="btn-default" href="/signup">
                     Criar cartão grátis
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
-
-            {/* HERO VISUAL */}
             <div className="col-lg-11 col-xl-11 justify-content-center">
               <div className="slider-frame kardme-showcase">
-
-                {/* iPhone traseiro */}
-                <img
-                  src="/assets/kardme/iphone/iphone-back.png"
-                  className="iphone-back"
-                  alt="iPhone back"
-                />
-
-                {/* iPhone frontal */}
+                <img src="/assets/kardme/iphone/iphone-back.png" className="iphone-back" alt="iPhone back" />
                 <div className="iphone-front-wrapper">
-                  <img
-                    src="/assets/kardme/iphone/iphone-front.png"
-                    className="iphone-front"
-                    alt="iPhone front"
-                  />
-
-                  {/* Cartões */}
+                  <img src="/assets/kardme/iphone/iphone-front.png" className="iphone-front" alt="iPhone front" />
                   <div className="card-carousel">
                     <img src="/assets/kardme/cards/card-1.png" alt="Card 1" />
                     <img src="/assets/kardme/cards/card-2.png" alt="Card 2" />
                     <img src="/assets/kardme/cards/card-3.png" alt="Card 3" />
                   </div>
                 </div>
-
               </div>
             </div>
-
           </div>
         </div>
-
-        {/* BACKGROUND SHAPES (fora da row) */}
         <div className="bg-shape">
-          <img
-            className="bg-shape-one"
-            src="/assets/images/bg/bg-shape-four.png"
-            alt="Bg Shape"
-          />
-          <img
-            className="bg-shape-two"
-            src="/assets/images/bg/bg-shape-five.png"
-            alt="Bg Shape"
-          />
+          <img className="bg-shape-one" src="/assets/images/bg/bg-shape-four.png" alt="Bg Shape" />
+          <img className="bg-shape-two" src="/assets/images/bg/bg-shape-five.png" alt="Bg Shape" />
         </div>
-
       </div>
-      {/* End Slider Area */}
+
+      {/* COMO FUNCIONA */}
+      <section className="service-area service-style-1 padding-top-80 padding-bottom-80">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center">
+              <h2 className="section-title">Como funciona</h2>
+              <p className="section-description">Em 3 passos simples, tens o teu cartão pronto</p>
+            </div>
+          </div>
+          <div className="row padding-top-50">
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item service-item-1">
+                <div className="service-icon">
+                  <i className="fas fa-cube"></i>
+                </div>
+                <h3>Escolhe um template</h3>
+                <p>Seleciona um design premium já pronto para o teu setor</p>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item service-item-1">
+                <div className="service-icon">
+                  <i className="fas fa-edit"></i>
+                </div>
+                <h3>Personaliza</h3>
+                <p>Adiciona a tua foto, dados e informações de contacto</p>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item service-item-1">
+                <div className="service-icon">
+                  <i className="fas fa-share-alt"></i>
+                </div>
+                <h3>Partilha</h3>
+                <p>Envia o link ou código NFC e começa a receber contactos</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="feature-area feature-style-1 padding-top-80 padding-bottom-80">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center">
+              <h2 className="section-title">Porquê Kardme?</h2>
+              <p className="section-description">Tudo o que precisas para um cartão profissional</p>
+            </div>
+          </div>
+          <div className="row padding-top-50">
+            <div className="col-lg-6 col-md-6">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <i className="fas fa-zap"></i>
+                </div>
+                <h3>Rápido & Simples</h3>
+                <p>Cria em menos de 1 minuto, sem conhecimentos técnicos</p>
+              </div>
+            </div>
+            <div className="col-lg-6 col-md-6">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <i className="fas fa-palette"></i>
+                </div>
+                <h3>Totalmente customizável</h3>
+                <p>Cores, fontes, layout — tudo à tua medida</p>
+              </div>
+            </div>
+            <div className="col-lg-6 col-md-6">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <i className="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Mobile First</h3>
+                <p>Perfeito em qualquer dispositivo, sempre</p>
+              </div>
+            </div>
+            <div className="col-lg-6 col-md-6">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <i className="fas fa-chart-line"></i>
+                </div>
+                <h3>Analytics & Leads</h3>
+                <p>Vê quantas pessoas viram e clicaram no teu cartão</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="pricing-area pricing-style-1 padding-top-80 padding-bottom-80">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center">
+              <h2 className="section-title">Planos simples e transparentes</h2>
+              <p className="section-description">Começa grátis, upgrade quando precisares</p>
+            </div>
+          </div>
+          <div className="row padding-top-50">
+            <div className="col-lg-4 col-md-6">
+              <div className="pricing-item pricing-item-1">
+                <h3 className="pricing-title">Grátis</h3>
+                <p className="pricing-subtitle">Para começar</p>
+                <div className="pricing-price">
+                  <span className="price">€0</span>
+                  <span className="period">/mês</span>
+                </div>
+                <ul className="pricing-list">
+                  <li><i className="fas fa-check"></i> 1 cartão digital</li>
+                  <li><i className="fas fa-check"></i> Templates básicos</li>
+                  <li><i className="fas fa-check"></i> Customização limitada</li>
+                  <li><i className="fas fa-times"></i> Analytics</li>
+                </ul>
+                <Link href="/signup" className="btn btn-outline">Começar</Link>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="pricing-item pricing-item-1 pricing-item-featured">
+                <div className="pricing-badge">Mais popular</div>
+                <h3 className="pricing-title">Pro</h3>
+                <p className="pricing-subtitle">Para profissionais</p>
+                <div className="pricing-price">
+                  <span className="price">€9.99</span>
+                  <span className="period">/mês</span>
+                </div>
+                <ul className="pricing-list">
+                  <li><i className="fas fa-check"></i> Cartões ilimitados</li>
+                  <li><i className="fas fa-check"></i> Todos os templates</li>
+                  <li><i className="fas fa-check"></i> Customização completa</li>
+                  <li><i className="fas fa-check"></i> Analytics & Leads</li>
+                </ul>
+                <Link href="/signup" className="btn btn-primary">Começar</Link>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="pricing-item pricing-item-1">
+                <h3 className="pricing-title">Enterprise</h3>
+                <p className="pricing-subtitle">Para equipas</p>
+                <div className="pricing-price">
+                  <span className="price">Contactar</span>
+                </div>
+                <ul className="pricing-list">
+                  <li><i className="fas fa-check"></i> Tudo do Pro</li>
+                  <li><i className="fas fa-check"></i> Cartões NFC ilimitados</li>
+                  <li><i className="fas fa-check"></i> Suporte prioritário</li>
+                  <li><i className="fas fa-check"></i> Integrações custom</li>
+                </ul>
+                <Link href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="cta-area cta-style-1 padding-top-80 padding-bottom-80">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center">
+              <h2>Pronto para começar?</h2>
+              <p>Cria o teu cartão digital em menos de 1 minuto</p>
+              <Link href="/signup" className="btn btn-primary btn-lg">
+                Criar cartão grátis →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </main>
   )
