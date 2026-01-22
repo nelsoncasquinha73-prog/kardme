@@ -7,8 +7,8 @@
 
 .iphone {
   position: relative;
-  width: 380px;
-  height: 780px;
+  width: 420px;
+  height: 680px;
 }
 
 .iphoneFrame {
@@ -26,11 +26,12 @@
   top: 16px;
   left: 16px;
   width: 348px;
-  height: 748px;
+  height: 648px;    /* era 748, agora proporcional */
   border-radius: 50px;
   overflow: hidden;
   background: #000;
 }
+
 
 .cardSlide {
   position: absolute;
@@ -91,18 +92,18 @@
 @media (max-width: 768px) {
   .iphone {
     width: 300px;
-    height: 620px;
+    height: 540px;    /* proporcional ao novo tamanho */
   }
 
   .cardsContainer {
     top: 12px;
     left: 12px;
     width: 276px;
-    height: 596px;
+    height: 516px;    /* proporcional */
     border-radius: 40px;
   }
+}
 
   .cardSlide img {
     border-radius: 40px;
   }
-}
