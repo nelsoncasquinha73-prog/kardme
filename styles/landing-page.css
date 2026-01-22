@@ -487,3 +487,47 @@
   padding-top: 30px !important;
   margin-top: 0 !important;
 }
+/* ===== NUCLEAR FIX: HERO SPACING ===== */
+.landing-page .slider-area.heroGrid {
+  min-height: unset !important;
+  height: auto !important;
+  padding: 40px 0 0 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+.landing-page .slider-area.heroGrid .container {
+  padding: var(--bs-gutter-x, 1.5rem) !important;
+  margin: 0 !important;
+}
+
+.landing-page .slider-area.heroGrid .inner {
+  padding: 20px 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+.landing-page .slider-area.heroGrid .title,
+.landing-page .slider-area.heroGrid .display-one {
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+}
+
+.landing-page .slider-area.heroGrid .description {
+  margin-bottom: 16px !important;
+  padding: 0 !important;
+}
+
+.landing-page .heroCtaCard {
+  margin: 16px auto 0 !important;
+  padding: 24px !important;
+}
+
+.landing-page .showcase-section {
+  padding-top: 30px !important;
+  margin-top: 0 !important;
+}
+
+.landing-page .bg-shape {
+  display: none !important;
+}
