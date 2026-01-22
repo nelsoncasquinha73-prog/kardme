@@ -33,7 +33,6 @@
   background: #000;
 }
 
-
 .cardSlide {
   position: absolute;
   top: 0;
@@ -91,26 +90,54 @@
 }
 
 @media (max-width: 768px) {
+  .showcase {
+    padding: 12px;
+  }
+
+  .iphone {
+    width: min(340px, 92vw);
+    height: calc(min(340px, 92vw) * 1.3077);
+    margin: 0 auto;
+  }
+
   .cardsContainer {
     top: 12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 276px;
-    height: 516px;
+    width: calc(min(340px, 92vw) - 28px);
+    height: calc((min(340px, 92vw) * 1.3077) - 28px);
     border-radius: 40px;
+    overflow: hidden;
+    background: #000;
   }
-}
-@media (max-width: 400px) {
-
-  .cardsContainer {
-    top: 12px;
-    left: 12px;
-    width: 276px;
-    height: 516px;    /* proporcional */
-    border-radius: 40px;
-  }
-}
 
   .cardSlide img {
     border-radius: 40px;
   }
+}
+
+@media (max-width: 400px) {
+  .showcase {
+    padding: 8px;
+  }
+
+  .iphone {
+    width: min(300px, 90vw);
+    height: calc(min(300px, 90vw) * 1.3077);
+  }
+
+  .cardsContainer {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(min(300px, 90vw) - 24px);
+    height: calc((min(300px, 90vw) * 1.3077) - 24px);
+    border-radius: 36px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .cardSlide img {
+    border-radius: 36px;
+  }
+}
