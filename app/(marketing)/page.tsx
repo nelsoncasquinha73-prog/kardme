@@ -25,7 +25,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-12">
-              <div className="inner text-center" style={{ paddingTop: 110, paddingBottom: 90 }}>
+              <div className="inner text-center" style={{ paddingTop: 60, paddingBottom: 40 }}>
                 <h1 className="title display-one">
                   O teu cartão digital
                   <br />
