@@ -1,11 +1,10 @@
-
-
 import Link from 'next/link'
 import KardmeShowcase from '@/components/KardmeShowcase'
 
 export default function Home() {
   return (
     <main className="landing-page">
+      {/* NAVBAR */}
       <nav
         className="navbar navbar-expand-lg navbar-dark bg-transparent"
         style={{ paddingTop: 20, paddingBottom: 20 }}
@@ -26,10 +25,8 @@ export default function Home() {
         </div>
       </nav>
 
-      <div
-        className="slider-area slider-style-1 variation-default heroGrid"
-        style={{ minHeight: 'auto', height: 'auto', padding: '30px 0' }}
-      >
+      {/* HERO SECTION */}
+      <div className="slider-area slider-style-1 variation-default heroGrid">
         <div className="heroOrbs" aria-hidden="true">
           <span className="orb orb1" />
           <span className="orb orb2" />
@@ -50,7 +47,7 @@ export default function Home() {
                   O teu primeiro impacto nunca mais vai ser &quot;só mais um&quot;.
                 </p>
 
-                {/* CTA CARD (no HERO) */}
+                {/* CTA CARD */}
                 <div className="heroCtaCard">
                   <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
                   <Link className="btn-default" href="/signup">
@@ -69,16 +66,17 @@ export default function Home() {
         </div>
       </div>
 
-      <section style={{ background: 'var(--color-bg)', padding: '60px 20px' }}>
+      {/* SHOWCASE SECTION */}
+      <section className="showcase-section">
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-lg-8 text-center" style={{ marginBottom: 40 }}>
+            <div className="col-lg-8 text-center">
               <h2 className="section-title">Vê como funciona</h2>
               <p className="section-description">Exemplos de cartões digitais criados em Kardme</p>
             </div>
           </div>
 
-          <div className="row justify-content-center">
+          <div className="row justify-content-center" style={{ marginTop: 30 }}>
             <div className="col-lg-6">
               <KardmeShowcase />
             </div>
@@ -86,7 +84,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="service-area service-style-1 padding-top-80 padding-bottom-80">
+      {/* HOW IT WORKS SECTION */}
+      <section className="how-it-works-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
@@ -95,9 +94,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="row padding-top-50">
+          <div className="row" style={{ marginTop: 40 }}>
             <div className="col-lg-4 col-md-6">
-              <div className="service-item service-item-1">
+              <div className="service-item">
                 <div className="service-icon">
                   <i className="fas fa-cube"></i>
                 </div>
@@ -107,7 +106,7 @@ export default function Home() {
             </div>
 
             <div className="col-lg-4 col-md-6">
-              <div className="service-item service-item-1">
+              <div className="service-item">
                 <div className="service-icon">
                   <i className="fas fa-edit"></i>
                 </div>
@@ -117,7 +116,7 @@ export default function Home() {
             </div>
 
             <div className="col-lg-4 col-md-6">
-              <div className="service-item service-item-1">
+              <div className="service-item">
                 <div className="service-icon">
                   <i className="fas fa-share-alt"></i>
                 </div>
@@ -129,7 +128,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="feature-area feature-style-1 padding-top-80 padding-bottom-80">
+      {/* WHY KARDME SECTION */}
+      <section className="why-kardme-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
@@ -138,7 +138,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="row padding-top-50">
+          <div className="row" style={{ marginTop: 40 }}>
             <div className="col-lg-6 col-md-6">
               <div className="feature-item">
                 <div className="feature-icon">
@@ -182,7 +182,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="pricing-area pricing-style-1 padding-top-80 padding-bottom-80">
+      {/* PRICING SECTION */}
+      <section className="pricing-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
@@ -191,9 +192,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="row padding-top-50">
+          <div className="row" style={{ marginTop: 40 }}>
             <div className="col-lg-4 col-md-6">
-              <div className="pricing-item pricing-item-1">
+              <div className="pricing-item">
                 <h3 className="pricing-title">Grátis</h3>
                 <p className="pricing-subtitle">Para começar</p>
                 <div className="pricing-price">
@@ -221,7 +222,7 @@ export default function Home() {
             </div>
 
             <div className="col-lg-4 col-md-6">
-              <div className="pricing-item pricing-item-1 pricing-item-featured">
+              <div className="pricing-item pricing-item-featured">
                 <div className="pricing-badge">Mais popular</div>
                 <h3 className="pricing-title">Pro</h3>
                 <p className="pricing-subtitle">Para profissionais</p>
@@ -250,7 +251,7 @@ export default function Home() {
             </div>
 
             <div className="col-lg-4 col-md-6">
-              <div className="pricing-item pricing-item-1">
+              <div className="pricing-item">
                 <h3 className="pricing-title">Enterprise</h3>
                 <p className="pricing-subtitle">Para equipas</p>
                 <div className="pricing-price">
@@ -279,13 +280,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="cta-area cta-style-1 padding-top-80 padding-bottom-80">
+      {/* CTA FINAL SECTION */}
+      <section className="cta-final-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">Pronto para começar?</h2>
               <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
-              <div className="form-group" style={{ marginTop: 18 }}>
+              <div style={{ marginTop: 24 }}>
                 <Link className="btn-default" href="/signup">
                   Quero o meu cartão premium
                 </Link>

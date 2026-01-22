@@ -1,4 +1,4 @@
-/* KardmeShowcase Styles */
+/* ===== KardmeShowcase Styles ===== */
 .showcase {
   display: flex;
   justify-content: center;
@@ -143,10 +143,25 @@
   }
 }
 
-/* Landing Page Hero Grid */
+/* ===== Landing Page Root ===== */
+.landingRoot {
+  min-height: 100vh;
+}
+
+.landing-page {
+  position: relative;
+}
+
+/* ===== Hide Theme Switcher ===== */
+#theme-switcher {
+  display: none !important;
+}
+
+/* ===== HERO SECTION ===== */
 .landing-page .heroGrid {
   position: relative;
   overflow: hidden;
+  padding: 60px 0 40px 0;
   background: radial-gradient(1200px 700px at 50% 80%, rgba(255,255,255,0.10), rgba(0,0,0,0.0) 55%),
               radial-gradient(900px 500px at 50% 20%, rgba(168, 85, 247, 0.10), rgba(0,0,0,0.0) 60%),
               #0b0b12;
@@ -164,15 +179,6 @@
 .landing-page .heroGrid .inner {
   position: relative;
   z-index: 2;
-}
-
-/* Hide theme switcher on marketing page */
-#theme-switcher {
-  display: none !important;
-}
-
-.landing-page {
-  position: relative;
 }
 
 /* HERO WOW LAYERS - Floating Orbs */
@@ -216,6 +222,24 @@
   opacity: 0.7;
 }
 
+/* Hero Text */
+.landing-page .heroGrid h1,
+.landing-page .heroGrid .title {
+  color: #ffffff !important;
+}
+
+.landing-page .heroGrid p,
+.landing-page .heroGrid .description {
+  color: rgba(255,255,255,0.72) !important;
+}
+
+.landing-page .heroGrid h1,
+.landing-page .heroGrid .title,
+.landing-page .heroGrid p,
+.landing-page .heroGrid .description {
+  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+}
+
 /* Hero CTA Card */
 .landing-page .heroCtaCard {
   margin: 22px auto 0;
@@ -240,56 +264,191 @@
   font-size: 13px;
 }
 
-/* HERO TEXT - Readable in all states */
-.landing-page .heroGrid h1,
-.landing-page .heroGrid .title {
-  color: #ffffff !important;
+/* ===== SECTION STYLES ===== */
+.showcase-section {
+  padding: 60px 20px;
+  background: var(--color-bg, #ffffff);
 }
 
-.landing-page .heroGrid p,
-.landing-page .heroGrid .description {
-  color: rgba(255,255,255,0.72) !important;
+.how-it-works-section {
+  padding: 60px 20px;
+  background: var(--color-bg, #ffffff);
 }
 
-.landing-page .heroGrid h1,
-.landing-page .heroGrid .title,
-.landing-page .heroGrid p,
-.landing-page .heroGrid .description {
-  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+.why-kardme-section {
+  padding: 60px 20px;
+  background: var(--color-bg, #ffffff);
 }
 
-/* SPACING ADJUSTMENTS */
-.landing-page .slider-area {
-  padding: 40px 0 20px 0 !important;
+.pricing-section {
+  padding: 60px 20px;
+  background: var(--color-bg, #ffffff);
 }
 
-.landing-page .feature-area .row {
-  row-gap: 40px;
+.cta-final-section {
+  padding: 60px 20px;
+  background: var(--color-bg, #ffffff);
 }
 
-.landing-page .padding-top-80 {
-  padding-top: 60px !important;
+/* ===== SECTION TITLES ===== */
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--color-text, #000);
 }
 
-.landing-page .padding-bottom-80 {
-  padding-bottom: 60px !important;
+.section-description {
+  font-size: 16px;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
 }
 
-.landing-page .section-title-area,
-.landing-page .section-title,
-.landing-page .section-title-wrapper {
-  margin-bottom: 18px !important;
+/* ===== SERVICE ITEMS ===== */
+.service-item {
+  text-align: center;
+  padding: 20px;
 }
 
-.landing-page .feature-area,
-.landing-page .service-area,
-.landing-page .rn-section-gap,
-.landing-page .rn-section-gapTop,
-.landing-page .rn-section-gapBottom {
-  padding-top: 30px !important;
-  padding-bottom: 30px !important;
+.service-icon {
+  font-size: 40px;
+  color: var(--color-primary, #6366f1);
+  margin-bottom: 16px;
 }
 
-.landing-page .showcase {
-  padding-top: 8px;
+.service-item h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-text, #000);
+}
+
+.service-item p {
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+/* ===== FEATURE ITEMS ===== */
+.feature-item {
+  padding: 20px;
+}
+
+.feature-icon {
+  font-size: 40px;
+  color: var(--color-primary, #6366f1);
+  margin-bottom: 16px;
+}
+
+.feature-item h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-text, #000);
+}
+
+.feature-item p {
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+/* ===== PRICING ITEMS ===== */
+.pricing-item {
+  padding: 30px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  text-align: center;
+  background: var(--color-bg, #ffffff);
+  transition: all 0.3s;
+}
+
+.pricing-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-item-featured {
+  border-color: var(--color-primary, #6366f1);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+}
+
+.pricing-badge {
+  display: inline-block;
+  background: var(--color-primary, #6366f1);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.pricing-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--color-text, #000);
+}
+
+.pricing-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+  margin-bottom: 16px;
+}
+
+.pricing-price {
+  margin: 20px 0;
+}
+
+.pricing-price .price {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text, #000);
+}
+
+.pricing-price .period {
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+  margin-left: 4px;
+}
+
+.pricing-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.pricing-list li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--color-text, #000);
+}
+
+.pricing-list i {
+  color: var(--color-primary, #6366f1);
+  margin-right: 8px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 24px;
+  }
+
+  .section-description {
+    font-size: 14px;
+  }
+
+  .showcase-section,
+  .how-it-works-section,
+  .why-kardme-section,
+  .pricing-section,
+  .cta-final-section {
+    padding: 40px 16px;
+  }
+
+  .pricing-item {
+    margin-bottom: 20px;
+  }
 }
