@@ -161,11 +161,12 @@
 .landing-page .heroGrid {
   position: relative;
   overflow: hidden;
-  padding: 60px 0 40px 0;
+  padding: 40px 0 20px 0;
   background: radial-gradient(1200px 700px at 50% 80%, rgba(255,255,255,0.10), rgba(0,0,0,0.0) 55%),
               radial-gradient(900px 500px at 50% 20%, rgba(168, 85, 247, 0.10), rgba(0,0,0,0.0) 60%),
               #0b0b12;
 }
+
 
 .landing-page .heroGrid::after {
   content: "";
