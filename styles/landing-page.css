@@ -153,9 +153,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(900px 500px at 50% 30%, rgba(0,0,0,0.0), rgba(0,0,0,0.75));
+  /* vinheta leve, sem “lavar” o hero */
+  background:
+    radial-gradient(900px 520px at 50% 35%, rgba(0,0,0,0.00), rgba(0,0,0,0.55));
   pointer-events: none;
 }
+
 
 .landing-page .heroGrid .container,
 .landing-page .heroGrid .inner {
@@ -273,4 +276,10 @@ main.landing-page ~ #theme-switcher {
 
 .landing-page .padding-bottom-80 {
   padding-bottom: 60px !important;
+}
+.landing-page .heroGrid {
+  background:
+    radial-gradient(1200px 700px at 50% 80%, rgba(255,255,255,0.10), rgba(0,0,0,0.0) 55%),
+    radial-gradient(900px 500px at 50% 20%, rgba(168, 85, 247, 0.10), rgba(0,0,0,0.0) 60%),
+    #0b0b12;
 }
