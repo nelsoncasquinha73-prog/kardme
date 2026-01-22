@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   // PWA
   manifest: '/manifest.webmanifest',
 
-  // iOS “Adicionar ao ecrã principal”
+  // iOS "Adicionar ao ecrã principal"
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -57,8 +57,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt">
-      <body className="antialiased">{children}</body>
-    </html>
+    
+      {children}
+    
   )
 }
