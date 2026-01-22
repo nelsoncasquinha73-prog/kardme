@@ -334,9 +334,6 @@ main.landing-page ~ #theme-switcher {
   background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.9), rgba(124, 58, 237, 0.15) 60%, transparent 70%);
 }
 
-.landing-page .heroOrbs .orb1 { top: 90px; left: 10%; transform: rotate(12deg); }
-.landing-page .heroOrbs .orb2 { top: 140px; right: 12%; width: 220px; height: 220px; opacity: 0.75; }
-.landing-page .heroOrbs .orb3 { bottom: 60px; left: 18%; width: 140px; height: 140px; opacity: 0.6; }
 
 .landing-page .heroCtaCard {
   margin: 22px auto 0;
