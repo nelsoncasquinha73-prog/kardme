@@ -21,6 +21,7 @@ export default function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // Aplica o tema guardado (ou dark por default)
     const saved = (localStorage.getItem('kardme_theme') as ThemeMode) || 'dark'
     setTheme(saved)
     applyTheme(saved)
