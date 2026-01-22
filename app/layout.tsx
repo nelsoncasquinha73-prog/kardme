@@ -57,8 +57,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    
-      {children}
-    
+    <html lang="pt" className="dark" data-theme="dark">
+      <body className="antialiased dark">{children}</body>
+    </html>
   )
 }
