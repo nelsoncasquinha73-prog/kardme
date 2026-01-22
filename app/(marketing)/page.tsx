@@ -2,6 +2,7 @@
 
 import "@/styles/landing-page.css"
 import Link from 'next/link'
+import KardmeShowcase from '@/components/KardmeShowcase'
 
 export default function Home() {
   return (
@@ -19,49 +20,58 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO */}
+      {/* HERO (texto apenas) */}
       <div className="slider-area slider-style-1 variation-default slider-bg-image bg-banner1 slider-bg-shape" data-black-overlay="1">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-12">
-              <div className="inner text-center mt--140">
+              <div className="inner text-center" style={{ paddingTop: 110, paddingBottom: 90 }}>
                 <h1 className="title display-one">
                   O teu cartão digital
                   <br />
                   <span className="theme-gradient">inteligente</span>
                 </h1>
+
                 <p className="description">
                   Cria, partilha e gere o teu cartão digital profissional
                   <br />
                   num só link, em segundos.
                 </p>
-                <div className="form-group">
+
+                <div className="form-group" style={{ marginTop: 18 }}>
                   <Link className="btn-default" href="/signup">
                     Criar cartão grátis
                   </Link>
                 </div>
               </div>
             </div>
-            <div className="col-lg-11 col-xl-11 justify-content-center">
-              <div className="slider-frame kardme-showcase">
-                <img src="/assets/kardme/iphone/iphone-back.png" className="iphone-back" alt="iPhone back" />
-                <div className="iphone-front-wrapper">
-                  <img src="/assets/kardme/iphone/iphone-front.png" className="iphone-front" alt="iPhone front" />
-                  <div className="card-carousel">
-                    <img src="/assets/kardme/cards/card-1.png" alt="Card 1" />
-                    <img src="/assets/kardme/cards/card-2.png" alt="Card 2" />
-                    <img src="/assets/kardme/cards/card-3.png" alt="Card 3" />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+
         <div className="bg-shape">
           <img className="bg-shape-one" src="/assets/images/bg/bg-shape-four.png" alt="Bg Shape" />
           <img className="bg-shape-two" src="/assets/images/bg/bg-shape-five.png" alt="Bg Shape" />
         </div>
       </div>
+
+
+ {/* SHOWCASE */}
+ <section style={{ background: 'var(--color-bg)', padding: '60px 20px' }}>
+   <div className="container">
+     <div className="row justify-content-center">
+       <div className="col-lg-8 text-center" style={{ marginBottom: 40 }}>
+         <h2 className="section-title">Vê como funciona</h2>
+         <p className="section-description">Exemplos de cartões digitais criados em Kardme</p>
+       </div>
+     </div>
+     <div className="row justify-content-center">
+       <div className="col-lg-6">
+         <KardmeShowcase />
+       </div>
+     </div>
+   </div>
+ </section>
+
 
       {/* COMO FUNCIONA */}
       <section className="service-area service-style-1 padding-top-80 padding-bottom-80">
@@ -97,7 +107,7 @@ export default function Home() {
                   <i className="fas fa-share-alt"></i>
                 </div>
                 <h3>Partilha</h3>
-                <p>Envia o link ou código NFC e começa a receber contactos</p>
+                <p>Envia o link (e mais tarde NFC) e começa a receber contactos</p>
               </div>
             </div>
           </div>
@@ -181,6 +191,7 @@ export default function Home() {
                 <Link href="/signup" className="btn btn-outline">Começar</Link>
               </div>
             </div>
+
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-1 pricing-item-featured">
                 <div className="pricing-badge">Mais popular</div>
@@ -199,6 +210,7 @@ export default function Home() {
                 <Link href="/signup" className="btn btn-primary">Começar</Link>
               </div>
             </div>
+
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-1">
                 <h3 className="pricing-title">Enterprise</h3>
@@ -208,11 +220,11 @@ export default function Home() {
                 </div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> Tudo do Pro</li>
-                  <li><i className="fas fa-check"></i> Cartões NFC ilimitados</li>
+                  <li><i className="fas fa-check"></i> Cartões NFC</li>
                   <li><i className="fas fa-check"></i> Suporte prioritário</li>
                   <li><i className="fas fa-check"></i> Integrações custom</li>
                 </ul>
-                <Link href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</Link>
+                <a href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</a>
               </div>
             </div>
           </div>
@@ -233,7 +245,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
     </main>
   )
 }
