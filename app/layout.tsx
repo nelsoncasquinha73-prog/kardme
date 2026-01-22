@@ -4,7 +4,6 @@ import './globals.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/styles/tokens.css'
 
-// Importa as fontes locais via @fontsource
 import '@fontsource/montserrat/400.css'
 import '@fontsource/montserrat/700.css'
 import '@fontsource/montserrat/900.css'
@@ -28,18 +27,12 @@ import '@fontsource/poppins/900.css'
 export const metadata: Metadata = {
   title: 'Kardme',
   description: 'Cartões digitais inteligentes',
-
-  // PWA
   manifest: '/manifest.webmanifest',
-
-  // iOS "Adicionar ao ecrã principal"
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Kardme',
   },
-
-  // (Opcional mas recomendado)
   icons: {
     icon: '/icon-192.png',
     apple: '/apple-touch-icon.png',
@@ -52,20 +45,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html 
-      lang="pt" 
-      className="dark" 
-      data-theme="dark"
-      suppressHydrationWarning
-    >
-      <body className="antialiased dark">{children}</body>
+    <html lang="pt" suppressHydrationWarning>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }
-
