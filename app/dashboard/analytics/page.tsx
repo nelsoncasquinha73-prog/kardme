@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
       // Resumo por cartão (últimos N dias)
       const { data: summaryData, error: summaryError } = await supabase
         .from('card_daily_stats')
-        .select('card_id, views, clicks, leads, cards(name)')
+        .select('card_id, views, clicks, leads')
         .eq('user_id', userId)
         .gte('day', startDate.toISOString().split('T')[0])
 
@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
         if (!summary[key]) {
           summary[key] = {
             card_id: row.card_id,
-            card_name: row.cards?.name || 'Sem nome',
+            card_name: (row.cards as any)?.[0]?.name || 'Sem nome',
             total_views: 0,
             total_clicks: 0,
             total_leads: 0,
