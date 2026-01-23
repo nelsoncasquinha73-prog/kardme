@@ -2,7 +2,7 @@
   width: 280px;
   background: linear-gradient(180deg, #0b0b12 0%, #0f0f1a 100%);
   color: rgba(255, 255, 255, 0.92);
-  padding: 24px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
