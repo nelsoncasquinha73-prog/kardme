@@ -16,13 +16,16 @@
   font-weight: 900;
   letter-spacing: -0.02em;
   margin: 0;
+  color: rgba(255,255,255,0.92);
 }
 
 .dashboard-subtitle{
   margin: 6px 0 0;
   font-size: 13px;
-  opacity: 0.65;
+  color: rgba(255,255,255,0.62);
+  opacity: 1;
 }
+
 
 .btn-primary{
   height: 42px;
@@ -223,4 +226,23 @@
 
 .dashboard-subtitle {
   color: rgba(255, 255, 255, 0.55);
+}
+.card-tile-premium .card-name{
+  font-weight: 900;
+  font-size: 14px;
+  margin: 0;
+  color: rgba(255,255,255,0.92);
+}
+
+.card-tile-premium .card-meta{
+  font-size: 12px;
+  margin: 0;
+  color: rgba(255,255,255,0.62);
+}
+
+.card-tile-premium .card-link{
+  font-size: 12px;
+  margin-top: 10px;
+  color: rgba(167,139,250,0.95); /* roxo claro */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
