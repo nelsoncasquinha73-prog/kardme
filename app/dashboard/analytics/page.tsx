@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
       const formattedDaily = (dailyData || []).map((d: any) => ({
         day: d.day,
         card_id: d.card_id,
-        card_name: d.cards?.name || 'Sem nome',
+        card_name: Array.isArray(d.cards) ? d.cards[0]?.name : d.cards?.name || 'Sem nome',
         views: d.views,
         clicks: d.clicks,
         leads: d.leads,
@@ -89,12 +89,28 @@ export default function AnalyticsPage() {
 
       // Agregar por card_id
       const summary: { [key: string]: CardSummary } = {}
+
+      // Primeiro, preenche com nomes dos dados diários
+      for (const row of formattedDaily) {
+        const key = row.card_id
+        if (!summary[key]) {
+          summary[key] = {
+            card_id: row.card_id,
+            card_name: row.card_name,
+            total_views: 0,
+            total_clicks: 0,
+            total_leads: 0,
+          }
+        }
+      }
+
+      // Depois agrega
       for (const row of summaryData || []) {
         const key = row.card_id
         if (!summary[key]) {
           summary[key] = {
             card_id: row.card_id,
-            card_name: (row.cards as any)?.[0]?.name || 'Sem nome',
+            card_name: 'Sem nome',
             total_views: 0,
             total_clicks: 0,
             total_leads: 0,
