@@ -54,11 +54,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
-  // Título dinâmico da topbar
+ 
+    const titleByPrefix: Array<{ prefix: string; title: string }> = [
+    { prefix: '/dashboard/leads', title: 'Contactos' },
+    { prefix: '/dashboard/bookings', title: 'Reuniões' },
+    { prefix: '/dashboard/orders', title: 'Encomendas' },
+    { prefix: '/dashboard/affiliate', title: 'Afiliados' },
+    { prefix: '/dashboard/nfc', title: 'NFC' },
+    { prefix: '/dashboard/storage', title: 'Ficheiros' },
+    { prefix: '/dashboard/settings', title: 'Definições' },
+    { prefix: '/dashboard/catalog', title: 'Catálogo de Templates' },
+    { prefix: '/dashboard', title: 'Os meus cartões' },
+  ]
+
   const getPageTitle = () => {
-    const item = navItems.find((i) => isActive(i.href))
-    return item?.label || 'Dashboard'
+    const match = titleByPrefix.find((x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/'))
+    return match?.title || 'Kardme'
   }
+
 
   return (
     <ColorPickerProvider>
