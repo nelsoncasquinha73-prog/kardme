@@ -1,28 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/editor-ui.css'
 import '@/styles/dashboard-sidebar.css'
-
-// ✅ IMPORTA O PROVIDER
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [loading, setLoading] = useState(true)
-  const [activeRoute, setActiveRoute] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push('/login')
       else setLoading(false)
     })
-
-    // Track active route
-    setActiveRoute(window.location.pathname)
   }, [router])
 
   const logout = async () => {
@@ -33,16 +28,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   const navItems = [
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Cartões digitais', href: '/dashboard/cards' },
-    { label: 'Leads', href: '/dashboard/leads' },
-    { label: 'Marcações', href: '/dashboard/bookings' },
-    { label: 'Pedidos', href: '/dashboard/orders' },
-    { label: 'Afiliação', href: '/dashboard/affiliate' },
-    { label: 'Cartões NFC', href: '/dashboard/nfc' },
-    { label: 'Armazenamento', href: '/dashboard/storage' },
-    { label: 'Configurações', href: '/dashboard/settings' },
+    { label: 'Os meus cartões', href: '/dashboard' },
+    { label: 'Contactos', href: '/dashboard/leads' },
+    { label: 'Reuniões', href: '/dashboard/bookings' },
+    { label: 'Encomendas', href: '/dashboard/orders' },
+    { label: 'Afiliados', href: '/dashboard/affiliate' },
+    { label: 'NFC', href: '/dashboard/nfc' },
+    { label: 'Ficheiros', href: '/dashboard/storage' },
+    { label: 'Definições', href: '/dashboard/settings' },
   ]
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   return (
     <ColorPickerProvider>
@@ -50,16 +46,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
             <h2 className="sidebar-logo">Kardme</h2>
+            <p className="sidebar-tagline">Cartões digitais premium</p>
           </div>
 
           <nav className="sidebar-nav">
             <ul className="sidebar-menu">
               {navItems.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`sidebar-link ${activeRoute === item.href ? 'active' : ''}`}
-                  >
+                  <Link href={item.href} className={`sidebar-link ${isActive(item.href) ? 'active' : ''}`}>
                     {item.label}
                   </Link>
                 </li>
@@ -76,7 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div style={{ flex: 1 }}>
           <header className="dashboard-topbar">
-            <strong>Dashboard</strong>
+            <strong>Os meus cartões</strong>
           </header>
 
           <main style={{ padding: 24 }}>{children}</main>
