@@ -8,20 +8,30 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { cardId, type, key, path, referrer } = await req.json()
+    const { cardId, slug, type, key, path, referrer } = await req.json()
 
     // Validação básica
-    if (!cardId || !type || !['view', 'click', 'lead'].includes(type)) {
+    if (!type || !['view', 'click', 'lead'].includes(type)) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
-    // Valida que o card existe
-    const { data: card, error: cardError } = await supabase
+    if (!cardId && !slug) {
+      return NextResponse.json({ error: 'Missing cardId or slug' }, { status: 400 })
+    }
+
+    // Valida que o card existe e está publicado
+    let query = supabase
       .from('cards')
       .select('id, user_id')
-      .eq('id', cardId)
       .eq('published', true)
-      .single()
+
+    if (cardId) {
+      query = query.eq('id', cardId)
+    } else if (slug) {
+      query = query.eq('slug', slug)
+    }
+
+    const { data: card, error: cardError } = await query.single()
 
     if (cardError || !card) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 })
@@ -29,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     // Insere o evento
     const { error: insertError } = await supabase.from('card_events').insert({
-      card_id: cardId,
+      card_id: card.id,
       user_id: card.user_id,
       event_type: type,
       event_key: key || null,
