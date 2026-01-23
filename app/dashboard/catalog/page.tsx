@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
+import '@/styles/admin-templates.css'
 
 type Template = {
   id: string
