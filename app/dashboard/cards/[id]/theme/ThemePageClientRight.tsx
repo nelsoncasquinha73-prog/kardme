@@ -89,7 +89,12 @@ export default function ThemePageClientRight({
   const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
 
   const searchParams = useSearchParams()
-  const templateId = searchParams.get('template_id')
+
+  // ✅ À prova de bala:
+  // - se vier ?template_id=... usa isso
+  // - senão usa card.template_id (draft criado no admin)
+  const templateIdFromUrl = searchParams.get('template_id')
+  const templateId = templateIdFromUrl || card?.template_id || null
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -117,7 +122,7 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
-      // Se é draft de edição (templateId existe), faz UPDATE
+      // ✅ UPDATE template existente (edição)
       if (templateId) {
         const { error: updateErr } = await supabase
           .from('templates')
@@ -129,12 +134,12 @@ export default function ThemePageClientRight({
 
         if (updateErr) throw new Error(updateErr.message)
 
-        alert(`✅ Template atualizado com sucesso!`)
+        alert('✅ Template atualizado com sucesso!')
         setTemplateSaving(false)
         return
       }
 
-      // Senão, cria novo template (comportamento atual)
+      // ✅ INSERT novo template (criação)
       const { error: insertErr } = await supabase.from('templates').insert({
         name: data.name,
         description: data.description,
