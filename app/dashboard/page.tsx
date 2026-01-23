@@ -4,6 +4,7 @@ import '@/styles/dashboard.css'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
+import DeleteCardModal from '@/components/DeleteCardModal'
 
 type Card = {
   id: string
@@ -19,6 +20,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [cardToDelete, setCardToDelete] = useState<Card | null>(null)
 
   const loadCards = async () => {
     setLoading(true)
@@ -68,17 +71,26 @@ export default function DashboardPage() {
     return `${cards.length} cartão(ões) na tua conta`
   }, [loading, error, hasCards, cards.length])
 
-  const handleDelete = async (card: Card) => {
-    const ok = window.confirm(`Eliminar o cartão "${card.name}"?\n\nEsta ação não pode ser desfeita.`)
-    if (!ok) return
+  const openDeleteModal = (card: Card) => {
+    setCardToDelete(card)
+    setModalOpen(true)
+  }
 
-    setDeletingId(card.id)
+  const closeDeleteModal = () => {
+    setModalOpen(false)
+    setCardToDelete(null)
+  }
+
+  const confirmDelete = async () => {
+    if (!cardToDelete) return
+
+    setDeletingId(cardToDelete.id)
     setError(null)
 
     const { error: delErr } = await supabase
       .from('cards')
       .update({ deleted_at: new Date().toISOString() })
-      .eq('id', card.id)
+      .eq('id', cardToDelete.id)
 
     if (delErr) {
       setError(delErr.message)
@@ -87,8 +99,9 @@ export default function DashboardPage() {
     }
 
     // UI instantânea
-    setCards((prev) => prev.filter((c) => c.id !== card.id))
+    setCards((prev) => prev.filter((c) => c.id !== cardToDelete.id))
     setDeletingId(null)
+    closeDeleteModal()
   }
 
   if (loading) return <p style={{ padding: 24 }}>A carregar cartões…</p>
@@ -97,13 +110,13 @@ export default function DashboardPage() {
     <div className="dashboard-wrap">
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Dashboard</h1>
+          <h1 className="dashboard-title">Os meus cartões</h1>
           <p className="dashboard-subtitle">{subtitle}</p>
         </div>
 
         <div className="dashboard-actions">
-          <Link className="btn-secondary" href="/dashboard/templates">
-            Ver templates
+          <Link className="btn-secondary" href="/dashboard/catalog">
+            Ver catálogo
           </Link>
           <Link className="btn-primary" href="/dashboard/cards/new">
             + Criar cartão
@@ -125,8 +138,8 @@ export default function DashboardPage() {
             <Link className="btn-primary" href="/dashboard/cards/new">
               Criar cartão grátis
             </Link>
-            <Link className="btn-secondary" href="/dashboard/templates">
-              Escolher template
+            <Link className="btn-secondary" href="/dashboard/catalog">
+              Ver catálogo
             </Link>
           </div>
         </div>
@@ -156,7 +169,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     className="card-btn card-btn-danger"
-                    onClick={() => handleDelete(card)}
+                    onClick={() => openDeleteModal(card)}
                     disabled={deletingId === card.id}
                     title="Eliminar cartão"
                   >
@@ -170,6 +183,14 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+
+      <DeleteCardModal
+        isOpen={modalOpen}
+        cardName={cardToDelete?.name || ''}
+        onConfirm={confirmDelete}
+        onCancel={closeDeleteModal}
+        isDeleting={deletingId !== null}
+      />
     </div>
   )
 }
