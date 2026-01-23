@@ -22,7 +22,7 @@ type PriceFilter = 'all' | 'free' | 'premium'
 
 function eur(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
-  return `€\${v.toFixed(2)}`
+  return `€${v.toFixed(2)}`
 }
 
 function isFree(t: Template) {
@@ -114,7 +114,7 @@ export default function CatalogPage() {
         .insert({
           user_id: userId,
           name: t.name,
-          slug: `card-\${Date.now()}`,
+          slug: `card-${Date.now()}`,
           template_id: t.id,
         })
         .select('id')
@@ -142,13 +142,13 @@ export default function CatalogPage() {
 
         const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
         if (blocksErr) {
-          setError(`Erro ao criar blocos: \${blocksErr.message}`)
+          setError(`Erro ao criar blocos: ${blocksErr.message}`)
           setCreatingTemplateId(null)
           return
         }
       }
 
-      router.push(`/dashboard/cards/\${cardId}/theme`)
+      router.push(`/dashboard/cards/${cardId}/theme`)
     } catch {
       setError('Erro ao criar cartão.')
       setCreatingTemplateId(null)
@@ -329,204 +329,220 @@ export default function CatalogPage() {
               const priceLabel = free ? 'Grátis' : eur(t.price)
 
               return (
-<div
-  key={t.id}
-  style={{
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    borderRadius: 18,
-    padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-    backdropFilter: 'blur(10px)',
-  }}
->
-  <div
-    style={{
-      borderRadius: 14,
-      overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.10)',
-      background:
-        'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
-      height: 160,
-      position: 'relative',
-    }}
-  >
-    {t.image_url ? (
-      <img
-        src={t.image_url}
-        alt={t.name}
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-    ) : (
-      <div style={{ padding: 14 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: 'rgba(255,255,255,0.75)',
-            letterSpacing: 0.2,
-          }}
-        >
-          Preview (em breve)
-        </div>
+                <div
+                  key={t.id}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    borderRadius: 18,
+                    padding: 16,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <div
+                    style={{
+                      borderRadius: 14,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,255,255,0.10)',
+                      background:
+                        'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
+                      height: 160,
+                      position: 'relative',
+                    }}
+                  >
+                    {t.image_url ? (
+                      <img
+                        src={t.image_url}
+                        alt={t.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          padding: 14,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          height: '100%',
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 800,
+                            color: 'rgba(255,255,255,0.65)',
+                            letterSpacing: 0.5,
+                            textAlign: 'center',
+                          }}
+                        >
+                          ✨ Template
+                        </div>
 
-        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <span
-            style={{
-              fontSize: 11,
-              padding: '4px 10px',
-              borderRadius: 999,
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.75)',
-            }}
-          >
-            {t.category || 'geral'}
-          </span>
+                        <div
+                          style={{
+                            marginTop: 10,
+                            display: 'flex',
+                            gap: 8,
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              color: 'rgba(255,255,255,0.75)',
+                            }}
+                          >
+                            {t.category || 'geral'}
+                          </span>
 
-          <span
-            style={{
-              fontSize: 11,
-              padding: '4px 10px',
-              borderRadius: 999,
-              background: free ? 'rgba(34,197,94,0.18)' : 'rgba(168,85,247,0.18)',
-              border: free
-                ? '1px solid rgba(34,197,94,0.25)'
-                : '1px solid rgba(168,85,247,0.25)',
-              color: free ? 'rgba(134,239,172,0.95)' : 'rgba(217,70,239,0.95)',
-            }}
-          >
-            {priceLabel}
-          </span>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: free
+                                ? 'rgba(34,197,94,0.18)'
+                                : 'rgba(168,85,247,0.18)',
+                              border: free
+                                ? '1px solid rgba(34,197,94,0.25)'
+                                : '1px solid rgba(168,85,247,0.25)',
+                              color: free
+                                ? 'rgba(134,239,172,0.95)'
+                                : 'rgba(217,70,239,0.95)',
+                            }}
+                          >
+                            {priceLabel}
+                          </span>
 
-          <span
-            style={{
-              fontSize: 11,
-              padding: '4px 10px',
-              borderRadius: 999,
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.65)',
-            }}
-          >
-            Blocos: {Array.isArray(t.preview_json) ? t.preview_json.length : 0}
-          </span>
-        </div>
-      </div>
-    )}
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              color: 'rgba(255,255,255,0.65)',
+                            }}
+                          >
+                            Blocos: {Array.isArray(t.preview_json) ? t.preview_json.length : 0}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background:
-          'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%)',
-      }}
-    />
-  </div>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%)',
+                      }}
+                    />
+                  </div>
 
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        gap: 10,
-        alignItems: 'flex-start',
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <div
-          style={{
-            fontSize: 15,
-            fontWeight: 900,
-            color: 'rgba(255,255,255,0.95)',
-            lineHeight: 1.2,
-          }}
-        >
-          {t.name}
-        </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-          {t.category || '—'}
-        </div>
-      </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 10,
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 900,
+                            color: 'rgba(255,255,255,0.95)',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {t.name}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                          {t.category || '—'}
+                        </div>
+                      </div>
 
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 800,
-          color: free ? 'rgba(134,239,172,0.95)' : 'rgba(217,70,239,0.95)',
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          padding: '6px 10px',
-          borderRadius: 999,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {priceLabel}
-      </div>
-    </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: free ? 'rgba(134,239,172,0.95)' : 'rgba(217,70,239,0.95)',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.10)',
+                          padding: '6px 10px',
+                          borderRadius: 999,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {priceLabel}
+                      </div>
+                    </div>
 
-    {t.description ? (
-      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)' }}>
-        {t.description}
-      </div>
-    ) : (
-      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-        Sem descrição.
-      </div>
-    )}
-  </div>
+                    {t.description ? (
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)' }}>
+                        {t.description}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+                        Sem descrição.
+                      </div>
+                    )}
+                  </div>
 
-  <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-    {free ? (
-      <button
-        onClick={() => createCardFromTemplate(t)}
-        disabled={creatingTemplateId === t.id}
-        style={{
-          flex: 1,
-          height: 44,
-          borderRadius: 14,
-          border: 'none',
-          background: 'var(--color-primary)',
-          color: '#fff',
-          fontWeight: 900,
-          fontSize: 13,
-          cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
-          opacity: creatingTemplateId === t.id ? 0.7 : 1,
-        }}
-      >
-        {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
-      </button>
-    ) : (
-      <button
-        disabled
-        style={{
-          flex: 1,
-          height: 44,
-          borderRadius: 14,
-          border: '1px solid rgba(255,255,255,0.18)',
-          background: 'rgba(255,255,255,0.06)',
-          color: 'rgba(255,255,255,0.65)',
-          fontWeight: 900,
-          fontSize: 13,
-          cursor: 'not-allowed',
-          opacity: 0.75,
-        }}
-        title="Stripe em breve"
-      >
-        Comprar (em breve)
-      </button>
-    )}
-  </div>
-
-  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
-    ID: {t.id}
-  </div>
-</div>
-                              )
+                  <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                    {free ? (
+                      <button
+                        onClick={() => createCardFromTemplate(t)}
+                        disabled={creatingTemplateId === t.id}
+                        style={{
+                          flex: 1,
+                          height: 44,
+                          borderRadius: 14,
+                          border: 'none',
+                          background: 'var(--color-primary)',
+                          color: '#fff',
+                          fontWeight: 900,
+                          fontSize: 13,
+                          cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
+                          opacity: creatingTemplateId === t.id ? 0.7 : 1,
+                        }}
+                      >
+                        {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        style={{
+                          flex: 1,
+                          height: 44,
+                          borderRadius: 14,
+                          border: '1px solid rgba(168,85,247,0.25)',
+                          background: 'rgba(168,85,247,0.12)',
+                          color: 'rgba(217,70,239,0.95)',
+                          fontWeight: 900,
+                          fontSize: 13,
+                          cursor: 'not-allowed',
+                          opacity: 0.85,
+                        }}
+                        title="Disponível em breve"
+                      >
+                        Premium
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
             })}
           </div>
         )}
