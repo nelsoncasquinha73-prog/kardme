@@ -85,7 +85,8 @@ export default function ThemePageClientRight({
     })
   }, [])
 
-  const isAdmin = userEmail === 'nelson@kardme.com'
+  const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
+
 
   const handleSaveAsTemplate = async (data: {
     name: string
