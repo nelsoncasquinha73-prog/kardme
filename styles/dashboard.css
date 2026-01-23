@@ -199,3 +199,28 @@
 .card-btn:hover:not(:disabled) {
   filter: brightness(1.1);
 }
+/* ===== Buttons: texto mais claro ===== */
+.card-btn {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.card-btn-ghost {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* se o tema estiver a meter link azul dentro do botão */
+.card-btn:visited,
+.card-btn:hover,
+.card-btn:active {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+}
+
+/* ===== Título "Dashboard": mais escuro (menos brilho) ===== */
+.dashboard-title {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.55);
+}
