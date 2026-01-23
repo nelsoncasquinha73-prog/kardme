@@ -20,6 +20,7 @@ import {
   FiSettings,
   FiLogOut,
 } from 'react-icons/fi'
+import { FiBarChart2 } from 'react-icons/fi'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -52,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { label: 'Os meus cartões', href: '/dashboard', icon: FiHome },
     { label: 'Catálogo de Templates', href: '/dashboard/catalog', icon: FiLayout },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
     ...(isAdmin ? [{ label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout }] : []),
     { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
     { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
@@ -76,6 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/settings', title: 'Definições' },
     { prefix: '/dashboard/catalog', title: 'Catálogo de Templates' },
     { prefix: '/dashboard', title: 'Os meus cartões' },
+    { prefix: '/dashboard/analytics', title: 'Analytics' },
   ]
 
   const getPageTitle = () => {
