@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 import '@/styles/admin-templates.css'
 import { getBaseTemplateBlocks } from '@/lib/templates/baseTemplateBlocks'
+import { TEMPLATE_CATEGORIES, CATEGORY_LABELS } from '@/lib/templates/categories'
 
 
 type Template = {
@@ -772,26 +773,31 @@ const createNewTemplate = async () => {
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
-          Categoria
-        </label>
-        <input
-          type="text"
-          value={newModalDraft.category}
-          onChange={(e) => setNewModalDraft((p) => ({ ...p, category: e.target.value }))}
-          placeholder="geral"
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 12,
-            color: 'rgba(255,255,255,0.95)',
-            fontSize: 13,
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
+  <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
+    Categoria
+  </label>
+  <select
+    value={newModalDraft.category}
+    onChange={(e) => setNewModalDraft((p) => ({ ...p, category: e.target.value }))}
+    style={{
+      width: '100%',
+      padding: '10px 12px',
+      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid rgba(255,255,255,0.15)',
+      borderRadius: 12,
+      color: 'rgba(255,255,255,0.95)',
+      fontSize: 13,
+      boxSizing: 'border-box',
+    }}
+  >
+    {TEMPLATE_CATEGORIES.map((cat) => (
+      <option key={cat} value={cat}>
+        {CATEGORY_LABELS[cat] || cat}
+      </option>
+    ))}
+  </select>
+</div>
+
 
       <div style={{ marginBottom: 24 }}>
         <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
