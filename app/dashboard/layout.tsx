@@ -43,6 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { label: 'Os meus cartões', href: '/dashboard', icon: FiHome },
     { label: 'Catálogo de Templates', href: '/dashboard/catalog', icon: FiLayout },
+    ...(isAdmin ? [{ label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout }] : []),
     { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
     { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
     { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
@@ -56,6 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
  
     const titleByPrefix: Array<{ prefix: string; title: string }> = [
+    { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/dashboard/leads', title: 'Contactos' },
     { prefix: '/dashboard/bookings', title: 'Reuniões' },
     { prefix: '/dashboard/orders', title: 'Encomendas' },
