@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 import '@/styles/admin-templates.css'
 
+
 type Template = {
   id: string
   name: string
@@ -455,23 +456,14 @@ export default function AdminTemplatesPage() {
                     </button>
                     
 <button
+  className="btn-secondary"
   onClick={() => editTemplate(t.id)}
-  disabled={openingId === t.id}
-  style={{
-    padding: '8px 16px',
-    borderRadius: 8,
-    border: '1px solid rgba(168,85,247,0.3)',
-    background: 'rgba(168,85,247,0.1)',
-    color: 'rgba(217,70,239,0.95)',
-    fontWeight: 600,
-    fontSize: 12,
-    cursor: openingId === t.id ? 'not-allowed' : 'pointer',
-    opacity: openingId === t.id ? 0.6 : 1,
-  }}
-  title="Editar template no editor"
+  disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
+  title="Editar template no editor (atualiza o template original)"
 >
   {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
 </button>
+
 
                     <button
                       className="btn-primary"
@@ -582,7 +574,7 @@ export default function AdminTemplatesPage() {
                   ) : (
                     <>
                       <button className="btn-secondary" onClick={() => startEdit(t)}>
-                        Editar
+                        Editar Detalhes
                       </button>
                       <button
                         className="btn-danger"
