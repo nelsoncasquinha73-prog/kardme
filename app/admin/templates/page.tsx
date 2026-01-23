@@ -124,6 +124,78 @@ export default function AdminTemplatesPage() {
       image_url: t.image_url || '',
     })
   }
+  const editTemplate = async (templateId: string) => {
+    setOpeningId(templateId)
+    setError(null)
+
+    try {
+      const { data: authData, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !authData?.user?.id) {
+        setError('Sem sessão. Faz login novamente.')
+        setOpeningId(null)
+        return
+      }
+
+      const userId = authData.user.id
+      const template = templates.find((t) => t.id === templateId)
+      if (!template) {
+        setError('Template não encontrado')
+        setOpeningId(null)
+        return
+      }
+
+      // 1) Criar card "draft" a partir do template
+      const { data: newCard, error: cardErr } = await supabase
+        .from('cards')
+        .insert({
+          user_id: userId,
+          name: `[DRAFT] ${template.name}`,
+          slug: `draft-template-${templateId}-${Date.now()}`,
+          template_id: templateId,
+          is_template_draft: true,
+        })
+        .select('id')
+        .single()
+
+      if (cardErr) {
+        setError(cardErr.message)
+        setOpeningId(null)
+        return
+      }
+
+      const cardId = newCard.id
+
+      // 2) Copiar blocos do template para o card
+      const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
+      if (blocks.length) {
+        const blocksToInsert = blocks.map((block: any, index: number) => ({
+          card_id: cardId,
+          type: block.type,
+          order: block.order !== undefined ? block.order : index,
+          settings: block.settings || {},
+          style: block.style || {},
+          title: block.title || null,
+          enabled: block.enabled !== undefined ? block.enabled : true,
+        }))
+
+        const { error: blocksErr } = await supabase
+          .from('card_blocks')
+          .insert(blocksToInsert)
+
+        if (blocksErr) {
+          setError(`Erro ao copiar blocos: ${blocksErr.message}`)
+          setOpeningId(null)
+          return
+        }
+      }
+
+      // 3) Redirecionar para o editor
+      router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
+    } catch (e: any) {
+      setError(e.message || 'Erro ao abrir template para edição')
+      setOpeningId(null)
+    }
+  }
 
   const cancelEdit = () => {
     setEditId(null)
@@ -381,6 +453,25 @@ export default function AdminTemplatesPage() {
                     >
                       {togglingId === t.id ? '…' : t.is_active ? 'Desativar' : 'Ativar'}
                     </button>
+                    
+<button
+  onClick={() => editTemplate(t.id)}
+  disabled={openingId === t.id}
+  style={{
+    padding: '8px 16px',
+    borderRadius: 8,
+    border: '1px solid rgba(168,85,247,0.3)',
+    background: 'rgba(168,85,247,0.1)',
+    color: 'rgba(217,70,239,0.95)',
+    fontWeight: 600,
+    fontSize: 12,
+    cursor: openingId === t.id ? 'not-allowed' : 'pointer',
+    opacity: openingId === t.id ? 0.6 : 1,
+  }}
+  title="Editar template no editor"
+>
+  {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
+</button>
 
                     <button
                       className="btn-primary"

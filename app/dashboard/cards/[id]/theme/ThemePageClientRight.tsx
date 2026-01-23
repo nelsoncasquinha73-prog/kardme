@@ -20,6 +20,7 @@ import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButto
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
 import type { CardBg } from '@/lib/cardBg'
+import { useSearchParams } from 'next/navigation'
 
 type CardBlock = {
   id: string
@@ -87,6 +88,8 @@ export default function ThemePageClientRight({
 
   const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
 
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get('template_id')
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -114,6 +117,24 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
+      // Se é draft de edição (templateId existe), faz UPDATE
+      if (templateId) {
+        const { error: updateErr } = await supabase
+          .from('templates')
+          .update({
+            preview_json,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', templateId)
+
+        if (updateErr) throw new Error(updateErr.message)
+
+        alert(`✅ Template atualizado com sucesso!`)
+        setTemplateSaving(false)
+        return
+      }
+
+      // Senão, cria novo template (comportamento atual)
       const { error: insertErr } = await supabase.from('templates').insert({
         name: data.name,
         description: data.description,
@@ -410,7 +431,7 @@ export default function ThemePageClientRight({
               marginBottom: 8,
             }}
           >
-            📦 Guardar como template
+            {templateId ? '✏️ Atualizar template' : '📦 Guardar como template'}
           </button>
         )}
 
