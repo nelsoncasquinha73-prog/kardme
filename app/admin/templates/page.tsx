@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 import '@/styles/admin-templates.css'
+import { getBaseTemplateBlocks } from '@/lib/templates/baseTemplateBlocks'
 
 
 type Template = {
@@ -34,6 +35,12 @@ function money(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
   return `€${v.toFixed(2)}`
 }
+type NewTemplateModal = {
+  name: string
+  category: string
+  price: number
+}
+
 
 export default function AdminTemplatesPage() {
   const router = useRouter()
@@ -55,6 +62,15 @@ export default function AdminTemplatesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [openingId, setOpeningId] = useState<string | null>(null)
+
+const [showNewModal, setShowNewModal] = useState(false)
+const [newModalDraft, setNewModalDraft] = useState<NewTemplateModal>({
+  name: '',
+  category: 'geral',
+  price: 0,
+})
+const [creatingNew, setCreatingNew] = useState(false)
+
 
   useEffect(() => {
     const run = async () => {
@@ -323,6 +339,58 @@ export default function AdminTemplatesPage() {
 
     setOpeningId(null)
   }
+const createNewTemplate = async () => {
+  if (!newModalDraft.name.trim()) {
+    setError('Nome é obrigatório.')
+    return
+  }
+
+  setCreatingNew(true)
+  setError(null)
+
+  try {
+    const { data: authData, error: authErr } = await supabase.auth.getUser()
+    if (authErr || !authData?.user?.id) throw new Error('Sem sessão.')
+    const userId = authData.user.id
+
+    const { data: newCard, error: cardErr } = await supabase
+      .from('cards')
+      .insert({
+        user_id: userId,
+        name: `[NOVO] ${newModalDraft.name.trim()}`,
+        slug: `new-template-${Date.now()}`,
+        theme: { background: '#ffffff' },
+      })
+      .select('id')
+      .single()
+
+    if (cardErr) throw new Error(cardErr.message)
+    const cardId = newCard.id
+
+    const baseBlocks = getBaseTemplateBlocks()
+    const blocksToInsert = baseBlocks.map((b: any) => ({
+      card_id: cardId,
+      type: b.type,
+      order: b.order,
+      title: b.title,
+      enabled: b.enabled,
+      settings: b.settings,
+      style: b.style,
+    }))
+
+    const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
+    if (blocksErr) throw new Error(blocksErr.message)
+
+    setShowNewModal(false)
+    setNewModalDraft({ name: '', category: 'geral', price: 0 })
+    setCreatingNew(false)
+
+    router.push(`/dashboard/cards/${cardId}/theme`)
+  } catch (e) {
+    setCreatingNew(false)
+    setError(e instanceof Error ? e.message : 'Erro ao criar template.')
+  }
+}
 
   if (checkingAuth) {
     return <p style={{ padding: 24 }}>A verificar sessão…</p>
@@ -381,14 +449,25 @@ export default function AdminTemplatesPage() {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="admin-templates-toolbar">
-        <div className="admin-templates-search">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar por nome, categoria, descrição…"
-          />
-        </div>
+
+  <div className="admin-templates-toolbar">
+  <button 
+    className="btn-primary" 
+    onClick={() => setShowNewModal(true)}
+    disabled={loading}
+    style={{ marginRight: 'auto' }}
+  >
+    + Novo Template
+  </button>
+
+  <div className="admin-templates-search">
+    <input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Pesquisar por nome, categoria, descrição…"
+    />
+  </div>
+
 
         <div className="admin-templates-filters">
           <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as any)}>
@@ -417,6 +496,63 @@ export default function AdminTemplatesPage() {
           {filtered.map((t) => {
             const isEditing = editId === t.id
             const draft = isEditing ? editDraft : null
+
+const createNewTemplate = async () => {
+  if (!newModalDraft.name.trim()) {
+    setError('Nome é obrigatório.')
+    return
+  }
+
+  setCreatingNew(true)
+  setError(null)
+
+  try {
+    const { data: authData, error: authErr } = await supabase.auth.getUser()
+    if (authErr || !authData?.user?.id) throw new Error('Sem sessão.')
+    const userId = authData.user.id
+
+    // 1) Criar card draft
+    const { data: newCard, error: cardErr } = await supabase
+      .from('cards')
+      .insert({
+        user_id: userId,
+        name: `[NOVO] ${newModalDraft.name.trim()}`,
+        slug: `new-template-${Date.now()}`,
+        theme: { background: '#ffffff' },
+      })
+      .select('id')
+      .single()
+
+    if (cardErr) throw new Error(cardErr.message)
+    const cardId = newCard.id
+
+    // 2) Criar blocos base
+    const baseBlocks = getBaseTemplateBlocks()
+    const blocksToInsert = baseBlocks.map((b: any) => ({
+      card_id: cardId,
+      type: b.type,
+      order: b.order,
+      title: b.title,
+      enabled: b.enabled,
+      settings: b.settings,
+      style: b.style,
+    }))
+
+    const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
+    if (blocksErr) throw new Error(blocksErr.message)
+
+    // 3) Fechar modal e abrir editor
+    setShowNewModal(false)
+    setNewModalDraft({ name: '', category: 'geral', price: 0 })
+    setCreatingNew(false)
+
+    router.push(`/dashboard/cards/${cardId}/theme`)
+  } catch (e) {
+    setCreatingNew(false)
+    setError(e instanceof Error ? e.message : 'Erro ao criar template.')
+  }
+}
+
 
             return (
               <div key={t.id} className="admin-template-card">
@@ -591,6 +727,117 @@ export default function AdminTemplatesPage() {
           })}
         </div>
       )}
+      {showNewModal && (
+  <div style={{
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  }}>
+    <div style={{
+      background: 'rgba(15,15,26,0.95)',
+      border: '1px solid rgba(255,255,255,0.15)',
+      borderRadius: 24,
+      padding: 32,
+      maxWidth: 420,
+      width: '90%',
+    }}>
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginBottom: 20 }}>
+        Novo Template
+      </h2>
+
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
+          Nome *
+        </label>
+        <input
+          type="text"
+          value={newModalDraft.name}
+          onChange={(e) => setNewModalDraft((p) => ({ ...p, name: e.target.value }))}
+          placeholder="Ex: Real Estate Premium"
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 12,
+            color: 'rgba(255,255,255,0.95)',
+            fontSize: 13,
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
+          Categoria
+        </label>
+        <input
+          type="text"
+          value={newModalDraft.category}
+          onChange={(e) => setNewModalDraft((p) => ({ ...p, category: e.target.value }))}
+          placeholder="geral"
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 12,
+            color: 'rgba(255,255,255,0.95)',
+            fontSize: 13,
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
+          Preço (€)
+        </label>
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={newModalDraft.price}
+          onChange={(e) => setNewModalDraft((p) => ({ ...p, price: parseFloat(e.target.value) || 0 }))}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 12,
+            color: 'rgba(255,255,255,0.95)',
+            fontSize: 13,
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
+
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button
+          className="btn-secondary"
+          onClick={() => setShowNewModal(false)}
+          disabled={creatingNew}
+          style={{ flex: 1 }}
+        >
+          Cancelar
+        </button>
+        <button
+          className="btn-primary"
+          onClick={createNewTemplate}
+          disabled={creatingNew}
+          style={{ flex: 1 }}
+        >
+          {creatingNew ? 'A criar…' : 'Criar e abrir'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   )
 }
