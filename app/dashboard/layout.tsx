@@ -29,13 +29,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { label: 'Os meus cartões', href: '/dashboard' },
-    { label: 'Contactos', href: '/dashboard/leads' },
-    { label: 'Reuniões', href: '/dashboard/bookings' },
-    { label: 'Encomendas', href: '/dashboard/orders' },
-    { label: 'Afiliados', href: '/dashboard/affiliate' },
-    { label: 'NFC', href: '/dashboard/nfc' },
-    { label: 'Ficheiros', href: '/dashboard/storage' },
-    { label: 'Definições', href: '/dashboard/settings' },
+  { label: 'Catálogo de Templates', href: '/dashboard/catalog' },
+  { label: 'Contactos', href: '/dashboard/leads' },
+  { label: 'Reuniões', href: '/dashboard/bookings' },
+  { label: 'Encomendas', href: '/dashboard/orders' },
+  { label: 'Afiliados', href: '/dashboard/affiliate' },
+  { label: 'NFC', href: '/dashboard/nfc' },
+  { label: 'Ficheiros', href: '/dashboard/storage' },
+  { label: 'Definições', href: '/dashboard/settings' },
   ]
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
