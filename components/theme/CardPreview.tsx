@@ -17,6 +17,7 @@ import CardBackground from '@/components/theme/CardBackground'
 import BioBlock from '@/components/blocks/BioBlock'
 import FreeTextBlock from '@/components/blocks/FreeTextBlock'
 import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
+import { trackEvent } from '@/lib/trackEvent'
 
 type Card = {
   id: string
@@ -96,6 +97,27 @@ export default function CardPreview({
 
   const bg = cardBg ?? card?.theme?.background
 
+  const handleMainClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement
+
+    // Track links
+    if (target.closest('a')) {
+      const link = target.closest('a') as HTMLAnchorElement
+      const href = link.getAttribute('href') || ''
+      const key = link.getAttribute('data-track-key') || href.split('/').pop() || 'link'
+      trackEvent(card.id, 'click', key)
+    }
+
+    // Track buttons (exceto submit do form)
+    if (target.closest('button')) {
+      const btn = target.closest('button') as HTMLButtonElement
+      if (btn.type !== 'submit') {
+        const key = btn.getAttribute('data-track-key') || btn.textContent?.trim() || 'button'
+        trackEvent(card.id, 'click', key)
+      }
+    }
+  }
+
   return (
     <CardBackground
       bg={bg}
@@ -108,7 +130,6 @@ export default function CardPreview({
         } as React.CSSProperties
       }
     >
-
       {showTranslations && (
         <div
           style={{
@@ -132,6 +153,7 @@ export default function CardPreview({
           padding: 0,
           boxSizing: 'border-box',
         }}
+        onClick={handleMainClick}
       >
         <div
           style={{

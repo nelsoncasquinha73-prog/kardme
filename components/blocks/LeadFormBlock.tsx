@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+import { trackEvent } from '@/lib/trackEvent'
 
 type LeadFormSettings = {
   title?: string
@@ -183,7 +184,8 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       }
 
       setStatus('success')
-      setFormData({ name: '', email: '', phone: '', message: '' })
+trackEvent(cardId, 'lead', 'lead_form')
+setFormData({ name: '', email: '', phone: '', message: '' })
       window.setTimeout(() => setStatus('idle'), 1800)
     } catch (err: any) {
       setErrorMsg(err?.message || 'Erro no envio')

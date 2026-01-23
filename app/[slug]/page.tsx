@@ -10,6 +10,7 @@ import type { CardBg } from '@/lib/cardBg'
 import { bgToCssString } from '@/lib/bgToCss'
 import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
+import TrackingWrapper from '@/components/TrackingWrapper'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -92,6 +93,7 @@ export default async function CardPage({ params }: Props) {
   const bgCss = bgToCss(card?.theme?.background)
 
   return (
+  <TrackingWrapper cardId={card.id}>
     <MobileCardFrame background={bgCss}>
       <LanguageProvider>
         <ThemeProvider theme={card.theme}>
@@ -105,5 +107,7 @@ export default async function CardPage({ params }: Props) {
         </ThemeProvider>
       </LanguageProvider>
     </MobileCardFrame>
-  )
+  </TrackingWrapper>
+)
+
 }
