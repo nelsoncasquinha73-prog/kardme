@@ -25,6 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const pathname = usePathname()
   const [loading, setLoading] = useState(true)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -32,6 +33,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       else setLoading(false)
     })
   }, [router])
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data?.user?.email || null)
+    })
+  }, [])
+
+  const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
 
   const logout = async () => {
     await supabase.auth.signOut()
