@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/editor-ui.css'
+import '@/styles/dashboard-sidebar.css'
 
 // ✅ IMPORTA O PROVIDER
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
@@ -12,12 +13,16 @@ import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [activeRoute, setActiveRoute] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push('/login')
       else setLoading(false)
     })
+
+    // Track active route
+    setActiveRoute(window.location.pathname)
   }, [router])
 
   const logout = async () => {
@@ -27,41 +32,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
+  const navItems = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Cartões digitais', href: '/dashboard/cards' },
+    { label: 'Leads', href: '/dashboard/leads' },
+    { label: 'Marcações', href: '/dashboard/bookings' },
+    { label: 'Pedidos', href: '/dashboard/orders' },
+    { label: 'Afiliação', href: '/dashboard/affiliate' },
+    { label: 'Cartões NFC', href: '/dashboard/nfc' },
+    { label: 'Armazenamento', href: '/dashboard/storage' },
+    { label: 'Configurações', href: '/dashboard/settings' },
+  ]
+
   return (
-    // ✅ PROVIDER TEM DE ESTAR AQUI (ou acima do editor)
     <ColorPickerProvider>
       <div className="editor-ui dashboard-scope" style={{ display: 'flex', minHeight: '100vh' }}>
-        <aside style={{ width: 260, background: '#0b0b0f', color: '#fff', padding: 24 }}>
-          <h2 style={{ marginBottom: 30 }}>Kardme</h2>
+        <aside className="dashboard-sidebar">
+          <div className="sidebar-header">
+            <h2 className="sidebar-logo">Kardme</h2>
+          </div>
 
-          <nav>
-            <ul style={{ listStyle: 'none', padding: 0, lineHeight: '2.2em' }}>
-              <li><Link href="/dashboard">Dashboard</Link></li>
-              <li><Link href="/dashboard/cards">Cartões digitais</Link></li>
-              <li><Link href="/dashboard/leads">Leads</Link></li>
-              <li><Link href="/dashboard/bookings">Marcações</Link></li>
-              <li><Link href="/dashboard/orders">Pedidos</Link></li>
-              <li><Link href="/dashboard/affiliate">Afiliação</Link></li>
-              <li><Link href="/dashboard/nfc">Cartões NFC</Link></li>
-              <li><Link href="/dashboard/storage">Armazenamento</Link></li>
-              <li><Link href="/dashboard/settings">Configurações</Link></li>
+          <nav className="sidebar-nav">
+            <ul className="sidebar-menu">
+              {navItems.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`sidebar-link ${activeRoute === item.href ? 'active' : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
+
+          <div className="sidebar-footer">
+            <button className="sidebar-logout" onClick={logout}>
+              Logout
+            </button>
+          </div>
         </aside>
 
         <div style={{ flex: 1 }}>
-          <header
-            style={{
-              padding: '16px 24px',
-              background: '#fff',
-              borderBottom: '1px solid #ddd',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+          <header className="dashboard-topbar">
             <strong>Dashboard</strong>
-            <button className="btn" onClick={logout}>Logout</button>
           </header>
 
           <main style={{ padding: 24 }}>{children}</main>
