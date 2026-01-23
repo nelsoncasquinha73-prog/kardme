@@ -112,12 +112,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </ul>
           </nav>
 
-          <div className="sidebar-footer">
-            <button className="sidebar-logout" onClick={logout}>
-              <FiLogOut className="sidebar-icon" />
-              <span>Logout</span>
-            </button>
-          </div>
+         <div className="sidebar-footer">
+  <div style={{ 
+    fontSize: 11, 
+    color: 'rgba(255,255,255,0.55)', 
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    wordBreak: 'break-all'
+  }}>
+    <div style={{ marginBottom: 4 }}>Logado como:</div>
+    <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{userEmail}</strong>
+  </div>
+  <button className="sidebar-logout" onClick={logout}>
+    <FiLogOut className="sidebar-icon" />
+    <span>Logout</span>
+  </button>
+</div>
+
         </aside>
 
         <div style={{ flex: 1 }}>
