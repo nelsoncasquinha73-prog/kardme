@@ -349,9 +349,10 @@ export default function CatalogPage() {
                       overflow: 'hidden',
                       border: '1px solid rgba(255,255,255,0.10)',
                       background:
-                      (t as any)?.theme_json?.colors?.background ||
-                      (t as any)?.theme_json?.colors?.surface ||
-                      'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
+  (t as any)?.theme_json?.colors?.background ||
+  (t as any)?.theme_json?.background ||
+  (t as any)?.theme_json?.colors?.surface ||
+  'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
 
                       height: 160,
                       position: 'relative',
