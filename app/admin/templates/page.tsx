@@ -18,6 +18,7 @@ type Template = {
   price: number | null
   image_url: string | null
   preview_json: any[] | null
+  theme_json: any | null
   is_active: boolean | null
   created_at?: string | null
 }
@@ -164,16 +165,18 @@ const [creatingNew, setCreatingNew] = useState(false)
 
       // 1) Criar card "draft" a partir do template
       const { data: newCard, error: cardErr } = await supabase
-        .from('cards')
-        .insert({
-          user_id: userId,
-          name: `[DRAFT] ${template.name}`,
-          slug: `draft-template-${templateId}-${Date.now()}`,
-          template_id: templateId,
-          is_template_draft: true,
-        })
-        .select('id')
-        .single()
+  .from('cards')
+  .insert({
+    user_id: userId,
+    name: `[DRAFT] ${template.name}`,
+    slug: `draft-template-${templateId}-${Date.now()}`,
+    template_id: template.id,
+    is_template_draft: true,
+    theme: (template.theme_json as any) || { background: '#ffffff' },
+  })
+  .select('id')
+  .single()
+
 
       if (cardErr) {
         setError(cardErr.message)

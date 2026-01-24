@@ -122,15 +122,17 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
-      // ✅ UPDATE template existente (edição)
-      if (templateId) {
-        const { error: updateErr } = await supabase
-          .from('templates')
-          .update({
-            preview_json,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', templateId)
+     // ✅ UPDATE template existente (edição)
+if (templateId) {
+  const { error: updateErr } = await supabase
+    .from('templates')
+    .update({
+      preview_json,
+      theme_json: cardBg,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', templateId)
+
 
         if (updateErr) throw new Error(updateErr.message)
 
@@ -140,14 +142,16 @@ export default function ThemePageClientRight({
       }
 
       // ✅ INSERT novo template (criação)
-      const { error: insertErr } = await supabase.from('templates').insert({
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        price: data.price,
-        preview_json,
-        is_active: true,
-      })
+const { error: insertErr } = await supabase.from('templates').insert({
+  name: data.name,
+  description: data.description,
+  category: data.category,
+  price: data.price,
+  preview_json,
+  theme_json: cardBg,
+  is_active: true,
+})
+
 
       if (insertErr) throw new Error(insertErr.message)
 
