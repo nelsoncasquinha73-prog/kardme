@@ -105,16 +105,19 @@ export default function ThemePageClient({ card, blocks }: Props) {
         console.log(`🟡 Atualizando bloco type=${block.type}, settings=`, block.settings)
 
         const { data, error, count } = await supabase
-          .from('card_blocks')
-          .update({
-            settings: block.settings,
-            style: block.style,
-            enabled: block.enabled,
-            order: block.order,
-          })
-          .eq('card_id', card.id)
-          .eq('type', block.type)
-          .select('id')
+  .from('card_blocks')
+  .update({
+    settings: block.settings,
+    style: block.style,
+    enabled: block.enabled,
+    order: block.order,
+  })
+  .eq('card_id', card.id)
+  .eq('type', block.type)
+  .select('id, card_id, type, settings')
+
+console.log('🔴 UPDATE RESULT', block.type, { error, data, count })
+
 
         console.log(`🟡 Resultado para ${block.type}: error=`, error, 'count=', count, 'data=', data)
 
