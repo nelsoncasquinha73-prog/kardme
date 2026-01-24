@@ -90,9 +90,6 @@ export default function ThemePageClientRight({
 
   const searchParams = useSearchParams()
 
-  // ✅ À prova de bala:
-  // - se vier ?template_id=... usa isso
-  // - senão usa card.template_id (draft criado no admin)
   const templateIdFromUrl = searchParams.get('template_id')
   const templateId = templateIdFromUrl || card?.template_id || null
 
@@ -122,17 +119,15 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
-     // ✅ UPDATE template existente (edição)
-if (templateId) {
-  const { error: updateErr } = await supabase
-    .from('templates')
-    .update({
-      preview_json,
-      theme_json: cardBg,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', templateId)
-
+      if (templateId) {
+        const { error: updateErr } = await supabase
+          .from('templates')
+          .update({
+            preview_json,
+            theme_json: cardBg,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', templateId)
 
         if (updateErr) throw new Error(updateErr.message)
 
@@ -141,21 +136,19 @@ if (templateId) {
         return
       }
 
-      // ✅ INSERT novo template (criação)
-const { error: insertErr } = await supabase.from('templates').insert({
-  name: data.name,
-  description: data.description,
-  category: data.category,
-  price: data.price,
-  preview_json,
-  theme_json: cardBg,
-  is_active: true,
-})
-
+      const { error: insertErr } = await supabase.from('templates').insert({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        price: data.price,
+        preview_json,
+        theme_json: cardBg,
+        is_active: true,
+      })
 
       if (insertErr) throw new Error(insertErr.message)
 
-      alert(`✅ Template "${data.name}" guardado com sucesso!`)
+      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
       setTemplateSaving(false)
     } catch (err) {
       setTemplateSaving(false)
@@ -425,25 +418,31 @@ const { error: insertErr } = await supabase.from('templates').insert({
         )}
 
         {isAdmin && (
-  <>
-    {templateId ? (
-      <button
-        onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
-        style={{...}}
-      >
-        ✏️ Atualizar template
-      </button>
-    ) : (
-      <button
-        onClick={() => setTemplateModalOpen(true)}
-        style={{...}}
-      >
-        📦 Guardar como template
-      </button>
-    )}
-  </>
-)}
-
+          <button
+            onClick={() => {
+              if (templateId) {
+                handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })
+              } else {
+                setTemplateModalOpen(true)
+              }
+            }}
+            style={{
+              width: '100%',
+              height: 44,
+              borderRadius: 14,
+              border: '1px solid rgba(124, 58, 237, 0.3)',
+              background: 'rgba(124, 58, 237, 0.1)',
+              color: 'rgba(168, 85, 247, 0.95)',
+              fontWeight: 800,
+              fontSize: 14,
+              cursor: 'pointer',
+              marginBottom: 8,
+            }}
+            disabled={templateSaving}
+          >
+            {templateSaving ? 'A atualizar…' : templateId ? '✏️ Atualizar template' : '📦 Guardar como template'}
+          </button>
+        )}
 
         <button
           onClick={onSave}
@@ -455,6 +454,7 @@ const { error: insertErr } = await supabase.from('templates').insert({
             background: 'var(--color-primary)',
             color: '#fff',
             fontWeight: 800,
+            fontSize
             fontSize: 14,
             cursor: 'pointer',
             opacity: saveStatus === 'saving' ? 0.7 : 1,
@@ -478,3 +478,4 @@ const { error: insertErr } = await supabase.from('templates').insert({
     </aside>
   )
 }
+      
