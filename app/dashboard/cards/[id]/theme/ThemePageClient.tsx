@@ -99,8 +99,9 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges() {
-    setSaveStatus('saving')
+  setSaveStatus('saving')
 
+  try {
     // 1) Guardar blocos
     for (const block of localBlocks) {
       const { error } = await supabase
@@ -134,11 +135,47 @@ export default function ThemePageClient({ card, blocks }: Props) {
       return
     }
 
+    // 3) SE ADMIN E TEMPLATE_ID EXISTE: atualizar o template também
+    const templateId = card?.template_id
+    if (templateId) {
+      console.log('🔵 Atualizando template:', templateId)
+
+      const previewJson = localBlocks.map((b) => ({
+        type: b.type,
+        order: b.order ?? 0,
+        title: b.title ?? null,
+        enabled: b.enabled ?? true,
+        settings: b.settings ?? {},
+        style: b.style ?? {},
+      }))
+
+      const { error: templateError } = await supabase
+        .from('templates')
+        .update({
+          preview_json: previewJson,
+          theme_json: nextTheme,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', templateId)
+
+      if (templateError) {
+        console.error('❌ Erro ao atualizar template:', templateError)
+        alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
+      } else {
+        console.log('✅ Template atualizado com sucesso!')
+      }
+    }
+
     setLocalTheme(nextTheme)
     setSaveStatus('saved')
     window.setTimeout(() => setSaveStatus('idle'), 1200)
     alert('Alterações guardadas com sucesso ✅')
+  } catch (err) {
+    console.error('❌ Erro geral em saveChanges:', err)
+    setSaveStatus('error')
+    alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
   }
+}
 
   // Slug editing states
   const [slugEdit, setSlugEdit] = useState(card.slug)
