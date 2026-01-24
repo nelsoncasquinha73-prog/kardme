@@ -94,67 +94,79 @@ export default function ThemePageClientRight({
   const templateId = templateIdFromUrl || card?.template_id || null
 
   const handleSaveAsTemplate = async (data: {
-    name: string
-    description: string
-    category: string
-    price: number
-  }) => {
-    setTemplateSaving(true)
+  name: string
+  description: string
+  category: string
+  price: number
+}) => {
+  setTemplateSaving(true)
 
-    try {
-      const { data: blocks, error: blocksErr } = await supabase
-        .from('card_blocks')
-        .select('*')
-        .eq('card_id', card.id)
-        .order('order', { ascending: true })
+  try {
+    // 1) Carregar o card atual para ter o theme atualizado
+    const { data: currentCard, error: cardErr } = await supabase
+      .from('cards')
+      .select('theme')
+      .eq('id', card.id)
+      .single()
 
-      if (blocksErr) throw new Error(blocksErr.message)
+    if (cardErr) throw new Error(cardErr.message)
 
-      const preview_json = (blocks || []).map((b) => ({
-        type: b.type,
-        order: b.order ?? 0,
-        title: b.title ?? null,
-        enabled: b.enabled ?? true,
-        settings: b.settings ?? {},
-        style: b.style ?? {},
-      }))
+    const currentTheme = currentCard?.theme || cardBg
 
-      if (templateId) {
-        const { error: updateErr } = await supabase
-          .from('templates')
-          .update({
-            preview_json,
-            theme_json: cardBg,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', templateId)
+    // 2) Carregar blocos
+    const { data: blocks, error: blocksErr } = await supabase
+      .from('card_blocks')
+      .select('*')
+      .eq('card_id', card.id)
+      .order('order', { ascending: true })
 
-        if (updateErr) throw new Error(updateErr.message)
+    if (blocksErr) throw new Error(blocksErr.message)
 
-        alert('✅ Template atualizado com sucesso!')
-        setTemplateSaving(false)
-        return
-      }
+    const preview_json = (blocks || []).map((b) => ({
+      type: b.type,
+      order: b.order ?? 0,
+      title: b.title ?? null,
+      enabled: b.enabled ?? true,
+      settings: b.settings ?? {},
+      style: b.style ?? {},
+    }))
 
-      const { error: insertErr } = await supabase.from('templates').insert({
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        price: data.price,
-        preview_json,
-        theme_json: cardBg,
-        is_active: true,
-      })
+    // 3) UPDATE ou INSERT com o theme correto
+    if (templateId) {
+      const { error: updateErr } = await supabase
+        .from('templates')
+        .update({
+          preview_json,
+          theme_json: currentTheme,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', templateId)
 
-      if (insertErr) throw new Error(insertErr.message)
-
-      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
+      if (updateErr) throw new Error(updateErr.message)
+      alert('✅ Template atualizado com sucesso!')
       setTemplateSaving(false)
-    } catch (err) {
-      setTemplateSaving(false)
-      throw err
+      return
     }
+
+    const { error: insertErr } = await supabase.from('templates').insert({
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      price: data.price,
+      preview_json,
+      theme_json: currentTheme,
+      is_active: true,
+    })
+
+    if (insertErr) throw new Error(insertErr.message)
+    alert(`✅ Template "${data.name}" guardado com sucesso!`)
+    setTemplateSaving(false)
+  } catch (err) {
+    setTemplateSaving(false)
+    throw err
   }
+}
+
 
   return (
     <aside
