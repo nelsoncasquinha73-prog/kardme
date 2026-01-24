@@ -1,197 +1,589 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import '@/styles/dashboard.css'
 
-type TemplateCard = {
+type Template = {
   id: string
-  slug: string | null
-  title?: string | null
+  name: string
+  description: string | null
+  category: string | null
+  price: number | null
+  image_url: string | null
+  preview_json: any[] | null
+  is_active: boolean | null
+  created_at?: string | null
 }
 
-function slugify(input: string) {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
+type PriceFilter = 'all' | 'free' | 'premium'
+
+function eur(n: number | null | undefined) {
+  const v = typeof n === 'number' ? n : 0
+  return `€${v.toFixed(2)}`
 }
 
-export default function TemplatesPage() {
+function isFree(t: Template) {
+  const p = typeof t.price === 'number' ? t.price : 0
+  return p <= 0
+}
+
+export default function MyTemplatesPage() {
   const router = useRouter()
-  const [templates, setTemplates] = useState<TemplateCard[]>([])
-  const [mode, setMode] = useState<'template' | 'blank'>('template')
-  const [templateId, setTemplateId] = useState<string>('')
-  const [slug, setSlug] = useState<string>('')
-  const [loading, setLoading] = useState(false)
+
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [userTemplateIds, setUserTemplateIds] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const normalizedSlug = useMemo(() => slugify(slug), [slug])
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<string>('all')
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>('all')
 
+  const [creatingTemplateId, setCreatingTemplateId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // 1) Fetch user ID e templates desbloqueados
   useEffect(() => {
-    ;(async () => {
+    const loadData = async () => {
+      setLoading(true)
+      setError(null)
+
       try {
-        const res = await fetch('/api/templates')
-        const json = await res.json()
-        if (json.success) setTemplates(json.templates ?? [])
-        else setTemplates([])
-      } catch {
-        setTemplates([])
+        const { data: authData, error: authErr } = await supabase.auth.getUser()
+        if (authErr || !authData?.user?.id) {
+          setError('Sem sessão. Faz login novamente.')
+          setLoading(false)
+          return
+        }
+
+        const currentUserId = authData.user.id
+        setUserId(currentUserId)
+
+        // 2) Fetch templates ativos
+        const { data: allTemplates, error: templatesErr } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+
+        if (templatesErr) {
+          setError(templatesErr.message)
+          setLoading(false)
+          return
+        }
+
+        setTemplates((allTemplates || []) as Template[])
+
+        // 3) Fetch templates desbloqueados do user (grátis + comprados)
+        const { data: userTemplates, error: userTemplatesErr } = await supabase
+          .from('user_templates')
+          .select('template_id')
+          .eq('user_id', currentUserId)
+
+        if (userTemplatesErr) {
+          console.warn('Erro ao carregar templates do user:', userTemplatesErr.message)
+        }
+
+        const userTemplateIdSet = new Set<string>()
+
+        // Adiciona templates grátis (acesso automático)
+        allTemplates?.forEach((t) => {
+          if (isFree(t)) {
+            userTemplateIdSet.add(t.id)
+          }
+        })
+
+        // Adiciona templates comprados
+        userTemplates?.forEach((ut) => {
+          userTemplateIdSet.add(ut.template_id)
+        })
+
+        setUserTemplateIds(userTemplateIdSet)
+        setLoading(false)
+      } catch (err) {
+        setError('Erro ao carregar dados.')
+        setLoading(false)
       }
-    })()
+    }
+
+    loadData()
   }, [])
 
-  async function handleCreate() {
+  const categories = useMemo(() => {
+    const set = new Set<string>()
+    for (const t of templates) {
+      const c = (t.category || '').trim()
+      if (c) set.add(c)
+    }
+    return ['all', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
+  }, [templates])
+
+  // Filtra: só mostra templates desbloqueados
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return templates
+      .filter((t) => userTemplateIds.has(t.id)) // SÓ DESBLOQUEADOS
+      .filter((t) => {
+        const name = (t.name || '').toLowerCase()
+        const desc = (t.description || '').toLowerCase()
+        const cat = (t.category || '').toLowerCase()
+
+        const matchesQuery = !q || name.includes(q) || desc.includes(q) || cat.includes(q)
+        const matchesCategory = category === 'all' ? true : (t.category || '') === category
+
+        const free = isFree(t)
+        const matchesPrice =
+          priceFilter === 'all' ? true : priceFilter === 'free' ? free : !free
+
+        return matchesQuery && matchesCategory && matchesPrice
+      })
+  }, [templates, userTemplateIds, query, category, priceFilter])
+
+  const createCardFromTemplate = async (t: Template) => {
+    setCreatingTemplateId(t.id)
     setError(null)
 
-    if (!normalizedSlug) return setError('Escreve um slug válido (ex: cliente-joao).')
-    if (mode === 'template' && !templateId) return setError('Escolhe um template.')
-
-    setLoading(true)
     try {
-      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession()
-      const accessToken = sessionData?.session?.access_token
-      if (sessionErr || !accessToken) throw new Error('Sessão inválida. Faz login novamente.')
+      if (!userId) {
+        setError('Sem sessão. Faz login novamente.')
+        setCreatingTemplateId(null)
+        return
+      }
 
-      const endpoint =
-        mode === 'template' ? '/api/cards/create-from-template' : '/api/cards/create-empty'
+      const { data: newCard, error: cardErr } = await supabase
+        .from('cards')
+        .insert({
+          user_id: userId,
+          name: t.name,
+          slug: `card-${Date.now()}`,
+          template_id: t.id,
+        })
+        .select('id')
+        .single()
 
-      const payload =
-        mode === 'template' ? { templateId, slug: normalizedSlug } : { slug: normalizedSlug }
+      if (cardErr) {
+        setError(cardErr.message)
+        setCreatingTemplateId(null)
+        return
+      }
 
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-      })
+      const cardId = newCard.id
 
-      const json = await res.json()
-      if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao criar cartão')
+      const blocks = Array.isArray(t.preview_json) ? t.preview_json : []
+      if (blocks.length) {
+        const blocksToInsert = blocks.map((block: any, index: number) => ({
+          card_id: cardId,
+          type: block.type,
+          order: block.order !== undefined ? block.order : index,
+          settings: block.settings || {},
+          style: block.style || {},
+          title: block.title || null,
+          enabled: block.enabled !== undefined ? block.enabled : true,
+        }))
 
-      const newCardId = json.card.id as string
-      router.push(`/dashboard/cards/${newCardId}/theme`)
-    } catch (e: any) {
-      setError(e?.message || 'Erro ao criar cartão')
-    } finally {
-      setLoading(false)
+        const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
+        if (blocksErr) {
+          setError(`Erro ao criar blocos: ${blocksErr.message}`)
+          setCreatingTemplateId(null)
+          return
+        }
+      }
+
+      // Também restaura o theme do template
+      const { data: templateData } = await supabase
+        .from('templates')
+        .select('theme_json')
+        .eq('id', t.id)
+        .single()
+
+      if (templateData?.theme_json) {
+        await supabase
+          .from('cards')
+          .update({ theme: templateData.theme_json })
+          .eq('id', cardId)
+      }
+
+      router.push(`/dashboard/cards/${cardId}/theme`)
+    } catch {
+      setError('Erro ao criar cartão.')
+      setCreatingTemplateId(null)
     }
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 720 }}>
-      <h1 style={{ fontSize: 18, fontWeight: 900 }}>Criar cartão</h1>
-      <p style={{ opacity: 0.8, marginTop: 6 }}>
-        Escolhe um template ou cria do zero. Define o link (slug) e segue direto para o editor.
-      </p>
-
-      <div style={{ marginTop: 16, display: 'grid', gap: 10 }}>
-        <label style={{ fontSize: 13, fontWeight: 800 }}>Modo</label>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            type="button"
-            onClick={() => setMode('template')}
-            style={{
-              height: 38,
-              borderRadius: 10,
-              padding: '0 12px',
-              border: '1px solid rgba(255,255,255,0.18)',
-              background: mode === 'template' ? 'rgba(255,255,255,0.12)' : 'transparent',
-              color: 'inherit',
-              fontWeight: 800,
-              cursor: 'pointer',
-            }}
-          >
-            Escolher template
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('blank')}
-            style={{
-              height: 38,
-              borderRadius: 10,
-              padding: '0 12px',
-              border: '1px solid rgba(255,255,255,0.18)',
-              background: mode === 'blank' ? 'rgba(255,255,255,0.12)' : 'transparent',
-              color: 'inherit',
-              fontWeight: 800,
-              cursor: 'pointer',
-            }}
-          >
-            Criar do zero
-          </button>
-        </div>
-
-        {mode === 'template' && (
-          <>
-            <label style={{ fontSize: 13, fontWeight: 800, marginTop: 8 }}>Template</label>
-            <select
-              value={templateId}
-              onChange={(e) => setTemplateId(e.target.value)}
-              style={{
-                height: 40,
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.18)',
-                padding: '0 10px',
-                background: 'rgba(0,0,0,0.18)',
-                color: 'inherit',
-              }}
-            >
-              <option value="">— Escolher —</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.title ? `${t.title} (${t.slug ?? t.id.slice(0, 8)})` : `${t.slug ?? t.id.slice(0, 8)}`}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        <label style={{ fontSize: 13, fontWeight: 800, marginTop: 8 }}>Slug (link do cartão)</label>
-        <input
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="ex: nelson-teste, cliente-joao, remax-ana"
+    <div className="dashboard-wrap">
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <div
           style={{
-            height: 40,
-            borderRadius: 10,
-            border: '1px solid rgba(255,255,255,0.18)',
-            padding: '0 10px',
-            background: 'rgba(0,0,0,0.18)',
-            color: 'inherit',
+            position: 'absolute',
+            width: 520,
+            height: 520,
+            left: -120,
+            top: -140,
+            background:
+              'radial-gradient(circle at 30% 30%, rgba(168,85,247,0.35), rgba(168,85,247,0) 60%)',
+            filter: 'blur(8px)',
           }}
         />
+        <div
+          style={{
+            position: 'absolute',
+            width: 620,
+            height: 620,
+            right: -160,
+            bottom: -220,
+            background:
+              'radial-gradient(circle at 30% 30%, rgba(59,130,246,0.28), rgba(59,130,246,0) 60%)',
+            filter: 'blur(10px)',
+          }}
+        />
+      </div>
 
-        {slug && normalizedSlug !== slug && (
-          <div style={{ opacity: 0.8, fontSize: 12 }}>
-            Vai ficar: <strong>{normalizedSlug}</strong>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="dashboard-header">
+          <div>
+            <h1 className="dashboard-title">Meus Templates</h1>
+            <p className="dashboard-subtitle">
+              Templates grátis e comprados. Cria um cartão em segundos.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <Link className="btn-secondary" href="/dashboard">
+              ← Voltar
+            </Link>
+            <Link className="btn-secondary" href="/dashboard/catalog">
+              🛍️ Loja
+            </Link>
+          </div>
+        </div>
+
+        {error && (
+          <div
+            style={{
+              background: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 12,
+              padding: '12px 16px',
+              color: 'rgba(252,165,165,0.95)',
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            {error}
           </div>
         )}
 
-        <button
-          onClick={handleCreate}
-          disabled={loading}
+        <div
           style={{
-            marginTop: 10,
-            height: 44,
-            borderRadius: 12,
-            border: 'none',
-            background: '#111827',
-            color: '#fff',
-            fontWeight: 900,
-            cursor: 'pointer',
-            opacity: loading ? 0.7 : 1,
+            marginTop: 18,
+            display: 'grid',
+            gridTemplateColumns: '1fr 220px 180px auto',
+            gap: 12,
+            alignItems: 'center',
           }}
         >
-          {loading ? 'A criar…' : 'Criar cartão'}
-        </button>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Pesquisar por nome, categoria, descrição…"
+            style={{
+              width: '100%',
+              height: 42,
+              padding: '0 12px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.92)',
+              fontSize: 13,
+            }}
+          />
 
-        {error && <div style={{ color: '#ffb4b4', fontWeight: 800 }}>{error}</div>}
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={{
+              height: 42,
+              padding: '0 12px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.92)',
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c === 'all' ? 'Todas as categorias' : c}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={priceFilter}
+            onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
+            style={{
+              height: 42,
+              padding: '0 12px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.92)',
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            <option value="all">Todos</option>
+            <option value="free">Grátis</option>
+            <option value="premium">Premium</option>
+          </select>
+
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', padding: '0 12px' }}>
+            {filtered.length} / {templates.filter((t) => userTemplateIds.has(t.id)).length}
+          </div>
+        </div>
+
+        {loading ? (
+          <p style={{ padding: 24 }}>A carregar templates…</p>
+        ) : filtered.length === 0 ? (
+          <div className="empty" style={{ marginTop: 48, textAlign: 'center', padding: 32 }}>
+            <p
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: 'rgba(255,255,255,0.85)',
+                marginBottom: 8,
+              }}
+            >
+              Sem templates
+            </p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 16 }}>
+              Não tens templates desbloqueados. Vai à loja para comprar premium.
+            </p>
+            <Link className="btn-primary" href="/dashboard/catalog">
+              🛍️ Ir à Loja
+            </Link>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: 16,
+              marginTop: 20,
+            }}
+          >
+            {filtered.map((t) => {
+              const free = isFree(t)
+              const priceLabel = free ? 'Grátis' : eur(t.price)
+
+              return (
+                <div
+                  key={t.id}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    borderRadius: 18,
+                    padding: 16,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <div
+                    style={{
+                      borderRadius: 14,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,255,255,0.10)',
+                      background:
+                        'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
+                      height: 160,
+                      position: 'relative',
+                    }}
+                  >
+                    {t.image_url ? (
+                      <img
+                        src={t.image_url}
+                        alt={t.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          padding: 14,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          height: '100%',
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 800,
+                            color: 'rgba(255,255,255,0.65)',
+                            letterSpacing: 0.5,
+                            textAlign: 'center',
+                          }}
+                        >
+                          ✨ Template
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 10,
+                            display: 'flex',
+                            gap: 8,
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              color: 'rgba(255,255,255,0.75)',
+                            }}
+                          >
+                            {t.category || 'geral'}
+                          </span>
+
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: free
+                                ? 'rgba(34,197,94,0.18)'
+                                : 'rgba(168,85,247,0.18)',
+                              border: free
+                                ? '1px solid rgba(34,197,94,0.25)'
+                                : '1px solid rgba(168,85,247,0.25)',
+                              color: free
+                                ? 'rgba(134,239,172,0.95)'
+                                : 'rgba(217,70,239,0.95)',
+                            }}
+                          >
+                            {priceLabel}
+                          </span>
+
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: '4px 10px',
+                              borderRadius: 999,
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              color: 'rgba(255,255,255,0.65)',
+                            }}
+                          >
+                            Blocos: {Array.isArray(t.preview_json) ? t.preview_json.length : 0}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%)',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 10,
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 900,
+                            color: 'rgba(255,255,255,0.95)',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {t.name}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                          {t.category || '—'}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: free ? 'rgba(134,239,172,0.95)' : 'rgba(217,70,239,0.95)',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.10)',
+                          padding: '6px 10px',
+                          borderRadius: 999,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {priceLabel}
+                      </div>
+                    </div>
+
+                    {t.description ? (
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)' }}>
+                        {t.description}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+                        Sem descrição.
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => createCardFromTemplate(t)}
+                    disabled={creatingTemplateId === t.id}
+                    style={{
+                      width: '100%',
+                      height: 44,
+                      borderRadius: 14,
+                      border: 'none',
+                      background: 'var(--color-primary)',
+                      color: '#fff',
+                      fontWeight: 900,
+                      fontSize: 13,
+                      cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
+                      opacity: creatingTemplateId === t.id ? 0.7 : 1,
+                    }}
+                  >
+                    {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
