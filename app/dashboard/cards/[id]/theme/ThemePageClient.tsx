@@ -35,14 +35,14 @@ export default function ThemePageClient({ card, blocks }: Props) {
     blocks.map((b) => ({ ...b, style: b.style ?? {}, settings: b.settings ?? {} }))
   )
 
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [saveStatus, setSaveStatus] = useState('idle')
   const [addOpen, setAddOpen] = useState(false)
 
   // Theme (fonte única)
-  const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
+  const [localTheme, setLocalTheme] = useState(() => card?.theme ?? {})
 
   // cardBg (derivado do theme, mas mantemos em state para UX)
-  const [cardBg, setCardBg] = useState<CardBg>(() => {
+  const [cardBg, setCardBg] = useState(() => {
     const bg = card?.theme?.background
     if (bg) return bg
     return { mode: 'solid', color: '#ffffff', opacity: 1 }
@@ -63,10 +63,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
   function selectBlock(id: string) {
     setActiveBlockId(id)
 
-    const next = localBlocks.find((b) => b.id === id) || null
-    if (!next || next.type !== 'decorations') {
-      setActiveDecoId(null)
-    }
+const next = localBlocks.find((b) => b.id === id) || null
+if (!next || next.type !== 'decorations') {
+  setActiveDecoId(null)
+}
+
   }
 
   function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
@@ -99,60 +100,49 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges() {
-  setSaveStatus('saving')
+    setSaveStatus('saving')
 
-  try {
-    // 1) Guardar blocos
-    for (const block of localBlocks) {
-      const { error } = await supabase
-        .from('card_blocks')
-        .update({
-          settings: block.settings,
-          style: block.style,
-          enabled: block.enabled,
-          order: block.order,
-        })
-        .eq('id', block.id)
+try {
+  // 1) Guardar blocos (usando card_id + type como chave, não id)
+  for (const block of localBlocks) {
+    const { error } = await supabase
+      .from('card_blocks')
+      .update({
+        settings: block.settings,
+        style: block.style,
+        enabled: block.enabled,
+        order: block.order,
+      })
+      .eq('card_id', card.id)
+      .eq('type', block.type)
 
-      if (error) {
-        console.error(error)
-        setSaveStatus('error')
-        alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
-        return
-      }
-    }
-
-    // 2) Guardar theme (fonte única)
-    const nextTheme = structuredClone(localTheme || {})
-    nextTheme.background = cardBg
-
-    const { error: themeError } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
-
-    if (themeError) {
-      console.error(themeError)
+    if (error) {
+      console.error('❌ Erro ao atualizar bloco:', block.type, error)
       setSaveStatus('error')
-      alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+      alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
       return
     }
+  }
 
-    // 3) SE ADMIN E TEMPLATE_ID EXISTE: atualizar o template também
-   // 3) SE TEMPLATE_ID EXISTE: atualizar o template também
-const templateId = card?.template_id
-if (templateId) {
-  console.log('🔵 Atualizando template:', templateId)
+  // 2) Guardar theme (fonte única)
+  const nextTheme = structuredClone(localTheme || {})
+  nextTheme.background = cardBg
 
-  // LER DA BD (fonte de verdade)
-  const { data: dbBlocks, error: dbBlocksErr } = await supabase
-    .from('card_blocks')
-    .select('type, order, title, enabled, settings, style')
-    .eq('card_id', card.id)
-    .order('order', { ascending: true })
+  const { error: themeError } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
 
-  if (dbBlocksErr) {
-    console.error('❌ Erro a ler blocos da BD:', dbBlocksErr)
-    alert('Cartão guardado, mas falhou leitura de blocos para atualizar template ⚠️')
-  } else {
-    const previewJson = (dbBlocks || []).map((b) => ({
+  if (themeError) {
+    console.error('❌ Erro ao guardar tema:', themeError)
+    setSaveStatus('error')
+    alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+    return
+  }
+
+  // 3) SE TEMPLATE_ID EXISTE: atualizar o template também
+  const templateId = card?.template_id
+  if (templateId) {
+    console.log('🔵 Atualizando template:', templateId)
+
+    const previewJson = localBlocks.map((b) => ({
       type: b.type,
       order: b.order ?? 0,
       title: b.title ?? null,
@@ -177,19 +167,18 @@ if (templateId) {
       console.log('✅ Template atualizado com sucesso!')
     }
   }
+
+  setLocalTheme(nextTheme)
+  setSaveStatus('saved')
+  window.setTimeout(() => setSaveStatus('idle'), 1200)
+  alert('Alterações guardadas com sucesso ✅')
+} catch (err) {
+  console.error('❌ Erro geral em saveChanges:', err)
+  setSaveStatus('error')
+  alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
 }
 
-
-    setLocalTheme(nextTheme)
-    setSaveStatus('saved')
-    window.setTimeout(() => setSaveStatus('idle'), 1200)
-    alert('Alterações guardadas com sucesso ✅')
-  } catch (err) {
-    console.error('❌ Erro geral em saveChanges:', err)
-    setSaveStatus('error')
-    alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
   }
-}
 
   // Slug editing states
   const [slugEdit, setSlugEdit] = useState(card.slug)
@@ -199,37 +188,38 @@ if (templateId) {
   async function saveSlug() {
     if (!slugEdit || slugEdit === card.slug) return
 
-    setSlugSaving(true)
-    setSlugError(null)
+setSlugSaving(true)
+setSlugError(null)
 
-    try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const accessToken = sessionData?.session?.access_token
-      if (!accessToken) throw new Error('Sessão inválida')
+try {
+  const { data: sessionData } = await supabase.auth.getSession()
+  const accessToken = sessionData?.session?.access_token
+  if (!accessToken) throw new Error('Sessão inválida')
 
-      const res = await fetch('/api/cards/update-slug', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ cardId: card.id, newSlugRaw: slugEdit }),
-      })
+  const res = await fetch('/api/cards/update-slug', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ cardId: card.id, newSlugRaw: slugEdit }),
+  })
 
-      const json = await res.json()
-      if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
+  const json = await res.json()
+  if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
 
-      setSlugEdit(json.newSlug)
-      alert('Slug atualizado com sucesso ✅')
-    } catch (e: any) {
-      setSlugError(e.message || 'Erro ao guardar slug')
-    } finally {
-      setSlugSaving(false)
-    }
+  setSlugEdit(json.newSlug)
+  alert('Slug atualizado com sucesso ✅')
+} catch (e: any) {
+  setSlugError(e.message || 'Erro ao guardar slug')
+} finally {
+  setSlugSaving(false)
+}
+
   }
 
   return (
-    <ColorPickerProvider>
+    
       <div
         className="editor-scope"
         style={{
@@ -258,55 +248,56 @@ if (templateId) {
           enabledCount={enabledBlocksSorted.length}
         />
 
-        <ThemePageClientCenter
-          card={card}
-          theme={localTheme}
-          cardBg={cardBg}
-          blocksEnabledSorted={enabledBlocksSorted}
-          activeBlockId={activeBlockId}
-          onSelectBlock={selectBlock}
-          activeDecoId={activeDecoId}
-          onSelectDeco={setActiveDecoId}
-        />
+    <ThemePageClientCenter
+      card={card}
+      theme={localTheme}
+      cardBg={cardBg}
+      blocksEnabledSorted={enabledBlocksSorted}
+      activeBlockId={activeBlockId}
+      onSelectBlock={selectBlock}
+      activeDecoId={activeDecoId}
+      onSelectDeco={setActiveDecoId}
+    />
 
-        <ThemePageClientRight
-          card={card}
-          activeBlock={activeBlock}
-          activeDecoId={activeDecoId}
-          onSelectDeco={setActiveDecoId}
-          cardBg={cardBg}
-          onChangeCardBg={(nextBg) => {
-            setCardBg(nextBg)
+    <ThemePageClientRight
+      card={card}
+      activeBlock={activeBlock}
+      activeDecoId={activeDecoId}
+      onSelectDeco={setActiveDecoId}
+      cardBg={cardBg}
+      onChangeCardBg={(nextBg) => {
+        setCardBg(nextBg)
 
-            const nextTheme = structuredClone(localTheme || {})
-            nextTheme.background = nextBg
-            setLocalTheme(nextTheme)
+        const nextTheme = structuredClone(localTheme || {})
+        nextTheme.background = nextBg
+        setLocalTheme(nextTheme)
 
-            setSaveStatus('dirty')
-          }}
-          onChangeSettings={updateActiveSettings}
-          onChangeStyle={updateActiveStyle}
-          onSave={saveChanges}
-          saveStatus={saveStatus}
-          slugEdit={slugEdit}
-          setSlugEdit={setSlugEdit}
-          slugSaving={slugSaving}
-          slugError={slugError}
-          saveSlug={saveSlug}
-        />
+        setSaveStatus('dirty')
+      }}
+      onChangeSettings={updateActiveSettings}
+      onChangeStyle={updateActiveStyle}
+      onSave={saveChanges}
+      saveStatus={saveStatus}
+      slugEdit={slugEdit}
+      setSlugEdit={setSlugEdit}
+      slugSaving={slugSaving}
+      slugError={slugError}
+      saveSlug={saveSlug}
+    />
 
-        <AddBlockModal
-          open={addOpen}
-          cardId={card.id}
-          existingBlocks={allBlocksSorted}
-          onClose={() => setAddOpen(false)}
-          onCreated={(newBlock) => {
-            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
-            setActiveBlockId(newBlock.id)
-            setSaveStatus('idle')
-          }}
-        />
-      </div>
-    </ColorPickerProvider>
+    <AddBlockModal
+      open={addOpen}
+      cardId={card.id}
+      existingBlocks={allBlocksSorted}
+      onClose={() => setAddOpen(false)}
+      onCreated={(newBlock) => {
+        setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
+        setActiveBlockId(newBlock.id)
+        setSaveStatus('idle')
+      }}
+    />
+  </div>
+</ColorPickerProvider>
+
   )
 }
