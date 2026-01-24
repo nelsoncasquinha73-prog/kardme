@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/editor-ui.css'
@@ -81,10 +81,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/analytics', title: 'Analytics' },
   ]
 
-  const getPageTitle = () => {
-    const match = titleByPrefix.find((x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/'))
-    return match?.title || 'Kardme'
+ const getPageTitle = () => {
+  // 🎯 Se estás no editor de cartão/template
+  if (pathname.match(/^\/dashboard\/cards\/[^/]+\/theme/)) {
+    return templateId ? '✏️ Editar template' : '✏️ Editor'
   }
+
+  // Resto do código original
+  const match = titleByPrefix.find((x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/'))
+  return match?.title || 'Kardme'
+}
+
+
+const searchParams = useSearchParams()
+const templateId = searchParams.get('template_id')
 
 
   return (
