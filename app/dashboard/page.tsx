@@ -46,6 +46,7 @@ export default function DashboardPage() {
       .select('id,name,job,company,slug,user_id')
       .eq('user_id', userId)
       .is('deleted_at', null)
+      .or('is_template_draft.is.null,is_template_draft.eq.false')
       .order('created_at', { ascending: true })
 
     if (cardsErr) {
