@@ -425,24 +425,25 @@ const { error: insertErr } = await supabase.from('templates').insert({
         )}
 
         {isAdmin && (
-          <button
-            onClick={() => setTemplateModalOpen(true)}
-            style={{
-              width: '100%',
-              height: 44,
-              borderRadius: 14,
-              border: '1px solid rgba(124, 58, 237, 0.3)',
-              background: 'rgba(124, 58, 237, 0.1)',
-              color: 'rgba(168, 85, 247, 0.95)',
-              fontWeight: 800,
-              fontSize: 14,
-              cursor: 'pointer',
-              marginBottom: 8,
-            }}
-          >
-            {templateId ? '✏️ Atualizar template' : '📦 Guardar como template'}
-          </button>
-        )}
+  <>
+    {templateId ? (
+      <button
+        onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
+        style={{...}}
+      >
+        ✏️ Atualizar template
+      </button>
+    ) : (
+      <button
+        onClick={() => setTemplateModalOpen(true)}
+        style={{...}}
+      >
+        📦 Guardar como template
+      </button>
+    )}
+  </>
+)}
+
 
         <button
           onClick={onSave}
