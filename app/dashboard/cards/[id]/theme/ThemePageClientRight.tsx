@@ -99,7 +99,7 @@ export default function ThemePageClientRight({
   category: string
   price: number
 }) => {
-  
+
   console.log('🔴 handleSaveAsTemplate CALLED')
   console.log('  card.id=', card.id)
   console.log('  templateId=', templateId)
@@ -136,6 +136,44 @@ export default function ThemePageClientRight({
       settings: b.settings ?? {},
       style: b.style ?? {},
     }))
+// 2) Carregar blocos
+const { data: blocks, error: blocksErr } = await supabase
+  .from('card_blocks')
+  .select('*')
+  .eq('card_id', card.id)
+  .order('order', { ascending: true })
+
+if (blocksErr) throw new Error(blocksErr.message)
+
+const preview_json = (blocks || []).map((b) => ({
+  type: b.type,
+  order: b.order ?? 0,
+  title: b.title ?? null,
+  enabled: b.enabled ?? true,
+  settings: b.settings ?? {},
+  style: b.style ?? {},
+}))
+
+console.log('📦 preview_json blocks=', preview_json.length)
+
+// 3) UPDATE ou INSERT com o theme correto
+if (templateId) {
+  console.log('🔵 UPDATE template:', templateId)
+  const { error: updateErr } = await supabase
+    .from('templates')
+    .update({
+      preview_json,
+      theme_json: currentTheme,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', templateId)
+
+  console.log('updateErr=', updateErr)
+  if (updateErr) throw new Error(updateErr.message)
+  alert('✅ Template atualizado com sucesso!')
+  setTemplateSaving(false)
+  return
+}
 
     // 3) UPDATE ou INSERT com o theme correto
     if (templateId) {
