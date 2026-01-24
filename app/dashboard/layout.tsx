@@ -25,6 +25,9 @@ import { FiBarChart2 } from 'react-icons/fi'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get('template_id')
+  
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
@@ -66,8 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
- 
-    const titleByPrefix: Array<{ prefix: string; title: string }> = [
+  const titleByPrefix: Array<{ prefix: string; title: string }> = [
     { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/dashboard/leads', title: 'Contactos' },
     { prefix: '/dashboard/bookings', title: 'Reuniões' },
@@ -81,21 +83,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/analytics', title: 'Analytics' },
   ]
 
- const getPageTitle = () => {
-  // 🎯 Se estás no editor de cartão/template
-  if (pathname.match(/^\/dashboard\/cards\/[^/]+\/theme/)) {
-    return templateId ? '✏️ Editar template' : '✏️ Editor'
+  const getPageTitle = () => {
+    // 🎯 Se estás no editor de cartão/template
+    if (pathname.match(/^\/dashboard\/cards\/[^/]+\/theme/)) {
+      return templateId ? '✏️ Editar template' : '✏️ Editor'
+    }
+
+    // Resto do código original
+    const match = titleByPrefix.find(
+      (x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/')
+    )
+    return match?.title || 'Kardme'
   }
-
-  // Resto do código original
-  const match = titleByPrefix.find((x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/'))
-  return match?.title || 'Kardme'
-}
-
-
-const searchParams = useSearchParams()
-const templateId = searchParams.get('template_id')
-
 
   return (
     <ColorPickerProvider>
@@ -122,24 +121,25 @@ const templateId = searchParams.get('template_id')
             </ul>
           </nav>
 
-         <div className="sidebar-footer">
-  <div style={{ 
-    fontSize: 11, 
-    color: 'rgba(255,255,255,0.55)', 
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
-    wordBreak: 'break-all'
-  }}>
-    <div style={{ marginBottom: 4 }}>Logado como:</div>
-    <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{userEmail}</strong>
-  </div>
-  <button className="sidebar-logout" onClick={logout}>
-    <FiLogOut className="sidebar-icon" />
-    <span>Logout</span>
-  </button>
-</div>
-
+          <div className="sidebar-footer">
+            <div
+              style={{
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.55)',
+                marginBottom: 12,
+                paddingBottom: 12,
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                wordBreak: 'break-all',
+              }}
+            >
+              <div style={{ marginBottom: 4 }}>Logado como:</div>
+              <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{userEmail}</strong>
+            </div>
+            <button className="sidebar-logout" onClick={logout}>
+              <FiLogOut className="sidebar-icon" />
+              <span>Logout</span>
+            </button>
+          </div>
         </aside>
 
         <div style={{ flex: 1 }}>
