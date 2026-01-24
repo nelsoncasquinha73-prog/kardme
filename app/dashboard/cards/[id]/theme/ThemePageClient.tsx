@@ -136,35 +136,49 @@ export default function ThemePageClient({ card, blocks }: Props) {
     }
 
     // 3) SE ADMIN E TEMPLATE_ID EXISTE: atualizar o template também
-    const templateId = card?.template_id
-    if (templateId) {
-      console.log('🔵 Atualizando template:', templateId)
+   // 3) SE TEMPLATE_ID EXISTE: atualizar o template também
+const templateId = card?.template_id
+if (templateId) {
+  console.log('🔵 Atualizando template:', templateId)
 
-      const previewJson = localBlocks.map((b) => ({
-        type: b.type,
-        order: b.order ?? 0,
-        title: b.title ?? null,
-        enabled: b.enabled ?? true,
-        settings: b.settings ?? {},
-        style: b.style ?? {},
-      }))
+  // LER DA BD (fonte de verdade)
+  const { data: dbBlocks, error: dbBlocksErr } = await supabase
+    .from('card_blocks')
+    .select('type, order, title, enabled, settings, style')
+    .eq('card_id', card.id)
+    .order('order', { ascending: true })
 
-      const { error: templateError } = await supabase
-        .from('templates')
-        .update({
-          preview_json: previewJson,
-          theme_json: nextTheme,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', templateId)
+  if (dbBlocksErr) {
+    console.error('❌ Erro a ler blocos da BD:', dbBlocksErr)
+    alert('Cartão guardado, mas falhou leitura de blocos para atualizar template ⚠️')
+  } else {
+    const previewJson = (dbBlocks || []).map((b) => ({
+      type: b.type,
+      order: b.order ?? 0,
+      title: b.title ?? null,
+      enabled: b.enabled ?? true,
+      settings: b.settings ?? {},
+      style: b.style ?? {},
+    }))
 
-      if (templateError) {
-        console.error('❌ Erro ao atualizar template:', templateError)
-        alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
-      } else {
-        console.log('✅ Template atualizado com sucesso!')
-      }
+    const { error: templateError } = await supabase
+      .from('templates')
+      .update({
+        preview_json: previewJson,
+        theme_json: nextTheme,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', templateId)
+
+    if (templateError) {
+      console.error('❌ Erro ao atualizar template:', templateError)
+      alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
+    } else {
+      console.log('✅ Template atualizado com sucesso!')
     }
+  }
+}
+
 
     setLocalTheme(nextTheme)
     setSaveStatus('saved')
