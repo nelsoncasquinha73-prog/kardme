@@ -104,78 +104,74 @@ export default function ThemePageClientRight({
     console.log('  templateId=', templateId)
     console.log('  templateIdFromUrl=', templateIdFromUrl)
 
-setTemplateSaving(true)
+    setTemplateSaving(true)
 
-try {
-  // 1) Carregar o card atual para ter o theme atualizado
-  const { data: currentCard, error: cardErr } = await supabase
-    .from('cards')
-    .select('theme')
-    .eq('id', card.id)
-    .single()
+    try {
+      const { data: currentCard, error: cardErr } = await supabase
+        .from('cards')
+        .select('theme')
+        .eq('id', card.id)
+        .single()
 
-  if (cardErr) throw new Error(cardErr.message)
+      if (cardErr) throw new Error(cardErr.message)
 
-  const currentTheme = currentCard?.theme || cardBg
+      const currentTheme = currentCard?.theme || cardBg
 
-  // 2) Carregar blocos
-  const { data: blocks, error: blocksErr } = await supabase
-    .from('card_blocks')
-    .select('*')
-    .eq('card_id', card.id)
-    .order('order', { ascending: true })
+      const { data: blocks, error: blocksErr } = await supabase
+        .from('card_blocks')
+        .select('*')
+        .eq('card_id', card.id)
+        .order('order', { ascending: true })
 
-  if (blocksErr) throw new Error(blocksErr.message)
+      if (blocksErr) throw new Error(blocksErr.message)
 
-  const previewJson = (blocks || []).map((b) => ({
-    type: b.type,
-    order: b.order ?? 0,
-    title: b.title ?? null,
-    enabled: b.enabled ?? true,
-    settings: b.settings ?? {},
-    style: b.style ?? {},
-  }))
+      const previewJson = (blocks || []).map((b) => ({
+        type: b.type,
+        order: b.order ?? 0,
+        title: b.title ?? null,
+        enabled: b.enabled ?? true,
+        settings: b.settings ?? {},
+        style: b.style ?? {},
+      }))
 
-  console.log('📦 preview_json blocks=', previewJson.length)
+      console.log('📦 preview_json blocks=', previewJson.length)
 
-  // 3) UPDATE ou INSERT com o theme correto
-  if (templateId) {
-    console.log('🔵 UPDATE template:', templateId)
-    const { error: updateErr } = await supabase
-      .from('templates')
-      .update({
+      if (templateId) {
+        console.log('🔵 UPDATE template:', templateId)
+        const { error: updateErr } = await supabase
+          .from('templates')
+          .update({
+            preview_json: previewJson,
+            theme_json: currentTheme,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', templateId)
+
+        console.log('updateErr=', updateErr)
+        if (updateErr) throw new Error(updateErr.message)
+        alert('✅ Template atualizado com sucesso!')
+        setTemplateSaving(false)
+        return
+      }
+
+      const { error: insertErr } = await supabase.from('templates').insert({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        price: data.price,
         preview_json: previewJson,
         theme_json: currentTheme,
-        updated_at: new Date().toISOString(),
+        is_active: true,
       })
-      .eq('id', templateId)
 
-    console.log('updateErr=', updateErr)
-    if (updateErr) throw new Error(updateErr.message)
-    alert('✅ Template atualizado com sucesso!')
-    setTemplateSaving(false)
-    return
-  }
-
-  const { error: insertErr } = await supabase.from('templates').insert({
-    name: data.name,
-    description: data.description,
-    category: data.category,
-    price: data.price,
-    preview_json: previewJson,
-    theme_json: currentTheme,
-    is_active: true,
-  })
-
-  if (insertErr) throw new Error(insertErr.message)
-  alert(`✅ Template "${data.name}" guardado com sucesso!`)
-  setTemplateSaving(false)
-} catch (err) {
-  console.error('❌ Error in handleSaveAsTemplate:', err)
-  alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
-  setTemplateSaving(false)
-}
-
+      if (insertErr) throw new Error(insertErr.message)
+      alert(`✅ Template "${data.name}" guardado com sucesso!`)
+      setTemplateSaving(false)
+    } catch (err) {
+      console.error('❌ Error in handleSaveAsTemplate:', err)
+      alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
+      setTemplateSaving(false)
+    }
   }
 
   return (
@@ -209,260 +205,235 @@ try {
           gap: 12,
         }}
       >
-        <strong style={{ fontSize: 14, color: '#111827' }}>Editor
-
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      {activeBlock && (
-        <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>
-          Bloco: {activeBlock.type}
-        </span>
-      )}
-    </div>
-  </div>
-
-  <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-    <label style={{ fontWeight: 700, fontSize: 12, opacity: 0.7, color: '#111827' }}>
-      Editar slug (link do cartão)
-    </label>
-
-    <input
-      type="text"
-      value={slugEdit}
-      onChange={(e) => setSlugEdit(e.target.value)}
-      disabled={slugSaving}
-      style={{
-        width: '100%',
-        padding: '6px 8px',
-        borderRadius: 6,
-        border: '1px solid rgba(0,0,0,0.15)',
-        marginTop: 4,
-        fontSize: 14,
-        color: '#374151',
-      }}
-    />
-
-    {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
-
-    <button
-      onClick={saveSlug}
-      disabled={slugSaving || slugEdit === card.slug}
-      style={{
-        marginTop: 6,
-        padding: '8px 12px',
-        borderRadius: 8,
-        backgroundColor: '#111827',
-        color: '#fff',
-        fontWeight: 'bold',
-        cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
-        opacity: slugSaving || slugEdit === card.slug ? 0.6 : 1,
-      }}
-    >
-      {slugSaving ? 'A guardar…' : 'Guardar slug'}
-    </button>
-  </div>
-
-  <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-    {card?.slug ? <CardPublicLink slug={card.slug} /> : null}
-  </div>
-
-  <div style={{ padding: 12, overflow: 'auto' }}>
-    {!activeBlock && (
-      <p style={{ fontSize: 13, opacity: 0.5, paddingTop: 20, textAlign: 'center' }}>
-        Seleciona um bloco à esquerda para editar.
-      </p>
-    )}
-
-    {activeBlock?.type === 'header' && (
-      <HeaderBlockEditor
-        cardId={card.id}
-        settings={activeBlock.settings || {}}
-        onChange={(nextSettings) => onChangeSettings(nextSettings)}
-        cardBg={cardBg}
-        onChangeCardBg={onChangeCardBg}
-      />
-    )}
-
-    {activeBlock?.type === 'profile' && (
-      <ProfileBlockEditor
-        cardId={card.id}
-        settings={activeBlock.settings || {}}
-        onChange={(nextSettings) => onChangeSettings(nextSettings)}
-      />
-    )}
-
-    {activeBlock?.type === 'bio' && (
-      <BioBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'contact' && (
-      <ContactBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'social' && (
-      <SocialBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChange={({ settings, style }) => {
-          onChangeSettings(settings)
-          onChangeStyle(style)
-        }}
-      />
-    )}
-
-    {activeBlock?.type === 'gallery' && (
-      <GalleryBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'info_utilities' && (
-      <InfoUtilitiesBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'lead_form' && (
-      <LeadFormBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'embed' && (
-      <EmbedBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'services' && (
-      <ServicesBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'decorations' && (
-      <DecorationBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-        activeDecoId={activeDecoId}
-        onSelectDeco={onSelectDeco}
-      />
-    )}
-
-    {activeBlock?.type === 'business_hours' && (
-      <BusinessHoursBlockEditor
-        settings={activeBlock.settings || {}}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'free_text' && (
-      <FreeTextBlockEditor
-        settings={activeBlock.settings || { text: '' }}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock?.type === 'cta_buttons' && (
-      <CTAButtonsBlockEditor
-        cardId={card.id}
-        settings={activeBlock.settings || { buttons: [] }}
-        style={activeBlock.style || {}}
-        onChangeSettings={onChangeSettings}
-        onChangeStyle={onChangeStyle}
-      />
-    )}
-
-    {activeBlock &&
-      ![
-        'header',
-        'profile',
-        'bio',
-        'contact',
-        'social',
-        'gallery',
-        'info_utilities',
-        'lead_form',
-        'embed',
-        'services',
-        'decorations',
-        'business_hours',
-        'free_text',
-        'cta_buttons',
-      ].includes(activeBlock.type) && (
-        <p style={{ fontSize: 14, opacity: 0.65 }}>
-          Editor ainda não disponível para: <b>{activeBlock.type}</b>
-        </p>
-      )}
-  </div>
-
-  <div
-    style={{
-      padding: 12,
-      borderTop: '1px solid rgba(0,0,0,0.08)',
-      background: '#fff',
-    }}
-  >
-    {activeBlock && (
-      <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+        <strong style={{ fontSize: 14, color: '#111827' }}>Editor</strong>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {activeBlock && (
+            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>
+              Bloco: {activeBlock.type}
+            </span>
+          )}
+        </div>
       </div>
-    )}
 
-    {isAdmin && templateId ? (
-      <button
-        onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
+      <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+        <label style={{ fontWeight: 700, fontSize: 12, opacity: 0.7, color: '#111827' }}>
+          Editar slug (link do cartão)
+        </label>
+        <input
+          type="text"
+          value={slugEdit}
+          onChange={(e) => setSlugEdit(e.target.value)}
+          disabled={slugSaving}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            borderRadius: 6,
+            border: '1px solid rgba(0,0,0,0.15)',
+            marginTop: 4,
+            fontSize: 14,
+            color: '#374151',
+          }}
+        />
+        {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
+        <button
+          onClick={saveSlug}
+          disabled={slugSaving || slugEdit === card.slug}
+          style={{
+            marginTop: 6,
+            padding: '8px 12px',
+            borderRadius: 8,
+            backgroundColor: '#111827',
+            color: '#fff',
+            fontWeight: 'bold',
+            cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
+            opacity: slugSaving || slugEdit === card.slug ? 0.6 : 1,
+          }}
+        >
+          {slugSaving ? 'A guardar…' : 'Guardar slug'}
+        </button>
+      </div>
+
+      <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+        {card?.slug ? <CardPublicLink slug={card.slug} /> : null}
+      </div>
+
+      <div style={{ padding: 12, overflow: 'auto' }}>
+        {!activeBlock && (
+          <p style={{ fontSize: 13, opacity: 0.5, paddingTop: 20, textAlign: 'center' }}>
+            Seleciona um bloco à esquerda para editar.
+          </p>
+        )}
+
+        {activeBlock?.type === 'header' && (
+          <HeaderBlockEditor
+            cardId={card.id}
+            settings={activeBlock.settings || {}}
+            onChange={(nextSettings) => onChangeSettings(nextSettings)}
+            cardBg={cardBg}
+            onChangeCardBg={onChangeCardBg}
+          />
+        )}
+
+        {activeBlock?.type === 'profile' && (
+          <ProfileBlockEditor
+            cardId={card.id}
+            settings={activeBlock.settings || {}}
+            onChange={(nextSettings) => onChangeSettings(nextSettings)}
+          />
+        )}
+
+        {activeBlock?.type === 'bio' && (
+          <BioBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'contact' && (
+          <ContactBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'social' && (
+          <SocialBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChange={({ settings, style }) => {
+              onChangeSettings(settings)
+              onChangeStyle(style)
+            }}
+          />
+        )}
+
+        {activeBlock?.type === 'gallery' && (
+          <GalleryBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'info_utilities' && (
+          <InfoUtilitiesBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'lead_form' && (
+          <LeadFormBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'embed' && (
+          <EmbedBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'services' && (
+          <ServicesBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'decorations' && (
+          <DecorationBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+            activeDecoId={activeDecoId}
+            onSelectDeco={onSelectDeco}
+          />
+        )}
+
+        {activeBlock?.type === 'business_hours' && (
+          <BusinessHoursBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'free_text' && (
+          <FreeTextBlockEditor
+            settings={activeBlock.settings || { text: '' }}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'cta_buttons' && (
+          <CTAButtonsBlockEditor
+            cardId={card.id}
+            settings={activeBlock.settings || { buttons: [] }}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock &&
+          ![
+            'header',
+            'profile',
+            'bio',
+            'contact',
+            'social',
+            'gallery',
+            'info_utilities',
+            'lead_form',
+            'embed',
+            'services',
+            'decorations',
+            'business_hours',
+            'free_text',
+            'cta_buttons',
+          ].includes(activeBlock.type) && (
+            <p style={{ fontSize: 14, opacity: 0.65 }}>
+              Editor ainda não disponível para: <b>{activeBlock.type}</b>
+            </p>
+          )}
+      </div>
+
+      <div
         style={{
-          width: '100%',
-          height: 44,
-          borderRadius: 14,
-          border: '1px solid rgba(124, 58, 237, 0.3)',
-          background: 'rgba(124, 58, 237, 0.1)',
-          color: 'rgba(168, 85, 247, 0.95)',
-          fontWeight: 800,
-          fontSize: 14,
-          cursor: 'pointer',
-          marginBottom: 8,
+          padding: 12,
+          borderTop: '1px solid rgba(0,0,0,0.08)',
+          background: '#fff',
         }}
-        disabled={templateSaving}
       >
-        {templateSaving ? 'A atualizar…' : '✏️ Atualizar template'}
-      </button>
-    ) : (
-      <>
-        {isAdmin && (
+        {activeBlock && (
+          <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+          </div>
+        )}
+
+        {isAdmin && templateId ? (
           <button
-            onClick={() => setTemplateModalOpen(true)}
+            onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
             style={{
               width: '100%',
               height: 44,
@@ -477,43 +448,63 @@ try {
             }}
             disabled={templateSaving}
           >
-            {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
+            {templateSaving ? 'A atualizar…' : '✏️ Atualizar template'}
           </button>
+        ) : (
+          <>
+            {isAdmin && (
+              <button
+                onClick={() => setTemplateModalOpen(true)}
+                style={{
+                  width: '100%',
+                  height: 44,
+                  borderRadius: 14,
+                  border: '1px solid rgba(124, 58, 237, 0.3)',
+                  background: 'rgba(124, 58, 237, 0.1)',
+                  color: 'rgba(168, 85, 247, 0.95)',
+                  fontWeight: 800,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  marginBottom: 8,
+                }}
+                disabled={templateSaving}
+              >
+                {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
+              </button>
+            )}
+
+            <button
+              onClick={onSave}
+              style={{
+                width: '100%',
+                height: 44,
+                borderRadius: 14,
+                border: 'none',
+                background: 'var(--color-primary)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+                opacity: saveStatus === 'saving' ? 0.7 : 1,
+              }}
+              disabled={saveStatus === 'saving'}
+            >
+              💾 Guardar alterações
+            </button>
+          </>
         )}
 
-        <button
-          onClick={onSave}
-          style={{
-            width: '100%',
-            height: 44,
-            borderRadius: 14,
-            border: 'none',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14,
-            cursor: 'pointer',
-            opacity: saveStatus === 'saving' ? 0.7 : 1,
-          }}
-          disabled={saveStatus === 'saving'}
-        >
-          💾 Guardar alterações
-        </button>
-      </>
-    )}
+        <p style={{ marginTop: 10, fontSize: 12, opacity: 0.55 }}>
+          Auto-save: guarda automaticamente o bloco ativo ~600ms após parares de mexer.
+        </p>
+      </div>
 
-    <p style={{ marginTop: 10, fontSize: 12, opacity: 0.55 }}>
-      Auto-save: guarda automaticamente o bloco ativo ~600ms após parares de mexer.
-    </p>
-  </div>
-
-  <SaveAsTemplateModal
-    isOpen={templateModalOpen}
-    onClose={() => setTemplateModalOpen(false)}
-    onConfirm={handleSaveAsTemplate}
-    isLoading={templateSaving}
-  />
-</aside>
-
+      <SaveAsTemplateModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+        onConfirm={handleSaveAsTemplate}
+        isLoading={templateSaving}
+      />
+    </aside>
   )
-}    
+}
