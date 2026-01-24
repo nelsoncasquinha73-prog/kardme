@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/editor-ui.css'
@@ -25,9 +25,6 @@ import { FiBarChart2 } from 'react-icons/fi'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const templateId = searchParams.get('template_id')
-  
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
@@ -84,12 +81,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ]
 
   const getPageTitle = () => {
-    // 🎯 Se estás no editor de cartão/template
+    // Se estás no editor, mostra "Editor"
+    // (o título vai ser atualizado no cliente se houver ?template_id=...)
     if (pathname.match(/^\/dashboard\/cards\/[^/]+\/theme/)) {
-      return templateId ? '✏️ Editar template' : '✏️ Editor'
+      return '✏️ Editor'
     }
 
-    // Resto do código original
     const match = titleByPrefix.find(
       (x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/')
     )
