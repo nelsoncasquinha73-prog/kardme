@@ -99,6 +99,12 @@ export default function ThemePageClientRight({
   category: string
   price: number
 }) => {
+  
+  console.log('🔴 handleSaveAsTemplate CALLED')
+  console.log('  card.id=', card.id)
+  console.log('  templateId=', templateId)
+  console.log('  templateIdFromUrl=', templateIdFromUrl)
+
   setTemplateSaving(true)
 
   try {
