@@ -219,7 +219,7 @@ try {
   }
 
   return (
-    
+    <ColorPickerProvider>
       <div
         className="editor-scope"
         style={{
@@ -248,56 +248,55 @@ try {
           enabledCount={enabledBlocksSorted.length}
         />
 
-    <ThemePageClientCenter
-      card={card}
-      theme={localTheme}
-      cardBg={cardBg}
-      blocksEnabledSorted={enabledBlocksSorted}
-      activeBlockId={activeBlockId}
-      onSelectBlock={selectBlock}
-      activeDecoId={activeDecoId}
-      onSelectDeco={setActiveDecoId}
-    />
+        <ThemePageClientCenter
+          card={card}
+          theme={localTheme}
+          cardBg={cardBg}
+          blocksEnabledSorted={enabledBlocksSorted}
+          activeBlockId={activeBlockId}
+          onSelectBlock={selectBlock}
+          activeDecoId={activeDecoId}
+          onSelectDeco={setActiveDecoId}
+        />
 
-    <ThemePageClientRight
-      card={card}
-      activeBlock={activeBlock}
-      activeDecoId={activeDecoId}
-      onSelectDeco={setActiveDecoId}
-      cardBg={cardBg}
-      onChangeCardBg={(nextBg) => {
-        setCardBg(nextBg)
+        <ThemePageClientRight
+          card={card}
+          activeBlock={activeBlock}
+          activeDecoId={activeDecoId}
+          onSelectDeco={setActiveDecoId}
+          cardBg={cardBg}
+          onChangeCardBg={(nextBg) => {
+            setCardBg(nextBg)
 
-        const nextTheme = structuredClone(localTheme || {})
-        nextTheme.background = nextBg
-        setLocalTheme(nextTheme)
+            const nextTheme = structuredClone(localTheme || {})
+            nextTheme.background = nextBg
+            setLocalTheme(nextTheme)
 
-        setSaveStatus('dirty')
-      }}
-      onChangeSettings={updateActiveSettings}
-      onChangeStyle={updateActiveStyle}
-      onSave={saveChanges}
-      saveStatus={saveStatus}
-      slugEdit={slugEdit}
-      setSlugEdit={setSlugEdit}
-      slugSaving={slugSaving}
-      slugError={slugError}
-      saveSlug={saveSlug}
-    />
+            setSaveStatus('dirty')
+          }}
+          onChangeSettings={updateActiveSettings}
+          onChangeStyle={updateActiveStyle}
+          onSave={saveChanges}
+          saveStatus={saveStatus}
+          slugEdit={slugEdit}
+          setSlugEdit={setSlugEdit}
+          slugSaving={slugSaving}
+          slugError={slugError}
+          saveSlug={saveSlug}
+        />
 
-    <AddBlockModal
-      open={addOpen}
-      cardId={card.id}
-      existingBlocks={allBlocksSorted}
-      onClose={() => setAddOpen(false)}
-      onCreated={(newBlock) => {
-        setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
-        setActiveBlockId(newBlock.id)
-        setSaveStatus('idle')
-      }}
-    />
-  </div>
-</ColorPickerProvider>
-
+        <AddBlockModal
+          open={addOpen}
+          cardId={card.id}
+          existingBlocks={allBlocksSorted}
+          onClose={() => setAddOpen(false)}
+          onCreated={(newBlock) => {
+            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
+            setActiveBlockId(newBlock.id)
+            setSaveStatus('idle')
+          }}
+        />
+      </div>
+    </ColorPickerProvider>
   )
 }
