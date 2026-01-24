@@ -14,6 +14,7 @@ type Template = {
   price: number | null
   image_url: string | null
   preview_json: any[] | null
+  theme_json: any | null
   is_active: boolean | null
   created_at?: string | null
 }
@@ -22,12 +23,45 @@ type PriceFilter = 'all' | 'free' | 'premium'
 
 function eur(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
-  return `€${v.toFixed(2)}`
+  return `€\${v.toFixed(2)}`
 }
 
 function isFree(t: Template) {
   const p = typeof t.price === 'number' ? t.price : 0
   return p <= 0
+}
+
+function themeToCssBackground(theme: any): string | null {
+  if (!theme) return null
+
+  // Caso 1: background é string direta
+  if (typeof theme.background === 'string' && theme.background.trim()) {
+    return theme.background
+  }
+
+  // Caso 2: colors.background é string
+  const colorsBg = theme?.colors?.background
+  if (typeof colorsBg === 'string' && colorsBg.trim()) {
+    return colorsBg
+  }
+
+  // Caso 3: background.base é um gradiente
+  const base = theme?.background?.base
+  if (base?.kind === 'gradient' && Array.isArray(base.stops) && base.stops.length >= 2) {
+    const angle = typeof base.angle === 'number' ? base.angle : 135
+    const stops = base.stops
+      .filter((s: any) => typeof s?.color === 'string')
+      .map((s: any) => {
+        const pos = typeof s.pos === 'number' ? `\${s.pos}%` : ''
+        return `${s.color}${pos ? ` ${pos}` : ''}`
+      })
+      .join(', ')
+    if (stops) {
+      return `linear-gradient(\${angle}deg, \${stops})`
+    }
+  }
+
+  return null
 }
 
 export default function CatalogPage() {
@@ -114,7 +148,7 @@ export default function CatalogPage() {
         .insert({
           user_id: userId,
           name: t.name,
-          slug: `card-${Date.now()}`,
+          slug: `card-\${Date.now()}`,
           template_id: t.id,
         })
         .select('id')
@@ -142,13 +176,13 @@ export default function CatalogPage() {
 
         const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
         if (blocksErr) {
-          setError(`Erro ao criar blocos: ${blocksErr.message}`)
+          setError(`Erro ao criar blocos: \${blocksErr.message}`)
           setCreatingTemplateId(null)
           return
         }
       }
 
-      router.push(`/dashboard/cards/${cardId}/theme`)
+      router.push(`/dashboard/cards/\${cardId}/theme`)
     } catch {
       setError('Erro ao criar cartão.')
       setCreatingTemplateId(null)
@@ -327,6 +361,9 @@ export default function CatalogPage() {
             {filtered.map((t) => {
               const free = isFree(t)
               const priceLabel = free ? 'Grátis' : eur(t.price)
+              const bg =
+                themeToCssBackground((t as any).theme_json) ||
+                'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))'
 
               return (
                 <div
@@ -348,12 +385,7 @@ export default function CatalogPage() {
                       borderRadius: 14,
                       overflow: 'hidden',
                       border: '1px solid rgba(255,255,255,0.10)',
-                      background:
-  (t as any)?.theme_json?.colors?.background ||
-  (t as any)?.theme_json?.background ||
-  (t as any)?.theme_json?.colors?.surface ||
-  'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))',
-
+                      background: bg,
                       height: 160,
                       position: 'relative',
                     }}
