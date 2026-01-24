@@ -163,22 +163,27 @@ const editTemplate = async (templateId: string) => {
       return
     }
 
-    // 🎯 NOVO: Procura draft existente para este template
-    const { data: existingDraft } = await supabase
+    // 🎯 CRÍTICO: Procura draft existente ANTES de criar novo
+    const { data: existingDraft, error: draftErr } = await supabase
       .from('cards')
       .select('id')
       .eq('template_id', templateId)
       .eq('is_template_draft', true)
       .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single()
 
     let cardId: string
 
-    if (existingDraft) {
-      // Reutiliza o draft existente
+    if (existingDraft && !draftErr) {
+      // ✅ Reutiliza draft existente
+      console.log('✅ Reutilizando draft existente:', existingDraft.id)
       cardId = existingDraft.id
     } else {
-      // Cria novo draft (só se não existir)
+      // ✅ Cria novo draft APENAS se não existe
+      console.log('🆕 Criando novo draft para template:', templateId)
+      
       const { data: newCard, error: cardErr } = await supabase
         .from('cards')
         .insert({
@@ -200,7 +205,7 @@ const editTemplate = async (templateId: string) => {
 
       cardId = newCard.id
 
-      // Copiar blocos do template para o card (só na primeira vez)
+      // Copiar blocos do template para o card
       const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
       if (blocks.length) {
         const blocksToInsert = blocks.map((block: any, index: number) => ({
@@ -227,6 +232,7 @@ const editTemplate = async (templateId: string) => {
 
     // Redirecionar para o editor
     router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
+    setOpeningId(null)
   } catch (e: any) {
     setError(e.message || 'Erro ao abrir template para edição')
     setOpeningId(null)
