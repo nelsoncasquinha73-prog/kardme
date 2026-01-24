@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { label: 'Os meus cartões', href: '/dashboard', icon: FiHome },
-    { label: 'Catálogo de Templates', href: '/dashboard/catalog', icon: FiLayout },
+    { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
     { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
     ...(isAdmin ? [{ label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout }] : []),
     { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/nfc', title: 'NFC' },
     { prefix: '/dashboard/storage', title: 'Ficheiros' },
     { prefix: '/dashboard/settings', title: 'Definições' },
-    { prefix: '/dashboard/catalog', title: 'Catálogo de Templates' },
+    { prefix: '/dashboard/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/dashboard', title: 'Os meus cartões' },
     { prefix: '/dashboard/analytics', title: 'Analytics' },
   ]
