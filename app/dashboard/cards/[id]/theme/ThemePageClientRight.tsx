@@ -429,15 +429,10 @@ export default function ThemePageClientRight({
           </div>
         )}
 
-        {isAdmin && (
+                {/* Se estamos a editar um template (templateId existe), mostramos só o botão de atualizar template */}
+        {isAdmin && templateId ? (
           <button
-            onClick={() => {
-              if (templateId) {
-                handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })
-              } else {
-                setTemplateModalOpen(true)
-              }
-            }}
+            onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
             style={{
               width: '100%',
               height: 44,
@@ -452,28 +447,52 @@ export default function ThemePageClientRight({
             }}
             disabled={templateSaving}
           >
-            {templateSaving ? 'A atualizar…' : templateId ? '✏️ Atualizar template' : '📦 Guardar como template'}
+            {templateSaving ? 'A atualizar…' : '✏️ Atualizar template'}
           </button>
-        )}
+        ) : (
+          <>
+            {/* Se não há templateId, estamos num card normal. Se for admin, pode guardar como template (novo). */}
+            {isAdmin && (
+              <button
+                onClick={() => setTemplateModalOpen(true)}
+                style={{
+                  width: '100%',
+                  height: 44,
+                  borderRadius: 14,
+                  border: '1px solid rgba(124, 58, 237, 0.3)',
+                  background: 'rgba(124, 58, 237, 0.1)',
+                  color: 'rgba(168, 85, 247, 0.95)',
+                  fontWeight: 800,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  marginBottom: 8,
+                }}
+                disabled={templateSaving}
+              >
+                {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
+              </button>
+            )}
 
-        <button
-          onClick={onSave}
-          style={{
-            width: '100%',
-            height: 44,
-            borderRadius: 14,
-            border: 'none',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14,
-            cursor: 'pointer',
-            opacity: saveStatus === 'saving' ? 0.7 : 1,
-          }}
-          disabled={saveStatus === 'saving'}
-        >
-          💾 Guardar alterações
-        </button>
+            <button
+              onClick={onSave}
+              style={{
+                width: '100%',
+                height: 44,
+                borderRadius: 14,
+                border: 'none',
+                background: 'var(--color-primary)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+                opacity: saveStatus === 'saving' ? 0.7 : 1,
+              }}
+              disabled={saveStatus === 'saving'}
+            >
+              💾 Guardar alterações
+            </button>
+          </>
+        )}
 
         <p style={{ marginTop: 10, fontSize: 12, opacity: 0.55 }}>
           Auto-save: guarda automaticamente o bloco ativo ~600ms após parares de mexer.
