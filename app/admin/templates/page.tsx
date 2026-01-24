@@ -177,10 +177,58 @@ const editTemplate = async (templateId: string) => {
     let cardId: string
 
     if (existingDraft && !draftErr) {
-      // ✅ Reutiliza draft existente
-      console.log('✅ Reutilizando draft existente:', existingDraft.id)
-      cardId = existingDraft.id
+  // ✅ Reutiliza draft existente
+  console.log('✅ Reutilizando draft existente:', existingDraft.id)
+  cardId = existingDraft.id
+
+  // 🔄 SINCRONIZAR: atualizar tema do draft com o template
+  const { error: themeErr } = await supabase
+    .from('cards')
+    .update({
+      theme: (template.theme_json as any) || { background: '#ffffff' },
+    })
+    .eq('id', cardId)
+
+  if (themeErr) {
+    console.error('⚠️ Erro ao sincronizar tema:', themeErr)
+  }
+
+  // 🔄 SINCRONIZAR: atualizar blocos do draft com o template
+  // 1) Apagar blocos antigos
+  const { error: deleteErr } = await supabase
+    .from('card_blocks')
+    .delete()
+    .eq('card_id', cardId)
+
+  if (deleteErr) {
+    console.error('⚠️ Erro ao apagar blocos antigos:', deleteErr)
+  }
+
+  // 2) Inserir blocos novos do template
+  const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
+  if (blocks.length) {
+    const blocksToInsert = blocks.map((block: any, index: number) => ({
+      card_id: cardId,
+      type: block.type,
+      order: block.order !== undefined ? block.order : index,
+      settings: block.settings || {},
+      style: block.style || {},
+      title: block.title || null,
+      enabled: block.enabled !== undefined ? block.enabled : true,
+    }))
+
+    const { error: blocksErr } = await supabase
+      .from('card_blocks')
+      .insert(blocksToInsert)
+
+    if (blocksErr) {
+      console.error('⚠️ Erro ao inserir blocos sincronizados:', blocksErr)
     } else {
+      console.log('✅ Blocos sincronizados com sucesso')
+    }
+  }
+}
+ else {
       // ✅ Cria novo draft APENAS se não existe
       console.log('🆕 Criando novo draft para template:', templateId)
       
