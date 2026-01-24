@@ -96,6 +96,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges() {
+    console.log('🟢 saveChanges STARTED')
+  setSaveStatus('saving')
     setSaveStatus('saving')
     console.log('🔵 saveChanges iniciado. card.id=', card.id)
     console.log('🔵 localBlocks=', localBlocks)
