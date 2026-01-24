@@ -631,9 +631,9 @@ const createNewTemplate = async () => {
                       className="btn-primary"
                       onClick={() => openInEditor(t)}
                       disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
-                      title="Criar variação a partir deste template e abrir no editor"
+                      title="Duplicar este template como um cartão novo"
                     >
-                      {openingId === t.id ? 'A abrir…' : 'Abrir no editor'}
+                      {openingId === t.id ? 'A abrir…' : 'Duplicar cartão'}
                     </button>
                   </div>
                 </div>
