@@ -143,40 +143,54 @@ const [creatingNew, setCreatingNew] = useState(false)
       image_url: t.image_url || '',
     })
   }
-  const editTemplate = async (templateId: string) => {
-    setOpeningId(templateId)
-    setError(null)
+const editTemplate = async (templateId: string) => {
+  setOpeningId(templateId)
+  setError(null)
 
-    try {
-      const { data: authData, error: authErr } = await supabase.auth.getUser()
-      if (authErr || !authData?.user?.id) {
-        setError('Sem sessão. Faz login novamente.')
-        setOpeningId(null)
-        return
-      }
+  try {
+    const { data: authData, error: authErr } = await supabase.auth.getUser()
+    if (authErr || !authData?.user?.id) {
+      setError('Sem sessão. Faz login novamente.')
+      setOpeningId(null)
+      return
+    }
 
-      const userId = authData.user.id
-      const template = templates.find((t) => t.id === templateId)
-      if (!template) {
-        setError('Template não encontrado')
-        setOpeningId(null)
-        return
-      }
+    const userId = authData.user.id
+    const template = templates.find((t) => t.id === templateId)
+    if (!template) {
+      setError('Template não encontrado')
+      setOpeningId(null)
+      return
+    }
 
-      // 1) Criar card "draft" a partir do template
+    // 🎯 NOVO: Procura draft existente para este template
+    const { data: existingDraft } = await supabase
+      .from('cards')
+      .select('id')
+      .eq('template_id', templateId)
+      .eq('is_template_draft', true)
+      .eq('user_id', userId)
+      .single()
+
+    let cardId: string
+
+    if (existingDraft) {
+      // Reutiliza o draft existente
+      cardId = existingDraft.id
+    } else {
+      // Cria novo draft (só se não existir)
       const { data: newCard, error: cardErr } = await supabase
-  .from('cards')
-  .insert({
-    user_id: userId,
-    name: `[DRAFT] ${template.name}`,
-    slug: `draft-template-${templateId}-${Date.now()}`,
-    template_id: template.id,
-    is_template_draft: true,
-    theme: (template.theme_json as any) || { background: '#ffffff' },
-  })
-  .select('id')
-  .single()
-
+        .from('cards')
+        .insert({
+          user_id: userId,
+          name: `[DRAFT] ${template.name}`,
+          slug: `draft-template-${templateId}-${Date.now()}`,
+          template_id: template.id,
+          is_template_draft: true,
+          theme: (template.theme_json as any) || { background: '#ffffff' },
+        })
+        .select('id')
+        .single()
 
       if (cardErr) {
         setError(cardErr.message)
@@ -184,9 +198,9 @@ const [creatingNew, setCreatingNew] = useState(false)
         return
       }
 
-      const cardId = newCard.id
+      cardId = newCard.id
 
-      // 2) Copiar blocos do template para o card
+      // Copiar blocos do template para o card (só na primeira vez)
       const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
       if (blocks.length) {
         const blocksToInsert = blocks.map((block: any, index: number) => ({
@@ -209,14 +223,16 @@ const [creatingNew, setCreatingNew] = useState(false)
           return
         }
       }
-
-      // 3) Redirecionar para o editor
-      router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
-    } catch (e: any) {
-      setError(e.message || 'Erro ao abrir template para edição')
-      setOpeningId(null)
     }
+
+    // Redirecionar para o editor
+    router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
+  } catch (e: any) {
+    setError(e.message || 'Erro ao abrir template para edição')
+    setOpeningId(null)
   }
+}
+
 
   const cancelEdit = () => {
     setEditId(null)
