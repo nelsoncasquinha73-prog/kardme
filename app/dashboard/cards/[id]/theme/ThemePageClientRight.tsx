@@ -138,7 +138,7 @@ export default function ThemePageClientRight({
 
       if (templateId) {
         console.log('🔵 UPDATE template:', templateId)
-        const { error: updateErr } = await supabase
+        const { data: updatedRows, error: updateErr } = await supabase
           .from('templates')
           .update({
             preview_json: previewJson,
@@ -146,8 +146,11 @@ export default function ThemePageClientRight({
             updated_at: new Date().toISOString(),
           })
           .eq('id', templateId)
+          .select('id, updated_at')
 
+        console.log('updatedRows=', updatedRows)
         console.log('updateErr=', updateErr)
+
         if (updateErr) throw new Error(updateErr.message)
         alert('✅ Template atualizado com sucesso!')
         setTemplateSaving(false)
@@ -165,16 +168,15 @@ export default function ThemePageClientRight({
       })
 
       if (insertErr) throw new Error(insertErr.message)
-      alert(`✅ Template "${data.name}" guardado com sucesso!`)
+      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
       setTemplateSaving(false)
     } catch (err) {
       console.error('❌ Error in handleSaveAsTemplate:', err)
-      alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
+      alert(`❌ Erro: \${err instanceof Error ? err.message : 'Desconhecido'}`)
       setTemplateSaving(false)
     }
   }
-
-  return (
+ return (
     <aside
       style={{
         background: '#fff',
@@ -426,14 +428,39 @@ export default function ThemePageClientRight({
         }}
       >
         {activeBlock && (
-          <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+          <div style={{ padding: '12px', borderBottom: "1px solid rgba(0,0,0,0.08)"
+ }}>
             <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
           </div>
         )}
 
-        {isAdmin && templateId ? (
+        <button
+          onClick={onSave}
+          style={{
+            width: '100%',
+            height: 44,
+            borderRadius: 14,
+            border: 'none',
+            background: '#111827',
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: 14,
+            cursor: 'pointer',
+            marginBottom: 8,
+            opacity: saveStatus === 'saving' ? 0.7 : 1,
+          }}
+          disabled={saveStatus === 'saving'}
+        >
+          {saveStatus === 'saving'
+            ? 'A guardar…'
+            : isAdmin && templateId
+              ? '💾 Guardar (template)'
+              : '💾 Guardar'}
+        </button>
+
+        {isAdmin && (
           <button
-            onClick={() => handleSaveAsTemplate({ name: '', description: '', category: '', price: 0 })}
+            onClick={() => setTemplateModalOpen(true)}
             style={{
               width: '100%',
               height: 44,
@@ -448,50 +475,8 @@ export default function ThemePageClientRight({
             }}
             disabled={templateSaving}
           >
-            {templateSaving ? 'A atualizar…' : '✏️ Atualizar template'}
+            {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
           </button>
-        ) : (
-          <>
-            {isAdmin && (
-              <button
-                onClick={() => setTemplateModalOpen(true)}
-                style={{
-                  width: '100%',
-                  height: 44,
-                  borderRadius: 14,
-                  border: '1px solid rgba(124, 58, 237, 0.3)',
-                  background: 'rgba(124, 58, 237, 0.1)',
-                  color: 'rgba(168, 85, 247, 0.95)',
-                  fontWeight: 800,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  marginBottom: 8,
-                }}
-                disabled={templateSaving}
-              >
-                {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
-              </button>
-            )}
-
-            <button
-              onClick={onSave}
-              style={{
-                width: '100%',
-                height: 44,
-                borderRadius: 14,
-                border: 'none',
-                background: 'var(--color-primary)',
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: 14,
-                cursor: 'pointer',
-                opacity: saveStatus === 'saving' ? 0.7 : 1,
-              }}
-              disabled={saveStatus === 'saving'}
-            >
-              💾 Guardar alterações
-            </button>
-          </>
         )}
 
         <p style={{ marginTop: 10, fontSize: 12, opacity: 0.55 }}>
