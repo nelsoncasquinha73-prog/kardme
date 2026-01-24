@@ -454,7 +454,6 @@ export default function ThemePageClientRight({
             background: 'var(--color-primary)',
             color: '#fff',
             fontWeight: 800,
-            fontSize
             fontSize: 14,
             cursor: 'pointer',
             opacity: saveStatus === 'saving' ? 0.7 : 1,
