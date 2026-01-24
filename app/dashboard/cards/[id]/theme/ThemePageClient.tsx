@@ -35,14 +35,12 @@ export default function ThemePageClient({ card, blocks }: Props) {
     blocks.map((b) => ({ ...b, style: b.style ?? {}, settings: b.settings ?? {} }))
   )
 
-  const [saveStatus, setSaveStatus] = useState('idle')
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [addOpen, setAddOpen] = useState(false)
 
-  // Theme (fonte única)
-  const [localTheme, setLocalTheme] = useState(() => card?.theme ?? {})
+  const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
 
-  // cardBg (derivado do theme, mas mantemos em state para UX)
-  const [cardBg, setCardBg] = useState(() => {
+  const [cardBg, setCardBg] = useState<CardBg>(() => {
     const bg = card?.theme?.background
     if (bg) return bg
     return { mode: 'solid', color: '#ffffff', opacity: 1 }
@@ -62,12 +60,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
   function selectBlock(id: string) {
     setActiveBlockId(id)
-
-const next = localBlocks.find((b) => b.id === id) || null
-if (!next || next.type !== 'decorations') {
-  setActiveDecoId(null)
-}
-
+    const next = localBlocks.find((b) => b.id === id) || null
+    if (!next || next.type !== 'decorations') {
+      setActiveDecoId(null)
+    }
   }
 
   function ensureCardBlocks(next: BlockItem[]): CardBlock[] {
@@ -101,86 +97,102 @@ if (!next || next.type !== 'decorations') {
 
   async function saveChanges() {
     setSaveStatus('saving')
+    console.log('🔵 saveChanges iniciado. card.id=', card.id)
+    console.log('🔵 localBlocks=', localBlocks)
 
-try {
-  // 1) Guardar blocos (usando card_id + type como chave, não id)
-  for (const block of localBlocks) {
-    const { error } = await supabase
-      .from('card_blocks')
-      .update({
-        settings: block.settings,
-        style: block.style,
-        enabled: block.enabled,
-        order: block.order,
-      })
-      .eq('card_id', card.id)
-      .eq('type', block.type)
+    try {
+      for (const block of localBlocks) {
+        console.log(`🟡 Atualizando bloco type=${block.type}, settings=`, block.settings)
 
-    if (error) {
-      console.error('❌ Erro ao atualizar bloco:', block.type, error)
+        const { data, error, count } = await supabase
+          .from('card_blocks')
+          .update({
+            settings: block.settings,
+            style: block.style,
+            enabled: block.enabled,
+            order: block.order,
+          })
+          .eq('card_id', card.id)
+          .eq('type', block.type)
+          .select('id')
+
+        console.log(`🟡 Resultado para ${block.type}: error=`, error, 'count=', count, 'data=', data)
+
+        if (error) {
+          console.error('❌ Erro ao atualizar bloco:', block.type, error)
+          setSaveStatus('error')
+          alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
+          return
+        }
+
+        if (!data || data.length === 0) {
+          console.warn(`⚠️ Nenhuma linha foi atualizada para tipo ${block.type}`)
+        }
+      }
+
+      const nextTheme = structuredClone(localTheme || {})
+      nextTheme.background = cardBg
+
+      console.log('🟡 Atualizando tema:', nextTheme)
+
+      const { error: themeError, count: themeCount } = await supabase
+        .from('cards')
+        .update({ theme: nextTheme })
+        .eq('id', card.id)
+
+      console.log('🟡 Resultado tema: error=', themeError, 'count=', themeCount)
+
+      if (themeError) {
+        console.error('❌ Erro ao guardar tema:', themeError)
+        setSaveStatus('error')
+        alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+        return
+      }
+
+      const templateId = card?.template_id
+      if (templateId) {
+        console.log('🔵 Atualizando template:', templateId)
+
+        const previewJson = localBlocks.map((b) => ({
+          type: b.type,
+          order: b.order ?? 0,
+          title: b.title ?? null,
+          enabled: b.enabled ?? true,
+          settings: b.settings ?? {},
+          style: b.style ?? {},
+        }))
+
+        const { error: templateError, count: templateCount } = await supabase
+          .from('templates')
+          .update({
+            preview_json: previewJson,
+            theme_json: nextTheme,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', templateId)
+
+        console.log('🟡 Resultado template: error=', templateError, 'count=', templateCount)
+
+        if (templateError) {
+          console.error('❌ Erro ao atualizar template:', templateError)
+          alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
+        } else {
+          console.log('✅ Template atualizado com sucesso!')
+        }
+      }
+
+      setLocalTheme(nextTheme)
+      setSaveStatus('saved')
+      window.setTimeout(() => setSaveStatus('idle'), 1200)
+      console.log('✅ saveChanges concluído com sucesso!')
+      alert('Alterações guardadas com sucesso ✅')
+    } catch (err) {
+      console.error('❌ Erro geral em saveChanges:', err)
       setSaveStatus('error')
-      alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
-      return
+      alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
     }
   }
 
-  // 2) Guardar theme (fonte única)
-  const nextTheme = structuredClone(localTheme || {})
-  nextTheme.background = cardBg
-
-  const { error: themeError } = await supabase.from('cards').update({ theme: nextTheme }).eq('id', card.id)
-
-  if (themeError) {
-    console.error('❌ Erro ao guardar tema:', themeError)
-    setSaveStatus('error')
-    alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
-    return
-  }
-
-  // 3) SE TEMPLATE_ID EXISTE: atualizar o template também
-  const templateId = card?.template_id
-  if (templateId) {
-    console.log('🔵 Atualizando template:', templateId)
-
-    const previewJson = localBlocks.map((b) => ({
-      type: b.type,
-      order: b.order ?? 0,
-      title: b.title ?? null,
-      enabled: b.enabled ?? true,
-      settings: b.settings ?? {},
-      style: b.style ?? {},
-    }))
-
-    const { error: templateError } = await supabase
-      .from('templates')
-      .update({
-        preview_json: previewJson,
-        theme_json: nextTheme,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', templateId)
-
-    if (templateError) {
-      console.error('❌ Erro ao atualizar template:', templateError)
-      alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
-    } else {
-      console.log('✅ Template atualizado com sucesso!')
-    }
-  }
-
-  setLocalTheme(nextTheme)
-  setSaveStatus('saved')
-  window.setTimeout(() => setSaveStatus('idle'), 1200)
-  alert('Alterações guardadas com sucesso ✅')
-} catch (err) {
-  console.error('❌ Erro geral em saveChanges:', err)
-  setSaveStatus('error')
-  alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
-}
-
-  }
-
-  // Slug editing states
   const [slugEdit, setSlugEdit] = useState(card.slug)
   const [slugSaving, setSlugSaving] = useState(false)
   const [slugError, setSlugError] = useState<string | null>(null)
@@ -188,34 +200,33 @@ try {
   async function saveSlug() {
     if (!slugEdit || slugEdit === card.slug) return
 
-setSlugSaving(true)
-setSlugError(null)
+    setSlugSaving(true)
+    setSlugError(null)
 
-try {
-  const { data: sessionData } = await supabase.auth.getSession()
-  const accessToken = sessionData?.session?.access_token
-  if (!accessToken) throw new Error('Sessão inválida')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData?.session?.access_token
+      if (!accessToken) throw new Error('Sessão inválida')
 
-  const res = await fetch('/api/cards/update-slug', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ cardId: card.id, newSlugRaw: slugEdit }),
-  })
+      const res = await fetch('/api/cards/update-slug', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ cardId: card.id, newSlugRaw: slugEdit }),
+      })
 
-  const json = await res.json()
-  if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
+      const json = await res.json()
+      if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
 
-  setSlugEdit(json.newSlug)
-  alert('Slug atualizado com sucesso ✅')
-} catch (e: any) {
-  setSlugError(e.message || 'Erro ao guardar slug')
-} finally {
-  setSlugSaving(false)
-}
-
+      setSlugEdit(json.newSlug)
+      alert('Slug atualizado com sucesso ✅')
+    } catch (e: any) {
+      setSlugError(e.message || 'Erro ao guardar slug')
+    } finally {
+      setSlugSaving(false)
+    }
   }
 
   return (
