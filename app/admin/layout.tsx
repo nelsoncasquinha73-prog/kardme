@@ -25,22 +25,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) router.push('/login')
-      else setLoading(false)
-    })
+    const checkAdmin = async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData.session) {
+        router.push('/login')
+        return
+      }
+
+      const userId = sessionData.session.user.id
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single()
+
+      if (error || profile?.role !== 'admin') {
+        setIsAdmin(false)
+      } else {
+        setIsAdmin(true)
+      }
+
+      setLoading(false)
+    }
+
+    checkAdmin()
   }, [router])
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserEmail(data?.user?.email || null)
-    })
-  }, [])
-
-  const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
 
   const logout = async () => {
     await supabase.auth.signOut()
@@ -63,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Os meus cartões', href: '/dashboard', icon: FiHome },
     { label: 'Catálogo de Templates', href: '/dashboard/catalog', icon: FiLayout },
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
+    { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
     { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
     { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
     { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
@@ -75,6 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
+    { prefix: '/admin/clientes', title: 'Clientes' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/dashboard/leads', title: 'Contactos' },
     { prefix: '/dashboard/bookings', title: 'Reuniões' },
