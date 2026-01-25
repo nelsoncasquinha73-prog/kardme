@@ -90,7 +90,7 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const bgCss = bgToCss(card?.theme)
+  const bgCss = bgToCss(card?.theme?.background)
 
   return (
   <TrackingWrapper cardId={card.id}>
@@ -102,7 +102,7 @@ export default async function CardPage({ params }: Props) {
             blocks={blocks}
             showTranslations={false}
             fullBleed={false}
-            cardBg={card.theme}
+            cardBg={card.theme?.background}
           />
         </ThemeProvider>
       </LanguageProvider>
