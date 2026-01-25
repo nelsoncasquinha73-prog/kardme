@@ -14,9 +14,11 @@ type Template = {
   price: number | null
   image_url: string | null
   preview_json: any[] | null
+  theme_json: any | null
   is_active: boolean | null
   created_at?: string | null
 }
+
 
 type PriceFilter = 'all' | 'free' | 'premium'
 
@@ -160,6 +162,7 @@ export default function MyTemplatesPage() {
           name: t.name,
           slug: `card-${Date.now()}`,
           template_id: t.id,
+          theme: t.theme_json,
         })
         .select('id')
         .single()

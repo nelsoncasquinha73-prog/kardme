@@ -14,8 +14,10 @@ type Template = {
   price: number
   image_url: string | null
   preview_json: any[]
+  theme_json: any | null
   is_active: boolean
 }
+
 
 type UserTemplate = {
   template_id: string
@@ -91,13 +93,15 @@ export default function NewCardPage() {
 
       // 1) Create new card
       const { data: newCard, error: cardErr } = await supabase
-        .from('cards')
-        .insert({
-          user_id: userId,
-          name: template.name,
-          slug: `card-${Date.now()}`,
-          template_id: template.id,
-        })
+  .from('cards')
+  .insert({
+    user_id: userId,
+    name: template.name,
+    slug: `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    template_id: template.id,
+    theme: template.theme_json,
+  })
+
         .select('id')
         .single()
 
