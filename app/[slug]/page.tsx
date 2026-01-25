@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props) {
     .eq('published', true)
     .single()
 
-    const bg = card?.theme as CardBg | undefined
+  const bg = card?.theme?.background as CardBg | undefined
 
   const color = (() => {
     if (!bg) return '#000000'
@@ -90,13 +90,11 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const bgCss = bgToCss(card?.theme)
-  console.log('🔴 SERVER - card.theme=', card?.theme)
-  console.log('🔴 SERVER - bgCss=', bgCss)
-  
+  const bgCss = bgToCss(card?.theme?.background)
+
   return (
     <TrackingWrapper cardId={card.id}>
-      <MobileCardFrame background={bgCss} data-bgcss={bgCss}>
+      <MobileCardFrame background={bgCss}>
         <LanguageProvider>
           <ThemeProvider theme={card.theme}>
             <CardPreview
@@ -104,7 +102,7 @@ export default async function CardPage({ params }: Props) {
               blocks={blocks}
               showTranslations={false}
               fullBleed={false}
-              cardBg={card.theme}
+              cardBg={card.theme?.background}
             />
           </ThemeProvider>
         </LanguageProvider>
