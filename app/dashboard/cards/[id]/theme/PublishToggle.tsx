@@ -14,29 +14,45 @@ export default function PublishToggle({ cardId, initialPublished }: PublishToggl
 
   async function togglePublish() {
     setLoading(true)
-    const { error } = await supabase
-      .from('cards')
-      .update({ published: !published })
-      .eq('id', cardId)
+    
+    const { data, error } = await supabase
+      .rpc('publish_card', {
+        card_id: cardId,
+        should_publish: !published,
+      })
 
-    if (!error) setPublished(!published)
-    else alert('Erro ao atualizar estado de publicação')
+    if (error) {
+      alert('Erro: ' + error.message)
+      setLoading(false)
+      return
+    }
+
+    if (data?.success) {
+      setPublished(data.published)
+      alert(published ? 'Cartão despublicado ✅' : 'Cartão publicado ✅')
+    } else {
+      alert('Erro: ' + (data?.error || 'Desconhecido'))
+    }
 
     setLoading(false)
   }
 
   return (
-    <button onClick={togglePublish} disabled={loading} style={{
-      padding: '6px 12px',
-      borderRadius: '8px',
-      border: 'none',
-      backgroundColor: published ? '#4CAF50' : '#f44336',
-      color: 'white',
-      cursor: 'pointer',
-      fontWeight: 'bold',
-      fontSize: '14px',
-    }}>
-      {published ? 'Despublicar' : 'Publicar'}
+    <button
+      onClick={togglePublish}
+      disabled={loading}
+      style={{
+        padding: '6px 12px',
+        borderRadius: '8px',
+        border: 'none',
+        backgroundColor: published ? '#4CAF50' : '#f44336',
+        color: 'white',
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        fontSize: '14px',
+      }}
+    >
+      {loading ? 'A guardar...' : published ? 'Despublicar' : 'Publicar'}
     </button>
   )
 }
