@@ -14,8 +14,12 @@ type Profile = {
   plan: string | null
   billing: string | null
   published_card_limit: number | null
+  plan_started_at: string | null
+  plan_expires_at: string | null
+  plan_auto_renew: boolean | null
   created_at: string | null
 }
+
 
 type CardRow = {
   id: string
@@ -60,6 +64,14 @@ export default function AdminClienteDetailPage() {
 
   const [plan, setPlan] = useState('free')
   const [limit, setLimit] = useState<number>(1)
+  // Sync profile com estado local para datas
+useEffect(() => {
+  if (profile) {
+    setPlan(profile.plan ?? 'free')
+    setLimit(profile.published_card_limit ?? 1)
+  }
+}, [profile])
+
   const [saving, setSaving] = useState(false)
 
   // Analytics
@@ -227,36 +239,40 @@ export default function AdminClienteDetailPage() {
   }, [profile])
 
   async function savePlan() {
-    setSaving(true)
-    try {
-      const res = await fetch('/api/admin/users/update-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          plan,
-          published_card_limit: limit,
-        }),
-      })
+  setSaving(true)
+  try {
+    const res = await fetch('/api/admin/users/update-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        plan,
+        published_card_limit: limit,
+        plan_started_at: profile?.plan_started_at,
+        plan_expires_at: profile?.plan_expires_at,
+        plan_auto_renew: profile?.plan_auto_renew,
+      }),
+    })
 
-      const json = await res.json()
-      if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao atualizar plano')
+    const json = await res.json()
+    if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao atualizar plano')
 
-      alert('Plano atualizado ✅')
+    alert('Plano atualizado ✅')
 
-      const { data: p2 } = await supabase
-        .from('profiles')
-        .select('id,email,nome,apelido,plan,billing,published_card_limit,created_at')
-        .eq('id', userId)
-        .single()
+    const { data: p2 } = await supabase
+      .from('profiles')
+      .select('id,email,nome,apelido,plan,billing,published_card_limit,plan_started_at,plan_expires_at,plan_auto_renew,created_at')
+      .eq('id', userId)
+      .single()
 
-      if (p2) setProfile(p2 as any)
-    } catch (e: any) {
-      alert('Erro: ' + (e?.message || 'Desconhecido'))
-    } finally {
-      setSaving(false)
-    }
+    if (p2) setProfile(p2 as any)
+  } catch (e: any) {
+    alert('Erro: ' + (e?.message || 'Desconhecido'))
+  } finally {
+    setSaving(false)
   }
+}
+
 
   if (loading) return <div style={{ padding: 24, color: '#fff' }}>A carregar…</div>
 
@@ -311,102 +327,119 @@ export default function AdminClienteDetailPage() {
       {/* TAB: RESUMO */}
       {activeTab === 'resumo' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          <div
-            style={{
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.10)',
-              background: 'rgba(255,255,255,0.04)',
-              padding: 16,
-            }}
-          >
-            <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Dados do Cliente</h2>
-            <div style={{ display: 'grid', gap: 8, fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>
-              <div>
-                <strong style={{ color: '#fff' }}>Nome:</strong> {fullName}
-              </div>
-              <div>
-                <strong style={{ color: '#fff' }}>Email:</strong> {profile.email ?? '—'}
-              </div>
-              <div>
-                <strong style={{ color: '#fff' }}>Plano:</strong> {profile.plan ?? '—'}
-              </div>
-              <div>
-                <strong style={{ color: '#fff' }}>Billing:</strong> {profile.billing ?? '—'}
-              </div>
-              <div>
-                <strong style={{ color: '#fff' }}>Limite publicados:</strong> {profile.published_card_limit ?? '—'}
-              </div>
-              <div>
-                <strong style={{ color: '#fff' }}>Criado:</strong>{' '}
-                {profile.created_at ? new Date(profile.created_at).toLocaleString('pt-PT') : '—'}
-              </div>
-            </div>
-          </div>
+         <div
+  style={{
+    borderRadius: 12,
+    border: '1px solid rgba(255,255,255,0.10)',
+    background: 'rgba(255,255,255,0.04)',
+    padding: 16,
+  }}
+>
+  <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Alterar Plano</h2>
 
-          <div
-            style={{
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.10)',
-              background: 'rgba(255,255,255,0.04)',
-              padding: 16,
-            }}
-          >
-            <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Alterar Plano</h2>
+  <div style={{ display: 'grid', gap: 10 }}>
+    <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
+      Plano
+      <select
+        value={plan}
+        onChange={(e) => setPlan(e.target.value)}
+        style={{
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.18)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+        }}
+      >
+        <option value="free">free</option>
+        <option value="pro">pro</option>
+        <option value="agency">agency</option>
+      </select>
+    </label>
 
-            <div style={{ display: 'grid', gap: 10 }}>
-              <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
-                Plano
-                <select
-                  value={plan}
-                  onChange={(e) => setPlan(e.target.value)}
-                  style={{
-                    padding: '10px 12px',
-                    borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    background: 'rgba(255,255,255,0.06)',
-                    color: '#fff',
-                  }}
-                >
-                  <option value="free">free</option>
-                  <option value="pro">pro</option>
-                  <option value="agency">agency</option>
-                </select>
-              </label>
+    <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
+      Limite de cartões publicados
+      <input
+        type="number"
+        value={limit}
+        min={0}
+        onChange={(e) => setLimit(parseInt(e.target.value || '0', 10))}
+        style={{
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.18)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+        }}
+      />
+    </label>
 
-              <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
-                Limite de cartões publicados
-                <input
-                  type="number"
-                  value={limit}
-                  min={0}
-                  onChange={(e) => setLimit(parseInt(e.target.value || '0', 10))}
-                  style={{
-                    padding: '10px 12px',
-                    borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    background: 'rgba(255,255,255,0.06)',
-                    color: '#fff',
-                  }}
-                />
-              </label>
+    <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
+      Plano começa em
+      <input
+        type="datetime-local"
+        value={profile.plan_started_at ? new Date(profile.plan_started_at).toISOString().slice(0, 16) : ''}
+        onChange={(e) => {
+          const newDate = e.target.value ? new Date(e.target.value).toISOString() : null
+          setProfile({ ...profile, plan_started_at: newDate })
+        }}
+        style={{
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.18)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+        }}
+      />
+    </label>
 
-              <button
-                onClick={savePlan}
-                disabled={saving}
-                style={{
-                  padding: '10px 12px',
-                  borderRadius: 10,
-                  border: 'none',
-                  background: '#7c3aed',
-                  color: 'white',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {saving ? 'A guardar…' : 'Guardar'}
-              </button>
-            </div>
-          </div>
+    <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
+      Plano expira em
+      <input
+        type="datetime-local"
+        value={profile.plan_expires_at ? new Date(profile.plan_expires_at).toISOString().slice(0, 16) : ''}
+        onChange={(e) => {
+          const newDate = e.target.value ? new Date(e.target.value).toISOString() : null
+          setProfile({ ...profile, plan_expires_at: newDate })
+        }}
+        style={{
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.18)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+        }}
+      />
+    </label>
+
+    <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'rgba(255,255,255,0.8)', cursor: 'pointer' }}>
+      <input
+        type="checkbox"
+        checked={profile.plan_auto_renew ?? false}
+        onChange={(e) => setProfile({ ...profile, plan_auto_renew: e.target.checked })}
+        style={{ cursor: 'pointer' }}
+      />
+      <span>Auto-renovar plano</span>
+    </label>
+
+    <button
+      onClick={savePlan}
+      disabled={saving}
+      style={{
+        padding: '10px 12px',
+        borderRadius: 10,
+        border: 'none',
+        background: '#7c3aed',
+        color: 'white',
+        fontWeight: 900,
+        cursor: 'pointer',
+      }}
+    >
+      {saving ? 'A guardar…' : 'Guardar'}
+    </button>
+  </div>
+</div>
+
         </div>
       )}
 

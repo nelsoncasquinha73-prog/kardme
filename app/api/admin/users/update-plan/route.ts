@@ -9,12 +9,14 @@ export async function POST(req: Request) {
     const userId = body?.userId as string | undefined
     const plan = body?.plan as string | undefined
     const published_card_limit = body?.published_card_limit as number | undefined
+    const plan_started_at = body?.plan_started_at as string | undefined
+    const plan_expires_at = body?.plan_expires_at as string | undefined
+    const plan_auto_renew = body?.plan_auto_renew as boolean | undefined
 
     if (!userId || !plan || typeof published_card_limit !== 'number') {
       return NextResponse.json({ success: false, error: 'Parâmetros inválidos' }, { status: 400 })
     }
 
-    // 1) Validar que o user atual é admin
     const { data: sessionData } = await supabaseServer.auth.getSession()
     const currentUserId = sessionData?.session?.user?.id
 
@@ -32,12 +34,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Sem permissões' }, { status: 403 })
     }
 
-    // 2) Atualizar o cliente
     const { error: updateError } = await supabaseServer
       .from('profiles')
       .update({
         plan,
         published_card_limit,
+        plan_started_at,
+        plan_expires_at,
+        plan_auto_renew,
         updated_at: new Date().toISOString(),
       })
       .eq('id', userId)
