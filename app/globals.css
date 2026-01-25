@@ -23,7 +23,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: transparent;
+  background: var(--background);
 }
 
 @theme inline {
@@ -43,7 +43,7 @@ html, body {
 body {
   color: var(--foreground);
   font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
-  background: transparent !important;
+  background: var(--background);
 }
 
 @media (max-width: 520px) {
@@ -52,7 +52,5 @@ body {
     margin-right: auto !important;
   }
 }
-html, body {
-  background: transparent !important;
-}
+
 
