@@ -133,10 +133,20 @@ export default function ThemePageClient({ card, blocks }: Props) {
     }
 
     // 2) Atualizar tema do card
-    const nextTheme = structuredClone(localTheme || {})
-    nextTheme.background = cardBg
+    // 2) Atualizar tema do card
+const nextTheme = structuredClone(localTheme || {})
 
-    console.log('🟡 Atualizando tema:', nextTheme)
+// ✅ CORRETO: Preserva a estrutura antiga, só atualiza o que mudou
+if (nextTheme.background && typeof nextTheme.background === 'object' && 'base' in nextTheme.background) {
+  // Formato antigo com "base" → atualiza só o base
+  nextTheme.background.base = cardBg
+} else {
+  // Formato novo ou vazio → usa cardBg direto
+  nextTheme.background = cardBg
+}
+
+console.log('🟡 Atualizando tema:', nextTheme)
+
 
     const { error: themeError, data: themeData } = await supabase
       .from('cards')
