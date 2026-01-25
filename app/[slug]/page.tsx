@@ -91,7 +91,8 @@ export default async function CardPage({ params }: Props) {
 
   const blocks = blocksData ?? []
   const bgCss = bgToCss(card?.theme?.background)
-
+console.log('🔴 SERVER - card.theme.background=', card?.theme?.background)
+console.log('🔴 SERVER - bgCss=', bgCss)
   return (
   <TrackingWrapper cardId={card.id}>
     <MobileCardFrame background={bgCss}>
