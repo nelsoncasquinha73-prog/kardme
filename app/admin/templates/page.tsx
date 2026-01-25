@@ -279,7 +279,7 @@ const editTemplate = async (templateId: string) => {
     }
 
     // Redirecionar para o editor
-    console.log("🔴 PUSH:", cardId); router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
+    router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
     setOpeningId(null)
   } catch (e: any) {
     setError(e.message || 'Erro ao abrir template para edição')
@@ -404,7 +404,7 @@ const editTemplate = async (templateId: string) => {
         if (blocksErr) throw new Error(blocksErr.message)
       }
 
-      console.log("🔴 PUSH:", cardId); router.push(`/dashboard/cards/${cardId}/theme`)
+      router.push(`/dashboard/cards/${cardId}/theme`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao abrir no editor.')
       setOpeningId(null)
@@ -459,7 +459,7 @@ const createNewTemplate = async () => {
     setNewModalDraft({ name: '', category: 'geral', price: 0 })
     setCreatingNew(false)
 
-    console.log("🔴 PUSH:", cardId); router.push(`/dashboard/cards/${cardId}/theme`)
+    router.push(`/dashboard/cards/${cardId}/theme`)
   } catch (e) {
     setCreatingNew(false)
     setError(e instanceof Error ? e.message : 'Erro ao criar template.')
@@ -620,7 +620,7 @@ const createNewTemplate = async () => {
     setNewModalDraft({ name: '', category: 'geral', price: 0 })
     setCreatingNew(false)
 
-    console.log("🔴 PUSH:", cardId); router.push(`/dashboard/cards/${cardId}/theme`)
+    router.push(`/dashboard/cards/${cardId}/theme`)
   } catch (e) {
     setCreatingNew(false)
     setError(e instanceof Error ? e.message : 'Erro ao criar template.')
