@@ -169,7 +169,10 @@ export function bgToCssString(bg?: CardBg | null): string | null {
 
   // v1
   if ((bg as any).version === 1) {
-    const base = (bg as any).base
+    let base = (bg as any).base
+// ✅ hotfix: alguns themes ficaram com base.base por causa de um save antigo
+if (base && (base as any).base && !(base as any).kind) base = (base as any).base
+
     if (!base) return null
 
     if (base.kind === 'solid') return base.color ?? null
