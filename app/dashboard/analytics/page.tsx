@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import '@/styles/dashboard.css'
 
 type DailyStats = {
@@ -22,9 +23,17 @@ type CardSummary = {
   total_leads: number
 }
 
+type ChartData = {
+  date: string
+  views: number
+  clicks: number
+  leads: number
+}
+
 export default function AnalyticsPage() {
   const [stats, setStats] = useState<DailyStats[]>([])
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([])
+  const [chartData, setChartData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [days, setDays] = useState(7)
@@ -73,6 +82,30 @@ export default function AnalyticsPage() {
       }))
 
       setStats(formattedDaily)
+
+      // Agregar dados por dia para o gráfico
+      const chartMap: { [key: string]: ChartData } = {}
+      for (const row of formattedDaily) {
+        if (!chartMap[row.day]) {
+          chartMap[row.day] = {
+            date: new Date(row.day).toLocaleDateString('pt-PT', { month: 'short', day: 'numeric' }),
+            views: 0,
+            clicks: 0,
+            leads: 0,
+          }
+        }
+        chartMap[row.day].views += row.views
+        chartMap[row.day].clicks += row.clicks
+        chartMap[row.day].leads += row.leads
+      }
+
+      const sortedChartData = Object.values(chartMap).sort((a, b) => {
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
+        return dateA.getTime() - dateB.getTime()
+      })
+
+      setChartData(sortedChartData)
 
       // Resumo por cartão (últimos N dias)
       const { data: summaryData, error: summaryError } = await supabase
@@ -191,13 +224,69 @@ export default function AnalyticsPage() {
         </div>
 
         {loading ? (
-          <p style={{ padding: 24 }}>A carregar analytics…</p>
+          <p style={{ padding: 24, color: 'rgba(255,255,255,0.7)' }}>A carregar analytics…</p>
         ) : (
           <>
-            {/* Top Cards */}
+            {/* Gráfico de Linha — Histórico Diário */}
+            {chartData.length > 0 && (
+              <div style={{ marginBottom: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.10)', padding: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginTop: 0, marginBottom: 20 }}>
+                  Histórico Diário
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.10)" />
+                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" />
+                    <YAxis stroke="rgba(255,255,255,0.6)" />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'rgba(0,0,0,0.8)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: 8,
+                        color: '#fff',
+                      }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
+                    <Line type="monotone" dataKey="clicks" stroke="#a855f7" strokeWidth={2} dot={{ fill: '#a855f7', r: 4 }} />
+                    <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e', r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Gráfico de Barras — Top Cartões */}
+            {cardSummary.length > 0 && (
+              <div style={{ marginBottom: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.10)', padding: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginTop: 0, marginBottom: 20 }}>
+                  Top Cartões (Views)
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={cardSummary.slice(0, 10)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.10)" />
+                    <XAxis dataKey="card_name" stroke="rgba(255,255,255,0.6)" angle={-45} textAnchor="end" height={100} />
+                    <YAxis stroke="rgba(255,255,255,0.6)" />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'rgba(0,0,0,0.8)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: 8,
+                        color: '#fff',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="total_views" fill="#3b82f6" />
+                    <Bar dataKey="total_clicks" fill="#a855f7" />
+                    <Bar dataKey="total_leads" fill="#22c55e" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Cards Summary */}
             <div style={{ marginBottom: 40 }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginBottom: 16 }}>
-                Top Cartões
+                Resumo por Cartão
               </h2>
               {cardSummary.length === 0 ? (
                 <p style={{ color: 'rgba(255,255,255,0.55)' }}>Sem dados.</p>
@@ -212,7 +301,7 @@ export default function AnalyticsPage() {
                   {cardSummary.map((card) => (
                     <Link
                       key={card.card_id}
-                      href={`/dashboard/cards/${card.card_id}/analytics`}
+                      href={`/dashboard/cards/\${card.card_id}/analytics`}
                       style={{ textDecoration: 'none' }}
                     >
                       <div
@@ -265,7 +354,7 @@ export default function AnalyticsPage() {
                             </div>
                           </div>
 
-                          <div>
+                                                    <div>
                             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
                               Leads
                             </div>
@@ -284,7 +373,7 @@ export default function AnalyticsPage() {
             {/* Daily Stats Table */}
             <div>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginBottom: 16 }}>
-                Histórico Diário
+                Histórico Detalhado
               </h2>
               {stats.length === 0 ? (
                 <p style={{ color: 'rgba(255,255,255,0.55)' }}>Sem dados.</p>
