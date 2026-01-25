@@ -41,11 +41,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
 
   const [cardBg, setCardBg] = useState<CardBg>(() => {
-  const bg = card?.theme?.background || card?.theme
-  if (bg && typeof bg === 'object' && 'mode' in bg) return bg
-  return { mode: 'solid', color: '#ffffff', opacity: 1 }
+  return card?.theme?.background ?? { mode: 'solid', color: '#ffffff', opacity: 1 }
 })
-
 
   const enabledBlocksSorted = useMemo(
     () => localBlocks.filter((b) => b.enabled).sort((a, b) => a.order - b.order),
