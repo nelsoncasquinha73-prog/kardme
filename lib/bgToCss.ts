@@ -164,7 +164,10 @@ export function bgToStyle(bg: CardBg | null | undefined): {
  * - Para v1 (layers), devolve a "base" (solid/gradient) como fallback consistente.
  * - Para legacy, devolve o solid/linear-gradient normal.
  */
-export function bgToCssString(bg?: CardBg | null): string | null {
+
+    export function bgToCssString(bg?: CardBg | null): string | null {
+  console.log('🔴 bgToCssString called with:', JSON.stringify(bg, null, 2))
+
   if (!bg) return null
 
   // v1
