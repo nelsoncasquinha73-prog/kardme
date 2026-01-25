@@ -91,24 +91,24 @@ export default async function CardPage({ params }: Props) {
 
   const blocks = blocksData ?? []
   const bgCss = bgToCss(card?.theme)
-console.log('🔴 SERVER - card.theme.background=', card?.theme?.background)
-console.log('🔴 SERVER - bgCss=', bgCss)
+  console.log('🔴 SERVER - card.theme=', card?.theme)
+  console.log('🔴 SERVER - bgCss=', bgCss)
+  
   return (
-  <TrackingWrapper cardId={card.id}>
-    <MobileCardFrame background={bgCss}>
-      <LanguageProvider>
-        <ThemeProvider theme={card.theme}>
-          <CardPreview
-            card={card}
-            blocks={blocks}
-            showTranslations={false}
-            fullBleed={false}
-            cardBg={card.theme}
-          />
-        </ThemeProvider>
-      </LanguageProvider>
-    </MobileCardFrame>
-  </TrackingWrapper>
-)
-
+    <TrackingWrapper cardId={card.id}>
+      <MobileCardFrame background={bgCss} data-bgcss={bgCss}>
+        <LanguageProvider>
+          <ThemeProvider theme={card.theme}>
+            <CardPreview
+              card={card}
+              blocks={blocks}
+              showTranslations={false}
+              fullBleed={false}
+              cardBg={card.theme}
+            />
+          </ThemeProvider>
+        </LanguageProvider>
+      </MobileCardFrame>
+    </TrackingWrapper>
+  )
 }
