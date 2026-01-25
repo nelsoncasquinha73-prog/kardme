@@ -150,6 +150,9 @@ if (nextTheme.background && typeof nextTheme.background === 'object') {
 
 console.log('🟡 Atualizando tema:', nextTheme)
 
+console.log('🔴 ANTES DO UPDATE - nextTheme=', JSON.stringify(nextTheme, null, 2))
+console.log('🔴 ANTES DO UPDATE - card.id=', card.id)
+console.log('🔴 ANTES DO UPDATE - typeof nextTheme.background=', typeof nextTheme.background)
 
     const { error: themeError, data: themeData } = await supabase
       .from('cards')
