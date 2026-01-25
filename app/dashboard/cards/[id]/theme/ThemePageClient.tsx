@@ -97,107 +97,107 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges() {
-    console.log('🟢 saveChanges STARTED')
+  console.log('🟢 saveChanges STARTED')
   setSaveStatus('saving')
-    setSaveStatus('saving')
-    console.log('🔵 saveChanges iniciado. card.id=', card.id)
-    console.log('🔵 localBlocks=', localBlocks)
+  console.log('🔵 saveChanges iniciado. card.id=', card.id)
+  console.log('🔵 localBlocks=', localBlocks)
 
-    try {
-      for (const block of localBlocks) {
-        console.log(`🟡 Atualizando bloco type=${block.type}, settings=`, block.settings)
+  try {
+    // 1) Atualizar cada bloco individualmente (por ID, não por tipo!)
+    for (const block of localBlocks) {
+      console.log(`🟡 Atualizando bloco id=${block.id}, type=${block.type}`)
 
-        const { data, error, count } = await supabase
-  .from('card_blocks')
-  .update({
-    settings: block.settings,
-    style: block.style,
-    enabled: block.enabled,
-    order: block.order,
-  })
-  .eq('card_id', card.id)
-  .eq('type', block.type)
-  .select('id, card_id, type, settings')
+      const { error, data } = await supabase
+        .from('card_blocks')
+        .update({
+          settings: block.settings,
+          style: block.style,
+          enabled: block.enabled,
+          order: block.order,
+        })
+        .eq('id', block.id)
+        .select('id, card_id, type')
 
-console.log('🔴 UPDATE RESULT', block.type, { error, data, count })
+      console.log(`🔴 UPDATE RESULT id=${block.id}`, { error, data })
 
-
-        console.log(`🟡 Resultado para ${block.type}: error=`, error, 'count=', count, 'data=', data)
-
-        if (error) {
-          console.error('❌ Erro ao atualizar bloco:', block.type, error)
-          setSaveStatus('error')
-          alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
-          return
-        }
-
-        if (!data || data.length === 0) {
-          console.warn(`⚠️ Nenhuma linha foi atualizada para tipo ${block.type}`)
-        }
-      }
-
-      const nextTheme = structuredClone(localTheme || {})
-      nextTheme.background = cardBg
-
-      console.log('🟡 Atualizando tema:', nextTheme)
-
-      const { error: themeError, count: themeCount } = await supabase
-        .from('cards')
-        .update({ theme: nextTheme })
-        .eq('id', card.id)
-
-      console.log('🟡 Resultado tema: error=', themeError, 'count=', themeCount)
-
-      if (themeError) {
-        console.error('❌ Erro ao guardar tema:', themeError)
+      if (error) {
+        console.error('❌ Erro ao atualizar bloco:', block.id, error)
         setSaveStatus('error')
-        alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+        alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
         return
       }
 
-      const templateId = card?.template_id
-      if (templateId) {
-        console.log('🔵 Atualizando template:', templateId)
-
-        const preview_Json = localBlocks.map((b) => ({
-          type: b.type,
-          order: b.order ?? 0,
-          title: b.title ?? null,
-          enabled: b.enabled ?? true,
-          settings: b.settings ?? {},
-          style: b.style ?? {},
-        }))
-
-        const { error: templateError, count: templateCount } = await supabase
-          .from('templates')
-          .update({
-            preview_json: preview_Json,
-            theme_json: nextTheme,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', templateId)
-
-        console.log('🟡 Resultado template: error=', templateError, 'count=', templateCount)
-
-        if (templateError) {
-          console.error('❌ Erro ao atualizar template:', templateError)
-          alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
-        } else {
-          console.log('✅ Template atualizado com sucesso!')
-        }
+      if (!data || data.length === 0) {
+        console.warn(`⚠️ Nenhuma linha foi atualizada para bloco ${block.id}`)
       }
-
-      setLocalTheme(nextTheme)
-      setSaveStatus('saved')
-      window.setTimeout(() => setSaveStatus('idle'), 1200)
-      console.log('✅ saveChanges concluído com sucesso!')
-      alert('Alterações guardadas com sucesso ✅')
-    } catch (err) {
-      console.error('❌ Erro geral em saveChanges:', err)
-      setSaveStatus('error')
-      alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
     }
+
+    // 2) Atualizar tema do card
+    const nextTheme = structuredClone(localTheme || {})
+    nextTheme.background = cardBg
+
+    console.log('🟡 Atualizando tema:', nextTheme)
+
+    const { error: themeError, data: themeData } = await supabase
+      .from('cards')
+      .update({ theme: nextTheme })
+      .eq('id', card.id)
+      .select('id, theme')
+
+    console.log('🟡 Resultado tema:', { error: themeError, data: themeData })
+
+    if (themeError) {
+      console.error('❌ Erro ao guardar tema:', themeError)
+      setSaveStatus('error')
+      alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+      return
+    }
+
+    // 3) Atualizar template (se existir)
+    const templateId = card?.template_id
+    if (templateId) {
+      console.log('🔵 Atualizando template:', templateId)
+
+      const preview_Json = localBlocks.map((b) => ({
+        type: b.type,
+        order: b.order ?? 0,
+        title: b.title ?? null,
+        enabled: b.enabled ?? true,
+        settings: b.settings ?? {},
+        style: b.style ?? {},
+      }))
+
+      const { error: templateError } = await supabase
+        .from('templates')
+        .update({
+          preview_json: preview_Json,
+          theme_json: nextTheme,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', templateId)
+        .select('id')
+
+      console.log('🟡 Resultado template: error=', templateError)
+
+      if (templateError) {
+        console.error('❌ Erro ao atualizar template:', templateError)
+        alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
+      } else {
+        console.log('✅ Template atualizado com sucesso!')
+      }
+    }
+
+    setLocalTheme(nextTheme)
+    setSaveStatus('saved')
+    window.setTimeout(() => setSaveStatus('idle'), 1200)
+    console.log('✅ saveChanges concluído com sucesso!')
+    alert('Alterações guardadas com sucesso ✅')
+  } catch (err) {
+    console.error('❌ Erro geral em saveChanges:', err)
+    setSaveStatus('error')
+    alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
   }
+}
 
   const [slugEdit, setSlugEdit] = useState(card.slug)
   const [slugSaving, setSlugSaving] = useState(false)
