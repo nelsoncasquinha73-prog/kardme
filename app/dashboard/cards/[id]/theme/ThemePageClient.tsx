@@ -137,13 +137,16 @@ export default function ThemePageClient({ card, blocks }: Props) {
 const nextTheme = structuredClone(localTheme || {})
 
 // ✅ CORRETO: Preserva a estrutura antiga, só atualiza o que mudou
-if (nextTheme.background && typeof nextTheme.background === 'object' && 'base' in nextTheme.background) {
-  // Formato antigo com "base" → atualiza só o base
-  nextTheme.background.base = cardBg
+// ✅ CORRETO: Substitui o background inteiro, preservando opacity/version/overlays
+if (nextTheme.background && typeof nextTheme.background === 'object') {
+  nextTheme.background = {
+    ...nextTheme.background,  // Preserva opacity, version, overlays
+    base: cardBg,  // Atualiza só o base
+  }
 } else {
-  // Formato novo ou vazio → usa cardBg direto
   nextTheme.background = cardBg
 }
+
 
 console.log('🟡 Atualizando tema:', nextTheme)
 
