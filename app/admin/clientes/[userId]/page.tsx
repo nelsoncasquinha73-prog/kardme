@@ -22,7 +22,6 @@ type CardRow = {
   slug: string | null
   published: boolean | null
   created_at: string | null
-  updated_at: string | null
 }
 
 export default function AdminClienteDetailPage() {
@@ -59,7 +58,7 @@ export default function AdminClienteDetailPage() {
 
       const { data: c, error: cErr } = await supabase
         .from('cards')
-        .select('id,title,slug,published,created_at,updated_at')
+        .select('id,title,slug,published,created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
@@ -99,7 +98,6 @@ export default function AdminClienteDetailPage() {
 
       alert('Plano atualizado ✅')
 
-      // refresh profile
       const { data: p2 } = await supabase
         .from('profiles')
         .select('id,email,nome,apelido,plan,billing,published_card_limit,created_at')
@@ -114,13 +112,15 @@ export default function AdminClienteDetailPage() {
     }
   }
 
-  if (loading) return <div style={{ padding: 24 }}>A carregar…</div>
+  if (loading) return <div style={{ padding: 24, color: '#fff' }}>A carregar…</div>
 
   if (!profile) {
     return (
-      <div style={{ padding: 24 }}>
+      <div style={{ padding: 24, color: '#fff' }}>
         <p>Cliente não encontrado.</p>
-        <Link href="/admin/clientes">← Voltar</Link>
+        <Link href="/admin/clientes" style={{ color: '#93c5fd' }}>
+          ← Voltar
+        </Link>
       </div>
     )
   }
@@ -129,49 +129,70 @@ export default function AdminClienteDetailPage() {
     <div style={{ display: 'grid', gap: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22 }}>{fullName}</h1>
-          <p style={{ margin: '6px 0 0', opacity: 0.7 }}>{profile.email ?? '—'}</p>
+          <h1 style={{ margin: 0, fontSize: 22, color: '#fff' }}>{fullName}</h1>
+          <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.7)' }}>{profile.email ?? '—'}</p>
         </div>
-        <Link href="/admin/clientes" style={{ textDecoration: 'none', fontWeight: 700 }}>
+        <Link href="/admin/clientes" style={{ textDecoration: 'none', fontWeight: 700, color: '#93c5fd' }}>
           ← Voltar
         </Link>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid rgba(0,0,0,0.08)', padding: 16 }}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>Resumo</h2>
-          <div style={{ display: 'grid', gap: 8, fontSize: 14 }}>
+        <div
+          style={{
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.10)',
+            background: 'rgba(255,255,255,0.04)',
+            padding: 16,
+          }}
+        >
+          <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Resumo</h2>
+          <div style={{ display: 'grid', gap: 8, fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>
             <div>
-              <strong>Nome:</strong> {fullName}
+              <strong style={{ color: '#fff' }}>Nome:</strong> {fullName}
             </div>
             <div>
-              <strong>Email:</strong> {profile.email ?? '—'}
+              <strong style={{ color: '#fff' }}>Email:</strong> {profile.email ?? '—'}
             </div>
             <div>
-              <strong>Plano:</strong> {profile.plan ?? '—'}
+              <strong style={{ color: '#fff' }}>Plano:</strong> {profile.plan ?? '—'}
             </div>
             <div>
-              <strong>Billing:</strong> {profile.billing ?? '—'}
+              <strong style={{ color: '#fff' }}>Billing:</strong> {profile.billing ?? '—'}
             </div>
             <div>
-              <strong>Limite publicados:</strong> {profile.published_card_limit ?? '—'}
+              <strong style={{ color: '#fff' }}>Limite publicados:</strong> {profile.published_card_limit ?? '—'}
             </div>
             <div>
-              <strong>Criado:</strong> {profile.created_at ? new Date(profile.created_at).toLocaleString('pt-PT') : '—'}
+              <strong style={{ color: '#fff' }}>Criado:</strong>{' '}
+              {profile.created_at ? new Date(profile.created_at).toLocaleString('pt-PT') : '—'}
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid rgba(0,0,0,0.08)', padding: 16 }}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>Alterar plano</h2>
+        <div
+          style={{
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.10)',
+            background: 'rgba(255,255,255,0.04)',
+            padding: 16,
+          }}
+        >
+          <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Alterar plano</h2>
 
           <div style={{ display: 'grid', gap: 10 }}>
-            <label style={{ display: 'grid', gap: 6, fontSize: 13 }}>
+            <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
               Plano
               <select
                 value={plan}
                 onChange={(e) => setPlan(e.target.value)}
-                style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)' }}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  background: 'rgba(255,255,255,0.06)',
+                  color: '#fff',
+                }}
               >
                 <option value="free">free</option>
                 <option value="pro">pro</option>
@@ -179,14 +200,20 @@ export default function AdminClienteDetailPage() {
               </select>
             </label>
 
-            <label style={{ display: 'grid', gap: 6, fontSize: 13 }}>
+            <label style={{ display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>
               Limite de cartões publicados
               <input
                 type="number"
                 value={limit}
                 min={0}
                 onChange={(e) => setLimit(parseInt(e.target.value || '0', 10))}
-                style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)' }}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  background: 'rgba(255,255,255,0.06)',
+                  color: '#fff',
+                }}
               />
             </label>
 
@@ -197,9 +224,9 @@ export default function AdminClienteDetailPage() {
                 padding: '10px 12px',
                 borderRadius: 10,
                 border: 'none',
-                background: '#111827',
+                background: '#7c3aed',
                 color: 'white',
-                fontWeight: 800,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
@@ -209,29 +236,44 @@ export default function AdminClienteDetailPage() {
         </div>
       </div>
 
-      <div style={{ background: 'white', borderRadius: 12, border: '1px solid rgba(0,0,0,0.08)', padding: 16 }}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Cartões</h2>
+      <div
+        style={{
+          borderRadius: 12,
+          border: '1px solid rgba(255,255,255,0.10)',
+          background: 'rgba(255,255,255,0.04)',
+          padding: 16,
+        }}
+      >
+        <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Cartões</h2>
 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }}>
             <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                <th style={{ padding: 12 }}>Título</th>
-                <th style={{ padding: 12 }}>Slug</th>
-                <th style={{ padding: 12 }}>Publicado</th>
-                <th style={{ padding: 12 }}>Criado</th>
+              <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
+                <th style={{ padding: 12, color: '#fff' }}>Título</th>
+                <th style={{ padding: 12, color: '#fff' }}>Slug</th>
+                <th style={{ padding: 12, color: '#fff' }}>Publicado</th>
+                <th style={{ padding: 12, color: '#fff' }}>Criado</th>
                 <th style={{ padding: 12 }} />
               </tr>
             </thead>
             <tbody>
-              {cards.map((c) => {
+              {cards.map((c, idx) => {
                 const publicUrl = c.slug ? `/${c.slug}` : null
                 return (
-                  <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <td style={{ padding: 12, fontWeight: 600 }}>{c.title ?? '—'}</td>
-                    <td style={{ padding: 12 }}>{c.slug ?? '—'}</td>
-                    <td style={{ padding: 12 }}>{c.published ? 'Sim' : 'Não'}</td>
-                    <td style={{ padding: 12 }}>{c.created_at ? new Date(c.created_at).toLocaleString('pt-PT') : '—'}</td>
+                  <tr
+                    key={c.id}
+                    style={{
+                      borderBottom: '1px solid rgba(255,255,255,0.08)',
+                      background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                    }}
+                  >
+                    <td style={{ padding: 12, fontWeight: 700, color: '#fff' }}>{c.title ?? '—'}</td>
+                    <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.slug ?? '—'}</td>
+                    <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.published ? 'Sim' : 'Não'}</td>
+                    <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>
+                      {c.created_at ? new Date(c.created_at).toLocaleString('pt-PT') : '—'}
+                    </td>
                     <td style={{ padding: 12, textAlign: 'right' }}>
                       {publicUrl ? (
                         <a
@@ -245,14 +287,14 @@ export default function AdminClienteDetailPage() {
                             background: '#2563eb',
                             color: 'white',
                             textDecoration: 'none',
-                            fontWeight: 800,
+                            fontWeight: 900,
                             fontSize: 13,
                           }}
                         >
                           Ver público
                         </a>
                       ) : (
-                        '—'
+                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>—</span>
                       )}
                     </td>
                   </tr>
@@ -261,7 +303,7 @@ export default function AdminClienteDetailPage() {
 
               {cards.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ padding: 16, opacity: 0.7 }}>
+                  <td colSpan={5} style={{ padding: 16, color: 'rgba(255,255,255,0.6)' }}>
                     Sem cartões.
                   </td>
                 </tr>
