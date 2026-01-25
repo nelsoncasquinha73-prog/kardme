@@ -90,7 +90,7 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const bgCss = bgToCss(card?.theme?.background)
+  const bgCss = bgToCss(card?.theme)
 console.log('🔴 SERVER - card.theme.background=', card?.theme?.background)
 console.log('🔴 SERVER - bgCss=', bgCss)
   return (
@@ -103,7 +103,7 @@ console.log('🔴 SERVER - bgCss=', bgCss)
             blocks={blocks}
             showTranslations={false}
             fullBleed={false}
-            cardBg={card.theme?.background}
+            cardBg={card.theme}
           />
         </ThemeProvider>
       </LanguageProvider>
