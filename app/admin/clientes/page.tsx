@@ -48,7 +48,6 @@ export default function AdminClientesPage() {
       const list = (profiles ?? []) as ClientRow[]
       setRows(list)
 
-      // buscar contagens reais em cards (total + published) para todos os users listados
       const userIds = list.map((p) => p.id).filter(Boolean)
       if (userIds.length > 0) {
         const { data: cards, error: cardsError } = await supabase
@@ -86,7 +85,7 @@ export default function AdminClientesPage() {
     })
   }, [rows, q])
 
-  if (loading) return <div style={{ padding: 24 }}>A carregar clientes…</div>
+  if (loading) return <div style={{ padding: 24, color: '#fff' }}>A carregar clientes…</div>
 
   return (
     <div style={{ display: 'grid', gap: 16 }}>
@@ -100,8 +99,8 @@ export default function AdminClientesPage() {
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: 22 }}>Clientes</h1>
-          <p style={{ margin: '6px 0 0', opacity: 0.7 }}>Lista de contas + acesso ao detalhe</p>
+          <h1 style={{ margin: 0, fontSize: 22, color: '#fff' }}>Clientes</h1>
+          <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.7)' }}>Lista de contas + acesso ao detalhe</p>
         </div>
 
         <input
@@ -113,45 +112,54 @@ export default function AdminClientesPage() {
             maxWidth: '100%',
             padding: '10px 12px',
             borderRadius: 10,
-            border: '1px solid rgba(0,0,0,0.12)',
-            background: 'white',
+            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(255,255,255,0.08)',
+            color: '#fff',
           }}
         />
       </div>
 
-      <div style={{ overflowX: 'auto', background: 'white', borderRadius: 12, border: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ overflowX: 'auto', borderRadius: 12 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 980 }}>
           <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-              <th style={{ padding: 12 }}>Cliente</th>
-              <th style={{ padding: 12 }}>Email</th>
-              <th style={{ padding: 12 }}>Plano</th>
-              <th style={{ padding: 12 }}>Billing</th>
-              <th style={{ padding: 12 }}>Limite</th>
-              <th style={{ padding: 12 }}>Cartões</th>
-              <th style={{ padding: 12 }}>Publicados</th>
-              <th style={{ padding: 12 }}>Criado</th>
+            <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Cliente</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Email</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Plano</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Billing</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Limite</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Cartões</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Publicados</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Criado</th>
               <th style={{ padding: 12 }} />
             </tr>
           </thead>
 
           <tbody>
-            {filtered.map((r) => {
+            {filtered.map((r, idx) => {
               const name = `${r.nome ?? ''} ${r.apelido ?? ''}`.trim() || '—'
               const c = counts[r.id]
               const total = c?.total ?? r.cards_count ?? 0
               const published = c?.published ?? 0
 
               return (
-                <tr key={r.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                  <td style={{ padding: 12, fontWeight: 600 }}>{name}</td>
-                  <td style={{ padding: 12 }}>{r.email ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{r.plan ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{r.billing ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{r.published_card_limit ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{total}</td>
-                  <td style={{ padding: 12 }}>{published}</td>
-                  <td style={{ padding: 12 }}>{r.created_at ? new Date(r.created_at).toLocaleString('pt-PT') : '—'}</td>
+                <tr
+                  key={r.id}
+                  style={{
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                  }}
+                >
+                  <td style={{ padding: 12, fontWeight: 600, color: '#fff' }}>{name}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{r.email ?? '—'}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{r.plan ?? '—'}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{r.billing ?? '—'}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{r.published_card_limit ?? '—'}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{total}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>{published}</td>
+                  <td style={{ padding: 12, color: 'rgba(255,255,255,0.8)' }}>
+                    {r.created_at ? new Date(r.created_at).toLocaleString('pt-PT') : '—'}
+                  </td>
                   <td style={{ padding: 12, textAlign: 'right' }}>
                     <Link
                       href={`/admin/clientes/${r.id}`}
@@ -159,7 +167,7 @@ export default function AdminClientesPage() {
                         display: 'inline-block',
                         padding: '8px 10px',
                         borderRadius: 10,
-                        background: '#111827',
+                        background: '#7c3aed',
                         color: 'white',
                         textDecoration: 'none',
                         fontWeight: 700,
@@ -175,7 +183,7 @@ export default function AdminClientesPage() {
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} style={{ padding: 16, opacity: 0.7 }}>
+                <td colSpan={9} style={{ padding: 16, color: 'rgba(255,255,255,0.6)' }}>
                   Sem resultados.
                 </td>
               </tr>
