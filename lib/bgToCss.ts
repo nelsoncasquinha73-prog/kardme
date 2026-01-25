@@ -166,7 +166,6 @@ export function bgToStyle(bg: CardBg | null | undefined): {
  */
 
     export function bgToCssString(bg?: CardBg | null): string | null {
-  console.log('🔴 bgToCssString called with:', JSON.stringify(bg, null, 2))
 
   if (!bg) return null
 

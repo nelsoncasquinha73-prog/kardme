@@ -94,15 +94,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges() {
-    console.log('🟢 saveChanges STARTED')
     setSaveStatus('saving')
-    console.log('🔵 saveChanges iniciado. card.id=', card.id)
-    console.log('🔵 localBlocks=', localBlocks)
 
     try {
       // 1) Atualizar cada bloco individualmente (por ID, não por tipo!)
       for (const block of localBlocks) {
-        console.log(`🟡 Atualizando bloco id=${block.id}, type=${block.type}`)
 
         const { error, data } = await supabase
           .from('card_blocks')
@@ -115,7 +111,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
           .eq('id', block.id)
           .select('id, card_id, type')
 
-        console.log(`🔴 UPDATE RESULT id=${block.id}`, { error, data })
 
         if (error) {
           console.error('❌ Erro ao atualizar bloco:', block.id, error)
@@ -147,9 +142,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
         }
       }
 
-      console.log('🟡 Atualizando tema:', nextTheme)
-      console.log('🔴 ANTES DO UPDATE - nextTheme=', JSON.stringify(nextTheme, null, 2))
-      console.log('🔴 ANTES DO UPDATE - card.id=', card.id)
 
       const { error: themeError, data: themeData } = await supabase
         .from('cards')
@@ -157,7 +149,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
         .eq('id', card.id)
         .select('id, theme')
 
-      console.log('🟡 Resultado tema:', { error: themeError, data: themeData })
 
       if (themeError) {
         console.error('❌ Erro ao guardar tema:', themeError)
@@ -169,7 +160,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
       // 3) Atualizar template (se existir)
       const templateId = card?.template_id
       if (templateId) {
-        console.log('🔵 Atualizando template:', templateId)
 
         const preview_Json = localBlocks.map((b) => ({
           type: b.type,
@@ -190,20 +180,17 @@ export default function ThemePageClient({ card, blocks }: Props) {
           .eq('id', templateId)
           .select('id')
 
-        console.log('🟡 Resultado template: error=', templateError)
 
         if (templateError) {
           console.error('❌ Erro ao atualizar template:', templateError)
           alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
         } else {
-          console.log('✅ Template atualizado com sucesso!')
         }
       }
 
       setLocalTheme(nextTheme)
       setSaveStatus('saved')
       window.setTimeout(() => setSaveStatus('idle'), 1200)
-      console.log('✅ saveChanges concluído com sucesso!')
       alert('Alterações guardadas com sucesso ✅')
     } catch (err) {
       console.error('❌ Erro geral em saveChanges:', err)
