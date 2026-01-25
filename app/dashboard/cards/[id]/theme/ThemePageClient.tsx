@@ -158,7 +158,7 @@ console.log('🔴 UPDATE RESULT', block.type, { error, data, count })
       if (templateId) {
         console.log('🔵 Atualizando template:', templateId)
 
-        const previewJson = localBlocks.map((b) => ({
+        const preview_Json = localBlocks.map((b) => ({
           type: b.type,
           order: b.order ?? 0,
           title: b.title ?? null,
@@ -170,7 +170,7 @@ console.log('🔴 UPDATE RESULT', block.type, { error, data, count })
         const { error: templateError, count: templateCount } = await supabase
           .from('templates')
           .update({
-            preview_json: previewJson,
+            preview_json: preview_Json,
             theme_json: nextTheme,
             updated_at: new Date().toISOString(),
           })

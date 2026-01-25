@@ -125,7 +125,7 @@ export default function ThemePageClientRight({
 
       if (blocksErr) throw new Error(blocksErr.message)
 
-      const previewJson = (blocks || []).map((b) => ({
+      const preview_Json = (blocks || []).map((b) => ({
         type: b.type,
         order: b.order ?? 0,
         title: b.title ?? null,
@@ -134,14 +134,14 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
-      console.log('📦 preview_json blocks=', previewJson.length)
+      console.log('📦 preview_json blocks=', preview_Json.length)
 
       if (templateId) {
         console.log('🔵 UPDATE template:', templateId)
         const { data: updatedRows, error: updateErr } = await supabase
           .from('templates')
           .update({
-            preview_json: previewJson,
+            preview_json: preview_Json,
             theme_json: currentTheme,
             updated_at: new Date().toISOString(),
           })
@@ -162,7 +162,7 @@ export default function ThemePageClientRight({
         description: data.description,
         category: data.category,
         price: data.price,
-        preview_json: previewJson,
+        preview_json: preview_Json,
         theme_json: currentTheme,
         is_active: true,
       })
