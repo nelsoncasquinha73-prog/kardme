@@ -150,6 +150,7 @@ export default function CatalogPage() {
           name: t.name,
           slug: `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           template_id: t.id,
+          theme: t.theme_json, 
         })
         .select('id')
         .single()
@@ -160,7 +161,7 @@ export default function CatalogPage() {
         return
       }
 
-      const cardId = newCard.id
+      const cardId = newCard.id 
 
       const blocks = Array.isArray(t.preview_json) ? t.preview_json : []
       if (blocks.length) {
@@ -176,13 +177,13 @@ export default function CatalogPage() {
 
         const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
         if (blocksErr) {
-          setError(`Erro ao criar blocos: \${blocksErr.message}`)
+          setError(`Erro ao criar blocos: ${blocksErr.message}`)
           setCreatingTemplateId(null)
           return
         }
       }
 
-      router.push(`/dashboard/cards/\${cardId}/theme`)
+      router.push(`/dashboard/cards/${cardId}/theme`) 
     } catch {
       setError('Erro ao criar cartão.')
       setCreatingTemplateId(null)
