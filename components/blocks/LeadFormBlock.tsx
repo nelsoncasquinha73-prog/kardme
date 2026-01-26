@@ -116,19 +116,22 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
 
   const containerEnabled = st.container?.enabled !== false
 
-  const containerStyle: React.CSSProperties = {
-    marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
-    background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
-    borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
-    padding: st.container?.padding != null ? `${st.container.padding}px` : '12px',
-    border:
-      (st.container?.borderWidth ?? 0) > 0
-        ? `${st.container?.borderWidth}px solid ${st.container?.borderColor ?? 'rgba(0,0,0,0.12)'}`
-        : '1px solid rgba(0,0,0,0.08)',
-    boxShadow: st.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
-    position: 'relative',
-    width: '100%',
-  }
+  const containerPadding = st.container?.padding != null ? `${st.container.padding}px` : '12px'
+
+const containerStyle: React.CSSProperties = {
+  marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
+  background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
+  borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
+  padding: containerPadding,
+  border:
+    (st.container?.borderWidth ?? 0) > 0
+      ? `${st.container?.borderWidth}px solid ${st.container?.borderColor ?? 'rgba(0,0,0,0.12)'}`
+      : '1px solid rgba(0,0,0,0.08)',
+  boxShadow: st.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+  position: 'relative',
+  width: '100%',
+  boxSizing: 'border-box',
+}
 
   const headingStyle: React.CSSProperties = {
     fontFamily: st.heading?.fontFamily || undefined,
@@ -208,7 +211,8 @@ setFormData({ name: '', email: '', phone: '', message: '' })
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
+
         {fields.name && (
           <div>
             <div style={labelStyle}>{labels.name}</div>
