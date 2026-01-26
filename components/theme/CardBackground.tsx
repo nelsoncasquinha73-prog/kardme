@@ -2,9 +2,9 @@
 
 import React from 'react'
 import { bgToStyle } from '@/lib/bgToCss'
-import { migrateCardBg, type CardBg } from '@/lib/cardBg'
+import { migrateCardBg, type CardBgV1 } from '@/lib/cardBg'
 type Props = {
-  bg?: CardBg | null
+  bg?: CardBgV1 | null
   borderRadius?: number | string
   className?: string
   children?: React.ReactNode

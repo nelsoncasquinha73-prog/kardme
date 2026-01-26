@@ -96,9 +96,9 @@ export default function CardPreview({
 
   const safe = fullBleed ? 0 : Number(card?.theme?.layout?.safePadding ?? 10)
 
-  const bgRaw = (cardBg ?? card?.theme?.background) as CardBg | null | undefined
+  const bgRaw = (cardBg ?? card?.theme?.background)
 const bgV1 = migrateCardBg(bgRaw)
-  const bg = migrateCardBg((cardBg ?? card?.theme?.background) as CardBg | null | undefined)
+  const bg = migrateCardBg((cardBg ?? card?.theme?.background))
 
   const handleMainClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement

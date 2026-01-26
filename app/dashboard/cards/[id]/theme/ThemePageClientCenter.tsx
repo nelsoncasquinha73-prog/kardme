@@ -3,7 +3,7 @@
 import CardPreview from '@/components/theme/CardPreview'
 import CardContainer from '@/components/ui/CardContainer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
-import type { CardBg } from '@/lib/cardBg'
+import type { CardBgV1 } from '@/lib/cardBg'
 
 type CardBlock = {
   id: string
@@ -18,7 +18,7 @@ type CardBlock = {
 type Props = {
   card: any
   theme: any
-  cardBg: CardBg
+  cardBg: CardBgV1
   blocksEnabledSorted: CardBlock[]
   activeBlockId: string | null
   onSelectBlock: (blockId: string) => void

@@ -36,7 +36,7 @@ type Props = {
   activeBlock: CardBlock | null
   activeDecoId: string | null
   onSelectDeco: (decoId: string | null) => void
-  cardBg: CardBg
+  cardBg: CardBgV1
   onChangeCardBg: (nextBg: CardBgV1) => void
   onChangeSettings: (nextSettings: any) => void
   onChangeStyle: (nextStyle: any) => void

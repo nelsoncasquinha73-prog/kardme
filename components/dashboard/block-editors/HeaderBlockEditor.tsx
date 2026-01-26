@@ -17,7 +17,7 @@ type Props = {
   settings: HeaderSettings
   onChange: (s: HeaderSettings) => void
 
-  cardBg?: CardBg
+  cardBg?: CardBgV1
   onChangeCardBg?: (bg: CardBgV1) => void
 }
 
