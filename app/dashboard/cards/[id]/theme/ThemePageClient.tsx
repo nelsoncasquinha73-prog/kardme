@@ -93,7 +93,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
     setLocalBlocks((prev) => prev.map((b) => (b.id === activeBlock.id ? { ...b, style: nextStyle } : b)))
   }
 
-  async function saveChanges() {
+  async function saveChanges(): Promise<void> {
+
     setSaveStatus('saving')
 
     try {

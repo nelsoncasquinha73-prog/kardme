@@ -40,7 +40,7 @@ type Props = {
   onChangeCardBg: (nextBg: CardBg) => void
   onChangeSettings: (nextSettings: any) => void
   onChangeStyle: (nextStyle: any) => void
-  onSave: () => void
+  onSave: () => Promise<void>
   saveStatus: string
   slugEdit: string
   setSlugEdit: (slug: string) => void
@@ -98,11 +98,10 @@ export default function ThemePageClientRight({
 
   try {
     // 1️⃣ FORÇAR SAVE DO CARD (flush do autosave)
-    console.log('⏳ Forçando save do card antes de criar template…')
-    onSave()
-    
-    // 2️⃣ ESPERAR um pouco para o save terminar
-    await new Promise((resolve) => setTimeout(resolve, 800))
+console.log('⏳ Forçando save do card antes de criar template…')
+await onSave()
+
+// 2️⃣ Agora sim, os blocos estão na BD
 
     // 3️⃣ AGORA SIM, ler os blocos (que já estão na BD)
     const { data: currentCard, error: cardErr } = await supabase
