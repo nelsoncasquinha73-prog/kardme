@@ -118,21 +118,6 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
 
   const containerPadding = st.container?.padding != null ? `${st.container.padding}px` : '12px'
 
-const containerStyle: React.CSSProperties = {
-  marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
-  background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
-  borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
-  padding: containerPadding,
-  border:
-    (st.container?.borderWidth ?? 0) > 0
-      ? `${st.container?.borderWidth}px solid ${st.container?.borderColor ?? 'rgba(0,0,0,0.12)'}`
-      : '1px solid rgba(0,0,0,0.08)',
-  boxShadow: st.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
-  position: 'relative',
-  width: '100%',
-  boxSizing: 'border-box',
-}
-
   const headingStyle: React.CSSProperties = {
     fontFamily: st.heading?.fontFamily || undefined,
     fontWeight: st.heading?.fontWeight ?? 900,
@@ -199,80 +184,80 @@ setFormData({ name: '', email: '', phone: '', message: '' })
   }
 
   return (
-    <div style={containerStyle}>
-      {(isNonEmpty(s.title) || isNonEmpty(s.description)) && (
-        <div style={{ marginBottom: 10 }}>
-          {isNonEmpty(s.title) && <div style={{ ...headingStyle, display: 'block' }}>{s.title}</div>}
-          {isNonEmpty(s.description) && (
-            <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textAlign: headingStyle.textAlign as any }}>
-              {s.description}
-            </div>
-          )}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
+    {(isNonEmpty(s.title) || isNonEmpty(s.description)) && (
+      <div style={{ marginBottom: 10 }}>
+        {isNonEmpty(s.title) && <div style={{ ...headingStyle, display: 'block' }}>{s.title}</div>}
+        {isNonEmpty(s.description) && (
+          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textAlign: headingStyle.textAlign as any }}>
+            {s.description}
+          </div>
+        )}
+      </div>
+    )}
+
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
+      {fields.name && (
+        <div>
+          <div style={labelStyle}>{labels.name}</div>
+          <input
+            type="text"
+            placeholder={placeholders.name}
+            value={formData.name}
+            onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+            required
+            style={inputStyle}
+          />
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
+      {fields.email && (
+        <div>
+          <div style={labelStyle}>{labels.email}</div>
+          <input
+            type="email"
+            placeholder={placeholders.email}
+            value={formData.email}
+            onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+            required
+            style={inputStyle}
+          />
+        </div>
+      )}
 
-        {fields.name && (
-          <div>
-            <div style={labelStyle}>{labels.name}</div>
-            <input
-              type="text"
-              placeholder={placeholders.name}
-              value={formData.name}
-              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-              required
-              style={inputStyle}
-            />
-          </div>
-        )}
+      {fields.phone && (
+        <div>
+          <div style={labelStyle}>{labels.phone}</div>
+          <input
+            type="tel"
+            placeholder={placeholders.phone}
+            value={formData.phone}
+            onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+            style={inputStyle}
+          />
+        </div>
+      )}
 
-        {fields.email && (
-          <div>
-            <div style={labelStyle}>{labels.email}</div>
-            <input
-              type="email"
-              placeholder={placeholders.email}
-              value={formData.email}
-              onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-              required
-              style={inputStyle}
-            />
-          </div>
-        )}
+      {fields.message && (
+        <div>
+          <div style={labelStyle}>{labels.message}</div>
+          <textarea
+            placeholder={placeholders.message}
+            value={formData.message}
+            onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
+            style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
+          />
+        </div>
+      )}
 
-        {fields.phone && (
-          <div>
-            <div style={labelStyle}>{labels.phone}</div>
-            <input
-              type="tel"
-              placeholder={placeholders.phone}
-              value={formData.phone}
-              onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
-        )}
+      <button type="submit" disabled={status === 'sending'} style={btnStyle}>
+        {status === 'sending' ? 'A enviar…' : s.buttonLabel ?? 'Enviar'}
+      </button>
 
-        {fields.message && (
-          <div>
-            <div style={labelStyle}>{labels.message}</div>
-            <textarea
-              placeholder={placeholders.message}
-              value={formData.message}
-              onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
-              style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
-            />
-          </div>
-        )}
+      {status === 'success' && <div style={{ fontSize: 12, color: '#16a34a' }}>Enviado ✅</div>}
+      {status === 'error' && <div style={{ fontSize: 12, color: '#dc2626' }}>{errorMsg}</div>}
+    </form>
+  </div>
+)
 
-        <button type="submit" disabled={status === 'sending'} style={btnStyle}>
-          {status === 'sending' ? 'A enviar…' : s.buttonLabel ?? 'Enviar'}
-        </button>
-
-        {status === 'success' && <div style={{ fontSize: 12, color: '#16a34a' }}>Enviado ✅</div>}
-        {status === 'error' && <div style={{ fontSize: 12, color: '#dc2626' }}>{errorMsg}</div>}
-      </form>
-    </div>
-  )
 }
