@@ -30,7 +30,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [role, setRole] = useState<Role | null>(null)
 
   useEffect(() => {
     const boot = async () => {
@@ -47,7 +46,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       // 2) Tentar ler role de sessionStorage
       const storedRole = sessionStorage.getItem('userRole')
       if (storedRole) {
-        setRole(storedRole)
         setLoading(false)
         return
       }
@@ -61,10 +59,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       if (error) {
         console.error('Erro a buscar role:', error)
-        setRole('user')
+        sessionStorage.setItem('userRole', 'user')
       } else {
         const userRole = profile?.role || 'user'
-        setRole(userRole)
         // 4) Guardar em sessionStorage para próximas vezes
         sessionStorage.setItem('userRole', userRole)
       }
@@ -75,7 +72,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     boot()
   }, [router])
 
-  const isAdmin = role === 'admin'
+  // Ler role diretamente de sessionStorage (sem estado React)
+  const isAdmin = typeof window !== 'undefined' && sessionStorage.getItem('userRole') === 'admin'
 
   const logout = async () => {
     await supabase.auth.signOut()
@@ -133,7 +131,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return match?.title || 'Kardme'
   }
 
-  if (loading || role === null) return <p style={{ padding: 40 }}>A verificar sessão…</p>
+  if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   // Gate extra: se alguém tentar abrir /admin/* sem ser admin, manda para dashboard
   if (!isAdmin && pathname.startsWith('/admin')) {
