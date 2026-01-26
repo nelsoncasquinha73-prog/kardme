@@ -228,23 +228,45 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           />
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-sm">Tamanho</span>
+        <div className="flex flex-col gap-2">
+  <div className="flex justify-between items-center">
+    <span className="text-sm">Tamanho</span>
+    <span className="text-xs text-black/50">{local.avatar?.sizePx ?? 108}px</span>
+  </div>
 
-          <Segmented
-            value={local.avatar?.size ?? 'md'}
-            options={[
-              { key: 'sm', label: 'S' },
-              { key: 'md', label: 'M' },
-              { key: 'lg', label: 'L' },
-            ]}
-            onChange={(k) =>
-              patch((d) => {
-                d.avatar!.size = k as any
-              })
-            }
-          />
-        </div>
+  <input
+    type="range"
+    min={72}
+    max={180}
+    step={1}
+    value={(local.avatar as any)?.sizePx ?? 108}
+    onChange={(e) =>
+      patch((d) => {
+        d.avatar!.sizePx = Number(e.target.value)
+      })
+    }
+  />
+</div>
+       <div className="flex flex-col gap-2">
+  <div className="flex justify-between items-center">
+    <span className="text-sm">Tamanho</span>
+    <span className="text-xs text-black/50">{local.avatar?.sizePx ?? 108}px</span>
+  </div>
+
+  <input
+    type="range"
+    min={72}
+    max={180}
+    step={1}
+    value={(local.avatar as any)?.sizePx ?? 108}
+    onChange={(e) =>
+      patch((d) => {
+        d.avatar!.sizePx = Number(e.target.value)
+      })
+    }
+  />
+</div>
+
 
         <div className="flex justify-between items-center">
           <span className="text-sm">Forma</span>
@@ -269,6 +291,107 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             <span className="text-sm">Borda</span>
             <span className="text-xs text-black/50">{local.avatar?.borderWidth ?? 0}px</span>
           </div>
+{/* ✅ NOVO: Glow/Halo */}
+<div className="flex flex-col gap-2">
+  <div className="flex justify-between items-center">
+    <span className="text-sm">Glow (halo)</span>
+    <input
+      type="checkbox"
+      checked={(local.avatar?.glow as any)?.enabled ?? false}
+      onChange={(e) =>
+        patch((d) => {
+          d.avatar!.glow = d.avatar!.glow || { enabled: false, color: 'rgba(59,130,246,0.18)', size: 6 }
+          d.avatar!.glow!.enabled = e.target.checked
+        })
+      }
+    />
+  </div>
+
+  {((local.avatar?.glow as any)?.enabled ?? false) && (
+    <>
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-black/50">Tamanho</span>
+        <span className="text-xs text-black/50">{(local.avatar?.glow as any)?.size ?? 6}px</span>
+      </div>
+
+      <input
+        type="range"
+        min={2}
+        max={20}
+        step={1}
+        value={(local.avatar?.glow as any)?.size ?? 6}
+        onChange={(e) =>
+          patch((d) => {
+            d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+            d.avatar!.glow!.size = Number(e.target.value)
+          })
+        }
+      />
+
+      <SwatchRow
+        value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'}
+        onChange={(hex) =>
+          patch((d) => {
+            d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+            d.avatar!.glow!.color = hex
+          })
+        }
+        onEyedropper={() =>
+          openPicker({
+            onPick: (hex: string) => {
+              patch((d) => {
+                d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+                d.avatar!.glow!.color = hex
+              })
+            },
+          } as any)
+        }
+      />
+    </>
+  )}
+</div>
+
+{/* ✅ NOVO: Sombra */}
+<div className="flex flex-col gap-2">
+  <div className="flex justify-between items-center">
+    <span className="text-sm">Sombra</span>
+    <input
+      type="checkbox"
+      checked={(local.avatar?.shadow as any)?.enabled ?? false}
+      onChange={(e) =>
+        patch((d) => {
+          d.avatar!.shadow = d.avatar!.shadow || { enabled: false, intensity: 0.18 }
+          d.avatar!.shadow!.enabled = e.target.checked
+        })
+      }
+    />
+  </div>
+
+  {((local.avatar?.shadow as any)?.enabled ?? false) && (
+    <>
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-black/50">Intensidade</span>
+        <span className="text-xs text-black/50">
+          {(((local.avatar?.shadow as any)?.intensity ?? 0.18) * 100).toFixed(0)}%
+        </span>
+      </div>
+
+      <input
+        type="range"
+        min={0}
+        max={0.6}
+        step={0.05}
+        value={(local.avatar?.shadow as any)?.intensity ?? 0.18}
+        onChange={(e) =>
+          patch((d) => {
+            d.avatar!.shadow = d.avatar!.shadow || { enabled: true, intensity: 0.18 }
+            d.avatar!.shadow!.intensity = Number(e.target.value)
+          })
+        }
+      />
+    </>
+  )}
+</div>
 
           <input
             type="range"

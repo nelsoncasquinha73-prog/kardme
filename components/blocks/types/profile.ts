@@ -19,10 +19,20 @@ export type ProfileSettings = {
     image?: string
     shape?: 'circle' | 'rounded' | 'square'
     size?: 'sm' | 'md' | 'lg'
+    sizePx?: number
     borderWidth?: number
     borderColor?: string
     offsetX?: number
     offsetY?: number | null
+    glow?: {
+      enabled?: boolean
+      color?: string
+      size?: number
+    }
+    shadow?: {
+      enabled?: boolean
+      intensity?: number
+    }
   }
 
   name: ProfileTextLine
@@ -38,9 +48,10 @@ export type ProfileSettings = {
     color?: string
     style?: 'flat' | 'rounded' | 'pill'
   }
-layout?: {
-  lineGap?: number // px
-}
+
+  layout?: {
+    lineGap?: number // px
+  }
 
   offset?: {
     y?: number

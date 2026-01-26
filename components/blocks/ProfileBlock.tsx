@@ -114,8 +114,24 @@ export default function ProfileBlock({
 
   const dock = headerSettings?.layout?.avatarDock ?? 'overlap'
 
-  const avatarSizeKey = settings.avatar?.size ?? 'md'
-  const avatarSizePx = SIZE_MAP[avatarSizeKey].avatar
+// Suporta tanto o novo sizePx (72-180) como o antigo size ('sm'/'md'/'lg')
+const avatarSizePxRaw =
+  typeof (settings.avatar as any)?.sizePx === 'number'
+    ? (settings.avatar as any).sizePx
+    : undefined
+
+const avatarSizePx = avatarSizePxRaw
+  ? Math.max(72, Math.min(180, avatarSizePxRaw))
+  : SIZE_MAP[settings.avatar?.size ?? 'md']?.avatar ?? 108
+
+// Glow e shadow
+const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
+const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
+const glowSize = (settings.avatar?.glow as any)?.size ?? 6
+
+const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
+const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
+
 
   const autoOverlapY = dock === 'overlap' ? -avatarSizePx / 2 : 0
   const avatarOffsetY = settings.avatar?.offsetY != null ? settings.avatar.offsetY : autoOverlapY
@@ -163,7 +179,13 @@ export default function ProfileBlock({
                   : undefined,
               background: '#fff',
               transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+             boxShadow: [
+  glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
+  shadowEnabled ? `0 12px 28px rgba(0,0,0,${shadowIntensity})` : '0 10px 30px rgba(0,0,0,0.18)',
+]
+  .filter(Boolean)
+  .join(', '),
+
               zIndex: 20,
             }}
           />
