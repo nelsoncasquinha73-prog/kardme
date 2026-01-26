@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [role, setRole] = useState<Role>('user')
+  const [role, setRole] = useState<Role | null>(null)
 
   useEffect(() => {
     const boot = async () => {
@@ -133,7 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return match?.title || 'Kardme'
   }
 
-  if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
+  if (loading || role === null) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   // Gate extra: se alguém tentar abrir /admin/* sem ser admin, manda para dashboard
   if (!isAdmin && pathname.startsWith('/admin')) {

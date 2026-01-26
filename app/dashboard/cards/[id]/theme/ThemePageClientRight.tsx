@@ -20,7 +20,6 @@ import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButto
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
 import type { CardBg } from '@/lib/cardBg'
-import { useSearchParams } from 'next/navigation'
 
 type CardBlock = {
   id: string
@@ -78,18 +77,13 @@ export default function ThemePageClientRight({
 }: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const [templateSaving, setTemplateSaving] = useState(false)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserEmail(data?.user?.email || null)
-    })
+    // Ler role de sessionStorage (já foi guardado no DashboardLayout)
+    const storedRole = sessionStorage.getItem('userRole')
+    setIsAdmin(storedRole === 'admin')
   }, [])
-
-  const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
-
-  const searchParams = useSearchParams()
-  const templateIdFromUrl = searchParams.get('template_id')
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -160,11 +154,11 @@ export default function ThemePageClientRight({
         throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
       }
 
-      alert(`✅ Template "${data.name}" guardado com sucesso!`)
+      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
       setTemplateSaving(false)
     } catch (err) {
       console.error('❌ Error in handleSaveAsTemplate:', err)
-      alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
+      alert(`❌ Erro: \${err instanceof Error ? err.message : 'Desconhecido'}`)
       setTemplateSaving(false)
     }
   }
@@ -175,7 +169,7 @@ export default function ThemePageClientRight({
         background: '#fff',
         color: '#374151',
         borderRadius: 18,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
         overflow: 'hidden',
         minHeight: 0,
         display: 'flex',
@@ -481,3 +475,4 @@ export default function ThemePageClientRight({
     </aside>
   )
 }
+
