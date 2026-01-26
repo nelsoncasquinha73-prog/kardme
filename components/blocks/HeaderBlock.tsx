@@ -101,10 +101,14 @@ export default function HeaderBlock({
   const fadeTargetBase = headerBgEnabled ? headerBgColor : cardBgToFadeTarget(cardBg)
   const fadeTargetOpacity = typeof cardBg?.opacity === 'number' ? clamp(cardBg.opacity, 0, 1) : 1
 
-  const fadeTarget =
-    fadeTargetOpacity < 1 && fadeTargetBase.startsWith('rgb(') && !fadeTargetBase.startsWith('rgba(')
-      ? rgbToRgba(fadeTargetBase, fadeTargetOpacity)
-      : fadeTargetBase
+  const fadeTarget = (() => {
+  if (!fadeTargetBase) return '#ffffff'
+  if (fadeTargetOpacity < 1 && fadeTargetBase.startsWith('rgb(') && !fadeTargetBase.startsWith('rgba(')) {
+    return rgbToRgba(fadeTargetBase, fadeTargetOpacity)
+  }
+  return fadeTargetBase
+})()
+
 
   const badge = layout.badge ?? {}
   const badgeEnabled = badge.enabled === true && !!safeSettings.badgeImage

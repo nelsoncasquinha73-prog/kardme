@@ -33,7 +33,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const layout = settings.layout ?? {}
 
   // ✅ normalizamos sempre para v1 para editar sem dores
-  const v1 = migrateCardBg(cardBg as any)
+const v1 = migrateCardBg(cardBg ?? ({ mode: 'solid', color: '#ffffff', opacity: 1 } as any))
+
+
 const [recolorA, setRecolorA] = useState('#d8c08a')
 const [recolorB, setRecolorB] = useState('#2b2b2b')
 const [patternA, setPatternA] = useState('#ffffff')
