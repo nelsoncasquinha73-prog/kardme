@@ -89,9 +89,7 @@ export default function ThemePageClientRight({
   const isAdmin = userEmail === 'nelson@kardme.com' || userEmail === 'admin@kardme.com'
 
   const searchParams = useSearchParams()
-
   const templateIdFromUrl = searchParams.get('template_id')
-  const templateId = templateIdFromUrl || card?.template_id || null
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -101,8 +99,6 @@ export default function ThemePageClientRight({
   }) => {
     console.log('🔴 handleSaveAsTemplate CALLED')
     console.log('  card.id=', card.id)
-    console.log('  templateId=', templateId)
-    console.log('  templateIdFromUrl=', templateIdFromUrl)
 
     setTemplateSaving(true)
 
@@ -125,7 +121,7 @@ export default function ThemePageClientRight({
 
       if (blocksErr) throw new Error(blocksErr.message)
 
-      const preview_Json = (blocks || []).map((b) => ({
+      const preview_json = (blocks || []).map((b) => ({
         type: b.type,
         order: b.order ?? 0,
         title: b.title ?? null,
@@ -134,49 +130,46 @@ export default function ThemePageClientRight({
         style: b.style ?? {},
       }))
 
-      console.log('📦 preview_json blocks=', preview_Json.length)
+      console.log('📦 preview_json blocks=', preview_json.length)
 
-      if (templateId) {
-        console.log('🔵 UPDATE template:', templateId)
-        const { data: updatedRows, error: updateErr } = await supabase
-          .from('templates')
-          .update({
-            preview_json: preview_Json,
-            theme_json: currentTheme,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', templateId)
-          .select('id, updated_at')
+      // SEMPRE INSERT (ignora templateId)
+      console.log('🔵 INSERT novo template')
 
-        console.log('updatedRows=', updatedRows)
-        console.log('updateErr=', updateErr)
+      const { data: inserted, error: insertErr } = await supabase
+        .from('templates')
+        .insert({
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          price: data.price,
+          preview_json: preview_json,
+          theme_json: currentTheme,
+          is_active: true,
+        })
+        .select('id')
 
-        if (updateErr) throw new Error(updateErr.message)
-        alert('✅ Template atualizado com sucesso!')
-        setTemplateSaving(false)
-        return
+      console.log('Inserted:', inserted, 'Error:', insertErr)
+
+      if (insertErr) {
+        console.error('❌ INSERT ERROR:', insertErr)
+        throw new Error(insertErr.message)
       }
 
-      const { error: insertErr } = await supabase.from('templates').insert({
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        price: data.price,
-        preview_json: preview_Json,
-        theme_json: currentTheme,
-        is_active: true,
-      })
+      if (!inserted || inserted.length === 0) {
+        console.error('❌ INSERT retornou vazio (RLS bloqueou?)')
+        throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
+      }
 
-      if (insertErr) throw new Error(insertErr.message)
-      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
+      alert(`✅ Template "${data.name}" guardado com sucesso!`)
       setTemplateSaving(false)
     } catch (err) {
       console.error('❌ Error in handleSaveAsTemplate:', err)
-      alert(`❌ Erro: \${err instanceof Error ? err.message : 'Desconhecido'}`)
+      alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
       setTemplateSaving(false)
     }
   }
- return (
+
+  return (
     <aside
       style={{
         background: '#fff',
@@ -428,8 +421,7 @@ export default function ThemePageClientRight({
         }}
       >
         {activeBlock && (
-          <div style={{ padding: '12px', borderBottom: "1px solid rgba(0,0,0,0.08)"
- }}>
+          <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
             <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
           </div>
         )}
@@ -451,11 +443,7 @@ export default function ThemePageClientRight({
           }}
           disabled={saveStatus === 'saving'}
         >
-          {saveStatus === 'saving'
-            ? 'A guardar…'
-            : isAdmin && templateId
-              ? '💾 Guardar (template)'
-              : '💾 Guardar'}
+          {saveStatus === 'saving' ? 'A guardar…' : '💾 Guardar'}
         </button>
 
         {isAdmin && (
