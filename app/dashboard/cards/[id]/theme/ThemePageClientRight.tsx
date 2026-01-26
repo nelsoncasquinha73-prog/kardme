@@ -383,7 +383,7 @@ await onSave()
       >
         {activeBlock && (
           <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-            <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+            {!isAdmin && <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />}
           </div>
         )}
 
