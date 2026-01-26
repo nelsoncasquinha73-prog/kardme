@@ -30,6 +30,7 @@ type GallerySettings = {
 }
 
 type GalleryStyle = {
+  offsetY?: number
   headingFontSize?: number
   headingFontFamily?: string
   headingFontWeight?: number
@@ -535,6 +536,17 @@ export default function GalleryBlockEditor({
             onPointerDown={stop}
             onMouseDown={stop}
           />
+
+      <Section title="Posição">
+        <Row label="Mover (Y)">
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button type="button" onClick={() => setStyle({ offsetY: (st.offsetY ?? 0) - 4 })} style={{ padding: '6px 8px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 800, fontSize: 12 }} data-no-block-select="1" onPointerDown={stop} onMouseDown={stop}>⬆️</button>
+            <button type="button" onClick={() => setStyle({ offsetY: (st.offsetY ?? 0) + 4 })} style={{ padding: '6px 8px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 800, fontSize: 12 }} data-no-block-select="1" onPointerDown={stop} onMouseDown={stop}>⬇️</button>
+            <button type="button" onClick={() => setStyle({ offsetY: 0 })} style={{ padding: '6px 8px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 800, fontSize: 12 }} data-no-block-select="1" onPointerDown={stop} onMouseDown={stop}>Reset</button>
+            <span style={rightNum}>{st.offsetY ?? 0}px</span>
+          </div>
+        </Row>
+      </Section>
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
       </Section>

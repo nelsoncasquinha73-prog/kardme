@@ -32,6 +32,7 @@ type LeadFormSettings = {
 }
 
 type LeadFormStyle = {
+  offsetY?: number
   heading?: {
     fontFamily?: string
     fontWeight?: number
@@ -116,6 +117,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   const containerEnabled = st.container?.enabled !== false
 
   const containerStyle: React.CSSProperties = {
+    marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
     background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
     borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
     padding: st.container?.padding != null ? `${st.container.padding}px` : '12px',
