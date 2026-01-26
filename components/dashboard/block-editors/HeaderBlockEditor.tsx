@@ -732,18 +732,22 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   />
                 </Row>
 
-                <Row label="Intensidade (fine)">
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={coverFadeStrength}
-                    onChange={(e) =>
-                      setLayout({ ...(layout as any), coverFadeStrength: Number(e.target.value) } as any)
-                    }
-                  />
-                </Row>
+               <Row label="Intensidade (fine)">
+  <input
+    type="range"
+    min={0}
+    max={100}
+    step={1}
+    value={coverFadeStrength}
+    onChange={(e) => {
+      const nextLayout = {
+        ...layout,
+        coverFadeStrength: Number(e.target.value),
+      }
+      setLayout(nextLayout)
+    }}
+  />
+</Row>
 
                 <Row label="Altura (px)">
                   <input
