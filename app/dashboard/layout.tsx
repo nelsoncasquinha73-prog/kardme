@@ -65,33 +65,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const navItems = useMemo(() => {
+  if (isAdmin) {
     return [
-      { label: 'Os meus cartões', href: '/dashboard', icon: FiHome },
+      { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
+      { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
       { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
-      { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-
-      ...(isAdmin
-        ? [
-            { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-            { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
-          ]
-        : []),
-
-      { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
-      { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
-      { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
-      { label: 'Afiliados', href: '/dashboard/affiliate', icon: FiUsers },
-      { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
-      { label: 'Ficheiros', href: '/dashboard/storage', icon: FiHardDrive },
-      { label: 'Definições', href: '/dashboard/settings', icon: FiSettings },
+      { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
+      { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
     ]
-  }, [isAdmin])
+  }
+
+  return [
+    { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+    { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
+    { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
+    { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
+    { label: 'Afiliados', href: '/dashboard/affiliate', icon: FiUsers },
+    { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
+    { label: 'Ficheiros', href: '/dashboard/storage', icon: FiHardDrive },
+    { label: 'Definições', href: '/dashboard/settings', icon: FiSettings },
+  ]
+}, [isAdmin])
+
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
     { prefix: '/admin/clientes', title: 'Clientes' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
+    { prefix: '/admin/analytics', title: '📊 Analytics Geral' },
+    { prefix: '/admin/settings', title: 'Configurações' },
 
     { prefix: '/dashboard/leads', title: 'Contactos' },
     { prefix: '/dashboard/bookings', title: 'Reuniões' },
