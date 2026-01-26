@@ -312,7 +312,7 @@ const bgV1 = migrateCardBg(bgRaw)
                       <SocialBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'services' ? (
                       <ServicesBlock settings={block.settings} style={block.style} />
-                    ) :block.type === 'lead_form' ? (
+                    ) : block.type === 'lead_form' ? (
   <div
     style={{
       background: block.style?.container?.enabled !== false ? (block.style?.container?.bgColor ?? 'transparent') : 'transparent',
