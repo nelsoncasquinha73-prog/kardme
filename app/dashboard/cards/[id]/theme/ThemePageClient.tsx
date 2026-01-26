@@ -9,7 +9,7 @@ import ThemePageClientCenter from './ThemePageClientCenter'
 import ThemePageClientRight from './ThemePageClientRight'
 import Toast from '@/components/Toast'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
-import type { CardBg } from '@/lib/cardBg'
+import { migrateCardBg, type CardBgV1 } from '@/lib/cardBg'
 
 type CardBlock = {
   id: string
@@ -42,8 +42,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
   const [localTheme, setLocalTheme] = useState<any>(() => card?.theme ?? {})
 
-  const [cardBg, setCardBg] = useState<CardBg>(() => {
-    return card?.theme?.background?.base ?? { mode: 'solid', color: '#ffffff', opacity: 1 }
+  const [cardBg, setCardBg] = useState<CardBgV1>(() => {
+    return migrateCardBg(card?.theme?.background)
   })
 
   const [toast, setToast] = useState<ToastType>(null)
@@ -128,21 +128,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
       // 2) Atualizar tema do card
       const nextTheme = structuredClone(localTheme || {})
-
-      // ✅ CORRETO: Preserva a estrutura wrapper v1, só atualiza o base
-      if (nextTheme.background && typeof nextTheme.background === 'object') {
-        nextTheme.background = {
-          ...nextTheme.background,
-          base: cardBg,
-        }
-      } else {
-        nextTheme.background = {
-          version: 1,
-          opacity: 1,
-          overlays: [],
-          base: cardBg,
-        }
-      }
+      nextTheme.background = cardBg
 
       const { error: themeError, data: themeData } = await supabase
         .from('cards')
@@ -280,24 +266,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
           activeDecoId={activeDecoId}
           onSelectDeco={setActiveDecoId}
           cardBg={cardBg}
-          onChangeCardBg={(nextBg) => {
-            setCardBg(nextBg)
+          onChangeCardBg={(nextV1) => {
+            setCardBg(nextV1)
 
             const nextTheme = structuredClone(localTheme || {})
-
-            if (nextTheme.background && typeof nextTheme.background === 'object') {
-              nextTheme.background = {
-                ...nextTheme.background,
-                base: nextBg,
-              }
-            } else {
-              nextTheme.background = {
-                version: 1,
-                opacity: 1,
-                overlays: [],
-                base: nextBg,
-              }
-            }
+            nextTheme.background = nextV1
 
             setLocalTheme(nextTheme)
             setSaveStatus('dirty')

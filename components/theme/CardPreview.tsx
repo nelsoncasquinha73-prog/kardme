@@ -18,6 +18,7 @@ import BioBlock from '@/components/blocks/BioBlock'
 import FreeTextBlock from '@/components/blocks/FreeTextBlock'
 import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
 import { trackEvent } from '@/lib/trackEvent'
+import { migrateCardBg, type CardBg } from '@/lib/cardBg'
 
 type Card = {
   id: string
@@ -95,7 +96,9 @@ export default function CardPreview({
 
   const safe = fullBleed ? 0 : Number(card?.theme?.layout?.safePadding ?? 10)
 
-  const bg = cardBg ?? card?.theme?.background
+  const bgRaw = (cardBg ?? card?.theme?.background) as CardBg | null | undefined
+const bgV1 = migrateCardBg(bgRaw)
+  const bg = migrateCardBg((cardBg ?? card?.theme?.background) as CardBg | null | undefined)
 
   const handleMainClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement

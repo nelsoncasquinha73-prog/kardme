@@ -5,7 +5,7 @@ import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
-import type { CardBg } from '@/lib/cardBg'
+import type { CardBg, CardBgV1 } from '@/lib/cardBg'
 import { CARD_BG_PRESETS } from '@/lib/bgPresets'
 import { bgToStyle } from '@/lib/bgToCss'
 import { migrateCardBg } from '@/lib/cardBg'
@@ -18,7 +18,7 @@ type Props = {
   onChange: (s: HeaderSettings) => void
 
   cardBg?: CardBg
-  onChangeCardBg?: (bg: CardBg) => void
+  onChangeCardBg?: (bg: CardBgV1) => void
 }
 
 export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, onChangeCardBg }: Props) {
@@ -191,7 +191,7 @@ const [patternB, setPatternB] = useState('#000000')
     onChangeCardBg?.({
       ...v1,
       overlays: next ?? [],
-    } as CardBg)
+    })
   }
 
   function toggleEffects() {
@@ -317,7 +317,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         ...v1,
         base: { ...base, kind: 'gradient', stops: nextStops },
         overlays: nextOverlays,
-      } as CardBg)
+      })
     }}
   >
     Aplicar cores ao preset
@@ -446,7 +446,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               return (
                 <button
                   key={p.id}
-                  onClick={() => onChangeCardBg(p.bg as CardBg)}
+                  onClick={() => onChangeCardBg(p.bg)}
                   style={{
                     borderRadius: 14,
                     border: '1px solid rgba(0,0,0,0.10)',
@@ -488,7 +488,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
                   base: { kind: 'solid', color: v1.base.kind === 'solid' ? v1.base.color : '#ffffff' },
                   overlays: v1.overlays ?? [],
-                } as CardBg)
+                })
               }
             >
               Cor sólida
@@ -501,7 +501,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
                   base: gBase,
                   overlays: v1.overlays ?? [],
-                } as CardBg)
+                })
               }
             >
               Degradê
@@ -513,9 +513,9 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             <Row label="Cor">
               <SwatchRow
                 value={v1.base.color ?? '#ffffff'}
-                onChange={(hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } } as CardBg)}
+                onChange={(hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } })}
                 onEyedropper={() =>
-                  pickEyedropper((hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } } as CardBg))
+                  pickEyedropper((hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } }))
                 }
               />
             </Row>
@@ -528,14 +528,14 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                     const stops = [...(gBase.stops ?? [])]
                     if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
                     stops[0] = { ...stops[0], color: hex }
-                    onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                    onChangeCardBg({ ...v1, base: { ...gBase, stops } })
                   }}
                   onEyedropper={() =>
                     pickEyedropper((hex) => {
                       const stops = [...(gBase.stops ?? [])]
                       if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
                       stops[0] = { ...stops[0], color: hex }
-                      onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                      onChangeCardBg({ ...v1, base: { ...gBase, stops } })
                     })
                   }
                 />
@@ -549,7 +549,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                     if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
                     const last = stops.length - 1
                     stops[last] = { ...stops[last], color: hex }
-                    onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                    onChangeCardBg({ ...v1, base: { ...gBase, stops } })
                   }}
                   onEyedropper={() =>
                     pickEyedropper((hex) => {
@@ -557,7 +557,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                       if (!stops.length) stops.push({ color: '#ffffff', pos: 0 }, { color: '#f3f4f6', pos: 100 })
                       const last = stops.length - 1
                       stops[last] = { ...stops[last], color: hex }
-                      onChangeCardBg({ ...v1, base: { ...gBase, stops } } as CardBg)
+                      onChangeCardBg({ ...v1, base: { ...gBase, stops } })
                     })
                   }
                 />
@@ -570,7 +570,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   max={360}
                   value={typeof gBase.angle === 'number' ? gBase.angle : 180}
                   onChange={(e) =>
-                    onChangeCardBg({ ...v1, base: { ...gBase, angle: Number(e.target.value) } } as CardBg)
+                    onChangeCardBg({ ...v1, base: { ...gBase, angle: Number(e.target.value) } })
                   }
                   style={{ width: 90 }}
                 />
@@ -585,7 +585,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               max={1}
               step={0.05}
               value={typeof v1.opacity === 'number' ? v1.opacity : 1}
-              onChange={(e) => onChangeCardBg({ ...v1, opacity: Number(e.target.value) } as CardBg)}
+              onChange={(e) => onChangeCardBg({ ...v1, opacity: Number(e.target.value) })}
             />
           </Row>
         </Section>

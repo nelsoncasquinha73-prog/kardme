@@ -2,10 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-
-type CardBg =
-  | { mode: 'solid'; color: string; opacity?: number }
-  | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
+import { migrateCardBg, isV1, type CardBg, type CardBgV1 } from '@/lib/cardBg'
 
 export type BadgeSettings = {
   enabled?: boolean
@@ -48,22 +45,46 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
 }
 
-function cardBgToCss(bg?: CardBg): string {
-  if (!bg) return '#ffffff'
-  if (bg.mode === 'solid') return bg.color
-  const angle = typeof bg.angle === 'number' ? bg.angle : 180
-  return `linear-gradient(${angle}deg, ${bg.from}, ${bg.to})`
+/**
+ * Converte v1 CardBg para CSS background string
+ */
+function v1ToCss(v1: CardBgV1): string {
+  if (v1.base.kind === 'solid') {
+    return v1.base.color
+  }
+
+  // gradient
+  const angle = typeof v1.base.angle === 'number' ? v1.base.angle : 180
+  const stops = v1.base.stops ?? [
+    { color: '#ffffff', pos: 0 },
+    { color: '#f3f4f6', pos: 100 },
+  ]
+
+  const gradientStops = stops.map((s) => `${s.color} ${s.pos ?? 0}%`).join(', ')
+  return `linear-gradient(${angle}deg, ${gradientStops})`
 }
 
-function cardBgToFadeTarget(bg?: CardBg): string {
-  if (!bg) return '#ffffff'
-  if (bg.mode === 'solid') return bg.color
-  return bg.to
+/**
+ * Extrai a cor "de fundo" (última cor do gradient ou cor sólida)
+ */
+function v1ToFadeTarget(v1: CardBgV1): string {
+  if (v1.base.kind === 'solid') {
+    return v1.base.color
+  }
+
+  // gradient: pega na última cor
+  const stops = v1.base.stops ?? [
+    { color: '#ffffff', pos: 0 },
+    { color: '#f3f4f6', pos: 100 },
+  ]
+  return stops[stops.length - 1]?.color ?? '#ffffff'
 }
 
-// converte "rgb(r,g,b)" em "rgba(r,g,b,a)" com a opacidade pedida
+/**
+ * Converte "rgb(r,g,b)" em "rgba(r,g,b,a)" com a opacidade pedida
+ */
 function rgbToRgba(rgb: string, a: number) {
-  const m = rgb.match(/^rgb\((.+)\)$/)
+  const m = rgb.match(/^rgb$(.+)$$/)
   if (!m) return rgb
   return `rgba(${m[1]}, ${a})`
 }
@@ -77,6 +98,9 @@ export default function HeaderBlock({
 }) {
   const safeSettings: HeaderSettings = settings ?? {}
   const layout = safeSettings.layout ?? {}
+
+  // ✅ Normaliza sempre para v1 (aceita legacy + v1)
+  const v1 = migrateCardBg(cardBg)
 
   const headerBgEnabled = (layout as any)?.headerBgEnabled === true
   const headerBgColor = (layout as any)?.headerBgColor ?? '#ffffff'
@@ -97,18 +121,18 @@ export default function HeaderBlock({
   const coverFadeStrength = typeof layout.coverFadeStrength === 'number' ? clamp(layout.coverFadeStrength, 0, 100) : 55
   const coverFadeHeightPx = typeof layout.coverFadeHeightPx === 'number' ? layout.coverFadeHeightPx : 140
 
-  const bgCss = cardBgToCss(cardBg)
-  const fadeTargetBase = headerBgEnabled ? headerBgColor : cardBgToFadeTarget(cardBg)
-  const fadeTargetOpacity = typeof cardBg?.opacity === 'number' ? clamp(cardBg.opacity, 0, 1) : 1
+  // ✅ Usa v1 para tudo
+  const bgCss = v1ToCss(v1)
+  const fadeTargetBase = headerBgEnabled ? headerBgColor : v1ToFadeTarget(v1)
+  const fadeTargetOpacity = typeof v1.opacity === 'number' ? clamp(v1.opacity, 0, 1) : 1
 
   const fadeTarget = (() => {
-  if (!fadeTargetBase) return '#ffffff'
-  if (fadeTargetOpacity < 1 && fadeTargetBase.startsWith('rgb(') && !fadeTargetBase.startsWith('rgba(')) {
-    return rgbToRgba(fadeTargetBase, fadeTargetOpacity)
-  }
-  return fadeTargetBase
-})()
-
+    if (!fadeTargetBase) return '#ffffff'
+    if (fadeTargetOpacity < 1 && fadeTargetBase.startsWith('rgb(') && !fadeTargetBase.startsWith('rgba(')) {
+      return rgbToRgba(fadeTargetBase, fadeTargetOpacity)
+    }
+    return fadeTargetBase
+  })()
 
   const badge = layout.badge ?? {}
   const badgeEnabled = badge.enabled === true && !!safeSettings.badgeImage

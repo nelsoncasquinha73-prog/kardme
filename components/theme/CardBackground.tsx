@@ -1,9 +1,8 @@
 'use client'
 
 import React from 'react'
-import type { CardBg } from '@/lib/cardBg'
 import { bgToStyle } from '@/lib/bgToCss'
-
+import { migrateCardBg, type CardBg } from '@/lib/cardBg'
 type Props = {
   bg?: CardBg | null
   borderRadius?: number | string
@@ -128,7 +127,8 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
  * - Conteúdo mantém-se sempre nítido
  */
 export default function CardBackground({ bg, borderRadius, className, children, style }: Props) {
-  const { style: bgStyle, opacity: intensity, cssStringForOutside } = bgToStyle(bg)
+  const v1 = migrateCardBg(bg)
+  const { style: bgStyle, opacity: intensity, cssStringForOutside } = bgToStyle(v1)
 
   // intensity: 1 = normal; 0 = mais soft
   const t = Math.max(0, Math.min(1, typeof intensity === 'number' ? intensity : 1))
@@ -140,7 +140,8 @@ export default function CardBackground({ bg, borderRadius, className, children, 
   const bri = Math.max(0.9, 1 + 0.12 * soft)
 
   // overlays (v1)
-  const overlays = (bg as any)?.version === 1 ? (((bg as any).overlays ?? []) as Overlay[]) : []
+  const overlays = (v1.overlays ?? []) as Overlay[]
+
   const ov = overlays?.[0] ?? null
   const overlayStyle = ov ? overlayToCss(ov) : null
 

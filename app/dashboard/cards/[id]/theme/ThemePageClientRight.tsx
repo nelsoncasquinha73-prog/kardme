@@ -19,7 +19,7 @@ import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBl
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
-import type { CardBg } from '@/lib/cardBg'
+import type { CardBg, CardBgV1 } from '@/lib/cardBg'
 
 type CardBlock = {
   id: string
@@ -37,7 +37,7 @@ type Props = {
   activeDecoId: string | null
   onSelectDeco: (decoId: string | null) => void
   cardBg: CardBg
-  onChangeCardBg: (nextBg: CardBg) => void
+  onChangeCardBg: (nextBg: CardBgV1) => void
   onChangeSettings: (nextSettings: any) => void
   onChangeStyle: (nextStyle: any) => void
   onSave: () => Promise<void>

@@ -6,7 +6,7 @@ import CardPreview from '@/components/theme/CardPreview'
 import MobileCardFrame from '@/components/theme/MobileCardFrame'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
-import type { CardBg } from '@/lib/cardBg'
+import { migrateCardBg, type CardBg } from '@/lib/cardBg'
 import { bgToCssString } from '@/lib/bgToCss'
 import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
@@ -41,23 +41,17 @@ export async function generateMetadata({ params }: Props) {
     .eq('published', true)
     .single()
 
-  const bg = card?.theme?.background as CardBg | undefined
+  const rawBg = card?.theme?.background as CardBg | undefined
+  const v1 = migrateCardBg(rawBg)
 
   const color = (() => {
-    if (!bg) return '#000000'
-
-    // v1
-    if ((bg as any).version === 1) {
-      const base = (bg as any).base
-      if (base?.kind === 'solid') return base.color ?? '#000000'
-      if (base?.kind === 'gradient') return (base.stops?.[0]?.color ?? '#000000')
-      return '#000000'
+    if (v1.base.kind === 'solid') {
+      return v1.base.color ?? '#000000'
     }
 
-    // legacy
-    if ((bg as any).mode === 'solid') return (bg as any).color ?? '#000000'
-    if ((bg as any).mode === 'gradient') return (bg as any).from ?? '#000000'
-    return '#000000'
+    // gradient: pega na primeira cor
+    const stops = v1.base.stops ?? [{ color: '#000000', pos: 0 }]
+    return stops[0]?.color ?? '#000000'
   })()
 
   return {
@@ -92,6 +86,9 @@ export default async function CardPage({ params }: Props) {
   const blocks = blocksData ?? []
   const bgCss = bgToCss(card?.theme?.background)
 
+  // ✅ Normaliza para v1 antes de passar para componentes
+  const cardBgV1 = migrateCardBg(card?.theme?.background)
+
   return (
     <TrackingWrapper cardId={card.id}>
       <MobileCardFrame background={bgCss}>
@@ -102,7 +99,7 @@ export default async function CardPage({ params }: Props) {
               blocks={blocks}
               showTranslations={false}
               fullBleed={false}
-              cardBg={card.theme?.background}
+              cardBg={cardBgV1}
             />
           </ThemeProvider>
         </LanguageProvider>
