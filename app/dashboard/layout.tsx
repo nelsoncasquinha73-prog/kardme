@@ -34,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const boot = async () => {
+      // 1) Verificar sessão
       const { data: sessionData } = await supabase.auth.getSession()
       if (!sessionData.session) {
         router.push('/login')
@@ -43,14 +44,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const user = sessionData.session.user
       setUserEmail(user.email ?? null)
 
-      // buscar role do profile
+      // 2) Tentar ler role de sessionStorage
+      const storedRole = sessionStorage.getItem('userRole')
+      if (storedRole) {
+        setRole(storedRole)
+        setLoading(false)
+        return
+      }
+
+      // 3) Se não estiver em sessionStorage, buscar da BD
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
-      if (!error && profile?.role) setRole(profile.role)
+      if (error) {
+        console.error('Erro a buscar role:', error)
+        setRole('user')
+      } else {
+        const userRole = profile?.role || 'user'
+        setRole(userRole)
+        // 4) Guardar em sessionStorage para próximas vezes
+        sessionStorage.setItem('userRole', userRole)
+      }
+
       setLoading(false)
     }
 
@@ -61,33 +79,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const logout = async () => {
     await supabase.auth.signOut()
+    sessionStorage.removeItem('userRole') // Limpar ao logout
     router.push('/login')
   }
 
   const navItems = useMemo(() => {
-  if (isAdmin) {
+    if (isAdmin) {
+      return [
+        { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
+        { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
+        { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+        { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
+        { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+      ]
+    }
+
     return [
-      { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
-      { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
       { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
-      { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
-      { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+      { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+      { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
+      { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
+      { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
+      { label: 'Afiliados', href: '/dashboard/affiliate', icon: FiUsers },
+      { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
+      { label: 'Ficheiros', href: '/dashboard/storage', icon: FiHardDrive },
+      { label: 'Definições', href: '/dashboard/settings', icon: FiSettings },
     ]
-  }
-
-  return [
-    { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
-    { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-    { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
-    { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
-    { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
-    { label: 'Afiliados', href: '/dashboard/affiliate', icon: FiUsers },
-    { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
-    { label: 'Ficheiros', href: '/dashboard/storage', icon: FiHardDrive },
-    { label: 'Definições', href: '/dashboard/settings', icon: FiSettings },
-  ]
-}, [isAdmin])
-
+  }, [isAdmin])
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
