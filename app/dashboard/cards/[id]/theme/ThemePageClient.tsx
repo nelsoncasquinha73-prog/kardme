@@ -7,6 +7,7 @@ import AddBlockModal from '@/components/editor/AddBlockModal'
 import ThemePageClientLeft from './ThemePageClientLeft'
 import ThemePageClientCenter from './ThemePageClientCenter'
 import ThemePageClientRight from './ThemePageClientRight'
+import Toast from '@/components/Toast'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
 import type { CardBg } from '@/lib/cardBg'
 
@@ -26,6 +27,7 @@ type Props = {
 }
 
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
+type ToastType = { message: string; type: 'success' | 'error' } | null
 
 export default function ThemePageClient({ card, blocks }: Props) {
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
@@ -43,6 +45,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const [cardBg, setCardBg] = useState<CardBg>(() => {
     return card?.theme?.background?.base ?? { mode: 'solid', color: '#ffffff', opacity: 1 }
   })
+
+  const [toast, setToast] = useState<ToastType>(null)
 
   const enabledBlocksSorted = useMemo(
     () => localBlocks.filter((b) => b.enabled).sort((a, b) => a.order - b.order),
@@ -94,13 +98,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
   }
 
   async function saveChanges(): Promise<void> {
-
     setSaveStatus('saving')
 
     try {
       // 1) Atualizar cada bloco individualmente (por ID, não por tipo!)
       for (const block of localBlocks) {
-
         const { error, data } = await supabase
           .from('card_blocks')
           .update({
@@ -112,11 +114,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
           .eq('id', block.id)
           .select('id, card_id, type')
 
-
         if (error) {
           console.error('❌ Erro ao atualizar bloco:', block.id, error)
           setSaveStatus('error')
-          alert('Erro ao guardar alterações nos blocos ❌: ' + error.message)
+          setToast({ message: 'Erro ao guardar alterações nos blocos: ' + error.message, type: 'error' })
           return
         }
 
@@ -143,25 +144,22 @@ export default function ThemePageClient({ card, blocks }: Props) {
         }
       }
 
-
       const { error: themeError, data: themeData } = await supabase
         .from('cards')
         .update({ theme: nextTheme })
         .eq('id', card.id)
         .select('id, theme')
 
-
       if (themeError) {
         console.error('❌ Erro ao guardar tema:', themeError)
         setSaveStatus('error')
-        alert('Erro ao guardar tema do cartão ❌: ' + themeError.message)
+        setToast({ message: 'Erro ao guardar tema do cartão: ' + themeError.message, type: 'error' })
         return
       }
 
       // 3) Atualizar template (se existir)
       const templateId = card?.template_id
       if (templateId) {
-
         const preview_Json = localBlocks.map((b) => ({
           type: b.type,
           order: b.order ?? 0,
@@ -181,22 +179,20 @@ export default function ThemePageClient({ card, blocks }: Props) {
           .eq('id', templateId)
           .select('id')
 
-
         if (templateError) {
           console.error('❌ Erro ao atualizar template:', templateError)
-          alert('Aviso: Cartão guardado, mas template não foi atualizado ⚠️')
-        } else {
+          setToast({ message: 'Aviso: Cartão guardado, mas template não foi atualizado', type: 'error' })
         }
       }
 
       setLocalTheme(nextTheme)
       setSaveStatus('saved')
       window.setTimeout(() => setSaveStatus('idle'), 1200)
-      alert('Alterações guardadas com sucesso ✅')
+      setToast({ message: 'Alterações guardadas com sucesso', type: 'success' })
     } catch (err) {
       console.error('❌ Erro geral em saveChanges:', err)
       setSaveStatus('error')
-      alert('Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'))
+      setToast({ message: 'Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'), type: 'error' })
     }
   }
 
@@ -228,9 +224,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
       if (!res.ok || !json.success) throw new Error(json.error || 'Erro ao guardar slug')
 
       setSlugEdit(json.newSlug)
-      alert('Slug atualizado com sucesso ✅')
+      setToast({ message: 'Slug atualizado com sucesso', type: 'success' })
     } catch (e: any) {
       setSlugError(e.message || 'Erro ao guardar slug')
+      setToast({ message: e.message || 'Erro ao guardar slug', type: 'error' })
     } finally {
       setSlugSaving(false)
     }
@@ -327,6 +324,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
             setSaveStatus('idle')
           }}
         />
+
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       </div>
     </ColorPickerProvider>
   )
