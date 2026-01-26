@@ -167,12 +167,14 @@ export default function AdminAnalyticsPage() {
             style={{
               padding: '8px 16px',
               borderRadius: 12,
-              border: days === d ? '2px solid #7c3aed' : '1px solid rgba(0,0,0,0.15)',
-              background: days === d ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)',
-              color: '#111827',
+              border: days === d ? '2px solid #60a5fa' : '1px solid rgba(96, 165, 250, 0.2)',
+              background: days === d ? 'rgba(96, 165, 250, 0.2)' : 'rgba(30, 58, 138, 0.1)',
+              color: '#60a5fa',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.2s ease',
             }}
           >
             Últimos {d} dias
@@ -181,36 +183,39 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {analyticsLoading ? (
-        <p>A carregar analytics…</p>
+        <p style={{ color: '#60a5fa', textAlign: 'center', padding: 40 }}>A carregar analytics…</p>
       ) : (
         <>
           {/* Gráfico de Linha */}
           {chartData.length > 0 && (
             <div
               style={{
-                background: '#fff',
+                background: 'rgba(15, 23, 42, 0.4)',
+                backdropFilter: 'blur(10px)',
                 borderRadius: 18,
-                border: '1px solid rgba(0,0,0,0.08)',
+                border: '1px solid rgba(96, 165, 250, 0.2)',
                 padding: 24,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
               }}
             >
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111827', marginTop: 0, marginBottom: 20 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', marginTop: 0, marginBottom: 20 }}>
                 Histórico Diário (Todos os Cartões)
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-                  <XAxis dataKey="date" stroke="rgba(0,0,0,0.6)" />
-                  <YAxis stroke="rgba(0,0,0,0.6)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(96, 165, 250, 0.1)" />
+                  <XAxis dataKey="date" stroke="rgba(96, 165, 250, 0.6)" />
+                  <YAxis stroke="rgba(96, 165, 250, 0.6)" />
                   <Tooltip
                     contentStyle={{
-                      background: '#fff',
-                      border: '1px solid rgba(0,0,0,0.1)',
+                      background: 'rgba(15, 23, 42, 0.9)',
+                      border: '1px solid rgba(96, 165, 250, 0.3)',
                       borderRadius: 8,
-                      color: '#111827',
+                      color: '#60a5fa',
+                      backdropFilter: 'blur(10px)',
                     }}
                   />
-                  <Legend />
+                  <Legend wrapperStyle={{ color: '#60a5fa' }} />
                   <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
                   <Line type="monotone" dataKey="clicks" stroke="#a855f7" strokeWidth={2} dot={{ fill: '#a855f7', r: 4 }} />
                   <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e', r: 4 }} />
@@ -223,29 +228,32 @@ export default function AdminAnalyticsPage() {
           {cardSummary.length > 0 && (
             <div
               style={{
-                background: '#fff',
+                background: 'rgba(15, 23, 42, 0.4)',
+                backdropFilter: 'blur(10px)',
                 borderRadius: 18,
-                border: '1px solid rgba(0,0,0,0.08)',
+                border: '1px solid rgba(96, 165, 250, 0.2)',
                 padding: 24,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
               }}
             >
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111827', marginTop: 0, marginBottom: 20 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', marginTop: 0, marginBottom: 20 }}>
                 Top 10 Cartões (Views)
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={cardSummary.slice(0, 10)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-                  <XAxis dataKey="card_name" stroke="rgba(0,0,0,0.6)" angle={-45} textAnchor="end" height={100} />
-                  <YAxis stroke="rgba(0,0,0,0.6)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(96, 165, 250, 0.1)" />
+                  <XAxis dataKey="card_name" stroke="rgba(96, 165, 250, 0.6)" angle={-45} textAnchor="end" height={100} />
+                  <YAxis stroke="rgba(96, 165, 250, 0.6)" />
                   <Tooltip
                     contentStyle={{
-                      background: '#fff',
-                      border: '1px solid rgba(0,0,0,0.1)',
+                      background: 'rgba(15, 23, 42, 0.9)',
+                      border: '1px solid rgba(96, 165, 250, 0.3)',
                       borderRadius: 8,
-                      color: '#111827',
+                      color: '#60a5fa',
+                      backdropFilter: 'blur(10px)',
                     }}
                   />
-                  <Legend />
+                  <Legend wrapperStyle={{ color: '#60a5fa' }} />
                   <Bar dataKey="total_views" fill="#3b82f6" />
                   <Bar dataKey="total_clicks" fill="#a855f7" />
                   <Bar dataKey="total_leads" fill="#22c55e" />
@@ -257,22 +265,28 @@ export default function AdminAnalyticsPage() {
           {/* Resumo por Cliente */}
           {clientSummary.length > 0 && (
             <div>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111827', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', marginBottom: 16 }}>
                 Resumo por Cliente
               </h2>
               <div
                 style={{
                   overflowX: 'auto',
+                  background: 'rgba(15, 23, 42, 0.4)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 18,
+                  border: '1px solid rgba(96, 165, 250, 0.2)',
+                  padding: 24,
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
                 }}
               >
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
                   <thead>
-                    <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                      <th style={{ padding: 12, color: '#111827', fontWeight: 700 }}>Email</th>
-                      <th style={{ padding: 12, color: '#111827', fontWeight: 700 }}>Cartões</th>
-                      <th style={{ padding: 12, color: '#111827', fontWeight: 700 }}>Views</th>
-                      <th style={{ padding: 12, color: '#111827', fontWeight: 700 }}>Clicks</th>
-                      <th style={{ padding: 12, color: '#111827', fontWeight: 700 }}>Leads</th>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(96, 165, 250, 0.2)' }}>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Email</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Cartões</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Views</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Clicks</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -280,12 +294,12 @@ export default function AdminAnalyticsPage() {
                       <tr
                         key={client.user_email}
                         style={{
-                          borderBottom: '1px solid rgba(0,0,0,0.08)',
-                          background: idx % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent',
+                          borderBottom: '1px solid rgba(96, 165, 250, 0.1)',
+                          background: idx % 2 === 0 ? 'rgba(96, 165, 250, 0.05)' : 'transparent',
                         }}
                       >
-                        <td style={{ padding: 12, color: '#111827' }}>{client.user_email}</td>
-                        <td style={{ padding: 12, color: '#111827', fontWeight: 700 }}>{client.card_count}</td>
+                        <td style={{ padding: 12, color: '#e0e7ff' }}>{client.user_email}</td>
+                        <td style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{client.card_count}</td>
                         <td style={{ padding: 12, color: '#3b82f6', fontWeight: 700 }}>{client.total_views}</td>
                         <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{client.total_clicks}</td>
                         <td style={{ padding: 12, color: '#22c55e', fontWeight: 700 }}>{client.total_leads}</td>
@@ -298,7 +312,7 @@ export default function AdminAnalyticsPage() {
           )}
 
           {chartData.length === 0 && cardSummary.length === 0 && (
-            <p style={{ color: 'rgba(0,0,0,0.55)' }}>Sem dados de analytics.</p>
+            <p style={{ color: 'rgba(96, 165, 250, 0.55)', textAlign: 'center', padding: 40 }}>Sem dados de analytics.</p>
           )}
         </>
       )}
