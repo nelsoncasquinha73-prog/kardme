@@ -125,6 +125,20 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     textAlign: st.heading?.align ?? 'left',
     fontSize: st.heading?.fontSize ?? 14,
   }
+const containerStyle: React.CSSProperties = {
+  marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
+  background: containerEnabled ? (st.container?.bgColor ?? 'transparent') : 'transparent',
+  borderRadius: st.container?.radius != null ? `${st.container.radius}px` : '16px',
+  padding: st.container?.padding != null ? `${st.container.padding}px` : '12px',
+  border:
+    (st.container?.borderWidth ?? 0) > 0
+      ? `${st.container?.borderWidth}px solid ${st.container?.borderColor ?? 'rgba(0,0,0,0.12)'}`
+      : '1px solid rgba(0,0,0,0.08)',
+  boxShadow: st.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+  position: 'relative',
+  width: '100%',
+  boxSizing: 'border-box',
+}
 
   const labelStyle: React.CSSProperties = {
     fontSize: st.inputs?.labelSize ?? 12,

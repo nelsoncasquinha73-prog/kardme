@@ -313,22 +313,8 @@ const bgV1 = migrateCardBg(bgRaw)
                     ) : block.type === 'services' ? (
                       <ServicesBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'lead_form' ? (
-  <div
-    style={{
-      background: block.style?.container?.enabled !== false ? (block.style?.container?.bgColor ?? 'transparent') : 'transparent',
-      borderRadius: block.style?.container?.radius != null ? `${block.style.container.radius}px` : '16px',
-      padding: block.style?.container?.padding != null ? `${block.style.container.padding}px` : '12px',
-      border:
-        (block.style?.container?.borderWidth ?? 0) > 0
-          ? `${block.style.container.borderWidth}px solid ${block.style.container.borderColor ?? 'rgba(0,0,0,0.12)'}`
-          : '1px solid rgba(0,0,0,0.08)',
-      boxShadow: block.style?.container?.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
-    }}
-  >
-    <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
-  </div>
-)
- : block.type === 'business_hours' ? (
+                      <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                    ) : block.type === 'business_hours' ? (
                       <BusinessHoursBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'profile' ? (
                       <ProfileBlock settings={block.settings} headerSettings={headerBlock?.settings} />
