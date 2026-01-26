@@ -9,7 +9,6 @@ import '@/styles/admin-templates.css'
 import { getBaseTemplateBlocks } from '@/lib/templates/baseTemplateBlocks'
 import { TEMPLATE_CATEGORIES, CATEGORY_LABELS } from '@/lib/templates/categories'
 
-
 type Template = {
   id: string
   name: string
@@ -37,12 +36,6 @@ function money(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
   return `€${v.toFixed(2)}`
 }
-type NewTemplateModal = {
-  name: string
-  category: string
-  price: number
-}
-
 
 export default function AdminTemplatesPage() {
   const router = useRouter()
@@ -65,15 +58,7 @@ export default function AdminTemplatesPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [openingId, setOpeningId] = useState<string | null>(null)
 
-const [showNewModal, setShowNewModal] = useState(false)
-const [newModalDraft, setNewModalDraft] = useState<NewTemplateModal>({
-  name: '',
-  category: 'geral',
-  price: 0,
-})
-const [creatingNew, setCreatingNew] = useState(false)
-
-
+  const [creatingNew, setCreatingNew] = useState(false)
   useEffect(() => {
     const run = async () => {
       setCheckingAuth(true)
@@ -143,150 +128,6 @@ const [creatingNew, setCreatingNew] = useState(false)
       image_url: t.image_url || '',
     })
   }
-const editTemplate = async (templateId: string) => {
-  setOpeningId(templateId)
-  setError(null)
-
-  try {
-    const { data: authData, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !authData?.user?.id) {
-      setError('Sem sessão. Faz login novamente.')
-      setOpeningId(null)
-      return
-    }
-
-    const userId = authData.user.id
-    const template = templates.find((t) => t.id === templateId)
-    if (!template) {
-      setError('Template não encontrado')
-      setOpeningId(null)
-      return
-    }
-
-    // 🎯 CRÍTICO: Procura draft existente ANTES de criar novo
-    const { data: existingDraft, error: draftErr } = await supabase
-      .from('cards')
-      .select('id')
-      .eq('template_id', templateId)
-      .eq('is_template_draft', true)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    let cardId: string
-
-    if (existingDraft && !draftErr) {
-  // ✅ Reutiliza draft existente
-  console.log('✅ Reutilizando draft existente:', existingDraft.id)
-  cardId = existingDraft.id
-
-  // 🔄 SINCRONIZAR: atualizar tema do draft com o template
-  const { error: themeErr } = await supabase
-    .from('cards')
-    .update({
-      theme: (template.theme_json as any) || { background: '#ffffff' },
-    })
-    .eq('id', cardId)
-
-  if (themeErr) {
-    console.error('⚠️ Erro ao sincronizar tema:', themeErr)
-  }
-
-  // 🔄 SINCRONIZAR: atualizar blocos do draft com o template
-  // 1) Apagar blocos antigos
-  const { error: deleteErr } = await supabase
-    .from('card_blocks')
-    .delete()
-    .eq('card_id', cardId)
-
-  if (deleteErr) {
-    console.error('⚠️ Erro ao apagar blocos antigos:', deleteErr)
-  }
-
-  // 2) Inserir blocos novos do template
-  const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
-  if (blocks.length) {
-    const blocksToInsert = blocks.map((block: any, index: number) => ({
-      card_id: cardId,
-      type: block.type,
-      order: block.order !== undefined ? block.order : index,
-      settings: block.settings || {},
-      style: block.style || {},
-      title: block.title || null,
-      enabled: block.enabled !== undefined ? block.enabled : true,
-    }))
-
-    const { error: blocksErr } = await supabase
-      .from('card_blocks')
-      .insert(blocksToInsert)
-
-    if (blocksErr) {
-      console.error('⚠️ Erro ao inserir blocos sincronizados:', blocksErr)
-    } else {
-      console.log('✅ Blocos sincronizados com sucesso')
-    }
-  }
-}
- else {
-      // ✅ Cria novo draft APENAS se não existe
-      console.log('🆕 Criando novo draft para template:', templateId)
-      
-      const { data: newCard, error: cardErr } = await supabase
-        .from('cards')
-        .insert({
-          user_id: userId,
-          name: `[DRAFT] ${template.name}`,
-          slug: `draft-template-${templateId}-${Date.now()}`,
-          template_id: template.id,
-          is_template_draft: true,
-          theme: (template.theme_json as any) || { background: '#ffffff' },
-        })
-        .select('id')
-        .single()
-
-      if (cardErr) {
-        setError(cardErr.message)
-        setOpeningId(null)
-        return
-      }
-
-      cardId = newCard.id
-
-      // Copiar blocos do template para o card
-      const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
-      if (blocks.length) {
-        const blocksToInsert = blocks.map((block: any, index: number) => ({
-          card_id: cardId,
-          type: block.type,
-          order: block.order !== undefined ? block.order : index,
-          settings: block.settings || {},
-          style: block.style || {},
-          title: block.title || null,
-          enabled: block.enabled !== undefined ? block.enabled : true,
-        }))
-
-        const { error: blocksErr } = await supabase
-          .from('card_blocks')
-          .insert(blocksToInsert)
-
-        if (blocksErr) {
-          setError(`Erro ao copiar blocos: ${blocksErr.message}`)
-          setOpeningId(null)
-          return
-        }
-      }
-    }
-
-    // Redirecionar para o editor
-    router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
-    setOpeningId(null)
-  } catch (e: any) {
-    setError(e.message || 'Erro ao abrir template para edição')
-    setOpeningId(null)
-  }
-}
-
 
   const cancelEdit = () => {
     setEditId(null)
@@ -365,6 +206,140 @@ const editTemplate = async (templateId: string) => {
     }
   }
 
+  const editTemplate = async (templateId: string) => {
+    setOpeningId(templateId)
+    setError(null)
+
+    try {
+      const { data: authData, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !authData?.user?.id) {
+        setError('Sem sessão. Faz login novamente.')
+        setOpeningId(null)
+        return
+      }
+
+      const userId = authData.user.id
+      const template = templates.find((t) => t.id === templateId)
+      if (!template) {
+        setError('Template não encontrado')
+        setOpeningId(null)
+        return
+      }
+
+      const { data: existingDraft, error: draftErr } = await supabase
+        .from('cards')
+        .select('id')
+        .eq('template_id', templateId)
+        .eq('is_template_draft', true)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      let cardId: string
+
+      if (existingDraft && !draftErr) {
+        console.log('✅ Reutilizando draft existente:', existingDraft.id)
+        cardId = existingDraft.id
+
+        const { error: themeErr } = await supabase
+          .from('cards')
+          .update({
+            theme: (template.theme_json as any) || { background: '#ffffff' },
+          })
+          .eq('id', cardId)
+
+        if (themeErr) {
+          console.error('⚠️ Erro ao sincronizar tema:', themeErr)
+        }
+
+        const { error: deleteErr } = await supabase
+          .from('card_blocks')
+          .delete()
+          .eq('card_id', cardId)
+
+        if (deleteErr) {
+          console.error('⚠️ Erro ao apagar blocos antigos:', deleteErr)
+        }
+
+        const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
+        if (blocks.length) {
+          const blocksToInsert = blocks.map((block: any, index: number) => ({
+            card_id: cardId,
+            type: block.type,
+            order: block.order !== undefined ? block.order : index,
+            settings: block.settings || {},
+            style: block.style || {},
+            title: block.title || null,
+            enabled: block.enabled !== undefined ? block.enabled : true,
+          }))
+
+          const { error: blocksErr } = await supabase
+            .from('card_blocks')
+            .insert(blocksToInsert)
+
+          if (blocksErr) {
+            console.error('⚠️ Erro ao inserir blocos sincronizados:', blocksErr)
+          } else {
+            console.log('✅ Blocos sincronizados com sucesso')
+          }
+        }
+      } else {
+        console.log('🆕 Criando novo draft para template:', templateId)
+
+        const { data: newCard, error: cardErr } = await supabase
+          .from('cards')
+          .insert({
+            user_id: userId,
+            name: `[DRAFT] ${template.name}`,
+            slug: `draft-template-${templateId}-${Date.now()}`,
+            template_id: template.id,
+            is_template_draft: true,
+            theme: (template.theme_json as any) || { background: '#ffffff' },
+          })
+          .select('id')
+          .single()
+
+        if (cardErr) {
+          setError(cardErr.message)
+          setOpeningId(null)
+          return
+        }
+
+        cardId = newCard.id
+
+        const blocks = Array.isArray(template.preview_json) ? template.preview_json : []
+        if (blocks.length) {
+          const blocksToInsert = blocks.map((block: any, index: number) => ({
+            card_id: cardId,
+            type: block.type,
+            order: block.order !== undefined ? block.order : index,
+            settings: block.settings || {},
+            style: block.style || {},
+            title: block.title || null,
+            enabled: block.enabled !== undefined ? block.enabled : true,
+          }))
+
+          const { error: blocksErr } = await supabase
+            .from('card_blocks')
+            .insert(blocksToInsert)
+
+          if (blocksErr) {
+            setError(`Erro ao copiar blocos: ${blocksErr.message}`)
+            setOpeningId(null)
+            return
+          }
+        }
+      }
+
+      router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
+      setOpeningId(null)
+    } catch (e: any) {
+      setError(e.message || 'Erro ao abrir template para edição')
+      setOpeningId(null)
+    }
+  }
+
   const openInEditor = async (t: Template) => {
     setOpeningId(t.id)
     setError(null)
@@ -413,59 +388,52 @@ const editTemplate = async (templateId: string) => {
 
     setOpeningId(null)
   }
-const createNewTemplate = async () => {
-  if (!newModalDraft.name.trim()) {
-    setError('Nome é obrigatório.')
-    return
+
+  const createNewTemplate = async () => {
+    setCreatingNew(true)
+    setError(null)
+
+    try {
+      const { data: authData, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !authData?.user?.id) throw new Error('Sem sessão.')
+      const userId = authData.user.id
+
+      const { data: newCard, error: cardErr } = await supabase
+        .from('cards')
+        .insert({
+          user_id: userId,
+          name: `[NOVO] ${Date.now()}`,
+          slug: `draft-${Date.now()}`,
+          theme: { background: '#ffffff' },
+          is_template_draft: true,
+        })
+        .select('id')
+        .single()
+
+      if (cardErr) throw new Error(cardErr.message)
+      const cardId = newCard.id
+
+      const baseBlocks = getBaseTemplateBlocks()
+      const blocksToInsert = baseBlocks.map((b: any) => ({
+        card_id: cardId,
+        type: b.type,
+        order: b.order,
+        title: b.title,
+        enabled: b.enabled,
+        settings: b.settings,
+        style: b.style,
+      }))
+
+      const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
+      if (blocksErr) throw new Error(blocksErr.message)
+
+      setCreatingNew(false)
+      router.push(`/dashboard/cards/${cardId}/theme?mode=template_draft`)
+    } catch (e) {
+      setCreatingNew(false)
+      setError(e instanceof Error ? e.message : 'Erro ao criar template.')
+    }
   }
-
-  setCreatingNew(true)
-  setError(null)
-
-  try {
-    const { data: authData, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !authData?.user?.id) throw new Error('Sem sessão.')
-    const userId = authData.user.id
-
-    const { data: newCard, error: cardErr } = await supabase
-      .from('cards')
-      .insert({
-        user_id: userId,
-        name: `[NOVO] ${newModalDraft.name.trim()}`,
-        slug: `new-template-${Date.now()}`,
-        theme: { background: '#ffffff' },
-      })
-      .select('id')
-      .single()
-
-    if (cardErr) throw new Error(cardErr.message)
-    const cardId = newCard.id
-
-    const baseBlocks = getBaseTemplateBlocks()
-    const blocksToInsert = baseBlocks.map((b: any) => ({
-      card_id: cardId,
-      type: b.type,
-      order: b.order,
-      title: b.title,
-      enabled: b.enabled,
-      settings: b.settings,
-      style: b.style,
-    }))
-
-    const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
-    if (blocksErr) throw new Error(blocksErr.message)
-
-    setShowNewModal(false)
-    setNewModalDraft({ name: '', category: 'geral', price: 0 })
-    setCreatingNew(false)
-
-    router.push(`/dashboard/cards/${cardId}/theme`)
-  } catch (e) {
-    setCreatingNew(false)
-    setError(e instanceof Error ? e.message : 'Erro ao criar template.')
-  }
-}
-
   if (checkingAuth) {
     return <p style={{ padding: 24 }}>A verificar sessão…</p>
   }
@@ -523,25 +491,23 @@ const createNewTemplate = async () => {
 
       {error && <div className="error">{error}</div>}
 
+      <div className="admin-templates-toolbar">
+        <button
+          className="btn-primary"
+          onClick={createNewTemplate}
+          disabled={loading || creatingNew}
+          style={{ marginRight: 'auto' }}
+        >
+          {creatingNew ? 'A criar…' : '+ Novo Template'}
+        </button>
 
-  <div className="admin-templates-toolbar">
-  <button 
-    className="btn-primary" 
-    onClick={() => setShowNewModal(true)}
-    disabled={loading}
-    style={{ marginRight: 'auto' }}
-  >
-    + Novo Template
-  </button>
-
-  <div className="admin-templates-search">
-    <input
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      placeholder="Pesquisar por nome, categoria, descrição…"
-    />
-  </div>
-
+        <div className="admin-templates-search">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Pesquisar por nome, categoria, descrição…"
+          />
+        </div>
 
         <div className="admin-templates-filters">
           <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as any)}>
@@ -570,63 +536,6 @@ const createNewTemplate = async () => {
           {filtered.map((t) => {
             const isEditing = editId === t.id
             const draft = isEditing ? editDraft : null
-
-const createNewTemplate = async () => {
-  if (!newModalDraft.name.trim()) {
-    setError('Nome é obrigatório.')
-    return
-  }
-
-  setCreatingNew(true)
-  setError(null)
-
-  try {
-    const { data: authData, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !authData?.user?.id) throw new Error('Sem sessão.')
-    const userId = authData.user.id
-
-    // 1) Criar card draft
-    const { data: newCard, error: cardErr } = await supabase
-      .from('cards')
-      .insert({
-        user_id: userId,
-        name: `[NOVO] ${newModalDraft.name.trim()}`,
-        slug: `new-template-${Date.now()}`,
-        theme: { background: '#ffffff' },
-      })
-      .select('id')
-      .single()
-
-    if (cardErr) throw new Error(cardErr.message)
-    const cardId = newCard.id
-
-    // 2) Criar blocos base
-    const baseBlocks = getBaseTemplateBlocks()
-    const blocksToInsert = baseBlocks.map((b: any) => ({
-      card_id: cardId,
-      type: b.type,
-      order: b.order,
-      title: b.title,
-      enabled: b.enabled,
-      settings: b.settings,
-      style: b.style,
-    }))
-
-    const { error: blocksErr } = await supabase.from('card_blocks').insert(blocksToInsert)
-    if (blocksErr) throw new Error(blocksErr.message)
-
-    // 3) Fechar modal e abrir editor
-    setShowNewModal(false)
-    setNewModalDraft({ name: '', category: 'geral', price: 0 })
-    setCreatingNew(false)
-
-    router.push(`/dashboard/cards/${cardId}/theme`)
-  } catch (e) {
-    setCreatingNew(false)
-    setError(e instanceof Error ? e.message : 'Erro ao criar template.')
-  }
-}
-
 
             return (
               <div key={t.id} className="admin-template-card">
@@ -664,16 +573,15 @@ const createNewTemplate = async () => {
                     >
                       {togglingId === t.id ? '…' : t.is_active ? 'Desativar' : 'Ativar'}
                     </button>
-                    
-<button
-  className="btn-secondary"
-  onClick={() => editTemplate(t.id)}
-  disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
-  title="Editar template no editor (atualiza o template original)"
->
-  {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
-</button>
 
+                    <button
+                      className="btn-secondary"
+                      onClick={() => editTemplate(t.id)}
+                      disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
+                      title="Editar template no editor (atualiza o template original)"
+                    >
+                      {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
+                    </button>
 
                     <button
                       className="btn-primary"
@@ -801,122 +709,6 @@ const createNewTemplate = async () => {
           })}
         </div>
       )}
-      {showNewModal && (
-  <div style={{
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  }}>
-    <div style={{
-      background: 'rgba(15,15,26,0.95)',
-      border: '1px solid rgba(255,255,255,0.15)',
-      borderRadius: 24,
-      padding: 32,
-      maxWidth: 420,
-      width: '90%',
-    }}>
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginBottom: 20 }}>
-        Novo Template
-      </h2>
-
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
-          Nome *
-        </label>
-        <input
-          type="text"
-          value={newModalDraft.name}
-          onChange={(e) => setNewModalDraft((p) => ({ ...p, name: e.target.value }))}
-          placeholder="Ex: Real Estate Premium"
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 12,
-            color: 'rgba(255,255,255,0.95)',
-            fontSize: 13,
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
-
-      <div style={{ marginBottom: 16 }}>
-  <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
-    Categoria
-  </label>
-  <select
-    value={newModalDraft.category}
-    onChange={(e) => setNewModalDraft((p) => ({ ...p, category: e.target.value }))}
-    style={{
-      width: '100%',
-      padding: '10px 12px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.15)',
-      borderRadius: 12,
-      color: 'rgba(255,255,255,0.95)',
-      fontSize: 13,
-      boxSizing: 'border-box',
-    }}
-  >
-    {TEMPLATE_CATEGORIES.map((cat) => (
-      <option key={cat} value={cat}>
-        {CATEGORY_LABELS[cat] || cat}
-      </option>
-    ))}
-  </select>
-</div>
-
-
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', display: 'block', marginBottom: 6 }}>
-          Preço (€)
-        </label>
-        <input
-          type="number"
-          min={0}
-          step={0.5}
-          value={newModalDraft.price}
-          onChange={(e) => setNewModalDraft((p) => ({ ...p, price: parseFloat(e.target.value) || 0 }))}
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 12,
-            color: 'rgba(255,255,255,0.95)',
-            fontSize: 13,
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
-
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button
-          className="btn-secondary"
-          onClick={() => setShowNewModal(false)}
-          disabled={creatingNew}
-          style={{ flex: 1 }}
-        >
-          Cancelar
-        </button>
-        <button
-          className="btn-primary"
-          onClick={createNewTemplate}
-          disabled={creatingNew}
-          style={{ flex: 1 }}
-        >
-          {creatingNew ? 'A criar…' : 'Criar e abrir'}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
     </div>
   )
 }
