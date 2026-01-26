@@ -111,7 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/admin/clientes', title: 'Clientes' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/admin/analytics', title: '📊 Analytics Geral' },
-    { prefix: '/admin/settings', title: 'Configurações' },
+    { prefix: '/dashboard/settings', title: 'Configurações' },
 
     { prefix: '/dashboard/leads', title: 'Contactos' },
     { prefix: '/dashboard/bookings', title: 'Reuniões' },
