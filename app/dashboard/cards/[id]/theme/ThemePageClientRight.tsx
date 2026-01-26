@@ -212,47 +212,6 @@ await onSave()
         </div>
       </div>
 
-      <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <label style={{ fontWeight: 700, fontSize: 12, opacity: 0.7, color: '#111827' }}>
-          Editar slug (link do cartão)
-        </label>
-        <input
-          type="text"
-          value={slugEdit}
-          onChange={(e) => setSlugEdit(e.target.value)}
-          disabled={slugSaving}
-          style={{
-            width: '100%',
-            padding: '6px 8px',
-            borderRadius: 6,
-            border: '1px solid rgba(0,0,0,0.15)',
-            marginTop: 4,
-            fontSize: 14,
-            color: '#374151',
-          }}
-        />
-        {slugError && <div style={{ color: 'red', marginTop: 4 }}>{slugError}</div>}
-        <button
-          onClick={saveSlug}
-          disabled={slugSaving || slugEdit === card.slug}
-          style={{
-            marginTop: 6,
-            padding: '8px 12px',
-            borderRadius: 8,
-            backgroundColor: '#111827',
-            color: '#fff',
-            fontWeight: 'bold',
-            cursor: slugSaving || slugEdit === card.slug ? 'not-allowed' : 'pointer',
-            opacity: slugSaving || slugEdit === card.slug ? 0.6 : 1,
-          }}
-        >
-          {slugSaving ? 'A guardar…' : 'Guardar slug'}
-        </button>
-      </div>
-
-      <div style={{ padding: 12, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        {card?.slug ? <CardPublicLink slug={card.slug} /> : null}
-      </div>
 
       <div style={{ padding: 12, overflow: 'auto' }}>
         {!activeBlock && (
