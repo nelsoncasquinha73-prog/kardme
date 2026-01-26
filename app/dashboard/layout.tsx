@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setUserEmail(user.email ?? null)
 
       // 2) Tentar ler role de sessionStorage
-      const storedRole = sessionStorage.getItem('userRole')
+      const storedRole = sessionStorage.getItem('role')
       if (storedRole) {
         setLoading(false)
         return
@@ -59,11 +59,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       if (error) {
         console.error('Erro a buscar role:', error)
-        sessionStorage.setItem('userRole', 'user')
+        sessionStorage.setItem('role', 'user')
       } else {
         const userRole = profile?.role || 'user'
         // 4) Guardar em sessionStorage para próximas vezes
-        sessionStorage.setItem('userRole', userRole)
+        sessionStorage.setItem('role', userRole)
       }
 
       setLoading(false)
@@ -73,11 +73,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router])
 
   // Ler role diretamente de sessionStorage (sem estado React)
-  const isAdmin = typeof window !== 'undefined' && sessionStorage.getItem('userRole') === 'admin'
+  const isAdmin = typeof window !== 'undefined' && sessionStorage.getItem('role') === 'admin'
 
   const logout = async () => {
     await supabase.auth.signOut()
-    sessionStorage.removeItem('userRole') // Limpar ao logout
+    sessionStorage.removeItem('role') // Limpar ao logout
     router.push('/login')
   }
 
