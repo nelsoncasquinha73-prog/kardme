@@ -161,7 +161,6 @@ await onSave()
       throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
     }
 
-    alert(`✅ Template "${data.name}" guardado com sucesso!`)
     setTemplateSaving(false)
     setTemplateModalOpen(false)
   } catch (err) {
