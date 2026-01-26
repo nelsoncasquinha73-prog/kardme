@@ -272,16 +272,32 @@ const bgV1 = migrateCardBg(bgRaw)
                     ? mapHeadingAlignToItems(block.style?.headingAlign)
                     : undefined
 
-                const wrapStyle: React.CSSProperties = {
-                  position: 'relative',
-                  zIndex: z,
-                  borderRadius: 18,
-                  cursor: onSelectBlock ? 'pointer' : 'default',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems,
-                  ...blockOuterSpacingFromJson(block.style),
-                }
+            
+
+
+const c = block.style?.container || {}
+const containerEnabled = c.enabled !== false
+
+const wrapStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: z,
+  cursor: onSelectBlock ? 'pointer' : 'default',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems,
+  ...blockOuterSpacingFromJson(block.style),
+  background: containerEnabled ? (c.bgColor ?? 'transparent') : 'transparent',
+  borderRadius: c.radius != null ? c.radius : 18,
+  padding: c.padding != null ? c.padding : undefined,
+  border:
+    (c.borderWidth ?? 0) > 0
+      ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}`
+      : undefined,
+  boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+  boxSizing: 'border-box',
+}
+
+
 
                 const Highlight = selected ? (
                   <div
