@@ -86,82 +86,92 @@ export default function ThemePageClientRight({
   }, [])
 
   const handleSaveAsTemplate = async (data: {
-    name: string
-    description: string
-    category: string
-    price: number
-  }) => {
-    console.log('🔴 handleSaveAsTemplate CALLED')
-    console.log('  card.id=', card.id)
+  name: string
+  description: string
+  category: string
+  price: number
+}) => {
+  console.log('🔴 handleSaveAsTemplate CALLED')
+  console.log('  card.id=', card.id)
 
-    setTemplateSaving(true)
+  setTemplateSaving(true)
 
-    try {
-      const { data: currentCard, error: cardErr } = await supabase
-        .from('cards')
-        .select('theme')
-        .eq('id', card.id)
-        .single()
+  try {
+    // 1️⃣ FORÇAR SAVE DO CARD (flush do autosave)
+    console.log('⏳ Forçando save do card antes de criar template…')
+    onSave()
+    
+    // 2️⃣ ESPERAR um pouco para o save terminar
+    await new Promise((resolve) => setTimeout(resolve, 800))
 
-      if (cardErr) throw new Error(cardErr.message)
+    // 3️⃣ AGORA SIM, ler os blocos (que já estão na BD)
+    const { data: currentCard, error: cardErr } = await supabase
+      .from('cards')
+      .select('theme')
+      .eq('id', card.id)
+      .single()
 
-      const currentTheme = currentCard?.theme || cardBg
+    if (cardErr) throw new Error(cardErr.message)
 
-      const { data: blocks, error: blocksErr } = await supabase
-        .from('card_blocks')
-        .select('*')
-        .eq('card_id', card.id)
-        .order('order', { ascending: true })
+    const currentTheme = currentCard?.theme || cardBg
 
-      if (blocksErr) throw new Error(blocksErr.message)
+    const { data: blocks, error: blocksErr } = await supabase
+      .from('card_blocks')
+      .select('*')
+      .eq('card_id', card.id)
+      .order('order', { ascending: true })
 
-      const preview_json = (blocks || []).map((b) => ({
-        type: b.type,
-        order: b.order ?? 0,
-        title: b.title ?? null,
-        enabled: b.enabled ?? true,
-        settings: b.settings ?? {},
-        style: b.style ?? {},
-      }))
+    if (blocksErr) throw new Error(blocksErr.message)
 
-      console.log('📦 preview_json blocks=', preview_json.length)
+    const preview_json = (blocks || []).map((b) => ({
+      type: b.type,
+      order: b.order ?? 0,
+      title: b.title ?? null,
+      enabled: b.enabled ?? true,
+      settings: b.settings ?? {},
+      style: b.style ?? {},
+    }))
 
-      // SEMPRE INSERT (ignora templateId)
-      console.log('🔵 INSERT novo template')
+    console.log('📦 preview_json blocks=', preview_json.length)
 
-      const { data: inserted, error: insertErr } = await supabase
-        .from('templates')
-        .insert({
-          name: data.name,
-          description: data.description,
-          category: data.category,
-          price: data.price,
-          preview_json: preview_json,
-          theme_json: currentTheme,
-          is_active: true,
-        })
-        .select('id')
+    // SEMPRE INSERT (ignora templateId)
+    console.log('🔵 INSERT novo template')
 
-      console.log('Inserted:', inserted, 'Error:', insertErr)
+    const { data: inserted, error: insertErr } = await supabase
+      .from('templates')
+      .insert({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        price: data.price,
+        preview_json: preview_json,
+        theme_json: currentTheme,
+        is_active: true,
+      })
+      .select('id')
 
-      if (insertErr) {
-        console.error('❌ INSERT ERROR:', insertErr)
-        throw new Error(insertErr.message)
-      }
+    console.log('Inserted:', inserted, 'Error:', insertErr)
 
-      if (!inserted || inserted.length === 0) {
-        console.error('❌ INSERT retornou vazio (RLS bloqueou?)')
-        throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
-      }
-
-      alert(`✅ Template "\${data.name}" guardado com sucesso!`)
-      setTemplateSaving(false)
-    } catch (err) {
-      console.error('❌ Error in handleSaveAsTemplate:', err)
-      alert(`❌ Erro: \${err instanceof Error ? err.message : 'Desconhecido'}`)
-      setTemplateSaving(false)
+    if (insertErr) {
+      console.error('❌ INSERT ERROR:', insertErr)
+      throw new Error(insertErr.message)
     }
+
+    if (!inserted || inserted.length === 0) {
+      console.error('❌ INSERT retornou vazio (RLS bloqueou?)')
+      throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
+    }
+
+    alert(`✅ Template "${data.name}" guardado com sucesso!`)
+    setTemplateSaving(false)
+    setTemplateModalOpen(false)
+  } catch (err) {
+    console.error('❌ Error in handleSaveAsTemplate:', err)
+    alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
+    setTemplateSaving(false)
   }
+}
+
 
   return (
     <aside
