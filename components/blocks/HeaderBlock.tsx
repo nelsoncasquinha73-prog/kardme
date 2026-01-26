@@ -184,7 +184,7 @@ export default function HeaderBlock({
         width: `calc(100% + ${horizontalBleed * 2}px)`,
         left: `-${horizontalBleed}px`,
         height,
-        background: headerBgEnabled ? headerBgColor : bgCss,
+        background: headerBgEnabled ? headerBgColor : 'transparent',
         overflow: 'hidden',
         marginLeft: 0,
         marginRight: 0,

@@ -132,6 +132,12 @@ const glowSize = (settings.avatar?.glow as any)?.size ?? 6
 const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
 const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
 
+// Shadow "botão premium": 2 camadas para depth
+const shadowCss = shadowEnabled
+  ? `0 8px 18px rgba(0,0,0,${0.16 * shadowIntensity / 0.18}), 0 2px 6px rgba(0,0,0,${0.10 * shadowIntensity / 0.18})`
+  : 'none'
+
+
 
   const autoOverlapY = dock === 'overlap' ? -avatarSizePx / 2 : 0
   const avatarOffsetY = settings.avatar?.offsetY != null ? settings.avatar.offsetY : autoOverlapY
@@ -179,9 +185,10 @@ const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
                   : undefined,
               background: '#fff',
               transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
-             boxShadow: [
+             
+  boxShadow: [
   glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
-  shadowEnabled ? `0 12px 28px rgba(0,0,0,${shadowIntensity})` : '0 10px 30px rgba(0,0,0,0.18)',
+  shadowCss,
 ]
   .filter(Boolean)
   .join(', '),
