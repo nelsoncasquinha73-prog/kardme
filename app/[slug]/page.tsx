@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props) {
     .eq('published', true)
     .single()
 
-  const rawBg = card?.theme?.background as CardBg | undefined
+  const rawBg = card?.theme?.background
   const v1 = migrateCardBg(rawBg)
 
   const color = (() => {
