@@ -50,7 +50,7 @@ export default function AdminAnalyticsPage() {
 
       // 1) Carregar eventos de analytics
       const { data: events, error: eventsErr } = await supabase
-        .from('card_analytics')
+        .from('card_events')
         .select('card_id, event_type, created_at')
         .gte('created_at', startIso)
         .order('created_at', { ascending: true })
