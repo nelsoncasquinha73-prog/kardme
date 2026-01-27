@@ -16,6 +16,7 @@ type SaveAsTemplateModalProps = {
     category: string
     category_id: number | null
     subcategory_id: number | null
+    pricing_tier: 'free' | 'paid' | 'premium'
     price: number
   }) => Promise<void>
   isLoading: boolean
@@ -32,6 +33,7 @@ export default function SaveAsTemplateModal({
   const [category, setCategory] = useState('geral')
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [subcategoryId, setSubcategoryId] = useState<number | null>(null)
+  const [pricingTier, setPricingTier] = useState<'free' | 'paid' | 'premium'>('free')
   const [price, setPrice] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,7 +41,6 @@ export default function SaveAsTemplateModal({
   const [subcategories, setSubcategories] = useState<SubcategoryRow[]>([])
   const [catsLoading, setCatsLoading] = useState(false)
 
-  // Carregar categorias quando o modal abre
   useEffect(() => {
     if (isOpen) {
       loadCategories()
@@ -76,7 +77,7 @@ export default function SaveAsTemplateModal({
   const handleCategoryChange = async (newCatId: number | null) => {
     setCategoryId(newCatId)
     setSubcategoryId(null)
-    
+
     if (newCatId) {
       const cat = categories.find((c) => c.id === newCatId)
       setCategory(cat?.slug || 'geral')
@@ -93,6 +94,11 @@ export default function SaveAsTemplateModal({
       return
     }
 
+    if (pricingTier === 'premium' && price <= 0) {
+    setError('Preço é obrigatório para templates Premium')
+    return
+  }
+
     try {
       await onConfirm({
         name,
@@ -100,13 +106,15 @@ export default function SaveAsTemplateModal({
         category,
         category_id: categoryId,
         subcategory_id: subcategoryId,
-        price,
+        pricing_tier: pricingTier,
+        price: pricingTier === 'premium' ? price : 0,
       })
       setName('')
       setDescription('')
       setCategory('geral')
       setCategoryId(null)
       setSubcategoryId(null)
+      setPricingTier('free')
       setPrice(0)
       setError(null)
       onClose()
@@ -232,29 +240,76 @@ export default function SaveAsTemplateModal({
             </div>
           )}
 
-          {/* Preço */}
+          {/* Pricing Tier */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, opacity: 0.8, color: 'rgba(255,255,255,0.92)' }}>
-              Preço (€) — 0 = grátis
+              Tipo de Template
             </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-              min="0"
-              step="0.5"
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.2)',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'rgba(255,255,255,0.92)',
-                marginTop: 6,
-                fontSize: 13,
-              }}
-            />
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="pricing_tier"
+                  value="free"
+                  checked={pricingTier === 'free'}
+                  onChange={(e) => setPricingTier(e.target.value as any)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.92)' }}>Free (0€)</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="pricing_tier"
+                  value="paid"
+                  checked={pricingTier === 'paid'}
+                  onChange={(e) => setPricingTier(e.target.value as any)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.92)' }}>Paid Plan (0€)</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="pricing_tier"
+                  value="premium"
+                  checked={pricingTier === 'premium'}
+                  onChange={(e) => setPricingTier(e.target.value as any)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.92)' }}>Premium (pago)</span>
+              </label>
+            </div>
           </div>
+
+          {/* Preço (só para Premium) */}
+          {pricingTier === 'premium' && (
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, opacity: 0.8, color: 'rgba(255,255,255,0.92)' }}>
+                Preço (€) *
+              </label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                min="0.01"
+                step="0.5"
+                placeholder="Ex: 9.99"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'rgba(255,255,255,0.92)',
+                  marginTop: 6,
+                  fontSize: 13,
+                }}
+              />
+            </div>
+          )}
 
           {error && (
             <div style={{ fontSize: 12, color: 'rgba(255, 120, 120, 0.95)', marginTop: 4 }}>

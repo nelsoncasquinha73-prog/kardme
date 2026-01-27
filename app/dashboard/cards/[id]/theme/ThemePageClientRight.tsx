@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import CardPublicLink from '@/components/dashboard/CardPublicLink'
 import PublishToggle from './PublishToggle'
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
 import ProfileBlockEditor from '@/components/dashboard/block-editors/ProfileBlockEditor'
@@ -19,7 +18,7 @@ import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBl
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
-import type { CardBg, CardBgV1 } from '@/lib/cardBg'
+import type { CardBgV1 } from '@/lib/cardBg'
 
 type CardBlock = {
   id: string
@@ -37,7 +36,7 @@ type Props = {
   activeDecoId: string | null
   onSelectDeco: (decoId: string | null) => void
   cardBg: CardBgV1
-  onChangeCardBg: (nextBg: CardBgV1) => void
+  onChangeCardBg: (nextV1: CardBgV1) => void
   onChangeSettings: (nextSettings: any) => void
   onChangeStyle: (nextStyle: any) => void
   onSave: () => Promise<void>
@@ -80,96 +79,78 @@ export default function ThemePageClientRight({
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    // Ler role de sessionStorage (já foi guardado no DashboardLayout)
     const storedRole = sessionStorage.getItem('userRole')
     setIsAdmin(storedRole === 'admin')
   }, [])
 
   const handleSaveAsTemplate = async (data: {
-  name: string
-  description: string
-  category: string
-  price: number
-}) => {
-  console.log('🔴 handleSaveAsTemplate CALLED')
-  console.log('  card.id=', card.id)
+    name: string
+    description: string
+    category: string
+    category_id: number | null
+    subcategory_id: number | null
+    pricing_tier: 'free' | 'paid' | 'premium'
+    price: number
+  }) => {
+    setTemplateSaving(true)
 
-  setTemplateSaving(true)
+    try {
+      await onSave()
 
-  try {
-    // 1️⃣ FORÇAR SAVE DO CARD (flush do autosave)
-console.log('⏳ Forçando save do card antes de criar template…')
-await onSave()
+      const { data: currentCard, error: cardErr } = await supabase
+        .from('cards')
+        .select('theme')
+        .eq('id', card.id)
+        .single()
 
-// 2️⃣ Agora sim, os blocos estão na BD
+      if (cardErr) throw new Error(cardErr.message)
 
-    // 3️⃣ AGORA SIM, ler os blocos (que já estão na BD)
-    const { data: currentCard, error: cardErr } = await supabase
-      .from('cards')
-      .select('theme')
-      .eq('id', card.id)
-      .single()
+      const currentTheme = currentCard?.theme || { background: cardBg }
 
-    if (cardErr) throw new Error(cardErr.message)
+      const { data: blocks, error: blocksErr } = await supabase
+        .from('card_blocks')
+        .select('*')
+        .eq('card_id', card.id)
+        .order('order', { ascending: true })
 
-    const currentTheme = currentCard?.theme || cardBg
+      if (blocksErr) throw new Error(blocksErr.message)
 
-    const { data: blocks, error: blocksErr } = await supabase
-      .from('card_blocks')
-      .select('*')
-      .eq('card_id', card.id)
-      .order('order', { ascending: true })
+      const preview_json = (blocks || []).map((b) => ({
+        type: b.type,
+        order: b.order ?? 0,
+        title: b.title ?? null,
+        enabled: b.enabled ?? true,
+        settings: b.settings ?? {},
+        style: b.style ?? {},
+      }))
 
-    if (blocksErr) throw new Error(blocksErr.message)
+      const { data: inserted, error: insertErr } = await supabase
+        .from('templates')
+        .insert({
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          category_id: data.category_id,
+          subcategory_id: data.subcategory_id,
+          pricing_tier: data.pricing_tier,
+          price: data.price,
+          preview_json,
+          theme_json: currentTheme,
+          is_active: true,
+        })
+        .select('id')
 
-    const preview_json = (blocks || []).map((b) => ({
-      type: b.type,
-      order: b.order ?? 0,
-      title: b.title ?? null,
-      enabled: b.enabled ?? true,
-      settings: b.settings ?? {},
-      style: b.style ?? {},
-    }))
+      if (insertErr) throw new Error(insertErr.message)
+      if (!inserted || inserted.length === 0) throw new Error('Template não foi inserido (RLS?)')
 
-    console.log('📦 preview_json blocks=', preview_json.length)
-
-    // SEMPRE INSERT (ignora templateId)
-    console.log('🔵 INSERT novo template')
-
-    const { data: inserted, error: insertErr } = await supabase
-      .from('templates')
-      .insert({
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        price: data.price,
-        preview_json: preview_json,
-        theme_json: currentTheme,
-        is_active: true,
-      })
-      .select('id')
-
-    console.log('Inserted:', inserted, 'Error:', insertErr)
-
-    if (insertErr) {
-      console.error('❌ INSERT ERROR:', insertErr)
-      throw new Error(insertErr.message)
+      setTemplateModalOpen(false)
+    } catch (err) {
+      console.error('❌ Error in handleSaveAsTemplate:', err)
+      alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
+    } finally {
+      setTemplateSaving(false)
     }
-
-    if (!inserted || inserted.length === 0) {
-      console.error('❌ INSERT retornou vazio (RLS bloqueou?)')
-      throw new Error('Template não foi inserido (sem permissões ou RLS bloqueou)')
-    }
-
-    setTemplateSaving(false)
-    setTemplateModalOpen(false)
-  } catch (err) {
-    console.error('❌ Error in handleSaveAsTemplate:', err)
-    alert(`❌ Erro: ${err instanceof Error ? err.message : 'Desconhecido'}`)
-    setTemplateSaving(false)
   }
-}
-
 
   return (
     <aside
@@ -177,7 +158,7 @@ await onSave()
         background: '#fff',
         color: '#374151',
         borderRadius: 18,
-                boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
         overflow: 'hidden',
         minHeight: 0,
         display: 'flex',
@@ -205,13 +186,10 @@ await onSave()
         <strong style={{ fontSize: 14, color: '#111827' }}>Editor</strong>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {activeBlock && (
-            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>
-              Bloco: {activeBlock.type}
-            </span>
+            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>Bloco: {activeBlock.type}</span>
           )}
         </div>
       </div>
-
 
       <div style={{ padding: 12, overflow: 'auto' }}>
         {!activeBlock && (
@@ -383,7 +361,7 @@ await onSave()
       >
         {activeBlock && (
           <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-            {!isAdmin && <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />}
+            <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
           </div>
         )}
 
@@ -442,4 +420,3 @@ await onSave()
     </aside>
   )
 }
-
