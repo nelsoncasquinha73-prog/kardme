@@ -9,11 +9,18 @@ import '@/styles/admin-templates.css'
 import { getBaseTemplateBlocks } from '@/lib/templates/baseTemplateBlocks'
 import { TEMPLATE_CATEGORIES, CATEGORY_LABELS } from '@/lib/templates/categories'
 
+const ADMIN_EMAIL = 'admin@kardme.com'
+
+type CategoryRow = { id: number; name: string; slug: string; sort_order: number; is_active: boolean }
+type SubcategoryRow = { id: number; category_id: number; name: string; slug: string; sort_order: number }
+
 type Template = {
   id: string
   name: string
   description: string | null
-  category: string | null
+  category: string | null // legacy (slug)
+  category_id: number | null
+  subcategory_id: number | null
   price: number | null
   image_url: string | null
   preview_json: any[] | null
@@ -25,12 +32,13 @@ type Template = {
 type EditDraft = {
   name: string
   description: string
-  category: string
+  category: string // legacy (slug)
+  category_id: number | null
+  subcategory_id: number | null
   price: number
   image_url: string
 }
 
-const ADMIN_EMAIL = 'admin@kardme.com'
 
 function money(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
@@ -57,8 +65,16 @@ export default function AdminTemplatesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [openingId, setOpeningId] = useState<string | null>(null)
-
+  const isAdmin = userEmail === ADMIN_EMAIL
   const [creatingNew, setCreatingNew] = useState(false)
+
+const [categories, setCategories] = useState<CategoryRow[]>([])
+const [subcategories, setSubcategories] = useState<SubcategoryRow[]>([])
+const [catsLoading, setCatsLoading] = useState(false)
+
+
+
+
   useEffect(() => {
     const run = async () => {
       setCheckingAuth(true)
@@ -74,7 +90,16 @@ export default function AdminTemplatesPage() {
     run()
   }, [])
 
-  const isAdmin = userEmail === ADMIN_EMAIL
+useEffect(() => {
+  if (!checkingAuth && isAdmin) {
+    loadTemplates()
+    loadCategories()
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [checkingAuth, isAdmin])
+
+
+  
 
   const loadTemplates = async () => {
     setLoading(true)
@@ -96,10 +121,6 @@ export default function AdminTemplatesPage() {
     setLoading(false)
   }
 
-  useEffect(() => {
-    if (!checkingAuth && isAdmin) loadTemplates()
-  }, [checkingAuth, isAdmin])
-
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
 
@@ -119,20 +140,68 @@ export default function AdminTemplatesPage() {
   }, [templates, query, filterActive])
 
   const startEdit = (t: Template) => {
-    setEditId(t.id)
-    setEditDraft({
-      name: t.name || '',
-      description: t.description || '',
-      category: t.category || 'geral',
-      price: typeof t.price === 'number' ? t.price : 0,
-      image_url: t.image_url || '',
-    })
+  setEditId(t.id)
+  setEditDraft({
+    name: t.name || '',
+    description: t.description || '',
+    category: t.category || 'geral',
+    category_id: t.category_id || null,
+    subcategory_id: t.subcategory_id || null,
+    price: typeof t.price === 'number' ? t.price : 0,
+    image_url: t.image_url || '',
+  })
+
+  // carregar subcategorias da categoria atual
+  loadSubcategories(t.category_id || null)
+}
+
+
+const loadCategories = async () => {
+  setCatsLoading(true)
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug, sort_order, is_active')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+
+  if (!error) setCategories((data || []) as CategoryRow[])
+  setCatsLoading(false)
+}
+
+const loadSubcategories = async (categoryId: number | null) => {
+  if (!categoryId) {
+    setSubcategories([])
+    return
   }
 
+  const { data, error } = await supabase
+    .from('subcategories')
+    .select('id, category_id, name, slug, sort_order')
+    .eq('category_id', categoryId)
+    .order('sort_order', { ascending: true })
+
+  if (!error) setSubcategories((data || []) as SubcategoryRow[])
+}
+const onEditCategoryChange = async (categoryId: number | null) => {
+  setEditDraft((p) => {
+    if (!p) return p
+    const slug = categoryId ? (categories.find((c) => c.id === categoryId)?.slug || 'geral') : 'geral'
+    return { ...p, category_id: categoryId, subcategory_id: null, category: slug }
+  })
+  await loadSubcategories(categoryId)
+}
+
+const onEditSubcategoryChange = (subcategoryId: number | null) => {
+  setEditDraft((p) => (p ? { ...p, subcategory_id: subcategoryId } : p))
+}
+
+
   const cancelEdit = () => {
-    setEditId(null)
-    setEditDraft(null)
-  }
+  setEditId(null)
+  setEditDraft(null)
+  setSubcategories([])
+}
+
 
   const saveEdit = async () => {
     if (!editId || !editDraft) return
@@ -143,13 +212,16 @@ export default function AdminTemplatesPage() {
       if (!editDraft.name.trim()) throw new Error('Nome é obrigatório.')
 
       const payload = {
-        name: editDraft.name.trim(),
-        description: editDraft.description.trim() || null,
-        category: editDraft.category.trim() || 'geral',
-        price: Number.isFinite(editDraft.price) ? editDraft.price : 0,
-        image_url: editDraft.image_url.trim() || null,
-        updated_at: new Date().toISOString(),
-      }
+  name: editDraft.name.trim(),
+  description: editDraft.description.trim() || null,
+  category: editDraft.category.trim() || 'geral',
+  category_id: editDraft.category_id || null,
+  subcategory_id: editDraft.subcategory_id || null,
+  price: Number.isFinite(editDraft.price) ? editDraft.price : 0,
+  image_url: editDraft.image_url.trim() || null,
+  updated_at: new Date().toISOString(),
+}
+
 
       const { error } = await supabase.from('templates').update(payload).eq('id', editId)
       if (error) throw new Error(error.message)
@@ -389,6 +461,7 @@ export default function AdminTemplatesPage() {
     setOpeningId(null)
   }
 
+
   const createNewTemplate = async () => {
     setCreatingNew(true)
     setError(null)
@@ -539,172 +612,199 @@ export default function AdminTemplatesPage() {
 
             return (
               <div key={t.id} className="admin-template-card">
-                <div className="admin-template-top">
-                  <div className="admin-template-title">
-                    <div className="admin-template-name">
-                      {isEditing ? (
-                        <input
-                          value={draft?.name || ''}
-                          onChange={(e) =>
-                            setEditDraft((p) => (p ? { ...p, name: e.target.value } : p))
-                          }
-                          placeholder="Nome"
-                        />
-                      ) : (
-                        <span>{t.name}</span>
-                      )}
-                    </div>
+  <div className="admin-template-top">
+    <div className="admin-template-title">
+      <div className="admin-template-name">
+        {isEditing ? (
+          <input
+            value={draft?.name || ''}
+            onChange={(e) =>
+              setEditDraft((p) => (p ? { ...p, name: e.target.value } : p))
+            }
+            placeholder="Nome"
+          />
+        ) : (
+          <span>{t.name}</span>
+        )}
+      </div>
 
-                    <div className="admin-template-meta">
-                      <span className={t.is_active ? 'pill pill-active' : 'pill pill-inactive'}>
-                        {t.is_active ? 'Ativo' : 'Inativo'}
-                      </span>
-                      <span className="pill pill-price">{money(t.price)}</span>
-                      <span className="pill pill-cat">{t.category || '—'}</span>
-                    </div>
-                  </div>
+      <div className="admin-template-meta">
+        <span className={t.is_active ? 'pill pill-active' : 'pill pill-inactive'}>
+          {t.is_active ? 'Ativo' : 'Inativo'}
+        </span>
+        <span className="pill pill-price">{money(t.price)}</span>
+        <span className="pill pill-cat">{t.category || '—'}</span>
+      </div>
+    </div>
 
-                  <div className="admin-template-actions">
-                    <button
-                      className="btn-ghost"
-                      onClick={() => toggleActive(t)}
-                      disabled={togglingId === t.id || deletingId === t.id || savingId === t.id}
-                      title="Ativar/Desativar"
-                    >
-                      {togglingId === t.id ? '…' : t.is_active ? 'Desativar' : 'Ativar'}
-                    </button>
+    <div className="admin-template-actions">
+      <button
+        className="btn-ghost"
+        onClick={() => toggleActive(t)}
+        disabled={togglingId === t.id || deletingId === t.id || savingId === t.id}
+        title="Ativar/Desativar"
+      >
+        {togglingId === t.id ? '…' : t.is_active ? 'Desativar' : 'Ativar'}
+      </button>
 
-                    <button
-                      className="btn-secondary"
-                      onClick={() => editTemplate(t.id)}
-                      disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
-                      title="Editar template no editor (atualiza o template original)"
-                    >
-                      {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
-                    </button>
+      <button
+        className="btn-secondary"
+        onClick={() => editTemplate(t.id)}
+        disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
+        title="Editar template no editor (atualiza o template original)"
+      >
+        {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
+      </button>
 
-                    <button
-                      className="btn-primary"
-                      onClick={() => openInEditor(t)}
-                      disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
-                      title="Duplicar este template como um cartão novo"
-                    >
-                      {openingId === t.id ? 'A abrir…' : 'Duplicar cartão'}
-                    </button>
-                  </div>
-                </div>
+      <button
+        className="btn-primary"
+        onClick={() => openInEditor(t)}
+        disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
+        title="Duplicar este template como um cartão novo"
+      >
+        {openingId === t.id ? 'A abrir…' : 'Duplicar cartão'}
+      </button>
+    </div>
+  </div>
 
-                <div className="admin-template-body">
-                  <div className="admin-template-field">
-                    <label>Descrição</label>
-                    {isEditing ? (
-                      <textarea
-                        value={draft?.description || ''}
-                        onChange={(e) =>
-                          setEditDraft((p) => (p ? { ...p, description: e.target.value } : p))
-                        }
-                        placeholder="Descrição (opcional)"
-                      />
-                    ) : (
-                      <p className="admin-template-text">{t.description || '—'}</p>
-                    )}
-                  </div>
+  <div className="admin-template-body">
+    <div className="admin-template-field">
+      <label>Descrição</label>
+      {isEditing ? (
+        <textarea
+          value={draft?.description || ''}
+          onChange={(e) =>
+            setEditDraft((p) => (p ? { ...p, description: e.target.value } : p))
+          }
+          placeholder="Descrição (opcional)"
+        />
+      ) : (
+        <p className="admin-template-text">{t.description || '—'}</p>
+      )}
+    </div>
 
-                  <div className="admin-template-row">
-                    <div className="admin-template-field">
-                      <label>Categoria</label>
-                      {isEditing ? (
-                        <input
-                          value={draft?.category || ''}
-                          onChange={(e) =>
-                            setEditDraft((p) => (p ? { ...p, category: e.target.value } : p))
-                          }
-                          placeholder="geral"
-                        />
-                      ) : (
-                        <p className="admin-template-text">{t.category || '—'}</p>
-                      )}
-                    </div>
+    <div className="admin-template-field">
+      <label>Categoria</label>
 
-                    <div className="admin-template-field">
-                      <label>Preço (€)</label>
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          min={0}
-                          step={0.5}
-                          value={draft?.price ?? 0}
-                          onChange={(e) =>
-                            setEditDraft((p) =>
-                              p ? { ...p, price: parseFloat(e.target.value) || 0 } : p
-                            )
-                          }
-                        />
-                      ) : (
-                        <p className="admin-template-text">{money(t.price)}</p>
-                      )}
-                    </div>
-                  </div>
+      {isEditing ? (
+        <>
+          <select
+            value={draft?.category_id ?? ''}
+            onChange={(e) =>
+              onEditCategoryChange(e.target.value ? Number(e.target.value) : null)
+            }
+            disabled={catsLoading || savingId === t.id}
+            className="admin-template-select"
+          >
+            <option value="">— Selecionar —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
 
-                  <div className="admin-template-field">
-                    <label>Imagem (URL)</label>
-                    {isEditing ? (
-                      <input
-                        value={draft?.image_url || ''}
-                        onChange={(e) =>
-                          setEditDraft((p) => (p ? { ...p, image_url: e.target.value } : p))
-                        }
-                        placeholder="https://… (opcional)"
-                      />
-                    ) : (
-                      <p className="admin-template-text">{t.image_url || '—'}</p>
-                    )}
-                  </div>
+          {!!draft?.category_id && subcategories.length > 0 && (
+            <select
+              style={{ marginTop: 8 }}
+              value={draft?.subcategory_id ?? ''}
+              onChange={(e) =>
+                onEditSubcategoryChange(e.target.value ? Number(e.target.value) : null)
+              }
+              disabled={savingId === t.id}
+              className="admin-template-select"
+            >
+              <option value="">— Subcategoria (opcional) —</option>
+              {subcategories.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </>
+      ) : (
+        <p className="admin-template-text">
+          {t.category_id
+            ? `${categories.find((c) => c.id === t.category_id)?.name || t.category || '—'}${
+                t.subcategory_id
+                  ? ` / ${subcategories.find((s) => s.id === t.subcategory_id)?.name || ''}`
+                  : ''
+              }`
+            : t.category || '—'}
+        </p>
+      )}
+    </div>
 
-                  <div className="admin-template-small">
-                    <span>
-                      Blocos no preview:{' '}
-                      <b>{Array.isArray(t.preview_json) ? t.preview_json.length : 0}</b>
-                    </span>
-                    <span className="dot">•</span>
-                    <span>ID: {t.id}</span>
-                  </div>
-                </div>
+    <div className="admin-template-field">
+      <label>Preço (€)</label>
+      {isEditing ? (
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={draft?.price ?? 0}
+          onChange={(e) =>
+            setEditDraft((p) =>
+              p ? { ...p, price: parseFloat(e.target.value) || 0 } : p
+            )
+          }
+        />
+      ) : (
+        <p className="admin-template-text">{money(t.price)}</p>
+      )}
+    </div>
 
-                <div className="admin-template-footer">
-                  {isEditing ? (
-                    <>
-                      <button
-                        className="btn-secondary"
-                        onClick={cancelEdit}
-                        disabled={savingId === t.id}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        className="btn-primary"
-                        onClick={saveEdit}
-                        disabled={savingId === t.id}
-                      >
-                        {savingId === t.id ? 'A guardar…' : 'Guardar'}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="btn-secondary" onClick={() => startEdit(t)}>
-                        Editar Detalhes
-                      </button>
-                      <button
-                        className="btn-danger"
-                        onClick={() => deleteTemplate(t)}
-                        disabled={deletingId === t.id}
-                      >
-                        {deletingId === t.id ? 'A apagar…' : 'Apagar'}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+    <div className="admin-template-field">
+      <label>Imagem (URL)</label>
+      {isEditing ? (
+        <input
+          value={draft?.image_url || ''}
+          onChange={(e) =>
+            setEditDraft((p) => (p ? { ...p, image_url: e.target.value } : p))
+          }
+          placeholder="https://… (opcional)"
+        />
+      ) : (
+        <p className="admin-template-text">{t.image_url || '—'}</p>
+      )}
+    </div>
+
+    <div className="admin-template-small">
+      <span>
+        Blocos no preview: <b>{Array.isArray(t.preview_json) ? t.preview_json.length : 0}</b>
+      </span>
+      <span className="dot">•</span>
+      <span>ID: {t.id}</span>
+    </div>
+  </div>
+
+  <div className="admin-template-footer">
+    {isEditing ? (
+      <>
+        <button className="btn-secondary" onClick={cancelEdit} disabled={savingId === t.id}>
+          Cancelar
+        </button>
+        <button className="btn-primary" onClick={saveEdit} disabled={savingId === t.id}>
+          {savingId === t.id ? 'A guardar…' : 'Guardar'}
+        </button>
+      </>
+    ) : (
+      <>
+        <button className="btn-secondary" onClick={() => startEdit(t)}>
+          Editar Detalhes
+        </button>
+        <button
+          className="btn-danger"
+          onClick={() => deleteTemplate(t)}
+          disabled={deletingId === t.id}
+        >
+          {deletingId === t.id ? 'A apagar…' : 'Apagar'}
+        </button>
+      </>
+    )}
+  </div>
+</div>
             )
           })}
         </div>
