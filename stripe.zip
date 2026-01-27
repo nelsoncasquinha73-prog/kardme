@@ -1,0 +1,6 @@
+{
+  "error": {
+    "message": "Unrecognized request URL (GET: /stripe-cli/releases/latest/mac/stripe_mac.zip). Please see https://stripe.com/docs or we can help at https://support.stripe.com/.",
+    "type": "invalid_request_error"
+  }
+}

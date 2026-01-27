@@ -66,6 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       ]
     : [
         { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+        { label: 'Planos', href: '/dashboard/plans', icon: FiHome },
         { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
         { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
         { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
@@ -88,6 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/nfc', title: 'NFC' },
     { prefix: '/dashboard/storage', title: 'Ficheiros' },
     { prefix: '/dashboard/settings', title: 'Definições' },
+    { prefix: '/dashboard/plans', title: 'Planos' },
     { prefix: '/dashboard/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/dashboard/analytics', title: 'Analytics' },
     { prefix: '/dashboard', title: 'Os meus cartões' },

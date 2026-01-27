@@ -1,0 +1,134 @@
+import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+import Stripe from 'stripe'
+import { stripe } from '@/lib/stripe'
+import { createClient } from '@supabase/supabase-js'
+
+export const runtime = 'nodejs'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export async function POST(req: Request) {
+  const sig = (await headers()).get('stripe-signature')
+  if (!sig) return NextResponse.json({ error: 'Missing stripe-signature' }, { status: 400 })
+
+  const rawBody = await req.text()
+
+  let event: Stripe.Event
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (err: any) {
+    return NextResponse.json({ error: `Webhook signature verification failed: ${err.message}` }, { status: 400 })
+  }
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session
+      const purchaseType = session.metadata?.purchase_type
+
+      if (purchaseType === 'pro_subscription') {
+        const userId = session.metadata?.user_id
+        const billing = session.metadata?.billing
+
+        const subscriptionId = session.subscription as string | null
+        const customerId = session.customer as string | null
+
+        if (userId && subscriptionId && customerId) {
+          const sub = await stripe.subscriptions.retrieve(subscriptionId)
+
+          const plan =
+            billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
+
+          await supabaseAdmin.from('user_subscriptions').upsert({
+            user_id: userId,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            plan,
+            status: sub.status,
+            current_period_end: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000).toISOString() : null,
+            updated_at: new Date().toISOString(),
+          })
+        }
+      }
+
+      if (purchaseType === 'nfc_order') {
+        const orderId = session.metadata?.order_id
+        const paymentIntentId = session.payment_intent as string | null
+
+        if (orderId && session.payment_status === 'paid') {
+          const shipping = (session as any).shipping_details
+
+          const addr = shipping?.address
+
+          await supabaseAdmin
+            .from('nfc_orders')
+            .update({
+              status: 'paid',
+              stripe_payment_intent_id: paymentIntentId,
+              paid_at: new Date().toISOString(),
+              shipping_name: shipping?.name || '—',
+              shipping_email: session.customer_details?.email || '—',
+              shipping_phone: session.customer_details?.phone || null,
+              shipping_address_line1: addr?.line1 || '—',
+              shipping_address_line2: addr?.line2 || null,
+              shipping_city: addr?.city || '—',
+              shipping_postal_code: addr?.postal_code || '—',
+              shipping_country: addr?.country || '—',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orderId)
+
+          // Enable NFC on all cards in this order
+          const { data: items } = await supabaseAdmin
+            .from('nfc_order_items')
+            .select('card_id')
+            .eq('nfc_order_id', orderId)
+
+          const cardIds = (items || []).map((x: any) => x.card_id).filter(Boolean)
+
+          if (cardIds.length) {
+            await supabaseAdmin
+              .from('cards')
+              .update({
+                nfc_enabled: true,
+                nfc_order_id: orderId,
+                nfc_enabled_at: new Date().toISOString(),
+              })
+              .in('id', cardIds)
+          }
+        }
+      }
+    }
+
+    // Keep subscription table in sync
+    if (
+      event.type === 'customer.subscription.created' ||
+      event.type === 'customer.subscription.updated' ||
+      event.type === 'customer.subscription.deleted'
+    ) {
+      const sub = event.data.object as Stripe.Subscription
+      const customerId = sub.customer as string
+
+      const { data: row } = await supabaseAdmin
+        .from('user_subscriptions')
+        .select('user_id, plan')
+        .eq('stripe_customer_id', customerId)
+        .maybeSingle()
+
+      if (row?.user_id) {
+        await supabaseAdmin.from('user_subscriptions').update({
+          status: sub.status,
+          current_period_end: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000).toISOString() : null,
+          updated_at: new Date().toISOString(),
+        }).eq('user_id', row.user_id)
+      }
+    }
+
+    return NextResponse.json({ received: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Webhook handler error' }, { status: 500 })
+  }
+}
