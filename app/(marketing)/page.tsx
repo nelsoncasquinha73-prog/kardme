@@ -40,35 +40,35 @@ export default function Home() {
   return (
     <main className="landing-page">
       {/* NAVBAR */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
-        <div className="container">
-          <Link className="navbar-brand" href="/">
-            <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
-          </Link>
+<nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
+  <div className="container">
+    <Link className="navbar-brand" href="/">
+      <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
+    </Link>
 
-          <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {user ? (
-              <>
-                <Link className="nav-link" href="/dashboard">
-                  Dashboard
-                </Link>
-                <Link className="btn btn-primary" href="/dashboard/plans">
-                  Upgrade
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link className="nav-link" href="/signin">
-                  Entrar
-                </Link>
-                <Link className="btn btn-primary" href="/signup">
-                  Criar grátis
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      {user ? (
+        <>
+          <Link className="nav-link" href="/dashboard">
+            Dashboard
+          </Link>
+          <Link className="btn btn-primary" href="/dashboard/plans">
+            Upgrade
+          </Link>
+        </>
+      ) : (
+        <>
+          <Link className="nav-link" href="/signin">
+            Entrar
+          </Link>
+          <Link className="btn btn-primary" href="/signup">
+            Criar cartão grátis
+          </Link>
+        </>
+      )}
+    </div>
+  </div>
+</nav>
 
       {/* HERO SECTION */}
       <div className="slider-area slider-style-1 variation-default heroGrid">
@@ -251,34 +251,39 @@ export default function Home() {
           </div>
 
           <div className="row" style={{ marginTop: 40 }}>
-            {/* FREE PLAN */}
-            <div className="col-lg-4 col-md-6">
-              <div className="pricing-item">
-                <h3 className="pricing-title">Grátis</h3>
-                <p className="pricing-subtitle">Para começar</p>
-                <div className="pricing-price">
-                  <span className="price">€0</span>
-                  <span className="period">/mês</span>
-                </div>
-                <ul className="pricing-list">
-                  <li>
-                    <i className="fas fa-check"></i> 1 cartão digital
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Templates básicos
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Customização limitada
-                  </li>
-                  <li>
-                    <i className="fas fa-times"></i> Analytics
-                  </li>
-                </ul>
-                <Link href="/signup" className="btn btn-outline">
-                  Começar
-                </Link>
-              </div>
-            </div>
+
+            {/* FREE PLAN */}        
+<div className="col-lg-4 col-md-6">
+  <div className="pricing-item">
+    <h3 className="pricing-title">Grátis</h3>
+    <p className="pricing-subtitle">Para começar</p>
+    <div className="pricing-price">
+      <span className="price">€0</span>
+      <span className="period">*</span>
+    </div>
+    <ul className="pricing-list">
+      <li>
+        <i className="fas fa-check"></i> 1 cartão digital
+      </li>
+      <li>
+        <i className="fas fa-check"></i> 10 templates
+      </li>
+      <li>
+        <i className="fas fa-check"></i> Analytics completo
+      </li>
+      <li>
+        <i className="fas fa-check"></i> Gestão de leads
+      </li>
+    </ul>
+    <Link href="/signup" className="btn btn-outline">
+      Criar cartão grátis
+    </Link>
+    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
+      *3 meses de utilização grátis
+    </p>
+  </div>
+</div>
+
 
             {/* PRO PLAN */}
             <div className="col-lg-4 col-md-6">
@@ -292,13 +297,13 @@ export default function Home() {
                 </div>
                 <ul className="pricing-list">
                   <li>
-                    <i className="fas fa-check"></i> 30-40 cartões
+                    <i className="fas fa-check"></i> 1 cartão digital
                   </li>
                   <li>
-                    <i className="fas fa-check"></i> Todos os templates
+                    <i className="fas fa-check"></i> 30+ templates
                   </li>
                   <li>
-                    <i className="fas fa-check"></i> Customização completa
+                    <i className="fas fa-check"></i> Customização avançada
                   </li>
                   <li>
                     <i className="fas fa-check"></i> Analytics &amp; Leads
