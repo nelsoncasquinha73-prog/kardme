@@ -500,3 +500,218 @@
 .landing-page .bg-shape {
   display: none;
 }
+/* ===== PREMIUM LANDING IMPROVEMENTS ===== */
+
+/* Navbar */
+.landing-page .navbar {
+  position: relative;
+  z-index: 100;
+  padding: 16px 0;
+}
+
+.landing-page .navbar .btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s;
+}
+
+.landing-page .navbar .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.landing-page .navbar .nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.landing-page .navbar .nav-link:hover {
+  color: #fff !important;
+}
+
+/* Hero Gradient Text */
+.landing-page .theme-gradient {
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero CTA Buttons */
+.landing-page .heroCtaCard .btn-default,
+.landing-page .heroCtaCard button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.landing-page .heroCtaCard .btn-default {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.landing-page .heroCtaCard .btn-default:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+}
+
+/* CTA Final Section Buttons */
+.cta-final-section .btn-default,
+.cta-final-section button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.cta-final-section .btn-default:hover,
+.cta-final-section button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+}
+
+/* Pricing Buttons Fix */
+.pricing-item .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+  width: 100%;
+}
+
+.pricing-item .btn-outline {
+  background: transparent;
+  color: var(--color-text, #fff) !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+}
+
+.pricing-item .btn-outline:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5) !important;
+}
+
+.pricing-item .btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+
+.pricing-item .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+/* Pricing Item Featured Glow */
+.pricing-item-featured {
+  border: 2px solid rgba(139, 92, 246, 0.5) !important;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.2), 0 4px 20px rgba(0,0,0,0.3) !important;
+  background: rgba(139, 92, 246, 0.05) !important;
+}
+
+/* Annual Option Button */
+.pricing-section .btn-outline {
+  background: transparent;
+  color: rgba(255,255,255,0.85) !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.pricing-section .btn-outline:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5) !important;
+}
+
+/* Dark Mode Sections */
+.showcase-section,
+.how-it-works-section,
+.why-kardme-section,
+.pricing-section,
+.cta-final-section {
+  background: #0b0b12 !important;
+}
+
+.section-title {
+  color: #fff !important;
+}
+
+.section-description {
+  color: rgba(255,255,255,0.65) !important;
+}
+
+.service-item h3,
+.feature-item h3 {
+  color: #fff !important;
+}
+
+.service-item p,
+.feature-item p {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.pricing-item {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+.pricing-title {
+  color: #fff !important;
+}
+
+.pricing-subtitle {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.pricing-price .price {
+  color: #fff !important;
+}
+
+.pricing-price .period {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.pricing-list li {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+.pricing-list .fa-check {
+  color: #22c55e !important;
+}
+
+.pricing-list .fa-times {
+  color: rgba(255,255,255,0.3) !important;
+}
