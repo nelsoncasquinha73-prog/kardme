@@ -43,15 +43,16 @@ type EditDraft = {
 
 function money(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
-  return `€\${v.toFixed(2)}`
+  return `€${v.toFixed(2)}`
 }
 
 function getPricingDisplay(tier: string | null, price: number | null) {
   if (tier === 'free') return 'Free (0€)'
   if (tier === 'paid') return 'Incluído no Plano (0€)'
-  if (tier === 'premium') return `Premium (\${money(price)})`
+  if (tier === 'premium') return `Premium (${money(price)})`
   return money(price)
 }
+
 
 export default function AdminTemplatesPage() {
   const router = useRouter()
