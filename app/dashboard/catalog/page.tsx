@@ -11,6 +11,9 @@ type Template = {
   name: string
   description: string | null
   category: string | null
+  category_id: number | null
+  subcategory_id: number | null
+  pricing_tier: 'free' | 'paid' | 'premium' | null
   price: number | null
   image_url: string | null
   preview_json: any[] | null
@@ -19,17 +22,33 @@ type Template = {
   created_at?: string | null
 }
 
+
 type PriceFilter = 'all' | 'free' | 'premium'
 
 function eur(n: number | null | undefined) {
   const v = typeof n === 'number' ? n : 0
-  return `€\${v.toFixed(2)}`
+  return `€${v.toFixed(2)}`
+}
+
+function getPriceDisplay(tier: string | null, price: number | null) {
+  if (tier === 'free') return 'Grátis'
+  if (tier === 'paid') return 'Incluído no Plano'
+  if (tier === 'premium') return eur(price)
+  return eur(price)
+}
+
+function priceLabelFor(t: Template) {
+  if (t.pricing_tier === 'free') return 'Grátis'
+  if (t.pricing_tier === 'paid') return 'Incluído no Plano'
+  if (t.pricing_tier === 'premium') return eur(t.price)
+  // fallback legacy
+  return isFree(t) ? 'Grátis' : eur(t.price)
 }
 
 function isFree(t: Template) {
-  const p = typeof t.price === 'number' ? t.price : 0
-  return p <= 0
+  return t.pricing_tier === 'free' || t.pricing_tier === 'paid'
 }
+
 
 function themeToCssBackground(theme: any): string | null {
   if (!theme) return null
@@ -112,22 +131,27 @@ export default function CatalogPage() {
   }, [templates])
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return templates.filter((t) => {
-      const name = (t.name || '').toLowerCase()
-      const desc = (t.description || '').toLowerCase()
-      const cat = (t.category || '').toLowerCase()
+  const q = query.trim().toLowerCase()
+  return templates.filter((t) => {
+    const name = (t.name || '').toLowerCase()
+    const desc = (t.description || '').toLowerCase()
+    const cat = (t.category || '').toLowerCase()
 
-      const matchesQuery = !q || name.includes(q) || desc.includes(q) || cat.includes(q)
-      const matchesCategory = category === 'all' ? true : (t.category || '') === category
+    const matchesQuery = !q || name.includes(q) || desc.includes(q) || cat.includes(q)
+    const matchesCategory = category === 'all' ? true : (t.category || '') === category
 
-      const free = isFree(t)
-      const matchesPrice =
-        priceFilter === 'all' ? true : priceFilter === 'free' ? free : !free
+    const matchesPrice =
+  priceFilter === 'all'
+    ? true
+    : priceFilter === 'free'
+    ? t.pricing_tier === 'free' || t.pricing_tier === 'paid'
+    : t.pricing_tier === 'premium'
 
-      return matchesQuery && matchesCategory && matchesPrice
-    })
-  }, [templates, query, category, priceFilter])
+
+    return matchesQuery && matchesCategory && matchesPrice
+  })
+}, [templates, query, category, priceFilter])
+
 
   const createCardFromTemplate = async (t: Template) => {
     setCreatingTemplateId(t.id)
@@ -361,7 +385,7 @@ export default function CatalogPage() {
           >
             {filtered.map((t) => {
               const free = isFree(t)
-              const priceLabel = free ? 'Grátis' : eur(t.price)
+              const priceLabel = getPriceDisplay(t.pricing_tier, t.price)
               const bg =
                 themeToCssBackground((t as any).theme_json) ||
                 'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))'
