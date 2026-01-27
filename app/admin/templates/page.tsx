@@ -632,7 +632,12 @@ export default function AdminTemplatesPage() {
                         {t.is_active ? 'Ativo' : 'Inativo'}
                       </span>
                       <span className="pill pill-price">{getPricingDisplay(t.pricing_tier, t.price)}</span>
-                      <span className="pill pill-cat">{t.category || '—'}</span>
+                      <span className="pill pill-cat">
+  {t.category_id
+    ? categories.find((c) => c.id === t.category_id)?.name || t.category || '—'
+    : t.category || '—'}
+</span>
+
                     </div>
                   </div>
 
