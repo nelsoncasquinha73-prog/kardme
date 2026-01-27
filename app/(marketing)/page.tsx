@@ -1,7 +1,42 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 import KardmeShowcase from '@/components/KardmeShowcase'
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data?.user || null)
+      setLoading(false)
+    }
+    getUser()
+  }, [])
+
+  const handleUpgradeClick = async (billing: 'monthly' | 'yearly') => {
+    if (!user) {
+      window.location.href = '/signup'
+      return
+    }
+
+    try {
+      const res = await fetch('/api/stripe/checkout-pro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, billing }),
+      })
+      const data = await res.json()
+      if (data?.url) window.location.href = data.url
+    } catch (e) {
+      console.error('Erro ao iniciar checkout:', e)
+    }
+  }
+
   return (
     <main className="landing-page">
       {/* NAVBAR */}
@@ -12,12 +47,25 @@ export default function Home() {
           </Link>
 
           <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Link className="nav-link" href="/signin">
-              Entrar
-            </Link>
-            <Link className="btn btn-primary" href="/signup">
-              Criar grátis
-            </Link>
+            {user ? (
+              <>
+                <Link className="nav-link" href="/dashboard">
+                  Dashboard
+                </Link>
+                <Link className="btn btn-primary" href="/dashboard/plans">
+                  Upgrade
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link className="nav-link" href="/signin">
+                  Entrar
+                </Link>
+                <Link className="btn btn-primary" href="/signup">
+                  Criar grátis
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -46,9 +94,23 @@ export default function Home() {
 
                 <div className="heroCtaCard">
                   <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
-                  <Link className="btn-default" href="/signup">
-                    Quero o meu cartão premium
-                  </Link>
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Link className="btn-default" href={user ? '/dashboard/catalog' : '/signup'}>
+                      {user ? 'Ir para catálogo' : 'Quero o meu cartão premium'}
+                    </Link>
+                    {user && (
+                      <button
+                        onClick={() => handleUpgradeClick('monthly')}
+                        className="btn-default"
+                        style={{
+                          background: 'rgba(139, 92, 246, 0.8)',
+                          border: '1px solid rgba(139, 92, 246, 0.5)',
+                        }}
+                      >
+                        Upgrade Pro
+                      </button>
+                    )}
+                  </div>
                   <p className="heroCtaMicro">Sem cartão de crédito. Começa grátis.</p>
                 </div>
               </div>
@@ -189,6 +251,7 @@ export default function Home() {
           </div>
 
           <div className="row" style={{ marginTop: 40 }}>
+            {/* FREE PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
                 <h3 className="pricing-title">Grátis</h3>
@@ -217,18 +280,19 @@ export default function Home() {
               </div>
             </div>
 
+            {/* PRO PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-featured">
                 <div className="pricing-badge">Mais popular</div>
                 <h3 className="pricing-title">Pro</h3>
                 <p className="pricing-subtitle">Para profissionais</p>
                 <div className="pricing-price">
-                  <span className="price">€9.99</span>
+                  <span className="price">€6,99</span>
                   <span className="period">/mês</span>
                 </div>
                 <ul className="pricing-list">
                   <li>
-                    <i className="fas fa-check"></i> Cartões ilimitados
+                    <i className="fas fa-check"></i> 30-40 cartões
                   </li>
                   <li>
                     <i className="fas fa-check"></i> Todos os templates
@@ -240,12 +304,23 @@ export default function Home() {
                     <i className="fas fa-check"></i> Analytics &amp; Leads
                   </li>
                 </ul>
-                <Link href="/signup" className="btn btn-primary">
-                  Começar
-                </Link>
+                {user ? (
+                  <button
+                    onClick={() => handleUpgradeClick('monthly')}
+                    className="btn btn-primary"
+                    style={{ width: '100%', border: 'none', cursor: 'pointer' }}
+                  >
+                    Fazer upgrade
+                  </button>
+                ) : (
+                  <Link href="/signup" className="btn btn-primary">
+                    Começar
+                  </Link>
+                )}
               </div>
             </div>
 
+            {/* ENTERPRISE PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
                 <h3 className="pricing-title">Enterprise</h3>
@@ -273,20 +348,55 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* ANNUAL OPTION */}
+          <div className="row justify-content-center" style={{ marginTop: 40 }}>
+            <div className="col-lg-8 text-center">
+              <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
+                Preferes pagar anualmente? Poupa 20% com €69/ano
+              </p>
+              {user ? (
+                <button
+                  onClick={() => handleUpgradeClick('yearly')}
+                  className="btn btn-outline"
+                  style={{ border: 'none', cursor: 'pointer' }}
+                >
+                  Upgrade anual (€69/ano)
+                </button>
+              ) : (
+                <Link href="/signup" className="btn btn-outline">
+                  Começar com plano anual
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* CTA FINAL SECTION */}
+         {/* CTA FINAL SECTION */}
       <section className="cta-final-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">Pronto para começar?</h2>
               <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
-              <div style={{ marginTop: 24 }}>
-                <Link className="btn-default" href="/signup">
-                  Quero o meu cartão premium
+              <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link className="btn-default" href={user ? '/dashboard/catalog' : '/signup'}>
+                  {user ? 'Ver catálogo' : 'Quero o meu cartão premium'}
                 </Link>
+                {user && (
+                  <button
+                    onClick={() => handleUpgradeClick('monthly')}
+                    className="btn-default"
+                    style={{
+                      background: 'rgba(139, 92, 246, 0.8)',
+                      border: '1px solid rgba(139, 92, 246, 0.5)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Upgrade Pro
+                  </button>
+                )}
               </div>
             </div>
           </div>
