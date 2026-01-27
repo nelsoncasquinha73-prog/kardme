@@ -1,7 +1,11 @@
 'use client'
 
 import '@/styles/dashboard-modal.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+
+type CategoryRow = { id: number; name: string; slug: string; sort_order: number; is_active: boolean }
+type SubcategoryRow = { id: number; category_id: number; name: string; slug: string; sort_order: number }
 
 type SaveAsTemplateModalProps = {
   isOpen: boolean
@@ -10,6 +14,8 @@ type SaveAsTemplateModalProps = {
     name: string
     description: string
     category: string
+    category_id: number | null
+    subcategory_id: number | null
     price: number
   }) => Promise<void>
   isLoading: boolean
@@ -24,8 +30,62 @@ export default function SaveAsTemplateModal({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('geral')
+  const [categoryId, setCategoryId] = useState<number | null>(null)
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null)
   const [price, setPrice] = useState(0)
   const [error, setError] = useState<string | null>(null)
+
+  const [categories, setCategories] = useState<CategoryRow[]>([])
+  const [subcategories, setSubcategories] = useState<SubcategoryRow[]>([])
+  const [catsLoading, setCatsLoading] = useState(false)
+
+  // Carregar categorias quando o modal abre
+  useEffect(() => {
+    if (isOpen) {
+      loadCategories()
+    }
+  }, [isOpen])
+
+  const loadCategories = async () => {
+    setCatsLoading(true)
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name, slug, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+
+    if (!error) setCategories((data || []) as CategoryRow[])
+    setCatsLoading(false)
+  }
+
+  const loadSubcategories = async (catId: number | null) => {
+    if (!catId) {
+      setSubcategories([])
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('subcategories')
+      .select('id, category_id, name, slug, sort_order')
+      .eq('category_id', catId)
+      .order('sort_order', { ascending: true })
+
+    if (!error) setSubcategories((data || []) as SubcategoryRow[])
+  }
+
+  const handleCategoryChange = async (newCatId: number | null) => {
+    setCategoryId(newCatId)
+    setSubcategoryId(null)
+    
+    if (newCatId) {
+      const cat = categories.find((c) => c.id === newCatId)
+      setCategory(cat?.slug || 'geral')
+      await loadSubcategories(newCatId)
+    } else {
+      setCategory('geral')
+      setSubcategories([])
+    }
+  }
 
   const handleConfirm = async () => {
     if (!name.trim()) {
@@ -34,10 +94,19 @@ export default function SaveAsTemplateModal({
     }
 
     try {
-      await onConfirm({ name, description, category, price })
+      await onConfirm({
+        name,
+        description,
+        category,
+        category_id: categoryId,
+        subcategory_id: subcategoryId,
+        price,
+      })
       setName('')
       setDescription('')
       setCategory('geral')
+      setCategoryId(null)
+      setSubcategoryId(null)
       setPrice(0)
       setError(null)
       onClose()
@@ -110,8 +179,9 @@ export default function SaveAsTemplateModal({
               Categoria
             </label>
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={categoryId ?? ''}
+              onChange={(e) => handleCategoryChange(e.target.value ? Number(e.target.value) : null)}
+              disabled={catsLoading}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -123,15 +193,44 @@ export default function SaveAsTemplateModal({
                 fontSize: 13,
               }}
             >
-              <option value="geral">Geral</option>
-              <option value="imobiliario">Imobiliário</option>
-              <option value="restaurante">Restaurante</option>
-              <option value="vendas">Vendas</option>
-              <option value="consultoria">Consultoria</option>
-              <option value="tech">Tech</option>
-              <option value="outro">Outro</option>
+              <option value="">— Selecionar categoria —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
+
+          {/* Subcategoria */}
+          {categoryId && subcategories.length > 0 && (
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, opacity: 0.8, color: 'rgba(255,255,255,0.92)' }}>
+                Subcategoria (opcional)
+              </label>
+              <select
+                value={subcategoryId ?? ''}
+                onChange={(e) => setSubcategoryId(e.target.value ? Number(e.target.value) : null)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'rgba(255,255,255,0.92)',
+                  marginTop: 6,
+                  fontSize: 13,
+                }}
+              >
+                <option value="">— Selecionar subcategoria —</option>
+                {subcategories.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Preço */}
           <div>
