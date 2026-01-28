@@ -195,20 +195,20 @@ export default function DashboardPage() {
 
     return (
       <div className="dashboard-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 200px)' }}>
-        <div style={{ textAlign: 'center', maxWidth: 600, padding: '40px 20px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 800, padding: '40px 20px' }}>
           {/* Greeting */}
-          <p style={{ fontSize: 18, color: '#9ca3af', marginBottom: 8 }}>
+          <p style={{ fontSize: 27, color: '#9ca3af', marginBottom: 8 }}>
             {greeting}, <span style={{ color: '#8b5cf6', fontWeight: 600 }}>{userName}</span> 👋
           </p>
           
           {/* Big Emoji */}
-          <div style={{ fontSize: 64, marginBottom: 24 }}>
+          <div style={{ fontSize: 96, marginBottom: 36 }}>
             {quote.emoji}
           </div>
           
           {/* Quote */}
           <p style={{ 
-            fontSize: 28, 
+            fontSize: 42, 
             fontWeight: 600, 
             color: '#d1d5db', 
             lineHeight: 1.4,
@@ -218,7 +218,7 @@ export default function DashboardPage() {
           </p>
           
           {/* Subtle branding */}
-          <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
+          <p style={{ fontSize: 21, color: '#9ca3af', marginBottom: 50 }}>
             — {quote.author}
           </p>
 
