@@ -6,6 +6,31 @@ import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
 import DeleteCardModal from '@/components/DeleteCardModal'
 
+const ADMIN_EMAILS = ['admin@kardme.com', 'nelson@kardme.com']
+
+const MOTIVATIONAL_QUOTES = [
+  { quote: "Cada template que crias é uma porta que se abre para alguém realizar o seu sonho.", emoji: "🚀" },
+  { quote: "O Kardme não é só um produto. É a tua visão a ganhar vida.", emoji: "✨" },
+  { quote: "Hoje é mais um dia para construir algo extraordinário.", emoji: "🔥" },
+  { quote: "Os grandes projetos começam com pequenos passos consistentes. Continua.", emoji: "👣" },
+  { quote: "Cada cliente que ajudas é uma história de sucesso que começa.", emoji: "📖" },
+  { quote: "O teu bebé está a crescer. Cuida dele com amor.", emoji: "💜" },
+  { quote: "Não estás só a criar cartões. Estás a criar conexões.", emoji: "🤝" },
+  { quote: "A persistência transforma sonhos em realidade. Estás no caminho certo.", emoji: "🎯" },
+  { quote: "Cada linha de código é um tijolo no império que estás a construir.", emoji: "🏗️" },
+  { quote: "O sucesso não é um destino, é a jornada. Aproveita cada momento.", emoji: "🌟" },
+  { quote: "Hoje o Kardme está melhor do que ontem. Amanhã estará ainda melhor.", emoji: "📈" },
+  { quote: "A tua dedicação vai inspirar outros a seguir os seus sonhos.", emoji: "💫" },
+  { quote: "Grandes coisas nunca vêm de zonas de conforto. Continua a arriscar.", emoji: "🦁" },
+  { quote: "O mundo precisa do que estás a criar. Não desistas.", emoji: "🌍" },
+  { quote: "Cada desafio superado torna-te mais forte. Tu consegues.", emoji: "💪" },
+  { quote: "O Kardme é único porque TU és único.", emoji: "⭐" },
+  { quote: "Acredita no processo. Os resultados vão aparecer.", emoji: "🌱" },
+  { quote: "Estás a construir algo que vai mudar vidas. Isso é poderoso.", emoji: "⚡" },
+  { quote: "O melhor momento para começar foi ontem. O segundo melhor é agora.", emoji: "⏰" },
+  { quote: "Sê paciente contigo mesmo. Roma não foi construída num dia.", emoji: "🏛️" },
+]
+
 type Card = {
   id: string
   name: string
@@ -22,8 +47,17 @@ export default function DashboardPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [quote, setQuote] = useState({ quote: '', emoji: '' })
 
-  const loadCards = async () => {
+  useEffect(() => {
+    // Pick random quote on mount
+    const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]
+    setQuote(randomQuote)
+  }, [])
+
+  const loadData = async () => {
     setLoading(true)
     setError(null)
 
@@ -35,12 +69,29 @@ export default function DashboardPage() {
     }
 
     const userId = authData?.user?.id
+    const userEmail = authData?.user?.email
+
     if (!userId) {
       setError('Sem sessão. Faz login novamente.')
       setLoading(false)
       return
     }
 
+    const adminUser = userEmail && ADMIN_EMAILS.includes(userEmail)
+    setIsAdmin(!!adminUser)
+
+    // Get first name from email
+    if (userEmail) {
+      const name = userEmail.split('@')[0]
+      setUserName(name.charAt(0).toUpperCase() + name.slice(1))
+    }
+
+    if (adminUser) {
+      setLoading(false)
+      return
+    }
+
+    // Regular user - load their cards
     const { data, error: cardsErr } = await supabase
       .from('cards')
       .select('id,name,job,company,slug,user_id')
@@ -60,7 +111,7 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    loadCards()
+    loadData()
   }, [])
 
   const hasCards = cards.length > 0
@@ -99,14 +150,74 @@ export default function DashboardPage() {
       return
     }
 
-    // UI instantânea
     setCards((prev) => prev.filter((c) => c.id !== cardToDelete.id))
     setDeletingId(null)
     closeDeleteModal()
   }
 
-  if (loading) return <p style={{ padding: 24 }}>A carregar cartões…</p>
+  if (loading) return <p style={{ padding: 24 }}>A carregar…</p>
 
+  // Admin Dashboard - Motivational
+  if (isAdmin) {
+    const hour = new Date().getHours()
+    let greeting = 'Olá'
+    if (hour < 12) greeting = 'Bom dia'
+    else if (hour < 19) greeting = 'Boa tarde'
+    else greeting = 'Boa noite'
+
+    return (
+      <div className="dashboard-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 200px)' }}>
+        <div style={{ textAlign: 'center', maxWidth: 600, padding: '40px 20px' }}>
+          {/* Greeting */}
+          <p style={{ fontSize: 18, color: '#6b7280', marginBottom: 8 }}>
+            {greeting}, <span style={{ color: '#8b5cf6', fontWeight: 600 }}>{userName}</span> 👋
+          </p>
+          
+          {/* Big Emoji */}
+          <div style={{ fontSize: 64, marginBottom: 24 }}>
+            {quote.emoji}
+          </div>
+          
+          {/* Quote */}
+          <p style={{ 
+            fontSize: 28, 
+            fontWeight: 600, 
+            color: '#1f2937', 
+            lineHeight: 1.4,
+            marginBottom: 32 
+          }}>
+            "{quote.quote}"
+          </p>
+          
+          {/* Subtle branding */}
+          <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
+            — O teu Kardme 💜
+          </p>
+
+          {/* Quick action */}
+          <Link 
+            href="/admin/templates" 
+            style={{ 
+              display: 'inline-block',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+              color: '#fff',
+              padding: '14px 32px',
+              borderRadius: 12,
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: 15,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              boxShadow: '0 4px 14px rgba(139, 92, 246, 0.3)'
+            }}
+          >
+            Começar a criar ✨
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Regular User Dashboard
   return (
     <div className="dashboard-wrap">
       <div className="dashboard-header">
