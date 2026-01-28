@@ -42,60 +42,6 @@ export default function Home() {
     window.location.href = '/'
   }
 
-  // Loading state
-  if (loading) {
-    return (
-      <main className="landing-page">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
-        <div className="container">
-          <Link className="navbar-brand" href="/">
-            <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
-          </Link>
-          <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Link className="nav-link" href="/signin">Entrar</Link>
-            <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="slider-area slider-style-1 variation-default heroGrid">
-        <div className="heroOrbs" aria-hidden="true">
-          <span className="orb orb1" />
-          <span className="orb orb2" />
-          <span className="orb orb3" />
-        </div>
-
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-lg-12">
-              <div className="inner text-center">
-                <h1 className="title display-one">
-                  Um <span className="theme-gradient">cartão digital</span> <br /> com efeito{' '}
-                  <span className="theme-gradient">wow</span>
-                </h1>
-
-                <p className="description">
-                  Escolhe um template premium, personaliza ao teu estilo e partilha como um pro. <br />
-                  O teu primeiro impacto nunca mais vai ser &quot;só mais um&quot;.
-                </p>
-
-                <div className="heroCtaCard">
-                  <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link className="btn btn-cta-green" href="/signup">
-                      Criar o meu cartão grátis
-                    </Link>
-                  </div>
-                  <p className="heroCtaMicro">Sem cartão de crédito. 3 meses grátis.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-    )
-  }
 
   return (
     <main className="landing-page">
