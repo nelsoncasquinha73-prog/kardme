@@ -37,7 +37,12 @@ export default function Home() {
     }
   }
 
-  // Loading state - mostra navbar com botões padrão
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
+  // Loading state
   if (loading) {
     return (
       <main className="landing-page">
@@ -47,12 +52,8 @@ export default function Home() {
               <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
             </Link>
             <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Link className="nav-link" href="/signin">
-                Entrar
-              </Link>
-              <Link className="btn btn-primary" href="/signup">
-                Criar cartão grátis
-              </Link>
+              <Link className="nav-link" href="/signin">Entrar</Link>
+              <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
             </div>
           </div>
         </nav>
@@ -74,33 +75,17 @@ export default function Home() {
 
           <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {user ? (
-  <>
-    <Link className="nav-link" href="/dashboard">
-      Dashboard
-    </Link>
-    <Link className="btn btn-primary" href="/dashboard/plans">
-      Upgrade
-    </Link>
-    <button
-      onClick={async () => {
-        await supabase.auth.signOut()
-        window.location.href = '/'
-      }}
-      className="nav-link"
-      style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-    >
-      Sair
-    </button>
-  </>
-
+              <>
+                <Link className="nav-link" href="/dashboard">Dashboard</Link>
+                <Link className="btn btn-primary" href="/dashboard/plans">Upgrade</Link>
+                <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Sair
+                </button>
+              </>
             ) : (
               <>
-                <Link className="nav-link" href="/signin">
-                  Entrar
-                </Link>
-                <Link className="btn btn-primary" href="/signup">
-                  Criar cartão grátis
-                </Link>
+                <Link className="nav-link" href="/signin">Entrar</Link>
+                <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
               </>
             )}
           </div>
@@ -134,23 +119,16 @@ export default function Home() {
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                     {user ? (
                       <>
-                        <Link className="btn-default" href="/dashboard/catalog">
+                        <Link className="btn btn-cta-green" href="/dashboard/catalog">
                           Ir para catálogo
                         </Link>
-                        <Link
-                          className="btn-default"
-                          href="/dashboard"
-                          style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                          }}
-                        >
-                          Ir para dashboard
+                        <Link className="btn btn-secondary" href="/dashboard">
+                          Dashboard
                         </Link>
                       </>
                     ) : (
-                      <Link className="btn-default" href="/signup">
-                        Criar cartão grátis
+                      <Link className="btn btn-cta-green" href="/signup">
+                        Criar o meu cartão grátis
                       </Link>
                     )}
                   </div>
@@ -159,11 +137,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="bg-shape">
-          <img className="bg-shape-one" src="/assets/images/bg/bg-shape-four.png" alt="Bg Shape" />
-          <img className="bg-shape-two" src="/assets/images/bg/bg-shape-five.png" alt="Bg Shape" />
         </div>
       </div>
 
@@ -304,18 +277,10 @@ export default function Home() {
                   <span className="period">*</span>
                 </div>
                 <ul className="pricing-list">
-                  <li>
-                    <i className="fas fa-check"></i> 1 cartão digital
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> 10 templates
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Analytics completo
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Gestão de leads
-                  </li>
+                  <li><i className="fas fa-check"></i> 1 cartão digital</li>
+                  <li><i className="fas fa-check"></i> 10 templates</li>
+                  <li><i className="fas fa-check"></i> Analytics completo</li>
+                  <li><i className="fas fa-check"></i> Gestão de leads</li>
                 </ul>
                 <Link href="/signup" className="btn btn-outline">
                   Criar cartão grátis
@@ -337,31 +302,17 @@ export default function Home() {
                   <span className="period">/mês</span>
                 </div>
                 <ul className="pricing-list">
-                  <li>
-                    <i className="fas fa-check"></i> Cartões ilimitados
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Todos os templates
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Customização avançada
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Analytics &amp; Leads
-                  </li>
+                  <li><i className="fas fa-check"></i> Cartões ilimitados</li>
+                  <li><i className="fas fa-check"></i> Todos os templates</li>
+                  <li><i className="fas fa-check"></i> Customização avançada</li>
+                  <li><i className="fas fa-check"></i> Analytics &amp; Leads</li>
                 </ul>
                 {user ? (
-                  <button
-                    onClick={() => handleUpgradeClick('monthly')}
-                    className="btn btn-primary"
-                    style={{ width: '100%', border: 'none', cursor: 'pointer' }}
-                  >
+                  <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ width: '100%', border: 'none', cursor: 'pointer' }}>
                     Fazer upgrade
                   </button>
                 ) : (
-                  <Link href="/signup" className="btn btn-primary">
-                    Começar
-                  </Link>
+                  <Link href="/signup" className="btn btn-primary">Começar</Link>
                 )}
               </div>
             </div>
@@ -375,44 +326,34 @@ export default function Home() {
                   <span className="price">Contactar</span>
                 </div>
                 <ul className="pricing-list">
-                  <li>
-                    <i className="fas fa-check"></i> Tudo do Pro
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Cartões NFC
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Suporte prioritário
-                  </li>
-                  <li>
-                    <i className="fas fa-check"></i> Integrações custom
-                  </li>
+                  <li><i className="fas fa-check"></i> Tudo do Pro</li>
+                  <li><i className="fas fa-check"></i> Cartões NFC</li>
+                  <li><i className="fas fa-check"></i> Suporte prioritário</li>
+                  <li><i className="fas fa-check"></i> Integrações custom</li>
                 </ul>
-                <a href="mailto:hello@kardme.com" className="btn btn-outline">
-                  Contactar
-                </a>
+                <a href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</a>
               </div>
             </div>
           </div>
 
-                   {/* ANNUAL OPTION */}
+          {/* ANNUAL OPTION */}
           <div className="row justify-content-center" style={{ marginTop: 40 }}>
             <div className="col-lg-8 text-center">
               <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
                 Preferes pagar anualmente? Poupa 20% com €69/ano
               </p>
-              {user ? (
-                <button
-                  onClick={() => handleUpgradeClick('yearly')}
-                  className="btn btn-outline"
-                  style={{ cursor: 'pointer' }}
-                >
+              user ? (
+                <button onClick={() => handleUpgradeClick('yearly')} className="btn btn-outline" style={{ cursor: 'pointer' }}>
                   Upgrade anual (€69/ano)
                 </button>
               ) : (
-                <Link href="/signup" className="btn btn-outline">
-                  Começar com plano anual
-                </Link>
+                <Link href="/signup" className="btn btn-outline">Começar com plano anual</Link>
+                            {user ? (
+                <button onClick={() => handleUpgradeClick('yearly')} className="btn btn-outline" style={{ cursor: 'pointer' }}>
+                  Upgrade anual (€69/ano)
+                </button>
+              ) : (
+                <Link href="/signup" className="btn btn-outline">Começar com plano anual</Link>
               )}
             </div>
           </div>
@@ -429,25 +370,13 @@ export default function Home() {
               <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 {user ? (
                   <>
-                    <Link className="btn-default" href="/dashboard/catalog">
-                      Ver catálogo
-                    </Link>
-                    <button
-                      onClick={() => handleUpgradeClick('monthly')}
-                      className="btn-default"
-                      style={{
-                        background: 'rgba(139, 92, 246, 0.8)',
-                        border: '1px solid rgba(139, 92, 246, 0.5)',
-                        cursor: 'pointer',
-                      }}
-                    >
+                    <Link className="btn btn-cta-green" href="/dashboard/catalog">Ver catálogo</Link>
+                    <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
                       Upgrade Pro
                     </button>
                   </>
                 ) : (
-                  <Link className="btn-default" href="/signup">
-                    Criar cartão grátis
-                  </Link>
+                  <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
                 )}
               </div>
             </div>
