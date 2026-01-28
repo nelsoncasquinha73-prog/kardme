@@ -18,24 +18,24 @@ export default function Home() {
     getUser()
   }, [])
 
-  const handleUpgradeClick = async (billing: 'monthly' | 'yearly') => {
-    if (!user) {
-      window.location.href = '/signup'
-      return
-    }
+  'use client'
 
-    try {
-      const res = await fetch('/api/stripe/checkout-pro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, billing }),
-      })
-      const data = await res.json()
-      if (data?.url) window.location.href = data.url
-    } catch (e) {
-      console.error('Erro ao iniciar checkout:', e)
-    }
-  }
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+import KardmeShowcase from '@/components/KardmeShowcase'
+
+export default function Home() {
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data?.user || null)
+    })
+  }, [])
+
+  const handleUpgradeClick = async (billing: 'monthly' | 'yearly') => {
+    // ... resto igual
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -357,3 +357,4 @@ export default function Home() {
   )
 }
 
+}
