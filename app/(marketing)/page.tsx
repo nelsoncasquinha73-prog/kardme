@@ -7,26 +7,6 @@ import KardmeShowcase from '@/components/KardmeShowcase'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data?.user || null)
-      setLoading(false)
-    }
-    getUser()
-  }, [])
-
-  'use client'
-
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import KardmeShowcase from '@/components/KardmeShowcase'
-
-export default function Home() {
-  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -35,13 +15,28 @@ export default function Home() {
   }, [])
 
   const handleUpgradeClick = async (billing: 'monthly' | 'yearly') => {
-    // ... resto igual
+    if (!user) {
+      window.location.href = '/signup'
+      return
+    }
+
+    try {
+      const res = await fetch('/api/stripe/checkout-pro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, billing }),
+      })
+      const data = await res.json()
+      if (data?.url) window.location.href = data.url
+    } catch (e) {
+      console.error('Erro ao iniciar checkout:', e)
+    }
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
   }
-
 
   return (
     <main className="landing-page">
@@ -315,7 +310,7 @@ export default function Home() {
             </div>
           </div>
 
-                    {/* ANNUAL OPTION */}
+          {/* ANNUAL OPTION */}
           <div className="row justify-content-center" style={{ marginTop: 40 }}>
             <div className="col-lg-8 text-center">
               <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
@@ -326,7 +321,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -355,6 +349,4 @@ export default function Home() {
       </section>
     </main>
   )
-}
-
 }
