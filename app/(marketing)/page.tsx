@@ -37,38 +37,64 @@ export default function Home() {
     }
   }
 
+  // Loading state - mostra navbar com botões padrão
+  if (loading) {
+    return (
+      <main className="landing-page">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
+          <div className="container">
+            <Link className="navbar-brand" href="/">
+              <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
+            </Link>
+            <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Link className="nav-link" href="/signin">
+                Entrar
+              </Link>
+              <Link className="btn btn-primary" href="/signup">
+                Criar cartão grátis
+              </Link>
+            </div>
+          </div>
+        </nav>
+        <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: 'rgba(255,255,255,0.6)' }}>A carregar...</p>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="landing-page">
       {/* NAVBAR */}
-<nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
-  <div className="container">
-    <Link className="navbar-brand" href="/">
-      <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
-    </Link>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
+        <div className="container">
+          <Link className="navbar-brand" href="/">
+            <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
+          </Link>
 
-    <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-      {user ? (
-        <>
-          <Link className="nav-link" href="/dashboard">
-            Dashboard
-          </Link>
-          <Link className="btn btn-primary" href="/dashboard/plans">
-            Upgrade
-          </Link>
-        </>
-      ) : (
-        <>
-          <Link className="nav-link" href="/signin">
-            Entrar
-          </Link>
-          <Link className="btn btn-primary" href="/signup">
-            Criar cartão grátis
-          </Link>
-        </>
-      )}
-    </div>
-  </div>
-</nav>
+          <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {user ? (
+              <>
+                <Link className="nav-link" href="/dashboard">
+                  Dashboard
+                </Link>
+                <Link className="btn btn-primary" href="/dashboard/plans">
+                  Upgrade
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link className="nav-link" href="/signin">
+                  Entrar
+                </Link>
+                <Link className="btn btn-primary" href="/signup">
+                  Criar cartão grátis
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
 
       {/* HERO SECTION */}
       <div className="slider-area slider-style-1 variation-default heroGrid">
@@ -95,23 +121,29 @@ export default function Home() {
                 <div className="heroCtaCard">
                   <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link className="btn-default" href={user ? '/dashboard/catalog' : '/signup'}>
-                      {user ? 'Ir para catálogo' : 'Quero o meu cartão premium'}
-                    </Link>
-                    {user && (
-                      <button
-                        onClick={() => handleUpgradeClick('monthly')}
-                        className="btn-default"
-                        style={{
-                          background: 'rgba(139, 92, 246, 0.8)',
-                          border: '1px solid rgba(139, 92, 246, 0.5)',
-                        }}
-                      >
-                        Upgrade Pro
-                      </button>
+                    {user ? (
+                      <>
+                        <Link className="btn-default" href="/dashboard/catalog">
+                          Ir para catálogo
+                        </Link>
+                        <Link
+                          className="btn-default"
+                          href="/dashboard"
+                          style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          Ir para dashboard
+                        </Link>
+                      </>
+                    ) : (
+                      <Link className="btn-default" href="/signup">
+                        Criar cartão grátis
+                      </Link>
                     )}
                   </div>
-                  <p className="heroCtaMicro">Sem cartão de crédito. Começa grátis.</p>
+                  <p className="heroCtaMicro">Sem cartão de crédito. 3 meses grátis.</p>
                 </div>
               </div>
             </div>
@@ -251,39 +283,37 @@ export default function Home() {
           </div>
 
           <div className="row" style={{ marginTop: 40 }}>
-
-            {/* FREE PLAN */}        
-<div className="col-lg-4 col-md-6">
-  <div className="pricing-item">
-    <h3 className="pricing-title">Grátis</h3>
-    <p className="pricing-subtitle">Para começar</p>
-    <div className="pricing-price">
-      <span className="price">€0</span>
-      <span className="period">*</span>
-    </div>
-    <ul className="pricing-list">
-      <li>
-        <i className="fas fa-check"></i> 1 cartão digital
-      </li>
-      <li>
-        <i className="fas fa-check"></i> 10 templates
-      </li>
-      <li>
-        <i className="fas fa-check"></i> Analytics completo
-      </li>
-      <li>
-        <i className="fas fa-check"></i> Gestão de leads
-      </li>
-    </ul>
-    <Link href="/signup" className="btn btn-outline">
-      Criar cartão grátis
-    </Link>
-    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
-      *3 meses de utilização grátis
-    </p>
-  </div>
-</div>
-
+            {/* FREE PLAN */}
+            <div className="col-lg-4 col-md-6">
+              <div className="pricing-item">
+                <h3 className="pricing-title">Grátis</h3>
+                <p className="pricing-subtitle">Para começar</p>
+                <div className="pricing-price">
+                  <span className="price">€0</span>
+                  <span className="period">*</span>
+                </div>
+                <ul className="pricing-list">
+                  <li>
+                    <i className="fas fa-check"></i> 1 cartão digital
+                  </li>
+                  <li>
+                    <i className="fas fa-check"></i> 10 templates
+                  </li>
+                  <li>
+                    <i className="fas fa-check"></i> Analytics completo
+                  </li>
+                  <li>
+                    <i className="fas fa-check"></i> Gestão de leads
+                  </li>
+                </ul>
+                <Link href="/signup" className="btn btn-outline">
+                  Criar cartão grátis
+                </Link>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
+                  *3 meses de utilização grátis
+                </p>
+              </div>
+            </div>
 
             {/* PRO PLAN */}
             <div className="col-lg-4 col-md-6">
@@ -297,10 +327,10 @@ export default function Home() {
                 </div>
                 <ul className="pricing-list">
                   <li>
-                    <i className="fas fa-check"></i> 1 cartão digital
+                    <i className="fas fa-check"></i> Cartões ilimitados
                   </li>
                   <li>
-                    <i className="fas fa-check"></i> 30+ templates
+                    <i className="fas fa-check"></i> Todos os templates
                   </li>
                   <li>
                     <i className="fas fa-check"></i> Customização avançada
@@ -354,7 +384,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ANNUAL OPTION */}
+                   {/* ANNUAL OPTION */}
           <div className="row justify-content-center" style={{ marginTop: 40 }}>
             <div className="col-lg-8 text-center">
               <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
@@ -364,7 +394,7 @@ export default function Home() {
                 <button
                   onClick={() => handleUpgradeClick('yearly')}
                   className="btn btn-outline"
-                  style={{ border: 'none', cursor: 'pointer' }}
+                  style={{ cursor: 'pointer' }}
                 >
                   Upgrade anual (€69/ano)
                 </button>
@@ -378,7 +408,7 @@ export default function Home() {
         </div>
       </section>
 
-         {/* CTA FINAL SECTION */}
+      {/* CTA FINAL SECTION */}
       <section className="cta-final-section">
         <div className="container">
           <div className="row justify-content-center">
@@ -386,21 +416,27 @@ export default function Home() {
               <h2 className="section-title">Pronto para começar?</h2>
               <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
               <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link className="btn-default" href={user ? '/dashboard/catalog' : '/signup'}>
-                  {user ? 'Ver catálogo' : 'Quero o meu cartão premium'}
-                </Link>
-                {user && (
-                  <button
-                    onClick={() => handleUpgradeClick('monthly')}
-                    className="btn-default"
-                    style={{
-                      background: 'rgba(139, 92, 246, 0.8)',
-                      border: '1px solid rgba(139, 92, 246, 0.5)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Upgrade Pro
-                  </button>
+                {user ? (
+                  <>
+                    <Link className="btn-default" href="/dashboard/catalog">
+                      Ver catálogo
+                    </Link>
+                    <button
+                      onClick={() => handleUpgradeClick('monthly')}
+                      className="btn-default"
+                      style={{
+                        background: 'rgba(139, 92, 246, 0.8)',
+                        border: '1px solid rgba(139, 92, 246, 0.5)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Upgrade Pro
+                    </button>
+                  </>
+                ) : (
+                  <Link className="btn-default" href="/signup">
+                    Criar cartão grátis
+                  </Link>
                 )}
               </div>
             </div>
@@ -410,3 +446,4 @@ export default function Home() {
     </main>
   )
 }
+
