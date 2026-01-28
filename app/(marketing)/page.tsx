@@ -74,14 +74,25 @@ export default function Home() {
 
           <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {user ? (
-              <>
-                <Link className="nav-link" href="/dashboard">
-                  Dashboard
-                </Link>
-                <Link className="btn btn-primary" href="/dashboard/plans">
-                  Upgrade
-                </Link>
-              </>
+  <>
+    <Link className="nav-link" href="/dashboard">
+      Dashboard
+    </Link>
+    <Link className="btn btn-primary" href="/dashboard/plans">
+      Upgrade
+    </Link>
+    <button
+      onClick={async () => {
+        await supabase.auth.signOut()
+        window.location.href = '/'
+      }}
+      className="nav-link"
+      style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+    >
+      Sair
+    </button>
+  </>
+
             ) : (
               <>
                 <Link className="nav-link" href="/signin">
