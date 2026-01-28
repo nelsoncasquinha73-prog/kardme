@@ -7,7 +7,7 @@
 
 .phoneContainer {
   position: relative;
-  width: 320px;
+  width: 400px;  /* aumentado de 320px */
 }
 
 .cardImage {
@@ -61,12 +61,12 @@
 
 @media (max-width: 768px) {
   .phoneContainer {
-    width: 260px;
+    width: 320px;  /* aumentado de 260px */
   }
 }
 
 @media (max-width: 400px) {
   .phoneContainer {
-    width: 220px;
+    width: 280px;  /* aumentado de 220px */
   }
 }
