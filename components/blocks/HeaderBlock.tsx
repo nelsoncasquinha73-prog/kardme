@@ -53,16 +53,20 @@ function v1ToCss(v1: CardBgV1): string {
     return v1.base.color
   }
 
-  // gradient
-  const angle = typeof v1.base.angle === 'number' ? v1.base.angle : 180
-  const stops = v1.base.stops ?? [
-    { color: '#ffffff', pos: 0 },
-    { color: '#f3f4f6', pos: 100 },
-  ]
+  if (v1.base.kind === 'gradient') {
+    const angle = typeof v1.base.angle === 'number' ? v1.base.angle : 180
+    const stops = v1.base.stops ?? [
+      { color: '#ffffff', pos: 0 },
+      { color: '#f3f4f6', pos: 100 },
+    ]
+    const gradientStops = stops.map((s) => `${s.color} ${s.pos ?? 0}%`).join(', ')
+    return `linear-gradient(${angle}deg, ${gradientStops})`
+  }
 
-  const gradientStops = stops.map((s) => `${s.color} ${s.pos ?? 0}%`).join(', ')
-  return `linear-gradient(${angle}deg, ${gradientStops})`
+  // image: retorna transparente (a imagem é renderizada separadamente)
+  return 'transparent'
 }
+
 
 /**
  * Extrai a cor "de fundo" (última cor do gradient ou cor sólida)
@@ -72,13 +76,22 @@ function v1ToFadeTarget(v1: CardBgV1): string {
     return v1.base.color
   }
 
-  // gradient: pega na última cor
-  const stops = v1.base.stops ?? [
-    { color: '#ffffff', pos: 0 },
-    { color: '#f3f4f6', pos: 100 },
-  ]
-  return stops[stops.length - 1]?.color ?? '#ffffff'
+  if (v1.base.kind === 'gradient') {
+    const stops = v1.base.stops ?? [
+      { color: '#ffffff', pos: 0 },
+      { color: '#f3f4f6', pos: 100 },
+    ]
+    return stops[stops.length - 1]?.color ?? '#ffffff'
+  }
+
+  // image: usa cor do fadeToColor ou default
+  if (v1.base.kind === 'image') {
+    return v1.base.fadeToColor ?? '#000000'
+  }
+
+  return '#ffffff'
 }
+
 
 /**
  * Converte "rgb(r,g,b)" em "rgba(r,g,b,a)" com a opacidade pedida

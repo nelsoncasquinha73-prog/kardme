@@ -49,9 +49,13 @@ export async function generateMetadata({ params }: Props) {
       return v1.base.color ?? '#000000'
     }
 
-    // gradient: pega na primeira cor
-    const stops = v1.base.stops ?? [{ color: '#000000', pos: 0 }]
-    return stops[0]?.color ?? '#000000'
+    if (v1.base.kind === 'gradient') {
+      const stops = v1.base.stops ?? [{ color: '#000000', pos: 0 }]
+      return stops[0]?.color ?? '#000000'
+    }
+
+    // image: usa cor default
+    return '#000000'
   })()
 
   return {
@@ -59,6 +63,7 @@ export async function generateMetadata({ params }: Props) {
     colorScheme: 'dark',
   }
 }
+
 
 export default async function CardPage({ params }: Props) {
   const { slug } = await params

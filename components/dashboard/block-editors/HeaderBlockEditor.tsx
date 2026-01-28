@@ -632,7 +632,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             const { publicUrl } = await uploadCardImage({ cardId, file, kind: 'background' })
             onChangeCardBg?.({
               ...v1,
-              base: { ...v1.base, kind: 'image', url: publicUrl },
+              base: { ...(v1.base as any), kind: 'image', url: publicUrl },
             })
           } catch (err) {
             console.error('Erro ao fazer upload:', err)
@@ -649,7 +649,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', url: e.target.value },
+            base: { ...(v1.base as any), kind: 'image', url: e.target.value },
           })
         }
         placeholder="https://..."
@@ -663,7 +663,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', fit: e.target.value as any },
+            base: { ...(v1.base as any), kind: 'image', fit: e.target.value as any },
           })
         }
         style={{ width: 140, padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontWeight: 700 }}
@@ -681,7 +681,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', position: e.target.value as any },
+            base: { ...(v1.base as any), kind: 'image', position: e.target.value as any },
           })
         }
         style={{ width: 140, padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontWeight: 700 }}
@@ -708,7 +708,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
     onChange={(e) =>
       onChangeCardBg?.({
         ...v1,
-        base: { ...v1.base, kind: 'image', zoom: Number(e.target.value) },
+        base: { ...(v1.base as any), kind: 'image', zoom: Number(e.target.value) },
       })
     }
   />
@@ -726,7 +726,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', offsetY: Number(e.target.value) },
+            base: { ...(v1.base as any), kind: 'image', offsetY: Number(e.target.value) },
           })
         }
       />
@@ -743,7 +743,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', offsetX: Number(e.target.value) },
+            base: { ...(v1.base as any), kind: 'image', offsetX: Number(e.target.value) },
           })
         }
       />
@@ -760,7 +760,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         onChange={(e) =>
           onChangeCardBg?.({
             ...v1,
-            base: { ...v1.base, kind: 'image', blur: Number(e.target.value) },
+            base: { ...(v1.base as any), kind: 'image', blur: Number(e.target.value) },
           })
         }
       />
@@ -775,14 +775,14 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             onChange={(hex) =>
               onChangeCardBg?.({
                 ...v1,
-                base: { ...v1.base, kind: 'image', fadeToColor: hex },
+                base: { ...(v1.base as any), kind: 'image', fadeToColor: hex },
               })
             }
             onEyedropper={() =>
               pickEyedropper((hex) =>
                 onChangeCardBg?.({
                   ...v1,
-                  base: { ...v1.base, kind: 'image', fadeToColor: hex },
+                  base: { ...(v1.base as any), kind: 'image', fadeToColor: hex },
                 })
               )
             }
@@ -799,7 +799,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             onChange={(e) =>
               onChangeCardBg?.({
                 ...v1,
-                base: { ...v1.base, kind: 'image', fadeHeight: Number(e.target.value) },
+                base: { ...(v1.base as any), kind: 'image', fadeHeight: Number(e.target.value) },
               })
             }
           />

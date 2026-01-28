@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-type Kind = 'cover' | 'avatar' | 'gallery' | 'badge'
+type Kind = 'cover' | 'avatar' | 'gallery' | 'badge' | 'background'
 
 export async function uploadCardImage(params: { cardId: string; file: File; kind: Kind }) {
   const { cardId, file, kind } = params
