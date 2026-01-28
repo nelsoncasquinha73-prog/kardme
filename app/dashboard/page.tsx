@@ -9,27 +9,55 @@ import DeleteCardModal from '@/components/DeleteCardModal'
 const ADMIN_EMAILS = ['admin@kardme.com', 'nelson@kardme.com']
 
 const MOTIVATIONAL_QUOTES = [
-  { quote: "Cada template que crias é uma porta que se abre para alguém realizar o seu sonho.", emoji: "🚀" },
-  { quote: "O Kardme não é só um produto. É a tua visão a ganhar vida.", emoji: "✨" },
-  { quote: "Hoje é mais um dia para construir algo extraordinário.", emoji: "🔥" },
-  { quote: "Os grandes projetos começam com pequenos passos consistentes. Continua.", emoji: "👣" },
-  { quote: "Cada cliente que ajudas é uma história de sucesso que começa.", emoji: "📖" },
-  { quote: "O teu bebé está a crescer. Cuida dele com amor.", emoji: "💜" },
-  { quote: "Não estás só a criar cartões. Estás a criar conexões.", emoji: "🤝" },
-  { quote: "A persistência transforma sonhos em realidade. Estás no caminho certo.", emoji: "🎯" },
-  { quote: "Cada linha de código é um tijolo no império que estás a construir.", emoji: "🏗️" },
-  { quote: "O sucesso não é um destino, é a jornada. Aproveita cada momento.", emoji: "🌟" },
-  { quote: "Hoje o Kardme está melhor do que ontem. Amanhã estará ainda melhor.", emoji: "📈" },
-  { quote: "A tua dedicação vai inspirar outros a seguir os seus sonhos.", emoji: "💫" },
-  { quote: "Grandes coisas nunca vêm de zonas de conforto. Continua a arriscar.", emoji: "🦁" },
-  { quote: "O mundo precisa do que estás a criar. Não desistas.", emoji: "🌍" },
-  { quote: "Cada desafio superado torna-te mais forte. Tu consegues.", emoji: "💪" },
-  { quote: "O Kardme é único porque TU és único.", emoji: "⭐" },
-  { quote: "Acredita no processo. Os resultados vão aparecer.", emoji: "🌱" },
-  { quote: "Estás a construir algo que vai mudar vidas. Isso é poderoso.", emoji: "⚡" },
-  { quote: "O melhor momento para começar foi ontem. O segundo melhor é agora.", emoji: "⏰" },
-  { quote: "Sê paciente contigo mesmo. Roma não foi construída num dia.", emoji: "🏛️" },
+  // Kardme
+  { quote: "Cada template que crias é uma porta que se abre para alguém realizar o seu sonho.", emoji: "🚀", author: "Kardme" },
+  { quote: "O Kardme não é só um produto. É a tua visão a ganhar vida.", emoji: "✨", author: "Kardme" },
+  { quote: "Hoje é mais um dia para construir algo extraordinário.", emoji: "🔥", author: "Kardme" },
+  { quote: "Os grandes projetos começam com pequenos passos consistentes. Continua.", emoji: "👣", author: "Kardme" },
+  { quote: "Cada cliente que ajudas é uma história de sucesso que começa.", emoji: "📖", author: "Kardme" },
+  { quote: "O teu bebé está a crescer. Cuida dele com amor.", emoji: "💜", author: "Kardme" },
+  { quote: "Não estás só a criar cartões. Estás a criar conexões.", emoji: "🤝", author: "Kardme" },
+  { quote: "A persistência transforma sonhos em realidade. Estás no caminho certo.", emoji: "🎯", author: "Kardme" },
+  { quote: "Cada linha de código é um tijolo no império que estás a construir.", emoji: "🏗️", author: "Kardme" },
+  { quote: "O sucesso não é um destino, é a jornada. Aproveita cada momento.", emoji: "🌟", author: "Kardme" },
+  { quote: "Hoje o Kardme está melhor do que ontem. Amanhã estará ainda melhor.", emoji: "📈", author: "Kardme" },
+  { quote: "A tua dedicação vai inspirar outros a seguir os seus sonhos.", emoji: "💫", author: "Kardme" },
+  { quote: "Grandes coisas nunca vêm de zonas de conforto. Continua a arriscar.", emoji: "🦁", author: "Kardme" },
+  { quote: "O mundo precisa do que estás a criar. Não desistas.", emoji: "🌍", author: "Kardme" },
+  { quote: "Cada desafio superado torna-te mais forte. Tu consegues.", emoji: "💪", author: "Kardme" },
+  { quote: "O Kardme é único porque TU és único.", emoji: "⭐", author: "Kardme" },
+  { quote: "Acredita no processo. Os resultados vão aparecer.", emoji: "🌱", author: "Kardme" },
+  { quote: "Estás a construir algo que vai mudar vidas. Isso é poderoso.", emoji: "⚡", author: "Kardme" },
+  { quote: "O melhor momento para começar foi ontem. O segundo melhor é agora.", emoji: "⏰", author: "Kardme" },
+  { quote: "Sê paciente contigo mesmo. Roma não foi construída num dia.", emoji: "🏛️", author: "Kardme" },
+  // Grant Cardone
+  { quote: "O sucesso é o teu dever, obrigação e responsabilidade.", emoji: "🔥", author: "Grant Cardone" },
+  { quote: "Ação massiva é a cura para todos os problemas.", emoji: "💥", author: "Grant Cardone" },
+  { quote: "Nunca reduzas um objetivo. Aumenta as ações.", emoji: "🎯", author: "Grant Cardone" },
+  { quote: "O medo é um indicador. O medo diz-te o que tens de fazer.", emoji: "🦁", author: "Grant Cardone" },
+  { quote: "Pessoas medianas procuram equilíbrio. Pessoas extraordinárias procuram domínio.", emoji: "👑", author: "Grant Cardone" },
+  { quote: "Não vais a lado nenhum a jogar pelo seguro.", emoji: "🚀", author: "Grant Cardone" },
+  { quote: "Multiplica por 10 os teus objetivos e multiplica por 10 as tuas ações.", emoji: "📈", author: "Grant Cardone" },
+  { quote: "O dinheiro e o sucesso não vão ter contigo. Tens de ir buscá-los.", emoji: "💰", author: "Grant Cardone" },
+  { quote: "Compromete-te primeiro, descobre o resto depois.", emoji: "⚡", author: "Grant Cardone" },
+  { quote: "Obscuridade é um problema maior do que dinheiro.", emoji: "📢", author: "Grant Cardone" },
+  { quote: "Se não estás a ser criticado, não estás a fazer o suficiente.", emoji: "🔥", author: "Grant Cardone" },
+  { quote: "Trata cada dia como se a tua vida dependesse disso. Porque depende.", emoji: "⏰", author: "Grant Cardone" },
+  // Tony Robbins
+  { quote: "O caminho para o sucesso é tomar ação massiva e determinada.", emoji: "🚀", author: "Tony Robbins" },
+  { quote: "É nas tuas decisões, não nas tuas condições, que o teu destino é moldado.", emoji: "🎯", author: "Tony Robbins" },
+  { quote: "A qualidade da tua vida é a qualidade das tuas emoções.", emoji: "💜", author: "Tony Robbins" },
+  { quote: "Onde o foco vai, a energia flui.", emoji: "⚡", author: "Tony Robbins" },
+  { quote: "O único limite para o teu impacto é a tua imaginação e compromisso.", emoji: "🌟", author: "Tony Robbins" },
+  { quote: "Pessoas de sucesso fazem perguntas melhores.", emoji: "🧠", author: "Tony Robbins" },
+  { quote: "Se fazes o que sempre fizeste, terás o que sempre tiveste.", emoji: "🔄", author: "Tony Robbins" },
+  { quote: "Não é o que fazemos de vez em quando que molda as nossas vidas, mas o que fazemos consistentemente.", emoji: "📈", author: "Tony Robbins" },
+  { quote: "O progresso é igual à felicidade.", emoji: "😊", author: "Tony Robbins" },
+  { quote: "Identifica os teus problemas, mas dá o teu poder e energia às soluções.", emoji: "💡", author: "Tony Robbins" },
+  { quote: "A mudança acontece quando a dor de ficar igual é maior do que a dor de mudar.", emoji: "🦋", author: "Tony Robbins" },
+  { quote: "Quanto mais gratidão tens, mais coisas tens para agradecer.", emoji: "🙏", author: "Tony Robbins" },
 ]
+
 
 type Card = {
   id: string
@@ -49,7 +77,7 @@ export default function DashboardPage() {
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
-  const [quote, setQuote] = useState({ quote: '', emoji: '' })
+  const [quote, setQuote] = useState({ quote: '', emoji: '', author: '' })
 
   useEffect(() => {
     // Pick random quote on mount
@@ -191,7 +219,7 @@ export default function DashboardPage() {
           
           {/* Subtle branding */}
           <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
-            — O teu Kardme 💜
+            — {quote.author}
           </p>
 
           {/* Quick action */}
