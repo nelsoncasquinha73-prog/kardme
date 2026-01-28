@@ -7,12 +7,12 @@ import KardmeShowcase from '@/components/KardmeShowcase'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [checked, setChecked] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data?.user || null)
-      setLoading(false)
+      setChecked(true)
     })
   }, [])
 
@@ -40,6 +40,9 @@ export default function Home() {
     window.location.href = '/'
   }
 
+  // Mostrar versão guest por defeito, só muda se user estiver logado E já verificámos
+  const isLoggedIn = checked && user
+
   return (
     <main className="landing-page">
       {/* NAVBAR */}
@@ -49,10 +52,8 @@ export default function Home() {
             <span style={{ fontSize: 24, fontWeight: 900 }}>Kardme</span>
           </Link>
 
-          <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16, minHeight: 40 }}>
-            {loading ? (
-              <span style={{ width: 200 }}></span>
-            ) : user ? (
+          <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {isLoggedIn ? (
               <>
                 <Link className="nav-link" href="/dashboard">Dashboard</Link>
                 <Link className="btn btn-primary" href="/dashboard/plans">Upgrade</Link>
@@ -94,10 +95,8 @@ export default function Home() {
 
                 <div className="heroCtaCard">
                   <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', minHeight: 48 }}>
-                    {loading ? (
-                      <span></span>
-                    ) : user ? (
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {isLoggedIn ? (
                       <>
                         <Link className="btn btn-cta-green" href="/dashboard/catalog">
                           Ir para catálogo
@@ -287,9 +286,7 @@ export default function Home() {
                   <li><i className="fas fa-check"></i> Customização avançada</li>
                   <li><i className="fas fa-check"></i> Analytics &amp; Leads</li>
                 </ul>
-                {loading ? (
-                  <span className="btn btn-primary" style={{ width: '100%', opacity: 0.5 }}>...</span>
-                ) : user ? (
+                {isLoggedIn ? (
                   <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ width: '100%', border: 'none', cursor: 'pointer' }}>
                     Fazer upgrade
                   </button>
@@ -332,17 +329,15 @@ export default function Home() {
         </div>
       </section>
 
-           {/* CTA FINAL SECTION */}
+      {/* CTA FINAL SECTION */}
       <section className="cta-final-section">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">Pronto para começar?</h2>
               <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
-              <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', minHeight: 48 }}>
-                {loading ? (
-                  <span></span>
-                ) : user ? (
+              <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {isLoggedIn ? (
                   <>
                     <Link className="btn btn-cta-green" href="/dashboard/catalog">Ver catálogo</Link>
                     <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
