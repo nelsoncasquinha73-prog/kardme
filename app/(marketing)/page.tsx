@@ -63,7 +63,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                <Link className="nav-link" href="/signin">Entrar</Link>
+                <Link className="nav-link" href="/login">Entrar</Link>
                 <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
               </>
             )}
