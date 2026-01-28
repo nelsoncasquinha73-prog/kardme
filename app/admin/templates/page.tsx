@@ -657,7 +657,7 @@ export default function AdminTemplatesPage() {
                       disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
                       title="Editar template no editor (atualiza o template original)"
                     >
-                      {openingId === t.id ? 'A abrir…' : '✏️ Editar'}
+                      {openingId === t.id ? 'A abrir…' : 'Editar'}
                     </button>
 
                     <button
