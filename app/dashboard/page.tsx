@@ -169,7 +169,7 @@ export default function DashboardPage() {
       <div className="dashboard-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 200px)' }}>
         <div style={{ textAlign: 'center', maxWidth: 600, padding: '40px 20px' }}>
           {/* Greeting */}
-          <p style={{ fontSize: 18, color: '#6b7280', marginBottom: 8 }}>
+          <p style={{ fontSize: 18, color: '#9ca3af', marginBottom: 8 }}>
             {greeting}, <span style={{ color: '#8b5cf6', fontWeight: 600 }}>{userName}</span> 👋
           </p>
           
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <p style={{ 
             fontSize: 28, 
             fontWeight: 600, 
-            color: '#374151', 
+            color: '#d1d5db', 
             lineHeight: 1.4,
             marginBottom: 32 
           }}>
