@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/styles/tokens.css'
+import '@/styles/landing-page.css'
 
 import '@fontsource/montserrat/400.css'
 import '@fontsource/montserrat/700.css'
