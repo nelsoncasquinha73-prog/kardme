@@ -336,27 +336,18 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ANNUAL OPTION */}
+                    {/* ANNUAL OPTION */}
           <div className="row justify-content-center" style={{ marginTop: 40 }}>
             <div className="col-lg-8 text-center">
               <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
                 Preferes pagar anualmente? Poupa 20% com €69/ano
               </p>
-              user ? (
-                <button onClick={() => handleUpgradeClick('yearly')} className="btn btn-outline" style={{ cursor: 'pointer' }}>
-                  Upgrade anual (€69/ano)
-                </button>
-              ) : (
-                <Link href="/signup" className="btn btn-outline">Começar com plano anual</Link>
-                            {user ? (
-                <button onClick={() => handleUpgradeClick('yearly')} className="btn btn-outline" style={{ cursor: 'pointer' }}>
-                  Upgrade anual (€69/ano)
-                </button>
-              ) : (
-                <Link href="/signup" className="btn btn-outline">Começar com plano anual</Link>
-              )}
+              <Link href="/signup" className="btn btn-outline">
+                Começar com plano anual
+              </Link>
             </div>
           </div>
+
         </div>
       </section>
 
