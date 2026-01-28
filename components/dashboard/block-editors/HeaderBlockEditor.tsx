@@ -480,33 +480,57 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
 
           {/* Tipo base */}
-          <Row label="Tipo">
-            <Button
-              onClick={() =>
-                onChangeCardBg({
-                  version: 1,
-                  opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
-                  base: { kind: 'solid', color: v1.base.kind === 'solid' ? v1.base.color : '#ffffff' },
-                  overlays: v1.overlays ?? [],
-                })
-              }
-            >
-              Cor sólida
-            </Button>
+<Row label="Tipo">
+  <Button
+    onClick={() =>
+      onChangeCardBg({
+        version: 1,
+        opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
+        base: { kind: 'solid', color: v1.base.kind === 'solid' ? v1.base.color : '#ffffff' },
+        overlays: v1.overlays ?? [],
+      })
+    }
+  >
+    Cor
+  </Button>
 
-            <Button
-              onClick={() =>
-                onChangeCardBg({
-                  version: 1,
-                  opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
-                  base: gBase,
-                  overlays: v1.overlays ?? [],
-                })
-              }
-            >
-              Degradê
-            </Button>
-          </Row>
+  <Button
+    onClick={() =>
+      onChangeCardBg({
+        version: 1,
+        opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
+        base: gBase,
+        overlays: v1.overlays ?? [],
+      })
+    }
+  >
+    Degradê
+  </Button>
+
+  <Button
+    onClick={() =>
+      onChangeCardBg({
+        version: 1,
+        opacity: typeof v1.opacity === 'number' ? v1.opacity : 1,
+        base: {
+          kind: 'image',
+          url: v1.base.kind === 'image' ? v1.base.url : '',
+          fit: 'cover',
+          position: 'center',
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0,
+          blur: 0,
+        },
+        imageOverlay: { enabled: true, color: '#000000', opacity: 0.4, gradient: true, gradientDirection: 'to-bottom' },
+        overlays: v1.overlays ?? [],
+      })
+    }
+  >
+    🖼 Imagem
+  </Button>
+</Row>
+
 
           {/* Editor de cores */}
           {v1.base.kind === 'solid' ? (
@@ -590,6 +614,289 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           </Row>
         </Section>
       ) : null}
+
+{/* Editor de imagem de fundo */}
+{v1.base.kind === 'image' && (
+  <>
+    <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+    <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8, marginBottom: 8 }}>Imagem de fundo</div>
+
+    <Row label="Upload">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
+          try {
+            const { publicUrl } = await uploadCardImage({ cardId, file, kind: 'background' })
+            onChangeCardBg?.({
+              ...v1,
+              base: { ...v1.base, kind: 'image', url: publicUrl },
+            })
+          } catch (err) {
+            console.error('Erro ao fazer upload:', err)
+          }
+        }}
+        style={{ fontSize: 12 }}
+      />
+    </Row>
+
+    <Row label="URL">
+      <input
+        type="text"
+        value={(v1.base as any).url ?? ''}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', url: e.target.value },
+          })
+        }
+        placeholder="https://..."
+        style={{ width: 200, padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)' }}
+      />
+    </Row>
+
+    <Row label="Preenchimento">
+      <select
+        value={(v1.base as any).fit ?? 'cover'}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', fit: e.target.value as any },
+          })
+        }
+        style={{ width: 140, padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontWeight: 700 }}
+      >
+        <option value="cover">Cover (estica)</option>
+        <option value="fixed">Fixo (parallax)</option>
+        <option value="tile">Repetir (tile)</option>
+        <option value="top-fade">Topo + Fade</option>
+      </select>
+    </Row>
+
+    <Row label="Posição">
+      <select
+        value={(v1.base as any).position ?? 'center'}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', position: e.target.value as any },
+          })
+        }
+        style={{ width: 140, padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontWeight: 700 }}
+      >
+        <option value="center">Centro</option>
+        <option value="top">Topo</option>
+        <option value="bottom">Baixo</option>
+        <option value="left">Esquerda</option>
+        <option value="right">Direita</option>
+        <option value="top-left">Topo esquerdo</option>
+        <option value="top-right">Topo direito</option>
+        <option value="bottom-left">Baixo esquerdo</option>
+        <option value="bottom-right">Baixo direito</option>
+      </select>
+    </Row>
+
+    <Row label="Zoom">
+  <input
+    type="range"
+    min={0.5}
+    max={2}
+    step={0.05}
+    value={(v1.base as any).zoom ?? 1}
+    onChange={(e) =>
+      onChangeCardBg?.({
+        ...v1,
+        base: { ...v1.base, kind: 'image', zoom: Number(e.target.value) },
+      })
+    }
+  />
+  <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{Math.round(((v1.base as any).zoom ?? 1) * 100)}%</span>
+</Row>
+
+
+    <Row label="Offset Y">
+      <input
+        type="range"
+        min={-100}
+        max={100}
+        step={5}
+        value={(v1.base as any).offsetY ?? 0}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', offsetY: Number(e.target.value) },
+          })
+        }
+      />
+      <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{(v1.base as any).offsetY ?? 0}px</span>
+    </Row>
+
+    <Row label="Offset X">
+      <input
+        type="range"
+        min={-100}
+        max={100}
+        step={5}
+        value={(v1.base as any).offsetX ?? 0}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', offsetX: Number(e.target.value) },
+          })
+        }
+      />
+      <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{(v1.base as any).offsetX ?? 0}px</span>
+    </Row>
+
+    <Row label="Blur">
+      <input
+        type="range"
+        min={0}
+        max={20}
+        step={1}
+        value={(v1.base as any).blur ?? 0}
+        onChange={(e) =>
+          onChangeCardBg?.({
+            ...v1,
+            base: { ...v1.base, kind: 'image', blur: Number(e.target.value) },
+          })
+        }
+      />
+      <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{(v1.base as any).blur ?? 0}px</span>
+    </Row>
+
+    {(v1.base as any).fit === 'top-fade' && (
+      <>
+        <Row label="Fade para cor">
+          <SwatchRow
+            value={(v1.base as any).fadeToColor ?? '#000000'}
+            onChange={(hex) =>
+              onChangeCardBg?.({
+                ...v1,
+                base: { ...v1.base, kind: 'image', fadeToColor: hex },
+              })
+            }
+            onEyedropper={() =>
+              pickEyedropper((hex) =>
+                onChangeCardBg?.({
+                  ...v1,
+                  base: { ...v1.base, kind: 'image', fadeToColor: hex },
+                })
+              )
+            }
+          />
+        </Row>
+
+        <Row label="Altura do fade">
+          <input
+            type="range"
+            min={100}
+            max={500}
+            step={10}
+            value={(v1.base as any).fadeHeight ?? 300}
+            onChange={(e) =>
+              onChangeCardBg?.({
+                ...v1,
+                base: { ...v1.base, kind: 'image', fadeHeight: Number(e.target.value) },
+              })
+            }
+          />
+          <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{(v1.base as any).fadeHeight ?? 300}px</span>
+        </Row>
+      </>
+    )}
+
+    <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
+    <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8, marginBottom: 8 }}>Overlay (escurecer)</div>
+
+    <Row label="Ativar">
+      <Toggle
+        active={v1.imageOverlay?.enabled ?? false}
+        onClick={() =>
+          onChangeCardBg?.({
+            ...v1,
+            imageOverlay: { ...v1.imageOverlay, enabled: !(v1.imageOverlay?.enabled ?? false) },
+          })
+        }
+      />
+    </Row>
+
+    {v1.imageOverlay?.enabled && (
+      <>
+        <Row label="Cor">
+          <SwatchRow
+            value={v1.imageOverlay?.color ?? '#000000'}
+            onChange={(hex) =>
+              onChangeCardBg?.({
+                ...v1,
+                imageOverlay: { ...v1.imageOverlay, color: hex },
+              })
+            }
+            onEyedropper={() =>
+              pickEyedropper((hex) =>
+                onChangeCardBg?.({
+                  ...v1,
+                  imageOverlay: { ...v1.imageOverlay, color: hex },
+                })
+              )
+            }
+          />
+        </Row>
+
+        <Row label="Opacidade">
+          <input
+            type="range"
+            min={0}
+            max={0.9}
+            step={0.05}
+            value={v1.imageOverlay?.opacity ?? 0.4}
+            onChange={(e) =>
+              onChangeCardBg?.({
+                ...v1,
+                imageOverlay: { ...v1.imageOverlay, opacity: Number(e.target.value) },
+              })
+            }
+          />
+          <span style={{ fontSize: 12, opacity: 0.7, minWidth: 40 }}>{Math.round((v1.imageOverlay?.opacity ?? 0.4) * 100)}%</span>
+        </Row>
+
+        <Row label="Gradiente">
+          <Toggle
+            active={v1.imageOverlay?.gradient ?? false}
+            onClick={() =>
+              onChangeCardBg?.({
+                ...v1,
+                imageOverlay: { ...v1.imageOverlay, gradient: !(v1.imageOverlay?.gradient ?? false) },
+              })
+            }
+          />
+        </Row>
+
+        {v1.imageOverlay?.gradient && (
+          <Row label="Direção">
+            <select
+              value={v1.imageOverlay?.gradientDirection ?? 'to-bottom'}
+              onChange={(e) =>
+                onChangeCardBg?.({
+                  ...v1,
+                  imageOverlay: { ...v1.imageOverlay, gradientDirection: e.target.value as any },
+                })
+              }
+              style={{ width: 140, padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontWeight: 700 }}
+            >
+              <option value="to-bottom">Para baixo</option>
+              <option value="to-top">Para cima</option>
+              <option value="radial">Radial</option>
+            </select>
+          </Row>
+        )}
+      </>
+    )}
+  </>
+)}
+
 
       {/* Fundo do header (bloco) */}
       <Section title="Fundo do header (bloco)">

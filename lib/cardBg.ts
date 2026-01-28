@@ -2,33 +2,56 @@ export type LegacyCardBg =
   | { mode: 'solid'; color: string; opacity?: number }
   | { mode: 'gradient'; from: string; to: string; angle?: number; opacity?: number }
 
-// v1 preparado para stops/patterns (mantém compatibilidade com legacy)
-export type ColorStop = { color: string; pos?: number } // 0..100
+export type ColorStop = { color: string; pos?: number }
 
 export type PatternKind = 'dots' | 'grid' | 'lines' | 'diagonal' | 'silk' | 'noise' | 'marble'
 
 export type PatternOverlay = {
   kind: PatternKind
-  opacity: number // 0..1
+  opacity: number
   scale?: number
-  density?: number // 0..1
+  density?: number
   angle?: number
-  softness?: number // 0..1
+  softness?: number
   blendMode?: React.CSSProperties['backgroundBlendMode']
   colorA?: string
   colorB?: string
 }
 
+// ✅ NOVO: Overlay para imagem de fundo
+export type ImageOverlay = {
+  enabled?: boolean
+  color?: string
+  opacity?: number
+  gradient?: boolean
+  gradientDirection?: 'to-bottom' | 'to-top' | 'radial'
+}
+
+// ✅ NOVO: Configuração de imagem de fundo
+export type ImageBase = {
+  kind: 'image'
+  url: string
+  fit?: 'cover' | 'fixed' | 'tile' | 'top-fade'
+  position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  zoom?: number        // 1 = 100%, 1.5 = 150%, etc.
+  offsetX?: number     // px
+  offsetY?: number     // px
+  blur?: number        // px
+  fadeToColor?: string // cor para onde faz fade (usado com fit: 'top-fade')
+  fadeHeight?: number  // altura do fade em px
+}
+
 export type CardBgV1 = {
   version: 1
-  opacity?: number // 0..1 (apenas do fundo)
+  opacity?: number
   base:
     | { kind: 'solid'; color: string }
     | { kind: 'gradient'; angle?: number; stops: ColorStop[] }
+    | ImageBase
+  imageOverlay?: ImageOverlay
   overlays?: PatternOverlay[]
 }
 
-// Tipo público: aceita legacy + v1
 export type CardBg = LegacyCardBg | CardBgV1
 
 export function isV1(bg: any): bg is CardBgV1 {
@@ -57,7 +80,6 @@ export function migrateCardBg(bg: CardBg | null | undefined): CardBgV1 {
     }
   }
 
-  // gradient legacy
   return {
     version: 1,
     opacity: typeof bg.opacity === 'number' ? bg.opacity : 1,

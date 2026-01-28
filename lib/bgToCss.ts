@@ -1,7 +1,6 @@
 import type React from 'react'
-import type { CardBg, CardBgV1, PatternOverlay } from '@/lib/cardBg'
+import type { CardBg, CardBgV1, PatternOverlay, ImageBase } from '@/lib/cardBg'
 import { migrateCardBg } from '@/lib/cardBg'
-
 
 function clamp(n: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, n))
@@ -106,18 +105,42 @@ function overlayToLayer(ov: PatternOverlay): { image: string; size?: string; rep
     }
 
     default:
-      // NOTE: 'lines' e outros podem ser adicionados depois
       return null
   }
 }
 
-export function bgToStyle(bg: CardBg | null | undefined): {
+// ✅ NOVO: Tipo de retorno expandido para imagens
+export type BgStyleResult = {
   style: React.CSSProperties
   opacity: number
   cssStringForOutside?: string
-} {
+  // Campos específicos para imagem
+  isImage?: boolean
+  image?: ImageBase
+  imageOverlay?: {
+    enabled?: boolean
+    color?: string
+    opacity?: number
+    gradient?: boolean
+    gradientDirection?: 'to-bottom' | 'to-top' | 'radial'
+  }
+}
+
+export function bgToStyle(bg: CardBg | null | undefined): BgStyleResult {
   const v1: CardBgV1 = migrateCardBg(bg)
   const opacity = clamp(typeof v1.opacity === 'number' ? v1.opacity : 1)
+
+  // ✅ NOVO: Se for imagem, retorna dados separados
+  if (v1.base.kind === 'image') {
+    return {
+      style: {},
+      opacity,
+      isImage: true,
+      image: v1.base as ImageBase,
+      imageOverlay: v1.imageOverlay,
+      cssStringForOutside: v1.base.url,
+    }
+  }
 
   const layers: string[] = []
   const blendModes: string[] = []
@@ -125,13 +148,11 @@ export function bgToStyle(bg: CardBg | null | undefined): {
   const repeats: string[] = []
   const positions: string[] = []
 
-  // Base
   if (v1.base.kind === 'gradient') {
     const angle = typeof v1.base.angle === 'number' ? v1.base.angle : 180
     layers.push(`linear-gradient(${angle}deg, ${stopsToCss(v1.base.stops)})`)
   }
 
-  // Overlays
   for (const ov of v1.overlays ?? []) {
     const out = overlayToLayer(ov)
     if (!out) continue
@@ -159,21 +180,12 @@ export function bgToStyle(bg: CardBg | null | undefined): {
   return { style, opacity, cssStringForOutside }
 }
 
-/**
- * Devolve uma string CSS de background (single string) para casos como frames/metadata.
- * - Para v1 (layers), devolve a "base" (solid/gradient) como fallback consistente.
- * - Para legacy, devolve o solid/linear-gradient normal.
- */
-
-    export function bgToCssString(bg?: CardBg | null): string | null {
-
+export function bgToCssString(bg?: CardBg | null): string | null {
   if (!bg) return null
 
-  // v1
   if ((bg as any).version === 1) {
     let base = (bg as any).base
-// ✅ hotfix: alguns themes ficaram com base.base por causa de um save antigo
-if (base && (base as any).base && !(base as any).kind) base = (base as any).base
+    if (base && (base as any).base && !(base as any).kind) base = (base as any).base
 
     if (!base) return null
 
@@ -187,10 +199,13 @@ if (base && (base as any).base && !(base as any).kind) base = (base as any).base
       return `linear-gradient(${angle}deg, ${parts.join(', ')})`
     }
 
+    if (base.kind === 'image') {
+      return base.url ?? null
+    }
+
     return null
   }
 
-  // legacy
   const mode = (bg as any).mode
   if (mode === 'solid') return (bg as any).color ?? null
   if (mode === 'gradient') {
@@ -200,4 +215,3 @@ if (base && (base as any).base && !(base as any).kind) base = (base as any).base
 
   return null
 }
-// deploy: dom 25 jan 2026 17:14:06 WET
