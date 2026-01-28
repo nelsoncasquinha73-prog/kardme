@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/plans', title: 'Planos' },
     { prefix: '/dashboard/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/dashboard/analytics', title: 'Analytics' },
-    { prefix: '/dashboard', title: 'Os meus cartões' },
+    { prefix: '/dashboard', title: isAdmin ? 'Dashboard' : 'Os meus cartões' },
   ]
 
   const getPageTitle = () => {
