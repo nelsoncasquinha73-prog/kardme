@@ -428,3 +428,10 @@
   font-size: 14px;
   margin-bottom: 16px;
 }
+
+/* Fix botão Editar */
+.admin-template-actions .btn-secondary {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}
