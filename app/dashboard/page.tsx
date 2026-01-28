@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <p style={{ 
             fontSize: 28, 
             fontWeight: 600, 
-            color: '#1f2937', 
+            color: '#374151', 
             lineHeight: 1.4,
             marginBottom: 32 
           }}>
