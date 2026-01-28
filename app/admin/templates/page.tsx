@@ -259,7 +259,7 @@ export default function AdminTemplatesPage() {
   }
 
   const deleteTemplate = async (t: Template) => {
-    const ok = confirm(`Apagar o template "\${t.name}"? Esta ação não dá para reverter.`)
+    const ok = confirm(`Apagar o template "${t.name}"? Esta ação não dá para reverter.`)
     if (!ok) return
 
     setDeletingId(t.id)
@@ -362,8 +362,8 @@ export default function AdminTemplatesPage() {
           .from('cards')
           .insert({
             user_id: userId,
-            name: `[DRAFT] \${template.name}`,
-            slug: `draft-template-\${templateId}-\${Date.now()}`,
+            name: `[DRAFT] ${template.name}`,
+            slug: `draft-template-${templateId}-${Date.now()}`,
             template_id: template.id,
             is_template_draft: true,
             theme: (template.theme_json as any) || { background: '#ffffff' },
@@ -396,14 +396,14 @@ export default function AdminTemplatesPage() {
             .insert(blocksToInsert)
 
           if (blocksErr) {
-            setError(`Erro ao copiar blocos: \${blocksErr.message}`)
+            setError(`Erro ao copiar blocos: ${blocksErr.message}`)
             setOpeningId(null)
             return
           }
         }
       }
 
-            router.push(`/dashboard/cards/\${cardId}/theme?template_id=\${templateId}`)
+            router.push(`/dashboard/cards/${cardId}/theme?template_id=${templateId}`)
       setOpeningId(null)
     } catch (e: any) {
       setError(e.message || 'Erro ao abrir template para edição')
@@ -424,8 +424,8 @@ export default function AdminTemplatesPage() {
         .from('cards')
         .insert({
           user_id: userId,
-          name: `\${t.name} (variação)`,
-          slug: `card-\${Date.now()}`,
+          name: `${t.name} (variação)`,
+          slug: `card-${Date.now()}`,
           template_id: t.id,
         })
         .select('id')
@@ -450,7 +450,7 @@ export default function AdminTemplatesPage() {
         if (blocksErr) throw new Error(blocksErr.message)
       }
 
-      router.push(`/dashboard/cards/\${cardId}/theme`)
+      router.push(`/dashboard/cards/${cardId}/theme`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao abrir no editor.')
       setOpeningId(null)
@@ -473,8 +473,8 @@ export default function AdminTemplatesPage() {
         .from('cards')
         .insert({
           user_id: userId,
-          name: `[NOVO] \${Date.now()}`,
-          slug: `draft-\${Date.now()}`,
+          name: `[NOVO] ${Date.now()}`,
+          slug: `draft-${Date.now()}`,
           theme: { background: '#ffffff' },
           is_template_draft: true,
         })
@@ -499,7 +499,7 @@ export default function AdminTemplatesPage() {
       if (blocksErr) throw new Error(blocksErr.message)
 
       setCreatingNew(false)
-      router.push(`/dashboard/cards/\${cardId}/theme?mode=template_draft`)
+      router.push(`/dashboard/cards/${cardId}/theme?mode=template_draft`)
     } catch (e) {
       setCreatingNew(false)
       setError(e instanceof Error ? e.message : 'Erro ao criar template.')
