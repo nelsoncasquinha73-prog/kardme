@@ -598,7 +598,7 @@ export default function CatalogPage() {
                         }}
                         title="Disponível em breve"
                       >
-                        Premium
+                        {t.price ? `Comprar €${t.price.toFixed(2)}` : 'Premium'}
                       </button>
                     )}
                   </div>
