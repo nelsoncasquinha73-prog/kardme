@@ -43,7 +43,6 @@ export async function generateMetadata({ params }: Props) {
 
   const rawBg = card?.theme?.background
   const v1 = migrateCardBg(rawBg)
-  console.log('DEBUG browserBarColor:', v1.browserBarColor, 'base.kind:', v1.base.kind)
 
   const color = (() => {
     if (v1.base.kind === 'solid') {
