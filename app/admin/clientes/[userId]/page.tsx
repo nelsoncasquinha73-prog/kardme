@@ -142,6 +142,17 @@ export default function AdminClienteDetailPage() {
       setCards(cards.map(c => c.id === cardId ? { ...c, published: publish } : c))
     } catch (e: any) { alert("Erro: " + e?.message) }
   }
+
+  async function deleteCard(cardId: string) {
+    if (!confirm("Eliminar este cartão? Esta ação é irreversível!")) return
+    try {
+      const res = await fetch("/api/admin/cards/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cardId }) })
+      const json = await res.json()
+      if (!res.ok || !json?.success) throw new Error(json?.error || "Erro")
+      setCards(cards.filter(c => c.id !== cardId))
+      alert("Cartão eliminado!")
+    } catch (e: any) { alert("Erro: " + e?.message) }
+  }
   if (loading) return <div style={{ padding: 24, color: '#fff' }}>A carregar…</div>
   if (!profile) return <div style={{ padding: 24, color: '#fff' }}><p>Cliente não encontrado.</p><Link href="/admin/clientes" style={{ color: '#93c5fd' }}>← Voltar</Link></div>
 
@@ -238,7 +249,7 @@ export default function AdminClienteDetailPage() {
                     <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.published ? '✅ Sim' : '❌ Não'}</td>
                     <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.created_at ? new Date(c.created_at).toLocaleString('pt-PT') : '—'}</td>
                     <td style={{ padding: 12 }}><span style={{ padding: "4px 8px", borderRadius: 6, fontSize: 12, fontWeight: 600, background: c.published ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: c.published ? "#22c55e" : "#ef4444" }}>{c.published ? "Publicado" : "Rascunho"}</span></td>
-                    <td style={{ padding: 12 }}><div style={{ display: "flex", gap: 8 }}><button onClick={() => toggleCardPublish(c.id, !c.published)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: c.published ? "#ef4444" : "#22c55e", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{c.published ? "Despublicar" : "Publicar"}</button>{c.slug && <a href={"/" + c.slug} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#2563eb", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>Ver</a>}</div></td>
+                    <td style={{ padding: 12 }}><div style={{ display: "flex", gap: 8 }}><button onClick={() => toggleCardPublish(c.id, !c.published)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: c.published ? "#ef4444" : "#22c55e", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{c.published ? "Despublicar" : "Publicar"}</button>{c.slug && <a href={"/" + c.slug} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#2563eb", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>Ver</a>}<button onClick={() => deleteCard(c.id)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: "#7f1d1d", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>🗑️</button></div></td>
                   </tr>
                 ))}
                 {cards.length === 0 && <tr><td colSpan={6} style={{ padding: 16, color: 'rgba(255,255,255,0.6)' }}>Sem cartões.</td></tr>}
