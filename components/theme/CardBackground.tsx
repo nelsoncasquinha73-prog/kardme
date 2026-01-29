@@ -143,7 +143,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     pointerEvents: 'none',
     borderRadius,
     overflow: 'hidden',
-    transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+    transform: (fit !== 'fixed' && zoom !== 1) ? `scale(${zoom})` : undefined,
     transformOrigin: 'center center',
   }
 
