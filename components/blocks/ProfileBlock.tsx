@@ -226,8 +226,8 @@ export default function ProfileBlock({
               <div
                 style={{
                   position: 'absolute',
-                  left: 0,
-                  right: 0,
+                  left: -50,
+                  right: -50,
                   bottom: avatarSizePx,
                   height: overflowHeight,
                   overflow: 'hidden',
