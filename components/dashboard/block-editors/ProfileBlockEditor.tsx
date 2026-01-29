@@ -281,7 +281,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
       checked={(local.avatar?.glow as any)?.enabled ?? false}
       onChange={(e) =>
         patch((d) => {
-          d.avatar!.glow = d.avatar!.glow || { enabled: false, color: 'rgba(59,130,246,0.18)', size: 6 }
+          d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: false, color: 'rgba(59,130,246,0.18)', size: 6 }
           d.avatar!.glow!.enabled = e.target.checked
         })
       }
@@ -303,7 +303,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         value={(local.avatar?.glow as any)?.size ?? 6}
         onChange={(e) =>
           patch((d) => {
-            d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+            d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
             d.avatar!.glow!.size = Number(e.target.value)
           })
         }
@@ -313,7 +313,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'}
         onChange={(hex) =>
           patch((d) => {
-            d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+            d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
             d.avatar!.glow!.color = hex
           })
         }
@@ -322,7 +322,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             mode: 'eyedropper' as any,
             onPick: (hex: string) => {
               patch((d) => {
-                d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
+                d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
                 d.avatar!.glow!.color = hex
               })
             },

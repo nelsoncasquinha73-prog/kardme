@@ -126,7 +126,6 @@ const avatarSizePx = avatarSizePxRaw
 
 // Glow e shadow
 const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
-console.log("GLOW DEBUG:", { glowEnabled, glow: settings.avatar?.glow })
 const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
 const glowSize = (settings.avatar?.glow as any)?.size ?? 6
 
