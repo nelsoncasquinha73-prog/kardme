@@ -167,6 +167,8 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     pointerEvents: 'none',
     borderRadius,
     overflow: 'hidden',
+    transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+    transformOrigin: `calc(50% + ${offsetX}px) calc(50% + ${offsetY}px)`,
   }
 
   // Para top-fade, precisamos de um container extra
