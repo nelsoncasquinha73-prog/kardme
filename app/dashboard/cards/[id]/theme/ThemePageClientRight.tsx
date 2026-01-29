@@ -79,9 +79,15 @@ export default function ThemePageClientRight({
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    const storedRole = sessionStorage.getItem('userRole')
-    setIsAdmin(storedRole === 'admin')
+    const checkAdmin = async () => {
+      const { data } = await supabase.auth.getUser()
+      const email = data?.user?.email
+      const ADMIN_EMAILS = ['admin@kardme.com', 'nelson@kardme.com']
+      setIsAdmin(email ? ADMIN_EMAILS.includes(email) : false)
+    }
+    checkAdmin()
   }, [])
+
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -361,7 +367,7 @@ export default function ThemePageClientRight({
       >
         {activeBlock && (
           <div style={{ padding: '12px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-            <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />
+            {!isAdmin && <PublishToggle cardId={card.id} initialPublished={card.published ?? false} />}
           </div>
         )}
 
