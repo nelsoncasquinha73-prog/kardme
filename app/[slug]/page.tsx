@@ -59,10 +59,14 @@ export async function generateMetadata({ params }: Props) {
   })()
 
   return {
+    manifest: `/${slug}/manifest.webmanifest`,
     other: {
       "theme-color": color,
     },
-    themeColor: color,
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: color },
+      { media: "(prefers-color-scheme: dark)", color: color },
+    ],
     metadataBase: new URL("https://new.kardme.com"),
     colorScheme: 'dark',
   }
