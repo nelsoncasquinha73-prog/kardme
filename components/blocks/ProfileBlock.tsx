@@ -151,7 +151,7 @@ export default function ProfileBlock({
         backgroundColor: bgEnabled ? bgColor : 'transparent',
         borderRadius: radiusFor(bgStyle),
         border: bgEnabled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
-        boxShadow: bgEnabled ? '0 6px 20px rgba(0,0,0,0.06)' : 'none',
+        boxShadow: bgEnabled ? '0 6px 20px rgba(0,0,0,0.06)' : `inset(0 0 ${avatarSizePx}px 0)`,
         overflow: 'visible',
         transition: 'margin-top 200ms ease, background-color 200ms ease',
       }}
@@ -240,7 +240,7 @@ export default function ProfileBlock({
                   zIndex: 3,
                   clipPath: shape === 'circle' 
                     ? 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 50%, 0% 50%)'
-                    : 'none',
+                    : `inset(0 0 ${avatarSizePx}px 0)`,
                 }}
               />
             </div>
