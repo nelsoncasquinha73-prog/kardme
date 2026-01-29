@@ -248,6 +248,25 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   />
 </div>
 
+        {/* Forma do avatar */}
+        <div className="flex flex-col gap-2">
+          <span className="text-sm">Forma</span>
+          <div className="flex gap-2">
+            {(["circle", "rounded", "square"] as const).map((shape) => (
+              <button
+                key={shape}
+                type="button"
+                onClick={() => patch((d) => { d.avatar!.shape = shape })}
+                className={`h-8 w-8 flex items-center justify-center rounded-lg border ${
+                  local.avatar?.shape === shape ? "border-blue-500 bg-blue-50" : "border-black/10"
+                }`}
+              >
+                <ShapeIcon kind={shape} />
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <span className="text-sm">Borda</span>
