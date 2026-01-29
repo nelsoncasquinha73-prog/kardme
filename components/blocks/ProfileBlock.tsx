@@ -114,38 +114,33 @@ export default function ProfileBlock({
 
   const dock = headerSettings?.layout?.avatarDock ?? 'overlap'
 
-// Suporta tanto o novo sizePx (72-180) como o antigo size ('sm'/'md'/'lg')
-const avatarSizePxRaw =
-  typeof (settings.avatar as any)?.sizePx === 'number'
-    ? (settings.avatar as any).sizePx
-    : undefined
+  // Suporta tanto o novo sizePx (72-180) como o antigo size ('sm'/'md'/'lg')
+  const avatarSizePxRaw =
+    typeof (settings.avatar as any)?.sizePx === 'number'
+      ? (settings.avatar as any).sizePx
+      : undefined
 
-const avatarSizePx = avatarSizePxRaw
-  ? Math.max(72, Math.min(180, avatarSizePxRaw))
-  : SIZE_MAP[settings.avatar?.size ?? 'md']?.avatar ?? 108
+  const avatarSizePx = avatarSizePxRaw
+    ? Math.max(72, Math.min(180, avatarSizePxRaw))
+    : SIZE_MAP[settings.avatar?.size ?? 'md']?.avatar ?? 108
 
-// Glow e shadow
-const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
-const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
-const glowSize = (settings.avatar?.glow as any)?.size ?? 6
+  // Glow e shadow
+  const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
+  const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
+  const glowSize = (settings.avatar?.glow as any)?.size ?? 6
 
+  const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
+  const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
 
-const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
-const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
+  // Shadow "botão 3D premium": múltiplas camadas para depth intenso
+  const shadowCss = shadowEnabled && shadowIntensity > 0
+    ? `0 ${Math.round(10 * shadowIntensity / 0.18)}px ${Math.round(26 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.16 * shadowIntensity / 0.18).toFixed(2)}), 0 ${Math.round(4 * shadowIntensity / 0.18)}px ${Math.round(10 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.12 * shadowIntensity / 0.18).toFixed(2)})`
+    : 'none'
 
-// Shadow "botão 3D premium": múltiplas camadas para depth intenso
-const shadowCss = shadowEnabled && shadowIntensity > 0
-  ? `0 ${Math.round(10 * shadowIntensity / 0.18)}px ${Math.round(26 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.16 * shadowIntensity / 0.18).toFixed(2)}), 0 ${Math.round(4 * shadowIntensity / 0.18)}px ${Math.round(10 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.12 * shadowIntensity / 0.18).toFixed(2)})`
-  : 'none'
-
-
-// Efeito 3D (foto sai da moldura)
-const effect3dEnabled = (settings.avatar?.effect3d as any)?.enabled ?? false
-const effect3dBgColor = (settings.avatar?.effect3d as any)?.bgColor ?? "#ffffff"
-const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
-console.log("PROFILE BLOCK effect3dScale:", effect3dScale, settings.avatar?.effect3d)
-
-
+  // Efeito 3D (foto sai da moldura)
+  const effect3dEnabled = (settings.avatar?.effect3d as any)?.enabled ?? false
+  const effect3dBgColor = (settings.avatar?.effect3d as any)?.bgColor ?? "#ffffff"
+  const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
 
   const autoOverlapY = dock === 'overlap' ? -avatarSizePx / 2 : 0
   const avatarOffsetY = settings.avatar?.offsetY != null ? settings.avatar.offsetY : autoOverlapY
@@ -186,6 +181,7 @@ console.log("PROFILE BLOCK effect3dScale:", effect3dScale, settings.avatar?.effe
                 height: avatarSizePx,
                 transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
                 zIndex: 20,
+                overflow: 'visible',
               }}
             >
               {/* Moldura de fundo */}
@@ -202,52 +198,26 @@ console.log("PROFILE BLOCK effect3dScale:", effect3dScale, settings.avatar?.effe
                   boxShadow: [
                     glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
                     shadowCss,
-                  ].filter(Boolean).join(', ') || 'none',
+                  ].filter(Boolean).join(", ") || "none",
+                  zIndex: 1,
                 }}
               />
-              {/* Container da foto - clip na metade inferior */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  overflow: 'hidden',
-                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
-                  clipPath: 'inset(0 0 0 0)', // clip dentro da moldura nos lados e em baixo
-                }}
-              >
-                {/* Foto que sai pelo topo */}
-                <img
-                  src={avatarUrl as string}
-                  alt="Avatar"
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: '50%',
-                    transform: `translateX(-50%) scale(${effect3dScale})`,
-                    width: avatarSizePx * effect3dScale,
-                    height: 'auto',
-                    objectFit: 'contain',
-                    objectPosition: 'bottom',
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
-              {/* Foto que sai pelo topo (parte visível acima da moldura) */}
+              {/* Foto - sai pelo topo */}
               <img
                 src={avatarUrl as string}
-                alt=""
-                aria-hidden="true"
+                alt="Avatar"
                 style={{
                   position: 'absolute',
                   bottom: 0,
                   left: '50%',
                   transform: `translateX(-50%) scale(${effect3dScale})`,
-                  width: avatarSizePx * effect3dScale,
+                  transformOrigin: 'bottom center',
+                  width: avatarSizePx,
                   height: 'auto',
                   objectFit: 'contain',
                   objectPosition: 'bottom',
                   pointerEvents: 'none',
-                  clipPath: `inset(0 0 ${avatarSizePx}px 0)`, // só mostra a parte acima da moldura
+                  zIndex: 2,
                 }}
               />
             </div>
@@ -270,7 +240,7 @@ console.log("PROFILE BLOCK effect3dScale:", effect3dScale, settings.avatar?.effe
                 boxShadow: [
                   glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
                   shadowCss,
-                ].filter(Boolean).join(', ') || 'none',
+                ].filter(Boolean).join(", ") || "none",
                 zIndex: 20,
               }}
             />
