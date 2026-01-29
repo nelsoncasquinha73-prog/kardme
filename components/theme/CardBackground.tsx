@@ -127,7 +127,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = 'auto 100%'
+    backgroundSize = 'cover'
     backgroundAttachment = 'fixed'
   }
 
