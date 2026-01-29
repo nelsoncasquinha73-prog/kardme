@@ -240,7 +240,7 @@ export default function ProfileBlock({
                   zIndex: 3,
                   clipPath: shape === 'circle' 
                     ? 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 50%, 0% 50%)'
-                    : `polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)`,
+                    : 'none',
                 }}
               />
             </div>
