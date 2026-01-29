@@ -90,8 +90,6 @@ export default function ProfileBlock({
   const showProfession = settings.profession?.enabled && settings.profession.text?.trim()
   const showCompany = settings.company?.enabled && settings.company.text?.trim()
 
-  // O teu tipo ProfileSettings.layout atualmente não declara "align".
-  // Então lemos de forma segura via any, com fallback.
   const alignRaw = (settings as any)?.layout?.align
   const align: 'left' | 'center' | 'right' =
     alignRaw === 'left' || alignRaw === 'right' || alignRaw === 'center' ? alignRaw : 'center'
@@ -114,7 +112,6 @@ export default function ProfileBlock({
 
   const dock = headerSettings?.layout?.avatarDock ?? 'overlap'
 
-  // Suporta tanto o novo sizePx (72-180) como o antigo size ('sm'/'md'/'lg')
   const avatarSizePxRaw =
     typeof (settings.avatar as any)?.sizePx === 'number'
       ? (settings.avatar as any).sizePx
@@ -132,7 +129,6 @@ export default function ProfileBlock({
   const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
   const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
 
-  // Shadow "botão 3D premium": múltiplas camadas para depth intenso
   const shadowCss = shadowEnabled && shadowIntensity > 0
     ? `0 ${Math.round(10 * shadowIntensity / 0.18)}px ${Math.round(26 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.16 * shadowIntensity / 0.18).toFixed(2)}), 0 ${Math.round(4 * shadowIntensity / 0.18)}px ${Math.round(10 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.12 * shadowIntensity / 0.18).toFixed(2)})`
     : 'none'
@@ -149,6 +145,9 @@ export default function ProfileBlock({
   const extraTopPadding = avatarEnabled && dock === 'overlap' ? avatarSizePx / 2 + 10 : 0
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
+
+  // Calcular quanto a foto sai pelo topo (para o efeito 3D)
+  const photoExcessTop = avatarSizePx * (effect3dScale - 1)
 
   return (
     <section
@@ -181,7 +180,6 @@ export default function ProfileBlock({
                 height: avatarSizePx,
                 transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
                 zIndex: 20,
-                overflow: 'visible',
               }}
             >
               {/* Moldura de fundo */}
@@ -202,24 +200,36 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Foto - sai pelo topo */}
-              <img
-                src={avatarUrl as string}
-                alt="Avatar"
+              {/* Container que permite overflow só no topo */}
+              <div
                 style={{
                   position: 'absolute',
+                  top: -photoExcessTop,
+                  left: 0,
+                  right: 0,
                   bottom: 0,
-                  left: '50%',
-                  transform: `translateX(-50%) scale(${effect3dScale})`,
-                  transformOrigin: 'bottom center',
-                  width: avatarSizePx,
-                  height: 'auto',
-                  objectFit: 'contain',
-                  objectPosition: 'bottom',
-                  pointerEvents: 'none',
+                  overflow: 'hidden',
                   zIndex: 2,
                 }}
-              />
+              >
+                {/* Foto - posicionada no fundo do container */}
+                <img
+                  src={avatarUrl as string}
+                  alt="Avatar"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    transform: `translateX(-50%) scale(${effect3dScale})`,
+                    transformOrigin: 'bottom center',
+                    width: avatarSizePx,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
             </div>
           ) : (
             /* Avatar normal */
