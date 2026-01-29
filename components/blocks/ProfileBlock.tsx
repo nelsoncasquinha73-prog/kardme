@@ -143,6 +143,7 @@ const shadowCss = shadowEnabled && shadowIntensity > 0
 const effect3dEnabled = (settings.avatar?.effect3d as any)?.enabled ?? false
 const effect3dBgColor = (settings.avatar?.effect3d as any)?.bgColor ?? "#ffffff"
 const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
+console.log("PROFILE BLOCK effect3dScale:", effect3dScale, settings.avatar?.effect3d)
 
 
 
