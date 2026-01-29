@@ -247,44 +247,6 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     }
   />
 </div>
-       <div className="flex flex-col gap-2">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">Tamanho</span>
-    <span className="text-xs text-black/50">{local.avatar?.sizePx ?? 108}px</span>
-  </div>
-
-  <input
-    type="range"
-    min={72}
-    max={180}
-    step={1}
-    value={(local.avatar as any)?.sizePx ?? 108}
-    onChange={(e) =>
-      patch((d) => {
-        d.avatar!.sizePx = Number(e.target.value)
-      })
-    }
-  />
-</div>
-
-
-        <div className="flex justify-between items-center">
-          <span className="text-sm">Forma</span>
-
-          <Segmented
-            value={local.avatar?.shape ?? 'circle'}
-            options={[
-              { key: 'circle', label: <ShapeIcon kind="circle" /> },
-              { key: 'rounded', label: <ShapeIcon kind="rounded" /> },
-              { key: 'square', label: <ShapeIcon kind="square" /> },
-            ]}
-            onChange={(k) =>
-              patch((d) => {
-                d.avatar!.shape = k as any
-              })
-            }
-          />
-        </div>
 
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">

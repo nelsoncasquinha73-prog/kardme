@@ -114,29 +114,12 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
 // ✅ NOVO: Renderiza o layer de imagem de fundo
 function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borderRadius?: number | string }) {
   const fit = image.fit ?? 'cover'
-  const position = image.position ?? 'center'
   const zoom = typeof image.zoom === 'number' ? image.zoom : 1
   const offsetX = typeof image.offsetX === 'number' ? image.offsetX : 0
   const offsetY = typeof image.offsetY === 'number' ? image.offsetY : 0
   const blur = typeof image.blur === 'number' ? image.blur : 0
 
-  // Mapear position para CSS
-  const positionMap: Record<string, string> = {
-    'center': 'center center',
-    'top': 'center top',
-    'bottom': 'center bottom',
-    'left': 'left center',
-    'right': 'right center',
-    'top-left': 'left top',
-    'top-right': 'right top',
-    'bottom-left': 'left bottom',
-    'bottom-right': 'right bottom',
-  }
-
-  const bgPosition = positionMap[position] ?? 'center center'
-
-  // ✅ Calcular backgroundSize baseado no fit e zoom
-  let backgroundSize: string
+  let backgroundSize: string = 'cover'
   let backgroundRepeat: string = 'no-repeat'
   let backgroundAttachment: string = 'scroll'
 
@@ -144,17 +127,10 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = zoom === 1 ? 'cover' : `${zoom * 100}%`
     backgroundAttachment = 'fixed'
-  } else if (fit === 'top-fade') {
-    backgroundSize = zoom === 1 ? 'cover' : `${zoom * 100}%`
-  } else {
-    // cover - mas agora controlado pelo zoom
-    // zoom 1 = 100% da largura, zoom 0.5 = 50%, etc.
-    backgroundSize = zoom === 1 ? 'cover' : `${zoom * 100}%`
   }
 
-  // Estilos base
+  // Estilos base - sempre cover, zoom via transform
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
@@ -168,7 +144,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     borderRadius,
     overflow: 'hidden',
     transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-    transformOrigin: `calc(50% + ${offsetX}px) calc(50% + ${offsetY}px)`,
+    transformOrigin: 'center center',
   }
 
   // Para top-fade, precisamos de um container extra
