@@ -143,7 +143,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     filter: blur > 0 ? `blur(${blur}px)` : undefined,
     pointerEvents: 'none',
     borderRadius,
-    overflow: fit === 'fixed' ? 'visible' : 'hidden',
+    overflow: 'hidden',
     transform: (fit !== 'fixed' && zoom !== 1) ? `scale(${zoom})` : undefined,
     transformOrigin: 'center center',
   }
