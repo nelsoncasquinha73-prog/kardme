@@ -99,23 +99,28 @@ export default async function CardPage({ params }: Props) {
 
 
 
+  const barColor = cardBgV1.browserBarColor ?? "#000000"
+
   return (
-    <TrackingWrapper cardId={card.id}>
-      <div style={{ minHeight: "100dvh", width: "100%", backgroundColor: cardBgV1.browserBarColor ?? "#000000" }}>
-        <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
-          <LanguageProvider>
-            <ThemeProvider theme={card.theme}>
-              <CardPreview
-                card={card}
-                blocks={blocks}
-                showTranslations={false}
-                fullBleed={true}
-                cardBg={cardBgV1}
-              />
-            </ThemeProvider>
-          </LanguageProvider>
+    <>
+      <style>{`html, body { background-color: ${barColor} !important; }`}</style>
+      <TrackingWrapper cardId={card.id}>
+        <div style={{ minHeight: "100dvh", width: "100%", backgroundColor: barColor, paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
+            <LanguageProvider>
+              <ThemeProvider theme={card.theme}>
+                <CardPreview
+                  card={card}
+                  blocks={blocks}
+                  showTranslations={false}
+                  fullBleed={true}
+                  cardBg={cardBgV1}
+                />
+              </ThemeProvider>
+            </LanguageProvider>
+          </div>
         </div>
-      </div>
-    </TrackingWrapper>
+      </TrackingWrapper>
+    </>
   )
 }
