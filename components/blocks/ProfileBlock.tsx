@@ -206,27 +206,33 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Container único para a foto - permite overflow só no topo */}
+              {/* Foto dentro da moldura (clipped ao círculo) */}
               <div
                 style={{
                   position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  top: -100, // espaço extra para a foto sair pelo topo
-                  clipPath: `inset(0 round 0 0 ${avatarRadius(settings.avatar?.shape ?? 'circle')} ${avatarRadius(settings.avatar?.shape ?? 'circle')})`,
+                  inset: 0,
+                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                  overflow: 'hidden',
                   zIndex: 2,
                 }}
               >
                 <img
                   src={avatarUrl as string}
                   alt="Avatar"
-                  style={{
-                    ...effect3dImageStyle,
-                    bottom: 0,
-                  }}
+                  style={effect3dImageStyle}
                 />
               </div>
+              {/* Foto que sai pelo topo - usa clip-path para mostrar só acima da moldura */}
+              <img
+                src={avatarUrl as string}
+                alt=""
+                aria-hidden="true"
+                style={{
+                  ...effect3dImageStyle,
+                  clipPath: `inset(0 0 ${avatarSizePx}px 0)`,
+                  zIndex: 3,
+                }}
+              />
             </div>
           ) : (
             /* Avatar normal */
