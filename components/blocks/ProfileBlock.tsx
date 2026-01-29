@@ -141,7 +141,7 @@ export default function ProfileBlock({
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
-  // Quanto a foto excede pelo topo (em pixels)
+  // Quanto a foto excede pelo topo (em pixels) quando escalada
   const photoExcessTop = Math.round(avatarSizePx * (effect3dScale - 1))
 
   return (
@@ -195,7 +195,7 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Foto dentro da moldura (clipped aos limites da moldura) */}
+              {/* Foto dentro da moldura (clipped aos limites circulares) */}
               <div
                 style={{
                   position: 'absolute',
@@ -210,7 +210,7 @@ export default function ProfileBlock({
                   alt="Avatar"
                   style={{
                     position: 'absolute',
-                    bottom: -avatarSizePx,
+                    bottom: 0,
                     left: '50%',
                     transform: `translateX(-50%) scale(${effect3dScale})`,
                     transformOrigin: 'bottom center',
@@ -228,8 +228,8 @@ export default function ProfileBlock({
                   position: 'absolute',
                   left: 0,
                   right: 0,
-                  bottom: avatarSizePx,
-                  height: photoExcessTop + 50,
+                  top: -(photoExcessTop + 20),
+                  height: photoExcessTop + 20,
                   overflow: 'hidden',
                   zIndex: 3,
                 }}
@@ -240,14 +240,14 @@ export default function ProfileBlock({
                   aria-hidden="true"
                   style={{
                     position: 'absolute',
-                    bottom: -avatarSizePx,
+                    top: 0,
                     left: '50%',
                     transform: `translateX(-50%) scale(${effect3dScale})`,
-                    transformOrigin: 'bottom center',
+                    transformOrigin: 'top center',
                     width: avatarSizePx,
                     height: 'auto',
                     objectFit: 'contain',
-                    objectPosition: 'bottom',
+                    objectPosition: 'top',
                     pointerEvents: 'none',
                   }}
                 />
