@@ -141,8 +141,19 @@ export default function ProfileBlock({
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
-  // Quanto a foto excede pelo topo (em pixels) quando escalada
-  const photoExcessTop = Math.round(avatarSizePx * (effect3dScale - 1))
+  // Estilos comuns para a imagem no efeito 3D
+  const effect3dImageStyle: React.CSSProperties = {
+    position: 'absolute',
+    bottom: 0,
+    left: '50%',
+    transform: `translateX(-50%) scale(${effect3dScale})`,
+    transformOrigin: 'bottom center',
+    width: avatarSizePx,
+    height: 'auto',
+    objectFit: 'contain',
+    objectPosition: 'bottom',
+    pointerEvents: 'none',
+  }
 
   return (
     <section
@@ -195,13 +206,15 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Foto dentro da moldura (clipped aos limites circulares) */}
+              {/* Container único para a foto - permite overflow só no topo */}
               <div
                 style={{
                   position: 'absolute',
-                  inset: 0,
-                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
-                  overflow: 'hidden',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  top: -100, // espaço extra para a foto sair pelo topo
+                  clipPath: `inset(0 round 0 0 ${avatarRadius(settings.avatar?.shape ?? 'circle')} ${avatarRadius(settings.avatar?.shape ?? 'circle')})`,
                   zIndex: 2,
                 }}
               >
@@ -209,46 +222,8 @@ export default function ProfileBlock({
                   src={avatarUrl as string}
                   alt="Avatar"
                   style={{
-                    position: 'absolute',
+                    ...effect3dImageStyle,
                     bottom: 0,
-                    left: '50%',
-                    transform: `translateX(-50%) scale(${effect3dScale})`,
-                    transformOrigin: 'bottom center',
-                    width: avatarSizePx,
-                    height: 'auto',
-                    objectFit: 'contain',
-                    objectPosition: 'bottom',
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
-              {/* Foto que sai pelo topo (só a parte acima da moldura) */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: -(photoExcessTop + 20),
-                  height: photoExcessTop + 20,
-                  overflow: 'hidden',
-                  zIndex: 3,
-                }}
-              >
-                <img
-                  src={avatarUrl as string}
-                  alt=""
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '50%',
-                    transform: `translateX(-50%) scale(${effect3dScale})`,
-                    transformOrigin: 'top center',
-                    width: avatarSizePx,
-                    height: 'auto',
-                    objectFit: 'contain',
-                    objectPosition: 'top',
-                    pointerEvents: 'none',
                   }}
                 />
               </div>
