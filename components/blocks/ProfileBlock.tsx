@@ -141,19 +141,8 @@ export default function ProfileBlock({
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
-  // Estilos comuns para a imagem no efeito 3D
-  const effect3dImageStyle: React.CSSProperties = {
-    position: 'absolute',
-    bottom: 0,
-    left: '50%',
-    transform: `translateX(-50%) scale(${effect3dScale})`,
-    transformOrigin: 'bottom center',
-    width: avatarSizePx,
-    height: 'auto',
-    objectFit: 'contain',
-    objectPosition: 'bottom',
-    pointerEvents: 'none',
-  }
+  // Altura extra que a foto ocupa acima da moldura quando escalada
+  const overflowHeight = Math.round(avatarSizePx * effect3dScale * 0.5)
 
   return (
     <section
@@ -219,20 +208,50 @@ export default function ProfileBlock({
                 <img
                   src={avatarUrl as string}
                   alt="Avatar"
-                  style={effect3dImageStyle}
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    transform: `translateX(-50%) scale(${effect3dScale})`,
+                    transformOrigin: 'bottom center',
+                    width: avatarSizePx,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                  }}
                 />
               </div>
-              {/* Foto que sai pelo topo - usa clip-path para mostrar só acima da moldura */}
-              <img
-                src={avatarUrl as string}
-                alt=""
-                aria-hidden="true"
+              {/* Container para a parte que sai pelo topo */}
+              <div
                 style={{
-                  ...effect3dImageStyle,
-                  clipPath: `inset(0 0 ${avatarSizePx}px 0)`,
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: avatarSizePx,
+                  height: overflowHeight,
+                  overflow: 'hidden',
                   zIndex: 3,
                 }}
-              />
+              >
+                <img
+                  src={avatarUrl as string}
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    bottom: -avatarSizePx,
+                    left: '50%',
+                    transform: `translateX(-50%) scale(${effect3dScale})`,
+                    transformOrigin: 'bottom center',
+                    width: avatarSizePx,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
             </div>
           ) : (
             /* Avatar normal */
