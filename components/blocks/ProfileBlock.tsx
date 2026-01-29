@@ -228,7 +228,7 @@ export default function ProfileBlock({
                   position: 'absolute',
                   left: 0,
                   right: 0,
-                  bottom: avatarSizePx,
+                  top: -photoExcessTop - 50,
                   height: photoExcessTop + 50,
                   overflow: 'hidden',
                   zIndex: 3,
@@ -240,7 +240,7 @@ export default function ProfileBlock({
                   aria-hidden="true"
                   style={{
                     position: 'absolute',
-                    bottom: -avatarSizePx,
+                    bottom: 0,
                     left: '50%',
                     transform: `translateX(-50%) scale(${effect3dScale})`,
                     transformOrigin: 'bottom center',
