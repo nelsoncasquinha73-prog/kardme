@@ -100,7 +100,7 @@ export default async function CardPage({ params }: Props) {
 
   return (
     <TrackingWrapper cardId={card.id}>
-      <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
+      <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto", backgroundColor: cardBgV1.browserBarColor ?? "#000000" }}>
         <LanguageProvider>
           <ThemeProvider theme={card.theme}>
             <CardPreview
