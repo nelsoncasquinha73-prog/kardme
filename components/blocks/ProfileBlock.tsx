@@ -141,8 +141,7 @@ export default function ProfileBlock({
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
-  // Altura extra que a foto ocupa acima da moldura quando escalada
-  const overflowHeight = Math.round(avatarSizePx * effect3dScale * 1.5)
+  const shape = settings.avatar?.shape ?? 'circle'
 
   return (
     <section
@@ -182,7 +181,7 @@ export default function ProfileBlock({
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                  borderRadius: avatarRadius(shape),
                   background: effect3dBgColor,
                   border:
                     (settings.avatar?.borderWidth ?? 0) > 0
@@ -195,12 +194,12 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Foto dentro da moldura (clipped ao círculo) */}
+              {/* Foto dentro da moldura (clipped) */}
               <div
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                  borderRadius: avatarRadius(shape),
                   overflow: 'hidden',
                   zIndex: 2,
                 }}
@@ -222,36 +221,28 @@ export default function ProfileBlock({
                   }}
                 />
               </div>
-              {/* Container para a parte que sai pelo topo */}
-              <div
+              {/* Foto que sai pelo topo */}
+              <img
+                src={avatarUrl as string}
+                alt=""
+                aria-hidden="true"
                 style={{
                   position: 'absolute',
-                  left: -50,
-                  right: -50,
-                  bottom: avatarSizePx,
-                  height: overflowHeight,
-                  overflow: 'hidden',
+                  bottom: 0,
+                  left: '50%',
+                  transform: `translateX(-50%) scale(${effect3dScale})`,
+                  transformOrigin: 'bottom center',
+                  width: avatarSizePx,
+                  height: 'auto',
+                  objectFit: 'contain',
+                  objectPosition: 'bottom',
+                  pointerEvents: 'none',
                   zIndex: 3,
+                  clipPath: shape === 'circle' 
+                    ? 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 50%, 0% 50%)'
+                    : `polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)`,
                 }}
-              >
-                <img
-                  src={avatarUrl as string}
-                  alt=""
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    bottom: -avatarSizePx,
-                    left: '50%',
-                    transform: `translateX(-50%) scale(${effect3dScale})`,
-                    transformOrigin: 'bottom center',
-                    width: avatarSizePx,
-                    height: 'auto',
-                    objectFit: 'contain',
-                    objectPosition: 'bottom',
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
+              />
             </div>
           ) : (
             /* Avatar normal */
@@ -262,7 +253,7 @@ export default function ProfileBlock({
                 width: avatarSizePx,
                 height: avatarSizePx,
                 objectFit: 'cover',
-                borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                borderRadius: avatarRadius(shape),
                 border:
                   (settings.avatar?.borderWidth ?? 0) > 0
                     ? `${settings.avatar?.borderWidth}px solid ${settings.avatar?.borderColor ?? 'rgba(255,255,255,0.9)'}`
