@@ -127,7 +127,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = '100% auto'
+    backgroundSize = 'auto 100%'
     backgroundAttachment = 'fixed'
   }
 
@@ -143,7 +143,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     filter: blur > 0 ? `blur(${blur}px)` : undefined,
     pointerEvents: 'none',
     borderRadius,
-    overflow: 'hidden',
+    overflow: fit === 'fixed' ? 'visible' : 'hidden',
     transform: (fit !== 'fixed' && zoom !== 1) ? `scale(${zoom})` : undefined,
     transformOrigin: 'center center',
   }
