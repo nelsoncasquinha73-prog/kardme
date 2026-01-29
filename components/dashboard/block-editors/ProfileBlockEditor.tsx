@@ -43,6 +43,9 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       borderColor: input.avatar?.borderColor ?? 'rgba(255,255,255,0.85)',
       offsetX: input.avatar?.offsetX ?? 0,
       offsetY: input.avatar?.offsetY ?? null,
+      sizePx: input.avatar?.sizePx ?? undefined,
+      glow: input.avatar?.glow ?? undefined,
+      shadow: input.avatar?.shadow ?? undefined,
     },
 
     name: {
