@@ -319,6 +319,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         }
         onEyedropper={() =>
           openPicker({
+            mode: 'eyedropper' as any,
             onPick: (hex: string) => {
               patch((d) => {
                 d.avatar!.glow = d.avatar!.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
