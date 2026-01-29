@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
 
 export const dynamic = 'force-dynamic'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(req: Request) {
   try {
@@ -13,42 +16,6 @@ export async function POST(req: Request) {
     if (!userId) {
       return NextResponse.json({ success: false, error: 'userId é obrigatório' }, { status: 400 })
     }
-
-    // Criar cliente Supabase com cookies
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-        },
-      }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
-    }
-
-    const { data: adminProfile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (adminProfile?.role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Sem permissões' }, { status: 403 })
-    }
-
-    // Usar service role para update
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
 
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
