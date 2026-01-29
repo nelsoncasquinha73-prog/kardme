@@ -89,10 +89,10 @@ export default async function CardPage({ params }: Props) {
   if (blocksError) notFound()
 
   const blocks = blocksData ?? []
-  const bgCss = bgToCss(card?.theme?.background)
-
-  // ✅ Normaliza para v1 antes de passar para componentes
   const cardBgV1 = migrateCardBg(card?.theme?.background)
+  const isImageBg = cardBgV1.base.kind === 'image'
+  const bgCss = isImageBg ? 'transparent' : bgToCss(card?.theme?.background)
+
 
   return (
     <TrackingWrapper cardId={card.id}>
