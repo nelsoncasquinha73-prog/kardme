@@ -46,6 +46,7 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       sizePx: input.avatar?.sizePx ?? undefined,
       glow: input.avatar?.glow ?? undefined,
       shadow: input.avatar?.shadow ?? undefined,
+      effect3d: input.avatar?.effect3d ?? undefined,
     },
 
     name: {
@@ -371,6 +372,73 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           patch((d) => {
             d.avatar!.shadow = d.avatar!.shadow || { enabled: true, intensity: 0.18 }
             d.avatar!.shadow!.intensity = Number(e.target.value)
+          })
+        }
+      />
+    </>
+  )}
+</div>
+
+{/* Efeito 3D (foto sai da moldura) */}
+<div className="flex flex-col gap-2">
+  <div className="flex justify-between items-center">
+    <span className="text-sm">Efeito 3D</span>
+    <input
+      type="checkbox"
+      checked={(local.avatar?.effect3d as any)?.enabled ?? false}
+      onChange={(e) =>
+        patch((d) => {
+          d.avatar = d.avatar || {}
+          d.avatar.effect3d = d.avatar.effect3d || { enabled: false, bgColor: "#ffffff", scale: 1.15 }
+          d.avatar.effect3d.enabled = e.target.checked
+        })
+      }
+    />
+  </div>
+
+  {((local.avatar?.effect3d as any)?.enabled ?? false) && (
+    <>
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-black/50">Cor da moldura</span>
+      </div>
+      <SwatchRow
+        value={(local.avatar?.effect3d as any)?.bgColor ?? "#ffffff"}
+        onChange={(hex) =>
+          patch((d) => {
+            d.avatar = d.avatar || {}
+            d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
+            d.avatar.effect3d.bgColor = hex
+          })
+        }
+        onEyedropper={() =>
+          openPicker({
+            mode: "eyedropper" as any,
+            onPick: (hex: string) => {
+              patch((d) => {
+                d.avatar = d.avatar || {}
+                d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
+                d.avatar.effect3d.bgColor = hex
+              })
+            },
+          } as any)
+        }
+      />
+
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-black/50">Escala</span>
+        <span className="text-xs text-black/50">{((local.avatar?.effect3d as any)?.scale ?? 1.15).toFixed(2)}x</span>
+      </div>
+      <input
+        type="range"
+        min={1}
+        max={1.5}
+        step={0.05}
+        value={(local.avatar?.effect3d as any)?.scale ?? 1.15}
+        onChange={(e) =>
+          patch((d) => {
+            d.avatar = d.avatar || {}
+            d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
+            d.avatar.effect3d.scale = Number(e.target.value)
           })
         }
       />

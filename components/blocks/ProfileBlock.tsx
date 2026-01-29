@@ -139,6 +139,11 @@ const shadowCss = shadowEnabled && shadowIntensity > 0
   : 'none'
 
 
+// Efeito 3D (foto sai da moldura)
+const effect3dEnabled = (settings.avatar?.effect3d as any)?.enabled ?? false
+const effect3dBgColor = (settings.avatar?.effect3d as any)?.bgColor ?? "#ffffff"
+const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
+
 
 
   const autoOverlapY = dock === 'overlap' ? -avatarSizePx / 2 : 0
@@ -171,33 +176,78 @@ const shadowCss = shadowEnabled && shadowIntensity > 0
             height: 0,
           }}
         >
-          <img
-            src={avatarUrl as string}
-            alt="Avatar"
-            style={{
-              width: avatarSizePx,
-              height: avatarSizePx,
-              objectFit: 'cover',
-              borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
-              border:
-                (settings.avatar?.borderWidth ?? 0) > 0
-                  ? `${settings.avatar?.borderWidth}px solid ${
-                      settings.avatar?.borderColor ?? 'rgba(255,255,255,0.9)'
-                    }`
-                  : undefined,
-              background: '#fff',
-              transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
-             
-  boxShadow: [
-  glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
-  shadowCss,
-]
-  .filter(Boolean)
-  .join(', '),
-
-              zIndex: 20,
-            }}
-          />
+          {effect3dEnabled ? (
+            /* Efeito 3D: moldura + foto que sai */
+            <div
+              style={{
+                position: 'relative',
+                width: avatarSizePx,
+                height: avatarSizePx,
+                transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
+                zIndex: 20,
+              }}
+            >
+              {/* Moldura de fundo */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                  background: effect3dBgColor,
+                  border:
+                    (settings.avatar?.borderWidth ?? 0) > 0
+                      ? `${settings.avatar?.borderWidth}px solid ${settings.avatar?.borderColor ?? 'rgba(255,255,255,0.9)'}`
+                      : undefined,
+                  boxShadow: [
+                    glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
+                    shadowCss,
+                  ].filter(Boolean).join(', ') || 'none',
+                }}
+              />
+              {/* Foto que sai da moldura */}
+              <img
+                src={avatarUrl as string}
+                alt="Avatar"
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: '50%',
+                  transform: `translateX(-50%) scale(${effect3dScale})`,
+                  transformOrigin: 'bottom center',
+                  width: avatarSizePx,
+                  height: 'auto',
+                  maxHeight: avatarSizePx * effect3dScale,
+                  objectFit: 'contain',
+                  objectPosition: 'bottom',
+                  borderRadius: 0,
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+          ) : (
+            /* Avatar normal */
+            <img
+              src={avatarUrl as string}
+              alt="Avatar"
+              style={{
+                width: avatarSizePx,
+                height: avatarSizePx,
+                objectFit: 'cover',
+                borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                border:
+                  (settings.avatar?.borderWidth ?? 0) > 0
+                    ? `${settings.avatar?.borderWidth}px solid ${settings.avatar?.borderColor ?? 'rgba(255,255,255,0.9)'}`
+                    : undefined,
+                background: '#fff',
+                transform: `translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
+                boxShadow: [
+                  glowEnabled ? `0 0 0 ${glowSize}px ${glowColor}` : '',
+                  shadowCss,
+                ].filter(Boolean).join(', ') || 'none',
+                zIndex: 20,
+              }}
+            />
+          )}
         </div>
       )}
 

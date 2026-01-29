@@ -33,6 +33,11 @@ export type ProfileSettings = {
       enabled?: boolean
       intensity?: number
     }
+    effect3d?: {
+      enabled?: boolean
+      bgColor?: string
+      scale?: number
+    }
   }
 
   name: ProfileTextLine
