@@ -22,30 +22,18 @@ const FONT_MAP: Record<string, string> = {
 
 function mapGoogleFont(ff?: string) {
   if (!ff) return undefined
-
   if (ff.startsWith('var(--font-')) return ff
-
   switch (ff) {
-    case 'Inter':
-      return 'var(--font-inter)'
-    case 'Poppins':
-      return 'var(--font-poppins)'
-    case 'Montserrat':
-      return 'var(--font-montserrat)'
-    case 'Roboto':
-      return 'var(--font-roboto)'
-    case 'Open Sans':
-      return 'var(--font-open-sans)'
-    case 'Lato':
-      return 'var(--font-lato)'
-    case 'Nunito':
-      return 'var(--font-nunito)'
-    case 'Playfair Display':
-      return 'var(--font-playfair)'
-    case 'Dancing Script':
-      return 'var(--font-dancing)'
-    default:
-      return undefined
+    case 'Inter': return 'var(--font-inter)'
+    case 'Poppins': return 'var(--font-poppins)'
+    case 'Montserrat': return 'var(--font-montserrat)'
+    case 'Roboto': return 'var(--font-roboto)'
+    case 'Open Sans': return 'var(--font-open-sans)'
+    case 'Lato': return 'var(--font-lato)'
+    case 'Nunito': return 'var(--font-nunito)'
+    case 'Playfair Display': return 'var(--font-playfair)'
+    case 'Dancing Script': return 'var(--font-dancing)'
+    default: return undefined
   }
 }
 
@@ -142,6 +130,8 @@ export default function ProfileBlock({
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
   const shape = settings.avatar?.shape ?? 'circle'
+  const isCircle = shape === 'circle'
+  const overflowHeight = Math.round(avatarSizePx * effect3dScale)
 
   return (
     <section
@@ -151,7 +141,7 @@ export default function ProfileBlock({
         backgroundColor: bgEnabled ? bgColor : 'transparent',
         borderRadius: radiusFor(bgStyle),
         border: bgEnabled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
-        boxShadow: bgEnabled ? '0 6px 20px rgba(0,0,0,0.06)' : `inset(0 0 ${avatarSizePx}px 0)`,
+        boxShadow: bgEnabled ? '0 6px 20px rgba(0,0,0,0.06)' : 'none',
         overflow: 'visible',
         transition: 'margin-top 200ms ease, background-color 200ms ease',
       }}
@@ -166,7 +156,6 @@ export default function ProfileBlock({
           }}
         >
           {effect3dEnabled ? (
-            /* Efeito 3D: moldura + foto que sai só pelo topo */
             <div
               style={{
                 position: 'relative',
@@ -176,7 +165,6 @@ export default function ProfileBlock({
                 zIndex: 20,
               }}
             >
-              {/* Moldura de fundo com glow/shadow */}
               <div
                 style={{
                   position: 'absolute',
@@ -194,7 +182,6 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Foto dentro da moldura (clipped) */}
               <div
                 style={{
                   position: 'absolute',
@@ -221,31 +208,59 @@ export default function ProfileBlock({
                   }}
                 />
               </div>
-              {/* Foto que sai pelo topo */}
-              <img
-                src={avatarUrl as string}
-                alt=""
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '50%',
-                  transform: `translateX(-50%) scale(${effect3dScale})`,
-                  transformOrigin: 'bottom center',
-                  width: avatarSizePx,
-                  height: 'auto',
-                  objectFit: 'contain',
-                  objectPosition: 'bottom',
-                  pointerEvents: 'none',
-                  zIndex: 3,
-                  clipPath: shape === 'circle' 
-                    ? 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 50%, 0% 50%)'
-                    : `inset(0 0 ${avatarSizePx}px 0)`,
-                }}
-              />
+              {isCircle ? (
+                <img
+                  src={avatarUrl as string}
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    transform: `translateX(-50%) scale(${effect3dScale})`,
+                    transformOrigin: 'bottom center',
+                    width: avatarSizePx,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                    zIndex: 3,
+                    clipPath: 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 50%, 0% 50%)',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: avatarSizePx,
+                    height: overflowHeight,
+                    overflow: 'hidden',
+                    zIndex: 3,
+                  }}
+                >
+                  <img
+                    src={avatarUrl as string}
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      bottom: -avatarSizePx,
+                      left: '50%',
+                      transform: `translateX(-50%) scale(${effect3dScale})`,
+                      transformOrigin: 'bottom center',
+                      width: avatarSizePx,
+                      height: 'auto',
+                      objectFit: 'contain',
+                      objectPosition: 'bottom',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ) : (
-            /* Avatar normal */
             <img
               src={avatarUrl as string}
               alt="Avatar"
