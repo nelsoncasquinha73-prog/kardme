@@ -126,7 +126,7 @@ const bgV1 = migrateCardBg(bgRaw)
       bg={bg}
       style={
         {
-          minHeight: 'auto',
+          minHeight: '100dvh',
           padding: 0,
           borderRadius: 0,
           width: '100%',
