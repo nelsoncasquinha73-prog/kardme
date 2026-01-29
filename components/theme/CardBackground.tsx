@@ -128,7 +128,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
     backgroundSize = zoom === 1 ? 'cover' : `${zoom * 100}%`
-    backgroundAttachment = 'fixed'
+    backgroundAttachment = 'scroll' // fixed não funciona em iOS
   }
 
   // Estilos base - sempre cover, zoom via transform
