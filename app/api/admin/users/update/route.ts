@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabaseServer'
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,24 +14,43 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'userId é obrigatório' }, { status: 400 })
     }
 
-    const { data: sessionData } = await supabaseServer.auth.getSession()
-    const currentUserId = sessionData?.session?.user?.id
+    // Criar cliente Supabase com cookies
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+        },
+      }
+    )
 
-    if (!currentUserId) {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
     }
 
-    const { data: adminProfile, error: adminError } = await supabaseServer
+    const { data: adminProfile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', currentUserId)
+      .eq('id', user.id)
       .single()
 
-    if (adminError || adminProfile?.role !== 'admin') {
+    if (adminProfile?.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Sem permissões' }, { status: 403 })
     }
 
-    const { error: updateError } = await supabaseServer
+    // Usar service role para update
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
         nome,
