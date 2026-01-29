@@ -132,11 +132,16 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   }
 
   // Estilos base - sempre cover, zoom via transform
+  // Background position - para fixed, usar center (offset não funciona bem com fixed)
+  const bgPosition = fit === 'fixed' 
+    ? 'center center'
+    : `calc(50% + ${offsetX}px) calc(50% + ${offsetY}px)`
+
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
     backgroundImage: `url(${image.url})`,
-    backgroundPosition: `calc(50% + ${offsetX}px) calc(50% + ${offsetY}px)`,
+    backgroundPosition: bgPosition,
     backgroundRepeat,
     backgroundSize,
     backgroundAttachment,
