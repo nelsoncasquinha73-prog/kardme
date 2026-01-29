@@ -60,7 +60,11 @@ export async function generateMetadata({ params }: Props) {
   })()
 
   return {
+    other: {
+      "theme-color": color,
+    },
     themeColor: color,
+    metadataBase: new URL("https://new.kardme.com"),
     colorScheme: 'dark',
   }
 }
