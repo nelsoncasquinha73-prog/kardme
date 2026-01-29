@@ -235,7 +235,7 @@ useEffect(() => {
 
   const fullName = useMemo(() => {
     if (!profile) return 'Cliente'
-    return `\${profile.nome ?? ''} \${profile.apelido ?? ''}`.trim() || '—'
+    return `${profile.nome ?? ''} ${profile.apelido ?? ''}`.trim() || '—'
   }, [profile])
 
   async function savePlan() {
