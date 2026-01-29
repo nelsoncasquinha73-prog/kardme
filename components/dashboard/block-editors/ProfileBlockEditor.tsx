@@ -438,7 +438,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           patch((d) => {
             d.avatar = d.avatar || {}
             d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
-            d.avatar.effect3d.scale = Number(e.target.value)
+            d.avatar.effect3d.scale = Number(e.target.value); console.log("SCALE:", e.target.value, d.avatar.effect3d)
           })
         }
       />
