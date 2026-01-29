@@ -23,10 +23,8 @@ const FONT_MAP: Record<string, string> = {
 function mapGoogleFont(ff?: string) {
   if (!ff) return undefined
 
-  // Se já vier como variável CSS, usa direto
   if (ff.startsWith('var(--font-')) return ff
 
-  // Compatibilidade com nomes antigos
   switch (ff) {
     case 'Inter':
       return 'var(--font-inter)'
@@ -51,7 +49,6 @@ function mapGoogleFont(ff?: string) {
   }
 }
 
-// Recebe o "style" do background (string) e devolve radius
 function radiusFor(bgStyle?: string) {
   if (bgStyle === 'pill') return 999
   if (bgStyle === 'rounded') return 24
@@ -121,7 +118,6 @@ export default function ProfileBlock({
     ? Math.max(72, Math.min(180, avatarSizePxRaw))
     : SIZE_MAP[settings.avatar?.size ?? 'md']?.avatar ?? 108
 
-  // Glow e shadow
   const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
   const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
   const glowSize = (settings.avatar?.glow as any)?.size ?? 6
@@ -133,7 +129,6 @@ export default function ProfileBlock({
     ? `0 ${Math.round(10 * shadowIntensity / 0.18)}px ${Math.round(26 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.16 * shadowIntensity / 0.18).toFixed(2)}), 0 ${Math.round(4 * shadowIntensity / 0.18)}px ${Math.round(10 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.12 * shadowIntensity / 0.18).toFixed(2)})`
     : 'none'
 
-  // Efeito 3D (foto sai da moldura)
   const effect3dEnabled = (settings.avatar?.effect3d as any)?.enabled ?? false
   const effect3dBgColor = (settings.avatar?.effect3d as any)?.bgColor ?? "#ffffff"
   const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
@@ -146,8 +141,8 @@ export default function ProfileBlock({
 
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
-  // Calcular quanto a foto sai pelo topo (para o efeito 3D)
-  const photoExcessTop = avatarSizePx * (effect3dScale - 1)
+  // Quanto a foto excede pelo topo (em pixels)
+  const photoExcessTop = Math.round(avatarSizePx * (effect3dScale - 1))
 
   return (
     <section
@@ -182,7 +177,7 @@ export default function ProfileBlock({
                 zIndex: 20,
               }}
             >
-              {/* Moldura de fundo */}
+              {/* Moldura de fundo com glow/shadow */}
               <div
                 style={{
                   position: 'absolute',
@@ -200,25 +195,52 @@ export default function ProfileBlock({
                   zIndex: 1,
                 }}
               />
-              {/* Container que permite overflow só no topo */}
+              {/* Foto dentro da moldura (clipped aos limites da moldura) */}
               <div
                 style={{
                   position: 'absolute',
-                  top: -photoExcessTop,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
+                  inset: 0,
+                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
                   overflow: 'hidden',
                   zIndex: 2,
                 }}
               >
-                {/* Foto - posicionada no fundo do container */}
                 <img
                   src={avatarUrl as string}
                   alt="Avatar"
                   style={{
                     position: 'absolute',
                     bottom: 0,
+                    left: '50%',
+                    transform: `translateX(-50%) scale(${effect3dScale})`,
+                    transformOrigin: 'bottom center',
+                    width: avatarSizePx,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+              {/* Foto que sai pelo topo (só a parte acima da moldura) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: avatarSizePx,
+                  height: photoExcessTop + 50,
+                  overflow: 'hidden',
+                  zIndex: 3,
+                }}
+              >
+                <img
+                  src={avatarUrl as string}
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    bottom: -avatarSizePx,
                     left: '50%',
                     transform: `translateX(-50%) scale(${effect3dScale})`,
                     transformOrigin: 'bottom center',
