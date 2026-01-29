@@ -142,7 +142,7 @@ export default function ProfileBlock({
   const lineGap = (settings as any)?.layout?.lineGap ?? (lineCount === 1 ? 4 : 10)
 
   // Altura extra que a foto ocupa acima da moldura quando escalada
-  const overflowHeight = Math.round(avatarSizePx * effect3dScale)
+  const overflowHeight = Math.round(avatarSizePx * effect3dScale * 1.5)
 
   return (
     <section
