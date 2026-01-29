@@ -144,14 +144,14 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = "cover"
+    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
     backgroundAttachment = 'fixed'
   } else if (fit === 'top-fade') {
-    backgroundSize = "cover"
+    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
   } else {
     // cover - mas agora controlado pelo zoom
     // zoom 1 = 100% da largura, zoom 0.5 = 50%, etc.
-    backgroundSize = "cover"
+    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
   }
 
   // Estilos base
