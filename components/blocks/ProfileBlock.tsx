@@ -126,16 +126,19 @@ const avatarSizePx = avatarSizePxRaw
 
 // Glow e shadow
 const glowEnabled = (settings.avatar?.glow as any)?.enabled ?? false
+console.log("GLOW DEBUG:", { glowEnabled, glow: settings.avatar?.glow })
 const glowColor = (settings.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'
 const glowSize = (settings.avatar?.glow as any)?.size ?? 6
+
 
 const shadowEnabled = (settings.avatar?.shadow as any)?.enabled ?? false
 const shadowIntensity = (settings.avatar?.shadow as any)?.intensity ?? 0.18
 
-// Shadow "botão premium": 2 camadas para depth
-const shadowCss = shadowEnabled
-  ? `0 8px 18px rgba(0,0,0,${0.16 * shadowIntensity / 0.18}), 0 2px 6px rgba(0,0,0,${0.10 * shadowIntensity / 0.18})`
+// Shadow "botão 3D premium": múltiplas camadas para depth intenso
+const shadowCss = shadowEnabled && shadowIntensity > 0
+  ? `0 ${Math.round(10 * shadowIntensity / 0.18)}px ${Math.round(26 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.16 * shadowIntensity / 0.18).toFixed(2)}), 0 ${Math.round(4 * shadowIntensity / 0.18)}px ${Math.round(10 * shadowIntensity / 0.18)}px rgba(0,0,0,${(0.12 * shadowIntensity / 0.18).toFixed(2)})`
   : 'none'
+
 
 
 
