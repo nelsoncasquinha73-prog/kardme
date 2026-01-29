@@ -177,7 +177,7 @@ const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
           }}
         >
           {effect3dEnabled ? (
-            /* Efeito 3D: moldura + foto que sai */
+            /* Efeito 3D: moldura + foto que sai só pelo topo */
             <div
               style={{
                 position: 'relative',
@@ -204,23 +204,49 @@ const effect3dScale = (settings.avatar?.effect3d as any)?.scale ?? 1.15
                   ].filter(Boolean).join(', ') || 'none',
                 }}
               />
-              {/* Foto que sai da moldura */}
+              {/* Container da foto - clip na metade inferior */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  overflow: 'hidden',
+                  borderRadius: avatarRadius(settings.avatar?.shape ?? 'circle'),
+                  clipPath: 'inset(0 0 0 0)', // clip dentro da moldura nos lados e em baixo
+                }}
+              >
+                {/* Foto que sai pelo topo */}
+                <img
+                  src={avatarUrl as string}
+                  alt="Avatar"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    transform: `translateX(-50%)`,
+                    width: avatarSizePx * effect3dScale,
+                    height: 'auto',
+                    objectFit: 'contain',
+                    objectPosition: 'bottom',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+              {/* Foto que sai pelo topo (parte visível acima da moldura) */}
               <img
                 src={avatarUrl as string}
-                alt="Avatar"
+                alt=""
+                aria-hidden="true"
                 style={{
                   position: 'absolute',
                   bottom: 0,
                   left: '50%',
-                  transform: `translateX(-50%) scale(${effect3dScale})`,
-                  transformOrigin: 'bottom center',
-                  width: avatarSizePx,
+                  transform: `translateX(-50%)`,
+                  width: avatarSizePx * effect3dScale,
                   height: 'auto',
-                  maxHeight: avatarSizePx * effect3dScale,
                   objectFit: 'contain',
                   objectPosition: 'bottom',
-                  borderRadius: 0,
                   pointerEvents: 'none',
+                  clipPath: `inset(0 0 ${avatarSizePx}px 0)`, // só mostra a parte acima da moldura
                 }}
               />
             </div>
