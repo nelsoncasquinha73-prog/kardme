@@ -897,6 +897,21 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
   </>
 )}
 
+        {/* Cor da barra do browser (mobile) */}
+        <Row label="Cor da barra (mobile)">
+          <SwatchRow
+            value={v1.browserBarColor ?? "#000000"}
+            onChange={(hex) =>
+              onChangeCardBg?.({
+                ...v1,
+                browserBarColor: hex,
+              })
+            }
+            onEyedropper={openEyedropperOverlay}
+          />
+        </Row>
+
+
 
       {/* Fundo do header (bloco) */}
       <Section title="Fundo do header (bloco)">

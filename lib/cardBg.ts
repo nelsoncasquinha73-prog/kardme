@@ -50,6 +50,7 @@ export type CardBgV1 = {
     | ImageBase
   imageOverlay?: ImageOverlay
   overlays?: PatternOverlay[]
+  browserBarColor?: string
 }
 
 export type CardBg = LegacyCardBg | CardBgV1

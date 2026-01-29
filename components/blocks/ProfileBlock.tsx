@@ -164,7 +164,7 @@ const shadowCss = shadowEnabled
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: justify,
             position: 'relative',
             height: 0,
           }}

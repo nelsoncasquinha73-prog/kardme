@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props) {
     }
 
     // image: usa cor default
-    return '#000000'
+    return v1.browserBarColor ?? '#000000'
   })()
 
   return {
