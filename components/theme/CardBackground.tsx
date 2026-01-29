@@ -145,7 +145,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
     backgroundSize = zoom === 1 ? '100vw auto' : `${zoom * 100}vw auto`
-    backgroundAttachment = 'fixed'
+    backgroundAttachment = 'scroll' // teste
   } else if (fit === 'top-fade') {
     backgroundSize = zoom === 1 ? '100vw auto' : `${zoom * 100}vw auto`
   } else {
