@@ -98,20 +98,23 @@ export default async function CardPage({ params }: Props) {
   const bgCss = isImageBg ? 'transparent' : bgToCss(card?.theme?.background)
 
 
+
   return (
     <TrackingWrapper cardId={card.id}>
-      <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto", backgroundColor: cardBgV1.browserBarColor ?? "#000000" }}>
-        <LanguageProvider>
-          <ThemeProvider theme={card.theme}>
-            <CardPreview
-              card={card}
-              blocks={blocks}
-              showTranslations={false}
-              fullBleed={true}
-              cardBg={cardBgV1}
-            />
-          </ThemeProvider>
-        </LanguageProvider>
+      <div style={{ minHeight: "100dvh", width: "100%", backgroundColor: cardBgV1.browserBarColor ?? "#000000" }}>
+        <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
+          <LanguageProvider>
+            <ThemeProvider theme={card.theme}>
+              <CardPreview
+                card={card}
+                blocks={blocks}
+                showTranslations={false}
+                fullBleed={true}
+                cardBg={cardBgV1}
+              />
+            </ThemeProvider>
+          </LanguageProvider>
+        </div>
       </div>
     </TrackingWrapper>
   )
