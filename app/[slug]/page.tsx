@@ -96,7 +96,7 @@ export default async function CardPage({ params }: Props) {
 
   return (
     <TrackingWrapper cardId={card.id}>
-      <MobileCardFrame background={bgCss}>
+      <div style={{ minHeight: "100dvh", width: "100%" }}>
         <LanguageProvider>
           <ThemeProvider theme={card.theme}>
             <CardPreview
@@ -108,7 +108,7 @@ export default async function CardPage({ params }: Props) {
             />
           </ThemeProvider>
         </LanguageProvider>
-      </MobileCardFrame>
+      </div>
     </TrackingWrapper>
   )
 }
