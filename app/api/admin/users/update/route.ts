@@ -43,3 +43,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: err?.message || 'Erro desconhecido' }, { status: 500 })
   }
 }
+// v2
