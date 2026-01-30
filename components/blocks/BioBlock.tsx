@@ -10,7 +10,7 @@ type BioStyle = {
   offsetY?: number
 
   textColor?: string
-  fontFamily?: string // pode ser "Dancing Script" ou "var(--font-dancing)"
+  fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
@@ -40,10 +40,8 @@ const FONT_MAP: Record<string, string> = {
 function mapGoogleFont(ff?: string) {
   if (!ff) return undefined
 
-  // ✅ se já vier como variável CSS, usa direto
   if (ff.startsWith('var(--font-')) return ff
 
-  // compat: se vier com nomes antigos
   switch (ff) {
     case 'Inter':
       return 'var(--font-inter)'
@@ -71,30 +69,6 @@ function mapGoogleFont(ff?: string) {
 export default function BioBlock({ settings, style }: Props) {
   if (!settings?.text) return null
 
-  const container = style?.container || {}
-  const bg = container.bgColor ?? 'transparent'
-  const shadowOn = container.shadow === true
-
-  const effectiveBg =
-    shadowOn && (bg === 'transparent' || bg === 'rgba(0,0,0,0)')
-      ? 'rgba(255,255,255,0.92)'
-      : bg
-
-  const containerStyle: React.CSSProperties = {
-    marginTop: style?.offsetY ? `${style.offsetY}px` : undefined,
-
-    backgroundColor: effectiveBg,
-    borderRadius: container.radius != null ? `${container.radius}px` : undefined,
-    padding: container.padding != null ? `${container.padding}px` : '16px',
-    boxShadow: container.shadow
-      ? '0 10px 30px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.10)'
-      : undefined,
-
-    borderStyle: container.borderWidth ? 'solid' : undefined,
-    borderWidth: container.borderWidth ? `${container.borderWidth}px` : undefined,
-    borderColor: container.borderColor ?? undefined,
-  }
-
   const globalFontFamily = FONT_MAP.System
   const resolvedFont = mapGoogleFont(style?.fontFamily)
 
@@ -106,11 +80,8 @@ export default function BioBlock({ settings, style }: Props) {
     lineHeight: style?.lineHeight ?? 1.6,
     textAlign: style?.align ?? 'center',
     whiteSpace: 'pre-wrap',
+    margin: 0,
   }
 
-  return (
-    <section style={containerStyle}>
-      <p style={textStyle}>{settings.text}</p>
-    </section>
-  )
+  return <p style={textStyle}>{settings.text}</p>
 }
