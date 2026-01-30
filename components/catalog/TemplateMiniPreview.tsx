@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { migrateCardBg } from '@/lib/cardBg'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 
 const CardPreview = dynamic(() => import('@/components/theme/CardPreview'), {
   ssr: false,
@@ -62,6 +63,10 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
     }
   }, [template])
 
+  const themeForProvider = useMemo(() => {
+    return template.theme_json || {}
+  }, [template])
+
   if (blocks.length === 0) {
     return (
       <div style={{
@@ -99,13 +104,15 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
           width: '222%',
           marginLeft: '-61%',
         }}>
-          <CardPreview
-            card={fakeCard as any}
-            blocks={blocks as any}
-            showTranslations={false}
-            fullBleed={true}
-            cardBg={cardBg}
-          />
+          <ThemeProvider theme={themeForProvider}>
+            <CardPreview
+              card={fakeCard as any}
+              blocks={blocks as any}
+              showTranslations={false}
+              fullBleed={true}
+              cardBg={cardBg}
+            />
+          </ThemeProvider>
         </div>
       </div>
     </div>
