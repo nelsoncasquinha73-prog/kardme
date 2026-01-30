@@ -1,8 +1,24 @@
 'use client'
 
 import { useMemo } from 'react'
-import CardPreview from '@/components/theme/CardPreview'
+import dynamic from 'next/dynamic'
 import { migrateCardBg } from '@/lib/cardBg'
+
+const CardPreview = dynamic(() => import('@/components/theme/CardPreview'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'rgba(255,255,255,0.5)',
+      fontSize: 12,
+    }}>
+      A carregar...
+    </div>
+  ),
+})
 
 type Template = {
   id: string
@@ -29,7 +45,7 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
     return template.preview_json.map((block: any, index: number) => ({
       id: `preview-${index}`,
       card_id: template.id,
-      type: block.type,
+      type: block.type || 'unknown',
       order: block.order ?? index,
       settings: block.settings || {},
       style: block.style || {},
@@ -38,7 +54,13 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
     }))
   }, [template])
 
-  const cardBg = useMemo(() => migrateCardBg(template.theme_json?.background), [template])
+  const cardBg = useMemo(() => {
+    try {
+      return migrateCardBg(template.theme_json?.background)
+    } catch {
+      return undefined
+    }
+  }, [template])
 
   if (blocks.length === 0) {
     return (
@@ -51,6 +73,7 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
         borderRadius: 12,
         color: 'rgba(255,255,255,0.5)',
         fontSize: 13,
+        border: '1px solid rgba(255,255,255,0.08)',
       }}>
         Sem preview
       </div>
@@ -60,18 +83,30 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
   return (
     <div style={{
       height,
-      overflow: 'auto',
+      overflow: 'hidden',
       borderRadius: 12,
       position: 'relative',
+      border: '1px solid rgba(255,255,255,0.08)',
     }}>
-      <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center', width: '200%' }}>
-        <CardPreview
-          card={fakeCard as any}
-          blocks={blocks as any}
-          showTranslations={false}
-          fullBleed={true}
-          cardBg={cardBg}
-        />
+      <div style={{
+        height: '100%',
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        <div style={{ 
+          transform: 'scale(0.45)', 
+          transformOrigin: 'top center', 
+          width: '222%',
+          marginLeft: '-61%',
+        }}>
+          <CardPreview
+            card={fakeCard as any}
+            blocks={blocks as any}
+            showTranslations={false}
+            fullBleed={true}
+            cardBg={cardBg}
+          />
+        </div>
       </div>
     </div>
   )
