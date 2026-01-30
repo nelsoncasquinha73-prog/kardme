@@ -406,7 +406,7 @@ export default function CatalogPage() {
                     backdropFilter: 'blur(10px)',
                   }}
                 >
-                  <TemplateMiniPreview template={t} height={280} />
+                  <TemplateMiniPreview template={t} height={420} />
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div

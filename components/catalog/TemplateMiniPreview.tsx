@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { migrateCardBg } from '@/lib/cardBg'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import PhoneFrame from '@/components/theme/PhoneFrame'
 
 const CardPreview = dynamic(() => import('@/components/theme/CardPreview'), {
   ssr: false,
@@ -33,7 +33,7 @@ type Props = {
   height?: number
 }
 
-export default function TemplateMiniPreview({ template, height = 400 }: Props) {
+export default function TemplateMiniPreview({ template, height = 480 }: Props) {
   const fakeCard = useMemo(() => ({
     id: template.id,
     name: template.name,
@@ -53,14 +53,6 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
       title: block.title || null,
       enabled: block.enabled !== false,
     }))
-  }, [template])
-
-  const cardBg = useMemo(() => {
-    try {
-      return migrateCardBg(template.theme_json?.background)
-    } catch {
-      return undefined
-    }
   }, [template])
 
   const themeForProvider = useMemo(() => {
@@ -85,35 +77,40 @@ export default function TemplateMiniPreview({ template, height = 400 }: Props) {
     )
   }
 
+  // Scale para o PhoneFrame caber no container
+  // PhoneFrame tem 420x880, queremos que caiba em ~height
+  const scale = height / 880
+
   return (
     <div style={{
       height,
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
       overflow: 'hidden',
       borderRadius: 12,
       position: 'relative',
-      border: '1px solid rgba(255,255,255,0.08)',
     }}>
       <div style={{
-        height: '100%',
-        overflow: 'auto',
-        WebkitOverflowScrolling: 'touch',
+        transform: `scale(${scale})`,
+        transformOrigin: 'top center',
       }}>
-        <div style={{ 
-          transform: 'scale(0.45)', 
-          transformOrigin: 'top center', 
-          width: '222%',
-          marginLeft: '-61%',
-        }}>
-          <ThemeProvider theme={themeForProvider}>
-            <CardPreview
-              card={fakeCard as any}
-              blocks={blocks as any}
-              showTranslations={false}
-              fullBleed={true}
-              cardBg={cardBg}
-            />
-          </ThemeProvider>
-        </div>
+        <PhoneFrame>
+          <div style={{
+            height: '100%',
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch',
+          }}>
+            <ThemeProvider theme={themeForProvider}>
+              <CardPreview
+                card={fakeCard as any}
+                blocks={blocks as any}
+                showTranslations={false}
+                fullBleed={true}
+              />
+            </ThemeProvider>
+          </div>
+        </PhoneFrame>
       </div>
     </div>
   )
