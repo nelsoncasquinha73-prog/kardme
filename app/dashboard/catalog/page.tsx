@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 
+import TemplateMiniPreview from "@/components/catalog/TemplateMiniPreview"
 type Template = {
   id: string
   name: string
@@ -405,109 +406,7 @@ export default function CatalogPage() {
                     backdropFilter: 'blur(10px)',
                   }}
                 >
-                  <div
-                    style={{
-                      borderRadius: 14,
-                      overflow: 'hidden',
-                      border: '1px solid rgba(255,255,255,0.10)',
-                      background: bg,
-                      height: 160,
-                      position: 'relative',
-                    }}
-                  >
-                    {t.image_url ? (
-                      <img
-                        src={t.image_url}
-                        alt={t.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          padding: 14,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          height: '100%',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 800,
-                            color: 'rgba(255,255,255,0.65)',
-                            letterSpacing: 0.5,
-                            textAlign: 'center',
-                          }}
-                        >
-                          ✨ Template
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 10,
-                            display: 'flex',
-                            gap: 8,
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: 11,
-                              padding: '4px 10px',
-                              borderRadius: 999,
-                              background: 'rgba(255,255,255,0.08)',
-                              border: '1px solid rgba(255,255,255,0.12)',
-                              color: 'rgba(255,255,255,0.75)',
-                            }}
-                          >
-                            {t.category || 'geral'}
-                          </span>
-
-                          <span
-                            style={{
-                              fontSize: 11,
-                              padding: '4px 10px',
-                              borderRadius: 999,
-                              background: free
-                                ? 'rgba(34,197,94,0.18)'
-                                : 'rgba(168,85,247,0.18)',
-                              border: free
-                                ? '1px solid rgba(34,197,94,0.25)'
-                                : '1px solid rgba(168,85,247,0.25)',
-                              color: free
-                                ? 'rgba(134,239,172,0.95)'
-                                : 'rgba(217,70,239,0.95)',
-                            }}
-                          >
-                            {priceLabel}
-                          </span>
-
-                          <span
-                            style={{
-                              fontSize: 11,
-                              padding: '4px 10px',
-                              borderRadius: 999,
-                              background: 'rgba(255,255,255,0.08)',
-                              border: '1px solid rgba(255,255,255,0.12)',
-                              color: 'rgba(255,255,255,0.65)',
-                            }}
-                          >
-                            Blocos: {Array.isArray(t.preview_json) ? t.preview_json.length : 0}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%)',
-                      }}
-                    />
-                  </div>
+                  <TemplateMiniPreview template={t} height={280} />
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div
