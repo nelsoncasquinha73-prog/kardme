@@ -242,6 +242,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
             setSaveStatus('dirty')
             setLocalBlocks(ensureCardBlocks(next))
           }}
+          onDelete={(id) => {
+            setSaveStatus("dirty")
+            setLocalBlocks((prev) => prev.filter((b) => b.id !== id))
+          }}
           onOpenAddModal={() => setAddOpen(true)}
           onSave={saveChanges}
           saveStatus={saveStatus}

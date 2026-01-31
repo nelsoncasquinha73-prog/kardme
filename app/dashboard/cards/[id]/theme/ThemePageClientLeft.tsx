@@ -19,6 +19,7 @@ type Props = {
   onSelect: (id: string) => void
   onToggle: (id: string, enabled: boolean) => void
   onReorder: (next: BlockItem[]) => void
+  onDelete?: (id: string) => void
   onOpenAddModal: () => void
   onSave: () => void
   saveStatus: string
@@ -32,6 +33,7 @@ export default function ThemePageClientLeft({
   onSelect,
   onToggle,
   onReorder,
+  onDelete,
   onOpenAddModal,
   onSave,
   saveStatus,
@@ -89,6 +91,7 @@ export default function ThemePageClientLeft({
           onSelect={onSelect}
           onToggle={onToggle}
           onReorder={onReorder}
+          onDelete={onDelete}
         />
       </div>
 

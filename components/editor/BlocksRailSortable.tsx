@@ -22,12 +22,14 @@ export default function BlocksRailSortable({
   onSelect,
   onToggle,
   onReorder,
+  onDelete,
 }: {
   blocks: BlockItem[]
   selectedId: string | null
   onSelect: (id: string) => void
   onToggle: (id: string, enabled: boolean) => void
   onReorder: (next: BlockItem[]) => void
+  onDelete?: (id: string) => void
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -62,6 +64,7 @@ export default function BlocksRailSortable({
               active={b.id === selectedId}
               onSelect={() => onSelect(b.id)}
               onToggle={(enabled) => onToggle(b.id, enabled)}
+              onDelete={onDelete ? () => onDelete(b.id) : undefined}
             />
           ))}
         </div>
@@ -75,11 +78,13 @@ function SortableRow({
   active,
   onSelect,
   onToggle,
+  onDelete,
 }: {
   block: BlockItem
   active: boolean
   onSelect: () => void
   onToggle: (enabled: boolean) => void
+  onDelete?: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
@@ -224,6 +229,32 @@ function SortableRow({
               }}
             />
           </button>
+          
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (onDelete && confirm("Remover este bloco?")) onDelete()
+              }}
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 8,
+                border: "none",
+                background: "rgba(239,68,68,0.1)",
+                color: "#ef4444",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: 800,
+                display: "grid",
+                placeItems: "center",
+              }}
+              title="Remover bloco"
+            >
+              ✕
+            </button>
+          
         </div>
       </div>
     </div>
