@@ -58,15 +58,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = isAdmin
     ? [
+        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
         { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
         { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-        { label: '📇 Os meus cartões', href: '/dashboard', icon: FiLayout },
+        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
         { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
         { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
         { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
       ]
     : [
-        { label: '📇 Os meus cartões', href: '/dashboard', icon: FiLayout },
+        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
         { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
         { label: 'Planos', href: '/dashboard/plans', icon: FiHome },
         { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
@@ -94,7 +95,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/plans', title: 'Planos' },
     { prefix: '/dashboard/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/dashboard/analytics', title: 'Analytics' },
-    { prefix: '/dashboard', title: isAdmin ? 'Dashboard' : 'Os meus cartões' },
+    { prefix: '/dashboard', title: 'Dashboard' },
   ]
 
   const getPageTitle = () => {
