@@ -61,9 +61,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
         { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
         { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
-        { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
         { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
+        { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
         { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
       ]
     : [
