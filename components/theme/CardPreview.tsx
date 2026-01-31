@@ -295,6 +295,10 @@ const wrapStyle: React.CSSProperties = {
       : undefined,
   boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
   boxSizing: 'border-box',
+  width: c.widthMode === 'custom' && c.customWidthPx ? `${c.customWidthPx}px` : undefined,
+  maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
+  alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
+  marginTop: block.style?.offsetY ? `${block.style.offsetY}px` : undefined,
 }
 
 

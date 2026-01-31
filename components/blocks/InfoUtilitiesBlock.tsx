@@ -45,6 +45,8 @@ export type InfoUtilitiesStyle = {
     shadow?: boolean
     borderWidth?: number
     borderColor?: string
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
   }
 
   headingColor?: string
@@ -111,29 +113,7 @@ export default function InfoUtilitiesBlock({
   const s = settings || {}
   const st = style || {}
 
-  const container = st.container || {}
-  const bg = container.bgColor ?? 'transparent'
-  const hasBg = bg !== 'transparent' && bg !== 'rgba(0,0,0,0)'
-  const hasShadow = container.shadow === true
-  const hasBorder = (container.borderWidth ?? 0) > 0
-  const effectiveBg = hasShadow && !hasBg ? 'rgba(255,255,255,0.92)' : bg
-
-  const wrapStyle: React.CSSProperties = {
-    marginTop: st.offsetY ? `${st.offsetY}px` : undefined,
-    backgroundColor: hasBg || hasShadow ? effectiveBg : 'transparent',
-    borderRadius:
-      hasBg || hasShadow || hasBorder
-        ? (container.radius != null ? `${container.radius}px` : undefined)
-        : undefined,
-    padding:
-      hasBg || hasShadow || hasBorder
-        ? (container.padding != null ? `${container.padding}px` : '16px')
-        : '0px',
-    boxShadow: hasShadow ? '0 10px 30px rgba(0,0,0,0.14)' : undefined,
-    borderStyle: hasBorder ? 'solid' : undefined,
-    borderWidth: hasBorder ? `${container.borderWidth}px` : undefined,
-    borderColor: hasBorder ? (container.borderColor ?? undefined) : undefined,
-  }
+  const wrapStyle: React.CSSProperties = {}
 
   const heading = s.heading ?? 'Utilidades'
   const layout = s.layout ?? 'grid'

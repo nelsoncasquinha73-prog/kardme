@@ -20,12 +20,15 @@ type BioStyle = {
   align?: 'left' | 'center' | 'right'
 
   container?: {
+    enabled?: boolean
     bgColor?: string
     radius?: number
     padding?: number
     shadow?: boolean
     borderWidth?: number
     borderColor?: string
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
   }
 }
 
@@ -42,7 +45,6 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const s: BioStyle = style || {}
   const c = s.container || {}
 
-  // ✅ FIX: abrir SEMPRE a lupa
   const pickEyedropper = (apply: (hex: string) => void) =>
     openPicker({
       mode: 'eyedropper',
@@ -63,6 +65,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
 
   const bgEnabled = (c.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (c.borderWidth ?? 0) > 0
+  const widthCustom = c.widthMode === 'custom'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -221,6 +224,24 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           />
           <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.padding ?? 16}px</span>
         </Row>
+
+        <Row label="Largura personalizada">
+          <Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} />
+        </Row>
+
+        {widthCustom && (
+          <Row label="Largura">
+            <input
+              type="range"
+              min={200}
+              max={400}
+              step={10}
+              value={c.customWidthPx ?? 320}
+              onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })}
+            />
+            <span style={{ width: 42, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.customWidthPx ?? 320}px</span>
+          </Row>
+        )}
       </Section>
 
       <Section title="Posição">

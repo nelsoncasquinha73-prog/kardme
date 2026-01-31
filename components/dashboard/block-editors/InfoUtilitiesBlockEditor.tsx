@@ -49,6 +49,8 @@ export type InfoUtilitiesStyle = {
     shadow?: boolean
     borderWidth?: number
     borderColor?: string
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
   }
 
   headingColor?: string
@@ -90,6 +92,17 @@ type Props = {
   style?: InfoUtilitiesStyle
   onChangeSettings: (s: InfoUtilitiesSettings) => void
   onChangeStyle?: (s: InfoUtilitiesStyle) => void
+}
+
+
+const miniBtn: React.CSSProperties = {
+  padding: '6px 10px',
+  borderRadius: 10,
+  border: '1px solid rgba(0,0,0,0.12)',
+  background: '#fff',
+  cursor: 'pointer',
+  fontWeight: 700,
+  fontSize: 13,
 }
 
 function uid(prefix = 'info') {
@@ -202,6 +215,18 @@ export default function InfoUtilitiesBlockEditor({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
+
+
+      <Section title="Posição">
+        <Row label="Mover (Y)">
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button type="button" onClick={() => updateStyle({ offsetY: (st.offsetY ?? 0) - 4 })} style={miniBtn}>⬆️</button>
+            <button type="button" onClick={() => updateStyle({ offsetY: (st.offsetY ?? 0) + 4 })} style={miniBtn}>⬇️</button>
+            <button type="button" onClick={() => updateStyle({ offsetY: 0 })} style={miniBtn}>Reset</button>
+            <span style={{ fontSize: 12, opacity: 0.7, width: 60, textAlign: 'right' }}>{st.offsetY ?? 0}px</span>
+          </div>
+        </Row>
+      </Section>
 
       <Section title="Conteúdo">
         <Row label="Título">
@@ -525,6 +550,73 @@ export default function InfoUtilitiesBlockEditor({
             </div>
           )
         })}
+      </Section>
+
+
+      <Section title="Aparência do bloco">
+        <Row label="Fundo">
+          <Toggle
+            active={(st.container?.bgColor ?? 'transparent') !== 'transparent'}
+            onClick={() => updateStyle({ container: { ...st.container, bgColor: (st.container?.bgColor ?? 'transparent') !== 'transparent' ? 'transparent' : '#ffffff' } })}
+          />
+        </Row>
+        {(st.container?.bgColor ?? 'transparent') !== 'transparent' && (
+          <Row label="Cor do fundo">
+            <SwatchRow
+              value={st.container?.bgColor ?? '#ffffff'}
+              onChange={(hex) => updateStyle({ container: { ...st.container, bgColor: hex } })}
+              onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...st.container, bgColor: hex } }))}
+            />
+          </Row>
+        )}
+        <Row label="Sombra">
+          <Toggle
+            active={st.container?.shadow ?? false}
+            onClick={() => updateStyle({ container: { ...st.container, shadow: !(st.container?.shadow ?? false) } })}
+          />
+        </Row>
+        <Row label="Borda">
+          <Toggle
+            active={(st.container?.borderWidth ?? 0) > 0}
+            onClick={() => updateStyle({ container: { ...st.container, borderWidth: (st.container?.borderWidth ?? 0) > 0 ? 0 : 1 } })}
+          />
+        </Row>
+        {(st.container?.borderWidth ?? 0) > 0 && (
+          <>
+            <Row label="Espessura">
+              <input type="range" min={1} max={6} step={1} value={st.container?.borderWidth ?? 1} onChange={(e) => updateStyle({ container: { ...st.container, borderWidth: Number(e.target.value) } })} />
+              <span style={rightNum}>{st.container?.borderWidth ?? 1}px</span>
+            </Row>
+            <Row label="Cor da borda">
+              <SwatchRow
+                value={st.container?.borderColor ?? 'rgba(0,0,0,0.08)'}
+                onChange={(hex) => updateStyle({ container: { ...st.container, borderColor: hex } })}
+                onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...st.container, borderColor: hex } }))}
+              />
+            </Row>
+          </>
+        )}
+        <Row label="Raio">
+          <input type="range" min={0} max={32} step={1} value={st.container?.radius ?? 14} onChange={(e) => updateStyle({ container: { ...st.container, radius: Number(e.target.value) } })} />
+          <span style={rightNum}>{st.container?.radius ?? 14}px</span>
+        </Row>
+        <Row label="Padding">
+          <input type="range" min={0} max={28} step={1} value={st.container?.padding ?? 16} onChange={(e) => updateStyle({ container: { ...st.container, padding: Number(e.target.value) } })} />
+          <span style={rightNum}>{st.container?.padding ?? 16}px</span>
+        </Row>
+        <Row label="Largura personalizada">
+          <Toggle
+            active={(st.container?.widthMode ?? 'full') === 'custom'}
+            onClick={() => updateStyle({ container: { ...st.container, widthMode: (st.container?.widthMode ?? 'full') === 'custom' ? 'full' : 'custom', customWidthPx: st.container?.customWidthPx ?? 340 } })}
+          />
+        </Row>
+        {(st.container?.widthMode ?? 'full') === 'custom' && (
+          <Row label="Largura (px)">
+            <input type="range" min={200} max={400} step={5} value={st.container?.customWidthPx ?? 340} onChange={(e) => updateStyle({ container: { ...st.container, customWidthPx: Number(e.target.value) } })} />
+            <span style={rightNum}>{st.container?.customWidthPx ?? 340}px</span>
+          </Row>
+        )}
+
       </Section>
 
       <Section title="Título">

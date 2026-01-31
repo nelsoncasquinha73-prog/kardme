@@ -17,12 +17,15 @@ type BioStyle = {
   align?: 'left' | 'center' | 'right'
 
   container?: {
+    enabled?: boolean
     bgColor?: string
     radius?: number
     padding?: number
     shadow?: boolean
     borderWidth?: number
     borderColor?: string
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
   }
 }
 
