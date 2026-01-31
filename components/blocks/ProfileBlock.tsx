@@ -150,7 +150,7 @@ export default function ProfileBlock({
         <div
           style={{
             display: 'flex',
-            justifyContent: justify,
+            justifyContent: 'center', // avatar sempre centrado
             position: 'relative',
             height: 0,
           }}
@@ -321,7 +321,7 @@ export default function ProfileBlock({
               padding: '6px 0',
               minHeight: 24,
               display: 'flex',
-              justifyContent: justify,
+              justifyContent: 'center', // avatar sempre centrado
               alignItems: 'center',
             }}
           >
