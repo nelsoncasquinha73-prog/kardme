@@ -44,6 +44,8 @@ type LeadFormStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    widthMode?: "full" | "custom"
+    customWidthPx?: number
   }
   inputs?: {
     bgColor?: string

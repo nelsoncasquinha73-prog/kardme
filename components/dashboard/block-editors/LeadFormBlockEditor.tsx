@@ -32,6 +32,8 @@ type LeadFormStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    widthMode?: "full" | "custom"
+    customWidthPx?: number
   }
   inputs?: {
     bgColor?: string
@@ -374,6 +376,37 @@ export default function LeadFormBlockEditor({
           />
           <span style={rightNum}>{container.padding ?? 12}px</span>
         </Row>
+
+        <Row label="Largura">
+          <select
+            value={container.widthMode ?? "full"}
+            onChange={(e) => setContainer({ widthMode: e.target.value as any })}
+            style={select}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
+            <option value="full">100%</option>
+            <option value="custom">Personalizada</option>
+          </select>
+        </Row>
+
+        {container.widthMode === "custom" && (
+          <Row label="Largura (px)">
+            <input
+              type="range"
+              min={200}
+              max={400}
+              step={5}
+              value={container.customWidthPx ?? 320}
+              onChange={(e) => setContainer({ customWidthPx: clampNum(e.target.value, 320) })}
+              data-no-block-select="1"
+              onPointerDown={stop}
+              onMouseDown={stop}
+            />
+            <span style={rightNum}>{container.customWidthPx ?? 320}px</span>
+          </Row>
+        )}
       </Section>
 
       <Section title="Inputs">
