@@ -211,11 +211,6 @@
 }
 
 /* Sidebar com fundo escuro e texto claro */
-.dashboard-scope aside {
-  background: #0b0b1a;
-  color: #f9fafb;
-}
-
 /* Botões com classe .btn (se existirem no dashboard) */
 .dashboard-scope button.btn {
   background-color: #000814;

@@ -62,13 +62,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
         { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
         { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
-        { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+        { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
         { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
         { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
       ]
     : [
         { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
-        { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+        { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
         { label: 'Planos', href: '/dashboard/plans', icon: FiHome },
         { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
         { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { prefix: '/dashboard/storage', title: 'Ficheiros' },
     { prefix: '/dashboard/settings', title: 'Definições' },
     { prefix: '/dashboard/plans', title: 'Planos' },
-    { prefix: '/dashboard/catalog', title: '🛍️ Loja de Templates' },
+    { prefix: '/admin/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/dashboard/analytics', title: 'Analytics' },
     { prefix: '/dashboard', title: 'Dashboard' },
   ]

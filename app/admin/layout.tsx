@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-    { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
+    { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
     { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
   ]
@@ -63,6 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { prefix: '/admin/clientes', title: 'Clientes' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/admin/analytics', title: '📊 Analytics Geral' },
+    { prefix: '/admin/catalog', title: '🛍️ Loja de Templates' },
     { prefix: '/admin/settings', title: 'Configurações' },
   ]
 
