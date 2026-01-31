@@ -28,7 +28,10 @@ export default function AppChrome({
   const router = useRouter()
   const pathname = usePathname()
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard"
+    return pathname === href || pathname.startsWith(href + "/")
+  }
 
   const logout = async () => {
     await supabase.auth.signOut()
