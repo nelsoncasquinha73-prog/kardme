@@ -11,6 +11,10 @@ function rgbToHex(r: number, g: number, b: number) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
 }
 
+function hasNativeEyeDropper(): boolean {
+  return typeof window !== 'undefined' && 'EyeDropper' in window
+}
+
 export default function EyedropperLoupeOverlay() {
   const { picker, closePicker } = useColorPicker()
 
@@ -23,8 +27,58 @@ export default function EyedropperLoupeOverlay() {
   const [pos, setPos] = useState<Pos | null>(null)
   const [hex, setHex] = useState('#FFFFFF')
   const [ready, setReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [usingNative, setUsingNative] = useState(false)
 
   const dpr = useMemo(() => (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1), [])
+
+  useEffect(() => {
+    if (!picker.active) return
+
+    if (hasNativeEyeDropper()) {
+      setUsingNative(true)
+      
+      const tooltip = document.createElement('div')
+      tooltip.id = 'eyedropper-tooltip'
+      tooltip.innerHTML = '🎨 Clica para escolher cor · <b>ESC</b> para sair'
+      tooltip.style.position = 'fixed'
+      tooltip.style.bottom = '24px'
+      tooltip.style.left = '50%'
+      tooltip.style.transform = 'translateX(-50%)'
+      tooltip.style.padding = '10px 18px'
+      tooltip.style.borderRadius = '10px'
+      tooltip.style.background = 'rgba(0,0,0,0.85)'
+      tooltip.style.color = '#fff'
+      tooltip.style.fontSize = '13px'
+      tooltip.style.fontWeight = '500'
+      tooltip.style.zIndex = '99999'
+      tooltip.style.pointerEvents = 'none'
+      tooltip.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)'
+      document.body.appendChild(tooltip)
+      
+      // @ts-expect-error - EyeDropper API
+      const eyeDropper = new window.EyeDropper()
+      
+      eyeDropper.open()
+        .then((result: { sRGBHex: string }) => {
+          picker.onPick?.(result.sRGBHex.toUpperCase())
+          closePicker()
+        })
+        .catch((err: Error) => {
+          console.log('EyeDropper cancelled or error:', err.message)
+          closePicker()
+        })
+        .finally(() => {
+          tooltip.remove()
+        })
+      
+      return () => {
+        tooltip.remove()
+      }
+    }
+
+    setUsingNative(false)
+  }, [picker.active, picker.onPick, closePicker])
 
   function getPreviewEl() {
     return document.getElementById('preview-hitbox')
@@ -50,68 +104,84 @@ export default function EyedropperLoupeOverlay() {
     return clampToRect(x, y, r)
   }
 
-  // ESC global enquanto ativo
+  function isInsidePreview(x: number, y: number): boolean {
+    const rect = rectRef.current || updateRect()
+    if (!rect) return false
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+  }
+
   useEffect(() => {
-    if (!picker.active) return
+    if (!picker.active || usingNative) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closePicker()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [picker.active, closePicker])
+  }, [picker.active, usingNative, closePicker])
 
   useEffect(() => {
-    if (!picker.active) return
+    if (!picker.active || usingNative) return
 
     let cancelled = false
 
     async function capturePreview() {
       setReady(false)
+      setError(null)
 
       const target = getPreviewEl()
       if (!target) {
         console.warn('Eyedropper: falta #preview-hitbox')
+        setError('Preview não encontrado')
         setReady(true)
         return
       }
 
       const rect = updateRect()
       if (!rect) {
+        setError('Não foi possível obter dimensões')
         setReady(true)
         return
       }
 
-      const shot = await html2canvas(target, {
-        backgroundColor: null,
-        scale: dpr,
-        useCORS: true,
-      })
+      try {
+        const shot = await html2canvas(target, {
+          backgroundColor: null,
+          scale: dpr,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          foreignObjectRendering: false,
+        })
 
-      if (cancelled) return
+        if (cancelled) return
 
-      const out = canvasRef.current
-      if (!out) return
+        const out = canvasRef.current
+        if (!out) return
 
-      out.width = Math.round(rect.width * dpr)
-      out.height = Math.round(rect.height * dpr)
+        out.width = Math.round(rect.width * dpr)
+        out.height = Math.round(rect.height * dpr)
 
-      const ctx = out.getContext('2d', { willReadFrequently: true })
-      if (!ctx) return
+        const ctx = out.getContext('2d', { willReadFrequently: true })
+        if (!ctx) return
 
-      ctx.clearRect(0, 0, out.width, out.height)
-      ctx.drawImage(shot, 0, 0)
+        ctx.clearRect(0, 0, out.width, out.height)
+        ctx.drawImage(shot, 0, 0)
 
-      setReady(true)
+        setReady(true)
 
-      // centro por defeito
-      const p = pos ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-      setPos(p)
+        const p = pos ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        setPos(p)
 
-      const sp = getSamplePoint(p.x, p.y)
-      if (sp) {
-        drawLoupe(sp.x, sp.y)
-        const px = getPixelCss(sp.x, sp.y)
-        if (px) setHex(rgbToHex(px.r, px.g, px.b))
+        const sp = getSamplePoint(p.x, p.y)
+        if (sp) {
+          drawLoupe(sp.x, sp.y)
+          const px = getPixelCss(sp.x, sp.y)
+          if (px) setHex(rgbToHex(px.r, px.g, px.b))
+        }
+      } catch (err) {
+        console.error('Eyedropper capture error:', err)
+        setError('Erro ao capturar preview')
+        setReady(true)
       }
     }
 
@@ -138,10 +208,9 @@ export default function EyedropperLoupeOverlay() {
       scroller?.removeEventListener('scroll', scheduleCapture)
       window.removeEventListener('resize', scheduleCapture)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [picker.active, dpr])
+  }, [picker.active, usingNative, dpr])
 
-  if (!picker.active) return null
+  if (!picker.active || usingNative) return null
 
   function toLocalDpr(xCss: number, yCss: number) {
     const rect = updateRect() || rectRef.current
@@ -163,8 +232,13 @@ export default function EyedropperLoupeOverlay() {
     const x = Math.max(0, Math.min(canvas.width - 1, local.lx))
     const y = Math.max(0, Math.min(canvas.height - 1, local.ly))
 
-    const data = ctx.getImageData(x, y, 1, 1).data
-    return { r: data[0], g: data[1], b: data[2] }
+    try {
+      const data = ctx.getImageData(x, y, 1, 1).data
+      return { r: data[0], g: data[1], b: data[2] }
+    } catch (err) {
+      console.error('getPixelCss error:', err)
+      return null
+    }
   }
 
   function drawLoupe(xCss: number, yCss: number) {
@@ -177,7 +251,7 @@ export default function EyedropperLoupeOverlay() {
     const local = toLocalDpr(xCss, yCss)
     if (!local) return
 
-    const size = out.width // 72
+    const size = out.width
     const zoom = 10
 
     const sample = Math.round(size / zoom)
@@ -201,7 +275,7 @@ export default function EyedropperLoupeOverlay() {
 
   function updateFromClient(x: number, y: number) {
     setPos({ x, y })
-    if (!ready) return
+    if (!ready || error) return
 
     const sp = getSamplePoint(x, y)
     if (!sp) return
@@ -213,19 +287,33 @@ export default function EyedropperLoupeOverlay() {
   }
 
   function pickAtClient(x: number, y: number) {
-    if (!ready) return
+    if (!isInsidePreview(x, y)) {
+      closePicker()
+      return
+    }
+
+    if (!ready || error) {
+      closePicker()
+      return
+    }
 
     const sp = getSamplePoint(x, y)
-    if (!sp) return
+    if (!sp) {
+      closePicker()
+      return
+    }
 
     const p = getPixelCss(sp.x, sp.y)
     picker.onPick?.(p ? rgbToHex(p.r, p.g, p.b) : hex)
     closePicker()
   }
 
+  function handleCancel() {
+    closePicker()
+  }
+
   return (
     <>
-      {/* overlay fullscreen */}
       <div
         data-no-block-select="1"
         onPointerMove={(e) => {
@@ -239,8 +327,6 @@ export default function EyedropperLoupeOverlay() {
           pickAtClient(e.clientX, e.clientY)
         }}
         onPointerDown={(e) => {
-          // IMPORTANTÍSSIMO: NÃO fechar aqui.
-          // Se fechares aqui, nunca chega ao "pick".
           e.preventDefault()
           e.stopPropagation()
           updateFromClient(e.clientX, e.clientY)
@@ -255,8 +341,46 @@ export default function EyedropperLoupeOverlay() {
         }}
       />
 
-      {/* lupa */}
-      {pos && (
+      <button
+        onClick={handleCancel}
+        style={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          zIndex: 10001,
+          padding: '8px 16px',
+          borderRadius: 8,
+          border: 'none',
+          background: 'rgba(0,0,0,0.8)',
+          color: '#fff',
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: 'pointer',
+        }}
+      >
+        ✕ Cancelar (ESC)
+      </button>
+
+      {error && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 60,
+            right: 16,
+            zIndex: 10001,
+            padding: '8px 12px',
+            borderRadius: 8,
+            background: 'rgba(220,38,38,0.9)',
+            color: '#fff',
+            fontSize: 12,
+            fontWeight: 500,
+          }}
+        >
+          {error} - clica para fechar
+        </div>
+      )}
+
+      {pos && !error && (
         <div
           data-no-block-select="1"
           style={{
@@ -276,6 +400,27 @@ export default function EyedropperLoupeOverlay() {
           }}
         >
           <canvas ref={loupeCanvasRef} width={72} height={72} style={{ display: 'block', width: 72, height: 72 }} />
+        </div>
+      )}
+
+      {pos && !error && (
+        <div
+          style={{
+            position: 'fixed',
+            left: pos.x + 16,
+            top: pos.y + 92,
+            zIndex: 10000,
+            padding: '4px 8px',
+            borderRadius: 6,
+            background: 'rgba(0,0,0,0.85)',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: 'monospace',
+            pointerEvents: 'none',
+          }}
+        >
+          {hex}
         </div>
       )}
 

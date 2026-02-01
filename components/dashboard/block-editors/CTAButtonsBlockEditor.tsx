@@ -9,7 +9,12 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 type IconMode = 'none' | 'library' | 'upload'
 
+type ActionType = 'link' | 'phone' | 'whatsapp'
+
 type CtaButton = {
+  actionType?: ActionType
+  phone?: string
+  whatsappMessage?: string
   id: string
   label: string
   url: string
@@ -45,10 +50,20 @@ type CTAButtonsStyle = {
     borderColor?: string
     shadow?: boolean
     iconGapPx?: number
+    widthMode?: "full" | "auto" | "custom"
+    customWidthPx?: number
   }
 
   container?: {
+    enabled?: boolean
+    bgColor?: string
+    radius?: number
     padding?: number
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+    widthMode?: "full" | "custom"
+    customWidthPx?: number
   }
 }
 
@@ -163,6 +178,10 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
   const updateBtnStyle = (patch: Partial<NonNullable<CTAButtonsStyle['button']>>) =>
     updateStyle({ button: { ...(st.button || {}), ...patch } })
 
+  const container = st.container || {}
+  const updateContainer = (patch: Partial<NonNullable<CTAButtonsStyle["container"]>>) =>
+    updateStyle({ container: { ...(st.container || {}), ...patch } })
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
@@ -251,19 +270,42 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                 <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder="Ex.: Marcar visita" />
               </Row>
 
-              <Row label="Link">
-                <input
-                  value={b.url ?? ''}
-                  onChange={(e) => updateButton(b.id, { url: e.target.value })}
-                  style={input}
-                  placeholder="https://…  |  tel:+351…  |  mailto:…"
-                />
+
+              <Row label="Tipo de ação">
+                <select value={b.actionType ?? "link"} onChange={(e) => updateButton(b.id, { actionType: e.target.value as any })} style={select}>
+                  <option value="link">Link (URL)</option>
+                  <option value="phone">Ligar (Telefone)</option>
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
               </Row>
 
-              <Row label="Abrir em nova aba">
-                <Toggle active={b.openInNewTab === true} onClick={() => updateButton(b.id, { openInNewTab: !(b.openInNewTab === true) })} />
-              </Row>
+              {(b.actionType ?? "link") === "link" && (
+                <>
+                  <Row label="URL">
+                    <input value={b.url ?? ""} onChange={(e) => updateButton(b.id, { url: e.target.value })} style={input} placeholder="https://exemplo.com" />
+                  </Row>
+                  <Row label="Abrir em nova aba">
+                    <Toggle active={b.openInNewTab === true} onClick={() => updateButton(b.id, { openInNewTab: !(b.openInNewTab === true) })} />
+                  </Row>
+                </>
+              )}
 
+              {b.actionType === "phone" && (
+                <Row label="Número de telefone">
+                  <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351 912 345 678" />
+                </Row>
+              )}
+
+              {b.actionType === "whatsapp" && (
+                <>
+                  <Row label="Número WhatsApp">
+                    <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351912345678" />
+                  </Row>
+                  <Row label="Mensagem pré-definida">
+                    <input value={b.whatsappMessage ?? ""} onChange={(e) => updateButton(b.id, { whatsappMessage: e.target.value })} style={input} placeholder="Olá, gostava de saber mais..." />
+                  </Row>
+                </>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 800, opacity: 0.75 }}>Ícone</span>
 
@@ -423,8 +465,97 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           <input type="range" min={4} max={20} step={1} value={btn.iconGapPx ?? 10} onChange={(e) => updateBtnStyle({ iconGapPx: Number(e.target.value) })} />
           <span style={rightNum}>{btn.iconGapPx ?? 10}px</span>
         </Row>
+
+        <Row label="Largura do botão">
+          <select value={btn.widthMode ?? "full"} onChange={(e) => updateBtnStyle({ widthMode: e.target.value as any })} style={select}>
+            <option value="full">100%</option>
+            <option value="auto">Automática</option>
+            <option value="custom">Personalizada</option>
+          </select>
+        </Row>
+
+        {btn.widthMode === "custom" && (
+          <Row label="Largura (px)">
+            <input type="range" min={100} max={350} step={5} value={btn.customWidthPx ?? 200} onChange={(e) => updateBtnStyle({ customWidthPx: Number(e.target.value) })} />
+            <span style={rightNum}>{btn.customWidthPx ?? 200}px</span>
+          </Row>
+        )}
       </Section>
 
+
+      <Section title="Container">
+        <Row label="Ativar container">
+          <Toggle active={container.enabled !== false} onClick={() => updateContainer({ enabled: !(container.enabled !== false) })} />
+        </Row>
+
+        <Row label="Fundo">
+          <Toggle
+            active={(container.bgColor ?? "transparent") !== "transparent"}
+            onClick={() => updateContainer({ bgColor: (container.bgColor ?? "transparent") !== "transparent" ? "transparent" : "#ffffff" })}
+          />
+        </Row>
+
+        {(container.bgColor ?? "transparent") !== "transparent" && (
+          <Row label="Cor do fundo">
+            <SwatchRow
+              value={container.bgColor ?? "#ffffff"}
+              onChange={(hex) => updateContainer({ bgColor: hex })}
+              onEyedropper={() => pickEyedropper((hex) => updateContainer({ bgColor: hex }))}
+            />
+          </Row>
+        )}
+
+        <Row label="Sombra">
+          <Toggle active={container.shadow ?? false} onClick={() => updateContainer({ shadow: !(container.shadow ?? false) })} />
+        </Row>
+
+        <Row label="Borda">
+          <Toggle
+            active={(container.borderWidth ?? 0) > 0}
+            onClick={() => updateContainer({ borderWidth: (container.borderWidth ?? 0) > 0 ? 0 : 1 })}
+          />
+        </Row>
+
+        {(container.borderWidth ?? 0) > 0 && (
+          <>
+            <Row label="Espessura">
+              <input type="range" min={1} max={6} step={1} value={container.borderWidth ?? 1} onChange={(e) => updateContainer({ borderWidth: Number(e.target.value) })} />
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
+            </Row>
+            <Row label="Cor da borda">
+              <SwatchRow
+                value={container.borderColor ?? "rgba(0,0,0,0.12)"}
+                onChange={(hex) => updateContainer({ borderColor: hex })}
+                onEyedropper={() => pickEyedropper((hex) => updateContainer({ borderColor: hex }))}
+              />
+            </Row>
+          </>
+        )}
+
+        <Row label="Raio">
+          <input type="range" min={0} max={32} step={1} value={container.radius ?? 16} onChange={(e) => updateContainer({ radius: Number(e.target.value) })} />
+          <span style={rightNum}>{container.radius ?? 16}px</span>
+        </Row>
+
+        <Row label="Padding">
+          <input type="range" min={0} max={28} step={1} value={container.padding ?? 12} onChange={(e) => updateContainer({ padding: Number(e.target.value) })} />
+          <span style={rightNum}>{container.padding ?? 12}px</span>
+        </Row>
+
+        <Row label="Largura">
+          <select value={container.widthMode ?? "full"} onChange={(e) => updateContainer({ widthMode: e.target.value as any })} style={select}>
+            <option value="full">100%</option>
+            <option value="custom">Personalizada</option>
+          </select>
+        </Row>
+
+        {container.widthMode === "custom" && (
+          <Row label="Largura (px)">
+            <input type="range" min={200} max={400} step={5} value={container.customWidthPx ?? 320} onChange={(e) => updateContainer({ customWidthPx: Number(e.target.value) })} />
+            <span style={rightNum}>{container.customWidthPx ?? 320}px</span>
+          </Row>
+        )}
+      </Section>
       <Section title="Posição">
         <Row label="Deslocamento Y (px)">
           <input type="range" min={-80} max={80} step={1} value={st.offsetY ?? 0} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} />

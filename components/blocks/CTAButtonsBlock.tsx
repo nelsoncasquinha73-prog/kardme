@@ -3,12 +3,18 @@
 import React from 'react'
 
 type IconMode = 'none' | 'library' | 'upload'
+type ActionType = 'link' | 'phone' | 'whatsapp'
 
 type CtaButton = {
   id: string
   label: string
   url: string
   openInNewTab?: boolean
+  actionType?: ActionType
+  phone?: string
+  whatsappMessage?: string
+  widthMode?: '100%' | 'auto' | 'custom'
+  customWidthPx?: number
   icon?: {
     mode: IconMode
     libraryName?: string
@@ -40,10 +46,20 @@ type CTAButtonsStyle = {
     borderColor?: string
     shadow?: boolean
     iconGapPx?: number
+    widthMode?: '100%' | 'auto' | 'custom'
+    customWidthPx?: number
   }
 
   container?: {
+    enabled?: boolean
+    bgColor?: string
+    radius?: number
     padding?: number
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
   }
 }
 
@@ -70,11 +86,24 @@ function normalizeUrl(url: string) {
   if (!u) return ''
   if (u.startsWith('http://') || u.startsWith('https://')) return u
   if (u.startsWith('mailto:') || u.startsWith('tel:')) return u
-  // WhatsApp shortcuts
   if (u.startsWith('wa.me/')) return `https://${u}`
   if (u.startsWith('www.')) return `https://${u}`
   if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(u)) return `https://${u}`
   return u
+}
+
+function getButtonHref(b: CtaButton): string {
+  const actionType = b.actionType || 'link'
+  if (actionType === 'phone' && b.phone) {
+    const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
+    return `tel:${cleanPhone}`
+  }
+  if (actionType === 'whatsapp' && b.phone) {
+    const cleanPhone = b.phone.replace(/[^0-9]/g, '')
+    const message = b.whatsappMessage ? encodeURIComponent(b.whatsappMessage) : ''
+    return `https://wa.me/${cleanPhone}${message ? '?text=' + message : ''}`
+  }
+  return normalizeUrl(b.url || '')
 }
 
 function mapAlign(align?: 'left' | 'center' | 'right') {
@@ -87,6 +116,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
   const s: CTAButtonsSettings = settings || { buttons: [] }
   const st: CTAButtonsStyle = style || {}
   const btn = st.button || {}
+  const c = st.container || {}
 
   const buttons = Array.isArray(s.buttons) ? s.buttons : []
   if (buttons.length === 0) {
@@ -98,11 +128,26 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
   const wrap: React.CSSProperties = {
     transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined,
-    padding: st.container?.padding ?? 0,
+    padding: c.padding ?? 0,
     display: 'flex',
     flexDirection: layout === 'row' ? 'row' : 'column',
     gap,
     alignItems: mapAlign(s.align),
+    background: c.enabled !== false ? (c.bgColor ?? 'transparent') : 'transparent',
+    borderRadius: c.radius ?? 0,
+    border: (c.borderWidth ?? 0) > 0 ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}` : undefined,
+    boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+    width: c.widthMode === 'custom' && c.customWidthPx ? c.customWidthPx : undefined,
+    maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
+    alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
+    boxSizing: 'border-box',
+  }
+
+  const getButtonWidth = (b: CtaButton): string | number | undefined => {
+    const mode = b.widthMode ?? btn.widthMode ?? '100%'
+    if (mode === 'custom') return b.customWidthPx ?? btn.customWidthPx ?? 200
+    if (mode === 'auto') return 'auto'
+    return layout === 'row' ? 'auto' : '100%'
   }
 
   const baseBtn: React.CSSProperties = {
@@ -123,8 +168,6 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
     fontWeight: btn.bold ? 800 : 700,
     cursor: 'pointer',
     userSelect: 'none',
-    width: layout === 'row' ? 'auto' : '100%',
-    maxWidth: layout === 'row' ? 260 : undefined,
     boxSizing: 'border-box',
   }
 
@@ -145,22 +188,25 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
       )
     }
 
-    // modo library: para não te prender já num pacote de ícones específico,
-    // deixamos placeholder; quando quiseres, ligamos ao teu picker de react-icons.
-    // Por agora, se não houver uploadUrl, não mostra.
     return null
   }
 
   return (
     <div style={wrap}>
       {buttons.map((b) => {
-        const href = normalizeUrl(b.url)
+        const href = getButtonHref(b)
         const isHttp = href.startsWith('http://') || href.startsWith('https://')
-        const target = b.openInNewTab && isHttp ? '_blank' : undefined
+        const actionType = b.actionType || 'link'
+        const target = actionType === 'link' && b.openInNewTab && isHttp ? '_blank' : undefined
         const rel = target ? 'noreferrer' : undefined
 
         const icon = renderIcon(b)
         const iconPos = b.icon?.position ?? 'left'
+
+        const btnStyle: React.CSSProperties = {
+          ...baseBtn,
+          width: getButtonWidth(b),
+        }
 
         return (
           <a
@@ -168,12 +214,10 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
             href={href || '#'}
             target={target}
             rel={rel}
-            style={baseBtn}
+            style={btnStyle}
             data-no-block-select="1"
             onClick={(e) => {
               if (!href) e.preventDefault()
-              // hook para analytics futuro:
-              // console.log('click_cta_button', { cardId, buttonId: b.id, url: href })
               void cardId
             }}
           >
