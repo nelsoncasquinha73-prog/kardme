@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       const storedRole = sessionStorage.getItem('role')
       if (storedRole) {
-        if (storedRole !== 'admin') {
+        if (storedRole !== 'admin' && !pathname.startsWith('/admin/catalog')) {
           router.push('/dashboard')
         }
         setLoading(false)
@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .eq('id', user.id)
         .single()
 
-      if (error || profile?.role !== 'admin') {
+      if ((error || profile?.role !== 'admin') && !pathname.startsWith('/admin/catalog')) {
         router.push('/dashboard')
         return
       }
