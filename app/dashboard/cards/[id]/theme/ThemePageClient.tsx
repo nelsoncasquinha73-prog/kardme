@@ -143,9 +143,9 @@ export default function ThemePageClient({ card, blocks }: Props) {
         return
       }
 
-      // 3) Atualizar template (se existir)
-      const templateId = card?.template_id
-      if (templateId) {
+
+      // 3) Atualizar template APENAS se for um draft de template (admin a editar template)
+      if (card?.is_template_draft && card?.template_id) {
         const preview_Json = localBlocks.map((b) => ({
           type: b.type,
           order: b.order ?? 0,
@@ -156,18 +156,18 @@ export default function ThemePageClient({ card, blocks }: Props) {
         }))
 
         const { error: templateError } = await supabase
-          .from('templates')
+          .from("templates")
           .update({
             preview_json: preview_Json,
             theme_json: nextTheme,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', templateId)
-          .select('id')
+          .eq("id", card.template_id)
+          .select("id")
 
         if (templateError) {
-          console.error('❌ Erro ao atualizar template:', templateError)
-          setToast({ message: 'Aviso: Cartão guardado, mas template não foi atualizado', type: 'error' })
+          console.error("❌ Erro ao atualizar template:", templateError)
+          setToast({ message: "Aviso: Cartão guardado, mas template não foi atualizado", type: "error" })
         }
       }
 
