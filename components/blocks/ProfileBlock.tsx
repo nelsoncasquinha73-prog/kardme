@@ -89,6 +89,9 @@ export default function ProfileBlock({
   const lineCount = Number(!!showName) + Number(!!showProfession) + Number(!!showCompany)
   const offsetY = settings.offset?.y ?? 0
 
+  const offsetX = settings.offset?.x ?? 0
+  const container = settings.container || {}
+  const containerEnabled = container.enabled ?? false
   const globalFontFamily = FONT_MAP[settings.typography?.fontFamily ?? 'System'] ?? FONT_MAP.System
 
   const bgEnabled = settings.background?.enabled
@@ -137,7 +140,7 @@ export default function ProfileBlock({
     <section
       aria-label="Perfil"
       style={{
-        marginTop: offsetY,
+        transform: `translate(${offsetX}px, ${offsetY}px)`,
         backgroundColor: bgEnabled ? bgColor : 'transparent',
         borderRadius: radiusFor(bgStyle),
         border: bgEnabled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
@@ -288,11 +291,18 @@ export default function ProfileBlock({
 
       <div
         style={{
-          padding: lineCount === 1 ? `18px 22px` : `22px 22px`,
-          paddingTop: (lineCount === 1 ? 18 : 22) + extraTopPadding,
+          padding: containerEnabled ? (container.padding ?? 12) : (lineCount === 1 ? 18 : 22),
+          paddingTop: containerEnabled ? (container.padding ?? 12) : ((lineCount === 1 ? 18 : 22) + extraTopPadding),
           display: 'flex',
           flexDirection: 'column',
           gap: lineGap,
+          backgroundColor: containerEnabled ? (container.bgColor ?? "transparent") : (bgEnabled ? bgColor : "transparent"),
+          borderRadius: containerEnabled ? (container.radius ?? 0) : radiusFor(bgStyle),
+          border: containerEnabled && (container.borderWidth ?? 0) > 0 ? `${container.borderWidth}px solid ${container.borderColor ?? "rgba(0,0,0,0.12)"}` : (bgEnabled ? "1px solid rgba(0,0,0,0.06)" : "none"),
+          boxShadow: containerEnabled && container.shadow ? "0 14px 40px rgba(0,0,0,0.12)" : (bgEnabled ? "0 6px 20px rgba(0,0,0,0.06)" : "none"),
+          width: containerEnabled && container.widthMode === "custom" ? (container.customWidthPx ?? 320) : undefined,
+          maxWidth: containerEnabled && container.widthMode === "custom" ? "100%" : undefined,
+          margin: containerEnabled && container.widthMode === "custom" ? "0 auto" : undefined,
         }}
       >
         {showName && (

@@ -58,7 +58,21 @@ export type ProfileSettings = {
     lineGap?: number // px
   }
 
+
+  container?: {
+    enabled?: boolean
+    bgColor?: string
+    radius?: number
+    padding?: number
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+    widthMode?: "full" | "custom"
+    customWidthPx?: number
+  }
+
   offset?: {
+    x?: number
     y?: number
   }
 }

@@ -6,7 +6,7 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
-import { Section } from '@/components/editor/ui'
+import { Section, Row, Toggle } from '@/components/editor/ui'
 
 
 
@@ -93,6 +93,7 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
     },
 
     offset: {
+      x: input.offset?.x ?? 0,
       y: input.offset?.y ?? 0,
     },
   }
@@ -552,18 +553,167 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         </div>
       </Section>
 
-      <Section title="Posição do bloco (vertical)">
-        <div className="flex justify-between items-center">
-          <span className="text-sm">Offset Y</span>
 
+
+      <Section title="Container">
+        <Row label="Ativar container">
+          <Toggle
+            active={local.container?.enabled ?? false}
+            onClick={() => patch((d) => {
+              d.container = d.container || {}
+              d.container.enabled = !(d.container.enabled ?? false)
+            })}
+          />
+        </Row>
+
+        {(local.container?.enabled ?? false) && (
+          <>
+            <Row label="Cor do fundo">
+              <SwatchRow
+                value={local.container?.bgColor ?? "#ffffff"}
+                onChange={(hex) => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.bgColor = hex
+                })}
+                onEyedropper={() => openPicker({
+                  mode: "eyedropper",
+                  onPick: (hex) => patch((d) => {
+                    d.container = d.container || {}
+                    d.container.bgColor = hex
+                  })
+                })}
+              />
+            </Row>
+
+            <Row label="Sombra">
+              <Toggle
+                active={local.container?.shadow ?? false}
+                onClick={() => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.shadow = !(d.container.shadow ?? false)
+                })}
+              />
+            </Row>
+
+            <Row label="Borda">
+              <Toggle
+                active={(local.container?.borderWidth ?? 0) > 0}
+                onClick={() => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.borderWidth = (d.container.borderWidth ?? 0) > 0 ? 0 : 1
+                })}
+              />
+            </Row>
+
+            {(local.container?.borderWidth ?? 0) > 0 && (
+              <>
+                <Row label="Espessura">
+                  <input
+                    type="range"
+                    min={1}
+                    max={6}
+                    step={1}
+                    value={local.container?.borderWidth ?? 1}
+                    onChange={(e) => patch((d) => {
+                      d.container = d.container || {}
+                      d.container.borderWidth = Number(e.target.value)
+                    })}
+                  />
+                  <span className="text-xs text-black/50">{local.container?.borderWidth ?? 1}px</span>
+                </Row>
+                <Row label="Cor da borda">
+                  <SwatchRow
+                    value={local.container?.borderColor ?? "rgba(0,0,0,0.12)"}
+                    onChange={(hex) => patch((d) => {
+                      d.container = d.container || {}
+                      d.container.borderColor = hex
+                    })}
+                    onEyedropper={() => openPicker({
+                      mode: "eyedropper",
+                      onPick: (hex) => patch((d) => {
+                        d.container = d.container || {}
+                        d.container.borderColor = hex
+                      })
+                    })}
+                  />
+                </Row>
+              </>
+            )}
+
+            <Row label="Raio">
+              <input
+                type="range"
+                min={0}
+                max={32}
+                step={1}
+                value={local.container?.radius ?? 16}
+                onChange={(e) => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.radius = Number(e.target.value)
+                })}
+              />
+              <span className="text-xs text-black/50">{local.container?.radius ?? 16}px</span>
+            </Row>
+
+            <Row label="Padding">
+              <input
+                type="range"
+                min={0}
+                max={28}
+                step={1}
+                value={local.container?.padding ?? 12}
+                onChange={(e) => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.padding = Number(e.target.value)
+                })}
+              />
+              <span className="text-xs text-black/50">{local.container?.padding ?? 12}px</span>
+            </Row>
+
+            <Row label="Largura">
+              <select
+                className="h-8 rounded-lg border border-black/10 px-2 text-sm"
+                value={local.container?.widthMode ?? "full"}
+                onChange={(e) => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.widthMode = e.target.value as any
+                })}
+              >
+                <option value="full">100%</option>
+                <option value="custom">Personalizada</option>
+              </select>
+            </Row>
+
+            {local.container?.widthMode === "custom" && (
+              <Row label="Largura (px)">
+                <input
+                  type="range"
+                  min={200}
+                  max={400}
+                  step={5}
+                  value={local.container?.customWidthPx ?? 320}
+                  onChange={(e) => patch((d) => {
+                    d.container = d.container || {}
+                    d.container.customWidthPx = Number(e.target.value)
+                  })}
+                />
+                <span className="text-xs text-black/50">{local.container?.customWidthPx ?? 320}px</span>
+              </Row>
+            )}
+          </>
+        )}
+      </Section>
+
+      <Section title="Posição do bloco">
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Offset X / Y</span>
           <button
             type="button"
             className="h-7 rounded-xl border border-black/10 px-2"
             onClick={() =>
               patch((d) => {
-  d.offset = d.offset || ({ y: 0 } as any)
-  d.offset!.y = 0
-})
+                d.offset = { x: 0, y: 0 }
+              })
             }
             title="Reset"
           >
@@ -577,11 +727,40 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             className="h-7 w-7 rounded-xl border border-black/10"
             onClick={(e) =>
               patch((d) => {
-  const off = (d.offset ?? { y: 0 }) as any
-  off.y = (off.y ?? 0) - stepFromEvent(e)
-  d.offset = off
-})
+                const off = d.offset ?? { x: 0, y: 0 }
+                off.x = (off.x ?? 0) - stepFromEvent(e)
+                d.offset = off
+              })
+            }
+            title="Esquerda (Shift = 10px)"
+          >
+            ⬅️
+          </button>
 
+          <button
+            type="button"
+            className="h-7 w-7 rounded-xl border border-black/10"
+            onClick={(e) =>
+              patch((d) => {
+                const off = d.offset ?? { x: 0, y: 0 }
+                off.x = (off.x ?? 0) + stepFromEvent(e)
+                d.offset = off
+              })
+            }
+            title="Direita (Shift = 10px)"
+          >
+            ➡️
+          </button>
+
+          <button
+            type="button"
+            className="h-7 w-7 rounded-xl border border-black/10"
+            onClick={(e) =>
+              patch((d) => {
+                const off = d.offset ?? { x: 0, y: 0 }
+                off.y = (off.y ?? 0) - stepFromEvent(e)
+                d.offset = off
+              })
             }
             title="Subir (Shift = 10px)"
           >
@@ -593,25 +772,25 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             className="h-7 w-7 rounded-xl border border-black/10"
             onClick={(e) =>
               patch((d) => {
-  const off = (d.offset ?? { y: 0 }) as any
-  off.y = (off.y ?? 0) + stepFromEvent(e)
-  d.offset = off
-})
-
+                const off = d.offset ?? { x: 0, y: 0 }
+                off.y = (off.y ?? 0) + stepFromEvent(e)
+                d.offset = off
+              })
             }
             title="Descer (Shift = 10px)"
           >
             ⬇️
           </button>
 
-          <span className="text-xs text-black/50">Y: {local.offset?.y ?? 0}px</span>
+          <span className="text-xs text-black/50">X: {local.offset?.x ?? 0}px · Y: {local.offset?.y ?? 0}px</span>
         </div>
 
         <span className="text-xs text-black/40 leading-tight">
-          Isto move o bloco “Perfil” inteiro no preview (não é o avatar).
+          Move o bloco Perfil inteiro. Shift = 10px.
         </span>
       </Section>
-<div className="flex flex-col gap-2">
+
+<Section title="Layout">
   <div className="flex justify-between items-center">
     <span className="text-sm">Espaçamento entre linhas</span>
     <span className="text-xs text-black/50">{local.layout?.lineGap ?? 10}px</span>
@@ -636,7 +815,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   <span className="text-xs text-black/40 leading-tight">
     Controla o espaço entre Nome, Profissão e Empresa.
   </span>
-</div>
+</Section>
 
       <Section title="Identidade">
         <TextLine
