@@ -102,9 +102,6 @@ export default async function CardPage({ params }: Props) {
   const isImageBg = cardBgV1.base.kind === 'image'
   const bgCss = isImageBg ? 'transparent' : bgToCss(card?.theme?.background)
 
-
-
-
   // Extrair dados para vCard
   const profileBlock = blocks.find((b: any) => b.type === "profile")
   const contactBlock = blocks.find((b: any) => b.type === "contact")
@@ -116,19 +113,22 @@ export default async function CardPage({ params }: Props) {
   const socialSettings = socialBlock?.settings || {}
   const infoSettings = infoBlock?.settings || {}
   
-  // Extrair contactos
-  const channels = contactSettings.channels || []
-  const phones = channels.filter((c: any) => c.type === "phone").map((c: any) => c.value)
-  const emails = channels.filter((c: any) => c.type === "email").map((c: any) => c.value)
-  const website = channels.find((c: any) => c.type === "website")?.value
+  // Extrair contactos (items é um objeto com phone, email, whatsapp, telegram)
+  const contactItems = contactSettings.items || {}
+  const phones = [contactItems.phone?.value].filter(Boolean) as string[]
+  const emails = [contactItems.email?.value].filter(Boolean) as string[]
+  const website = contactItems.website?.value
   
-  // Extrair redes sociais
-  const socialLinks = socialSettings.links || []
+  // Extrair redes sociais (items é um objeto por rede)
+  const socialItems = socialSettings.items || {}
+  const socialLinks = Object.entries(socialItems)
+    .filter(([_, item]: [string, any]) => item?.url)
+    .map(([type, item]: [string, any]) => ({ type, url: item.url }))
   
-  // Extrair localização do infoBlock
+  // Extrair localização do infoBlock (items é um array)
   const infoItems = infoSettings.items || []
-  const addressItem = infoItems.find((i: any) => i.type === "address")
-  const address = addressItem?.value || addressItem?.label || ""
+  const addressItem = infoItems.find((i: any) => i.type === "address" && i.enabled)
+  const address = addressItem?.value || ""
   
   const vCardData = {
     name: profileSettings.name?.text || card.title,
@@ -145,7 +145,6 @@ export default async function CardPage({ params }: Props) {
   const cardUrl = `https://kardme.com/${slug}`
 
   const floatingActions = card?.theme?.floatingActions || {}
-
 
   const barColor = cardBgV1.browserBarColor ?? "#000000"
 
