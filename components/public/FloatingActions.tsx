@@ -15,6 +15,12 @@ type Settings = {
   buttonColor?: string
 }
 
+type SocialLink = {
+  type: string
+  url: string
+  label?: string
+}
+
 type Props = {
   cardUrl: string
   cardTitle?: string
@@ -22,10 +28,12 @@ type Props = {
     name?: string
     profession?: string
     company?: string
-    phone?: string
-    email?: string
+    avatar?: string
+    phones?: string[]
+    emails?: string[]
     website?: string
     address?: string
+    socialLinks?: SocialLink[]
   }
   settings?: Settings
 }
@@ -53,22 +61,90 @@ export default function FloatingActions({ cardUrl, cardTitle, vCardData, setting
   const handleSaveContact = () => {
     if (!vCardData) return
 
-    const vCard = [
+    const lines: string[] = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      vCardData.name ? `FN:${vCardData.name}` : '',
-      vCardData.name ? `N:${vCardData.name.split(' ').reverse().join(';')};;;` : '',
-      vCardData.profession ? `TITLE:${vCardData.profession}` : '',
-      vCardData.company ? `ORG:${vCardData.company}` : '',
-      vCardData.phone ? `TEL;TYPE=CELL:${vCardData.phone}` : '',
-      vCardData.email ? `EMAIL:${vCardData.email}` : '',
-      vCardData.website ? `URL:${vCardData.website}` : '',
-      cardUrl ? `URL;TYPE=WORK:${cardUrl}` : '',
-      vCardData.address ? `ADR:;;${vCardData.address};;;;` : '',
-      `NOTE:Cartão digital: ${cardUrl}`,
-      'END:VCARD',
-    ].filter(Boolean).join('\n')
+    ]
 
+    // Nome
+    if (vCardData.name) {
+      lines.push(`FN:${vCardData.name}`)
+      const nameParts = vCardData.name.split(' ')
+      if (nameParts.length > 1) {
+        const lastName = nameParts.pop()
+        const firstName = nameParts.join(' ')
+        lines.push(`N:${lastName};${firstName};;;`)
+      } else {
+        lines.push(`N:${vCardData.name};;;;`)
+      }
+    }
+
+    // Profissão
+    if (vCardData.profession) {
+      lines.push(`TITLE:${vCardData.profession}`)
+    }
+
+    // Empresa
+    if (vCardData.company) {
+      lines.push(`ORG:${vCardData.company}`)
+    }
+
+    // Avatar/Foto
+    if (vCardData.avatar) {
+      lines.push(`PHOTO;VALUE=URI:${vCardData.avatar}`)
+    }
+
+    // Telefones
+    if (vCardData.phones && vCardData.phones.length > 0) {
+      vCardData.phones.forEach((phone, index) => {
+        if (phone) {
+          const type = index === 0 ? 'CELL' : 'WORK'
+          lines.push(`TEL;TYPE=${type}:${phone}`)
+        }
+      })
+    }
+
+    // Emails
+    if (vCardData.emails && vCardData.emails.length > 0) {
+      vCardData.emails.forEach((email, index) => {
+        if (email) {
+          const type = index === 0 ? 'INTERNET' : 'WORK'
+          lines.push(`EMAIL;TYPE=${type}:${email}`)
+        }
+      })
+    }
+
+    // Website
+    if (vCardData.website) {
+      lines.push(`URL;TYPE=WORK:${vCardData.website}`)
+    }
+
+    // URL do cartão digital
+    if (cardUrl) {
+      lines.push(`URL;TYPE=HOME:${cardUrl}`)
+    }
+
+    // Endereço
+    if (vCardData.address) {
+      lines.push(`ADR;TYPE=WORK:;;${vCardData.address};;;;`)
+    }
+
+    // Redes sociais como URLs extras e X-SOCIALPROFILE
+    if (vCardData.socialLinks && vCardData.socialLinks.length > 0) {
+      vCardData.socialLinks.forEach((link) => {
+        if (link.url) {
+          const socialType = link.type?.toUpperCase() || 'OTHER'
+          lines.push(`X-SOCIALPROFILE;TYPE=${socialType}:${link.url}`)
+        }
+      })
+    }
+
+    // Nota com link do cartão
+    lines.push(`NOTE:Cartão digital: ${cardUrl}`)
+
+    lines.push('END:VCARD')
+
+    const vCard = lines.join('\r\n')
     const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')

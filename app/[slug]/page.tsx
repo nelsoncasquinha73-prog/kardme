@@ -104,20 +104,42 @@ export default async function CardPage({ params }: Props) {
 
 
 
+
   // Extrair dados para vCard
   const profileBlock = blocks.find((b: any) => b.type === "profile")
   const contactBlock = blocks.find((b: any) => b.type === "contact")
+  const socialBlock = blocks.find((b: any) => b.type === "social")
+  const infoBlock = blocks.find((b: any) => b.type === "info_utilities")
   
   const profileSettings = profileBlock?.settings || {}
   const contactSettings = contactBlock?.settings || {}
+  const socialSettings = socialBlock?.settings || {}
+  const infoSettings = infoBlock?.settings || {}
+  
+  // Extrair contactos
+  const channels = contactSettings.channels || []
+  const phones = channels.filter((c: any) => c.type === "phone").map((c: any) => c.value)
+  const emails = channels.filter((c: any) => c.type === "email").map((c: any) => c.value)
+  const website = channels.find((c: any) => c.type === "website")?.value
+  
+  // Extrair redes sociais
+  const socialLinks = socialSettings.links || []
+  
+  // Extrair localização do infoBlock
+  const infoItems = infoSettings.items || []
+  const addressItem = infoItems.find((i: any) => i.type === "address")
+  const address = addressItem?.value || addressItem?.label || ""
   
   const vCardData = {
     name: profileSettings.name?.text || card.title,
     profession: profileSettings.profession?.text,
     company: profileSettings.company?.text,
-    phone: contactSettings.channels?.find((c: any) => c.type === "phone")?.value,
-    email: contactSettings.channels?.find((c: any) => c.type === "email")?.value,
-    website: contactSettings.channels?.find((c: any) => c.type === "website")?.value,
+    avatar: profileSettings.avatar?.image,
+    phones,
+    emails,
+    website,
+    address,
+    socialLinks,
   }
   
   const cardUrl = `https://kardme.com/${slug}`
