@@ -40,6 +40,7 @@ type Props = {
 
 export default function FloatingActions({ cardUrl, cardTitle, vCardData, settings }: Props) {
   const [expanded, setExpanded] = useState(false)
+  console.log("FloatingActions montado, vCardData:", vCardData)
   const [showShare, setShowShare] = useState(false)
   const [showQR, setShowQR] = useState(false)
 
