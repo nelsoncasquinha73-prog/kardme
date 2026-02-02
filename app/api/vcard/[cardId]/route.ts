@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
 
+async function imageToBase64(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+    
+    const buffer = await response.arrayBuffer()
+    const base64 = Buffer.from(buffer).toString('base64')
+    
+    // Detectar tipo de imagem
+    const contentType = response.headers.get('content-type') || 'image/jpeg'
+    const imageType = contentType.includes('png') ? 'PNG' : 'JPEG'
+    
+    return `PHOTO;ENCODING=b;TYPE=${imageType}:${base64}`
+  } catch {
+    return null
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ cardId: string }> }
@@ -83,9 +101,12 @@ export async function GET(
     lines.push(`ORG:${company}`)
   }
 
-  // Avatar/Foto
+  // Avatar/Foto em base64
   if (avatar) {
-    lines.push(`PHOTO;VALUE=URI:${avatar}`)
+    const photoLine = await imageToBase64(avatar)
+    if (photoLine) {
+      lines.push(photoLine)
+    }
   }
 
   // Telefones
