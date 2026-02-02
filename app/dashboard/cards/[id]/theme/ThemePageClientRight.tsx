@@ -16,6 +16,7 @@ import DecorationBlockEditor from '@/components/dashboard/block-editors/Decorati
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBlockEditor'
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
+import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
 import type { CardBgV1 } from '@/lib/cardBg'
@@ -47,6 +48,8 @@ type Props = {
   slugError: string | null
   saveSlug: () => void
   onEditingChange?: (isEditing: boolean) => void
+  floatingActions?: any
+  onChangeFloatingActions?: (settings: any) => void
 }
 
 function isFormEl(el: HTMLElement | null) {
@@ -73,6 +76,8 @@ export default function ThemePageClientRight({
   slugError,
   saveSlug,
   onEditingChange,
+  floatingActions,
+  onChangeFloatingActions,
 }: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const [templateSaving, setTemplateSaving] = useState(false)
@@ -199,9 +204,34 @@ export default function ThemePageClientRight({
 
       <div style={{ padding: 12, overflow: 'auto' }}>
         {!activeBlock && (
-          <p style={{ fontSize: 13, opacity: 0.5, paddingTop: 20, textAlign: 'center' }}>
-            Seleciona um bloco à esquerda para editar.
-          </p>
+          <FloatingActionsEditor
+            settings={floatingActions || {}}
+            onChange={(s) => onChangeFloatingActions?.(s)}
+          />
+        )}
+        {!activeBlock && (
+          <FloatingActionsEditor
+            settings={floatingActions || {}}
+            onChange={(s) => onChangeFloatingActions?.(s)}
+          />
+        )}
+        {!activeBlock && (
+          <FloatingActionsEditor
+            settings={floatingActions || {}}
+            onChange={(s) => onChangeFloatingActions?.(s)}
+          />
+        )}
+        {!activeBlock && (
+          <FloatingActionsEditor
+            settings={floatingActions || {}}
+            onChange={(s) => onChangeFloatingActions?.(s)}
+          />
+        )}
+        {!activeBlock && (
+          <FloatingActionsEditor
+            settings={floatingActions || {}}
+            onChange={(s) => onChangeFloatingActions?.(s)}
+          />
         )}
 
         {activeBlock?.type === 'header' && (

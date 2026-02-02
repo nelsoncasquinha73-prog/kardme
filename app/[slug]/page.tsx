@@ -11,6 +11,7 @@ import { bgToCssString } from '@/lib/bgToCss'
 import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
 import TrackingWrapper from '@/components/TrackingWrapper'
+import FloatingActions from "@/components/public/FloatingActions"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -103,6 +104,27 @@ export default async function CardPage({ params }: Props) {
 
 
 
+  // Extrair dados para vCard
+  const profileBlock = blocks.find((b: any) => b.type === "profile")
+  const contactBlock = blocks.find((b: any) => b.type === "contact")
+  
+  const profileSettings = profileBlock?.settings || {}
+  const contactSettings = contactBlock?.settings || {}
+  
+  const vCardData = {
+    name: profileSettings.name?.text || card.title,
+    profession: profileSettings.profession?.text,
+    company: profileSettings.company?.text,
+    phone: contactSettings.channels?.find((c: any) => c.type === "phone")?.value,
+    email: contactSettings.channels?.find((c: any) => c.type === "email")?.value,
+    website: contactSettings.channels?.find((c: any) => c.type === "website")?.value,
+  }
+  
+  const cardUrl = `https://kardme.com/${slug}`
+
+  const floatingActions = card?.theme?.floatingActions || {}
+
+
   const barColor = cardBgV1.browserBarColor ?? "#000000"
 
   return (
@@ -119,6 +141,12 @@ export default async function CardPage({ params }: Props) {
                   showTranslations={false}
                   fullBleed={true}
                   cardBg={cardBgV1}
+                />
+                <FloatingActions
+                  cardUrl={cardUrl}
+                  cardTitle={card.title}
+                  vCardData={vCardData}
+                  settings={floatingActions}
                 />
               </ThemeProvider>
             </LanguageProvider>

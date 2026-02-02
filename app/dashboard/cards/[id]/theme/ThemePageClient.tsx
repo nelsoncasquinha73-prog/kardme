@@ -288,6 +288,13 @@ export default function ThemePageClient({ card, blocks }: Props) {
           slugSaving={slugSaving}
           slugError={slugError}
           saveSlug={saveSlug}
+          floatingActions={localTheme?.floatingActions}
+          onChangeFloatingActions={(settings) => {
+            const nextTheme = structuredClone(localTheme || {})
+            nextTheme.floatingActions = settings
+            setLocalTheme(nextTheme)
+            setSaveStatus("dirty")
+          }}
         />
 
         <AddBlockModal
