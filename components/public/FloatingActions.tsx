@@ -61,6 +61,7 @@ export default function FloatingActions({ cardUrl, cardTitle, vCardData, setting
   const handleSaveContact = () => {
     if (!vCardData) return
 
+    console.log("vCardData recebido:", vCardData)
     const lines: string[] = [
       'BEGIN:VCARD',
       'VERSION:3.0',
