@@ -166,7 +166,7 @@ export default async function CardPage({ params }: Props) {
                 <FloatingActions
                   cardUrl={cardUrl}
                   cardTitle={card.title}
-                  vCardData={vCardData}
+                  cardId={card.id}
                   settings={floatingActions}
                 />
               </ThemeProvider>
