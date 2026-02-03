@@ -2,7 +2,7 @@
 'use client'
 
 import React, { useMemo, useRef, useState } from 'react'
-import Image from 'next/image'
+
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
@@ -712,11 +712,11 @@ export default function ServicesBlockEditor({
               </button>
 
               {item.imageSrc && (
-                <Image
+                <img
                   src={item.imageSrc}
                   alt={item.imageAlt ?? ''}
-                  width={120}
-                  height={80}
+                  
+                  
                   style={{ borderRadius: 8 }}
                 />
               )}
