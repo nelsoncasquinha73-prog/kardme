@@ -18,12 +18,10 @@ function parseRgb(str: string): { r: number; g: number; b: number } | null {
 }
 
 function parseGradientColor(gradient: string): { r: number; g: number; b: number } | null {
-  // Tenta extrair a primeira cor de um gradiente CSS
   const rgbMatch = gradient.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
   if (rgbMatch) {
     return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) }
   }
-  // Tenta extrair cor hex
   const hexMatch = gradient.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/)
   if (hexMatch) {
     const hex = hexMatch[1]
@@ -53,16 +51,12 @@ function isSafari(): boolean {
   return ua.includes('safari') && !ua.includes('chrome') && !ua.includes('chromium')
 }
 
-function isValidColor(rgb: { r: number; g: number; b: number } | null): boolean {
-  if (!rgb) return false
-  // Ignora preto puro e branco puro em alguns casos
-  return true
-}
-
 // ============ SAFARI FALLBACK COMPONENT ============
 function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: () => void }) {
   const [pos, setPos] = useState<Pos | null>(null)
   const [hex, setHex] = useState('#FFFFFF')
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const lastCapturedElement = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -72,7 +66,84 @@ function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: (
     return () => window.removeEventListener('keydown', onKey)
   }, [closePicker])
 
-  function getColorAtPoint(x: number, y: number): string {
+  // Tenta capturar cor via CSS computed styles
+  function getColorFromCSS(el: HTMLElement): string | null {
+    const computed = window.getComputedStyle(el)
+    
+    // Background color
+    const bgColor = computed.backgroundColor
+    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+      const rgb = parseRgb(bgColor)
+      if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+    }
+
+    // Background image (gradients)
+    const bgImage = computed.backgroundImage
+    if (bgImage && bgImage !== 'none') {
+      const rgb = parseGradientColor(bgImage)
+      if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+    }
+
+    // Border color
+    const borderColor = computed.borderTopColor || computed.borderColor
+    if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
+      const rgb = parseRgb(borderColor)
+      if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+    }
+
+    // Text color
+    const textColor = computed.color
+    if (textColor && el.textContent?.trim()) {
+      const rgb = parseRgb(textColor)
+      if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+    }
+
+    return null
+  }
+
+  // Tenta capturar cor via html2canvas do elemento específico
+  async function getColorFromCanvas(el: HTMLElement, x: number, y: number): Promise<string | null> {
+    try {
+      // Só recaptura se for um elemento diferente
+      if (lastCapturedElement.current !== el) {
+        const canvas = await html2canvas(el, {
+          backgroundColor: null,
+          scale: 1,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+        })
+        
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d')
+          if (ctx) {
+            canvasRef.current.width = canvas.width
+            canvasRef.current.height = canvas.height
+            ctx.drawImage(canvas, 0, 0)
+          }
+        }
+        lastCapturedElement.current = el
+      }
+
+      // Calcula posição relativa ao elemento
+      const rect = el.getBoundingClientRect()
+      const relX = Math.round(x - rect.left)
+      const relY = Math.round(y - rect.top)
+
+      const ctx = canvasRef.current?.getContext('2d')
+      if (ctx && relX >= 0 && relY >= 0 && relX < canvasRef.current!.width && relY < canvasRef.current!.height) {
+        const pixel = ctx.getImageData(relX, relY, 1, 1).data
+        if (pixel[3] > 0) { // Se não for transparente
+          return rgbToHex(pixel[0], pixel[1], pixel[2])
+        }
+      }
+    } catch (err) {
+      console.log('Safari canvas capture failed:', err)
+    }
+    return null
+  }
+
+  async function getColorAtPoint(x: number, y: number): Promise<string> {
     const elements = document.elementsFromPoint(x, y)
     
     for (const element of elements) {
@@ -83,82 +154,51 @@ function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: (
       if (el.dataset?.noBlockSelect) continue
       if (el.tagName === 'BUTTON') continue
       
+      // Primeiro tenta CSS (rápido)
+      const cssColor = getColorFromCSS(el)
+      if (cssColor) return cssColor
+
+      // Se for imagem ou tiver background-image, tenta canvas
       const computed = window.getComputedStyle(el)
+      const hasImage = el.tagName === 'IMG' || 
+                       (computed.backgroundImage && computed.backgroundImage !== 'none')
       
-      // 1. Verifica background-color
-      const bgColor = computed.backgroundColor
-      if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-        const rgb = parseRgb(bgColor)
-        if (rgb && isValidColor(rgb)) {
-          return rgbToHex(rgb.r, rgb.g, rgb.b)
-        }
-      }
-
-      // 2. Verifica background-image (gradientes)
-      const bgImage = computed.backgroundImage
-      if (bgImage && bgImage !== 'none') {
-        const rgb = parseGradientColor(bgImage)
-        if (rgb && isValidColor(rgb)) {
-          return rgbToHex(rgb.r, rgb.g, rgb.b)
-        }
-      }
-
-      // 3. Verifica border-color
-      const borderColor = computed.borderTopColor || computed.borderColor
-      if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
-        const rgb = parseRgb(borderColor)
-        if (rgb && isValidColor(rgb)) {
-          return rgbToHex(rgb.r, rgb.g, rgb.b)
-        }
-      }
-
-      // 4. Verifica SVG fill
-      if (el.tagName === 'svg' || el.closest('svg')) {
-        const fill = computed.fill || el.getAttribute('fill')
-        if (fill && fill !== 'none') {
-          const rgb = parseRgb(fill) || parseGradientColor(fill)
-          if (rgb && isValidColor(rgb)) {
-            return rgbToHex(rgb.r, rgb.g, rgb.b)
-          }
-        }
-      }
-
-      // 5. Verifica cor do texto (se tiver texto visível)
-      const textColor = computed.color
-      if (textColor && el.textContent?.trim()) {
-        const rgb = parseRgb(textColor)
-        if (rgb && isValidColor(rgb)) {
-          return rgbToHex(rgb.r, rgb.g, rgb.b)
-        }
-      }
-
-      // 6. Verifica box-shadow (extrai cor)
-      const boxShadow = computed.boxShadow
-      if (boxShadow && boxShadow !== 'none') {
-        const rgb = parseRgb(boxShadow)
-        if (rgb && isValidColor(rgb)) {
-          return rgbToHex(rgb.r, rgb.g, rgb.b)
-        }
+      if (hasImage) {
+        const canvasColor = await getColorFromCanvas(el, x, y)
+        if (canvasColor) return canvasColor
       }
     }
 
-    return '#FFFFFF'
+    // Fallback: tenta capturar o primeiro elemento não-overlay
+    for (const element of elements) {
+      const el = element as HTMLElement
+      if (el.dataset?.eyedropperOverlay) continue
+      if (el.dataset?.noBlockSelect) continue
+      
+      const canvasColor = await getColorFromCanvas(el, x, y)
+      if (canvasColor) return canvasColor
+      break
+    }
+
+    return '#808080'
   }
 
-  function updateFromClient(x: number, y: number) {
+  async function updateFromClient(x: number, y: number) {
     setPos({ x, y })
-    const color = getColorAtPoint(x, y)
+    const color = await getColorAtPoint(x, y)
     setHex(color)
   }
 
-  function pickAtClient(x: number, y: number) {
-    const color = getColorAtPoint(x, y)
+  async function pickAtClient(x: number, y: number) {
+    const color = await getColorAtPoint(x, y)
     picker.onPick?.(color)
     closePicker()
   }
 
   return (
     <>
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      
       <div
         data-eyedropper-overlay="1"
         data-no-block-select="1"
@@ -223,7 +263,7 @@ function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: (
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
-        ⚠️ No Safari captura cores de fundo, bordas e texto. Para imagens usa o <b>Chrome</b>.
+        ⚠️ No Safari a precisão é limitada. Para melhores resultados usa o <b>Chrome</b>.
       </div>
 
       {pos && (
@@ -291,7 +331,6 @@ export default function EyedropperLoupeOverlay() {
   useEffect(() => {
     if (!picker.active) return
 
-    // Chrome/Edge: usar EyeDropper nativo
     if (hasNativeEyeDropper()) {
       setUsingNative(true)
       setUsingSafari(false)
@@ -321,14 +360,12 @@ export default function EyedropperLoupeOverlay() {
       return () => tooltip.remove()
     }
 
-    // Safari: usar fallback simples
     if (isSafari()) {
       setUsingSafari(true)
       setUsingNative(false)
       return
     }
 
-    // Outros browsers: usar html2canvas
     setUsingNative(false)
     setUsingSafari(false)
   }, [picker.active, picker.onPick, closePicker])
@@ -354,7 +391,8 @@ export default function EyedropperLoupeOverlay() {
   function getSamplePoint(x: number, y: number) {
     const r = rectRef.current || updateRect()
     if (!r) return null
-    return clampToRect(x, y, r)
+    return clampToRect(x
+, y, r)
   }
 
   function isInsidePreview(x: number, y: number): boolean {
@@ -461,7 +499,6 @@ export default function EyedropperLoupeOverlay() {
     }
   }, [picker.active, usingNative, usingSafari, dpr])
 
-  // Se Safari, renderiza o componente simplificado
   if (picker.active && usingSafari) {
     return <SafariEyedropper picker={picker} closePicker={closePicker} />
   }
