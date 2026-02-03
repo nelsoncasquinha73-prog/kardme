@@ -32,6 +32,20 @@ type Block = {
   style?: any
 }
 
+type DecorationItem = {
+  id: string
+  src: string
+  alt?: string
+  x: number
+  y: number
+  width: number
+  height: number
+  rotation: number
+  opacity: number
+  zIndex: number
+  enabled: boolean
+}
+
 type Props = {
   card: Card
   blocks: Block[]
@@ -43,6 +57,8 @@ type Props = {
   showTranslations?: boolean
   fullBleed?: boolean
   cardBg?: any
+  themeDecorations?: DecorationItem[]
+  onPatchThemeDeco?: (id: string, patch: Partial<DecorationItem>) => void
 }
 
 function toPx(v: any) {
@@ -79,6 +95,64 @@ function mapHeadingAlignToItems(align?: 'left' | 'center' | 'right') {
   return 'center'
 }
 
+function ThemeDecorationsLayer({
+  decorations,
+  activeDecoId,
+  onSelectDeco,
+  isEditing,
+}: {
+  decorations: DecorationItem[]
+  activeDecoId?: string | null
+  onSelectDeco?: (id: string | null) => void
+  isEditing?: boolean
+}) {
+  const enabledDecos = decorations.filter((d) => d.enabled !== false && d.src)
+
+  if (enabledDecos.length === 0) return null
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: isEditing ? 'auto' : 'none',
+        userSelect: 'none',
+        zIndex: 10,
+        overflow: 'hidden',
+      }}
+    >
+      {enabledDecos.map((deco) => (
+        <img
+          key={deco.id}
+          src={deco.src}
+          alt={deco.alt || ''}
+          draggable={false}
+          onClick={(e) => {
+            if (!isEditing) return
+            e.stopPropagation()
+            onSelectDeco?.(deco.id)
+          }}
+          style={{
+            position: 'absolute',
+            left: `${deco.x}%`,
+            top: `${deco.y}%`,
+            width: deco.width,
+            height: deco.height,
+            transform: `translate(-50%, -50%) rotate(${deco.rotation || 0}deg)`,
+            opacity: deco.opacity ?? 1,
+            zIndex: deco.zIndex ?? 1,
+            pointerEvents: isEditing ? 'auto' : 'none',
+            cursor: isEditing ? 'pointer' : 'default',
+            outline: activeDecoId === deco.id ? '2px solid var(--color-primary)' : 'none',
+            outlineOffset: 2,
+            borderRadius: 4,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export default function CardPreview({
   card,
   blocks,
@@ -90,6 +164,8 @@ export default function CardPreview({
   showTranslations = true,
   fullBleed = false,
   cardBg,
+  themeDecorations,
+  onPatchThemeDeco,
 }: Props) {
   const headerBlock = blocks?.find((b) => b.type === 'header')
   const isOverlap = headerBlock?.settings?.layout?.avatarDock !== 'inline'
@@ -97,13 +173,15 @@ export default function CardPreview({
   const safe = fullBleed ? 0 : Number(card?.theme?.layout?.safePadding ?? 10)
 
   const bgRaw = (cardBg ?? card?.theme?.background)
-const bgV1 = migrateCardBg(bgRaw)
+  const bgV1 = migrateCardBg(bgRaw)
   const bg = migrateCardBg((cardBg ?? card?.theme?.background))
+
+  const allThemeDecorations: DecorationItem[] = themeDecorations ?? card?.theme?.decorations ?? []
+  const isEditingThemeDecos = !activeBlockId && !!onSelectDeco
 
   const handleMainClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement
 
-    // Track links
     if (target.closest('a')) {
       const link = target.closest('a') as HTMLAnchorElement
       const href = link.getAttribute('href') || ''
@@ -111,7 +189,6 @@ const bgV1 = migrateCardBg(bgRaw)
       trackEvent(card.id, 'click', key)
     }
 
-    // Track buttons (exceto submit do form)
     if (target.closest('button')) {
       const btn = target.closest('button') as HTMLButtonElement
       if (btn.type !== 'submit') {
@@ -124,14 +201,12 @@ const bgV1 = migrateCardBg(bgRaw)
   return (
     <CardBackground
       bg={bg}
-      style={
-        {
-          minHeight: '100dvh',
-          padding: 0,
-          borderRadius: 0,
-          width: '100%',
-        } as React.CSSProperties
-      }
+      style={{
+        minHeight: '100dvh',
+        padding: 0,
+        borderRadius: 0,
+        width: '100%',
+      } as React.CSSProperties}
     >
       {showTranslations && (
         <div
@@ -170,7 +245,15 @@ const bgV1 = migrateCardBg(bgRaw)
             boxShadow: fullBleed ? 'none' : '0 30px 80px rgba(0,0,0,0.25)',
           }}
         >
-          {/* DECORATIONS */}
+          {allThemeDecorations.length > 0 && (
+            <ThemeDecorationsLayer
+              decorations={allThemeDecorations}
+              activeDecoId={activeDecoId}
+              onSelectDeco={onSelectDeco}
+              isEditing={isEditingThemeDecos}
+            />
+          )}
+
           {blocks
             ?.filter((block) => block.type === 'decorations')
             .map((block) => {
@@ -218,7 +301,6 @@ const bgV1 = migrateCardBg(bgRaw)
               )
             })}
 
-          {/* HEADER */}
           {headerBlock ? (
             <div
               style={{
@@ -249,7 +331,6 @@ const bgV1 = migrateCardBg(bgRaw)
             </div>
           ) : null}
 
-          {/* OUTROS BLOCOS */}
           <div
             style={{
               display: 'flex',
@@ -272,36 +353,31 @@ const bgV1 = migrateCardBg(bgRaw)
                     ? mapHeadingAlignToItems(block.style?.headingAlign)
                     : undefined
 
-            
+                const c = block.style?.container || {}
+                const containerEnabled = c.enabled !== false
 
-
-const c = block.style?.container || {}
-const containerEnabled = c.enabled !== false
-
-const wrapStyle: React.CSSProperties = {
-  position: 'relative',
-  zIndex: z,
-  cursor: onSelectBlock ? 'pointer' : 'default',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems,
-  ...blockOuterSpacingFromJson(block.style),
-  background: containerEnabled ? (c.bgColor ?? 'transparent') : 'transparent',
-  borderRadius: c.radius != null ? c.radius : 18,
-  padding: c.padding != null ? c.padding : undefined,
-  border:
-    (c.borderWidth ?? 0) > 0
-      ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}`
-      : undefined,
-  boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
-  boxSizing: 'border-box',
-  width: c.widthMode === 'custom' && c.customWidthPx ? `${c.customWidthPx}px` : undefined,
-  maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
-  alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
-  marginTop: block.style?.offsetY ? `${block.style.offsetY}px` : undefined,
-}
-
-
+                const wrapStyle: React.CSSProperties = {
+                  position: 'relative',
+                  zIndex: z,
+                  cursor: onSelectBlock ? 'pointer' : 'default',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems,
+                  ...blockOuterSpacingFromJson(block.style),
+                  background: containerEnabled ? (c.bgColor ?? 'transparent') : 'transparent',
+                  borderRadius: c.radius != null ? c.radius : 18,
+                  padding: c.padding != null ? c.padding : undefined,
+                  border:
+                    (c.borderWidth ?? 0) > 0
+                      ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}`
+                      : undefined,
+                  boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+                  boxSizing: 'border-box',
+                  width: c.widthMode === 'custom' && c.customWidthPx ? `${c.customWidthPx}px` : undefined,
+                  maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
+                  alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
+                  marginTop: block.style?.offsetY ? `${block.style.offsetY}px` : undefined,
+                }
 
                 const Highlight = selected ? (
                   <div
@@ -314,7 +390,6 @@ const wrapStyle: React.CSSProperties = {
                     }}
                   />
                 ) : null
-
                 return (
                   <div
                     key={block.id}

@@ -17,9 +17,11 @@ import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/Busin
 import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBlockEditor'
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
+import ThemeDecorationsEditor from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import { supabase } from '@/lib/supabaseClient'
 import type { CardBgV1 } from '@/lib/cardBg'
+import type { DecorationItem } from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 
 type CardBlock = {
   id: string
@@ -50,6 +52,8 @@ type Props = {
   onEditingChange?: (isEditing: boolean) => void
   floatingActions?: any
   onChangeFloatingActions?: (settings: any) => void
+  themeDecorations?: DecorationItem[]
+  onChangeThemeDecorations?: (decorations: DecorationItem[]) => void
 }
 
 function isFormEl(el: HTMLElement | null) {
@@ -78,6 +82,8 @@ export default function ThemePageClientRight({
   onEditingChange,
   floatingActions,
   onChangeFloatingActions,
+  themeDecorations,
+  onChangeThemeDecorations,
 }: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const [templateSaving, setTemplateSaving] = useState(false)
@@ -92,7 +98,6 @@ export default function ThemePageClientRight({
     }
     checkAdmin()
   }, [])
-
 
   const handleSaveAsTemplate = async (data: {
     name: string
@@ -202,36 +207,23 @@ export default function ThemePageClientRight({
         </div>
       </div>
 
-      <div style={{ padding: 12, overflow: 'auto' }}>
+      <div style={{ padding: 12, overflow: 'auto', flex: 1 }}>
         {!activeBlock && (
-          <FloatingActionsEditor
-            settings={floatingActions || {}}
-            onChange={(s) => onChangeFloatingActions?.(s)}
-          />
-        )}
-        {!activeBlock && (
-          <FloatingActionsEditor
-            settings={floatingActions || {}}
-            onChange={(s) => onChangeFloatingActions?.(s)}
-          />
-        )}
-        {!activeBlock && (
-          <FloatingActionsEditor
-            settings={floatingActions || {}}
-            onChange={(s) => onChangeFloatingActions?.(s)}
-          />
-        )}
-        {!activeBlock && (
-          <FloatingActionsEditor
-            settings={floatingActions || {}}
-            onChange={(s) => onChangeFloatingActions?.(s)}
-          />
-        )}
-        {!activeBlock && (
-          <FloatingActionsEditor
-            settings={floatingActions || {}}
-            onChange={(s) => onChangeFloatingActions?.(s)}
-          />
+          <>
+            <FloatingActionsEditor
+              settings={floatingActions || {}}
+              onChange={(s) => onChangeFloatingActions?.(s)}
+            />
+            <div style={{ marginTop: 16 }}>
+              <ThemeDecorationsEditor
+                cardId={card.id}
+                decorations={themeDecorations || []}
+                onChange={(d) => onChangeThemeDecorations?.(d)}
+                activeDecoId={activeDecoId}
+                onSelectDeco={onSelectDeco}
+              />
+            </div>
+          </>
         )}
 
         {activeBlock?.type === 'header' && (
@@ -387,7 +379,6 @@ export default function ThemePageClientRight({
             </p>
           )}
       </div>
-
       <div
         style={{
           padding: 12,

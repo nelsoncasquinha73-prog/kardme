@@ -10,6 +10,7 @@ import ThemePageClientRight from './ThemePageClientRight'
 import Toast from '@/components/Toast'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
 import { migrateCardBg, type CardBgV1 } from '@/lib/cardBg'
+import type { DecorationItem } from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 
 type CardBlock = {
   id: string
@@ -45,6 +46,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const [cardBg, setCardBg] = useState<CardBgV1>(() => {
     return migrateCardBg(card?.theme?.background)
   })
+
+  // Decorações do tema (independentes dos blocos)
+  const [themeDecorations, setThemeDecorations] = useState<DecorationItem[]>(
+    () => (card?.theme?.decorations as DecorationItem[]) ?? []
+  )
 
   const [toast, setToast] = useState<ToastType>(null)
 
@@ -126,9 +132,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
         }
       }
 
-      // 2) Atualizar tema do card
+      // 2) Atualizar tema do card (incluindo decorações)
       const nextTheme = structuredClone(localTheme || {})
       nextTheme.background = cardBg
+      nextTheme.decorations = themeDecorations
 
       const { error: themeError, data: themeData } = await supabase
         .from('cards')
@@ -142,7 +149,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
         setToast({ message: 'Erro ao guardar tema do cartão: ' + themeError.message, type: 'error' })
         return
       }
-
 
       // 3) Atualizar template APENAS se for um draft de template (admin a editar template)
       if (card?.is_template_draft && card?.template_id) {
@@ -237,6 +243,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           blocks={allBlocksSorted}
           selectedId={activeBlockId}
           onSelect={selectBlock}
+          onSelectTheme={() => setActiveBlockId(null)}
           onToggle={toggleBlockEnabled}
           onReorder={(next) => {
             setSaveStatus('dirty')
@@ -262,6 +269,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           onSelectBlock={selectBlock}
           activeDecoId={activeDecoId}
           onSelectDeco={setActiveDecoId}
+          themeDecorations={themeDecorations}
         />
 
         <ThemePageClientRight
@@ -294,6 +302,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
             nextTheme.floatingActions = settings
             setLocalTheme(nextTheme)
             setSaveStatus("dirty")
+          }}
+          themeDecorations={themeDecorations}
+          onChangeThemeDecorations={(decorations) => {
+            setThemeDecorations(decorations)
+            setSaveStatus('dirty')
           }}
         />
 

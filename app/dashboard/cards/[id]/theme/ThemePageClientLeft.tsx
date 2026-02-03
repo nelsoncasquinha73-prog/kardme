@@ -17,6 +17,7 @@ type Props = {
   blocks: CardBlock[]
   selectedId: string | null
   onSelect: (id: string) => void
+  onSelectTheme: () => void
   onToggle: (id: string, enabled: boolean) => void
   onReorder: (next: BlockItem[]) => void
   onDelete?: (id: string) => void
@@ -31,6 +32,7 @@ export default function ThemePageClientLeft({
   blocks,
   selectedId,
   onSelect,
+  onSelectTheme,
   onToggle,
   onReorder,
   onDelete,
@@ -81,6 +83,30 @@ export default function ThemePageClientLeft({
           }}
         >
           + Adicionar
+        </button>
+      </div>
+
+      {/* Botão Tema */}
+      <div style={{ padding: '12px 12px 0' }}>
+        <button
+          onClick={onSelectTheme}
+          style={{
+            width: '100%',
+            height: 44,
+            borderRadius: 14,
+            border: selectedId === null ? '2px solid var(--color-primary, #3b82f6)' : '1px solid rgba(0,0,0,0.12)',
+            background: selectedId === null ? 'rgba(59, 130, 246, 0.08)' : '#fff',
+            fontWeight: 800,
+            cursor: 'pointer',
+            color: selectedId === null ? 'var(--color-primary, #3b82f6)' : '#111827',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            fontSize: 14,
+          }}
+        >
+          🎨 Tema & Decorações
         </button>
       </div>
 

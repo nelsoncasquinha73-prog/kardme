@@ -4,6 +4,7 @@ import CardPreview from '@/components/theme/CardPreview'
 import CardContainer from '@/components/ui/CardContainer'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import type { CardBgV1 } from '@/lib/cardBg'
+import type { DecorationItem } from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 
 type CardBlock = {
   id: string
@@ -24,6 +25,8 @@ type Props = {
   onSelectBlock: (blockId: string) => void
   activeDecoId: string | null
   onSelectDeco: (decoId: string | null) => void
+  themeDecorations?: DecorationItem[]
+  onPatchThemeDeco?: (id: string, patch: Partial<DecorationItem>) => void
 }
 
 export default function ThemePageClientCenter({
@@ -35,6 +38,8 @@ export default function ThemePageClientCenter({
   onSelectBlock,
   activeDecoId,
   onSelectDeco,
+  themeDecorations,
+  onPatchThemeDeco,
 }: Props) {
   return (
     <main
@@ -75,16 +80,14 @@ export default function ThemePageClientCenter({
           />
 
           <div
-  style={{
-    borderRadius: 28,
-    overflow: 'hidden', // ✅ importante para o html2canvas
-    border: '1px solid rgba(0,0,0,0.08)',
-    minHeight: 680,
-    background: 'transparent',
-  }}
->
-
-
+            style={{
+              borderRadius: 28,
+              overflow: 'hidden',
+              border: '1px solid rgba(0,0,0,0.08)',
+              minHeight: 680,
+              background: 'transparent',
+            }}
+          >
             <div id="card-preview-root" style={{ minHeight: '100%' }}>
               <ThemeProvider theme={theme}>
                 <CardContainer variant="flat" hover={false}>
@@ -98,6 +101,8 @@ export default function ThemePageClientCenter({
                     showTranslations={false}
                     fullBleed
                     cardBg={cardBg}
+                    themeDecorations={themeDecorations}
+                    onPatchThemeDeco={onPatchThemeDeco}
                   />
                 </CardContainer>
               </ThemeProvider>
