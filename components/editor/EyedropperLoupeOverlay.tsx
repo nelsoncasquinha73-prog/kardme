@@ -8,7 +8,7 @@ type Pos = { x: number; y: number }
 
 function rgbToHex(r: number, g: number, b: number) {
   const toHex = (n: number) => n.toString(16).padStart(2, '0')
-  return `#\${toHex(r)}\${toHex(g)}\${toHex(b)}`.toUpperCase()
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
 }
 
 function parseRgb(str: string): { r: number; g: number; b: number } | null {
