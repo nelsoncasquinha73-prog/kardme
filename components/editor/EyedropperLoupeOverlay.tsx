@@ -8,13 +8,39 @@ type Pos = { x: number; y: number }
 
 function rgbToHex(r: number, g: number, b: number) {
   const toHex = (n: number) => n.toString(16).padStart(2, '0')
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
+  return `#\${toHex(r)}\${toHex(g)}\${toHex(b)}`.toUpperCase()
 }
 
 function parseRgb(str: string): { r: number; g: number; b: number } | null {
   const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
   if (!match) return null
   return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) }
+}
+
+function parseGradientColor(gradient: string): { r: number; g: number; b: number } | null {
+  // Tenta extrair a primeira cor de um gradiente CSS
+  const rgbMatch = gradient.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (rgbMatch) {
+    return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) }
+  }
+  // Tenta extrair cor hex
+  const hexMatch = gradient.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/)
+  if (hexMatch) {
+    const hex = hexMatch[1]
+    if (hex.length === 3) {
+      return {
+        r: parseInt(hex[0] + hex[0], 16),
+        g: parseInt(hex[1] + hex[1], 16),
+        b: parseInt(hex[2] + hex[2], 16),
+      }
+    }
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+    }
+  }
+  return null
 }
 
 function hasNativeEyeDropper(): boolean {
@@ -25,6 +51,12 @@ function isSafari(): boolean {
   if (typeof navigator === 'undefined') return false
   const ua = navigator.userAgent.toLowerCase()
   return ua.includes('safari') && !ua.includes('chrome') && !ua.includes('chromium')
+}
+
+function isValidColor(rgb: { r: number; g: number; b: number } | null): boolean {
+  if (!rgb) return false
+  // Ignora preto puro e branco puro em alguns casos
+  return true
 }
 
 // ============ SAFARI FALLBACK COMPONENT ============
@@ -44,25 +76,69 @@ function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: (
     const elements = document.elementsFromPoint(x, y)
     
     for (const element of elements) {
-      if ((element as HTMLElement).dataset?.eyedropperOverlay) continue
-      if ((element as HTMLElement).dataset?.noBlockSelect) continue
+      const el = element as HTMLElement
       
-      const computed = window.getComputedStyle(element as HTMLElement)
+      // Ignora elementos do overlay
+      if (el.dataset?.eyedropperOverlay) continue
+      if (el.dataset?.noBlockSelect) continue
+      if (el.tagName === 'BUTTON') continue
       
-      // Verifica background-color
+      const computed = window.getComputedStyle(el)
+      
+      // 1. Verifica background-color
       const bgColor = computed.backgroundColor
       if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
         const rgb = parseRgb(bgColor)
-        if (rgb && (rgb.r !== 0 || rgb.g !== 0 || rgb.b !== 0 || bgColor.includes('255'))) {
+        if (rgb && isValidColor(rgb)) {
           return rgbToHex(rgb.r, rgb.g, rgb.b)
         }
       }
 
-      // Verifica cor do texto
+      // 2. Verifica background-image (gradientes)
+      const bgImage = computed.backgroundImage
+      if (bgImage && bgImage !== 'none') {
+        const rgb = parseGradientColor(bgImage)
+        if (rgb && isValidColor(rgb)) {
+          return rgbToHex(rgb.r, rgb.g, rgb.b)
+        }
+      }
+
+      // 3. Verifica border-color
+      const borderColor = computed.borderTopColor || computed.borderColor
+      if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
+        const rgb = parseRgb(borderColor)
+        if (rgb && isValidColor(rgb)) {
+          return rgbToHex(rgb.r, rgb.g, rgb.b)
+        }
+      }
+
+      // 4. Verifica SVG fill
+      if (el.tagName === 'svg' || el.closest('svg')) {
+        const fill = computed.fill || el.getAttribute('fill')
+        if (fill && fill !== 'none') {
+          const rgb = parseRgb(fill) || parseGradientColor(fill)
+          if (rgb && isValidColor(rgb)) {
+            return rgbToHex(rgb.r, rgb.g, rgb.b)
+          }
+        }
+      }
+
+      // 5. Verifica cor do texto (se tiver texto visível)
       const textColor = computed.color
-      if (textColor && element.textContent?.trim()) {
+      if (textColor && el.textContent?.trim()) {
         const rgb = parseRgb(textColor)
-        if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+        if (rgb && isValidColor(rgb)) {
+          return rgbToHex(rgb.r, rgb.g, rgb.b)
+        }
+      }
+
+      // 6. Verifica box-shadow (extrai cor)
+      const boxShadow = computed.boxShadow
+      if (boxShadow && boxShadow !== 'none') {
+        const rgb = parseRgb(boxShadow)
+        if (rgb && isValidColor(rgb)) {
+          return rgbToHex(rgb.r, rgb.g, rgb.b)
+        }
       }
     }
 
@@ -147,7 +223,7 @@ function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: (
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
-        ⚠️ No Safari só captura cores de fundo. Para todas as cores usa o <b>Chrome</b>.
+        ⚠️ No Safari captura cores de fundo, bordas e texto. Para imagens usa o <b>Chrome</b>.
       </div>
 
       {pos && (
