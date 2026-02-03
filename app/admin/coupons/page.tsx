@@ -58,6 +58,8 @@ const labelStyle: React.CSSProperties = {
 }
 
 const inputStyle: React.CSSProperties = {
+  color: '#111827',
+  background: '#fff',
   padding: '10px 14px',
   borderRadius: 10,
   border: '1px solid #d1d5db',
@@ -267,7 +269,7 @@ export default function CouponsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <label style={labelStyle}>
                 <span>Código *</span>
-                <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex: GRATIS100" style={inputStyle} />
+                <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex: GRATIS100" style={{...inputStyle, color: "#111827"}} />
               </label>
 
               <label style={labelStyle}>
