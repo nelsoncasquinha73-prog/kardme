@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
-import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2 } from 'react-icons/fi'
+import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag } from 'react-icons/fi'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -61,6 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
     { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
     { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
+    { label: '🎟️ Cupões', href: '/admin/coupons', icon: FiTag },
     { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
   ] : [
     { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
