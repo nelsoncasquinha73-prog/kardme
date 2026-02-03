@@ -11,6 +11,12 @@ function rgbToHex(r: number, g: number, b: number) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
 }
 
+function parseRgb(str: string): { r: number; g: number; b: number } | null {
+  const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (!match) return null
+  return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) }
+}
+
 function hasNativeEyeDropper(): boolean {
   return typeof window !== 'undefined' && 'EyeDropper' in window
 }
@@ -21,6 +27,173 @@ function isSafari(): boolean {
   return ua.includes('safari') && !ua.includes('chrome') && !ua.includes('chromium')
 }
 
+// ============ SAFARI FALLBACK COMPONENT ============
+function SafariEyedropper({ picker, closePicker }: { picker: any; closePicker: () => void }) {
+  const [pos, setPos] = useState<Pos | null>(null)
+  const [hex, setHex] = useState('#FFFFFF')
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closePicker()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [closePicker])
+
+  function getColorAtPoint(x: number, y: number): string {
+    const elements = document.elementsFromPoint(x, y)
+    
+    for (const element of elements) {
+      if ((element as HTMLElement).dataset?.eyedropperOverlay) continue
+      if ((element as HTMLElement).dataset?.noBlockSelect) continue
+      
+      const computed = window.getComputedStyle(element as HTMLElement)
+      
+      // Verifica background-color
+      const bgColor = computed.backgroundColor
+      if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+        const rgb = parseRgb(bgColor)
+        if (rgb && (rgb.r !== 0 || rgb.g !== 0 || rgb.b !== 0 || bgColor.includes('255'))) {
+          return rgbToHex(rgb.r, rgb.g, rgb.b)
+        }
+      }
+
+      // Verifica cor do texto
+      const textColor = computed.color
+      if (textColor && element.textContent?.trim()) {
+        const rgb = parseRgb(textColor)
+        if (rgb) return rgbToHex(rgb.r, rgb.g, rgb.b)
+      }
+    }
+
+    return '#FFFFFF'
+  }
+
+  function updateFromClient(x: number, y: number) {
+    setPos({ x, y })
+    const color = getColorAtPoint(x, y)
+    setHex(color)
+  }
+
+  function pickAtClient(x: number, y: number) {
+    const color = getColorAtPoint(x, y)
+    picker.onPick?.(color)
+    closePicker()
+  }
+
+  return (
+    <>
+      <div
+        data-eyedropper-overlay="1"
+        data-no-block-select="1"
+        onPointerMove={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          updateFromClient(e.clientX, e.clientY)
+        }}
+        onPointerUp={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          pickAtClient(e.clientX, e.clientY)
+        }}
+        onPointerDown={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          cursor: 'crosshair',
+          zIndex: 9999,
+          background: 'transparent',
+          touchAction: 'none',
+        }}
+      />
+
+      <button
+        onClick={() => closePicker()}
+        style={{
+          position: 'fixed',
+          top: 16,
+          right: 16,
+          zIndex: 10001,
+          padding: '8px 16px',
+          borderRadius: 8,
+          border: 'none',
+          background: 'rgba(0,0,0,0.8)',
+          color: '#fff',
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: 'pointer',
+        }}
+      >
+        ✕ Cancelar (ESC)
+      </button>
+
+      <div
+        style={{
+          position: 'fixed',
+          top: 60,
+          right: 16,
+          zIndex: 10001,
+          padding: '10px 14px',
+          borderRadius: 10,
+          background: 'rgba(245, 158, 11, 0.95)',
+          color: '#fff',
+          fontSize: 12,
+          fontWeight: 500,
+          maxWidth: 220,
+          lineHeight: 1.4,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        }}
+      >
+        ⚠️ No Safari só captura cores de fundo. Para todas as cores usa o <b>Chrome</b>.
+      </div>
+
+      {pos && (
+        <div
+          style={{
+            position: 'fixed',
+            left: pos.x + 20,
+            top: pos.y + 20,
+            zIndex: 10000,
+            pointerEvents: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: hex,
+              border: '3px solid rgba(255,255,255,0.9)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(0,0,0,0.1)',
+            }}
+          />
+          <div
+            style={{
+              padding: '4px 10px',
+              borderRadius: 6,
+              background: 'rgba(0,0,0,0.85)',
+              color: '#fff',
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+            }}
+          >
+            {hex}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ============ MAIN COMPONENT ============
 export default function EyedropperLoupeOverlay() {
   const { picker, closePicker } = useColorPicker()
 
@@ -35,32 +208,27 @@ export default function EyedropperLoupeOverlay() {
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [usingNative, setUsingNative] = useState(false)
-  const [showSafariWarning, setShowSafariWarning] = useState(false)
+  const [usingSafari, setUsingSafari] = useState(false)
 
   const dpr = useMemo(() => (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1), [])
 
   useEffect(() => {
     if (!picker.active) return
 
+    // Chrome/Edge: usar EyeDropper nativo
     if (hasNativeEyeDropper()) {
       setUsingNative(true)
+      setUsingSafari(false)
       
       const tooltip = document.createElement('div')
       tooltip.id = 'eyedropper-tooltip'
       tooltip.innerHTML = '🎨 Clica para escolher cor · <b>ESC</b> para sair'
-      tooltip.style.position = 'fixed'
-      tooltip.style.bottom = '24px'
-      tooltip.style.left = '50%'
-      tooltip.style.transform = 'translateX(-50%)'
-      tooltip.style.padding = '10px 18px'
-      tooltip.style.borderRadius = '10px'
-      tooltip.style.background = 'rgba(0,0,0,0.85)'
-      tooltip.style.color = '#fff'
-      tooltip.style.fontSize = '13px'
-      tooltip.style.fontWeight = '500'
-      tooltip.style.zIndex = '99999'
-      tooltip.style.pointerEvents = 'none'
-      tooltip.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)'
+      tooltip.style.cssText = `
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        padding: 10px 18px; border-radius: 10px; background: rgba(0,0,0,0.85);
+        color: #fff; font-size: 13px; font-weight: 500; z-index: 99999;
+        pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      `
       document.body.appendChild(tooltip)
       
       // @ts-expect-error - EyeDropper API
@@ -71,25 +239,22 @@ export default function EyedropperLoupeOverlay() {
           picker.onPick?.(result.sRGBHex.toUpperCase())
           closePicker()
         })
-        .catch((err: Error) => {
-          console.log('EyeDropper cancelled or error:', err.message)
-          closePicker()
-        })
-        .finally(() => {
-          tooltip.remove()
-        })
+        .catch(() => closePicker())
+        .finally(() => tooltip.remove())
       
-      return () => {
-        tooltip.remove()
-      }
+      return () => tooltip.remove()
     }
 
-    // Fallback - mostrar aviso no Safari
+    // Safari: usar fallback simples
     if (isSafari()) {
-      setShowSafariWarning(true)
+      setUsingSafari(true)
+      setUsingNative(false)
+      return
     }
 
+    // Outros browsers: usar html2canvas
     setUsingNative(false)
+    setUsingSafari(false)
   }, [picker.active, picker.onPick, closePicker])
 
   function getPreviewEl() {
@@ -123,16 +288,16 @@ export default function EyedropperLoupeOverlay() {
   }
 
   useEffect(() => {
-    if (!picker.active || usingNative) return
+    if (!picker.active || usingNative || usingSafari) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closePicker()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [picker.active, usingNative, closePicker])
+  }, [picker.active, usingNative, usingSafari, closePicker])
 
   useEffect(() => {
-    if (!picker.active || usingNative) return
+    if (!picker.active || usingNative || usingSafari) return
 
     let cancelled = false
 
@@ -142,7 +307,6 @@ export default function EyedropperLoupeOverlay() {
 
       const target = getPreviewEl()
       if (!target) {
-        console.warn('Eyedropper: falta #preview-hitbox')
         setError('Preview não encontrado')
         setReady(true)
         return
@@ -156,7 +320,6 @@ export default function EyedropperLoupeOverlay() {
       }
 
       try {
-        // Configurações melhoradas para html2canvas
         const shot = await html2canvas(target, {
           backgroundColor: '#ffffff',
           scale: dpr,
@@ -166,23 +329,6 @@ export default function EyedropperLoupeOverlay() {
           foreignObjectRendering: true,
           imageTimeout: 5000,
           removeContainer: true,
-          onclone: (clonedDoc) => {
-            // Forçar cores de fundo em elementos que possam estar transparentes
-            const clonedTarget = clonedDoc.getElementById('preview-hitbox')
-            if (clonedTarget) {
-              const allElements = clonedTarget.querySelectorAll('*')
-              allElements.forEach((el) => {
-                const htmlEl = el as HTMLElement
-                const computed = window.getComputedStyle(htmlEl)
-                // Se o background for transparente, não fazer nada especial
-                // mas garantir que imagens são carregadas
-                if (htmlEl.tagName === 'IMG') {
-                  const img = htmlEl as HTMLImageElement
-                  img.crossOrigin = 'anonymous'
-                }
-              })
-            }
-          },
         })
 
         if (cancelled) return
@@ -219,9 +365,7 @@ export default function EyedropperLoupeOverlay() {
 
     function scheduleCapture() {
       if (captureTimerRef.current) window.clearTimeout(captureTimerRef.current)
-      captureTimerRef.current = window.setTimeout(() => {
-        capturePreview()
-      }, 90)
+      captureTimerRef.current = window.setTimeout(() => capturePreview(), 90)
     }
 
     const rect = updateRect()
@@ -236,11 +380,15 @@ export default function EyedropperLoupeOverlay() {
     return () => {
       cancelled = true
       if (captureTimerRef.current) window.clearTimeout(captureTimerRef.current)
-      captureTimerRef.current = null
       scroller?.removeEventListener('scroll', scheduleCapture)
       window.removeEventListener('resize', scheduleCapture)
     }
-  }, [picker.active, usingNative, dpr])
+  }, [picker.active, usingNative, usingSafari, dpr])
+
+  // Se Safari, renderiza o componente simplificado
+  if (picker.active && usingSafari) {
+    return <SafariEyedropper picker={picker} closePicker={closePicker} />
+  }
 
   if (!picker.active || usingNative) return null
 
@@ -267,8 +415,7 @@ export default function EyedropperLoupeOverlay() {
     try {
       const data = ctx.getImageData(x, y, 1, 1).data
       return { r: data[0], g: data[1], b: data[2] }
-    } catch (err) {
-      console.error('getPixelCss error:', err)
+    } catch {
       return null
     }
   }
@@ -285,13 +432,11 @@ export default function EyedropperLoupeOverlay() {
 
     const size = out.width
     const zoom = 10
-
     const sample = Math.round(size / zoom)
     const sampleSize = Math.max(9, sample % 2 === 0 ? sample + 1 : sample)
 
     let sx = local.lx - Math.floor(sampleSize / 2)
     let sy = local.ly - Math.floor(sampleSize / 2)
-
     sx = Math.max(0, Math.min(sx, src.width - sampleSize))
     sy = Math.max(0, Math.min(sy, src.height - sampleSize))
 
@@ -313,7 +458,6 @@ export default function EyedropperLoupeOverlay() {
     if (!sp) return
 
     drawLoupe(sp.x, sp.y)
-
     const p = getPixelCss(sp.x, sp.y)
     if (p) setHex(rgbToHex(p.r, p.g, p.b))
   }
@@ -340,9 +484,6 @@ export default function EyedropperLoupeOverlay() {
     closePicker()
   }
 
-  function handleCancel() {
-    closePicker()
-  }
   return (
     <>
       <div
@@ -373,7 +514,7 @@ export default function EyedropperLoupeOverlay() {
       />
 
       <button
-        onClick={handleCancel}
+        onClick={() => closePicker()}
         style={{
           position: 'fixed',
           top: 16,
@@ -392,33 +533,11 @@ export default function EyedropperLoupeOverlay() {
         ✕ Cancelar (ESC)
       </button>
 
-      {showSafariWarning && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 60,
-            right: 16,
-            zIndex: 10001,
-            padding: '10px 14px',
-            borderRadius: 10,
-            background: 'rgba(245, 158, 11, 0.95)',
-            color: '#fff',
-            fontSize: 12,
-            fontWeight: 500,
-            maxWidth: 220,
-            lineHeight: 1.4,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          }}
-        >
-          ⚠️ O eyedropper funciona melhor no <b>Chrome</b>. No Safari pode não capturar todas as cores corretamente.
-        </div>
-      )}
-
       {error && (
         <div
           style={{
             position: 'fixed',
-            top: showSafariWarning ? 140 : 60,
+            top: 60,
             right: 16,
             zIndex: 10001,
             padding: '8px 12px',
