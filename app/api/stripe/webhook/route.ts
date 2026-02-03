@@ -32,15 +32,12 @@ export async function POST(req: Request) {
       if (purchaseType === 'pro_subscription') {
         const userId = session.metadata?.user_id
         const billing = session.metadata?.billing
-
         const subscriptionId = session.subscription as string | null
         const customerId = session.customer as string | null
 
         if (userId && subscriptionId && customerId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId)
-
-          const plan =
-            billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
+          const plan = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
 
           await supabaseAdmin.from('user_subscriptions').upsert({
             user_id: userId,
@@ -60,7 +57,6 @@ export async function POST(req: Request) {
 
         if (orderId && session.payment_status === 'paid') {
           const shipping = (session as any).shipping_details
-
           const addr = shipping?.address
 
           await supabaseAdmin
@@ -81,7 +77,6 @@ export async function POST(req: Request) {
             })
             .eq('id', orderId)
 
-          // Enable NFC on all cards in this order
           const { data: items } = await supabaseAdmin
             .from('nfc_order_items')
             .select('card_id')
@@ -101,9 +96,44 @@ export async function POST(req: Request) {
           }
         }
       }
+
+      if (purchaseType === 'template_purchase') {
+        const templateId = session.metadata?.template_id
+        const userId = session.metadata?.user_id
+        const couponId = session.metadata?.coupon_id
+        const originalPrice = session.metadata?.original_price
+        const finalPrice = session.metadata?.final_price
+
+        if (userId && templateId && session.payment_status === 'paid') {
+          await supabaseAdmin.from('user_templates').upsert({
+            user_id: userId,
+            template_id: templateId,
+          })
+
+          if (couponId) {
+            const { data: coupon } = await supabaseAdmin
+              .from('coupons')
+              .select('uses_count')
+              .eq('id', couponId)
+              .single()
+
+            await supabaseAdmin
+              .from('coupons')
+              .update({ uses_count: (coupon?.uses_count || 0) + 1 })
+              .eq('id', couponId)
+
+            await supabaseAdmin.from('coupon_uses').insert({
+              coupon_id: couponId,
+              user_id: userId,
+              template_id: templateId,
+              original_price: parseFloat(originalPrice || '0'),
+              final_price: parseFloat(finalPrice || '0'),
+            })
+          }
+        }
+      }
     }
 
-    // Keep subscription table in sync
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||

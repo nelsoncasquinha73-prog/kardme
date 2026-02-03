@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 
 import TemplateMiniPreview from "@/components/catalog/TemplateMiniPreview"
+
 type Template = {
   id: string
   name: string
@@ -22,7 +23,6 @@ type Template = {
   is_active: boolean | null
   created_at?: string | null
 }
-
 
 type PriceFilter = 'all' | 'free' | 'premium'
 
@@ -42,7 +42,6 @@ function priceLabelFor(t: Template) {
   if (t.pricing_tier === 'free') return 'Grátis'
   if (t.pricing_tier === 'paid') return 'Incluído no Plano'
   if (t.pricing_tier === 'premium') return eur(t.price)
-  // fallback legacy
   return isFree(t) ? 'Grátis' : eur(t.price)
 }
 
@@ -50,46 +49,41 @@ function isFree(t: Template) {
   return t.pricing_tier === 'free' || t.pricing_tier === 'paid'
 }
 
-
 function themeToCssBackground(theme: any): string | null {
   if (!theme) return null
-
-  // Caso 1: background é string direta
   if (typeof theme.background === 'string' && theme.background.trim()) {
     return theme.background
   }
-
-  // Caso 2: colors.background é string
   const colorsBg = theme?.colors?.background
   if (typeof colorsBg === 'string' && colorsBg.trim()) {
     return colorsBg
   }
-
-  // Caso 3: background.base é um gradiente
   const base = theme?.background?.base
   if (base?.kind === 'gradient' && Array.isArray(base.stops) && base.stops.length >= 2) {
     const angle = typeof base.angle === 'number' ? base.angle : 135
     const stops = base.stops
       .filter((s: any) => typeof s?.color === 'string')
       .map((s: any) => {
-        const pos = typeof s.pos === 'number' ? `\${s.pos}%` : ''
+        const pos = typeof s.pos === 'number' ? `${s.pos}%` : ''
         return `${s.color}${pos ? ` ${pos}` : ''}`
       })
       .join(', ')
     if (stops) {
-      return `linear-gradient(\${angle}deg, \${stops})`
+      return `linear-gradient(${angle}deg, ${stops})`
     }
   }
-
   return null
 }
 
 export default function CatalogPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [templates, setTemplates] = useState<Template[]>([])
+  const [ownedTemplates, setOwnedTemplates] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<string>('all')
@@ -97,9 +91,28 @@ export default function CatalogPage() {
 
   const [creatingTemplateId, setCreatingTemplateId] = useState<string | null>(null)
 
-  const loadTemplates = async () => {
+  // Checkout modal
+  const [checkoutTemplate, setCheckoutTemplate] = useState<Template | null>(null)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle')
+  const [couponDiscount, setCouponDiscount] = useState<{ type: string; value: number } | null>(null)
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (searchParams.get('success') === '1') {
+      setSuccessMessage('Template comprado com sucesso! Já podes usá-lo.')
+      loadData()
+    }
+  }, [searchParams])
+
+  const loadData = async () => {
     setLoading(true)
     setError(null)
+
+    const { data: authData } = await supabase.auth.getUser()
+    const uid = authData?.user?.id || null
+    setUserId(uid)
 
     const { data, error } = await supabase
       .from('templates')
@@ -115,11 +128,23 @@ export default function CatalogPage() {
     }
 
     setTemplates((data || []) as Template[])
+
+    if (uid) {
+      const { data: owned } = await supabase
+        .from('user_templates')
+        .select('template_id')
+        .eq('user_id', uid)
+
+      if (owned) {
+        setOwnedTemplates(new Set(owned.map((o: any) => o.template_id)))
+      }
+    }
+
     setLoading(false)
   }
 
   useEffect(() => {
-    loadTemplates()
+    loadData()
   }, [])
 
   const categories = useMemo(() => {
@@ -132,27 +157,22 @@ export default function CatalogPage() {
   }, [templates])
 
   const filtered = useMemo(() => {
-  const q = query.trim().toLowerCase()
-  return templates.filter((t) => {
-    const name = (t.name || '').toLowerCase()
-    const desc = (t.description || '').toLowerCase()
-    const cat = (t.category || '').toLowerCase()
-
-    const matchesQuery = !q || name.includes(q) || desc.includes(q) || cat.includes(q)
-    const matchesCategory = category === 'all' ? true : (t.category || '') === category
-
-    const matchesPrice =
-  priceFilter === 'all'
-    ? true
-    : priceFilter === 'free'
-    ? t.pricing_tier === 'free' || t.pricing_tier === 'paid'
-    : t.pricing_tier === 'premium'
-
-
-    return matchesQuery && matchesCategory && matchesPrice
-  })
-}, [templates, query, category, priceFilter])
-
+    const q = query.trim().toLowerCase()
+    return templates.filter((t) => {
+      const name = (t.name || '').toLowerCase()
+      const desc = (t.description || '').toLowerCase()
+      const cat = (t.category || '').toLowerCase()
+      const matchesQuery = !q || name.includes(q) || desc.includes(q) || cat.includes(q)
+      const matchesCategory = category === 'all' ? true : (t.category || '') === category
+      const matchesPrice =
+        priceFilter === 'all'
+          ? true
+          : priceFilter === 'free'
+          ? t.pricing_tier === 'free' || t.pricing_tier === 'paid'
+          : t.pricing_tier === 'premium'
+      return matchesQuery && matchesCategory && matchesPrice
+    })
+  }, [templates, query, category, priceFilter])
 
   const createCardFromTemplate = async (t: Template) => {
     setCreatingTemplateId(t.id)
@@ -166,16 +186,16 @@ export default function CatalogPage() {
         return
       }
 
-      const userId = authData.user.id
+      const uid = authData.user.id
 
       const { data: newCard, error: cardErr } = await supabase
         .from('cards')
         .insert({
-          user_id: userId,
+          user_id: uid,
           name: t.name,
           slug: `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           template_id: t.id,
-          theme: t.theme_json, 
+          theme: t.theme_json,
         })
         .select('id')
         .single()
@@ -186,7 +206,7 @@ export default function CatalogPage() {
         return
       }
 
-      const cardId = newCard.id 
+      const cardId = newCard.id
 
       const blocks = Array.isArray(t.preview_json) ? t.preview_json : []
       if (blocks.length) {
@@ -208,11 +228,104 @@ export default function CatalogPage() {
         }
       }
 
-      router.push(`/dashboard/cards/${cardId}/theme`) 
+      router.push(`/dashboard/cards/${cardId}/theme`)
     } catch {
       setError('Erro ao criar cartão.')
       setCreatingTemplateId(null)
     }
+  }
+
+  const checkCoupon = async () => {
+    if (!couponCode.trim() || !checkoutTemplate) return
+
+    setCouponStatus('checking')
+    setCouponDiscount(null)
+
+    try {
+      const { data: coupon, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.toUpperCase().trim())
+        .eq('is_active', true)
+        .single()
+
+      if (error || !coupon) {
+        setCouponStatus('invalid')
+        return
+      }
+
+      if (coupon.valid_until && new Date(coupon.valid_until) < new Date()) {
+        setCouponStatus('invalid')
+        return
+      }
+
+      if (coupon.max_uses && coupon.uses_count >= coupon.max_uses) {
+        setCouponStatus('invalid')
+        return
+      }
+
+      if (coupon.template_id && coupon.template_id !== checkoutTemplate.id) {
+        setCouponStatus('invalid')
+        return
+      }
+
+      setCouponStatus('valid')
+      setCouponDiscount({ type: coupon.discount_type, value: coupon.discount_value })
+    } catch {
+      setCouponStatus('invalid')
+    }
+  }
+
+  const getFinalPrice = () => {
+    if (!checkoutTemplate) return 0
+    const original = checkoutTemplate.price || 0
+    if (!couponDiscount) return original
+
+    if (couponDiscount.type === 'free') return 0
+    if (couponDiscount.type === 'percentage') return original * (1 - couponDiscount.value / 100)
+    if (couponDiscount.type === 'fixed') return Math.max(0, original - couponDiscount.value)
+    return original
+  }
+
+  const handleCheckout = async () => {
+    if (!checkoutTemplate || !userId) return
+
+    setCheckoutLoading(true)
+
+    try {
+      const res = await fetch('/api/stripe/checkout-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: checkoutTemplate.id,
+          userId,
+          couponCode: couponStatus === 'valid' ? couponCode.toUpperCase().trim() : null,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.free) {
+        setCheckoutTemplate(null)
+        setSuccessMessage('Template desbloqueado! Já podes usá-lo.')
+        loadData()
+      } else if (data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error || 'Erro no checkout')
+      }
+    } catch {
+      setError('Erro ao processar pagamento')
+    } finally {
+      setCheckoutLoading(false)
+    }
+  }
+
+  const openCheckout = (t: Template) => {
+    setCheckoutTemplate(t)
+    setCouponCode('')
+    setCouponStatus('idle')
+    setCouponDiscount(null)
   }
 
   return (
@@ -257,7 +370,7 @@ export default function CatalogPage() {
           <div>
             <h1 className="dashboard-title">Catálogo de templates</h1>
             <p className="dashboard-subtitle">
-              Explora templates ativos (grátis e premium). Premium: compra (em breve).
+              Explora templates ativos. Usa cupões para descontos!
             </p>
           </div>
 
@@ -265,11 +378,30 @@ export default function CatalogPage() {
             <Link className="btn-secondary" href="/dashboard">
               ← Voltar
             </Link>
-            <button className="btn-secondary" onClick={loadTemplates} disabled={loading}>
+            <button className="btn-secondary" onClick={loadData} disabled={loading}>
               {loading ? 'A atualizar…' : 'Recarregar'}
             </button>
           </div>
         </div>
+
+        {successMessage && (
+          <div
+            style={{
+              background: 'rgba(34,197,94,0.15)',
+              border: '1px solid rgba(34,197,94,0.3)',
+              borderRadius: 12,
+              padding: '12px 16px',
+              marginBottom: 16,
+              color: '#22c55e',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>✅ {successMessage}</span>
+            <button onClick={() => setSuccessMessage(null)} style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer' }}>✕</button>
+          </div>
+        )}
 
         {error && (
           <div
@@ -278,228 +410,166 @@ export default function CatalogPage() {
               border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12,
               padding: '12px 16px',
-              color: 'rgba(252,165,165,0.95)',
-              fontSize: 13,
               marginBottom: 16,
+              color: '#ef4444',
             }}
           >
             {error}
           </div>
         )}
 
-        <div
-          style={{
-            marginTop: 18,
-            display: 'grid',
-            gridTemplateColumns: '1fr 220px 180px auto',
-            gap: 12,
-            alignItems: 'center',
-          }}
-        >
+        <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
           <input
+            type="text"
+            placeholder="Pesquisar..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar por nome, categoria, descrição…"
             style={{
-              width: '100%',
-              height: 42,
-              padding: '0 12px',
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.15)',
+              flex: 1,
+              minWidth: 180,
+              padding: '10px 14px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.1)',
               background: 'rgba(255,255,255,0.05)',
-              color: 'rgba(255,255,255,0.92)',
-              fontSize: 13,
+              color: '#fff',
+              fontSize: 14,
             }}
           />
-
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
-              height: 42,
-              padding: '0 12px',
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.15)',
+              padding: '10px 14px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.1)',
               background: 'rgba(255,255,255,0.05)',
-              color: 'rgba(255,255,255,0.92)',
-              fontSize: 13,
-              cursor: 'pointer',
+              color: '#fff',
+              fontSize: 14,
             }}
           >
             {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === 'all' ? 'Todas as categorias' : c}
+              <option key={c} value={c} style={{ background: '#1a1a2e' }}>
+                {c === 'all' ? 'Todas categorias' : c}
               </option>
             ))}
           </select>
-
           <select
             value={priceFilter}
             onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
             style={{
-              height: 42,
-              padding: '0 12px',
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.15)',
+              padding: '10px 14px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.1)',
               background: 'rgba(255,255,255,0.05)',
-              color: 'rgba(255,255,255,0.92)',
-              fontSize: 13,
-              cursor: 'pointer',
+              color: '#fff',
+              fontSize: 14,
             }}
           >
-            <option value="all">Todos</option>
-            <option value="free">Grátis</option>
-            <option value="premium">Premium</option>
+            <option value="all" style={{ background: '#1a1a2e' }}>Todos preços</option>
+            <option value="free" style={{ background: '#1a1a2e' }}>Grátis</option>
+            <option value="premium" style={{ background: '#1a1a2e' }}>Premium</option>
           </select>
-
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', padding: '0 12px' }}>
-            {filtered.length} / {templates.length}
-          </div>
         </div>
 
         {loading ? (
-          <p style={{ padding: 24 }}>A carregar templates…</p>
+          <p style={{ color: 'rgba(255,255,255,0.6)' }}>A carregar templates...</p>
         ) : filtered.length === 0 ? (
-          <div className="empty" style={{ marginTop: 48, textAlign: 'center', padding: 32 }}>
-            <p
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                color: 'rgba(255,255,255,0.85)',
-                marginBottom: 8,
-              }}
-            >
-              Sem templates
-            </p>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
-              Não há templates ativos a mostrar. (Confirma <b>is_active</b> no admin.)
-            </p>
-          </div>
+          <p style={{ color: 'rgba(255,255,255,0.6)' }}>Nenhum template encontrado.</p>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: 16,
-              marginTop: 20,
-            }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
             {filtered.map((t) => {
               const free = isFree(t)
-              const priceLabel = getPriceDisplay(t.pricing_tier, t.price)
-              const bg =
-                themeToCssBackground((t as any).theme_json) ||
-                'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(59,130,246,0.12))'
+              const owned = ownedTemplates.has(t.id)
+              const priceLabel = priceLabelFor(t)
 
               return (
                 <div
                   key={t.id}
                   style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.10)',
-                    borderRadius: 18,
-                    padding: 16,
+                    background: 'rgba(30,30,50,0.7)',
+                    borderRadius: 20,
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.08)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 12,
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-                    backdropFilter: 'blur(10px)',
                   }}
                 >
-                  <TemplateMiniPreview template={t} height={420} />
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ position: 'relative', height: 320, background: '#111' }}>
+                    <TemplateMiniPreview template={t} />
                     <div
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        gap: 10,
-                        alignItems: 'flex-start',
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        padding: '4px 10px',
+                        borderRadius: 20,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: free ? 'rgba(34,197,94,0.2)' : owned ? 'rgba(59,130,246,0.2)' : 'rgba(168,85,247,0.2)',
+                        color: free ? '#22c55e' : owned ? '#3b82f6' : '#a855f7',
                       }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: 15,
-                            fontWeight: 900,
-                            color: 'rgba(255,255,255,0.95)',
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {t.name}
-                        </div>
-                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                          {t.category || '—'}
-                        </div>
-                      </div>
+                      {owned ? '✓ Comprado' : priceLabel}
+                    </div>
+                  </div>
 
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 800,
-                          color: free ? 'rgba(134,239,172,0.95)' : 'rgba(217,70,239,0.95)',
-                          background: 'rgba(255,255,255,0.06)',
-                          border: '1px solid rgba(255,255,255,0.10)',
-                          padding: '6px 10px',
-                          borderRadius: 999,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {priceLabel}
-                      </div>
+                  <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>{t.name}</h3>
+                      {t.category && (
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{t.category}</span>
+                      )}
                     </div>
 
                     {t.description ? (
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)' }}>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)', marginBottom: 12 }}>
                         {t.description}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
                         Sem descrição.
                       </div>
                     )}
-                  </div>
 
-                  <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-                    {free ? (
-                      <button
-                        onClick={() => createCardFromTemplate(t)}
-                        disabled={creatingTemplateId === t.id}
-                        style={{
-                          flex: 1,
-                          height: 44,
-                          borderRadius: 14,
-                          border: 'none',
-                          background: 'var(--color-primary)',
-                          color: '#fff',
-                          fontWeight: 900,
-                          fontSize: 13,
-                          cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
-                          opacity: creatingTemplateId === t.id ? 0.7 : 1,
-                        }}
-                      >
-                        {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
-                      </button>
-                    ) : (
-                      <button
-                        disabled
-                        style={{
-                          flex: 1,
-                          height: 44,
-                          borderRadius: 14,
-                          border: '1px solid rgba(168,85,247,0.25)',
-                          background: 'rgba(168,85,247,0.12)',
-                          color: 'rgba(217,70,239,0.95)',
-                          fontWeight: 900,
-                          fontSize: 13,
-                          cursor: 'not-allowed',
-                          opacity: 0.85,
-                        }}
-                        title="Disponível em breve"
-                      >
-                        {t.price ? `Comprar €${t.price.toFixed(2)}` : 'Premium'}
-                      </button>
-                    )}
+                    <div style={{ marginTop: 'auto' }}>
+                      {free || owned ? (
+                        <button
+                          onClick={() => createCardFromTemplate(t)}
+                          disabled={creatingTemplateId === t.id}
+                          style={{
+                            width: '100%',
+                            height: 44,
+                            borderRadius: 14,
+                            border: 'none',
+                            background: 'var(--color-primary)',
+                            color: '#fff',
+                            fontWeight: 900,
+                            fontSize: 13,
+                            cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
+                            opacity: creatingTemplateId === t.id ? 0.7 : 1,
+                          }}
+                        >
+                          {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openCheckout(t)}
+                          style={{
+                            width: '100%',
+                            height: 44,
+                            borderRadius: 14,
+                            border: 'none',
+                            background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+                            color: '#fff',
+                            fontWeight: 900,
+                            fontSize: 13,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Comprar {eur(t.price)}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )
@@ -507,6 +577,146 @@ export default function CatalogPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Checkout */}
+      {checkoutTemplate && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setCheckoutTemplate(null)}
+        >
+          <div
+            style={{
+              background: '#1a1a2e',
+              borderRadius: 24,
+              padding: 32,
+              width: '100%',
+              maxWidth: 420,
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
+              Comprar Template
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>
+              {checkoutTemplate.name}
+            </p>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
+                Tens um cupão?
+              </label>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase())
+                    setCouponStatus('idle')
+                    setCouponDiscount(null)
+                  }}
+                  placeholder="Código do cupão"
+                  style={{
+                    flex: 1,
+                    padding: '12px 14px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#fff',
+                    fontSize: 14,
+                  }}
+                />
+                <button
+                  onClick={checkCoupon}
+                  disabled={!couponCode.trim() || couponStatus === 'checking'}
+                  style={{
+                    padding: '12px 20px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'rgba(255,255,255,0.1)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    cursor: couponCode.trim() ? 'pointer' : 'not-allowed',
+                    opacity: couponCode.trim() ? 1 : 0.5,
+                  }}
+                >
+                  {couponStatus === 'checking' ? '...' : 'Aplicar'}
+                </button>
+              </div>
+              {couponStatus === 'valid' && (
+                <p style={{ color: '#22c55e', fontSize: 13, marginTop: 8 }}>
+                  ✓ Cupão válido! {couponDiscount?.type === 'free' ? 'Template grátis!' : couponDiscount?.type === 'percentage' ? `${couponDiscount.value}% desconto` : `€${couponDiscount?.value} desconto`}
+                </p>
+              )}
+              {couponStatus === 'invalid' && (
+                <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8 }}>
+                  ✕ Cupão inválido ou expirado
+                </p>
+              )}
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 20, marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ color: 'rgba(255,255,255,0.6)' }}>Preço original</span>
+                <span style={{ color: '#fff' }}>{eur(checkoutTemplate.price)}</span>
+              </div>
+              {couponStatus === 'valid' && couponDiscount && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ color: '#22c55e' }}>Desconto</span>
+                  <span style={{ color: '#22c55e' }}>-{eur((checkoutTemplate.price || 0) - getFinalPrice())}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 12, marginTop: 8 }}>
+                <span style={{ color: '#fff', fontWeight: 700 }}>Total</span>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 20 }}>{eur(getFinalPrice())}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setCheckoutTemplate(null)}
+                style={{
+                  flex: 1,
+                  padding: '14px 24px',
+                  borderRadius: 14,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'transparent',
+                  color: '#fff',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
+                style={{
+                  flex: 1,
+                  padding: '14px 24px',
+                  borderRadius: 14,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+                  color: '#fff',
+                  fontWeight: 900,
+                  cursor: checkoutLoading ? 'not-allowed' : 'pointer',
+                  opacity: checkoutLoading ? 0.7 : 1,
+                }}
+              >
+                {checkoutLoading ? 'A processar...' : getFinalPrice() <= 0 ? 'Obter Grátis' : `Pagar ${eur(getFinalPrice())}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
