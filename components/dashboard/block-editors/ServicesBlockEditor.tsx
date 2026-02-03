@@ -694,22 +694,326 @@ export default function ServicesBlockEditor({
 
             <label>
               <span>Imagem (upload)</span>
-              <button
-                type="button"
-                onClick={() => pickFileFor(item.id)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  border: '1px solid rgba(0,0,0,0.12)',
-                  backgroundColor: '#f0f0f0',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  marginBottom: 8,
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
                 }}
+                style={{ marginBottom: 8 }}
                 data-no-block-select="1"
-              >
-                Upload de imagem
-              </button>
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const bucket = "decorations"
+                    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+                    const path = `${safe(cardId || "no-card")}/${safe(item.id)}.${ext}`
+                    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type })
+                    if (error) throw error
+                    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+                    if (data?.publicUrl) updateItem(item.id, { imageSrc: data.publicUrl })
+                  } catch (err: any) { alert(err?.message || "Erro no upload") }
+                  e.target.value = ""
+                }}
+                style={{ marginBottom: 8 }}
+                data-no-block-select="1"
+              />
 
               {item.imageSrc && (
                 <img
