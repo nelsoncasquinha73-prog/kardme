@@ -146,7 +146,6 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const heading = s.heading ?? 'Serviços e Produtos'
   const items = useMemo(() => (s.items || []).filter((i) => i.enabled), [s.items])
   const layout = s.layout ?? 'grid'
-  if (items.length === 0) return null
 
   // Card base
   const cardRadius = st.cardRadiusPx ?? 12
@@ -253,6 +252,9 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const hasHeading = typeof heading === 'string' && heading.trim().length > 0
   const headingBoldOn = st.headingBold !== false
 
+
+  // Early return se não houver items (depois de todos os hooks)
+  if (items.length === 0) return null
   return (
     <section style={wrapStyle}>
       {hasHeading && (
