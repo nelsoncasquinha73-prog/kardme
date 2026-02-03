@@ -12,6 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [loading, setLoading] = useState(true)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const boot = async () => {
@@ -26,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       const storedRole = sessionStorage.getItem('role')
       if (storedRole) {
+        if (storedRole === 'admin') setIsAdmin(true)
         if (storedRole !== 'admin' && !pathname.startsWith('/admin/catalog')) {
           router.push('/dashboard')
         }
@@ -44,19 +46,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return
       }
 
-      sessionStorage.setItem('role', 'admin')
+      if (profile?.role === 'admin') {
+        sessionStorage.setItem('role', 'admin')
+        setIsAdmin(true)
+      }
       setLoading(false)
     }
 
     boot()
-  }, [router])
+  }, [router, pathname])
 
-  const navItems = [
+  const navItems = isAdmin ? [
     { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
     { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
     { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+  ] : [
+    { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
   ]
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
@@ -76,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   return (
-    <AppChrome userEmail={userEmail} isAdmin={true} navItems={navItems} getPageTitle={getPageTitle}>
+    <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
       {children}
     </AppChrome>
   )
