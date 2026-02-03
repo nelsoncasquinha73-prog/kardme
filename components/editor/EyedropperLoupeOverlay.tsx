@@ -15,6 +15,12 @@ function hasNativeEyeDropper(): boolean {
   return typeof window !== 'undefined' && 'EyeDropper' in window
 }
 
+function isSafari(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent.toLowerCase()
+  return ua.includes('safari') && !ua.includes('chrome') && !ua.includes('chromium')
+}
+
 export default function EyedropperLoupeOverlay() {
   const { picker, closePicker } = useColorPicker()
 
@@ -29,6 +35,7 @@ export default function EyedropperLoupeOverlay() {
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [usingNative, setUsingNative] = useState(false)
+  const [showSafariWarning, setShowSafariWarning] = useState(false)
 
   const dpr = useMemo(() => (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1), [])
 
@@ -75,6 +82,11 @@ export default function EyedropperLoupeOverlay() {
       return () => {
         tooltip.remove()
       }
+    }
+
+    // Fallback - mostrar aviso no Safari
+    if (isSafari()) {
+      setShowSafariWarning(true)
     }
 
     setUsingNative(false)
@@ -144,13 +156,33 @@ export default function EyedropperLoupeOverlay() {
       }
 
       try {
+        // Configurações melhoradas para html2canvas
         const shot = await html2canvas(target, {
-          backgroundColor: null,
+          backgroundColor: '#ffffff',
           scale: dpr,
           useCORS: true,
           logging: false,
           allowTaint: true,
-          foreignObjectRendering: false,
+          foreignObjectRendering: true,
+          imageTimeout: 5000,
+          removeContainer: true,
+          onclone: (clonedDoc) => {
+            // Forçar cores de fundo em elementos que possam estar transparentes
+            const clonedTarget = clonedDoc.getElementById('preview-hitbox')
+            if (clonedTarget) {
+              const allElements = clonedTarget.querySelectorAll('*')
+              allElements.forEach((el) => {
+                const htmlEl = el as HTMLElement
+                const computed = window.getComputedStyle(htmlEl)
+                // Se o background for transparente, não fazer nada especial
+                // mas garantir que imagens são carregadas
+                if (htmlEl.tagName === 'IMG') {
+                  const img = htmlEl as HTMLImageElement
+                  img.crossOrigin = 'anonymous'
+                }
+              })
+            }
+          },
         })
 
         if (cancelled) return
@@ -311,7 +343,6 @@ export default function EyedropperLoupeOverlay() {
   function handleCancel() {
     closePicker()
   }
-
   return (
     <>
       <div
@@ -361,11 +392,33 @@ export default function EyedropperLoupeOverlay() {
         ✕ Cancelar (ESC)
       </button>
 
-      {error && (
+      {showSafariWarning && (
         <div
           style={{
             position: 'fixed',
             top: 60,
+            right: 16,
+            zIndex: 10001,
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: 'rgba(245, 158, 11, 0.95)',
+            color: '#fff',
+            fontSize: 12,
+            fontWeight: 500,
+            maxWidth: 220,
+            lineHeight: 1.4,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          }}
+        >
+          ⚠️ O eyedropper funciona melhor no <b>Chrome</b>. No Safari pode não capturar todas as cores corretamente.
+        </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            position: 'fixed',
+            top: showSafariWarning ? 140 : 60,
             right: 16,
             zIndex: 10001,
             padding: '8px 12px',
