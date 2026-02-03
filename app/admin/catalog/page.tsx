@@ -495,7 +495,7 @@ export default function CatalogPage() {
                   }}
                 >
                   <div style={{ position: 'relative', height: 320, background: '#111' }}>
-                    <TemplateMiniPreview template={t} />
+                    <TemplateMiniPreview template={t} height={300} />
                     <div
                       style={{
                         position: 'absolute',
