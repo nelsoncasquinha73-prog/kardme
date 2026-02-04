@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 import TemplateMiniPreview from "@/components/catalog/TemplateMiniPreview"
 
@@ -79,6 +80,7 @@ export default function CatalogPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const { t: tr } = useLanguage()
   const [templates, setTemplates] = useState<Template[]>([])
   const [ownedTemplates, setOwnedTemplates] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -371,7 +373,7 @@ export default function CatalogPage() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div className="dashboard-header">
           <div>
-            <h1 className="dashboard-title">Catálogo de templates</h1>
+            <h1 className="dashboard-title">{tr('catalog.title')}</h1>
             <p className="dashboard-subtitle">
               Explora templates ativos. Usa cupões para descontos!
             </p>
@@ -426,7 +428,7 @@ export default function CatalogPage() {
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
           <input
             type="text"
-            placeholder="Pesquisar..."
+            placeholder={tr('common.search')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{
@@ -468,7 +470,7 @@ export default function CatalogPage() {
           >
             {categories.map((c) => (
               <option key={c} value={c} style={{ background: '#1a1a2e', padding: '8px' }}>
-                {c === 'all' ? 'Todas categorias' : c}
+                {c === 'all' ? tr('catalog.all_categories') : c}
               </option>
             ))}
           </select>
@@ -495,8 +497,8 @@ export default function CatalogPage() {
               
             }}
           >
-            <option value="all" style={{ background: '#1a1a2e' }}>Todos preços</option>
-            <option value="free" style={{ background: '#1a1a2e' }}>Grátis</option>
+            <option value="all" style={{ background: '#1a1a2e' }}>{tr('catalog.all_prices')}</option>
+            <option value="free" style={{ background: '#1a1a2e' }}>{tr('catalog.free')}</option>
             <option value="premium" style={{ background: '#1a1a2e' }}>Premium</option>
           </select>
         </div>
@@ -582,7 +584,7 @@ export default function CatalogPage() {
                             opacity: creatingTemplateId === t.id ? 0.7 : 1,
                           }}
                         >
-                          {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
+                          {creatingTemplateId === t.id ? 'A criar…' : tr('catalog.use_template')}
                         </button>
                       ) : (
                         <button
@@ -640,7 +642,7 @@ export default function CatalogPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
-              Comprar Template
+              {tr('catalog.buy')} Template
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>
               {checkoutTemplate.name}
