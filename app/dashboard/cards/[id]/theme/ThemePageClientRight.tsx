@@ -16,6 +16,7 @@ import DecorationBlockEditor from '@/components/dashboard/block-editors/Decorati
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBlockEditor'
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
+import VideoBlockEditor from '@/components/dashboard/block-editors/VideoBlockEditor'
 import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
 import ThemeDecorationsEditor from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
@@ -275,6 +276,15 @@ export default function ThemePageClientRight({
 
         {activeBlock?.type === 'gallery' && (
           <GalleryBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'video' && (
+          <VideoBlockEditor
             settings={activeBlock.settings || {}}
             style={activeBlock.style || {}}
             onChangeSettings={onChangeSettings}

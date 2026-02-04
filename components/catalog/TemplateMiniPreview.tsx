@@ -19,6 +19,7 @@ import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 import FreeTextBlock from '@/components/blocks/FreeTextBlock'
 import DecorationBlock from '@/components/blocks/DecorationBlock'
+import VideoBlock from '@/components/blocks/VideoBlock'
 
 type Template = {
   id: string
@@ -64,6 +65,7 @@ function renderBlock(block: Block, index: number, templateId: string) {
     case 'social': return <SocialBlock {...props} />
     case 'contact': return <ContactBlock {...props} />
     case 'gallery': return <GalleryBlock {...props} />
+    case 'video': return <VideoBlock {...props} />
     case 'services': return <ServicesBlock {...props} />
     case 'bio': return <BioBlock {...props} />
     case 'lead_form': return <LeadFormBlock {...props} cardId={templateId} />

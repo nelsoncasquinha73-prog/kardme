@@ -6,6 +6,7 @@ import ServicesBlock from '@/components/blocks/ServicesBlock'
 import LeadFormBlock from '@/components/blocks/LeadFormBlock'
 import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
+import VideoBlock from '@/components/blocks/VideoBlock'
 
 export const blockRegistry = {
   header: HeaderBlock,
@@ -14,5 +15,6 @@ export const blockRegistry = {
   services: ServicesBlock,
   lead_form: LeadFormBlock,
   business_hours: BusinessHoursBlock,
+  video: VideoBlock,
 }
 export type BlockType = keyof typeof blockRegistry

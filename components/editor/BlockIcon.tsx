@@ -14,6 +14,7 @@ export type BlockType =
   | 'embed'
   | 'lead_form'
   | 'booking'
+  | 'video'
 
 export function BlockIcon({
   type,
@@ -97,6 +98,15 @@ export function BlockIcon({
         </svg>
       )
 
+
+    case 'video':
+      return (
+        <svg {...common}>
+          <rect x="4" y="6" width="16" height="12" rx="3" fill="#FEE2E2" />
+          <polygon points="10,9 10,15 15,12" fill="#DC2626" />
+          <rect x="4" y="6" width="16" height="12" rx="3" stroke="#DC2626" strokeWidth="1.6" />
+        </svg>
+      )
     case 'services':
       return (
         <svg {...common}>

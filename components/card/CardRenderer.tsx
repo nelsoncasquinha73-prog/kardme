@@ -12,6 +12,7 @@ import DecorationBlock from '@/components/blocks/DecorationBlock'
 import BioBlock from '@/components/blocks/BioBlock'
 import ServicesBlock from '@/components/blocks/ServicesBlock'
 import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
+import VideoBlock from '@/components/blocks/VideoBlock'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 
 type Card = {
@@ -196,6 +197,13 @@ export default function CardRenderer({ card, blocks, showTranslations = true, fu
                       </div>
                     )
 
+
+                  case 'video':
+                    return (
+                      <div key={block.id} style={wrapStyle}>
+                        <VideoBlock settings={block.settings} style={block.style} />
+                      </div>
+                    )
                   case 'bio':
                     return (
                       <div key={block.id} style={wrapStyle}>

@@ -45,6 +45,7 @@ export default function AddBlockModal({
       { type: 'contact', title: 'Contacto', description: 'Telefone, email, WhatsApp, etc.', defaultSettings: {}, defaultStyle: {} },
       { type: 'social', title: 'Redes sociais', description: 'Links sociais e botões', defaultSettings: {}, defaultStyle: {} },
       { type: 'gallery', title: 'Galeria', description: 'Imagens / carrossel', defaultSettings: {}, defaultStyle: {} },
+      { type: 'video', title: 'Vídeo', description: 'YouTube, Vimeo ou vídeo direto', defaultSettings: { url: '', title: '' }, defaultStyle: { aspectRatio: '16:9', borderRadius: 12 } },
       { type: 'services', title: 'Serviços', description: 'Lista de serviços', defaultSettings: {}, defaultStyle: {} },
       { type: 'info_utilities', title: 'Info & Utilidades', description: 'Menus, WiFi, horários rápidos', defaultSettings: {}, defaultStyle: {} },
       { type: 'lead_form', title: 'Formulário lead', description: 'Captura de leads', defaultSettings: {}, defaultStyle: {} },
