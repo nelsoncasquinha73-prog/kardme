@@ -439,16 +439,24 @@ export default function CatalogPage() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
+              padding: '12px 16px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(40,40,70,0.95) 100%)',
               color: '#fff',
               fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              minWidth: 180,
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+              paddingRight: 36,
             }}
           >
             {categories.map((c) => (
-              <option key={c} value={c} style={{ background: '#1a1a2e' }}>
+              <option key={c} value={c} style={{ background: '#1a1a2e', padding: '8px' }}>
                 {c === 'all' ? 'Todas categorias' : c}
               </option>
             ))}
@@ -457,12 +465,20 @@ export default function CatalogPage() {
             value={priceFilter}
             onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
             style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
+              padding: '12px 16px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(40,40,70,0.95) 100%)',
               color: '#fff',
               fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              minWidth: 140,
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+              paddingRight: 36,
             }}
           >
             <option value="all" style={{ background: '#1a1a2e' }}>Todos preços</option>
