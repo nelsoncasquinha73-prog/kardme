@@ -34,6 +34,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
   const [activeDecoId, setActiveDecoId] = useState<string | null>(null)
 
+  const initialBlockIds = blocks.map((b) => b.id)
   const [localBlocks, setLocalBlocks] = useState<CardBlock[]>(
     blocks.map((b) => ({ ...b, style: b.style ?? {}, settings: b.settings ?? {} }))
   )
@@ -108,6 +109,23 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
     try {
       // 1) Atualizar cada bloco individualmente (por ID, não por tipo!)
+      // 0) Eliminar blocos que foram removidos
+      const currentBlockIds = localBlocks.map((b) => b.id)
+      const deletedBlockIds = initialBlockIds.filter((id) => !currentBlockIds.includes(id))
+      if (deletedBlockIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("card_blocks")
+          .delete()
+          .in("id", deletedBlockIds)
+        if (deleteError) {
+          console.error("❌ Erro ao eliminar blocos:", deleteError)
+          setSaveStatus("error")
+          setToast({ message: "Erro ao eliminar blocos: " + deleteError.message, type: "error" })
+          return
+        }
+      }
+
+
       for (const block of localBlocks) {
         const { error, data } = await supabase
           .from('card_blocks')
