@@ -55,7 +55,7 @@ function parseVideoUrl(url: string): VideoInfo {
       type: 'youtube',
       videoId,
       embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1`,
-      thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+      thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
     }
   }
 
