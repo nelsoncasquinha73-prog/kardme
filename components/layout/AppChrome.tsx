@@ -9,6 +9,7 @@ import '@/styles/dashboard-sidebar.css'
 import '@/styles/dashboard-modal.css'
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 import { FiLogOut } from 'react-icons/fi'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import LanguageDropdown from '@/components/language/LanguageDropdown'
 
 type NavItem = { label: string; href: string; icon: any }
@@ -29,6 +30,7 @@ export default function AppChrome({
   const router = useRouter()
   const pathname = usePathname()
 
+  const { t } = useLanguage()
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard"
     return pathname === href || pathname.startsWith(href + "/")
@@ -48,7 +50,7 @@ export default function AppChrome({
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
             <h2 className="sidebar-logo">Kardme</h2>
-            <p className="sidebar-tagline">Cartões digitais premium</p>
+            <p className="sidebar-tagline">{t('common.tagline')}</p>
           </div>
 
           <nav className="sidebar-nav">
@@ -78,7 +80,7 @@ export default function AppChrome({
                 wordBreak: 'break-all',
               }}
             >
-              <div style={{ marginBottom: 4 }}>Logado como:</div>
+              <div style={{ marginBottom: 4 }}>{t('common.logged_as')}</div>
               <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{userEmail}</strong>
               {isAdmin && (
                 <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>ADMIN</div>
@@ -91,7 +93,7 @@ export default function AppChrome({
             </div>
             <button className="sidebar-logout" onClick={logout}>
               <FiLogOut className="sidebar-icon" />
-              <span>Logout</span>
+              <span>{t('nav.logout')}</span>
             </button>
           </div>
         </aside>
