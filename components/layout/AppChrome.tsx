@@ -9,6 +9,7 @@ import '@/styles/dashboard-sidebar.css'
 import '@/styles/dashboard-modal.css'
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 import { FiLogOut } from 'react-icons/fi'
+import LanguageDropdown from '@/components/language/LanguageDropdown'
 
 type NavItem = { label: string; href: string; icon: any }
 
@@ -84,6 +85,10 @@ export default function AppChrome({
               )}
             </div>
 
+
+            <div style={{ marginBottom: 12 }}>
+              <LanguageDropdown />
+            </div>
             <button className="sidebar-logout" onClick={logout}>
               <FiLogOut className="sidebar-icon" />
               <span>Logout</span>

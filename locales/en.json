@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "open": "Open",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "search": "Search...",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cards": "Cards",
+    "templates": "Templates",
+    "template_store": "Template Store",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "clients": "Clients",
+    "coupons": "Coupons",
+    "plans": "Plans",
+    "contacts": "Contacts",
+    "meetings": "Meetings",
+    "orders": "Orders",
+    "affiliates": "Affiliates",
+    "nfc": "NFC",
+    "files": "Files",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "your_cards": "Your Cards",
+    "create_card": "Create Card",
+    "no_cards": "You don't have any cards yet",
+    "card_views": "Card Views",
+    "total_leads": "Total Leads"
+  },
+  "editor": {
+    "edit_card": "Edit Card",
+    "theme": "Theme",
+    "blocks": "Blocks",
+    "add_block": "Add Block",
+    "decorations": "Decorations",
+    "floating_buttons": "Floating Buttons",
+    "save_template": "Save as Template",
+    "preview": "Preview"
+  },
+  "catalog": {
+    "title": "Template Catalog",
+    "subtitle": "Explore active templates. Use coupons for discounts!",
+    "all_categories": "All categories",
+    "all_prices": "All prices",
+    "free": "Free",
+    "premium": "Premium",
+    "buy": "Buy",
+    "use_template": "Use template",
+    "owned": "Owned"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

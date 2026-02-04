@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "copy": "Copier",
+    "open": "Ouvrir",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "loading": "Chargement...",
+    "search": "Rechercher...",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "cards": "Cartes",
+    "templates": "Modèles",
+    "template_store": "Boutique de Modèles",
+    "analytics": "Analytiques",
+    "settings": "Paramètres",
+    "clients": "Clients",
+    "coupons": "Coupons",
+    "plans": "Plans",
+    "contacts": "Contacts",
+    "meetings": "Réunions",
+    "orders": "Commandes",
+    "affiliates": "Affiliés",
+    "nfc": "NFC",
+    "files": "Fichiers",
+    "logout": "Déconnexion"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue",
+    "your_cards": "Vos Cartes",
+    "create_card": "Créer une Carte",
+    "no_cards": "Vous n'avez pas encore de cartes",
+    "card_views": "Vues",
+    "total_leads": "Total des Leads"
+  },
+  "editor": {
+    "edit_card": "Modifier la Carte",
+    "theme": "Thème",
+    "blocks": "Blocs",
+    "add_block": "Ajouter un Bloc",
+    "decorations": "Décorations",
+    "floating_buttons": "Boutons Flottants",
+    "save_template": "Enregistrer comme Modèle",
+    "preview": "Aperçu"
+  },
+  "catalog": {
+    "title": "Catalogue de Modèles",
+    "subtitle": "Explorez les modèles actifs. Utilisez des coupons pour des réductions!",
+    "all_categories": "Toutes les catégories",
+    "all_prices": "Tous les prix",
+    "free": "Gratuit",
+    "premium": "Premium",
+    "buy": "Acheter",
+    "use_template": "Utiliser le modèle",
+    "owned": "Acquis"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "forgot_password": "Mot de passe oublié?",
+    "no_account": "Pas de compte?",
+    "have_account": "Déjà un compte?"
+  },
+  "language": {
+    "select": "Langue",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

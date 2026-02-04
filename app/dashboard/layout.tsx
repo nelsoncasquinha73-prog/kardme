@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
 import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiHardDrive, FiSettings, FiBarChart2 } from 'react-icons/fi'
+import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 type Role = 'admin' | 'user' | string
 
@@ -107,16 +108,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isAdmin && pathname.startsWith('/admin')) {
     return (
+    <LanguageProvider>
       <div style={{ padding: 40, textAlign: 'center' }}>
         <h2>Sem permissões</h2>
         <p>Este painel só está disponível para admin.</p>
       </div>
+    </LanguageProvider>
     )
   }
 
   return (
+    <LanguageProvider>
     <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
       {children}
     </AppChrome>
+    </LanguageProvider>
   )
 }

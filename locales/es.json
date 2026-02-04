@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "open": "Abrir",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "loading": "Cargando...",
+    "search": "Buscar...",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "cards": "Tarjetas",
+    "templates": "Plantillas",
+    "template_store": "Tienda de Plantillas",
+    "analytics": "Analíticas",
+    "settings": "Configuración",
+    "clients": "Clientes",
+    "coupons": "Cupones",
+    "plans": "Planes",
+    "contacts": "Contactos",
+    "meetings": "Reuniones",
+    "orders": "Pedidos",
+    "affiliates": "Afiliados",
+    "nfc": "NFC",
+    "files": "Archivos",
+    "logout": "Salir"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido",
+    "your_cards": "Tus Tarjetas",
+    "create_card": "Crear Tarjeta",
+    "no_cards": "Aún no tienes tarjetas",
+    "card_views": "Visualizaciones",
+    "total_leads": "Total de Leads"
+  },
+  "editor": {
+    "edit_card": "Editar Tarjeta",
+    "theme": "Tema",
+    "blocks": "Bloques",
+    "add_block": "Añadir Bloque",
+    "decorations": "Decoraciones",
+    "floating_buttons": "Botones Flotantes",
+    "save_template": "Guardar como Plantilla",
+    "preview": "Vista previa"
+  },
+  "catalog": {
+    "title": "Catálogo de Plantillas",
+    "subtitle": "Explora plantillas activas. ¡Usa cupones para descuentos!",
+    "all_categories": "Todas las categorías",
+    "all_prices": "Todos los precios",
+    "free": "Gratis",
+    "premium": "Premium",
+    "buy": "Comprar",
+    "use_template": "Usar plantilla",
+    "owned": "Adquirido"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "no_account": "¿No tienes cuenta?",
+    "have_account": "¿Ya tienes cuenta?"
+  },
+  "language": {
+    "select": "Idioma",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

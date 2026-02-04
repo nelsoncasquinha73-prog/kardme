@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "open": "Abrir",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "loading": "Carregando...",
+    "search": "Pesquisar...",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "cards": "Cartões",
+    "templates": "Templates",
+    "template_store": "Loja de Templates",
+    "analytics": "Análises",
+    "settings": "Configurações",
+    "clients": "Clientes",
+    "coupons": "Cupons",
+    "plans": "Planos",
+    "contacts": "Contatos",
+    "meetings": "Reuniões",
+    "orders": "Pedidos",
+    "affiliates": "Afiliados",
+    "nfc": "NFC",
+    "files": "Arquivos",
+    "logout": "Sair"
+  },
+  "dashboard": {
+    "welcome": "Bem-vindo",
+    "your_cards": "Seus Cartões",
+    "create_card": "Criar Cartão",
+    "no_cards": "Você ainda não tem cartões",
+    "card_views": "Visualizações",
+    "total_leads": "Total de Leads"
+  },
+  "editor": {
+    "edit_card": "Editar Cartão",
+    "theme": "Tema",
+    "blocks": "Blocos",
+    "add_block": "Adicionar Bloco",
+    "decorations": "Decorações",
+    "floating_buttons": "Botões Flutuantes",
+    "save_template": "Salvar como Template",
+    "preview": "Pré-visualizar"
+  },
+  "catalog": {
+    "title": "Catálogo de Templates",
+    "subtitle": "Explore templates ativos. Use cupons para descontos!",
+    "all_categories": "Todas categorias",
+    "all_prices": "Todos preços",
+    "free": "Grátis",
+    "premium": "Premium",
+    "buy": "Comprar",
+    "use_template": "Usar template",
+    "owned": "Adquirido"
+  },
+  "auth": {
+    "login": "Entrar",
+    "signup": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgot_password": "Esqueceu a senha?",
+    "no_account": "Não tem conta?",
+    "have_account": "Já tem conta?"
+  },
+  "language": {
+    "select": "Idioma",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "copy": "نسخ",
+    "open": "فتح",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "loading": "جاري التحميل...",
+    "search": "بحث...",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "cards": "البطاقات",
+    "templates": "القوالب",
+    "template_store": "متجر القوالب",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات",
+    "clients": "العملاء",
+    "coupons": "الكوبونات",
+    "plans": "الخطط",
+    "contacts": "جهات الاتصال",
+    "meetings": "الاجتماعات",
+    "orders": "الطلبات",
+    "affiliates": "الشركاء",
+    "nfc": "NFC",
+    "files": "الملفات",
+    "logout": "تسجيل الخروج"
+  },
+  "dashboard": {
+    "welcome": "مرحباً",
+    "your_cards": "بطاقاتك",
+    "create_card": "إنشاء بطاقة",
+    "no_cards": "ليس لديك بطاقات بعد",
+    "card_views": "المشاهدات",
+    "total_leads": "إجمالي العملاء المحتملين"
+  },
+  "editor": {
+    "edit_card": "تعديل البطاقة",
+    "theme": "المظهر",
+    "blocks": "الكتل",
+    "add_block": "إضافة كتلة",
+    "decorations": "الزخارف",
+    "floating_buttons": "الأزرار العائمة",
+    "save_template": "حفظ كقالب",
+    "preview": "معاينة"
+  },
+  "catalog": {
+    "title": "كتالوج القوالب",
+    "subtitle": "استكشف القوالب النشطة. استخدم الكوبونات للحصول على خصومات!",
+    "all_categories": "جميع الفئات",
+    "all_prices": "جميع الأسعار",
+    "free": "مجاني",
+    "premium": "مميز",
+    "buy": "شراء",
+    "use_template": "استخدم القالب",
+    "owned": "مملوك"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgot_password": "نسيت كلمة المرور؟",
+    "no_account": "ليس لديك حساب؟",
+    "have_account": "لديك حساب بالفعل؟"
+  },
+  "language": {
+    "select": "اللغة",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

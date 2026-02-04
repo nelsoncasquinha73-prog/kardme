@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "open": "Abrir",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "loading": "A carregar...",
+    "search": "Pesquisar...",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cards": "Cartões",
+    "templates": "Templates",
+    "template_store": "Loja de Templates",
+    "analytics": "Analytics",
+    "settings": "Configurações",
+    "clients": "Clientes",
+    "coupons": "Cupões",
+    "plans": "Planos",
+    "contacts": "Contactos",
+    "meetings": "Reuniões",
+    "orders": "Encomendas",
+    "affiliates": "Afiliados",
+    "nfc": "NFC",
+    "files": "Ficheiros",
+    "logout": "Sair"
+  },
+  "dashboard": {
+    "welcome": "Bem-vindo",
+    "your_cards": "Os teus Cartões",
+    "create_card": "Criar Cartão",
+    "no_cards": "Ainda não tens cartões",
+    "card_views": "Visualizações",
+    "total_leads": "Total de Leads"
+  },
+  "editor": {
+    "edit_card": "Editar Cartão",
+    "theme": "Tema",
+    "blocks": "Blocos",
+    "add_block": "Adicionar Bloco",
+    "decorations": "Decorações",
+    "floating_buttons": "Botões Flutuantes",
+    "save_template": "Guardar como Template",
+    "preview": "Pré-visualizar"
+  },
+  "catalog": {
+    "title": "Catálogo de Templates",
+    "subtitle": "Explora templates ativos. Usa cupões para descontos!",
+    "all_categories": "Todas categorias",
+    "all_prices": "Todos preços",
+    "free": "Grátis",
+    "premium": "Premium",
+    "buy": "Comprar",
+    "use_template": "Usar template",
+    "owned": "Adquirido"
+  },
+  "auth": {
+    "login": "Entrar",
+    "signup": "Registar",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "forgot_password": "Esqueceste a palavra-passe?",
+    "no_account": "Não tens conta?",
+    "have_account": "Já tens conta?"
+  },
+  "language": {
+    "select": "Idioma",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

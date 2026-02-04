@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "copy": "Kopieren",
+    "open": "Öffnen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "loading": "Laden...",
+    "search": "Suchen...",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cards": "Karten",
+    "templates": "Vorlagen",
+    "template_store": "Vorlagen-Shop",
+    "analytics": "Analysen",
+    "settings": "Einstellungen",
+    "clients": "Kunden",
+    "coupons": "Gutscheine",
+    "plans": "Pläne",
+    "contacts": "Kontakte",
+    "meetings": "Meetings",
+    "orders": "Bestellungen",
+    "affiliates": "Partner",
+    "nfc": "NFC",
+    "files": "Dateien",
+    "logout": "Abmelden"
+  },
+  "dashboard": {
+    "welcome": "Willkommen",
+    "your_cards": "Deine Karten",
+    "create_card": "Karte erstellen",
+    "no_cards": "Du hast noch keine Karten",
+    "card_views": "Aufrufe",
+    "total_leads": "Leads gesamt"
+  },
+  "editor": {
+    "edit_card": "Karte bearbeiten",
+    "theme": "Design",
+    "blocks": "Blöcke",
+    "add_block": "Block hinzufügen",
+    "decorations": "Dekorationen",
+    "floating_buttons": "Schwebende Buttons",
+    "save_template": "Als Vorlage speichern",
+    "preview": "Vorschau"
+  },
+  "catalog": {
+    "title": "Vorlagen-Katalog",
+    "subtitle": "Entdecke aktive Vorlagen. Nutze Gutscheine für Rabatte!",
+    "all_categories": "Alle Kategorien",
+    "all_prices": "Alle Preise",
+    "free": "Kostenlos",
+    "premium": "Premium",
+    "buy": "Kaufen",
+    "use_template": "Vorlage verwenden",
+    "owned": "Erworben"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgot_password": "Passwort vergessen?",
+    "no_account": "Noch kein Konto?",
+    "have_account": "Bereits ein Konto?"
+  },
+  "language": {
+    "select": "Sprache",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}

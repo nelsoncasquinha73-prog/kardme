@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "copy": "Copia",
+    "open": "Apri",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "loading": "Caricamento...",
+    "search": "Cerca...",
+    "confirm": "Conferma",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cards": "Biglietti",
+    "templates": "Modelli",
+    "template_store": "Negozio Modelli",
+    "analytics": "Analisi",
+    "settings": "Impostazioni",
+    "clients": "Clienti",
+    "coupons": "Coupon",
+    "plans": "Piani",
+    "contacts": "Contatti",
+    "meetings": "Riunioni",
+    "orders": "Ordini",
+    "affiliates": "Affiliati",
+    "nfc": "NFC",
+    "files": "File",
+    "logout": "Esci"
+  },
+  "dashboard": {
+    "welcome": "Benvenuto",
+    "your_cards": "I tuoi Biglietti",
+    "create_card": "Crea Biglietto",
+    "no_cards": "Non hai ancora biglietti",
+    "card_views": "Visualizzazioni",
+    "total_leads": "Lead Totali"
+  },
+  "editor": {
+    "edit_card": "Modifica Biglietto",
+    "theme": "Tema",
+    "blocks": "Blocchi",
+    "add_block": "Aggiungi Blocco",
+    "decorations": "Decorazioni",
+    "floating_buttons": "Pulsanti Flottanti",
+    "save_template": "Salva come Modello",
+    "preview": "Anteprima"
+  },
+  "catalog": {
+    "title": "Catalogo Modelli",
+    "subtitle": "Esplora i modelli attivi. Usa i coupon per gli sconti!",
+    "all_categories": "Tutte le categorie",
+    "all_prices": "Tutti i prezzi",
+    "free": "Gratis",
+    "premium": "Premium",
+    "buy": "Acquista",
+    "use_template": "Usa modello",
+    "owned": "Acquistato"
+  },
+  "auth": {
+    "login": "Accedi",
+    "signup": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Password dimenticata?",
+    "no_account": "Non hai un account?",
+    "have_account": "Hai già un account?"
+  },
+  "language": {
+    "select": "Lingua",
+    "en": "English",
+    "pt": "Português",
+    "pt-br": "Português (Brasil)",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية"
+  }
+}
