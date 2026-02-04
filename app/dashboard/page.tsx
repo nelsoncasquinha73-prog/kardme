@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
 import DeleteCardModal from '@/components/DeleteCardModal'
 
+import { useLanguage } from '@/components/language/LanguageProvider'
 const ADMIN_EMAILS = ['admin@kardme.com', 'nelson@kardme.com']
 
 const MOTIVATIONAL_QUOTES = [
@@ -78,6 +79,7 @@ export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
   const [quote, setQuote] = useState({ quote: '', emoji: '', author: '' })
+  const { t } = useLanguage()
 
   useEffect(() => {
     // Pick random quote on mount
@@ -238,7 +240,7 @@ export default function DashboardPage() {
               boxShadow: '0 4px 14px rgba(139, 92, 246, 0.3)'
             }}
           >
-            Começar a criar ✨
+            {t('dashboard.start_creating')} ✨
           </Link>
         </div>
       </div>
@@ -250,7 +252,7 @@ export default function DashboardPage() {
     <div className="dashboard-wrap">
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Os meus cartões</h1>
+          <h1 className="dashboard-title">{t('dashboard.my_cards')}</h1>
           <p className="dashboard-subtitle">{subtitle}</p>
         </div>
 
@@ -259,7 +261,7 @@ export default function DashboardPage() {
             Ver catálogo
           </Link>
           <Link className="btn-primary" href="/dashboard/cards/new">
-            + Criar cartão
+            + {t('dashboard.create_card')}
           </Link>
         </div>
       </div>
@@ -276,7 +278,7 @@ export default function DashboardPage() {
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Link className="btn-primary" href="/dashboard/cards/new">
-              Criar cartão grátis
+              {t('dashboard.create_card_free')}
             </Link>
             <Link className="btn-secondary" href="/dashboard/catalog">
               Ver catálogo
@@ -313,7 +315,7 @@ export default function DashboardPage() {
                     disabled={deletingId === card.id}
                     title="Eliminar cartão"
                   >
-                    {deletingId === card.id ? 'A eliminar…' : 'Eliminar'}
+                    {deletingId === card.id ? t('dashboard.deleting') : 'Eliminar'}
                   </button>
                 </div>
               </div>

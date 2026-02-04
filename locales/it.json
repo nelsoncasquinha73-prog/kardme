@@ -44,7 +44,11 @@
     "create_card": "Crea Biglietto",
     "no_cards": "Non hai ancora biglietti",
     "card_views": "Visualizzazioni",
-    "total_leads": "Lead Totali"
+    "total_leads": "Lead Totali",
+    "my_cards": "I miei biglietti",
+    "create_card_free": "Crea biglietto gratis",
+    "deleting": "Eliminando...",
+    "start_creating": "Inizia a creare"
   },
   "editor": {
     "edit_card": "Modifica Biglietto",

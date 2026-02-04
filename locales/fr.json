@@ -44,7 +44,11 @@
     "create_card": "Créer une Carte",
     "no_cards": "Vous n'avez pas encore de cartes",
     "card_views": "Vues",
-    "total_leads": "Total des Leads"
+    "total_leads": "Total des Leads",
+    "my_cards": "Mes cartes",
+    "create_card_free": "Créer une carte gratuite",
+    "deleting": "Suppression...",
+    "start_creating": "Commencer à créer"
   },
   "editor": {
     "edit_card": "Modifier la Carte",

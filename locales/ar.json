@@ -44,7 +44,11 @@
     "create_card": "إنشاء بطاقة",
     "no_cards": "ليس لديك بطاقات بعد",
     "card_views": "المشاهدات",
-    "total_leads": "إجمالي العملاء المحتملين"
+    "total_leads": "إجمالي العملاء المحتملين",
+    "my_cards": "بطاقاتي",
+    "create_card_free": "إنشاء بطاقة مجانية",
+    "deleting": "جاري الحذف...",
+    "start_creating": "ابدأ الإنشاء"
   },
   "editor": {
     "edit_card": "تعديل البطاقة",

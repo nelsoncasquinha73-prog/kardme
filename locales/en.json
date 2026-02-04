@@ -44,7 +44,11 @@
     "create_card": "Create Card",
     "no_cards": "You don't have any cards yet",
     "card_views": "Card Views",
-    "total_leads": "Total Leads"
+    "total_leads": "Total Leads",
+    "my_cards": "My Cards",
+    "create_card_free": "Create free card",
+    "deleting": "Deleting...",
+    "start_creating": "Start creating"
   },
   "editor": {
     "edit_card": "Edit Card",

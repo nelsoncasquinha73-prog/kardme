@@ -44,7 +44,11 @@
     "create_card": "Crear Tarjeta",
     "no_cards": "Aún no tienes tarjetas",
     "card_views": "Visualizaciones",
-    "total_leads": "Total de Leads"
+    "total_leads": "Total de Leads",
+    "my_cards": "Mis tarjetas",
+    "create_card_free": "Crear tarjeta gratis",
+    "deleting": "Eliminando...",
+    "start_creating": "Empezar a crear"
   },
   "editor": {
     "edit_card": "Editar Tarjeta",
