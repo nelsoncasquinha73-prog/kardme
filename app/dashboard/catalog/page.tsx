@@ -432,6 +432,9 @@ export default function CatalogPage() {
             style={{
               flex: 1,
               minWidth: 200,
+              overflow: 'visible',
+              textOverflow: 'clip',
+              whiteSpace: 'nowrap',
               padding: '10px 14px',
               borderRadius: 10,
               border: '1px solid rgba(255,255,255,0.1)',
@@ -454,6 +457,9 @@ export default function CatalogPage() {
               fontWeight: 500,
               cursor: 'pointer',
               minWidth: 200,
+              overflow: 'visible',
+              textOverflow: 'clip',
+              whiteSpace: 'nowrap',
               
               
               
@@ -480,6 +486,9 @@ export default function CatalogPage() {
               fontWeight: 500,
               cursor: 'pointer',
               minWidth: 160,
+              overflow: 'visible',
+              textOverflow: 'clip',
+              whiteSpace: 'nowrap',
               
               
               
