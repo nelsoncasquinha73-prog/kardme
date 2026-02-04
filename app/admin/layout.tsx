@@ -58,14 +58,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router, pathname])
 
   const navItems = isAdmin ? [
-    { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
-    { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-    { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
-    { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
-    { label: '🎟️ Cupões', href: '/admin/coupons', icon: FiTag },
-    { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+    { label: 'nav.clients', href: '/admin/clientes', icon: FiUsers },
+    { label: 'nav.manage_templates', href: '/admin/templates', icon: FiLayout },
+    { label: 'nav.template_store', href: '/admin/catalog', icon: FiShoppingCart, emoji: '🛍️' },
+    { label: 'nav.analytics', href: '/admin/analytics', icon: FiBarChart2, emoji: '📊' },
+    { label: 'nav.coupons', href: '/admin/coupons', icon: FiTag, emoji: '🎟️' },
+    { label: 'nav.settings', href: '/admin/settings', icon: FiSettings },
   ] : [
-    { label: '🛍️ Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
+    { label: 'nav.template_store', href: '/admin/catalog', icon: FiShoppingCart, emoji: '🛍️' },
   ]
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
