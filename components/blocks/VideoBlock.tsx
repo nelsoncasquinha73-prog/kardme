@@ -93,7 +93,6 @@ function getAspectRatioPadding(ratio: string): string {
 }
 
 export default function VideoBlock({ settings, style }: Props) {
-  console.log("VideoBlock render:", { url: settings?.url, settings, style });
   const [isModalOpen, setIsModalOpen] = useState(false)
   
   const videoInfo = useMemo(() => parseVideoUrl(settings?.url || ''), [settings?.url])
