@@ -332,6 +332,7 @@ export default function CatalogPage() {
     <div className="dashboard-wrap">
       <div
         style={{
+              flex: 'none',
           position: 'absolute',
           inset: 0,
           pointerEvents: 'none',
@@ -341,6 +342,7 @@ export default function CatalogPage() {
       >
         <div
           style={{
+              flex: 'none',
             position: 'absolute',
             width: 520,
             height: 520,
@@ -353,6 +355,7 @@ export default function CatalogPage() {
         />
         <div
           style={{
+              flex: 'none',
             position: 'absolute',
             width: 620,
             height: 620,
@@ -387,6 +390,7 @@ export default function CatalogPage() {
         {successMessage && (
           <div
             style={{
+              flex: 'none',
               background: 'rgba(34,197,94,0.15)',
               border: '1px solid rgba(34,197,94,0.3)',
               borderRadius: 12,
@@ -406,6 +410,7 @@ export default function CatalogPage() {
         {error && (
           <div
             style={{
+              flex: 'none',
               background: 'rgba(239,68,68,0.15)',
               border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12,
@@ -439,6 +444,7 @@ export default function CatalogPage() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
+              flex: 'none',
               padding: '12px 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
@@ -464,6 +470,7 @@ export default function CatalogPage() {
             value={priceFilter}
             onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
             style={{
+              flex: 'none',
               padding: '12px 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
@@ -500,6 +507,7 @@ export default function CatalogPage() {
                 <div
                   key={t.id}
                   style={{
+              flex: 'none',
                     background: 'rgba(30,30,50,0.7)',
                     borderRadius: 20,
                     overflow: 'hidden',
@@ -512,6 +520,7 @@ export default function CatalogPage() {
                     <TemplateMiniPreview template={t} height={300} />
                     <div
                       style={{
+              flex: 'none',
                         position: 'absolute',
                         top: 10,
                         right: 10,
@@ -551,6 +560,7 @@ export default function CatalogPage() {
                           onClick={() => createCardFromTemplate(t)}
                           disabled={creatingTemplateId === t.id}
                           style={{
+              flex: 'none',
                             width: '100%',
                             height: 44,
                             borderRadius: 14,
@@ -569,6 +579,7 @@ export default function CatalogPage() {
                         <button
                           onClick={() => openCheckout(t)}
                           style={{
+              flex: 'none',
                             width: '100%',
                             height: 44,
                             borderRadius: 14,
@@ -596,6 +607,7 @@ export default function CatalogPage() {
       {checkoutTemplate && (
         <div
           style={{
+              flex: 'none',
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.8)',
@@ -608,6 +620,7 @@ export default function CatalogPage() {
         >
           <div
             style={{
+              flex: 'none',
               background: '#1a1a2e',
               borderRadius: 24,
               padding: 32,
@@ -652,6 +665,7 @@ export default function CatalogPage() {
                   onClick={checkCoupon}
                   disabled={!couponCode.trim() || couponStatus === 'checking'}
                   style={{
+              flex: 'none',
                     padding: '12px 20px',
                     borderRadius: 12,
                     border: 'none',
