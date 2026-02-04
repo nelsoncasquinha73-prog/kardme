@@ -12,7 +12,7 @@ import { FiLogOut } from 'react-icons/fi'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import LanguageDropdown from '@/components/language/LanguageDropdown'
 
-type NavItem = { label: string; href: string; icon: any }
+type NavItem = { label: string; href: string; icon: any; emoji?: string }
 
 export default function AppChrome({
   children,
@@ -61,7 +61,7 @@ export default function AppChrome({
                   <li key={item.href}>
                     <Link href={item.href} className={`sidebar-link ${isActive(item.href) ? 'active' : ''}`}>
                       <Icon className="sidebar-icon" />
-                      <span>{item.label}</span>
+                      <span>{item.emoji ? `${item.emoji} ${t(item.label)}` : t(item.label)}</span>
                     </Link>
                   </li>
                 )

@@ -21,6 +21,8 @@
     "dashboard": "Tableau de bord",
     "cards": "Cartes",
     "templates": "Modèles",
+    "manage_templates": "Gérer les Modèles",
+    "clients": "Clients",
     "template_store": "Boutique de Modèles",
     "analytics": "Analytiques",
     "settings": "Paramètres",

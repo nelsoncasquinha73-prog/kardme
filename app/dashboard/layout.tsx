@@ -57,27 +57,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     boot()
   }, [router])
 
+
+
   const navItems = isAdmin
     ? [
-        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
-        { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
-        { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-        { label: '📊 Analytics', href: '/admin/analytics', icon: FiBarChart2 },
-        { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
-        { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+        { label: 'nav.dashboard', href: '/dashboard', icon: FiHome, emoji: '🏠' },
+        { label: 'nav.clients', href: '/admin/clientes', icon: FiUsers },
+        { label: 'nav.manage_templates', href: '/admin/templates', icon: FiLayout },
+        { label: 'nav.analytics', href: '/admin/analytics', icon: FiBarChart2, emoji: '📊' },
+        { label: 'nav.template_store', href: '/dashboard/catalog', icon: FiShoppingCart, emoji: '🛍️' },
+        { label: 'nav.settings', href: '/admin/settings', icon: FiSettings },
       ]
     : [
-        { label: '🏠 Dashboard', href: '/dashboard', icon: FiHome },
-        { label: '🛍️ Loja de Templates', href: '/dashboard/catalog', icon: FiShoppingCart },
-        { label: 'Planos', href: '/dashboard/plans', icon: FiHome },
-        { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-        { label: 'Contactos', href: '/dashboard/leads', icon: FiMail },
-        { label: 'Reuniões', href: '/dashboard/bookings', icon: FiCalendar },
-        { label: 'Encomendas', href: '/dashboard/orders', icon: FiShoppingCart },
-        { label: 'Afiliados', href: '/dashboard/affiliate', icon: FiUsers },
-        { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
-        { label: 'Ficheiros', href: '/dashboard/storage', icon: FiHardDrive },
-        { label: 'Definições', href: '/dashboard/settings', icon: FiSettings },
+        { label: 'nav.dashboard', href: '/dashboard', icon: FiHome, emoji: '🏠' },
+        { label: 'nav.template_store', href: '/dashboard/catalog', icon: FiShoppingCart, emoji: '🛍️' },
+        { label: 'nav.plans', href: '/dashboard/plans', icon: FiHome },
+        { label: 'nav.analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+        { label: 'nav.contacts', href: '/dashboard/leads', icon: FiMail },
+        { label: 'nav.meetings', href: '/dashboard/bookings', icon: FiCalendar },
+        { label: 'nav.orders', href: '/dashboard/orders', icon: FiShoppingCart },
+        { label: 'nav.affiliates', href: '/dashboard/affiliate', icon: FiUsers },
+        { label: 'nav.nfc', href: '/dashboard/nfc', icon: FiZap },
+        { label: 'nav.files', href: '/dashboard/storage', icon: FiHardDrive },
+        { label: 'nav.settings', href: '/dashboard/settings', icon: FiSettings },
       ]
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [

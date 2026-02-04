@@ -21,6 +21,8 @@
     "dashboard": "Panel",
     "cards": "Tarjetas",
     "templates": "Plantillas",
+    "manage_templates": "Gestionar Plantillas",
+    "clients": "Clientes",
     "template_store": "Tienda de Plantillas",
     "analytics": "Analíticas",
     "settings": "Configuración",

@@ -21,6 +21,8 @@
     "dashboard": "Dashboard",
     "cards": "Cards",
     "templates": "Templates",
+    "manage_templates": "Manage Templates",
+    "clients": "Clients",
     "template_store": "Template Store",
     "analytics": "Analytics",
     "settings": "Settings",
