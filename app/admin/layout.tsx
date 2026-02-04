@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
 import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag } from 'react-icons/fi'
+import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -84,8 +85,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
 
   return (
-    <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
-      {children}
-    </AppChrome>
+    <LanguageProvider>
+      <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
+        {children}
+      </AppChrome>
+    </LanguageProvider>
   )
 }
