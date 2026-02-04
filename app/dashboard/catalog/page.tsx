@@ -427,10 +427,6 @@ export default function CatalogPage() {
             style={{
               flex: 1,
               minWidth: 200,
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              textOverflow: 'ellipsis',
-              overflow: 'visible',
               padding: '10px 14px',
               borderRadius: 10,
               border: '1px solid rgba(255,255,255,0.1)',
@@ -452,10 +448,6 @@ export default function CatalogPage() {
               fontWeight: 500,
               cursor: 'pointer',
               minWidth: 200,
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              textOverflow: 'ellipsis',
-              overflow: 'visible',
               
               
               
@@ -481,10 +473,6 @@ export default function CatalogPage() {
               fontWeight: 500,
               cursor: 'pointer',
               minWidth: 160,
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              textOverflow: 'ellipsis',
-              overflow: 'visible',
               
               
               
