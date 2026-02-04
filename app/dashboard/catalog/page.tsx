@@ -426,7 +426,7 @@ export default function CatalogPage() {
             onChange={(e) => setQuery(e.target.value)}
             style={{
               flex: 1,
-              minWidth: 180,
+              minWidth: 200,
               padding: '10px 14px',
               borderRadius: 10,
               border: '1px solid rgba(255,255,255,0.1)',
@@ -442,12 +442,12 @@ export default function CatalogPage() {
               padding: '12px 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
-              background: 'linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(40,40,70,0.95) 100%)',
+              background: 'rgba(30,30,50,0.95)',
               color: '#fff',
               fontSize: 14,
               fontWeight: 500,
               cursor: 'pointer',
-              minWidth: 180,
+              minWidth: 200,
               
               
               
@@ -467,12 +467,12 @@ export default function CatalogPage() {
               padding: '12px 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
-              background: 'linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(40,40,70,0.95) 100%)',
+              background: 'rgba(30,30,50,0.95)',
               color: '#fff',
               fontSize: 14,
               fontWeight: 500,
               cursor: 'pointer',
-              minWidth: 140,
+              minWidth: 160,
               
               
               
