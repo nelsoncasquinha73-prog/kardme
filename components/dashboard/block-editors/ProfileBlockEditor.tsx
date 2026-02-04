@@ -277,6 +277,26 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             <span className="text-sm">Borda</span>
             <span className="text-xs text-black/50">{local.avatar?.borderWidth ?? 0}px</span>
           </div>
+
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={1}
+            value={local.avatar?.borderWidth ?? 0}
+            onChange={(e) => patch((d) => (d.avatar!.borderWidth = Number(e.target.value)))}
+          />
+
+          <SwatchRow
+            value={local.avatar?.borderColor ?? '#FFFFFF'}
+            onChange={(hex) =>
+              patch((d) => {
+                d.avatar!.borderColor = hex
+              })
+            }
+            onEyedropper={openEyedropperBorder}
+          />
+        </div>
 {/* ✅ NOVO: Glow/Halo */}
 <div className="flex flex-col gap-2">
   <div className="flex justify-between items-center">
@@ -446,26 +466,6 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     </>
   )}
 </div>
-
-          <input
-            type="range"
-            min={0}
-            max={10}
-            step={1}
-            value={local.avatar?.borderWidth ?? 0}
-            onChange={(e) => patch((d) => (d.avatar!.borderWidth = Number(e.target.value)))}
-          />
-
-          <SwatchRow
-            value={local.avatar?.borderColor ?? '#FFFFFF'}
-            onChange={(hex) =>
-              patch((d) => {
-                d.avatar!.borderColor = hex
-              })
-            }
-            onEyedropper={openEyedropperBorder}
-          />
-        </div>
 
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
