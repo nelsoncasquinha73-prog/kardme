@@ -146,7 +146,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2 className="section-title">Como funciona</h2>
+              <h2 className="section-title">{t('landing.how_it_works_title')}</h2>
               <p className="section-description">{t('landing.three_steps')}</p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function Home() {
                   <i className="fas fa-edit"></i>
                 </div>
                 <h3>{t('landing.customize')}</h3>
-                <p>Adiciona a tua foto, dados e informações de contacto</p>
+                <p>{t('landing.step2_description')}</p>
               </div>
             </div>
 
@@ -178,7 +178,7 @@ export default function Home() {
                   <i className="fas fa-share-alt"></i>
                 </div>
                 <h3>{t('landing.share')}</h3>
-                <p>Envia o link (e mais tarde NFC) e começa a receber contactos</p>
+                <p>{t('landing.step3_description')}</p>
               </div>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2 className="section-title">Porquê Kardme?</h2>
+              <h2 className="section-title">{t('landing.why_kardme')}</h2>
               <p className="section-description">{t('landing.features_title')}</p>
             </div>
           </div>
@@ -201,8 +201,8 @@ export default function Home() {
                 <div className="feature-icon">
                   <i className="fas fa-zap"></i>
                 </div>
-                <h3>Rápido &amp; Simples</h3>
-                <p>Cria em menos de 1 minuto, sem conhecimentos técnicos</p>
+                <h3>{t('landing.fast_simple')}</h3>
+                <p>{t('landing.fast_simple_desc')}</p>
               </div>
             </div>
 
@@ -211,8 +211,8 @@ export default function Home() {
                 <div className="feature-icon">
                   <i className="fas fa-palette"></i>
                 </div>
-                <h3>Totalmente customizável</h3>
-                <p>Cores, fontes, layout — tudo à tua medida</p>
+                <h3>{t('landing.fully_customizable')}</h3>
+                <p>{t('landing.fully_customizable_desc')}</p>
               </div>
             </div>
 
@@ -221,8 +221,8 @@ export default function Home() {
                 <div className="feature-icon">
                   <i className="fas fa-mobile-alt"></i>
                 </div>
-                <h3>Mobile First</h3>
-                <p>Perfeito em qualquer dispositivo, sempre</p>
+                <h3>{t('landing.mobile_first')}</h3>
+                <p>{t('landing.mobile_first_desc')}</p>
               </div>
             </div>
 
@@ -231,7 +231,7 @@ export default function Home() {
                 <div className="feature-icon">
                   <i className="fas fa-chart-line"></i>
                 </div>
-                <h3>Analytics &amp; Leads</h3>
+                <h3>{t('landing.analytics_leads')}</h3>
                 <p>{t('landing.analytics_description')}</p>
               </div>
             </div>
@@ -261,8 +261,8 @@ export default function Home() {
                 </div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> 1 {t('landing.digital_card')}</li>
-                  <li><i className="fas fa-check"></i> 10 templates</li>
-                  <li><i className="fas fa-check"></i> Analytics completo</li>
+                  <li><i className="fas fa-check"></i> 10 {t('nav.templates')}</li>
+                  <li><i className="fas fa-check"></i> {t('landing.full_analytics')}</li>
                   <li><i className="fas fa-check"></i> Gestão de leads</li>
                 </ul>
                 <Link href="/signup" className="btn btn-outline">
@@ -288,7 +288,7 @@ export default function Home() {
                   <li><i className="fas fa-check"></i> {t('landing.unlimited_cards')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.all_templates')}</li>
                   <li><i className="fas fa-check"></i> Customização avançada</li>
-                  <li><i className="fas fa-check"></i> Analytics &amp; Leads</li>
+                  <li><i className="fas fa-check"></i> {t('landing.analytics_leads')}</li>
                 </ul>
                 {isLoggedIn ? (
                   <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ width: '100%', border: 'none', cursor: 'pointer' }}>
@@ -310,8 +310,8 @@ export default function Home() {
                 </div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> {t('landing.everything_pro')}</li>
-                  <li><i className="fas fa-check"></i> Cartões NFC</li>
-                  <li><i className="fas fa-check"></i> Suporte prioritário</li>
+                  <li><i className="fas fa-check"></i> {t('landing.nfc_cards')}</li>
+                  <li><i className="fas fa-check"></i> {t('landing.priority_support')}</li>
                   <li><i className="fas fa-check"></i> Integrações custom</li>
                 </ul>
                 <a href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</a>

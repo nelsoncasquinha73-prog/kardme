@@ -132,7 +132,20 @@
     "analytics_description": "Guarda quante persone hanno visto e cliccato il tuo biglietto",
     "unlimited_cards": "Biglietti illimitati",
     "everything_pro": "Tutto di Pro",
-    "ready_to_start": "Pronto per iniziare?"
+    "ready_to_start": "Pronto per iniziare?",
+    "step2_description": "Aggiungi la tua foto, dati e informazioni di contatto",
+    "step3_description": "Invia il link (e più tardi NFC) e inizia a ricevere contatti",
+    "analytics_leads": "Analytics e Leads",
+    "full_analytics": "Analytics completo",
+    "priority_support": "Supporto prioritario",
+    "how_it_works_title": "Come funziona",
+    "why_kardme": "Perché Kardme?",
+    "fast_simple": "Veloce e Semplice",
+    "fast_simple_desc": "Crea in meno di 1 minuto, senza conoscenze tecniche",
+    "fully_customizable": "Completamente personalizzabile",
+    "fully_customizable_desc": "Colori, font, layout — tutto a modo tuo",
+    "mobile_first": "Mobile First",
+    "mobile_first_desc": "Perfetto su qualsiasi dispositivo, sempre"
   },
   "language": {
     "select": "Lingua",

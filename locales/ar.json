@@ -132,7 +132,20 @@
     "analytics_description": "شاهد كم شخص شاهد ونقر على بطاقتك",
     "unlimited_cards": "بطاقات غير محدودة",
     "everything_pro": "كل شيء في Pro",
-    "ready_to_start": "مستعد للبدء؟"
+    "ready_to_start": "مستعد للبدء؟",
+    "step2_description": "أضف صورتك وبياناتك ومعلومات الاتصال",
+    "step3_description": "أرسل الرابط (ولاحقاً NFC) وابدأ في استقبال جهات الاتصال",
+    "analytics_leads": "التحليلات والعملاء المحتملين",
+    "full_analytics": "تحليلات كاملة",
+    "priority_support": "دعم ذو أولوية",
+    "how_it_works_title": "كيف يعمل",
+    "why_kardme": "لماذا Kardme؟",
+    "fast_simple": "سريع وبسيط",
+    "fast_simple_desc": "أنشئ في أقل من دقيقة، بدون معرفة تقنية",
+    "fully_customizable": "قابل للتخصيص بالكامل",
+    "fully_customizable_desc": "الألوان، الخطوط، التصميم — كل شيء على طريقتك",
+    "mobile_first": "Mobile First",
+    "mobile_first_desc": "مثالي على أي جهاز، دائماً"
   },
   "language": {
     "select": "اللغة",

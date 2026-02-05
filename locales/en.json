@@ -132,7 +132,20 @@
     "analytics_description": "See how many people viewed and clicked your card",
     "unlimited_cards": "Unlimited cards",
     "everything_pro": "Everything in Pro",
-    "ready_to_start": "Ready to start?"
+    "ready_to_start": "Ready to start?",
+    "step2_description": "Add your photo, data and contact information",
+    "step3_description": "Send the link (and later NFC) and start receiving contacts",
+    "analytics_leads": "Analytics u0026 Leads",
+    "full_analytics": "Full analytics",
+    "priority_support": "Priority support",
+    "how_it_works_title": "How it works",
+    "why_kardme": "Why Kardme?",
+    "fast_simple": "Fast u0026 Simple",
+    "fast_simple_desc": "Create in less than 1 minute, no technical knowledge needed",
+    "fully_customizable": "Fully customizable",
+    "fully_customizable_desc": "Colors, fonts, layout — all your way",
+    "mobile_first": "Mobile First",
+    "mobile_first_desc": "Perfect on any device, always"
   },
   "language": {
     "select": "Language",
