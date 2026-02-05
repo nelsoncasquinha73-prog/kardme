@@ -3,14 +3,11 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
+  useEffect,
 } from 'react'
 
-import { detectLanguageByIP } from '@/components/i18n/detectLanguage'
-
-// Importar traduções
 import en from '@/locales/en.json'
 import pt from '@/locales/pt.json'
 import ptBr from '@/locales/pt-br.json'
@@ -21,8 +18,43 @@ import it from '@/locales/it.json'
 import ar from '@/locales/ar.json'
 
 export type Language = 'en' | 'pt' | 'pt-br' | 'es' | 'fr' | 'de' | 'it' | 'ar'
-
 type TranslationDict = Record<string, any>
+
+interface LanguageContextType {
+  lang: Language
+  setLang: (lang: Language) => void
+  dir: 'ltr' | 'rtl'
+  t: (key: string) => string
+}
+
+const SUPPORTED_LANGS: Language[] = ['en', 'pt', 'pt-br', 'es', 'fr', 'de', 'it', 'ar']
+const DEFAULT_LANG: Language = 'en'
+
+function isSupported(l: any): l is Language {
+  return SUPPORTED_LANGS.includes(l)
+}
+
+// Função para obter tradução com suporte a chaves aninhadas (ex: "common.save" ou "fab.addToHomeScreen.title")
+function getTranslation(dict: TranslationDict, key: string, fallbackDict: TranslationDict): string {
+  const parts = key.split('.')
+  
+  // Navega pelos níveis de nesting
+  let value: any = dict
+  for (const part of parts) {
+    value = value?.[part]
+  }
+  if (typeof value === 'string' && value) return value
+  
+  // Fallback para inglês
+  let fallbackValue: any = fallbackDict
+  for (const part of parts) {
+    fallbackValue = fallbackValue?.[part]
+  }
+  if (typeof fallbackValue === 'string' && fallbackValue) return fallbackValue
+  
+  // Se nada encontrado, retorna a chave
+  return key
+}
 
 const DICTS: Record<Language, TranslationDict> = {
   en,
@@ -35,117 +67,61 @@ const DICTS: Record<Language, TranslationDict> = {
   ar,
 }
 
-type LanguageContextType = {
-  lang: Language
-  setLang: (l: Language) => void
-  t: (key: string) => string
-  dir: 'ltr' | 'rtl'
-}
-
 const LanguageContext = createContext<LanguageContextType | null>(null)
 
-const SUPPORTED_LANGS = Object.keys(DICTS) as Language[]
-const DEFAULT_LANG: Language = 'en'
-
-function isSupported(l: any): l is Language {
-  return SUPPORTED_LANGS.includes(l)
-}
-
-// Função para obter tradução com suporte a chaves aninhadas (ex: "common.save")
-function getTranslation(dict: TranslationDict, key: string, fallbackDict: TranslationDict): string {
-  const parts = key.split('.')
-  
-  if (parts.length === 2) {
-    const [section, subKey] = parts
-    const value = dict[section]?.[subKey]
-    if (value) return value
-    
-    // Fallback para inglês
-    const fallbackValue = fallbackDict[section]?.[subKey]
-    if (fallbackValue) return fallbackValue
-  }
-  
-  // Chave simples (retrocompatibilidade)
-  for (const section of Object.values(dict)) {
-    if (section[key]) return section[key]
-  }
-  
-  // Fallback inglês para chave simples
-  for (const section of Object.values(fallbackDict)) {
-    if (section[key]) return section[key]
-  }
-  
-  return key
-}
-
-export function LanguageProvider({
-  children,
-  initialLang,
-}: {
-  children: React.ReactNode
-  initialLang?: Language
-}) {
-  const [lang, setLangState] = useState<Language>(initialLang || DEFAULT_LANG)
-
-  const dir: 'ltr' | 'rtl' = lang === 'ar' ? 'rtl' : 'ltr'
-
-  function setLang(l: Language) {
-    const next = isSupported(l) ? l : DEFAULT_LANG
-    setLangState(next)
-    try {
-      localStorage.setItem('kardme_lang', next)
-    } catch {}
-  }
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Language>(DEFAULT_LANG)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
+    setMounted(true)
 
-    const normalizeLangCode = (code: string): Language => {
-      const c = code.toLowerCase()
-      if (c === 'pt-br' || c === 'pt_br') return 'pt-br'
-      if (c.startsWith('pt')) return 'pt'
-      if (c.startsWith('es')) return 'es'
-      if (c.startsWith('fr')) return 'fr'
-      if (c.startsWith('de')) return 'de'
-      if (c.startsWith('it')) return 'it'
-      if (c.startsWith('ar')) return 'ar'
-      if (c.startsWith('en')) return 'en'
-      return 'en'
-    }
-
-    const stored = (() => {
+    // Detectar idioma do navegador
+    const detectLanguageByIP = async () => {
       try {
-        return localStorage.getItem('kardme_lang') as Language | null
-      } catch {
-        return null
-      }
-    })()
+        const response = await fetch('https://ipapi.co/json/')
+        const data = await response.json()
+        const countryCode = data.country_code?.toLowerCase()
 
-    if (stored && isSupported(stored)) {
-      setLangState(stored)
-      return
-    }
-
-    ;(async () => {
-      try {
-        const ipLang = await detectLanguageByIP()
-        const candidate = normalizeLangCode(ipLang)
-        const next = isSupported(candidate) ? candidate : DEFAULT_LANG
-        if (!cancelled) {
-          setLangState(next)
-          try {
-            localStorage.setItem('kardme_lang', next)
-          } catch {}
+        const langMap: Record<string, Language> = {
+          pt: 'pt',
+          br: 'pt-br',
+          es: 'es',
+          fr: 'fr',
+          de: 'de',
+          it: 'it',
+          ae: 'ar',
+          sa: 'ar',
+          eg: 'ar',
         }
-      } catch {
-        if (!cancelled) setLangState(DEFAULT_LANG)
-      }
-    })()
 
-    return () => {
-      cancelled = true
+        const detectedLang = langMap[countryCode] || DEFAULT_LANG
+        if (isSupported(detectedLang)) {
+          setLangState(detectedLang)
+          localStorage.setItem('language', detectedLang)
+        }
+      } catch (err) {
+        console.error('Failed to detect language:', err)
+      }
+    }
+
+    // Verificar localStorage primeiro
+    const savedLang = localStorage.getItem('language')
+    if (savedLang && isSupported(savedLang)) {
+      setLangState(savedLang)
+    } else {
+      detectLanguageByIP()
     }
   }, [])
+
+  const setLang = (newLang: Language) => {
+    if (isSupported(newLang)) {
+      setLangState(newLang)
+      localStorage.setItem('language', newLang)
+    }
+  }
+
+  const dir: 'ltr' | 'rtl' = lang === 'ar' ? 'rtl' : 'ltr'
 
   const value = useMemo(
     () => ({
