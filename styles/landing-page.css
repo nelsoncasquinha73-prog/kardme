@@ -145,6 +145,7 @@
 
 /* ===== Landing Page Root ===== */
 .landingRoot {
+  background: #0a0a0a;
   min-height: 100vh;
 }
 
