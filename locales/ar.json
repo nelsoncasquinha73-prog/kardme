@@ -78,7 +78,10 @@
     "password": "كلمة المرور",
     "forgot_password": "نسيت كلمة المرور؟",
     "no_account": "ليس لديك حساب؟",
-    "have_account": "لديك حساب بالفعل؟"
+    "have_account": "لديك حساب بالفعل؟",
+    "login_google": "تسجيل الدخول بـ Google",
+    "login_facebook": "تسجيل الدخول بـ Facebook",
+    "signing_in": "جاري تسجيل الدخول..."
   },
   "language": {
     "select": "اللغة",

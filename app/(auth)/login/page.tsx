@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation'
 import ThemeSwitcher from '@/components/auth/ThemeSwitcher'
 import { supabase } from '@/lib/supabaseClient'
 import PasswordInput from '@/components/ui/PasswordInput'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 export default function LoginPage() {
   const router = useRouter()
 
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -76,14 +78,14 @@ export default function LoginPage() {
                           <span className="icon-left">
                             <img src="/assets/images/sign-up/google.png" alt="Google Icon" />
                           </span>
-                          Login with Google
+                          {t('auth.login_google')}
                         </button>
 
                         <button className="btn-default btn-border" type="button" disabled>
                           <span className="icon-left">
                             <img src="/assets/images/sign-up/facebook.png" alt="Facebook Icon" />
                           </span>
-                          Login with Facebook
+                          {t('auth.login_facebook')}
                         </button>
                       </div>
 
@@ -116,7 +118,7 @@ export default function LoginPage() {
                           <PasswordInput
                             value={password}
                             onChange={setPassword}
-                            placeholder="Password"
+                            placeholder={t('auth.password')}
                             required
                             autoComplete="current-password"
                             inputClassName="input-black-bg"
@@ -125,12 +127,12 @@ export default function LoginPage() {
 
                         <div className="forget-text">
                           <Link className="btn-read-more" href="/forgot-password">
-                            <span>Forgot password</span>
+                            <span>{t('auth.forgot_password')}</span>
                           </Link>
                         </div>
 
                         <button type="submit" className="btn-default" disabled={loading}>
-                          {loading ? 'A entrar...' : 'Sign In'}
+                          {loading ? t('auth.signing_in') : t('auth.login')}
                         </button>
 
                         {error && <p style={{ color: 'crimson', marginTop: 10, fontSize: 14 }}>{error}</p>}
@@ -139,9 +141,9 @@ export default function LoginPage() {
 
                     <div className="signup-box-footer">
                       <div className="bottom-text">
-                        Don't have an account?
+                        {t('auth.no_account')}
                         <Link className="btn-read-more ml--5" href="/signup">
-                          <span>Sign Up</span>
+                          <span>{t('auth.signup')}</span>
                         </Link>
                       </div>
                     </div>

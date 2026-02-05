@@ -78,7 +78,10 @@
     "password": "Mot de passe",
     "forgot_password": "Mot de passe oublié?",
     "no_account": "Pas de compte?",
-    "have_account": "Déjà un compte?"
+    "have_account": "Déjà un compte?",
+    "login_google": "Se connecter avec Google",
+    "login_facebook": "Se connecter avec Facebook",
+    "signing_in": "Connexion..."
   },
   "language": {
     "select": "Langue",
