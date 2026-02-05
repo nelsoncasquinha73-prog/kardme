@@ -45,6 +45,19 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
 
   const handleSaveContact = () => {
     // Abre a API route que devolve o vCard
+
+  const handleAddToHome = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: cardTitle || "Kardme",
+        text: "Vê o meu cartão digital",
+        url: window.location.href,
+      })
+    } else {
+      alert("Toca no botão Partilhar do Safari → Adicionar ao ecrã principal")
+    }
+  }
+
     window.location.href = `/api/vcard/${cardId}`
   }
 
@@ -141,6 +154,19 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
                 <BsQrCode size={22} />
               </button>
             )}
+
+            {/* Add to Home Screen */}
+            <button
+              onClick={() => {
+                handleAddToHome()
+                setExpanded(false)
+              }}
+              style={secondaryButton}
+              aria-label="Adicionar ao ecrã principal"
+            >
+              <MdAddToPhotos size={22} />
+            </button>
+
 
             {/* Save Contact */}
             {s.showSaveContact && (
