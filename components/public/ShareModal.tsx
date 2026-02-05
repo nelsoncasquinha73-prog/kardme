@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { FiX, FiCopy, FiCheck, FiChevronRight } from 'react-icons/fi'
-import { FaFacebook, FaLinkedin, FaPinterest, FaReddit, FaWhatsapp, FaSnapchat } from 'react-icons/fa'
+import { FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { FaXTwitter } from 'react-icons/fa6'
+import { FaFacebookMessenger } from 'react-icons/fa'
+import { SiTelegram } from 'react-icons/si'
 import { HiOutlineMail } from 'react-icons/hi'
 
 type Props = {
@@ -20,9 +22,29 @@ export default function ShareModal({ url, title, onClose }: Props) {
 
   const shareOptions = [
     {
-      name: 'Partilhar no Facebook',
-      icon: <FaFacebook size={24} color="#1877F2" />,
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      name: 'Partilhar no WhatsApp',
+      icon: <FaWhatsapp size={24} color="#25D366" />,
+      href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+    },
+    {
+      name: 'Partilhar no Messenger',
+      icon: <FaFacebookMessenger size={24} color="#0084FF" />,
+      href: `https://www.facebook.com/dialog/share?app_id=YOUR_APP_ID&display=popup&href=${encodedUrl}&redirect_uri=${encodedUrl}`,
+    },
+    {
+      name: 'Partilhar no Telegram',
+      icon: <SiTelegram size={24} color="#0088cc" />,
+      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
+    },
+    {
+      name: 'Partilhar por SMS',
+      icon: <HiOutlineMail size={24} color="#34C759" />,
+      href: `sms:?body=${encodedTitle}%20${encodedUrl}`,
+    },
+    {
+      name: 'Partilhar por Email',
+      icon: <HiOutlineMail size={24} color="#333" />,
+      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
     },
     {
       name: 'Partilhar no Twitter',
@@ -33,31 +55,6 @@ export default function ShareModal({ url, title, onClose }: Props) {
       name: 'Partilhar no LinkedIn',
       icon: <FaLinkedin size={24} color="#0A66C2" />,
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    },
-    {
-      name: 'Partilhar por email',
-      icon: <HiOutlineMail size={24} color="#333" />,
-      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
-    },
-    {
-      name: 'Partilhar no Pinterest',
-      icon: <FaPinterest size={24} color="#E60023" />,
-      href: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}`,
-    },
-    {
-      name: 'Partilhar no Reddit',
-      icon: <FaReddit size={24} color="#FF4500" />,
-      href: `https://reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
-    },
-    {
-      name: 'Partilhar no WhatsApp',
-      icon: <FaWhatsapp size={24} color="#25D366" />,
-      href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-    },
-    {
-      name: 'Partilhar no Snapchat',
-      icon: <FaSnapchat size={24} color="#FFFC00" style={{ background: '#000', borderRadius: 4, padding: 2 }} />,
-      href: `https://www.snapchat.com/share?url=${encodedUrl}`,
     },
   ]
 
