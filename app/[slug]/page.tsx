@@ -58,10 +58,10 @@ export async function generateMetadata({ params }: Props) {
     .eq('enabled', true)
     .single()
 
-  const profileSettings = profileBlock?.settings as { name?: string; title?: string; avatarUrl?: string } | null
-  const name = profileSettings?.name || card.title || 'Cartão Digital'
-  const jobTitle = profileSettings?.title || ''
-  const avatarUrl = profileSettings?.avatarUrl
+  const profileSettings = profileBlock?.settings as any
+  const name = profileSettings?.name?.text || card.title || 'Cartão Digital'
+  const jobTitle = profileSettings?.profession?.text || ''
+  const avatarUrl = profileSettings?.avatar?.image
   const description = jobTitle ? `${name} - ${jobTitle}` : name
 
   const rawBg = card?.theme?.background
