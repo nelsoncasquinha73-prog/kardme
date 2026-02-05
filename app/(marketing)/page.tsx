@@ -88,13 +88,13 @@ export default function Home() {
             <div className="col-lg-12">
               <div className="inner text-center">
                 <h1 className="title display-one">
-                  Um <span className="theme-gradient">cartão digital</span> <br /> com efeito{' '}
-                  <span className="theme-gradient">wow</span>
+                  {t('landing.hero_title_1')} <span className="theme-gradient">{t('landing.hero_title_2')}</span> <br /> {t('landing.hero_title_3')}{' '}
+                  <span className="theme-gradient">{t('landing.hero_title_4')}</span>
                 </h1>
 
                 <p className="description">
-                  Escolhe um template premium, personaliza ao teu estilo e partilha como um pro. <br />
-                  O teu primeiro impacto nunca mais vai ser &quot;só mais um&quot;.
+                  {t('landing.hero_subtitle')} <br />
+                  {t('landing.hero_subtitle_2')}
                 </p>
 
                 <div className="heroCtaCard">
