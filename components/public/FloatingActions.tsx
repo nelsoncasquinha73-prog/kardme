@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FiShare2, FiX } from 'react-icons/fi'
+import { FiShare2, FiX, FiUpload } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import { HiOutlineUserAdd } from 'react-icons/hi'
 import { IoShareSocial } from 'react-icons/io5'
@@ -113,7 +113,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
                 style={secondaryButton}
                 aria-label="Partilhar"
               >
-                <FiShare2 size={22} />
+                <div style={{ width: 26, height: 26, borderRadius: 6, border: `2px solid ${s.buttonColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiUpload size={16} /></div>
               </button>
             )}
 
