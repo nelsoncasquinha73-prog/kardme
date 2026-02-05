@@ -6,6 +6,7 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
 type SocialItem = { enabled?: boolean; label?: string; url?: string }
@@ -189,6 +190,7 @@ function normalizeCombined(inputSettings: SocialSettings, inputStyle?: SocialSty
 export default function SocialBlockEditor({ settings, style, onChange }: Props) {
   const { openPicker } = useColorPicker()
   const [local, setLocal] = useState<CombinedState>(() => normalizeCombined(settings, style))
+  const { t } = useLanguage()
 
   React.useEffect(() => setLocal(normalizeCombined(settings, style)), [settings, style])
 
@@ -216,8 +218,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title="Posição">
-        <Row label="Mover (Y)">
+      <Section title={t('editor.position')}>
+        <Row label={t('editor.move_y')}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button type="button" onClick={() => patch((d) => (d.style.offsetY = (st.offsetY ?? 0) - 4))} style={miniBtn}>⬆️</button>
             <button type="button" onClick={() => patch((d) => (d.style.offsetY = (st.offsetY ?? 0) + 4))} style={miniBtn}>⬇️</button>
@@ -227,8 +229,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
       </Section>
 
-      <Section title="Conteúdo">
-        <Row label="Título">
+      <Section title={t('editor.content')}>
+        <Row label={t('editor.title')}>
           <input
             value={s.heading ?? 'Redes Sociais'}
             onChange={(e) => patch((d) => (d.settings.heading = e.target.value))}
@@ -240,7 +242,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           />
         </Row>
 
-        <Row label="Alinhamento do título">
+        <Row label={t('editor.title_alignment')}>
           <select
             value={st.headingAlign ?? 'left'}
             onChange={(e) => patch((d) => (d.style.headingAlign = e.target.value as any))}
@@ -255,7 +257,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </select>
         </Row>
 
-        <Row label="Cor do título">
+        <Row label={t('editor.title_color')}>
           <SwatchRow
             value={st.headingColor ?? '#111827'}
             onChange={(hex) => patch((d) => (d.style.headingColor = hex))}
@@ -263,11 +265,11 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           />
         </Row>
 
-        <Row label="Negrito">
+        <Row label={t('editor.bold')}>
           <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
         </Row>
 
-        <Row label="Fonte do título">
+        <Row label={t('editor.title_font')}>
           <select
             value={st.headingFontFamily ?? ''}
             onChange={(e) => patch((d) => (d.style.headingFontFamily = e.target.value || ''))}
@@ -285,7 +287,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </select>
         </Row>
 
-        <Row label="Peso do título">
+        <Row label={t('editor.title_weight')}>
           <select
             value={String(st.headingFontWeight ?? 900)}
             onChange={(e) => patch((d) => (d.style.headingFontWeight = clampNum(e.target.value, 900)))}
@@ -302,7 +304,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </select>
         </Row>
 
-        <Row label="Tamanho do título (px)">
+        <Row label={t('editor.title_size')}>
           <input
             type="number"
             min={10}
@@ -317,8 +319,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
       </Section>
 
-      <Section title="Layout (alinhamento e espaçamento)">
-        <Row label="Direção">
+      <Section title={t('editor.layout')}>
+        <Row label={t('editor.direction')}>
           <select
             value={layout.direction ?? 'row'}
             onChange={(e) => patch((d) => (d.settings.layout = { ...layout, direction: e.target.value as any }))}
@@ -332,7 +334,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </select>
         </Row>
 
-        <Row label="Alinhamento">
+        <Row label={t('editor.alignment')}>
           <select
             value={layout.align ?? 'center'}
             onChange={(e) => patch((d) => (d.settings.layout = { ...layout, align: e.target.value as any }))}
@@ -347,7 +349,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </select>
         </Row>
 
-        <Row label="Espaço entre botões (px)">
+        <Row label={t('editor.button_spacing')}>
           <input
             type="range"
             min={0}
@@ -363,8 +365,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
       </Section>
 
-      <Section title="Aparência do bloco">
-        <Row label="Fundo">
+      <Section title={t('editor.block_appearance')}>
+        <Row label={t('editor.background')}>
           <Toggle
             active={bgEnabled}
             onClick={() =>
@@ -376,7 +378,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
 
         {bgEnabled && (
-          <Row label="Cor do fundo">
+          <Row label={t('editor.bg_color')}>
             <SwatchRow
               value={container.bgColor ?? '#ffffff'}
               onChange={(hex) => patch((d) => (d.style.container = { ...container, bgColor: hex }))}
@@ -385,14 +387,14 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </Row>
         )}
 
-        <Row label="Sombra">
+        <Row label={t('editor.shadow')}>
           <Toggle
             active={container.shadow ?? false}
             onClick={() => patch((d) => (d.style.container = { ...container, shadow: !(container.shadow ?? false) }))}
           />
         </Row>
 
-        <Row label="Borda">
+        <Row label={t('editor.border')}>
           <Toggle
             active={borderEnabled}
             onClick={() => patch((d) => (d.style.container = { ...container, borderWidth: borderEnabled ? 0 : 1 }))}
@@ -401,7 +403,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         {borderEnabled && (
           <>
-            <Row label="Espessura">
+            <Row label={t('editor.thickness')}>
               <input
                 type="range"
                 min={1}
@@ -626,7 +628,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </>
         )}
 
-        <Row label="Fundo">
+        <Row label={t('editor.background')}>
           <SwatchRow
             value={btn.bgColor ?? '#ffffff'}
             onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex }))}
@@ -635,7 +637,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           />
         </Row>
 
-        <Row label="Borda">
+        <Row label={t('editor.border')}>
           <Toggle
             active={defaultsBorderEnabled}
             onClick={() => patch((d) => (d.style.buttonDefaults = { ...btn, borderEnabled: !defaultsBorderEnabled }))}
@@ -644,7 +646,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
 
         {defaultsBorderEnabled && (
           <>
-            <Row label="Espessura">
+            <Row label={t('editor.thickness')}>
               <input
                 type="range"
                 min={1}

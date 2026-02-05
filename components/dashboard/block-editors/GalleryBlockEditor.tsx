@@ -6,6 +6,7 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type GalleryItem = {
   uid: string
@@ -79,6 +80,7 @@ export default function GalleryBlockEditor({
 }: Props) {
   const { openPicker } = useColorPicker()
   const [uploading, setUploading] = useState(false)
+  const { t } = useLanguage()
 
   const s = settings || ({ items: [] } as any)
   const st = style || {}
@@ -168,8 +170,8 @@ export default function GalleryBlockEditor({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title="Conteúdo">
-        <Row label="Título">
+      <Section title={t('editor.content')}>
+        <Row label={t('editor.title')}>
           <input
             value={s.heading ?? 'Galeria'}
             onChange={(e) => onChangeSettings({ ...s, heading: e.target.value })}
@@ -182,7 +184,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
 
-        <Row label="Alinhamento do título">
+        <Row label={t('editor.title_alignment')}>
           <select
             value={st.headingAlign ?? 'left'}
             onChange={(e) => setStyle({ headingAlign: e.target.value as any })}
@@ -197,7 +199,7 @@ export default function GalleryBlockEditor({
           </select>
         </Row>
 
-        <Row label="Cor do título">
+        <Row label={t('editor.title_color')}>
           <SwatchRow
             value={st.headingColor ?? '#111827'}
             onChange={(hex) => setStyle({ headingColor: hex })}
@@ -205,11 +207,11 @@ export default function GalleryBlockEditor({
           />
         </Row>
 
-        <Row label="Negrito">
+        <Row label={t('editor.bold')}>
           <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
         </Row>
 
-        <Row label="Fonte do título">
+        <Row label={t('editor.title_font')}>
           <select
             value={st.headingFontFamily ?? ''}
             onChange={(e) => setStyle({ headingFontFamily: e.target.value || '' })}
@@ -227,7 +229,7 @@ export default function GalleryBlockEditor({
           </select>
         </Row>
 
-        <Row label="Peso do título">
+        <Row label={t('editor.title_weight')}>
           <select
             value={String(st.headingFontWeight ?? 900)}
             onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })}
@@ -244,7 +246,7 @@ export default function GalleryBlockEditor({
           </select>
         </Row>
 
-        <Row label="Tamanho do título (px)">
+        <Row label={t('editor.title_size')}>
           <input
             type="number"
             min={10}
@@ -259,8 +261,8 @@ export default function GalleryBlockEditor({
         </Row>
       </Section>
 
-      <Section title="Imagens">
-        <Row label="Upload">
+      <Section title={t('editor.images')}>
+        <Row label={t('editor.upload')}>
           <input
             type="file"
             accept="image/*"
@@ -306,7 +308,7 @@ export default function GalleryBlockEditor({
                   fontSize: 16,
                   lineHeight: 1,
                 }}
-                aria-label="Remover"
+                aria-label={t('editor.remove')}
                 data-no-block-select="1"
                 onPointerDown={stop}
                 onMouseDown={stop}
@@ -315,7 +317,7 @@ export default function GalleryBlockEditor({
               </button>
             </div>
 
-            <Row label="Legenda">
+            <Row label={t('editor.caption')}>
               <input
                 value={it.caption ?? ''}
                 onChange={(e) => updateItem(it.uid, { caption: e.target.value })}
@@ -328,7 +330,7 @@ export default function GalleryBlockEditor({
               />
             </Row>
 
-            <Row label="Ativo">
+            <Row label={t('editor.active')}>
               <Toggle
                 active={it.enabled !== false}
                 onClick={() => {
@@ -341,8 +343,8 @@ export default function GalleryBlockEditor({
         ))}
       </Section>
 
-      <Section title="Layout">
-        <Row label="Modo do container">
+      <Section title={t('editor.layout_simple')}>
+        <Row label={t('editor.container_mode')}>
           <select
             value={layout.containerMode ?? 'full'}
             onChange={(e) => setLayout({ containerMode: e.target.value as any })}
@@ -357,7 +359,7 @@ export default function GalleryBlockEditor({
           </select>
         </Row>
 
-        <Row label="Gap entre fotos (px)">
+        <Row label={t('editor.photo_gap')}>
           <input
             type="range"
             min={0}
@@ -372,7 +374,7 @@ export default function GalleryBlockEditor({
           <span style={rightNum}>{layout.gapPx ?? 16}px</span>
         </Row>
 
-        <Row label="Respiro lateral (px)">
+        <Row label={t('editor.side_padding')}>
           <input
             type="range"
             min={0}
@@ -387,7 +389,7 @@ export default function GalleryBlockEditor({
           <span style={rightNum}>{layout.sidePaddingPx ?? (layout.containerMode === 'full' ? 0 : 16)}px</span>
         </Row>
 
-        <Row label="Largura (px) - só Auto Adapter">
+        <Row label={t('editor.width_auto')}>
           <input
             type="number"
             min={40}
@@ -401,7 +403,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
 
-        <Row label="Altura (px) - só Auto Adapter">
+        <Row label={t('editor.height_auto')}>
           <input
             type="number"
             min={40}
@@ -415,7 +417,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
 
-        <Row label="Object Fit - só Auto Adapter">
+        <Row label={t('editor.object_fit')}>
           <select
             value={layout.objectFit ?? 'cover'}
             onChange={(e) => setLayout({ objectFit: e.target.value as any })}

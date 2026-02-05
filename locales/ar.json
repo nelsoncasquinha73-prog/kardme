@@ -137,7 +137,19 @@
     "layout": "التخطيط (المحاذاة والتباعد)",
     "direction": "الاتجاه",
     "button_spacing": "المسافة بين الأزرار (px)",
-    "value": "القيمة"
+    "value": "القيمة",
+    "block_appearance": "مظهر الكتلة",
+    "images": "الصور",
+    "remove": "إزالة",
+    "caption": "التسمية التوضيحية",
+    "active": "نشط",
+    "layout_simple": "التخطيط",
+    "container_mode": "وضع الحاوية",
+    "photo_gap": "المسافة بين الصور (px)",
+    "side_padding": "الهامش الجانبي (px)",
+    "width_auto": "العرض (px) - Auto Adapter فقط",
+    "height_auto": "الارتفاع (px) - Auto Adapter فقط",
+    "object_fit": "Object Fit - Auto Adapter فقط"
   },
   "catalog": {
     "title": "كتالوج القوالب",

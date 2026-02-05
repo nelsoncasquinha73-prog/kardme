@@ -137,7 +137,19 @@
     "layout": "Disposition (alignement et espacement)",
     "direction": "Direction",
     "button_spacing": "Espacement des boutons (px)",
-    "value": "Valeur"
+    "value": "Valeur",
+    "block_appearance": "Apparence du bloc",
+    "images": "Images",
+    "remove": "Supprimer",
+    "caption": "Légende",
+    "active": "Actif",
+    "layout_simple": "Disposition",
+    "container_mode": "Mode conteneur",
+    "photo_gap": "Espace entre photos (px)",
+    "side_padding": "Marge latérale (px)",
+    "width_auto": "Largeur (px) - Auto Adapter uniquement",
+    "height_auto": "Hauteur (px) - Auto Adapter uniquement",
+    "object_fit": "Object Fit - Auto Adapter uniquement"
   },
   "catalog": {
     "title": "Catalogue de Modèles",

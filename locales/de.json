@@ -137,7 +137,19 @@
     "layout": "Layout (Ausrichtung und Abstand)",
     "direction": "Richtung",
     "button_spacing": "Abstand zwischen Buttons (px)",
-    "value": "Wert"
+    "value": "Wert",
+    "block_appearance": "Block-Erscheinung",
+    "images": "Bilder",
+    "remove": "Entfernen",
+    "caption": "Beschriftung",
+    "active": "Aktiv",
+    "layout_simple": "Layout",
+    "container_mode": "Container-Modus",
+    "photo_gap": "Abstand zwischen Fotos (px)",
+    "side_padding": "Seitenabstand (px)",
+    "width_auto": "Breite (px) - nur Auto Adapter",
+    "height_auto": "Höhe (px) - nur Auto Adapter",
+    "object_fit": "Object Fit - nur Auto Adapter"
   },
   "catalog": {
     "title": "Vorlagen-Katalog",

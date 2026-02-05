@@ -137,7 +137,19 @@
     "layout": "Layout (allineamento e spaziatura)",
     "direction": "Direzione",
     "button_spacing": "Spazio tra pulsanti (px)",
-    "value": "Valore"
+    "value": "Valore",
+    "block_appearance": "Aspetto del blocco",
+    "images": "Immagini",
+    "remove": "Rimuovi",
+    "caption": "Didascalia",
+    "active": "Attivo",
+    "layout_simple": "Layout",
+    "container_mode": "Modalità contenitore",
+    "photo_gap": "Spazio tra foto (px)",
+    "side_padding": "Padding laterale (px)",
+    "width_auto": "Larghezza (px) - solo Auto Adapter",
+    "height_auto": "Altezza (px) - solo Auto Adapter",
+    "object_fit": "Object Fit - solo Auto Adapter"
   },
   "catalog": {
     "title": "Catalogo Modelli",

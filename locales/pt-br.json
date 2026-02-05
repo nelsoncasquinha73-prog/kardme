@@ -137,7 +137,19 @@
     "layout": "Layout (alinhamento e espaçamento)",
     "direction": "Direção",
     "button_spacing": "Espaço entre botões (px)",
-    "value": "Valor"
+    "value": "Valor",
+    "block_appearance": "Aparência do bloco",
+    "images": "Imagens",
+    "remove": "Remover",
+    "caption": "Legenda",
+    "active": "Ativo",
+    "layout_simple": "Layout",
+    "container_mode": "Modo do container",
+    "photo_gap": "Espaço entre fotos (px)",
+    "side_padding": "Margem lateral (px)",
+    "width_auto": "Largura (px) - só Auto Adapter",
+    "height_auto": "Altura (px) - só Auto Adapter",
+    "object_fit": "Object Fit - só Auto Adapter"
   },
   "catalog": {
     "title": "Catálogo de Templates",

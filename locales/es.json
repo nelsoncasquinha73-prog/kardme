@@ -137,7 +137,19 @@
     "layout": "Diseño (alineación y espaciado)",
     "direction": "Dirección",
     "button_spacing": "Espacio entre botones (px)",
-    "value": "Valor"
+    "value": "Valor",
+    "block_appearance": "Apariencia del bloque",
+    "images": "Imágenes",
+    "remove": "Eliminar",
+    "caption": "Leyenda",
+    "active": "Activo",
+    "layout_simple": "Diseño",
+    "container_mode": "Modo del contenedor",
+    "photo_gap": "Espacio entre fotos (px)",
+    "side_padding": "Relleno lateral (px)",
+    "width_auto": "Ancho (px) - solo Auto Adapter",
+    "height_auto": "Altura (px) - solo Auto Adapter",
+    "object_fit": "Object Fit - solo Auto Adapter"
   },
   "catalog": {
     "title": "Catálogo de Plantillas",
