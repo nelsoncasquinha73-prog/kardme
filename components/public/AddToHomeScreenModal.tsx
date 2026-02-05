@@ -72,10 +72,10 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
 
           <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px' }}>
             <li style={{ marginBottom: '12px' }}>
-              {t('fab.addToHomeScreen.step1')}
+              Toque no botão <strong>Partilhar</strong> (quadrado com seta para cima)
             </li>
             <li style={{ marginBottom: '12px' }}>
-              {t('fab.addToHomeScreen.step2')}
+              Procure por <strong>Adicionar ao ecrã principal</strong>
             </li>
             <li style={{ marginBottom: '12px' }}>
               {t('fab.addToHomeScreen.step3')}
