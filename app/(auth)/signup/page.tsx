@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
+
 const baseTranslations = {
   firstNameLabel: 'First name',
   lastNameLabel: 'Last name',
@@ -23,6 +24,7 @@ const baseTranslations = {
 }
 
 const translations: Record<string, typeof baseTranslations> = {
+  en: baseTranslations,
   pt: {
     firstNameLabel: 'Nome',
     lastNameLabel: 'Apelido',
@@ -35,7 +37,78 @@ const translations: Record<string, typeof baseTranslations> = {
     phoneInvalidError: 'Telemóvel inválido (mínimo 9 dígitos)',
     successMessage: 'Conta criada! Verifica o email para confirmar.',
   },
-  en: baseTranslations,
+  'pt-br': {
+    firstNameLabel: 'Nome',
+    lastNameLabel: 'Sobrenome',
+    phoneLabel: 'Celular',
+    emailLabel: 'Email',
+    passwordLabel: 'Criar senha',
+    confirmPasswordLabel: 'Confirmar senha',
+    submitButton: 'Criar conta',
+    passwordsMismatchError: 'Senhas não coincidem',
+    phoneInvalidError: 'Celular inválido (mínimo 9 dígitos)',
+    successMessage: 'Conta criada! Verifique o email para confirmar.',
+  },
+  es: {
+    firstNameLabel: 'Nombre',
+    lastNameLabel: 'Apellido',
+    phoneLabel: 'Teléfono',
+    emailLabel: 'Email',
+    passwordLabel: 'Crear contraseña',
+    confirmPasswordLabel: 'Confirmar contraseña',
+    submitButton: 'Crear cuenta',
+    passwordsMismatchError: 'Las contraseñas no coinciden',
+    phoneInvalidError: 'Teléfono inválido (mínimo 9 dígitos)',
+    successMessage: 'Cuenta creada! Revisa tu email para confirmar.',
+  },
+  fr: {
+    firstNameLabel: 'Prénom',
+    lastNameLabel: 'Nom',
+    phoneLabel: 'Téléphone',
+    emailLabel: 'Email',
+    passwordLabel: 'Créer mot de passe',
+    confirmPasswordLabel: 'Confirmer mot de passe',
+    submitButton: 'Créer un compte',
+    passwordsMismatchError: 'Les mots de passe ne correspondent pas',
+    phoneInvalidError: 'Téléphone invalide (minimum 9 chiffres)',
+    successMessage: 'Compte créé! Vérifiez votre email pour confirmer.',
+  },
+  de: {
+    firstNameLabel: 'Vorname',
+    lastNameLabel: 'Nachname',
+    phoneLabel: 'Telefon',
+    emailLabel: 'Email',
+    passwordLabel: 'Passwort erstellen',
+    confirmPasswordLabel: 'Passwort bestätigen',
+    submitButton: 'Konto erstellen',
+    passwordsMismatchError: 'Passwörter stimmen nicht überein',
+    phoneInvalidError: 'Ungültige Telefonnummer (mindestens 9 Ziffern)',
+    successMessage: 'Konto erstellt! Überprüfen Sie Ihre Email zur Bestätigung.',
+  },
+  it: {
+    firstNameLabel: 'Nome',
+    lastNameLabel: 'Cognome',
+    phoneLabel: 'Telefono',
+    emailLabel: 'Email',
+    passwordLabel: 'Crea password',
+    confirmPasswordLabel: 'Conferma password',
+    submitButton: 'Crea account',
+    passwordsMismatchError: 'Le password non corrispondono',
+    phoneInvalidError: 'Telefono non valido (minimo 9 cifre)',
+    successMessage: 'Account creato! Controlla la tua email per confermare.',
+  },
+  ar: {
+    firstNameLabel: 'الاسم الأول',
+    lastNameLabel: 'اسم العائلة',
+    phoneLabel: 'الهاتف',
+    emailLabel: 'البريد الإلكتروني',
+    passwordLabel: 'إنشاء كلمة مرور',
+    confirmPasswordLabel: 'تأكيد كلمة المرور',
+    submitButton: 'إنشاء حساب',
+    passwordsMismatchError: 'كلمات المرور غير متطابقة',
+    phoneInvalidError: 'رقم هاتف غير صالح (9 أرقام على الأقل)',
+    successMessage: 'تم إنشاء الحساب! تحقق من بريدك الإلكتروني للتأكيد.',
+  },
 }
 
 export default function SignupPage() {
