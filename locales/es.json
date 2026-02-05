@@ -262,4 +262,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Añadir a la pantalla de inicio",
+      "description": "Siga estos pasos para añadir esta tarjeta a su pantalla de inicio:",
+      "step1": "Toque el botón <strong>Compartir</strong> (cuadrado con flecha hacia arriba)",
+      "step2": "Busque <strong>\"Añadir a la pantalla de inicio\"</strong>",
+      "step3": "Toque para confirmar",
+      "hint": "En iPhone (Safari), toque el botón de compartir (cuadrado con flecha hacia arriba) y luego <strong>\"Añadir a la pantalla de inicio\"</strong>.",
+      "understood": "Entendido"
+    }
+  }
 }

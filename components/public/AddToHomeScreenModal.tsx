@@ -2,12 +2,15 @@
 
 import { FiX } from 'react-icons/fi'
 import { FiUpload } from 'react-icons/fi'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type Props = {
   onClose: () => void
 }
 
 export default function AddToHomeScreenModal({ onClose }: Props) {
+  const { t } = useLanguage()
+
   return (
     <div
       style={{
@@ -43,7 +46,7 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
           }}
         >
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
-            Adicionar ao ecrã principal
+            {t('fab.addToHomeScreen.title')}
           </h2>
           <button
             onClick={onClose}
@@ -64,18 +67,18 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
         {/* Content */}
         <div style={{ marginBottom: '24px', lineHeight: 1.6, color: '#333' }}>
           <p style={{ margin: '0 0 16px 0', fontSize: '14px' }}>
-            Siga estes passos para adicionar este cartão ao seu ecrã principal:
+            {t('fab.addToHomeScreen.description')}
           </p>
 
           <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px' }}>
             <li style={{ marginBottom: '12px' }}>
-              Toque no botão <strong>Partilhar</strong> (ícone com seta para cima)
+              {t('fab.addToHomeScreen.step1')}
             </li>
             <li style={{ marginBottom: '12px' }}>
-              Procure por <strong>"Adicionar ao ecrã principal"</strong>
+              {t('fab.addToHomeScreen.step2')}
             </li>
             <li style={{ marginBottom: '12px' }}>
-              Toque para confirmar
+              {t('fab.addToHomeScreen.step3')}
             </li>
           </ol>
 
@@ -90,9 +93,23 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
               gap: '12px',
             }}
           >
-            <div style={{ width: 34, height: 34, borderRadius: 10, border: '2px solid #8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: '#fff' }}><FiUpload size={18} style={{ color: '#8B5CF6' }} /></div>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 10,
+                border: '2px solid #8B5CF6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                background: '#fff',
+              }}
+            >
+              <FiUpload size={18} style={{ color: '#8B5CF6' }} />
+            </div>
             <span style={{ fontSize: '13px', color: '#666' }}>
-              No iPhone (Safari), toque no botão de partilha (quadrado com seta para cima) e depois em “Adicionar ao ecrã principal”.
+              {t('fab.addToHomeScreen.hint')}
             </span>
           </div>
         </div>
@@ -115,7 +132,7 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#7c3aed')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8B5CF6')}
         >
-          Entendi
+          {t('fab.addToHomeScreen.understood')}
         </button>
       </div>
     </div>

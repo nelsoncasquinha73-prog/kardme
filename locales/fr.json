@@ -262,4 +262,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Ajouter à l'écran d'accueil",
+      "description": "Suivez ces étapes pour ajouter cette carte à votre écran d'accueil:",
+      "step1": "Appuyez sur le bouton <strong>Partager</strong> (carré avec flèche vers le haut)",
+      "step2": "Cherchez <strong>\"Ajouter à l'écran d'accueil\"</strong>",
+      "step3": "Appuyez pour confirmer",
+      "hint": "Sur iPhone (Safari), appuyez sur le bouton de partage (carré avec flèche vers le haut) puis sur <strong>\"Ajouter à l'écran d'accueil\"</strong>.",
+      "understood": "D'accord"
+    }
+  }
 }

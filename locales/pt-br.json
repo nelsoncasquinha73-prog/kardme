@@ -262,4 +262,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Adicionar à tela inicial",
+      "description": "Siga estes passos para adicionar este cartão à sua tela inicial:",
+      "step1": "Toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima)",
+      "step2": "Procure por <strong>\"Adicionar à tela inicial\"</strong>",
+      "step3": "Toque para confirmar",
+      "hint": "No iPhone (Safari), toque no botão de compartilhamento (quadrado com seta para cima) e depois em <strong>\"Adicionar à tela inicial\"</strong>.",
+      "understood": "Entendi"
+    }
+  }
 }

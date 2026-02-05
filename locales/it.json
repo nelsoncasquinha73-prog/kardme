@@ -262,4 +262,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Aggiungi alla schermata iniziale",
+      "description": "Segui questi passaggi per aggiungere questa carta alla tua schermata iniziale:",
+      "step1": "Tocca il pulsante <strong>Condividi</strong> (quadrato con freccia verso l'alto)",
+      "step2": "Cerca <strong>\"Aggiungi alla schermata iniziale\"</strong>",
+      "step3": "Tocca per confermare",
+      "hint": "Su iPhone (Safari), tocca il pulsante di condivisione (quadrato con freccia verso l'alto) e poi <strong>\"Aggiungi alla schermata iniziale\"</strong>.",
+      "understood": "Ho capito"
+    }
+  }
 }

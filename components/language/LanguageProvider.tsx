@@ -22,7 +22,7 @@ import ar from '@/locales/ar.json'
 
 export type Language = 'en' | 'pt' | 'pt-br' | 'es' | 'fr' | 'de' | 'it' | 'ar'
 
-type TranslationDict = Record<string, Record<string, string>>
+type TranslationDict = Record<string, any>
 
 const DICTS: Record<Language, TranslationDict> = {
   en,

@@ -262,4 +262,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Zum Startbildschirm hinzufügen",
+      "description": "Folgen Sie diesen Schritten, um diese Karte zu Ihrem Startbildschirm hinzuzufügen:",
+      "step1": "Tippen Sie auf die Schaltfläche <strong>Teilen</strong> (Quadrat mit Pfeil nach oben)",
+      "step2": "Suchen Sie nach <strong>\"Zum Startbildschirm hinzufügen\"</strong>",
+      "step3": "Tippen Sie zur Bestätigung",
+      "hint": "Tippen Sie auf dem iPhone (Safari) auf die Schaltfläche Teilen (Quadrat mit Pfeil nach oben) und dann auf <strong>\"Zum Startbildschirm hinzufügen\"</strong>.",
+      "understood": "Verstanden"
+    }
+  }
 }

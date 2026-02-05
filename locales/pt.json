@@ -173,4 +173,16 @@
     "it": "Italiano",
     "ar": "العربية"
   }
+,
+  "fab": {
+    "addToHomeScreen": {
+      "title": "Adicionar ao ecrã principal",
+      "description": "Siga estes passos para adicionar este cartão ao seu ecrã principal:",
+      "step1": "Toque no botão <strong>Partilhar</strong> (quadrado com seta para cima)",
+      "step2": "Procure por <strong>\"Adicionar ao ecrã principal\"</strong>",
+      "step3": "Toque para confirmar",
+      "hint": "No iPhone (Safari), toque no botão de partilha (quadrado com seta para cima) e depois em <strong>\"Adicionar ao ecrã principal\"</strong>.",
+      "understood": "Entendi"
+    }
+  }
 }
