@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import KardmeShowcase from '@/components/KardmeShowcase'
 import { useLanguage } from '@/components/language/LanguageProvider'
+import LanguageDropdown from '@/components/language/LanguageDropdown'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
@@ -69,6 +70,7 @@ export default function Home() {
                 <Link className="btn btn-cta-green" href="/signup">{t('landing.create_free_card')}</Link>
               </>
             )}
+            <LanguageDropdown />
           </div>
         </div>
       </nav>
