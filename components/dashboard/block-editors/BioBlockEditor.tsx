@@ -3,6 +3,7 @@
 import React from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { FONT_OPTIONS } from '@/lib/fontes'
 
 type BioSettings = {
@@ -41,6 +42,7 @@ type Props = {
 
 export default function BioBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
+  const { t } = useLanguage()
 
   const s: BioStyle = style || {}
   const c = s.container || {}
@@ -69,7 +71,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title="Texto">
+      <Section title={t('editor.text')}>
         <label style={{ fontSize: 12, opacity: 0.7 }}>Bio</label>
         <textarea
           value={settings.text || ''}
@@ -86,7 +88,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           }}
         />
 
-        <Row label="Alinhamento">
+        <Row label={t('editor.alignment')}>
           <Button onClick={() => setStyle({ align: 'left' })} active={s.align === 'left'}>
             Esquerda
           </Button>
@@ -98,7 +100,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           </Button>
         </Row>
 
-        <Row label="Fonte">
+        <Row label={t('editor.font')}>
           <select
             value={s.fontFamily ?? ''}
             onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })}
@@ -113,11 +115,11 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           </select>
         </Row>
 
-        <Row label="Negrito">
+        <Row label={t('editor.bold')}>
           <Toggle active={s.bold === true} onClick={() => setStyle({ bold: !(s.bold === true) })} />
         </Row>
 
-        <Row label="Cor do texto">
+        <Row label={t('editor.text_color')}>
           <SwatchRow
             value={s.textColor ?? '#111827'}
             onChange={(hex) => setStyle({ textColor: hex })}
@@ -125,7 +127,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           />
         </Row>
 
-        <Row label="Tamanho">
+        <Row label={t('editor.size')}>
           <input
             type="range"
             min={12}
@@ -137,7 +139,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{s.fontSize ?? 15}px</span>
         </Row>
 
-        <Row label="Linha">
+        <Row label={t('editor.line_height')}>
           <input
             type="range"
             min={1.1}
@@ -152,13 +154,13 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
         </Row>
       </Section>
 
-      <Section title="Bloco (fundo, borda, sombra)">
-        <Row label="Fundo">
+      <Section title={t('editor.block_style')}>
+        <Row label={t('editor.background')}>
           <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
         </Row>
 
         {bgEnabled && (
-          <Row label="Cor fundo">
+          <Row label={t('editor.bg_color')}>
             <SwatchRow
               value={c.bgColor ?? '#ffffff'}
               onChange={(hex) => setContainer({ bgColor: hex })}
@@ -167,17 +169,17 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           </Row>
         )}
 
-        <Row label="Sombra">
+        <Row label={t('editor.shadow')}>
           <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !(c.shadow === true) })} />
         </Row>
 
-        <Row label="Borda">
+        <Row label={t('editor.border')}>
           <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
         </Row>
 
         {borderEnabled && (
           <>
-            <Row label="Espessura">
+            <Row label={t('editor.thickness')}>
               <input
                 type="range"
                 min={1}
@@ -191,7 +193,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
               </span>
             </Row>
 
-            <Row label="Cor borda">
+            <Row label={t('editor.border_color')}>
               <SwatchRow
                 value={c.borderColor ?? '#e5e7eb'}
                 onChange={(hex) => setContainer({ borderColor: hex })}
@@ -201,7 +203,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           </>
         )}
 
-        <Row label="Raio">
+        <Row label={t('editor.radius')}>
           <input
             type="range"
             min={0}

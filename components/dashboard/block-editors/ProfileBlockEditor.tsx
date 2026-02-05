@@ -7,6 +7,7 @@ import { uploadCardImage } from '@/lib/uploadCardImage'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle } from '@/components/editor/ui'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 
 
@@ -129,6 +130,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   const [uploading, setUploading] = useState(false)
   const avatarRef = useRef<HTMLInputElement>(null)
 
+  const { t } = useLanguage()
   const { openPicker } = useColorPicker()
 
   function patch(fn: (d: ProfileSettings) => void) {
@@ -185,7 +187,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
   return (
     <div className="flex flex-col gap-3">
-      <Section title="Avatar">
+      <Section title={t('editor.avatar')}>
         <div className="flex justify-between items-center">
           <span className="text-sm">Mostrar avatar</span>
           <input
@@ -235,7 +237,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         <div className="flex flex-col gap-2">
   <div className="flex justify-between items-center">
-    <span className="text-sm">Tamanho</span>
+    <span className="text-sm">{t('editor.size')}</span>
     <span className="text-xs text-black/50">{local.avatar?.sizePx ?? 108}px</span>
   </div>
 
@@ -255,7 +257,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {/* Forma do avatar */}
         <div className="flex flex-col gap-2">
-          <span className="text-sm">Forma</span>
+          <span className="text-sm">{t('editor.shape')}</span>
           <div className="flex gap-2">
             {(["circle", "rounded", "square"] as const).map((shape) => (
               <button
@@ -274,7 +276,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm">Borda</span>
+            <span className="text-sm">{t('editor.border')}</span>
             <span className="text-xs text-black/50">{local.avatar?.borderWidth ?? 0}px</span>
           </div>
 
@@ -316,7 +318,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   {((local.avatar?.glow as any)?.enabled ?? false) && (
     <>
       <div className="flex justify-between items-center">
-        <span className="text-xs text-black/50">Tamanho</span>
+        <span className="text-xs text-black/50">{t('editor.size')}</span>
         <span className="text-xs text-black/50">{(local.avatar?.glow as any)?.size ?? 6}px</span>
       </div>
 
@@ -595,7 +597,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               />
             </Row>
 
-            <Row label="Borda">
+            <Row label={t('editor.border')}>
               <Toggle
                 active={(local.container?.borderWidth ?? 0) > 0}
                 onClick={() => patch((d) => {
@@ -819,7 +821,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
       <Section title="Identidade">
         <TextLine
-          label="Nome"
+          label={t('editor.name')}
           value={local.name.text}
           color={local.name.color ?? '#0B1220'}
           enabled={local.name.enabled}
@@ -907,7 +909,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         />
 
         <TextLine
-          label="Empresa"
+          label={t('editor.company')}
           value={local.company?.text ?? ''}
           color={local.company?.color ?? '#6B7280'}
           enabled={local.company?.enabled ?? true}
