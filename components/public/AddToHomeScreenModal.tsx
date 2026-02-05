@@ -1,7 +1,7 @@
 'use client'
 
 import { FiX } from 'react-icons/fi'
-import { IoShareSocial } from 'react-icons/io5'
+import { FiUpload } from 'react-icons/fi'
 
 type Props = {
   onClose: () => void
@@ -90,9 +90,9 @@ export default function AddToHomeScreenModal({ onClose }: Props) {
               gap: '12px',
             }}
           >
-            <IoShareSocial size={32} style={{ color: '#8B5CF6', flexShrink: 0 }} />
+            <div style={{ width: 34, height: 34, borderRadius: 10, border: '2px solid #8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: '#fff' }}><FiUpload size={18} style={{ color: '#8B5CF6' }} /></div>
             <span style={{ fontSize: '13px', color: '#666' }}>
-              O botão de partilha fica na barra inferior do Safari
+              No iPhone (Safari), toque no botão de partilha (quadrado com seta para cima) e depois em “Adicionar ao ecrã principal”.
             </span>
           </div>
         </div>
