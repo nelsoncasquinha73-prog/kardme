@@ -100,6 +100,28 @@
     "active": "Activo",
     "inactive": "Inactivo"
   },
+  "landing": {
+    "hero_title_1": "Una",
+    "hero_title_2": "tarjeta digital",
+    "hero_title_3": "con efecto",
+    "hero_title_4": "wow",
+    "hero_subtitle": "Elige una plantilla premium, personaliza tu estilo y comparte como un pro.",
+    "hero_subtitle_2": "Tu primera impresión nunca más será solo una más.",
+    "hero_cta_hint": "Crea tu tarjeta en 60 segundos",
+    "create_free_card": "Crear mi tarjeta gratis",
+    "no_credit_card": "Sin tarjeta de crédito. 3 meses gratis.",
+    "choose_template": "Elige una plantilla",
+    "customize": "Personaliza",
+    "share": "Comparte",
+    "features_title": "Todo lo que necesitas para una tarjeta profesional",
+    "free": "Gratis",
+    "create_free": "Crear tarjeta gratis",
+    "start": "Empezar",
+    "start_yearly": "Empezar con plan anual",
+    "digital_card": "tarjeta digital",
+    "all_templates": "Todas las plantillas",
+    "nfc_cards": "Tarjetas NFC"
+  },
   "language": {
     "select": "Idioma",
     "en": "English",

@@ -100,6 +100,28 @@
     "active": "Active",
     "inactive": "Inactive"
   },
+  "landing": {
+    "hero_title_1": "A",
+    "hero_title_2": "digital card",
+    "hero_title_3": "with",
+    "hero_title_4": "wow effect",
+    "hero_subtitle": "Choose a premium template, customize your style and share like a pro.",
+    "hero_subtitle_2": "Your first impression will never be just another one.",
+    "hero_cta_hint": "Create your card in 60 seconds",
+    "create_free_card": "Create my free card",
+    "no_credit_card": "No credit card. 3 months free.",
+    "choose_template": "Choose a template",
+    "customize": "Customize",
+    "share": "Share",
+    "features_title": "Everything you need for a professional card",
+    "free": "Free",
+    "create_free": "Create free card",
+    "start": "Start",
+    "start_yearly": "Start with yearly plan",
+    "digital_card": "digital card",
+    "all_templates": "All templates",
+    "nfc_cards": "NFC Cards"
+  },
   "language": {
     "select": "Language",
     "en": "English",

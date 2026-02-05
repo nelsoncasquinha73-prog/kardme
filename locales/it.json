@@ -100,6 +100,28 @@
     "active": "Attivo",
     "inactive": "Inattivo"
   },
+  "landing": {
+    "hero_title_1": "Un",
+    "hero_title_2": "biglietto digitale",
+    "hero_title_3": "con effetto",
+    "hero_title_4": "wow",
+    "hero_subtitle": "Scegli un modello premium, personalizza il tuo stile e condividi come un pro.",
+    "hero_subtitle_2": "La tua prima impressione non sarà mai più solo un altra.",
+    "hero_cta_hint": "Crea il tuo biglietto in 60 secondi",
+    "create_free_card": "Crea il mio biglietto gratis",
+    "no_credit_card": "Senza carta di credito. 3 mesi gratis.",
+    "choose_template": "Scegli un modello",
+    "customize": "Personalizza",
+    "share": "Condividi",
+    "features_title": "Tutto ciò di cui hai bisogno per un biglietto professionale",
+    "free": "Gratis",
+    "create_free": "Crea biglietto gratis",
+    "start": "Inizia",
+    "start_yearly": "Inizia con piano annuale",
+    "digital_card": "biglietto digitale",
+    "all_templates": "Tutti i modelli",
+    "nfc_cards": "Biglietti NFC"
+  },
   "language": {
     "select": "Lingua",
     "en": "English",

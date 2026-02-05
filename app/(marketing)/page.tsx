@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import KardmeShowcase from '@/components/KardmeShowcase'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
   const [checked, setChecked] = useState(false)
+  const { t } = useLanguage()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -64,7 +66,7 @@ export default function Home() {
             ) : (
               <>
                 <Link className="nav-link" href="/login">Entrar</Link>
-                <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
+                <Link className="btn btn-cta-green" href="/signup">{t('landing.create_free_card')}</Link>
               </>
             )}
           </div>
@@ -94,7 +96,7 @@ export default function Home() {
                 </p>
 
                 <div className="heroCtaCard">
-                  <p className="heroCtaHint">Cria o teu cartão em 60 segundos</p>
+                  <p className="heroCtaHint">{t('landing.hero_cta_hint')}</p>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                     {isLoggedIn ? (
                       <>
@@ -107,11 +109,11 @@ export default function Home() {
                       </>
                     ) : (
                       <Link className="btn btn-cta-green" href="/signup">
-                        Criar o meu cartão grátis
+                        {t('landing.create_free_card')}
                       </Link>
                     )}
                   </div>
-                  <p className="heroCtaMicro">Sem cartão de crédito. 3 meses grátis.</p>
+                  <p className="heroCtaMicro">{t('landing.no_credit_card')}</p>
                 </div>
               </div>
             </div>
@@ -153,7 +155,7 @@ export default function Home() {
                 <div className="service-icon">
                   <i className="fas fa-cube"></i>
                 </div>
-                <h3>Escolhe um template</h3>
+                <h3>{t('landing.choose_template')}</h3>
                 <p>Seleciona um design premium já pronto para o teu setor</p>
               </div>
             </div>
@@ -187,7 +189,7 @@ export default function Home() {
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">Porquê Kardme?</h2>
-              <p className="section-description">Tudo o que precisas para um cartão profissional</p>
+              <p className="section-description">{t('landing.features_title')}</p>
             </div>
           </div>
 
@@ -262,7 +264,7 @@ export default function Home() {
                   <li><i className="fas fa-check"></i> Gestão de leads</li>
                 </ul>
                 <Link href="/signup" className="btn btn-outline">
-                  Criar cartão grátis
+                  {t('landing.create_free')}
                 </Link>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
                   *3 meses de utilização grátis
@@ -291,7 +293,7 @@ export default function Home() {
                     Fazer upgrade
                   </button>
                 ) : (
-                  <Link href="/signup" className="btn btn-primary">Começar</Link>
+                  <Link href="/signup" className="btn btn-primary">{t('landing.start')}</Link>
                 )}
               </div>
             </div>
@@ -322,7 +324,7 @@ export default function Home() {
                 Preferes pagar anualmente? Poupa 20% com €69/ano
               </p>
               <Link href="/signup" className="btn btn-outline">
-                Começar com plano anual
+                {t('landing.start_yearly')}
               </Link>
             </div>
           </div>
@@ -345,7 +347,7 @@ export default function Home() {
                     </button>
                   </>
                 ) : (
-                  <Link className="btn btn-cta-green" href="/signup">Criar o meu cartão grátis</Link>
+                  <Link className="btn btn-cta-green" href="/signup">{t('landing.create_free_card')}</Link>
                 )}
               </div>
             </div>

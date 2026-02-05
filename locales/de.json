@@ -100,6 +100,28 @@
     "active": "Aktiv",
     "inactive": "Inaktiv"
   },
+  "landing": {
+    "hero_title_1": "Eine",
+    "hero_title_2": "digitale Karte",
+    "hero_title_3": "mit",
+    "hero_title_4": "Wow-Effekt",
+    "hero_subtitle": "Wähle eine Premium-Vorlage, passe deinen Stil an und teile wie ein Profi.",
+    "hero_subtitle_2": "Dein erster Eindruck wird nie wieder nur einer von vielen sein.",
+    "hero_cta_hint": "Erstelle deine Karte in 60 Sekunden",
+    "create_free_card": "Meine kostenlose Karte erstellen",
+    "no_credit_card": "Keine Kreditkarte. 3 Monate kostenlos.",
+    "choose_template": "Wähle eine Vorlage",
+    "customize": "Anpassen",
+    "share": "Teilen",
+    "features_title": "Alles was du für eine professionelle Karte brauchst",
+    "free": "Kostenlos",
+    "create_free": "Kostenlose Karte erstellen",
+    "start": "Starten",
+    "start_yearly": "Mit Jahresplan starten",
+    "digital_card": "digitale Karte",
+    "all_templates": "Alle Vorlagen",
+    "nfc_cards": "NFC-Karten"
+  },
   "language": {
     "select": "Sprache",
     "en": "English",

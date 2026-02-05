@@ -100,6 +100,28 @@
     "active": "Actif",
     "inactive": "Inactif"
   },
+  "landing": {
+    "hero_title_1": "Une",
+    "hero_title_2": "carte digitale",
+    "hero_title_3": "avec effet",
+    "hero_title_4": "wow",
+    "hero_subtitle": "Choisis un modèle premium, personnalise ton style et partage comme un pro.",
+    "hero_subtitle_2": "Ta première impression ne sera plus jamais juste une de plus.",
+    "hero_cta_hint": "Crée ta carte en 60 secondes",
+    "create_free_card": "Créer ma carte gratuite",
+    "no_credit_card": "Sans carte de crédit. 3 mois gratuits.",
+    "choose_template": "Choisis un modèle",
+    "customize": "Personnalise",
+    "share": "Partage",
+    "features_title": "Tout ce dont tu as besoin pour une carte professionnelle",
+    "free": "Gratuit",
+    "create_free": "Créer carte gratuite",
+    "start": "Commencer",
+    "start_yearly": "Commencer avec plan annuel",
+    "digital_card": "carte digitale",
+    "all_templates": "Tous les modèles",
+    "nfc_cards": "Cartes NFC"
+  },
   "language": {
     "select": "Langue",
     "en": "English",

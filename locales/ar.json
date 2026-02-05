@@ -100,6 +100,28 @@
     "active": "نشط",
     "inactive": "غير نشط"
   },
+  "landing": {
+    "hero_title_1": "",
+    "hero_title_2": "بطاقة رقمية",
+    "hero_title_3": "بتأثير",
+    "hero_title_4": "مذهل",
+    "hero_subtitle": "اختر قالبًا مميزًا، خصص أسلوبك وشارك كمحترف.",
+    "hero_subtitle_2": "انطباعك الأول لن يكون مجرد واحد آخر.",
+    "hero_cta_hint": "أنشئ بطاقتك في 60 ثانية",
+    "create_free_card": "إنشاء بطاقتي المجانية",
+    "no_credit_card": "بدون بطاقة ائتمان. 3 أشهر مجانًا.",
+    "choose_template": "اختر قالبًا",
+    "customize": "خصص",
+    "share": "شارك",
+    "features_title": "كل ما تحتاجه لبطاقة احترافية",
+    "free": "مجاني",
+    "create_free": "إنشاء بطاقة مجانية",
+    "start": "ابدأ",
+    "start_yearly": "ابدأ مع الخطة السنوية",
+    "digital_card": "بطاقة رقمية",
+    "all_templates": "جميع القوالب",
+    "nfc_cards": "بطاقات NFC"
+  },
   "language": {
     "select": "اللغة",
     "en": "English",

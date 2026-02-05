@@ -100,6 +100,28 @@
     "active": "Ativo",
     "inactive": "Inativo"
   },
+  "landing": {
+    "hero_title_1": "Um",
+    "hero_title_2": "cartão digital",
+    "hero_title_3": "com efeito",
+    "hero_title_4": "wow",
+    "hero_subtitle": "Escolha um template premium, personalize seu estilo e compartilhe como um pro.",
+    "hero_subtitle_2": "Sua primeira impressão nunca mais será apenas mais uma.",
+    "hero_cta_hint": "Crie seu cartão em 60 segundos",
+    "create_free_card": "Criar meu cartão grátis",
+    "no_credit_card": "Sem cartão de crédito. 3 meses grátis.",
+    "choose_template": "Escolha um template",
+    "customize": "Personalize",
+    "share": "Compartilhe",
+    "features_title": "Tudo o que você precisa para um cartão profissional",
+    "free": "Grátis",
+    "create_free": "Criar cartão grátis",
+    "start": "Começar",
+    "start_yearly": "Começar com plano anual",
+    "digital_card": "cartão digital",
+    "all_templates": "Todos os templates",
+    "nfc_cards": "Cartões NFC"
+  },
   "language": {
     "select": "Idioma",
     "en": "English",
