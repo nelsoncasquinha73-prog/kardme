@@ -118,6 +118,14 @@ export async function generateMetadata({ params }: Props) {
       description,
       ...(avatarUrl && { images: [avatarUrl] }),
     },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: name,
+    },
+    icons: {
+      apple: avatarUrl ? [{ url: avatarUrl, sizes: '180x180' }] : [{ url: '/apple-icon.png', sizes: '180x180' }],
+    },
   }
 }
 
