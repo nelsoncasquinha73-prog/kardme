@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${name} | Kardme`,
     description,
-    manifest: `/${slug}/manifest.webmanifest`,
+    manifest: `/api/manifest/${slug}`,
     other: {
       "theme-color": color,
     },
