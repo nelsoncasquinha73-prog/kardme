@@ -14,6 +14,7 @@
     "logged_as": "Logged in as:",
     "search": "Search...",
     "confirm": "Confirm",
+    "saving": "Saving...",
     "yes": "Yes",
     "no": "No"
   },
@@ -87,7 +88,17 @@
     "client": "Client",
     "create_client": "Create Client",
     "create_new_client": "Create New Client",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "coupons": "Coupons",
+    "create_coupon": "Create Coupon",
+    "create_first_coupon": "Create first coupon",
+    "edit_coupon": "Edit Coupon",
+    "code": "Code",
+    "discount": "Discount",
+    "discount_type": "Discount Type",
+    "uses": "Uses",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "language": {
     "select": "Language",

@@ -14,6 +14,7 @@
     "logged_as": "Angemeldet als:",
     "search": "Suchen...",
     "confirm": "Bestätigen",
+    "saving": "Speichern...",
     "yes": "Ja",
     "no": "Nein"
   },
@@ -87,7 +88,17 @@
     "client": "Kunde",
     "create_client": "Kunde erstellen",
     "create_new_client": "Neuen Kunden erstellen",
-    "creating": "Wird erstellt..."
+    "creating": "Wird erstellt...",
+    "coupons": "Gutscheine",
+    "create_coupon": "Gutschein erstellen",
+    "create_first_coupon": "Ersten Gutschein erstellen",
+    "edit_coupon": "Gutschein bearbeiten",
+    "code": "Code",
+    "discount": "Rabatt",
+    "discount_type": "Rabattart",
+    "uses": "Nutzungen",
+    "active": "Aktiv",
+    "inactive": "Inaktiv"
   },
   "language": {
     "select": "Sprache",

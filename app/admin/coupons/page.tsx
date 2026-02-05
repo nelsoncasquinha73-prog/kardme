@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 
 type Coupon = {
@@ -69,6 +70,7 @@ const inputStyle: React.CSSProperties = {
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([])
+  const { t } = useLanguage()
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -197,11 +199,11 @@ export default function CouponsPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <div>
-              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111827', margin: 0 }}>🎟️ Cupões</h1>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111827', margin: 0 }}>🎟️ {t('admin.coupons')}</h1>
               <p style={{ color: '#6b7280', marginTop: 4 }}>Cria e gere cupões de desconto para templates</p>
             </div>
             <button onClick={openCreateModal} style={{ padding: '12px 24px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
-              + Criar Cupão
+              + {t('admin.create_coupon')}
             </button>
           </div>
 
@@ -211,7 +213,7 @@ export default function CouponsPage() {
             <div style={{ background: '#fff', borderRadius: 16, padding: 48, textAlign: 'center', color: '#6b7280' }}>
               <p style={{ fontSize: 18, marginBottom: 16 }}>Ainda não tens cupões criados</p>
               <button onClick={openCreateModal} style={{ padding: '12px 24px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
-                Criar primeiro cupão
+                {t('admin.create_first_coupon')}
               </button>
             </div>
           ) : (
@@ -219,10 +221,10 @@ export default function CouponsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    <th style={thStyle}>Código</th>
-                    <th style={thStyle}>Desconto</th>
+                    <th style={thStyle}>{t('admin.code')}</th>
+                    <th style={thStyle}>{t('admin.discount')}</th>
                     <th style={thStyle}>Template</th>
-                    <th style={thStyle}>Usos</th>
+                    <th style={thStyle}>{t('admin.uses')}</th>
                     <th style={thStyle}>Validade</th>
                     <th style={thStyle}>Estado</th>
                     <th style={thStyle}>Ações</th>
@@ -240,7 +242,7 @@ export default function CouponsPage() {
                       <td style={tdStyle}>{formatDate(coupon.valid_until)}</td>
                       <td style={tdStyle}>
                         <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: coupon.is_active ? '#dcfce7' : '#fee2e2', color: coupon.is_active ? '#166534' : '#991b1b' }}>
-                          {coupon.is_active ? 'Ativo' : 'Inativo'}
+                          {coupon.is_active ? t('admin.active') : t('admin.inactive')}
                         </span>
                       </td>
                       <td style={tdStyle}>
@@ -263,17 +265,17 @@ export default function CouponsPage() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#fff', borderRadius: 20, padding: 32, width: '100%', maxWidth: 500, maxHeight: '90vh', overflow: 'auto' }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24 }}>
-              {editingCoupon ? 'Editar Cupão' : 'Criar Cupão'}
+              {editingCoupon ? t('admin.edit_coupon') : t('admin.create_coupon')}
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <label style={labelStyle}>
-                <span>Código *</span>
+                <span>{t('admin.code')} *</span>
                 <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Ex: GRATIS100" style={{...inputStyle, color: "#111827"}} />
               </label>
 
               <label style={labelStyle}>
-                <span>Tipo de Desconto</span>
+                <span>{t('admin.discount_type')}</span>
                 <select value={discountType} onChange={(e) => setDiscountType(e.target.value as any)} style={inputStyle}>
                   <option value="free">🎁 Grátis (100% desconto)</option>
                   <option value="percentage">📊 Percentagem</option>
@@ -324,7 +326,7 @@ export default function CouponsPage() {
                 Cancelar
               </button>
               <button onClick={saveCoupon} disabled={saving} style={{ flex: 1, padding: '12px 24px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
-                {saving ? 'A guardar...' : 'Guardar'}
+                {saving ? t('common.saving') : t('common.save')}
               </button>
             </div>
           </div>
