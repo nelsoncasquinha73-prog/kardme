@@ -127,7 +127,12 @@
     "examples_description": "Esempi di biglietti digitali creati con Kardme",
     "pricing_title": "Piani semplici e trasparenti",
     "month": "mese",
-    "yearly_discount": "Preferisci pagare annualmente? Risparmia 20% con €69/anno"
+    "yearly_discount": "Preferisci pagare annualmente? Risparmia 20% con €69/anno",
+    "three_steps": "In 3 semplici passi, il tuo biglietto è pronto",
+    "analytics_description": "Guarda quante persone hanno visto e cliccato il tuo biglietto",
+    "unlimited_cards": "Biglietti illimitati",
+    "everything_pro": "Tutto di Pro",
+    "ready_to_start": "Pronto per iniziare?"
   },
   "language": {
     "select": "Lingua",

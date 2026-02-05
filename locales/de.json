@@ -127,7 +127,12 @@
     "examples_description": "Beispiele für digitale Karten erstellt mit Kardme",
     "pricing_title": "Einfache und transparente Pläne",
     "month": "Monat",
-    "yearly_discount": "Lieber jährlich zahlen? Spare 20% mit €69/Jahr"
+    "yearly_discount": "Lieber jährlich zahlen? Spare 20% mit €69/Jahr",
+    "three_steps": "In 3 einfachen Schritten ist deine Karte fertig",
+    "analytics_description": "Sieh wie viele Leute deine Karte gesehen und geklickt haben",
+    "unlimited_cards": "Unbegrenzte Karten",
+    "everything_pro": "Alles von Pro",
+    "ready_to_start": "Bereit loszulegen?"
   },
   "language": {
     "select": "Sprache",

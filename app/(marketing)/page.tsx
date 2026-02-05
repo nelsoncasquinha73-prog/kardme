@@ -147,7 +147,7 @@ export default function Home() {
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">Como funciona</h2>
-              <p className="section-description">Em 3 passos simples, tens o teu cartão pronto</p>
+              <p className="section-description">{t('landing.three_steps')}</p>
             </div>
           </div>
 
@@ -232,7 +232,7 @@ export default function Home() {
                   <i className="fas fa-chart-line"></i>
                 </div>
                 <h3>Analytics &amp; Leads</h3>
-                <p>Vê quantas pessoas viram e clicaram no teu cartão</p>
+                <p>{t('landing.analytics_description')}</p>
               </div>
             </div>
           </div>
@@ -253,14 +253,14 @@ export default function Home() {
             {/* FREE PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
-                <h3 className="pricing-title">Grátis</h3>
+                <h3 className="pricing-title">{t('landing.free')}</h3>
                 <p className="pricing-subtitle">Para começar</p>
                 <div className="pricing-price">
                   <span className="price">€0</span>
                   <span className="period">*</span>
                 </div>
                 <ul className="pricing-list">
-                  <li><i className="fas fa-check"></i> 1 cartão digital</li>
+                  <li><i className="fas fa-check"></i> 1 {t('landing.digital_card')}</li>
                   <li><i className="fas fa-check"></i> 10 templates</li>
                   <li><i className="fas fa-check"></i> Analytics completo</li>
                   <li><i className="fas fa-check"></i> Gestão de leads</li>
@@ -285,8 +285,8 @@ export default function Home() {
                   <span className="period">/{t('landing.month')}</span>
                 </div>
                 <ul className="pricing-list">
-                  <li><i className="fas fa-check"></i> Cartões ilimitados</li>
-                  <li><i className="fas fa-check"></i> Todos os templates</li>
+                  <li><i className="fas fa-check"></i> {t('landing.unlimited_cards')}</li>
+                  <li><i className="fas fa-check"></i> {t('landing.all_templates')}</li>
                   <li><i className="fas fa-check"></i> Customização avançada</li>
                   <li><i className="fas fa-check"></i> Analytics &amp; Leads</li>
                 </ul>
@@ -309,7 +309,7 @@ export default function Home() {
                   <span className="price">Contactar</span>
                 </div>
                 <ul className="pricing-list">
-                  <li><i className="fas fa-check"></i> Tudo do Pro</li>
+                  <li><i className="fas fa-check"></i> {t('landing.everything_pro')}</li>
                   <li><i className="fas fa-check"></i> Cartões NFC</li>
                   <li><i className="fas fa-check"></i> Suporte prioritário</li>
                   <li><i className="fas fa-check"></i> Integrações custom</li>
@@ -338,7 +338,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2 className="section-title">Pronto para começar?</h2>
+              <h2 className="section-title">{t('landing.ready_to_start')}</h2>
               <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
               <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 {isLoggedIn ? (

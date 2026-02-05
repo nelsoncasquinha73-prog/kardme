@@ -127,7 +127,12 @@
     "examples_description": "أمثلة على البطاقات الرقمية المنشأة مع Kardme",
     "pricing_title": "خطط بسيطة وشفافة",
     "month": "شهر",
-    "yearly_discount": "تفضل الدفع سنوياً؟ وفر 20% مع €69/سنة"
+    "yearly_discount": "تفضل الدفع سنوياً؟ وفر 20% مع €69/سنة",
+    "three_steps": "في 3 خطوات بسيطة، بطاقتك جاهزة",
+    "analytics_description": "شاهد كم شخص شاهد ونقر على بطاقتك",
+    "unlimited_cards": "بطاقات غير محدودة",
+    "everything_pro": "كل شيء في Pro",
+    "ready_to_start": "مستعد للبدء؟"
   },
   "language": {
     "select": "اللغة",
