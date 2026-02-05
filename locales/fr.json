@@ -59,7 +59,20 @@
     "decorations": "Décorations",
     "floating_buttons": "Boutons Flottants",
     "save_template": "Enregistrer comme Modèle",
-    "preview": "Aperçu"
+    "preview": "Aperçu",
+    "theme_decorations": "Thème et Décorations",
+    "editor": "Éditeur",
+    "block": "Bloc",
+    "floating_buttons": "Boutons Flottants",
+    "enable_buttons": "Activer boutons",
+    "share_button": "Bouton Partager",
+    "qr_button": "Bouton QR Code",
+    "save_contact_button": "Bouton Sauvegarder Contact",
+    "button_color": "Couleur du bouton",
+    "decorations": "Décorations",
+    "add": "Ajouter",
+    "decorations_hint": "Les décorations restent fixes sur la carte, indépendantes des blocs.",
+    "no_decorations": "Tu n'as pas encore de décorations."
   },
   "catalog": {
     "title": "Catalogue de Modèles",

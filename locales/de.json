@@ -59,7 +59,20 @@
     "decorations": "Dekorationen",
     "floating_buttons": "Schwebende Buttons",
     "save_template": "Als Vorlage speichern",
-    "preview": "Vorschau"
+    "preview": "Vorschau",
+    "theme_decorations": "Design und Dekorationen",
+    "editor": "Editor",
+    "block": "Block",
+    "floating_buttons": "Schwebende Buttons",
+    "enable_buttons": "Buttons aktivieren",
+    "share_button": "Teilen-Button",
+    "qr_button": "QR-Code-Button",
+    "save_contact_button": "Kontakt-speichern-Button",
+    "button_color": "Button-Farbe",
+    "decorations": "Dekorationen",
+    "add": "Hinzufügen",
+    "decorations_hint": "Dekorationen bleiben auf der Karte fixiert, unabhängig von Blöcken.",
+    "no_decorations": "Du hast noch keine Dekorationen."
   },
   "catalog": {
     "title": "Vorlagen-Katalog",

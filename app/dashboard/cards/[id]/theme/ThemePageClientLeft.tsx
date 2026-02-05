@@ -2,6 +2,7 @@
 
 import BlocksRailSortable from '@/components/editor/BlocksRailSortable'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type CardBlock = {
   id: string
@@ -42,6 +43,7 @@ export default function ThemePageClientLeft({
   cardTitle,
   enabledCount,
 }: Props) {
+  const { t } = useLanguage()
   return (
     <aside
       style={{
@@ -65,7 +67,7 @@ export default function ThemePageClientLeft({
           gap: 10,
         }}
       >
-        <strong style={{ fontSize: 13, color: '#111827' }}>Blocos</strong>
+        <strong style={{ fontSize: 13, color: '#111827' }}>{t('editor.blocks')}</strong>
         <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6, color: '#111827' }}>
           {cardTitle || 'Cartão'} · {enabledCount} ativos
         </div>
@@ -82,7 +84,7 @@ export default function ThemePageClientLeft({
             color: '#111827',
           }}
         >
-          + Adicionar
+          + {t('editor.add_block')}
         </button>
       </div>
 
@@ -106,7 +108,7 @@ export default function ThemePageClientLeft({
             fontSize: 14,
           }}
         >
-          🎨 Tema & Decorações
+          🎨 {t('editor.theme_decorations')}
         </button>
       </div>
 
@@ -137,7 +139,7 @@ export default function ThemePageClientLeft({
           }}
           disabled={saveStatus === 'saving'}
         >
-          💾 Guardar
+          💾 {t('common.save')}
         </button>
 
         {saveStatus && (

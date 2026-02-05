@@ -59,7 +59,20 @@
     "decorations": "Decoraciones",
     "floating_buttons": "Botones Flotantes",
     "save_template": "Guardar como Plantilla",
-    "preview": "Vista previa"
+    "preview": "Vista previa",
+    "theme_decorations": "Tema y Decoraciones",
+    "editor": "Editor",
+    "block": "Bloque",
+    "floating_buttons": "Botones Flotantes",
+    "enable_buttons": "Activar botones",
+    "share_button": "Botón Compartir",
+    "qr_button": "Botón QR Code",
+    "save_contact_button": "Botón Guardar Contacto",
+    "button_color": "Color del botón",
+    "decorations": "Decoraciones",
+    "add": "Añadir",
+    "decorations_hint": "Las decoraciones quedan fijas en la tarjeta, independientes de los bloques.",
+    "no_decorations": "Aún no tienes decoraciones."
   },
   "catalog": {
     "title": "Catálogo de Plantillas",

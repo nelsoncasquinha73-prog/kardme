@@ -59,7 +59,20 @@
     "decorations": "Decorações",
     "floating_buttons": "Botões Flutuantes",
     "save_template": "Salvar como Template",
-    "preview": "Pré-visualizar"
+    "preview": "Pré-visualizar",
+    "theme_decorations": "Tema e Decorações",
+    "editor": "Editor",
+    "block": "Bloco",
+    "floating_buttons": "Botões Flutuantes",
+    "enable_buttons": "Ativar botões",
+    "share_button": "Botão Compartilhar",
+    "qr_button": "Botão QR Code",
+    "save_contact_button": "Botão Salvar Contato",
+    "button_color": "Cor do botão",
+    "decorations": "Decorações",
+    "add": "Adicionar",
+    "decorations_hint": "Decorações ficam fixas no cartão, independentes dos blocos.",
+    "no_decorations": "Você ainda não tem decorações."
   },
   "catalog": {
     "title": "Catálogo de Templates",

@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 export type DecorationItem = {
   id: string
@@ -41,6 +42,7 @@ export default function ThemeDecorationsEditor({
   onSelectDeco,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const { t } = useLanguage()
   const items = useMemo<DecorationItem[]>(() => decorations ?? [], [decorations])
 
   const updateAll = (next: DecorationItem[]) => onChange(next)
@@ -146,18 +148,18 @@ export default function ThemeDecorationsEditor({
 
       <div style={section}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-          <strong style={title}>🎨 Decorações</strong>
+          <strong style={title}>🎨 {t('editor.decorations')}</strong>
           <button type="button" onClick={addDecoration} style={btnPrimary}>
-            + Adicionar
+            + {t('editor.add')}
           </button>
         </div>
         <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.35 }}>
-          Decorações ficam fixas no cartão, independentes dos blocos.
+          {t('editor.decorations_hint')}
         </div>
       </div>
 
       {items.length === 0 && (
-        <div style={{ fontSize: 13, opacity: 0.7 }}>Ainda não tens decorações.</div>
+        <div style={{ fontSize: 13, opacity: 0.7 }}>{t('editor.no_decorations')}</div>
       )}
 
       {items.map((d, idx) => (

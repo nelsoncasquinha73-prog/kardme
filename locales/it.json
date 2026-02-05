@@ -59,7 +59,20 @@
     "decorations": "Decorazioni",
     "floating_buttons": "Pulsanti Flottanti",
     "save_template": "Salva come Modello",
-    "preview": "Anteprima"
+    "preview": "Anteprima",
+    "theme_decorations": "Tema e Decorazioni",
+    "editor": "Editor",
+    "block": "Blocco",
+    "floating_buttons": "Pulsanti Flottanti",
+    "enable_buttons": "Attiva pulsanti",
+    "share_button": "Pulsante Condividi",
+    "qr_button": "Pulsante QR Code",
+    "save_contact_button": "Pulsante Salva Contatto",
+    "button_color": "Colore pulsante",
+    "decorations": "Decorazioni",
+    "add": "Aggiungi",
+    "decorations_hint": "Le decorazioni rimangono fisse sul biglietto, indipendenti dai blocchi.",
+    "no_decorations": "Non hai ancora decorazioni."
   },
   "catalog": {
     "title": "Catalogo Modelli",

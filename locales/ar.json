@@ -59,7 +59,20 @@
     "decorations": "الزخارف",
     "floating_buttons": "الأزرار العائمة",
     "save_template": "حفظ كقالب",
-    "preview": "معاينة"
+    "preview": "معاينة",
+    "theme_decorations": "المظهر والزخارف",
+    "editor": "المحرر",
+    "block": "كتلة",
+    "floating_buttons": "الأزرار العائمة",
+    "enable_buttons": "تفعيل الأزرار",
+    "share_button": "زر المشاركة",
+    "qr_button": "زر QR Code",
+    "save_contact_button": "زر حفظ جهة الاتصال",
+    "button_color": "لون الزر",
+    "decorations": "الزخارف",
+    "add": "إضافة",
+    "decorations_hint": "الزخارف تبقى ثابتة على البطاقة، مستقلة عن الكتل.",
+    "no_decorations": "ليس لديك زخارف بعد."
   },
   "catalog": {
     "title": "كتالوج القوالب",

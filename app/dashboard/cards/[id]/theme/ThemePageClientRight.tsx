@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import PublishToggle from './PublishToggle'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
 import ProfileBlockEditor from '@/components/dashboard/block-editors/ProfileBlockEditor'
 import BioBlockEditor from '@/components/dashboard/block-editors/BioBlockEditor'
@@ -87,6 +88,7 @@ export default function ThemePageClientRight({
   onChangeThemeDecorations,
 }: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
+  const { t } = useLanguage()
   const [templateSaving, setTemplateSaving] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
 
@@ -200,10 +202,10 @@ export default function ThemePageClientRight({
           gap: 12,
         }}
       >
-        <strong style={{ fontSize: 14, color: '#111827' }}>Editor</strong>
+        <strong style={{ fontSize: 14, color: '#111827' }}>{t('editor.editor')}</strong>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {activeBlock && (
-            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>Bloco: {activeBlock.type}</span>
+            <span style={{ fontSize: 12, opacity: 0.6, color: '#111827' }}>{t('editor.block')}: {activeBlock.type}</span>
           )}
         </div>
       </div>
