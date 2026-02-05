@@ -150,7 +150,16 @@
     "contact": "اتصل",
     "custom_integrations": "تكاملات مخصصة",
     "join_thousands": "انضم إلى آلاف المحترفين الذين يستخدمون Kardme",
-    "view_catalog": "عرض الكتالوج"
+    "view_catalog": "عرض الكتالوج",
+    "go_to_catalog": "الذهاب للكتالوج",
+    "step1_description": "اختر تصميمًا مميزًا جاهزًا لقطاعك",
+    "pricing_subtitle": "ابدأ مجانًا، قم بالترقية عند الحاجة",
+    "to_start": "للبدء",
+    "lead_management": "إدارة العملاء المحتملين",
+    "three_months_free": "3 أشهر استخدام مجاني",
+    "most_popular": "الأكثر شعبية",
+    "for_professionals": "للمحترفين",
+    "advanced_customization": "تخصيص متقدم"
   },
   "language": {
     "select": "اللغة",

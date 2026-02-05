@@ -103,7 +103,7 @@ export default function Home() {
                     {isLoggedIn ? (
                       <>
                         <Link className="btn btn-cta-green" href="/dashboard/catalog">
-                          Ir para catálogo
+                          {t('landing.go_to_catalog')}
                         </Link>
                         <Link className="btn btn-secondary" href="/dashboard">
                           Dashboard
@@ -158,7 +158,7 @@ export default function Home() {
                   <i className="fas fa-cube"></i>
                 </div>
                 <h3>{t('landing.choose_template')}</h3>
-                <p>Seleciona um design premium já pronto para o teu setor</p>
+                <p>{t('landing.step1_description')}</p>
               </div>
             </div>
 
@@ -245,7 +245,7 @@ export default function Home() {
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">{t('landing.pricing_title')}</h2>
-              <p className="section-description">Começa grátis, upgrade quando precisares</p>
+              <p className="section-description">{t('landing.pricing_subtitle')}</p>
             </div>
           </div>
 
@@ -254,7 +254,7 @@ export default function Home() {
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
                 <h3 className="pricing-title">{t('landing.free')}</h3>
-                <p className="pricing-subtitle">Para começar</p>
+                <p className="pricing-subtitle">{t('landing.to_start')}</p>
                 <div className="pricing-price">
                   <span className="price">€0</span>
                   <span className="period">*</span>
@@ -263,13 +263,13 @@ export default function Home() {
                   <li><i className="fas fa-check"></i> 1 {t('landing.digital_card')}</li>
                   <li><i className="fas fa-check"></i> 10 {t('nav.templates')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.full_analytics')}</li>
-                  <li><i className="fas fa-check"></i> Gestão de leads</li>
+                  <li><i className="fas fa-check"></i> {t('landing.lead_management')}</li>
                 </ul>
                 <Link href="/signup" className="btn btn-outline">
                   {t('landing.create_free')}
                 </Link>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 12 }}>
-                  *3 meses de utilização grátis
+                  *{t('landing.three_months_free')}
                 </p>
               </div>
             </div>
@@ -277,9 +277,9 @@ export default function Home() {
             {/* PRO PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-featured">
-                <div className="pricing-badge">Mais popular</div>
+                <div className="pricing-badge">{t('landing.most_popular')}</div>
                 <h3 className="pricing-title">Pro</h3>
-                <p className="pricing-subtitle">Para profissionais</p>
+                <p className="pricing-subtitle">{t('landing.for_professionals')}</p>
                 <div className="pricing-price">
                   <span className="price">€6,99</span>
                   <span className="period">/{t('landing.month')}</span>
@@ -287,7 +287,7 @@ export default function Home() {
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> {t('landing.unlimited_cards')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.all_templates')}</li>
-                  <li><i className="fas fa-check"></i> Customização avançada</li>
+                  <li><i className="fas fa-check"></i> {t('landing.advanced_customization')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.analytics_leads')}</li>
                 </ul>
                 {isLoggedIn ? (

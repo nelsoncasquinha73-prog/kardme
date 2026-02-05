@@ -150,7 +150,16 @@
     "contact": "Contactar",
     "custom_integrations": "Integraciones personalizadas",
     "join_thousands": "Únete a miles de profesionales usando Kardme",
-    "view_catalog": "Ver catálogo"
+    "view_catalog": "Ver catálogo",
+    "go_to_catalog": "Ir al catálogo",
+    "step1_description": "Selecciona un diseño premium listo para tu sector",
+    "pricing_subtitle": "Empieza gratis, mejora cuando lo necesites",
+    "to_start": "Para empezar",
+    "lead_management": "Gestión de leads",
+    "three_months_free": "3 meses de uso gratis",
+    "most_popular": "Más popular",
+    "for_professionals": "Para profesionales",
+    "advanced_customization": "Personalización avanzada"
   },
   "language": {
     "select": "Idioma",
