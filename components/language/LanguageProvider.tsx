@@ -159,7 +159,7 @@ export function LanguageProvider({
 
   return (
     <LanguageContext.Provider value={value}>
-      <div dir={dir} lang={lang}>
+      <div dir={dir} lang={lang} style={{ background: 'transparent', minHeight: '100vh' }}>
         {children}
       </div>
     </LanguageContext.Provider>
