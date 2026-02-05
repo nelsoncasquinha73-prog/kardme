@@ -37,10 +37,32 @@ export async function generateMetadata({ params }: Props) {
 
   const { data: card } = await supabaseServer
     .from('cards')
-    .select('theme')
+    .select('id, theme, title')
     .eq('slug', slug)
     .eq('published', true)
     .single()
+
+  if (!card) {
+    return {
+      title: 'Kardme',
+      description: 'Cartão digital',
+    }
+  }
+
+  // Buscar o bloco de perfil para obter avatar e nome
+  const { data: profileBlock } = await supabaseServer
+    .from('card_blocks')
+    .select('settings')
+    .eq('card_id', card.id)
+    .eq('type', 'profile')
+    .eq('enabled', true)
+    .single()
+
+  const profileSettings = profileBlock?.settings as { name?: string; title?: string; avatarUrl?: string } | null
+  const name = profileSettings?.name || card.title || 'Cartão Digital'
+  const jobTitle = profileSettings?.title || ''
+  const avatarUrl = profileSettings?.avatarUrl
+  const description = jobTitle ? `${name} - ${jobTitle}` : name
 
   const rawBg = card?.theme?.background
   const v1 = migrateCardBg(rawBg)
@@ -55,11 +77,14 @@ export async function generateMetadata({ params }: Props) {
       return stops[0]?.color ?? '#000000'
     }
 
-    // image: usa cor default
     return v1.browserBarColor ?? '#000000'
   })()
 
+  const baseUrl = 'https://kardme.com'
+
   return {
+    title: `${name} | Kardme`,
+    description,
     manifest: `/${slug}/manifest.webmanifest`,
     other: {
       "theme-color": color,
@@ -68,11 +93,33 @@ export async function generateMetadata({ params }: Props) {
       { media: "(prefers-color-scheme: light)", color: color },
       { media: "(prefers-color-scheme: dark)", color: color },
     ],
-    metadataBase: new URL("https://new.kardme.com"),
+    metadataBase: new URL(baseUrl),
     colorScheme: 'dark',
+    openGraph: {
+      title: `${name} | Kardme`,
+      description,
+      url: `${baseUrl}/${slug}`,
+      siteName: 'Kardme',
+      type: 'profile',
+      ...(avatarUrl && {
+        images: [
+          {
+            url: avatarUrl,
+            width: 400,
+            height: 400,
+            alt: name,
+          },
+        ],
+      }),
+    },
+    twitter: {
+      card: 'summary',
+      title: `${name} | Kardme`,
+      description,
+      ...(avatarUrl && { images: [avatarUrl] }),
+    },
   }
 }
-
 
 export default async function CardPage({ params }: Props) {
   const { slug } = await params
