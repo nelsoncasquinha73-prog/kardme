@@ -103,7 +103,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
         {/* Secondary buttons */}
         {expanded && (
           <>
-            {/* Share */}
+            
             {s.showShare && (
               <button
                 onClick={() => {
@@ -113,7 +113,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
                 style={secondaryButton}
                 aria-label="Partilhar"
               >
-                <div style={{ width: 26, height: 26, borderRadius: 6, border: `2px solid ${s.buttonColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiUpload size={16} /></div>
+                <FiShare2 size={22} />
               </button>
             )}
 
@@ -140,7 +140,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
               style={secondaryButton}
               aria-label="Adicionar ao ecrã principal"
             >
-              <IoShareSocial size={22} />
+              <div style={{ width: 26, height: 26, borderRadius: 6, border: `2px solid ${s.buttonColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiUpload size={16} /></div>
             </button>
 
             {/* Save Contact */}
