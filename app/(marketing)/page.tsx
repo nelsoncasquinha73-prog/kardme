@@ -58,15 +58,15 @@ export default function Home() {
           <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {isLoggedIn ? (
               <>
-                <Link className="nav-link" href="/dashboard">Dashboard</Link>
-                <Link className="btn btn-primary" href="/dashboard/plans">Upgrade</Link>
+                <Link className="nav-link" href="/dashboard">{t('nav.dashboard')}</Link>
+                <Link className="btn btn-primary" href="/dashboard/plans">{t('landing.upgrade')}</Link>
                 <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                   Sair
                 </button>
               </>
             ) : (
               <>
-                <Link className="nav-link" href="/login">Entrar</Link>
+                <Link className="nav-link" href="/login">{t('auth.login')}</Link>
                 <Link className="btn btn-cta-green" href="/signup">{t('landing.create_free_card')}</Link>
               </>
             )}
@@ -128,8 +128,8 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2 className="section-title">Vê como funciona</h2>
-              <p className="section-description">Exemplos de cartões digitais criados em Kardme</p>
+              <h2 className="section-title">{t('landing.how_it_works')}</h2>
+              <p className="section-description">{t('landing.examples_description')}</p>
             </div>
           </div>
 
@@ -167,7 +167,7 @@ export default function Home() {
                 <div className="service-icon">
                   <i className="fas fa-edit"></i>
                 </div>
-                <h3>Personaliza</h3>
+                <h3>{t('landing.customize')}</h3>
                 <p>Adiciona a tua foto, dados e informações de contacto</p>
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function Home() {
                 <div className="service-icon">
                   <i className="fas fa-share-alt"></i>
                 </div>
-                <h3>Partilha</h3>
+                <h3>{t('landing.share')}</h3>
                 <p>Envia o link (e mais tarde NFC) e começa a receber contactos</p>
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
-              <h2 className="section-title">Planos simples e transparentes</h2>
+              <h2 className="section-title">{t('landing.pricing_title')}</h2>
               <p className="section-description">Começa grátis, upgrade quando precisares</p>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function Home() {
                 <p className="pricing-subtitle">Para profissionais</p>
                 <div className="pricing-price">
                   <span className="price">€6,99</span>
-                  <span className="period">/mês</span>
+                  <span className="period">/{t('landing.month')}</span>
                 </div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> Cartões ilimitados</li>
@@ -323,7 +323,7 @@ export default function Home() {
           <div className="row justify-content-center" style={{ marginTop: 40 }}>
             <div className="col-lg-8 text-center">
               <p style={{ color: 'rgba(255,255,255,0.70)', marginBottom: 16 }}>
-                Preferes pagar anualmente? Poupa 20% com €69/ano
+                {t('landing.yearly_discount')}
               </p>
               <Link href="/signup" className="btn btn-outline">
                 {t('landing.start_yearly')}
@@ -345,7 +345,7 @@ export default function Home() {
                   <>
                     <Link className="btn btn-cta-green" href="/dashboard/catalog">Ver catálogo</Link>
                     <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
-                      Upgrade Pro
+                      {t('landing.upgrade_pro')}
                     </button>
                   </>
                 ) : (

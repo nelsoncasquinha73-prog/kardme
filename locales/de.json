@@ -120,7 +120,14 @@
     "start_yearly": "Mit Jahresplan starten",
     "digital_card": "digitale Karte",
     "all_templates": "Alle Vorlagen",
-    "nfc_cards": "NFC-Karten"
+    "nfc_cards": "NFC-Karten",
+    "how_it_works": "So funktioniert es",
+    "upgrade": "Upgrade",
+    "upgrade_pro": "Upgrade Pro",
+    "examples_description": "Beispiele für digitale Karten erstellt mit Kardme",
+    "pricing_title": "Einfache und transparente Pläne",
+    "month": "Monat",
+    "yearly_discount": "Lieber jährlich zahlen? Spare 20% mit €69/Jahr"
   },
   "language": {
     "select": "Sprache",

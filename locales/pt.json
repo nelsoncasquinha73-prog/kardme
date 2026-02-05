@@ -120,7 +120,14 @@
     "start_yearly": "Começar com plano anual",
     "digital_card": "cartão digital",
     "all_templates": "Todos os templates",
-    "nfc_cards": "Cartões NFC"
+    "nfc_cards": "Cartões NFC",
+    "how_it_works": "Vê como funciona",
+    "upgrade": "Upgrade",
+    "upgrade_pro": "Upgrade Pro",
+    "examples_description": "Exemplos de cartões digitais criados em Kardme",
+    "pricing_title": "Planos simples e transparentes",
+    "month": "mês",
+    "yearly_discount": "Preferes pagar anualmente? Poupa 20% com €69/ano"
   },
   "language": {
     "select": "Idioma",

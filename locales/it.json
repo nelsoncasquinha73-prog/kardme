@@ -120,7 +120,14 @@
     "start_yearly": "Inizia con piano annuale",
     "digital_card": "biglietto digitale",
     "all_templates": "Tutti i modelli",
-    "nfc_cards": "Biglietti NFC"
+    "nfc_cards": "Biglietti NFC",
+    "how_it_works": "Guarda come funziona",
+    "upgrade": "Aggiorna",
+    "upgrade_pro": "Aggiorna a Pro",
+    "examples_description": "Esempi di biglietti digitali creati con Kardme",
+    "pricing_title": "Piani semplici e trasparenti",
+    "month": "mese",
+    "yearly_discount": "Preferisci pagare annualmente? Risparmia 20% con €69/anno"
   },
   "language": {
     "select": "Lingua",

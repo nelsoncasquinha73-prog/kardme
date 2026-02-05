@@ -120,7 +120,14 @@
     "start_yearly": "ابدأ مع الخطة السنوية",
     "digital_card": "بطاقة رقمية",
     "all_templates": "جميع القوالب",
-    "nfc_cards": "بطاقات NFC"
+    "nfc_cards": "بطاقات NFC",
+    "how_it_works": "شاهد كيف يعمل",
+    "upgrade": "ترقية",
+    "upgrade_pro": "ترقية إلى Pro",
+    "examples_description": "أمثلة على البطاقات الرقمية المنشأة مع Kardme",
+    "pricing_title": "خطط بسيطة وشفافة",
+    "month": "شهر",
+    "yearly_discount": "تفضل الدفع سنوياً؟ وفر 20% مع €69/سنة"
   },
   "language": {
     "select": "اللغة",
