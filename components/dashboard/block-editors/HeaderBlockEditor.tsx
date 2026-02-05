@@ -9,6 +9,7 @@ import type { CardBg, CardBgV1 } from '@/lib/cardBg'
 import { CARD_BG_PRESETS } from '@/lib/bgPresets'
 import { bgToStyle } from '@/lib/bgToCss'
 import { migrateCardBg } from '@/lib/cardBg'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type BadgePos = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
@@ -31,6 +32,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const { openPicker } = useColorPicker()
 
   const layout = settings.layout ?? {}
+  const { t } = useLanguage()
 
   // ✅ normalizamos sempre para v1 para editar sem dores
 const v1 = migrateCardBg(cardBg ?? ({ mode: 'solid', color: '#ffffff', opacity: 1 } as any))
@@ -255,12 +257,12 @@ const [patternB, setPatternB] = useState('#000000')
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Fundo global do cartão */}
       {cardBg && onChangeCardBg ? (
-        <Section title="Fundo do cartão (global)">
+        <Section title={t('editor.card_background')}>
           {/* Personalizar preset (recolor rápido) */}
 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
   <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Personalizar preset (rápido)</div>
 
-  <Row label="Cor A">
+  <Row label={t('editor.color_a')}>
     <SwatchRow
       value={recolorA}
       onChange={(hex) => setRecolorA(hex)}
@@ -268,7 +270,7 @@ const [patternB, setPatternB] = useState('#000000')
     />
   </Row>
 
-  <Row label="Cor B">
+  <Row label={t('editor.color_b')}>
     <SwatchRow
       value={recolorB}
       onChange={(hex) => setRecolorB(hex)}
@@ -278,7 +280,7 @@ const [patternB, setPatternB] = useState('#000000')
 
   <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-  <Row label="Pattern A">
+  <Row label={t('editor.pattern_a')}>
     <SwatchRow
       value={patternA}
       onChange={(hex) => setPatternA(hex)}
@@ -286,7 +288,7 @@ const [patternB, setPatternB] = useState('#000000')
     />
   </Row>
 
-  <Row label="Pattern B">
+  <Row label={t('editor.pattern_b')}>
     <SwatchRow
       value={patternB}
       onChange={(hex) => setPatternB(hex)}
@@ -334,11 +336,11 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8 }}>Efeitos (patterns)</div>
 
-            <Row label="Ativar efeitos">
+            <Row label={t('editor.enable_effects')}>
               <Toggle active={effectsEnabled} onClick={toggleEffects} />
             </Row>
 
-            <Row label="Tipo">
+            <Row label={t('editor.type')}>
               <select
                 value={effectsEnabled ? currentKind : 'none'}
                 onChange={(e) => setEffectKind(e.target.value)}
@@ -363,7 +365,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
             {effectsEnabled ? (
               <>
-                <Row label="Blend">
+                <Row label={t('editor.blend')}>
                   <select
                     value={currentBlendMode}
                     onChange={(e) => patchOverlay({ blendMode: e.target.value })}
@@ -384,7 +386,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   </select>
                 </Row>
 
-                <Row label="Intensidade">
+                <Row label={t('editor.intensity')}>
                   <input
                     type="range"
                     min={0}
@@ -395,7 +397,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   />
                 </Row>
 
-                <Row label="Densidade">
+                <Row label={t('editor.density')}>
                   <input
                     type="range"
                     min={0}
@@ -406,7 +408,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   />
                 </Row>
 
-                <Row label="Escala">
+                <Row label={t('editor.scale')}>
                   <input
                     type="range"
                     min={0.5}
@@ -417,7 +419,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   />
                 </Row>
 
-                <Row label="Softness">
+                <Row label={t('editor.softness')}>
                   <input
                     type="range"
                     min={0}
@@ -480,7 +482,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
 
           {/* Tipo base */}
-<Row label="Tipo">
+<Row label={t('editor.type')}>
   <Button
     onClick={() =>
       onChangeCardBg({
@@ -534,7 +536,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
           {/* Editor de cores */}
           {v1.base.kind === 'solid' ? (
-            <Row label="Cor">
+            <Row label={t('editor.color')}>
               <SwatchRow
                 value={v1.base.color ?? '#ffffff'}
                 onChange={(hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } })}
@@ -545,7 +547,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             </Row>
           ) : (
             <>
-              <Row label="De">
+              <Row label={t('editor.from')}>
                 <SwatchRow
                   value={gBase.stops?.[0]?.color ?? '#ffffff'}
                   onChange={(hex) => {
@@ -565,7 +567,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                 />
               </Row>
 
-              <Row label="Para">
+              <Row label={t('editor.to')}>
                 <SwatchRow
                   value={gBase.stops?.[gBase.stops.length - 1]?.color ?? '#f3f4f6'}
                   onChange={(hex) => {
@@ -587,7 +589,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                 />
               </Row>
 
-              <Row label="Ângulo">
+              <Row label={t('editor.angle')}>
                 <input
                   type="number"
                   min={0}
@@ -602,7 +604,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             </>
           )}
 
-          <Row label="Intensidade">
+          <Row label={t('editor.intensity')}>
             <input
               type="range"
               min={0}
@@ -621,7 +623,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
     <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
     <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8, marginBottom: 8 }}>Imagem de fundo</div>
 
-    <Row label="Upload">
+    <Row label={t('editor.upload')}>
       <input
         type="file"
         accept="image/*"
@@ -642,7 +644,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
       />
     </Row>
 
-    <Row label="URL">
+    <Row label={t('editor.url')}>
       <input
         type="text"
         value={(v1.base as any).url ?? ''}
@@ -675,7 +677,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
       </select>
     </Row>
 
-    <Row label="Posição">
+    <Row label={t('editor.position')}>
       <select
         value={(v1.base as any).position ?? 'center'}
         onChange={(e) =>
@@ -811,7 +813,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
     <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
     <div style={{ fontWeight: 900, fontSize: 12, opacity: 0.8, marginBottom: 8 }}>Overlay (escurecer)</div>
 
-    <Row label="Ativar">
+    <Row label={t('editor.enable')}>
       <Toggle
         active={v1.imageOverlay?.enabled ?? false}
         onClick={() =>
@@ -825,7 +827,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
     {v1.imageOverlay?.enabled && (
       <>
-        <Row label="Cor">
+        <Row label={t('editor.color')}>
           <SwatchRow
             value={v1.imageOverlay?.color ?? '#000000'}
             onChange={(hex) =>
@@ -915,7 +917,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
       {/* Fundo do header (bloco) */}
       <Section title="Fundo do header (bloco)">
-        <Row label="Ativar">
+        <Row label={t('editor.enable')}>
           <Toggle
             active={headerBgEnabled}
             onClick={() => setLayout({ ...(layout as any), headerBgEnabled: !headerBgEnabled } as any)}
@@ -923,7 +925,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         </Row>
 
         {headerBgEnabled ? (
-          <Row label="Cor">
+          <Row label={t('editor.color')}>
             <SwatchRow
               value={headerBgColor}
               onChange={(hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any)}
@@ -1048,7 +1050,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
             {coverFadeEnabled && (
               <>
-                <Row label="Cor do fade">
+                <Row label={t('editor.fade_color')}>
                   <SwatchRow
                     value={coverFadeColor}
                     onChange={(hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any)}
@@ -1056,7 +1058,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
                   />
                 </Row>
 
-               <Row label="Intensidade (fine)">
+               <Row label={t('editor.intensity_fine')}>
   <input
     type="range"
     min={0}
@@ -1073,7 +1075,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
   />
 </Row>
 
-                <Row label="Altura (px)">
+                <Row label={t('editor.height_px')}>
                   <input
                     type="number"
                     min={20}
@@ -1088,7 +1090,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               </>
             )}
 
-            <Row label="Opacidade (fine)">
+            <Row label={t('editor.opacity_fine')}>
               <input
                 type="range"
                 min={0}
@@ -1101,14 +1103,14 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
           </>
         ) : null}
 
-        <Row label="Largura">
+        <Row label={t('editor.width')}>
           <Button onClick={() => setLayout({ widthMode: 'full' } as any)}>Full</Button>
           <Button onClick={() => setLayout({ widthMode: 'fixed' } as any)}>Fixa</Button>
           <Button onClick={() => setLayout({ widthMode: 'custom' } as any)}>Custom</Button>
         </Row>
 
         {widthMode === 'custom' && (
-          <Row label="Largura (px)">
+          <Row label={t('editor.width_px')}>
             <input
               type="number"
               min={200}
@@ -1121,8 +1123,8 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         )}
       </Section>
 
-      <Section title="Badge (marca/logo)">
-        <Row label="Ativar">
+      <Section title={t('editor.badge')}>
+        <Row label={t('editor.enable')}>
           <Toggle
             active={badgeEnabled}
             onClick={() => setLayout({ ...(layout as any), badge: { ...badge, enabled: !badgeEnabled } } as any)}
@@ -1131,7 +1133,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
 
         {badgeEnabled ? (
           <>
-            <Row label="Upload">
+            <Row label={t('editor.upload')}>
               <Button onClick={() => badgeRef.current?.click()}>
                 {uploadingBadge ? 'A enviar...' : '📷 Upload badge'}
               </Button>
@@ -1148,7 +1150,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="URL (opcional)">
+            <Row label={t('editor.url_optional')}>
               <input
                 value={settings.badgeImage ?? ''}
                 onChange={(e) => onChange({ ...settings, badgeImage: e.target.value })}
@@ -1157,7 +1159,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="Posição">
+            <Row label={t('editor.position')}>
               <select
                 value={badgePos}
                 onChange={(e) =>
@@ -1172,7 +1174,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               </select>
             </Row>
 
-            <Row label="Tamanho (px)">
+            <Row label={t('editor.size_px')}>
               <input
                 type="number"
                 min={16}
@@ -1185,7 +1187,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="Offset X (px)">
+            <Row label={t('editor.offset_x')}>
               <input
                 type="number"
                 value={badgeOffsetX}
@@ -1196,7 +1198,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="Offset Y (px)">
+            <Row label={t('editor.offset_y')}>
               <input
                 type="number"
                 value={badgeOffsetY}
@@ -1207,7 +1209,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="Fundo (pill)">
+            <Row label={t('editor.pill_bg')}>
               <Toggle
                 active={badgeBgEnabled}
                 onClick={() => setLayout({ ...(layout as any), badge: { ...badge, bgEnabled: !badgeBgEnabled } } as any)}
@@ -1215,7 +1217,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
             </Row>
 
             {badgeBgEnabled ? (
-              <Row label="Cor do fundo">
+              <Row label={t('editor.bg_color')}>
                 <SwatchRow
                   value={badgeBgColor}
                   onChange={(hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)}
@@ -1224,7 +1226,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               </Row>
             ) : null}
 
-            <Row label="Raio (px)">
+            <Row label={t('editor.radius_px')}>
               <input
                 type="number"
                 min={0}
@@ -1237,7 +1239,7 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
               />
             </Row>
 
-            <Row label="Sombra">
+            <Row label={t('editor.shadow')}>
               <Toggle
                 active={badgeShadow}
                 onClick={() => setLayout({ ...(layout as any), badge: { ...badge, shadow: !badgeShadow } } as any)}
@@ -1249,8 +1251,8 @@ const nextOverlays = bg_recolorOverlays(v1.overlays ?? [], patternA, patternB)
         )}
       </Section>
 
-      <Section title="Avatar (layout)">
-        <Row label="Posição">
+      <Section title={t('editor.avatar_layout')}>
+        <Row label={t('editor.position')}>
           <Button onClick={() => setLayout({ avatarDock: 'overlap' } as any)}>Overlap</Button>
           <Button onClick={() => setLayout({ avatarDock: 'inline' } as any)}>Inline</Button>
         </Row>

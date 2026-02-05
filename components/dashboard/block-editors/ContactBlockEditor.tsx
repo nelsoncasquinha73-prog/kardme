@@ -5,6 +5,7 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 
 type ContactChannel = 'phone' | 'email' | 'whatsapp' | 'telegram'
@@ -181,6 +182,7 @@ function normalizeContactStyle(input?: Partial<ContactStyle>): ContactStyle {
 export default function ContactBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
 
+  const { t } = useLanguage()
   // Estado local para evitar re-renders e perda de foco
   const [localSettings, setLocalSettings] = useState<ContactSettings>(() => normalizeContactSettings(settings))
   const [localStyle, setLocalStyle] = useState<ContactStyle>(() => normalizeContactStyle(style))
@@ -260,8 +262,8 @@ useEffect(() => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title="Posição">
-        <Row label="Mover (Y)">
+      <Section title={t('editor.position')}>
+        <Row label={t('editor.move_y')}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button type="button" onClick={() => setStyle({ offsetY: (st.offsetY ?? 0) - 4 })} style={miniBtn}>⬆️</button>
             <button type="button" onClick={() => setStyle({ offsetY: (st.offsetY ?? 0) + 4 })} style={miniBtn}>⬇️</button>
@@ -271,8 +273,8 @@ useEffect(() => {
         </Row>
       </Section>
 
-      <Section title="Conteúdo">
-        <Row label="Título">
+      <Section title={t('editor.content')}>
+        <Row label={t('editor.title')}>
           <input
             value={s.heading ?? 'Contacto'}
             onChange={(e) => setSettings({ heading: e.target.value })}
@@ -284,7 +286,7 @@ useEffect(() => {
           />
         </Row>
 
-        <Row label="Alinhamento do título">
+        <Row label={t('editor.title_alignment')}>
           <select
             value={st.headingAlign ?? 'left'}
             onChange={(e) => setStyle({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
@@ -299,7 +301,7 @@ useEffect(() => {
           </select>
         </Row>
 
-        <Row label="Cor do título">
+        <Row label={t('editor.title_color')}>
           <SwatchRow
             value={st.headingColor ?? '#111827'}
             onChange={(hex) => setStyle({ headingColor: hex })}
@@ -307,11 +309,11 @@ useEffect(() => {
           />
         </Row>
 
-        <Row label="Negrito">
+        <Row label={t('editor.bold')}>
           <Toggle active={headingBold} onClick={() => setStyle({ headingBold: !headingBold })} />
         </Row>
 
-        <Row label="Fonte do título">
+        <Row label={t('editor.title_font')}>
           <select
             value={st.headingFontFamily ?? ''}
             onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })}
@@ -329,7 +331,7 @@ useEffect(() => {
           </select>
         </Row>
 
-        <Row label="Peso do título">
+        <Row label={t('editor.title_weight')}>
           <select
             value={String(st.headingFontWeight ?? 900)}
             onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })}
@@ -346,7 +348,7 @@ useEffect(() => {
           </select>
         </Row>
 
-        <Row label="Tamanho do título (px)">
+        <Row label={t('editor.title_size')}>
           <input
             type="number"
             min={10}
@@ -364,8 +366,8 @@ useEffect(() => {
           />
         </Row>
 
-        <Section title="Layout (alinhamento e espaçamento)">
-          <Row label="Direção">
+        <Section title={t('editor.layout')}>
+          <Row label={t('editor.direction')}>
             <select
               value={layout.direction ?? 'row'}
               onChange={(e) => setLayout({ direction: e.target.value as 'row' | 'column' })}
@@ -379,7 +381,7 @@ useEffect(() => {
             </select>
           </Row>
 
-          <Row label="Alinhamento">
+          <Row label={t('editor.alignment')}>
             <select
               value={layout.align ?? 'center'}
               onChange={(e) => setLayout({ align: e.target.value as 'left' | 'center' | 'right' })}
@@ -394,7 +396,7 @@ useEffect(() => {
             </select>
           </Row>
 
-          <Row label="Espaço entre botões (px)">
+          <Row label={t('editor.button_spacing')}>
             <input
               type="range"
               min={0}
@@ -431,7 +433,7 @@ useEffect(() => {
                 <Toggle active={isEnabled} onClick={() => setItem(cdef.key, { enabled: !isEnabled })} />
               </div>
 
-              <Row label="Valor">
+              <Row label={t('editor.value')}>
                 <input
                   value={it.value ?? ''}
                   onChange={(e) => setItem(cdef.key, { value: e.target.value })}

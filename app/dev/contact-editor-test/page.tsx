@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import ContactBlockEditor from '@/components/dashboard/block-editors/ContactBlockEditor'
-import ContactBlock from '@/components/blocks/ContactBlock' // caminho atualizado conforme indicado
+import ContactBlock from '@/components/blocks/ContactBlock'
+import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 export default function ContactEditorTestPage() {
   const [settings, setSettings] = useState<any>({
@@ -47,38 +48,40 @@ export default function ContactEditorTestPage() {
   })
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        padding: 24,
-        background: '#f3f4f6',
-        display: 'grid',
-        gridTemplateColumns: '420px 1fr',
-        gap: 18,
-        alignItems: 'start',
-      }}
-    >
-      <div style={{ position: 'sticky', top: 12 }}>
-        <ContactBlockEditor
-          settings={settings}
-          style={style}
-          onChangeSettings={setSettings}
-          onChangeStyle={setStyle}
-        />
-      </div>
-
+    <LanguageProvider>
       <div
         style={{
-          background: '#fff',
-          borderRadius: 18,
-          padding: 18,
-          border: '1px solid rgba(0,0,0,0.08)',
-          maxWidth: 520,
+          minHeight: '100vh',
+          padding: 24,
+          background: '#f3f4f6',
+          display: 'grid',
+          gridTemplateColumns: '420px 1fr',
+          gap: 18,
+          alignItems: 'start',
         }}
       >
-        <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 10 }}>Preview</div>
-        <ContactBlock settings={settings} style={style} />
+        <div style={{ position: 'sticky', top: 12 }}>
+          <ContactBlockEditor
+            settings={settings}
+            style={style}
+            onChangeSettings={setSettings}
+            onChangeStyle={setStyle}
+          />
+        </div>
+
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 18,
+            padding: 18,
+            border: '1px solid rgba(0,0,0,0.08)',
+            maxWidth: 520,
+          }}
+        >
+          <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 10 }}>Preview</div>
+          <ContactBlock settings={settings} style={style} />
+        </div>
       </div>
-    </div>
+    </LanguageProvider>
   )
 }
