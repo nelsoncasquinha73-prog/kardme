@@ -145,7 +145,12 @@
     "fully_customizable": "Totalmente personalizable",
     "fully_customizable_desc": "Colores, fuentes, diseño — todo a tu medida",
     "mobile_first": "Mobile First",
-    "mobile_first_desc": "Perfecto en cualquier dispositivo, siempre"
+    "mobile_first_desc": "Perfecto en cualquier dispositivo, siempre",
+    "for_teams": "Para equipos",
+    "contact": "Contactar",
+    "custom_integrations": "Integraciones personalizadas",
+    "join_thousands": "Únete a miles de profesionales usando Kardme",
+    "view_catalog": "Ver catálogo"
   },
   "language": {
     "select": "Idioma",

@@ -304,17 +304,17 @@ export default function Home() {
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
                 <h3 className="pricing-title">Enterprise</h3>
-                <p className="pricing-subtitle">Para equipas</p>
+                <p className="pricing-subtitle">{t('landing.for_teams')}</p>
                 <div className="pricing-price">
-                  <span className="price">Contactar</span>
+                  <span className="price">{t('landing.contact')}</span>
                 </div>
                 <ul className="pricing-list">
                   <li><i className="fas fa-check"></i> {t('landing.everything_pro')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.nfc_cards')}</li>
                   <li><i className="fas fa-check"></i> {t('landing.priority_support')}</li>
-                  <li><i className="fas fa-check"></i> Integrações custom</li>
+                  <li><i className="fas fa-check"></i> {t('landing.custom_integrations')}</li>
                 </ul>
-                <a href="mailto:hello@kardme.com" className="btn btn-outline">Contactar</a>
+                <a href="mailto:hello@kardme.com" className="btn btn-outline">{t('landing.contact')}</a>
               </div>
             </div>
           </div>
@@ -339,11 +339,11 @@ export default function Home() {
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
               <h2 className="section-title">{t('landing.ready_to_start')}</h2>
-              <p className="section-description">Junta-te a milhares de profissionais a usar Kardme</p>
+              <p className="section-description">{t('landing.join_thousands')}</p>
               <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 {isLoggedIn ? (
                   <>
-                    <Link className="btn btn-cta-green" href="/dashboard/catalog">Ver catálogo</Link>
+                    <Link className="btn btn-cta-green" href="/dashboard/catalog">{t('landing.view_catalog')}</Link>
                     <button onClick={() => handleUpgradeClick('monthly')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
                       {t('landing.upgrade_pro')}
                     </button>
