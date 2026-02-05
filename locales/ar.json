@@ -83,6 +83,12 @@
     "login_facebook": "تسجيل الدخول بـ Facebook",
     "signing_in": "جاري تسجيل الدخول..."
   },
+  "admin": {
+    "client": "عميل",
+    "create_client": "إنشاء عميل",
+    "create_new_client": "إنشاء عميل جديد",
+    "creating": "جاري الإنشاء..."
+  },
   "language": {
     "select": "اللغة",
     "en": "English",

@@ -83,6 +83,12 @@
     "login_facebook": "Accedi con Facebook",
     "signing_in": "Accesso in corso..."
   },
+  "admin": {
+    "client": "Cliente",
+    "create_client": "Crea Cliente",
+    "create_new_client": "Crea Nuovo Cliente",
+    "creating": "Creazione..."
+  },
   "language": {
     "select": "Lingua",
     "en": "English",

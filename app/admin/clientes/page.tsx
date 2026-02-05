@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type ClientRow = {
   id: string
@@ -20,6 +21,7 @@ type CountsByUser = Record<string, { total: number; published: number }>
 
 export default function AdminClientesPage() {
   const [loading, setLoading] = useState(true)
+  const { t } = useLanguage()
   const [rows, setRows] = useState<ClientRow[]>([])
   const [counts, setCounts] = useState<CountsByUser>({})
   const [q, setQ] = useState('')
@@ -118,18 +120,18 @@ export default function AdminClientesPage() {
     <div style={{ display: 'grid', gap: 16 }}>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, color: '#fff' }}>Clientes</h1>
+          <h1 style={{ margin: 0, fontSize: 22, color: '#fff' }}>{t('nav.clients')}</h1>
           <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.7)' }}>Lista de contas + acesso ao detalhe</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Pesquisar por nome, email ou plano…"
+            placeholder={t('common.search')}
             style={{ width: 300, maxWidth: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#fff' }}
           />
           <button onClick={() => setShowModal(true)} style={{ padding: '10px 16px', borderRadius: 10, border: 'none', background: '#22c55e', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
-            + Criar Cliente
+            + {t('admin.create_client')}
           </button>
         </div>
       </div>
@@ -138,12 +140,12 @@ export default function AdminClientesPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 980 }}>
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Cliente</th>
-              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Email</th>
-              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Plano</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>{t('admin.client')}</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>{t('auth.email')}</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>{t('nav.plans')}</th>
               <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Billing</th>
               <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Limite</th>
-              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Cartões</th>
+              <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>{t('nav.cards')}</th>
               <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Publicados</th>
               <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Criado</th>
               <th style={{ padding: 12 }} />
@@ -183,7 +185,7 @@ export default function AdminClientesPage() {
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowModal(false)}>
           <div style={{ background: '#1e1e2e', borderRadius: 16, padding: 24, width: 420, maxWidth: '90vw', border: '1px solid rgba(255,255,255,0.1)' }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 20px', fontSize: 18, color: '#fff' }}>Criar Novo Cliente</h2>
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, color: '#fff' }}>{t('admin.create_new_client')}</h2>
             <div style={{ display: 'grid', gap: 12 }}>
               <label style={labelStyle}>
                 Email *
@@ -222,7 +224,7 @@ export default function AdminClientesPage() {
                   Cancelar
                 </button>
                 <button onClick={handleCreateClient} disabled={creating} style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: 'none', background: '#22c55e', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
-                  {creating ? 'A criar…' : 'Criar Cliente'}
+                  {creating ? t('admin.creating') : t('admin.create_client')}
                 </button>
               </div>
             </div>
