@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { FiShare2, FiX } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import { HiOutlineUserAdd } from 'react-icons/hi'
+import { MdAddToPhotos } from 'react-icons/md'
 import ShareModal from './ShareModal'
 import QRCodeModal from './QRCodeModal'
 
@@ -72,6 +73,18 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
     height: 48,
     background: '#fff',
     color: s.buttonColor,
+  }
+
+  const handleAddToHome = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: cardTitle || "Kardme",
+        text: "Vê o meu cartão digital",
+        url: window.location.href,
+      })
+    } else {
+      alert("Toca no botão Partilhar do Safari → Adicionar ao ecrã principal")
+    }
   }
 
   return (
