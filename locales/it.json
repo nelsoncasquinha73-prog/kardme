@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "Esci",
     "save": "Salva",
     "cancel": "Annulla",
     "delete": "Elimina",

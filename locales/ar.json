@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "تسجيل الخروج",
     "save": "حفظ",
     "cancel": "إلغاء",
     "delete": "حذف",

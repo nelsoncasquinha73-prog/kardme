@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "Cerrar sesión",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",

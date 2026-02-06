@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "Sair",
     "save": "Salvar",
     "cancel": "Cancelar",
     "delete": "Excluir",

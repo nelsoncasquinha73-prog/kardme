@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "Abmelden",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",

@@ -61,7 +61,7 @@ export default function Home() {
                 <Link className="nav-link" href="/dashboard">{t('nav.dashboard')}</Link>
                 <Link className="btn btn-primary" href="/dashboard/plans">{t('landing.upgrade')}</Link>
                 <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                  Sair
+                  {t("common.logout")}
                 </button>
               </>
             ) : (
