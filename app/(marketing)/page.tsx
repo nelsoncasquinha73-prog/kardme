@@ -109,7 +109,7 @@ export default function Home() {
                           {t('landing.go_to_catalog')}
                         </Link>
                         <Link className="btn btn-secondary" href="/dashboard">
-                          Dashboard
+                          {t("landing.dashboard_label")}
                         </Link>
                       </>
                     ) : (
@@ -281,7 +281,7 @@ export default function Home() {
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item pricing-item-featured">
                 <div className="pricing-badge">{t('landing.most_popular')}</div>
-                <h3 className="pricing-title">Pro</h3>
+                <h3 className="pricing-title">{t("landing.pro_plan")}</h3>
                 <p className="pricing-subtitle">{t('landing.for_professionals')}</p>
                 <div className="pricing-price">
                   <span className="price">€6,99</span>
@@ -306,7 +306,7 @@ export default function Home() {
             {/* ENTERPRISE PLAN */}
             <div className="col-lg-4 col-md-6">
               <div className="pricing-item">
-                <h3 className="pricing-title">Enterprise</h3>
+                <h3 className="pricing-title">{t("landing.enterprise_plan")}</h3>
                 <p className="pricing-subtitle">{t('landing.for_teams')}</p>
                 <div className="pricing-price">
                   <span className="price">{t('landing.contact')}</span>

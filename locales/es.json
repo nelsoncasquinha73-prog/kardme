@@ -192,6 +192,12 @@
     "inactive": "Inactivo"
   },
   "landing": {
+    "dashboard_label": "Panel de Control",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Empresarial",
+    "dashboard_label": "Panel de Control",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Empresarial",
     "hero_title_1": "Una",
     "hero_title_2": "tarjeta digital",
     "hero_title_3": "con efecto",

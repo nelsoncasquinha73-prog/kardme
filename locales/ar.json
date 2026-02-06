@@ -192,6 +192,12 @@
     "inactive": "غير نشط"
   },
   "landing": {
+    "dashboard_label": "لوحة التحكم",
+    "pro_plan": "Pro",
+    "enterprise_plan": "مؤسسة",
+    "dashboard_label": "لوحة التحكم",
+    "pro_plan": "Pro",
+    "enterprise_plan": "مؤسسة",
     "hero_title_1": "",
     "hero_title_2": "بطاقة رقمية",
     "hero_title_3": "بتأثير",

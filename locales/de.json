@@ -192,6 +192,12 @@
     "inactive": "Inaktiv"
   },
   "landing": {
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Unternehmen",
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Unternehmen",
     "hero_title_1": "Eine",
     "hero_title_2": "digitale Karte",
     "hero_title_3": "mit",

@@ -192,6 +192,12 @@
     "inactive": "Inactif"
   },
   "landing": {
+    "dashboard_label": "Tableau de bord",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Entreprise",
+    "dashboard_label": "Tableau de bord",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Entreprise",
     "hero_title_1": "Une",
     "hero_title_2": "carte digitale",
     "hero_title_3": "avec effet",

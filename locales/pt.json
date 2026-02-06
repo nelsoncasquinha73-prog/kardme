@@ -103,6 +103,12 @@
     "inactive": "Inativo"
   },
   "landing": {
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
     "hero_title_1": "Um",
     "hero_title_2": "cartão digital",
     "hero_title_3": "com efeito",

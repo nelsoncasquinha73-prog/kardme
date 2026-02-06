@@ -192,6 +192,12 @@
     "inactive": "Inattivo"
   },
   "landing": {
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
+    "dashboard_label": "Dashboard",
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
     "hero_title_1": "Un",
     "hero_title_2": "biglietto digitale",
     "hero_title_3": "con effetto",
