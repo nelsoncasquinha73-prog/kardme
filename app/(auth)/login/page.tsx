@@ -66,8 +66,8 @@ export default function LoginPage() {
                 <div className="sign-up-box">
                   <div className="signup-box-top">
                     <Link href="/" aria-label="Ir para a homepage">
-                      <img className="logo-light" src="/assets/images/logo/logo.png" alt="Kardme logo" />
-                      <img className="logo-dark" src="/assets/images/light/logo/logo-dark.png" alt="Kardme logo dark" />
+                      <img className="logo-light" src="/kardme-logo.png" alt="Kardme logo" />
+                      <img className="logo-dark" src="/kardme-logo.png" alt="Kardme logo dark" />
                     </Link>
                   </div>
 
