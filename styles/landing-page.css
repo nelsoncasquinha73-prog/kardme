@@ -899,3 +899,10 @@
   opacity: 0.65 !important;
   filter: drop-shadow(0 0 110px rgba(96, 165, 250, 0.55)) contrast(1.15) brightness(1.08);
 }
+
+/* Mobile: hide hero logo mark to avoid overlapping hero text */
+@media (max-width: 768px) {
+  .landing-page .heroLogoMark {
+    display: none !important;
+  }
+}

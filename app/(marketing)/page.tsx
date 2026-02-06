@@ -52,7 +52,7 @@ export default function Home() {
       <nav className="navbar navbar-expand-lg navbar-dark bg-transparent">
         <div className="container">
           <Link className="navbar-brand" href="/">
-            <img src="/kardme-logo.png" alt="Kardme" style={{ height: 50, width: "auto" }} />
+            <span style={{ fontSize: 20, fontWeight: 900 }}>Kardme</span>
           </Link>
 
           <div className="navbar-nav ms-auto" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
