@@ -1,5 +1,6 @@
 {
   "common": {
+    "logout": "Logout",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -102,6 +103,8 @@
     "inactive": "Inactive"
   },
   "landing": {
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
     "hero_title_1": "A",
     "hero_title_2": "digital card",
     "hero_title_3": "with",

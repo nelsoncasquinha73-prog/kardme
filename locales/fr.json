@@ -192,6 +192,8 @@
     "inactive": "Inactif"
   },
   "landing": {
+    "pro_plan": "Pro",
+    "enterprise_plan": "Entreprise",
     "dashboard_label": "Tableau de bord",
     "pro_plan": "Pro",
     "enterprise_plan": "Entreprise",

@@ -103,6 +103,8 @@
     "inactive": "Inativo"
   },
   "landing": {
+    "pro_plan": "Pro",
+    "enterprise_plan": "Enterprise",
     "dashboard_label": "Dashboard",
     "pro_plan": "Pro",
     "enterprise_plan": "Enterprise",
