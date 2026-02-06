@@ -842,3 +842,46 @@
 .landing-page .navbar .nav-link:hover {
   color: #fff !important;
 }
+
+/* Hide left orbs, keep right */
+.landing-page .heroOrbs .orb1 {
+  display: none !important;
+}
+.landing-page .heroOrbs .orb3 {
+  display: none !important;
+}
+
+/* Logo hero mark (left side) */
+.landing-page .heroLogoMark {
+  position: absolute;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+.landing-page .heroLogoMark img {
+  width: 320px;
+  height: auto;
+  opacity: 0.18;
+  filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.35));
+}
+
+@media (max-width: 992px) {
+  .landing-page .heroLogoMark img {
+    width: 220px;
+    opacity: 0.14;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-page .heroLogoMark {
+    left: 50%;
+    top: 18%;
+    transform: translateX(-50%);
+  }
+  .landing-page .heroLogoMark img {
+    width: 180px;
+    opacity: 0.12;
+  }
+}

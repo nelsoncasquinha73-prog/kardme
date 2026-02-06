@@ -82,6 +82,9 @@ export default function Home() {
           <span className="orb orb2" />
           <span className="orb orb3" />
         </div>
+        <div className="heroLogoMark">
+          <img src="/kardme-logo.png" alt="" />
+        </div>
 
         <div className="container">
           <div className="row justify-content-center">
