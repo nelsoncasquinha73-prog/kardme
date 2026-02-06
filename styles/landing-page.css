@@ -886,3 +886,16 @@
     opacity: 0.28;
   }
 }
+
+/* Reduce right orb competition */
+.landing-page .heroOrbs .orb2 {
+  opacity: 0.35 !important;
+  filter: blur(6px) !important;
+  transform: scale(0.85);
+}
+
+/* Make hero logo mark punchier (cut through overlay) */
+.landing-page .heroLogoMark img {
+  opacity: 0.65 !important;
+  filter: drop-shadow(0 0 110px rgba(96, 165, 250, 0.55)) contrast(1.15) brightness(1.08);
+}
