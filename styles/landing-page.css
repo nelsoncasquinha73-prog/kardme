@@ -193,7 +193,7 @@
 
 .landing-page .heroOrbs .orb {
   position: absolute;
-  width: 180px;
+  width: 250px;
   height: 180px;
   border-radius: 999px;
   filter: blur(2px);
@@ -217,7 +217,7 @@
 }
 
 .landing-page .heroOrbs .orb3 {
-  width: 180px;
+  width: 250px;
   height: 180px;
   bottom: 40px;
   left: 15%;
@@ -861,17 +861,17 @@
   pointer-events: none;
 }
 .landing-page .heroLogoMark img {
-  width: 320px;
+  width: 500px;
   height: auto;
-  opacity: 0.18;
-  filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.35));
+  opacity: 0.45;
+  filter: drop-shadow(0 0 80px rgba(168, 85, 247, 0.7));
   mix-blend-mode: screen;
 }
 
 @media (max-width: 992px) {
   .landing-page .heroLogoMark img {
-    width: 220px;
-    opacity: 0.14;
+    width: 350px;
+    opacity: 0.35;
   }
 }
 
@@ -882,7 +882,7 @@
     transform: translateX(-50%);
   }
   .landing-page .heroLogoMark img {
-    width: 180px;
-    opacity: 0.12;
+    width: 250px;
+    opacity: 0.28;
   }
 }
