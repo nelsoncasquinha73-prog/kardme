@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { trackEvent } from '@/lib/trackEvent'
 
 type LeadFormSettings = {
@@ -80,6 +81,8 @@ function isNonEmpty(v?: string) {
 export default function LeadFormBlock({ cardId, settings, style }: Props) {
   const s: LeadFormSettings = settings ?? {}
   const st: LeadFormStyle = style ?? {}
+
+  const { t } = useLanguage()
 
   const fields = useMemo(
     () => ({

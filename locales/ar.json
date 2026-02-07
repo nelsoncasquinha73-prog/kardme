@@ -1,5 +1,9 @@
 {
   "common": {
+    "placeholder_name": "أدخل اسمك",
+    "placeholder_email": "أدخل بريدك الإلكتروني",
+    "placeholder_phone": "اختياري",
+    "placeholder_message": "كيف يمكنني مساعدتك؟",
     "logout": "تسجيل الخروج",
     "save": "حفظ",
     "cancel": "إلغاء",

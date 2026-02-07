@@ -1,5 +1,9 @@
 {
   "common": {
+    "placeholder_name": "Scrivi il tuo nome",
+    "placeholder_email": "Scrivi la tua email",
+    "placeholder_phone": "Opzionale",
+    "placeholder_message": "Come posso aiutarti?",
     "logout": "Esci",
     "save": "Salva",
     "cancel": "Annulla",
