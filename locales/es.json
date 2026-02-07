@@ -45,6 +45,10 @@
     "logout": "Salir"
   },
   "dashboard": {
+    "cards_count": "tarjeta(s) en tu cuenta",
+    "first_card_message": "Crea tu primera tarjeta y comparte en un solo enlace.",
+    "create_first_card": "Crea tu primera tarjeta en 60 segundos",
+
     "save_as_template": "Guardar como plantilla",
 
     "duplicate": "Duplicar tarjeta",

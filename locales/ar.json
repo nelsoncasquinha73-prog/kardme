@@ -45,6 +45,10 @@
     "logout": "تسجيل الخروج"
   },
   "dashboard": {
+    "cards_count": "بطاقة(ات) في حسابك",
+    "first_card_message": "أنشئ بطاقتك الأولى وشاركها في رابط واحد.",
+    "create_first_card": "أنشئ بطاقتك الأولى في 60 ثانية",
+
     "save_as_template": "حفظ كنموذج",
 
     "duplicate": "نسخ البطاقة",

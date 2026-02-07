@@ -45,6 +45,10 @@
     "logout": "Esci"
   },
   "dashboard": {
+    "cards_count": "cartone(i) nel tuo account",
+    "first_card_message": "Crea il tuo primo cartone e condividilo in un unico link.",
+    "create_first_card": "Crea il tuo primo cartone in 60 secondi",
+
     "save_as_template": "Salva come modello",
 
     "duplicate": "Duplica cartone",

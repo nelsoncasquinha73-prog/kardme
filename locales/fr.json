@@ -45,6 +45,10 @@
     "logout": "Déconnexion"
   },
   "dashboard": {
+    "cards_count": "carte(s) dans votre compte",
+    "first_card_message": "Créez votre première carte et partagez-la en un seul lien.",
+    "create_first_card": "Créez votre première carte en 60 secondes",
+
     "save_as_template": "Enregistrer comme modèle",
 
     "duplicate": "Dupliquer la carte",

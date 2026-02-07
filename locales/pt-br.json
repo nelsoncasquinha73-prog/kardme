@@ -45,6 +45,10 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "cards_count": "cartão(ões) na sua conta",
+    "first_card_message": "Crie seu primeiro cartão e compartilhe em um único link.",
+    "create_first_card": "Crie seu primeiro cartão em 60 segundos",
+
     "save_as_template": "Salvar como modelo",
 
     "duplicate": "Duplicar cartão",

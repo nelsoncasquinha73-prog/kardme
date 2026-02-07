@@ -45,6 +45,10 @@
     "logout": "Logout"
   },
   "dashboard": {
+    "cards_count": "card(s) in your account",
+    "first_card_message": "Create your first card and share it in one link.",
+    "create_first_card": "Create your first card in 60 seconds",
+
     "save_as_template": "Save as template",
 
     "duplicate": "Duplicate card",
