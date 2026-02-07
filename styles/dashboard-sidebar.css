@@ -1,8 +1,8 @@
 .dashboard-scope .dashboard-sidebar, .dashboard-sidebar {
-  width: 280px;
+  width: 220px;
   background: linear-gradient(180deg, #0b0b12 0%, #0f0f1a 100%);
   color: rgba(255, 255, 255, 0.92);
-  padding: 18px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -46,8 +46,8 @@
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   border-radius: 12px;
   color: rgba(255, 255, 255, 0.74);
   text-decoration: none;
@@ -138,4 +138,10 @@
     width: 16px;
     height: 16px;
   }
+}
+
+.sidebar-link span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
