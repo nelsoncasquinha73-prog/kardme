@@ -8,6 +8,7 @@ type PublishToggleProps = {
   cardId: string
   initialPublished: boolean
 }
+  const { t } = useLanguage()
 
 export default function PublishToggle({ cardId, initialPublished }: PublishToggleProps) {
   const { t } = useLanguage()
