@@ -251,7 +251,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           height: '100vh',
           minWidth: 0,
           display: 'grid',
-          gridTemplateColumns: '260px minmax(420px, 1fr) 420px',
+          gridTemplateColumns: '320px minmax(500px, 1fr) 380px',
           gap: 16,
           padding: 16,
           background: '#f3f4f6',
