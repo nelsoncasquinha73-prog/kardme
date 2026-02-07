@@ -236,8 +236,8 @@ export default function AdminClienteDetailPage() {
           <div style={cardStyle}>
             <h2 style={{ marginTop: 0, fontSize: 16, color: '#fff' }}>Ações</h2>
             <div style={{ display: 'grid', gap: 12 }}>
-              <button onClick={saveProfile} disabled={saving} style={{ padding: '12px', borderRadius: 10, border: 'none', background: '#22c55e', color: 'white', fontWeight: 700, cursor: 'pointer' }}>{saving ? 'A guardar…' : '💾 Guardar Alterações'}</button>
-              <button onClick={deleteAccount} disabled={deleting} style={{ padding: '12px', borderRadius: 10, border: '1px solid #dc2626', background: 'transparent', color: '#dc2626', fontWeight: 700, cursor: 'pointer' }}>{deleting ? 'A eliminar…' : '🗑️ Eliminar Conta'}</button>
+              <button onClick={saveProfile} disabled={saving} style={{ padding: '12px', borderRadius: 10, border: 'none', background: '#22c55e', color: 'white', fontWeight: 700, cursor: 'pointer' }}>{saving ? t('dashboard.saving') : '💾 ' + t('dashboard.save')}</button>
+              <button onClick={deleteAccount} disabled={deleting} style={{ padding: '12px', borderRadius: 10, border: '1px solid #dc2626', background: 'transparent', color: '#dc2626', fontWeight: 700, cursor: 'pointer' }}>{deleting ? t('dashboard.deleting') : '🗑️ ' + t('dashboard.delete')}</button>
             </div>
           </div>
         </div>
