@@ -193,7 +193,7 @@ function SortableRow({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {block.title || getBlockName(block.type, t) || block.type}
+                {block.type === 'header' ? 'TEST_HEADER' : (block.title || getBlockName(block.type, t) || block.type)}
               </div>
               <div style={{ fontSize: 12, color: 'rgba(17,24,39,0.55)' }}>{block.type}</div>
             </div>
