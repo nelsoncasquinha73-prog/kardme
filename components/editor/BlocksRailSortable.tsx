@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { BlockIcon } from '@/components/editor/BlockIcon'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 export type BlockItem = {
   id: string
@@ -31,6 +32,8 @@ export default function BlocksRailSortable({
   onReorder: (next: BlockItem[]) => void
   onDelete?: (id: string) => void
 }) {
+  const { t } = useLanguage()
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 12 },
@@ -59,6 +62,7 @@ export default function BlocksRailSortable({
         <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {blocks.map((b) => (
             <SortableRow
+              t={t}
               key={b.id}
               block={b}
               active={b.id === selectedId}
@@ -74,12 +78,14 @@ export default function BlocksRailSortable({
 }
 
 function SortableRow({
+  t,
   block,
   active,
   onSelect,
   onToggle,
   onDelete,
 }: {
+  t: (key: string) => string
   block: BlockItem
   active: boolean
   onSelect: () => void
@@ -187,7 +193,7 @@ function SortableRow({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {block.title || block.type}
+                {block.title || t(`blocks.${block.type}`) || block.type}
               </div>
               <div style={{ fontSize: 12, color: 'rgba(17,24,39,0.55)' }}>{block.type}</div>
             </div>
