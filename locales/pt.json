@@ -41,6 +41,17 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "edit": "Editar",
+    "view": "Ver",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "publish": "Publicar",
+    "unpublish": "Despublicar",
+    "saving": "A guardar…",
+    "deleting": "A eliminar…",
+    "opening": "A abrir…",
+
     "welcome": "Bem-vindo",
     "your_cards": "Os teus Cartões",
     "create_card": "Criar Cartão",

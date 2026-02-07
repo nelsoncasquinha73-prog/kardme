@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type Profile = {
   id: string
@@ -27,6 +28,7 @@ type CardSummary = { card_id: string; card_name: string; total_views: number; to
 type ChartData = { date: string; views: number; clicks: number; leads: number }
 
 export default function AdminClienteDetailPage() {
+  const { t } = useLanguage()
   const params = useParams<{ userId: string }>()
   const userId = params.userId
 
@@ -264,7 +266,7 @@ export default function AdminClienteDetailPage() {
                     <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.published ? '✅ Sim' : '❌ Não'}</td>
                     <td style={{ padding: 12, color: 'rgba(255,255,255,0.85)' }}>{c.created_at ? new Date(c.created_at).toLocaleString('pt-PT') : '—'}</td>
                     <td style={{ padding: 12 }}><span style={{ padding: "4px 8px", borderRadius: 6, fontSize: 12, fontWeight: 600, background: c.published ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: c.published ? "#22c55e" : "#ef4444" }}>{c.published ? "Publicado" : "Rascunho"}</span></td>
-                    <td style={{ padding: 12 }}><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><a href={"/dashboard/cards/" + c.id + "/theme"} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#7c3aed", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>✏️ Editar</a>{c.slug && c.published && <a href={"/" + c.slug} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#2563eb", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>👁 Ver</a>}<button onClick={() => toggleCardPublish(c.id, !c.published)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: c.published ? "#ef4444" : "#22c55e", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{c.published ? "Despublicar" : "Publicar"}</button><button onClick={() => deleteCard(c.id)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: "#7f1d1d", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>🗑️</button></div></td>
+                    <td style={{ padding: 12 }}><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><a href={"/dashboard/cards/" + c.id + "/theme"} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#7c3aed", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>✏️ {t('dashboard.edit')} </a>{c.slug && c.published && <a href={"/" + c.slug} target="_blank" rel="noreferrer" style={{ padding: "6px 10px", borderRadius: 8, background: "#2563eb", color: "white", textDecoration: "none", fontWeight: 600, fontSize: 12 }}>👁 {t('dashboard.view')} </a>}<button onClick={() => toggleCardPublish(c.id, !c.published)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: c.published ? "#ef4444" : "#22c55e", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{c.published ? t('dashboard.unpublish') : t('dashboard.publish')}</button><button onClick={() => deleteCard(c.id)} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: "#7f1d1d", color: "white", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>🗑️</button></div></td>
                   </tr>
                 ))}
                 {cards.length === 0 && <tr><td colSpan={6} style={{ padding: 16, color: 'rgba(255,255,255,0.6)' }}>Sem cartões.</td></tr>}

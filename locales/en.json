@@ -45,6 +45,17 @@
     "logout": "Logout"
   },
   "dashboard": {
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "saving": "Saving…",
+    "deleting": "Deleting…",
+    "opening": "Opening…",
+
     "welcome": "Welcome",
     "your_cards": "Your Cards",
     "create_card": "Create Card",

@@ -45,6 +45,17 @@
     "logout": "Déconnexion"
   },
   "dashboard": {
+    "edit": "Modifier",
+    "view": "Voir",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "publish": "Publier",
+    "unpublish": "Dépublier",
+    "saving": "Enregistrement…",
+    "deleting": "Suppression…",
+    "opening": "Ouverture…",
+
     "welcome": "Bienvenue",
     "your_cards": "Vos Cartes",
     "create_card": "Créer une Carte",

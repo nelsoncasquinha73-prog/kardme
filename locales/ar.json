@@ -45,6 +45,17 @@
     "logout": "تسجيل الخروج"
   },
   "dashboard": {
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "publish": "نشر",
+    "unpublish": "إلغاء النشر",
+    "saving": "جاري الحفظ…",
+    "deleting": "جاري الحذف…",
+    "opening": "جاري الفتح…",
+
     "welcome": "مرحباً",
     "your_cards": "بطاقاتك",
     "create_card": "إنشاء بطاقة",

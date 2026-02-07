@@ -45,6 +45,17 @@
     "logout": "Salir"
   },
   "dashboard": {
+    "edit": "Editar",
+    "view": "Ver",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "publish": "Publicar",
+    "unpublish": "Despublicar",
+    "saving": "Guardando…",
+    "deleting": "Eliminando…",
+    "opening": "Abriendo…",
+
     "welcome": "Bienvenido",
     "your_cards": "Tus Tarjetas",
     "create_card": "Crear Tarjeta",

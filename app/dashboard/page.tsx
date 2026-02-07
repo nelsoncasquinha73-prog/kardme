@@ -258,7 +258,7 @@ export default function DashboardPage() {
 
         <div className="dashboard-actions">
           <Link className="btn-secondary" href="/dashboard/catalog">
-            Ver catálogo
+            {t('dashboard.view')} catálogo
           </Link>
           <Link className="btn-primary" href="/dashboard/cards/new">
             + {t('dashboard.create_card')}
@@ -281,7 +281,7 @@ export default function DashboardPage() {
               {t('dashboard.create_card_free')}
             </Link>
             <Link className="btn-secondary" href="/dashboard/catalog">
-              Ver catálogo
+              {t('dashboard.view')} catálogo
             </Link>
           </div>
         </div>
@@ -302,10 +302,10 @@ export default function DashboardPage() {
 
                 <div className="card-tile-actions">
                   <Link className="card-btn card-btn-primary" href={`/dashboard/cards/${card.id}/theme`}>
-                    Editar
+                    {t('dashboard.edit')}
                   </Link>
                   <Link className="card-btn card-btn-ghost" href={`/${card.slug}`} target="_blank">
-                    Ver
+                    {t('dashboard.view')}
                   </Link>
 
                   <button
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                     disabled={deletingId === card.id}
                     title="Eliminar cartão"
                   >
-                    {deletingId === card.id ? t('dashboard.deleting') : 'Eliminar'}
+                    {deletingId === card.id ? t('dashboard.deleting') : t('dashboard.delete')}
                   </button>
                 </div>
               </div>

@@ -45,6 +45,17 @@
     "logout": "Esci"
   },
   "dashboard": {
+    "edit": "Modifica",
+    "view": "Visualizza",
+    "delete": "Elimina",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "publish": "Pubblica",
+    "unpublish": "Annulla pubblicazione",
+    "saving": "Salvataggio…",
+    "deleting": "Eliminazione…",
+    "opening": "Apertura…",
+
     "welcome": "Benvenuto",
     "your_cards": "I tuoi Biglietti",
     "create_card": "Crea Biglietto",
