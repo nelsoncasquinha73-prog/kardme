@@ -44,23 +44,6 @@ export default function ThemePageClientLeft({
   enabledCount,
 }: Props) {
   const { t } = useLanguage()
-
-  const blockNames: Record<string, string> = {
-    header: t('blocks.header'),
-    profile: t('blocks.profile'),
-    social: t('blocks.social'),
-    contact: t('blocks.contact'),
-    gallery: t('blocks.gallery'),
-    video: t('blocks.video'),
-    services: t('blocks.services'),
-    bio: t('blocks.bio'),
-    lead_form: t('blocks.lead_form'),
-    business_hours: t('blocks.business_hours'),
-    cta_buttons: t('blocks.cta_buttons'),
-    info_utilities: t('blocks.info_utilities'),
-    free_text: t('blocks.free_text'),
-    decoration: t('blocks.decoration'),
-  }
   return (
     <aside
       style={{
@@ -137,7 +120,7 @@ export default function ThemePageClientLeft({
 
       <div style={{ overflow: 'auto', minHeight: 0 }}>
         <BlocksRailSortable
-          blockNames={blockNames}
+          t={t}
           blocks={blocks}
           selectedId={selectedId}
           onSelect={onSelect}
