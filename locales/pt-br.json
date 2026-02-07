@@ -311,5 +311,18 @@
       "hint": "No iPhone (Safari), toque no botão de compartilhamento (quadrado com seta para cima) e depois em <strong>\"Adicionar à tela inicial\"</strong>.",
       "understood": "Entendi"
     }
+  },
+  "share": {
+    "title": "Share My vCard",
+    "whatsapp": "Share on WhatsApp",
+    "messenger": "Share on Messenger",
+    "telegram": "Share on Telegram",
+    "sms": "Share via SMS",
+    "email": "Share via Email",
+    "twitter": "Share on Twitter",
+    "linkedin": "Share on LinkedIn",
+    "copy_link": "Copy link",
+    "copied": "Copied!",
+    "default_title": "See my digital card"
   }
 }

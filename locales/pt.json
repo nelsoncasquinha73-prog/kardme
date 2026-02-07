@@ -296,5 +296,18 @@
     "de": "Deutsch",
     "it": "Italiano",
     "ar": "العربية"
+  },
+  "share": {
+    "title": "Partilhar Cartão",
+    "whatsapp": "Partilhar no WhatsApp",
+    "messenger": "Partilhar no Messenger",
+    "telegram": "Partilhar no Telegram",
+    "sms": "Partilhar por SMS",
+    "email": "Partilhar por Email",
+    "twitter": "Partilhar no Twitter",
+    "linkedin": "Partilhar no LinkedIn",
+    "copy_link": "Copiar link",
+    "copied": "Copiado!",
+    "default_title": "Vê o meu cartão digital"
   }
 }

@@ -1,4 +1,5 @@
 'use client'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 import { useState } from 'react'
 import { FiX, FiCopy, FiCheck, FiChevronRight } from 'react-icons/fi'
@@ -17,42 +18,43 @@ type Props = {
 export default function ShareModal({ url, title, onClose }: Props) {
   const [copied, setCopied] = useState(false)
 
+  const { t } = useLanguage()
   const encodedUrl = encodeURIComponent(url)
-  const encodedTitle = encodeURIComponent(title || 'Vê o meu cartão digital')
+  const encodedTitle = encodeURIComponent(title || t('share.default_title'))
 
   const shareOptions = [
     {
-      name: 'Partilhar no WhatsApp',
+      name: t('share.whatsapp'),
       icon: <FaWhatsapp size={24} color="#25D366" />,
       href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
     },
     {
-      name: 'Partilhar no Messenger',
+      name: t('share.messenger'),
       icon: <FaFacebookMessenger size={24} color="#0084FF" />,
       href: `https://www.facebook.com/dialog/share?app_id=YOUR_APP_ID&display=popup&href=${encodedUrl}&redirect_uri=${encodedUrl}`,
     },
     {
-      name: 'Partilhar no Telegram',
+      name: t('share.telegram'),
       icon: <SiTelegram size={24} color="#0088cc" />,
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
     },
     {
-      name: 'Partilhar por SMS',
+      name: t('share.sms'),
       icon: <HiOutlineMail size={24} color="#34C759" />,
       href: `sms:?body=${encodedTitle}%20${encodedUrl}`,
     },
     {
-      name: 'Partilhar por Email',
+      name: t('share.email'),
       icon: <HiOutlineMail size={24} color="#333" />,
       href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
     },
     {
-      name: 'Partilhar no Twitter',
+      name: t('share.twitter'),
       icon: <FaXTwitter size={24} color="#000" />,
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     },
     {
-      name: 'Partilhar no LinkedIn',
+      name: t('share.linkedin'),
       icon: <FaLinkedin size={24} color="#0A66C2" />,
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
     },
@@ -105,7 +107,7 @@ export default function ShareModal({ url, title, onClose }: Props) {
           }}
         >
           <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: '#1a1a1a' }}>
-            Share My vCard
+            {t('share.title')}
           </h2>
           <button
             onClick={onClose}
