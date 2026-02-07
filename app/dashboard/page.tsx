@@ -149,8 +149,8 @@ export default function DashboardPage() {
   const subtitle = useMemo(() => {
     if (loading) return 'A carregar…'
     if (error) return 'Não foi possível carregar os teus cartões.'
-    if (!hasCards) return 'Cria o teu primeiro cartão e partilha num só link.'
-    return `${cards.length} cartão(ões) na tua conta`
+    if (!hasCards) return t('dashboard.first_card_message')
+    return `${cards.length} ${t('dashboard.cards_count')}`
   }, [loading, error, hasCards, cards.length])
 
   const openDeleteModal = (card: Card) => {
@@ -270,7 +270,7 @@ export default function DashboardPage() {
 
       {!error && !hasCards && (
         <div className="empty">
-          <p className="empty-title">Cria o teu primeiro cartão em 60 segundos</p>
+          <p className="empty-title">{t('dashboard.create_first_card')}</p>
           <p className="empty-desc">
             Escolhe um template premium, adiciona os teus dados e partilha o link. Mais tarde podes ativar NFC, analytics
             e leads.
