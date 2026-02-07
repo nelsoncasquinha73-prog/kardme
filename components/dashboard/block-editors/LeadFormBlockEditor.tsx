@@ -484,6 +484,14 @@ export default function LeadFormBlockEditor({
           />
         </Row>
 
+
+        <Row label="Cor placeholder">
+          <SwatchRow
+            value={inputs.placeholderColor ?? "rgba(0,0,0,0.4)"}
+            onChange={(hex) => setInputs({ placeholderColor: hex })}
+            onEyedropper={() => pick((hex) => setInputs({ placeholderColor: hex }))}
+          />
+        </Row>
         <Row label="Fundo input">
           <SwatchRow
             value={inputs.bgColor ?? '#ffffff'}
