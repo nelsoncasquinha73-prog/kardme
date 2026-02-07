@@ -45,6 +45,21 @@
     "logout": "Abmelden"
   },
   "dashboard": {
+    "pricing_free": "Kostenlos",
+    "pricing_included": "Im Plan enthalten",
+    "template_purchased": "Vorlage erfolgreich gekauft! Sie können sie jetzt verwenden.",
+    "template_unlocked": "Vorlage entsperrt! Sie können sie jetzt verwenden.",
+    "no_session": "Keine Sitzung. Melden Sie sich erneut an.",
+    "error_create_card": "Fehler beim Erstellen der Karte.",
+    "error_checkout": "Fehler beim Checkout",
+    "error_payment": "Fehler bei der Zahlungsverarbeitung",
+    "loading_templates": "Vorlagen werden geladen...",
+    "no_templates_found": "Keine Vorlagen gefunden.",
+    "all_categories": "Alle Kategorien",
+    "all_prices": "Alle Preise",
+    "refresh": "Aktualisieren",
+    "updating": "Wird aktualisiert…",
+
     "loading": "Wird geladen…",
     "error_loading_cards": "Karten konnten nicht geladen werden.",
     "empty_desc": "Wählen Sie eine Premium-Vorlage, fügen Sie Ihre Daten hinzu und teilen Sie den Link. Später können Sie NFC, Analysen aktivieren",

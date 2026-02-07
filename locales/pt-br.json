@@ -45,6 +45,21 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "pricing_free": "Grátis",
+    "pricing_included": "Incluído no Plano",
+    "template_purchased": "Template comprado com sucesso! Já pode usá-lo.",
+    "template_unlocked": "Template desbloqueado! Já pode usá-lo.",
+    "no_session": "Sem sessão. Faça login novamente.",
+    "error_create_card": "Erro ao criar cartão.",
+    "error_checkout": "Erro no checkout",
+    "error_payment": "Erro ao processar pagamento",
+    "loading_templates": "Carregando modelos...",
+    "no_templates_found": "Nenhum modelo encontrado.",
+    "all_categories": "Todas as categorias",
+    "all_prices": "Todos os preços",
+    "refresh": "Recarregar",
+    "updating": "Atualizando…",
+
     "loading": "Carregando…",
     "error_loading_cards": "Não foi possível carregar seus cartões.",
     "empty_desc": "Escolha um modelo premium, adicione seus dados e compartilhe o link. Depois você pode ativar NFC, análises",

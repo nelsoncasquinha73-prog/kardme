@@ -41,6 +41,21 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "pricing_free": "Grátis",
+    "pricing_included": "Incluído no Plano",
+    "template_purchased": "Template comprado com sucesso! Já podes usá-lo.",
+    "template_unlocked": "Template desbloqueado! Já podes usá-lo.",
+    "no_session": "Sem sessão. Faz login novamente.",
+    "error_create_card": "Erro ao criar cartão.",
+    "error_checkout": "Erro no checkout",
+    "error_payment": "Erro ao processar pagamento",
+    "loading_templates": "A carregar templates...",
+    "no_templates_found": "Nenhum template encontrado.",
+    "all_categories": "Todas categorias",
+    "all_prices": "Todos preços",
+    "refresh": "Recarregar",
+    "updating": "A atualizar…",
+
     "loading": "A carregar…",
     "error_loading_cards": "Não foi possível carregar os teus cartões.",
     "empty_desc": "Escolhe um template premium, adiciona os teus dados e partilha o link. Mais tarde podes ativar NFC, analytics",

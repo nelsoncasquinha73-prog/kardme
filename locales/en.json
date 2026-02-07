@@ -45,6 +45,21 @@
     "logout": "Logout"
   },
   "dashboard": {
+    "pricing_free": "Free",
+    "pricing_included": "Included in Plan",
+    "template_purchased": "Template purchased successfully! You can use it now.",
+    "template_unlocked": "Template unlocked! You can use it now.",
+    "no_session": "No session. Please log in again.",
+    "error_create_card": "Error creating card.",
+    "error_checkout": "Checkout error",
+    "error_payment": "Error processing payment",
+    "loading_templates": "Loading templates...",
+    "no_templates_found": "No templates found.",
+    "all_categories": "All categories",
+    "all_prices": "All prices",
+    "refresh": "Refresh",
+    "updating": "Updating…",
+
     "loading": "Loading…",
     "error_loading_cards": "Could not load your cards.",
     "empty_desc": "Choose a premium template, add your data and share the link. Later you can enable NFC, analytics",

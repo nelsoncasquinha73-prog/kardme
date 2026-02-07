@@ -32,19 +32,7 @@ function eur(n: number | null | undefined) {
   return `€${v.toFixed(2)}`
 }
 
-function getPriceDisplay(tier: string | null, price: number | null) {
-  if (tier === 'free') return 'Grátis'
-  if (tier === 'paid') return 'Incluído no Plano'
-  if (tier === 'premium') return eur(price)
-  return eur(price)
-}
 
-function priceLabelFor(t: Template) {
-  if (t.pricing_tier === 'free') return 'Grátis'
-  if (t.pricing_tier === 'paid') return 'Incluído no Plano'
-  if (t.pricing_tier === 'premium') return eur(t.price)
-  return isFree(t) ? 'Grátis' : eur(t.price)
-}
 
 function isFree(t: Template) {
   return t.pricing_tier === 'free' || t.pricing_tier === 'paid'
@@ -78,6 +66,21 @@ function themeToCssBackground(theme: any): string | null {
 
 export default function CatalogPage() {
   const { t } = useLanguage()
+
+  const getPriceDisplayT = (tier: string | null, price: number | null) => {
+    if (tier === 'free') return t('dashboard.pricing_free')
+    if (tier === 'paid') return t('dashboard.pricing_included')
+    if (tier === 'premium') return eur(price)
+    return eur(price)
+  }
+
+  const priceLabelForT = (template: Template) => {
+    if (template.pricing_tier === 'free') return t('dashboard.pricing_free')
+    if (template.pricing_tier === 'paid') return t('dashboard.pricing_included')
+    if (template.pricing_tier === 'premium') return eur(template.price)
+    return isFree(template) ? t('dashboard.pricing_free') : eur(template.price)
+  }
+
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -482,7 +485,7 @@ export default function CatalogPage() {
             {filtered.map((t) => {
               const free = isFree(t)
               const owned = ownedTemplates.has(t.id)
-              const priceLabel = priceLabelFor(t)
+              const priceLabel = priceLabelForT(t)
 
               return (
                 <div

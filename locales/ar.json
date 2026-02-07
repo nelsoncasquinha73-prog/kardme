@@ -45,6 +45,21 @@
     "logout": "تسجيل الخروج"
   },
   "dashboard": {
+    "pricing_free": "مجاني",
+    "pricing_included": "مضمن في الخطة",
+    "template_purchased": "تم شراء النموذج بنجاح! يمكنك استخدامه الآن.",
+    "template_unlocked": "تم فتح النموذج! يمكنك استخدامه الآن.",
+    "no_session": "لا توجد جلسة. قم بتسجيل الدخول مرة أخرى.",
+    "error_create_card": "خطأ في إنشاء البطاقة.",
+    "error_checkout": "خطأ في الدفع",
+    "error_payment": "خطأ في معالجة الدفع",
+    "loading_templates": "جاري تحميل النماذج...",
+    "no_templates_found": "لم يتم العثور على نماذج.",
+    "all_categories": "جميع الفئات",
+    "all_prices": "جميع الأسعار",
+    "refresh": "تحديث",
+    "updating": "جاري التحديث…",
+
     "loading": "جاري التحميل…",
     "error_loading_cards": "تعذر تحميل بطاقاتك.",
     "empty_desc": "اختر نموذجًا متميزًا، أضف بياناتك وشارك الرابط. لاحقًا يمكنك تفعيل NFC والتحليلات",

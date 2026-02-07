@@ -45,6 +45,21 @@
     "logout": "Salir"
   },
   "dashboard": {
+    "pricing_free": "Gratis",
+    "pricing_included": "Incluido en el Plan",
+    "template_purchased": "¡Plantilla comprada con éxito! Ya puedes usarla.",
+    "template_unlocked": "¡Plantilla desbloqueada! Ya puedes usarla.",
+    "no_session": "Sin sesión. Inicia sesión de nuevo.",
+    "error_create_card": "Error al crear tarjeta.",
+    "error_checkout": "Error en el checkout",
+    "error_payment": "Error al procesar el pago",
+    "loading_templates": "Cargando plantillas...",
+    "no_templates_found": "Ninguna plantilla encontrada.",
+    "all_categories": "Todas las categorías",
+    "all_prices": "Todos los precios",
+    "refresh": "Recargar",
+    "updating": "Actualizando…",
+
     "loading": "Cargando…",
     "error_loading_cards": "No fue posible cargar tus tarjetas.",
     "empty_desc": "Elige una plantilla premium, añade tus datos y comparte el enlace. Más tarde puedes activar NFC, análisis",
