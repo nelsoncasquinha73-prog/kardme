@@ -120,6 +120,7 @@ export default function ThemePageClientLeft({
 
       <div style={{ overflow: 'auto', minHeight: 0 }}>
         <BlocksRailSortable
+          t={t}
           blocks={blocks}
           selectedId={selectedId}
           onSelect={onSelect}
