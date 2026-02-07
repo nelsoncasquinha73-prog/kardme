@@ -78,7 +78,6 @@ export default function BlocksRailSortable({
 
 function SortableRow({
   blockNames,
-  blockNames,
   block,
   active,
   onSelect,
