@@ -50,33 +50,35 @@ function fixBackgroundForPreview(themeJson: any): any {
   return clone
 }
 
+
 function renderBlock(block: Block, index: number, templateId: string) {
   if (block.enabled === false) return null
   
+  const key = block.id || index
   const props = {
-    key: block.id || index,
     settings: block.settings || {},
     style: block.style || {},
   }
 
   switch (block.type) {
-    case 'header': return <HeaderBlock {...props} />
-    case 'profile': return <ProfileBlock {...props} />
-    case 'social': return <SocialBlock {...props} />
-    case 'contact': return <ContactBlock {...props} />
-    case 'gallery': return <GalleryBlock {...props} />
-    case 'video': return <VideoBlock {...props} />
-    case 'services': return <ServicesBlock {...props} />
-    case 'bio': return <BioBlock {...props} />
-    case 'lead_form': return <LeadFormBlock {...props} cardId={templateId} />
-    case 'business_hours': return <BusinessHoursBlock {...props} />
-    case 'cta_buttons': return <CTAButtonsBlock {...props} />
-    case 'info_utilities': return <InfoUtilitiesBlock {...props} />
-    case 'free_text': return <FreeTextBlock {...props} />
-    case 'decoration': return <DecorationBlock {...props} />
+    case 'header': return <HeaderBlock key={key} {...props} />
+    case 'profile': return <ProfileBlock key={key} {...props} />
+    case 'social': return <SocialBlock key={key} {...props} />
+    case 'contact': return <ContactBlock key={key} {...props} />
+    case 'gallery': return <GalleryBlock key={key} {...props} />
+    case 'video': return <VideoBlock key={key} {...props} />
+    case 'services': return <ServicesBlock key={key} {...props} />
+    case 'bio': return <BioBlock key={key} {...props} />
+    case 'lead_form': return <LeadFormBlock key={key} {...props} cardId={templateId} />
+    case 'business_hours': return <BusinessHoursBlock key={key} {...props} />
+    case 'cta_buttons': return <CTAButtonsBlock key={key} {...props} />
+    case 'info_utilities': return <InfoUtilitiesBlock key={key} {...props} />
+    case 'free_text': return <FreeTextBlock key={key} {...props} />
+    case 'decoration': return <DecorationBlock key={key} {...props} />
     default: return null
   }
 }
+
 
 export default function TemplateMiniPreview({ template, height = 480 }: Props) {
   const fixedThemeJson = useMemo(() => {
