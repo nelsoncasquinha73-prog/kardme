@@ -34,25 +34,21 @@ function isSupported(l: any): l is Language {
   return SUPPORTED_LANGS.includes(l)
 }
 
-// Função para obter tradução com suporte a chaves aninhadas (ex: "common.save" ou "fab.addToHomeScreen.title")
 function getTranslation(dict: TranslationDict, key: string, fallbackDict: TranslationDict): string {
   const parts = key.split('.')
   
-  // Navega pelos níveis de nesting
   let value: any = dict
   for (const part of parts) {
     value = value?.[part]
   }
   if (typeof value === 'string' && value) return value
   
-  // Fallback para inglês
   let fallbackValue: any = fallbackDict
   for (const part of parts) {
     fallbackValue = fallbackValue?.[part]
   }
   if (typeof fallbackValue === 'string' && fallbackValue) return fallbackValue
   
-  // Se nada encontrado, retorna a chave
   return key
 }
 
@@ -76,7 +72,25 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true)
 
-    // Detectar idioma do navegador
+    // 1. Verificar ?lang= na URL (client-side only)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const urlLang = params.get('lang')
+      if (urlLang && isSupported(urlLang)) {
+        setLangState(urlLang)
+        localStorage.setItem('language', urlLang)
+        return
+      }
+    }
+
+    // 2. Verificar localStorage
+    const savedLang = localStorage.getItem('language')
+    if (savedLang && isSupported(savedLang)) {
+      setLangState(savedLang)
+      return
+    }
+
+    // 3. Detectar por IP
     const detectLanguageByIP = async () => {
       try {
         const response = await fetch('https://ipapi.co/json/')
@@ -105,13 +119,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Verificar localStorage primeiro
-    const savedLang = localStorage.getItem('language')
-    if (savedLang && isSupported(savedLang)) {
-      setLangState(savedLang)
-    } else {
-      detectLanguageByIP()
-    }
+    detectLanguageByIP()
   }, [])
 
   const setLang = (newLang: Language) => {
