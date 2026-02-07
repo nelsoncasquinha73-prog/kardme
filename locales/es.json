@@ -90,7 +90,6 @@
   "editor": {
     "edit_card": "Editar Tarjeta",
     "theme": "Tema",
-    "blocks": "Bloques",
     "add_block": "Añadir Bloque",
     "decorations": "Decoraciones",
     "floating_buttons": "Botones Flotantes",
@@ -183,7 +182,8 @@
     "side_padding": "Relleno lateral (px)",
     "width_auto": "Ancho (px) - solo Auto Adapter",
     "height_auto": "Altura (px) - solo Auto Adapter",
-    "object_fit": "Object Fit - solo Auto Adapter"
+    "object_fit": "Object Fit - solo Auto Adapter",
+    "blocks_label": "Bloques"
   },
   "catalog": {
     "title": "Catálogo de Plantillas",

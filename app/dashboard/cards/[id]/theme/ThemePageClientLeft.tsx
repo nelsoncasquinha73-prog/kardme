@@ -67,7 +67,7 @@ export default function ThemePageClientLeft({
           gap: 10,
         }}
       >
-        <strong style={{ fontSize: 13, color: '#111827' }}>{t('editor.blocks')}</strong>
+        <strong style={{ fontSize: 13, color: '#111827' }}>{t('editor.blocks_label')}</strong>
         <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6, color: '#111827' }}>
           {cardTitle} · {enabledCount} {t('editor.active')}
         </div>

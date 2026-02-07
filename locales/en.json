@@ -90,7 +90,6 @@
   "editor": {
     "edit_card": "Edit Card",
     "theme": "Theme",
-    "blocks": "Blocks",
     "add_block": "Add Block",
     "decorations": "Decorations",
     "floating_buttons": "Floating Buttons",
@@ -183,7 +182,8 @@
     "value": "Value",
     "width": "Width",
     "width_auto": "Width Auto",
-    "width_px": "Width (px)"
+    "width_px": "Width (px)",
+    "blocks_label": "Blocks"
   },
   "catalog": {
     "title": "Template Catalog",

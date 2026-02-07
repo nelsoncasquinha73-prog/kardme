@@ -76,7 +76,6 @@
   "editor": {
     "edit_card": "Modifier la Carte",
     "theme": "Thème",
-    "blocks": "Blocs",
     "add_block": "Ajouter un Bloc",
     "decorations": "Décorations",
     "floating_buttons": "Boutons Flottants",
@@ -169,7 +168,8 @@
     "side_padding": "Marge latérale (px)",
     "width_auto": "Largeur (px) - Auto Adapter uniquement",
     "height_auto": "Hauteur (px) - Auto Adapter uniquement",
-    "object_fit": "Object Fit - Auto Adapter uniquement"
+    "object_fit": "Object Fit - Auto Adapter uniquement",
+    "blocks_label": "Blocs"
   },
   "catalog": {
     "title": "Catalogue de Modèles",

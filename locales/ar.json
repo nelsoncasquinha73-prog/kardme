@@ -90,7 +90,6 @@
   "editor": {
     "edit_card": "تعديل البطاقة",
     "theme": "المظهر",
-    "blocks": "الكتل",
     "add_block": "إضافة كتلة",
     "decorations": "الزخارف",
     "floating_buttons": "الأزرار العائمة",
@@ -183,7 +182,8 @@
     "side_padding": "الهامش الجانبي (px)",
     "width_auto": "العرض (px) - Auto Adapter فقط",
     "height_auto": "الارتفاع (px) - Auto Adapter فقط",
-    "object_fit": "Object Fit - Auto Adapter فقط"
+    "object_fit": "Object Fit - Auto Adapter فقط",
+    "blocks_label": "الكتل"
   },
   "catalog": {
     "title": "كتالوج القوالب",

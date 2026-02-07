@@ -86,7 +86,6 @@
   "editor": {
     "edit_card": "Editar Cartão",
     "theme": "Tema",
-    "blocks": "Blocos",
     "add_block": "Adicionar Bloco",
     "decorations": "Decorações",
     "floating_buttons": "Botões Flutuantes",
@@ -179,7 +178,8 @@
     "value": "Value",
     "width": "Width",
     "width_auto": "Width Auto",
-    "width_px": "Width (px)"
+    "width_px": "Width (px)",
+    "blocks_label": "Blocos"
   },
   "catalog": {
     "title": "Catálogo de Templates",
