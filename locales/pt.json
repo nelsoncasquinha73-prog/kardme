@@ -309,21 +309,5 @@
     "copy_link": "Copiar link",
     "copied": "Copiado!",
     "default_title": "Vê o meu cartão digital"
-  },
-  "blocks": {
-    "header": "Cabeçalho",
-    "profile": "Perfil",
-    "social": "Redes Sociais",
-    "contact": "Contacto",
-    "gallery": "Galeria",
-    "video": "Vídeo",
-    "services": "Serviços",
-    "bio": "Bio",
-    "lead_form": "Formulário",
-    "business_hours": "Horário",
-    "cta_buttons": "Botões",
-    "info_utilities": "Informações",
-    "free_text": "Texto Livre",
-    "decoration": "Decoração"
   }
 }

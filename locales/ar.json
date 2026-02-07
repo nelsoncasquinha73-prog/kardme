@@ -90,6 +90,7 @@
   "editor": {
     "edit_card": "تعديل البطاقة",
     "theme": "المظهر",
+    "blocks": "الكتل",
     "add_block": "إضافة كتلة",
     "decorations": "الزخارف",
     "floating_buttons": "الأزرار العائمة",
@@ -182,8 +183,7 @@
     "side_padding": "الهامش الجانبي (px)",
     "width_auto": "العرض (px) - Auto Adapter فقط",
     "height_auto": "الارتفاع (px) - Auto Adapter فقط",
-    "object_fit": "Object Fit - Auto Adapter فقط",
-    "blocks_label": "الكتل"
+    "object_fit": "Object Fit - Auto Adapter فقط"
   },
   "catalog": {
     "title": "كتالوج القوالب",
@@ -324,21 +324,5 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
-  },
-  "blocks": {
-    "header": "رأس",
-    "profile": "الملف الشخصي",
-    "social": "وسائل التواصل",
-    "contact": "جهة الاتصال",
-    "gallery": "المعرض",
-    "video": "فيديو",
-    "services": "الخدمات",
-    "bio": "السيرة الذاتية",
-    "lead_form": "نموذج",
-    "business_hours": "ساعات العمل",
-    "cta_buttons": "أزرار",
-    "info_utilities": "معلومات",
-    "free_text": "نص حر",
-    "decoration": "زينة"
   }
 }

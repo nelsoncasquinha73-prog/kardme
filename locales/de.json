@@ -90,6 +90,7 @@
   "editor": {
     "edit_card": "Karte bearbeiten",
     "theme": "Design",
+    "blocks": "Blöcke",
     "add_block": "Block hinzufügen",
     "decorations": "Dekorationen",
     "floating_buttons": "Schwebende Buttons",
@@ -182,8 +183,7 @@
     "side_padding": "Seitenabstand (px)",
     "width_auto": "Breite (px) - nur Auto Adapter",
     "height_auto": "Höhe (px) - nur Auto Adapter",
-    "object_fit": "Object Fit - nur Auto Adapter",
-    "blocks_label": "Blöcke"
+    "object_fit": "Object Fit - nur Auto Adapter"
   },
   "catalog": {
     "title": "Vorlagen-Katalog",
@@ -324,21 +324,5 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
-  },
-  "blocks": {
-    "header": "Kopfzeile",
-    "profile": "Profil",
-    "social": "Soziale Netzwerke",
-    "contact": "Kontakt",
-    "gallery": "Galerie",
-    "video": "Video",
-    "services": "Dienstleistungen",
-    "bio": "Bio",
-    "lead_form": "Formular",
-    "business_hours": "Öffnungszeiten",
-    "cta_buttons": "Schaltflächen",
-    "info_utilities": "Informationen",
-    "free_text": "Freitext",
-    "decoration": "Dekoration"
   }
 }

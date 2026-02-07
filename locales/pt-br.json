@@ -90,6 +90,7 @@
   "editor": {
     "edit_card": "Editar Cartão",
     "theme": "Tema",
+    "blocks": "Blocos",
     "add_block": "Adicionar Bloco",
     "decorations": "Decorações",
     "floating_buttons": "Botões Flutuantes",
@@ -182,8 +183,7 @@
     "side_padding": "Margem lateral (px)",
     "width_auto": "Largura (px) - só Auto Adapter",
     "height_auto": "Altura (px) - só Auto Adapter",
-    "object_fit": "Object Fit - só Auto Adapter",
-    "blocks_label": "Blocos"
+    "object_fit": "Object Fit - só Auto Adapter"
   },
   "catalog": {
     "title": "Catálogo de Templates",
@@ -324,21 +324,5 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
-  },
-  "blocks": {
-    "header": "Cabeçalho",
-    "profile": "Perfil",
-    "social": "Redes Sociais",
-    "contact": "Contato",
-    "gallery": "Galeria",
-    "video": "Vídeo",
-    "services": "Serviços",
-    "bio": "Bio",
-    "lead_form": "Formulário",
-    "business_hours": "Horário",
-    "cta_buttons": "Botões",
-    "info_utilities": "Informações",
-    "free_text": "Texto livre",
-    "decoration": "Decoração"
   }
 }

@@ -76,6 +76,7 @@
   "editor": {
     "edit_card": "Modifica Biglietto",
     "theme": "Tema",
+    "blocks": "Blocchi",
     "add_block": "Aggiungi Blocco",
     "decorations": "Decorazioni",
     "floating_buttons": "Pulsanti Flottanti",
@@ -168,8 +169,7 @@
     "side_padding": "Padding laterale (px)",
     "width_auto": "Larghezza (px) - solo Auto Adapter",
     "height_auto": "Altezza (px) - solo Auto Adapter",
-    "object_fit": "Object Fit - solo Auto Adapter",
-    "blocks_label": "Blocchi"
+    "object_fit": "Object Fit - solo Auto Adapter"
   },
   "catalog": {
     "title": "Catalogo Modelli",
@@ -310,21 +310,5 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
-  },
-  "blocks": {
-    "header": "Intestazione",
-    "profile": "Profilo",
-    "social": "Social",
-    "contact": "Contatto",
-    "gallery": "Galleria",
-    "video": "Video",
-    "services": "Servizi",
-    "bio": "Bio",
-    "lead_form": "Modulo",
-    "business_hours": "Orari",
-    "cta_buttons": "Pulsanti",
-    "info_utilities": "Informazioni",
-    "free_text": "Testo libero",
-    "decoration": "Decorazione"
   }
 }
