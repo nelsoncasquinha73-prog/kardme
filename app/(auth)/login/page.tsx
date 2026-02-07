@@ -1,4 +1,5 @@
 'use client'
+import LanguageDropdown from '@/components/language/LanguageDropdown'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -42,6 +43,9 @@ export default function LoginPage() {
       <ThemeSwitcher />
 
       <main className="page-wrapper auth-scope login-page">
+        <div style={{ position: "absolute", top: 16, right: 16, zIndex: 2000 }}>
+          <LanguageDropdown />
+        </div>
         <div id="my_switcher" className="my_switcher">
           <ul>
             <li>
