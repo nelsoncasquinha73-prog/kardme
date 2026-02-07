@@ -88,7 +88,7 @@ export default function AdminClientesPage() {
 
   const handleCreateClient = async () => {
     if (!newClient.email || !newClient.password) {
-      alert('Email e password são obrigatórios')
+      alert(t('dashboard.email_password_required'))
       return
     }
     setCreating(true)
@@ -100,7 +100,7 @@ export default function AdminClientesPage() {
       })
       const json = await res.json()
       if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao criar cliente')
-      alert('Cliente criado com sucesso!')
+      alert(t('dashboard.client_created'))
       setShowModal(false)
       setNewClient({ email: '', password: '', nome: '', apelido: '', plan: 'free', published_card_limit: 1 })
       loadClients()

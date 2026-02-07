@@ -133,7 +133,7 @@ export default function CouponsPage() {
 
   async function saveCoupon() {
     if (!code.trim()) {
-      alert('Código é obrigatório')
+      alert(t('dashboard.code_required'))
       return
     }
     setSaving(true)

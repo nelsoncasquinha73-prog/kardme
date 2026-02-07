@@ -1,4 +1,5 @@
 'use client'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -14,6 +15,7 @@ type Lead = {
 }
 
 export default function LeadsPage() {
+  const { t } = useLanguage()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -49,7 +51,7 @@ export default function LeadsPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Erro ao carregar leads:', error)
+      console.error(t('dashboard.error_loading_data'), error)
       setLeads([])
     } else {
       setLeads(data || [])

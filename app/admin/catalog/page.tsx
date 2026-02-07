@@ -482,14 +482,14 @@ export default function CatalogPage() {
           <p style={{ color: 'rgba(255,255,255,0.6)' }}>Nenhum template encontrado.</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-            {filtered.map((t) => {
-              const free = isFree(t)
-              const owned = ownedTemplates.has(t.id)
-              const priceLabel = priceLabelForT(t)
+            {filtered.map((template) => {
+              const free = isFree(template)
+              const owned = ownedTemplates.has(template.id)
+              const priceLabel = priceLabelForT(template)
 
               return (
                 <div
-                  key={t.id}
+                  key={template.id}
                   style={{
                     background: 'rgba(30,30,50,0.7)',
                     borderRadius: 20,
@@ -500,7 +500,7 @@ export default function CatalogPage() {
                   }}
                 >
                   <div style={{ position: 'relative', height: 320, background: '#111' }}>
-                    <TemplateMiniPreview template={t} height={300} />
+                    <TemplateMiniPreview template={template} height={300} />
                     <div
                       style={{
                         position: 'absolute',
@@ -520,15 +520,15 @@ export default function CatalogPage() {
 
                   <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ marginBottom: 8 }}>
-                      <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>{t.name}</h3>
-                      {t.category && (
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{t.category}</span>
+                      <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>{template.name}</h3>
+                      {template.category && (
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{template.category}</span>
                       )}
                     </div>
 
-                    {t.description ? (
+                    {template.description ? (
                       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.70)', marginBottom: 12 }}>
-                        {t.description}
+                        {template.description}
                       </div>
                     ) : (
                       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
@@ -539,8 +539,8 @@ export default function CatalogPage() {
                     <div style={{ marginTop: 'auto' }}>
                       {free || owned ? (
                         <button
-                          onClick={() => createCardFromTemplate(t)}
-                          disabled={creatingTemplateId === t.id}
+                          onClick={() => createCardFromTemplate(template)}
+                          disabled={creatingTemplateId === template.id}
                           style={{
                             width: '100%',
                             height: 44,
@@ -550,15 +550,15 @@ export default function CatalogPage() {
                             color: '#fff',
                             fontWeight: 900,
                             fontSize: 13,
-                            cursor: creatingTemplateId === t.id ? 'not-allowed' : 'pointer',
-                            opacity: creatingTemplateId === t.id ? 0.7 : 1,
+                            cursor: creatingTemplateId === template.id ? 'not-allowed' : 'pointer',
+                            opacity: creatingTemplateId === template.id ? 0.7 : 1,
                           }}
                         >
-                          {creatingTemplateId === t.id ? 'A criar…' : 'Usar template'}
+                          {creatingTemplateId === template.id ? 'A criar…' : 'Usar template'}
                         </button>
                       ) : (
                         <button
-                          onClick={() => openCheckout(t)}
+                          onClick={() => openCheckout(template)}
                           style={{
                             width: '100%',
                             height: 44,
@@ -571,7 +571,7 @@ export default function CatalogPage() {
                             cursor: 'pointer',
                           }}
                         >
-                          Comprar {eur(t.price)}
+                          Comprar {eur(template.price)}
                         </button>
                       )}
                     </div>

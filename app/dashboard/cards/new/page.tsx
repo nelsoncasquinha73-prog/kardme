@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import '@/styles/dashboard.css'
 import Link from 'next/link'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type Template = {
   id: string
@@ -24,6 +25,7 @@ type UserTemplate = {
 }
 
 export default function NewCardPage() {
+  const { t } = useLanguage()
   const router = useRouter()
   const [allTemplates, setAllTemplates] = useState<Template[]>([])
   const [userTemplateIds, setUserTemplateIds] = useState<string[]>([])
@@ -42,7 +44,7 @@ export default function NewCardPage() {
     // Get user
     const { data: authData, error: authErr } = await supabase.auth.getUser()
     if (authErr || !authData?.user?.id) {
-      setError('Sem sessão. Faz login novamente.')
+      setError(t('dashboard.no_session'))
       setLoading(false)
       return
     }
@@ -69,7 +71,7 @@ export default function NewCardPage() {
       .eq('user_id', userId)
 
     if (userTemplatesErr) {
-      console.error('Erro ao carregar templates adquiridos:', userTemplatesErr)
+      console.error(t('dashboard.error_loading_templates'), userTemplatesErr)
     }
 
     setAllTemplates((templates || []) as Template[])
@@ -86,7 +88,7 @@ export default function NewCardPage() {
       const userId = authData?.user?.id
 
       if (!userId) {
-        setError('Sem sessão.')
+        setError(t('dashboard.no_session_short'))
         setCreatingCardId(null)
         return
       }
@@ -139,7 +141,7 @@ export default function NewCardPage() {
       // 3) Redirect to editor
       router.push(`/dashboard/cards/${cardId}/theme`)
     } catch (err) {
-      setError('Erro ao criar cartão.')
+      setError(t('dashboard.error_create_card'))
       setCreatingCardId(null)
     }
   }
