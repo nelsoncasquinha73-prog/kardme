@@ -69,7 +69,7 @@ export default function ThemePageClientLeft({
       >
         <strong style={{ fontSize: 13, color: '#111827' }}>{t('editor.blocks')}</strong>
         <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6, color: '#111827' }}>
-          {cardTitle || 'Cartão'} · {enabledCount} ativos
+          {cardTitle} · {enabledCount} {t('editor.active')}
         </div>
         <button
           onClick={onOpenAddModal}

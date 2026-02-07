@@ -275,7 +275,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           onSave={saveChanges}
           saveStatus={saveStatus}
           cardTitle={card?.title}
-          enabledCount={enabledBlocksSorted.length}
+          enabledCount={Math.max(0, enabledBlocksSorted.length)}
         />
 
         <ThemePageClientCenter
