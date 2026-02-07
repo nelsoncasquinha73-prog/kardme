@@ -46,9 +46,9 @@ export default function ThemePageClientLeft({
   const { t } = useLanguage()
 
   const blockNames: Record<string, string> = {
-    header: t('blocks.header'),
-    profile: t('blocks.profile'),
-    social: t('blocks.social'),
+    header: 'TEST_EN_TETE',
+    profile: 'TEST_PROFIL',
+    social: 'TEST_RESEAUX',
     contact: t('blocks.contact'),
     gallery: t('blocks.gallery'),
     video: t('blocks.video'),
