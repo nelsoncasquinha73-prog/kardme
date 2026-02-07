@@ -45,6 +45,7 @@ type LeadFormStyle = {
     paddingX?: number
     labelColor?: string
     labelSize?: number
+    placeholderColor?: string
   }
   button?: {
     bgColor?: string

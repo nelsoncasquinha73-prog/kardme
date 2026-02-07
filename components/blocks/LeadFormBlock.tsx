@@ -197,7 +197,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
+      <form id={`leadform-${cardId}`} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
         {fields.name && (
           <div>
             <div style={labelStyle}>{labels.name}</div>
