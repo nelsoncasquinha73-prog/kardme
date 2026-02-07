@@ -147,8 +147,8 @@ export default function DashboardPage() {
   const hasCards = cards.length > 0
 
   const subtitle = useMemo(() => {
-    if (loading) return 'A carregar…'
-    if (error) return 'Não foi possível carregar os teus cartões.'
+    if (loading) return t('dashboard.loading')
+    if (error) return t('dashboard.error_loading_cards')
     if (!hasCards) return t('dashboard.first_card_message')
     return `${cards.length} ${t('dashboard.cards_count')}`
   }, [loading, error, hasCards, cards.length])
@@ -185,7 +185,7 @@ export default function DashboardPage() {
     closeDeleteModal()
   }
 
-  if (loading) return <p style={{ padding: 24 }}>A carregar…</p>
+  if (loading) return <p style={{ padding: 24 }}>{t('dashboard.loading')}</p>
 
   // Admin Dashboard - Motivational
   if (isAdmin) {
@@ -272,7 +272,7 @@ export default function DashboardPage() {
         <div className="empty">
           <p className="empty-title">{t('dashboard.create_first_card')}</p>
           <p className="empty-desc">
-            Escolhe um template premium, adiciona os teus dados e partilha o link. Mais tarde podes ativar NFC, analytics
+            {t('dashboard.empty_desc')}
             e leads.
           </p>
 

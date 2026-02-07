@@ -45,6 +45,10 @@
     "logout": "Logout"
   },
   "dashboard": {
+    "loading": "Loading…",
+    "error_loading_cards": "Could not load your cards.",
+    "empty_desc": "Choose a premium template, add your data and share the link. Later you can enable NFC, analytics",
+
     "cards_count": "card(s) in your account",
     "first_card_message": "Create your first card and share it in one link.",
     "create_first_card": "Create your first card in 60 seconds",

@@ -45,6 +45,10 @@
     "logout": "Abmelden"
   },
   "dashboard": {
+    "loading": "Wird geladen…",
+    "error_loading_cards": "Karten konnten nicht geladen werden.",
+    "empty_desc": "Wählen Sie eine Premium-Vorlage, fügen Sie Ihre Daten hinzu und teilen Sie den Link. Später können Sie NFC, Analysen aktivieren",
+
     "cards_count": "Karte(n) in deinem Konto",
     "first_card_message": "Erstelle deine erste Karte und teile sie in einem Link.",
     "create_first_card": "Erstelle deine erste Karte in 60 Sekunden",

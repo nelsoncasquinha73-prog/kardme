@@ -45,6 +45,10 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "loading": "Carregando…",
+    "error_loading_cards": "Não foi possível carregar seus cartões.",
+    "empty_desc": "Escolha um modelo premium, adicione seus dados e compartilhe o link. Depois você pode ativar NFC, análises",
+
     "cards_count": "cartão(ões) na sua conta",
     "first_card_message": "Crie seu primeiro cartão e compartilhe em um único link.",
     "create_first_card": "Crie seu primeiro cartão em 60 segundos",

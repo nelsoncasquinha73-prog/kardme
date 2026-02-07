@@ -45,6 +45,10 @@
     "logout": "Esci"
   },
   "dashboard": {
+    "loading": "Caricamento…",
+    "error_loading_cards": "Impossibile caricare i tuoi cartoni.",
+    "empty_desc": "Scegli un modello premium, aggiungi i tuoi dati e condividi il link. Più tardi puoi attivare NFC, analitiche",
+
     "cards_count": "cartone(i) nel tuo account",
     "first_card_message": "Crea il tuo primo cartone e condividilo in un unico link.",
     "create_first_card": "Crea il tuo primo cartone in 60 secondi",

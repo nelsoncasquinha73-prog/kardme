@@ -45,6 +45,10 @@
     "logout": "Déconnexion"
   },
   "dashboard": {
+    "loading": "Chargement…",
+    "error_loading_cards": "Impossible de charger vos cartes.",
+    "empty_desc": "Choisissez un modèle premium, ajoutez vos données et partagez le lien. Plus tard, vous pouvez activer NFC, analyses",
+
     "cards_count": "carte(s) dans votre compte",
     "first_card_message": "Créez votre première carte et partagez-la en un seul lien.",
     "create_first_card": "Créez votre première carte en 60 secondes",
