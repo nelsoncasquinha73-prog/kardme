@@ -211,6 +211,56 @@ export default function LeadFormBlockEditor({
             onMouseDown={stop}
           />
         </Row>
+
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' , margin: '6px 0' }} />
+
+        <Row label="Placeholder Nome">
+          <input
+            value={placeholders.name ?? ''}
+            onChange={(e) => setPlaceholders({ name: e.target.value })}
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+            placeholder="Ex: Escreve o teu nome"
+          />
+        </Row>
+
+        <Row label="Placeholder Email">
+          <input
+            value={placeholders.email ?? ''}
+            onChange={(e) => setPlaceholders({ email: e.target.value })}
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+            placeholder="Ex: Escreve o teu email"
+          />
+        </Row>
+
+        <Row label="Placeholder Telefone">
+          <input
+            value={placeholders.phone ?? ''}
+            onChange={(e) => setPlaceholders({ phone: e.target.value })}
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+            placeholder="Ex: Opcional"
+          />
+        </Row>
+
+        <Row label="Placeholder Mensagem">
+          <input
+            value={placeholders.message ?? ''}
+            onChange={(e) => setPlaceholders({ message: e.target.value })}
+            style={input}
+            data-no-block-select="1"
+            onPointerDown={stop}
+            onMouseDown={stop}
+            placeholder="Ex: Como posso ajudar?"
+          />
+        </Row>
       </Section>
 
       <Section title="Título (estilo)">
