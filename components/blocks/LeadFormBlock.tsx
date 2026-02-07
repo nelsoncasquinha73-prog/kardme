@@ -150,6 +150,25 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     opacity: status === 'sending' ? 0.8 : 1,
   }
 
+  React.useEffect(() => {
+    const placeholderColor = st.inputs?.placeholderColor ?? 'rgba(0,0,0,0.4)'
+    const styleId = `leadform-placeholder-${cardId}`
+    let styleEl = document.getElementById(styleId)
+    
+    if (!styleEl) {
+      styleEl = document.createElement('style')
+      styleEl.id = styleId
+      document.head.appendChild(styleEl)
+    }
+    
+    styleEl.textContent = `
+      #leadform-${cardId} input::placeholder,
+      #leadform-${cardId} textarea::placeholder {
+        color: ${placeholderColor} !important;
+      }
+    `
+  }, [st.inputs?.placeholderColor, cardId])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('sending')
