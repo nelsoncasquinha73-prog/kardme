@@ -98,14 +98,6 @@ export default function AppChrome({
             <strong>{getPageTitle()}</strong>
             <LanguageDropdown />
           </header>
-          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <strong>{getPageTitle()}</strong>
-            <LanguageDropdown />
-          </header>
-          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <strong>{getPageTitle()}</strong>
-            <LanguageDropdown />
-          </header>
 
           <main style={{ padding: 24 }}>{children}</main>
         </div>
