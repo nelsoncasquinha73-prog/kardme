@@ -86,11 +86,6 @@ export default function AppChrome({
                 <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>ADMIN</div>
               )}
             </div>
-
-
-            <div style={{ marginBottom: 12 }}>
-              <LanguageDropdown />
-            </div>
             <button className="sidebar-logout" onClick={logout}>
               <FiLogOut className="sidebar-icon" />
               <span>{t('nav.logout')}</span>
