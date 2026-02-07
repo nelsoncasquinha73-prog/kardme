@@ -5,7 +5,6 @@ import { CSS } from '@dnd-kit/utilities'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { BlockIcon } from '@/components/editor/BlockIcon'
-import { getBlockName } from './blockNameHelper'
 
 export type BlockItem = {
   id: string
@@ -193,7 +192,7 @@ function SortableRow({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {block.title || (typeof t === 'function' ? t(`blocks.${block.type}`) : block.type) || block.type}
+                {block.title || t(`blocks.${block.type}`) || block.type}
               </div>
               <div style={{ fontSize: 12, color: 'rgba(17,24,39,0.55)' }}>{block.type}</div>
             </div>
