@@ -82,6 +82,12 @@ export default function ThemePageClientLeft({
             cursor: 'pointer',
             fontWeight: 800,
             color: '#111827',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            width: '100%',
+            whiteSpace: 'nowrap',
           }}
         >
           + {t('editor.add_block')}
