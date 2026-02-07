@@ -842,7 +842,7 @@ export default function AdminTemplatesPage() {
                   {isEditing ? (
                     <>
                       <button className="btn-secondary" onClick={cancelEdit} disabled={savingId === t.id}>
-                        Cancelar
+                        {tl('dashboard.cancel')}
                       </button>
                       <button className="btn-primary" onClick={saveEdit} disabled={savingId === t.id}>
                         {savingId === t.id ? tl('dashboard.saving') : tl('dashboard.save')}
@@ -851,7 +851,7 @@ export default function AdminTemplatesPage() {
                   ) : (
                     <>
                       <button className="btn-secondary" onClick={() => startEdit(t)}>
-                        Editar Detalhes
+                        {tl('dashboard.edit_details')}
                       </button>
                       <button
                         className="btn-danger"
