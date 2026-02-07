@@ -205,8 +205,8 @@ export default function SignupPage() {
               <div className="col-lg-6 bg-color-blackest left-wrapper">
                 <div className="sign-up-box">
                   <div className="signup-box-top">
-                    <img className="logo-light" src="/assets/images/logo/logo.png" alt="sign-up logo" />
-                    <img className="logo-dark" src="/assets/images/light/logo/logo-dark.png" alt="ChatBot Logo" />
+                    <img className="logo-light" src="/kardme-logo.png" alt="sign-up logo" />
+                    <img className="logo-dark" src="/kardme-logo.png" alt="ChatBot Logo" />
                   </div>
 
                   <div className="signup-box-bottom">
