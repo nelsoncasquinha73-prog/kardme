@@ -94,8 +94,17 @@ export default function AppChrome({
         </aside>
 
         <div style={{ flex: 1 }}>
-          <header className="dashboard-topbar">
+          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong>{getPageTitle()}</strong>
+            <LanguageDropdown />
+          </header>
+          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <strong>{getPageTitle()}</strong>
+            <LanguageDropdown />
+          </header>
+          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <strong>{getPageTitle()}</strong>
+            <LanguageDropdown />
           </header>
 
           <main style={{ padding: 24 }}>{children}</main>
