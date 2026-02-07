@@ -312,19 +312,19 @@
     "default_title": "See my digital card"
   },
   "blocks": {
-    "header": "Header",
-    "profile": "Profile",
-    "social": "Social",
+    "header": "En-tête",
+    "profile": "Profil",
+    "social": "Réseaux sociaux",
     "contact": "Contact",
-    "gallery": "Gallery",
-    "video": "Video",
+    "gallery": "Galerie",
+    "video": "Vidéo",
     "services": "Services",
     "bio": "Bio",
-    "lead_form": "Lead Form",
-    "business_hours": "Business Hours",
-    "cta_buttons": "CTA Buttons",
-    "info_utilities": "Info & Utilities",
-    "free_text": "Free Text",
-    "decoration": "Decoration"
+    "lead_form": "Formulaire",
+    "business_hours": "Horaires",
+    "cta_buttons": "Boutons",
+    "info_utilities": "Infos",
+    "free_text": "Texte libre",
+    "decoration": "Décoration"
   }
 }

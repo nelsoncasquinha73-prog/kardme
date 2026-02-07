@@ -326,19 +326,19 @@
     "default_title": "See my digital card"
   },
   "blocks": {
-    "header": "Header",
-    "profile": "Profile",
-    "social": "Social",
-    "contact": "Contact",
-    "gallery": "Gallery",
-    "video": "Video",
-    "services": "Services",
-    "bio": "Bio",
-    "lead_form": "Lead Form",
-    "business_hours": "Business Hours",
-    "cta_buttons": "CTA Buttons",
-    "info_utilities": "Info & Utilities",
-    "free_text": "Free Text",
-    "decoration": "Decoration"
+    "header": "رأس",
+    "profile": "الملف الشخصي",
+    "social": "وسائل التواصل",
+    "contact": "جهة الاتصال",
+    "gallery": "المعرض",
+    "video": "فيديو",
+    "services": "الخدمات",
+    "bio": "السيرة الذاتية",
+    "lead_form": "نموذج",
+    "business_hours": "ساعات العمل",
+    "cta_buttons": "أزرار",
+    "info_utilities": "معلومات",
+    "free_text": "نص حر",
+    "decoration": "زينة"
   }
 }
