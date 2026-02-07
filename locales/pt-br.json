@@ -45,6 +45,12 @@
     "logout": "Sair"
   },
   "dashboard": {
+    "save_as_template": "Salvar como modelo",
+
+    "duplicate": "Duplicar cartão",
+    "edit_details": "Editar Detalhes",
+    "edit_template": "Editar template",
+
     "edit": "Editar",
     "view": "Ver",
     "delete": "Excluir",

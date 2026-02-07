@@ -45,6 +45,12 @@
     "logout": "Salir"
   },
   "dashboard": {
+    "save_as_template": "Guardar como plantilla",
+
+    "duplicate": "Duplicar tarjeta",
+    "edit_details": "Editar Detalles",
+    "edit_template": "Editar plantilla",
+
     "edit": "Editar",
     "view": "Ver",
     "delete": "Eliminar",

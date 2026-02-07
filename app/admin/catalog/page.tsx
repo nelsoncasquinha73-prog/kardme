@@ -1,4 +1,5 @@
 'use client'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -76,6 +77,7 @@ function themeToCssBackground(theme: any): string | null {
 }
 
 export default function CatalogPage() {
+  const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -694,7 +696,7 @@ export default function CatalogPage() {
                   cursor: 'pointer',
                 }}
               >
-                Cancelar
+                {t('dashboard.cancel')}
               </button>
               <button
                 onClick={handleCheckout}

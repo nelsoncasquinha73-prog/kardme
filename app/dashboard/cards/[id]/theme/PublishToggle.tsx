@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 type PublishToggleProps = {
   cardId: string
   initialPublished: boolean
 }
+  const { t } = useLanguage()
 
 export default function PublishToggle({ cardId, initialPublished }: PublishToggleProps) {
   const [published, setPublished] = useState(initialPublished)
@@ -174,7 +176,7 @@ export default function PublishToggle({ cardId, initialPublished }: PublishToggl
           opacity: planExpired ? 0.6 : 1,
         }}
       >
-        {loading ? 'A guardar...' : published ? 'Despublicar' : 'Publicar'}
+        {loading ? 'A guardar...' : published ? t('dashboard.unpublish') : t('dashboard.publish')}
       </button>
 
       {planExpired && (
@@ -326,7 +328,7 @@ export default function PublishToggle({ cardId, initialPublished }: PublishToggl
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Cancelar
+                  {t('dashboard.cancel')}
                 </button>
               </div>
             </div>

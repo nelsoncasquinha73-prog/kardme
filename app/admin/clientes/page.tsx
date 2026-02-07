@@ -221,7 +221,7 @@ export default function AdminClientesPage() {
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                 <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
-                  Cancelar
+                  {t('dashboard.cancel')}
                 </button>
                 <button onClick={handleCreateClient} disabled={creating} style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: 'none', background: '#22c55e', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
                   {creating ? t('admin.creating') : t('admin.create_client')}

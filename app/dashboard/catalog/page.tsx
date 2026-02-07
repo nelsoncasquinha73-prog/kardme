@@ -733,7 +733,7 @@ export default function CatalogPage() {
                   cursor: 'pointer',
                 }}
               >
-                Cancelar
+                {tr('dashboard.cancel')}
               </button>
               <button
                 onClick={handleCheckout}

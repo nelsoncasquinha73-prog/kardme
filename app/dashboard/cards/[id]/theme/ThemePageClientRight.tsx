@@ -421,7 +421,7 @@ export default function ThemePageClientRight({
           }}
           disabled={saveStatus === 'saving'}
         >
-          {saveStatus === 'saving' ? 'A guardar…' : '💾 Guardar'}
+          {saveStatus === 'saving' ? t('dashboard.saving') : t('dashboard.save')}
         </button>
 
         {isAdmin && (
@@ -441,7 +441,7 @@ export default function ThemePageClientRight({
             }}
             disabled={templateSaving}
           >
-            {templateSaving ? 'A guardar…' : '📦 Guardar como template'}
+            {templateSaving ? t('dashboard.saving') : '📦 ' + t('dashboard.save_as_template')}
           </button>
         )}
 

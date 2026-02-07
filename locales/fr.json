@@ -45,6 +45,12 @@
     "logout": "Déconnexion"
   },
   "dashboard": {
+    "save_as_template": "Enregistrer comme modèle",
+
+    "duplicate": "Dupliquer la carte",
+    "edit_details": "Modifier les détails",
+    "edit_template": "Modifier le modèle",
+
     "edit": "Modifier",
     "view": "Voir",
     "delete": "Supprimer",

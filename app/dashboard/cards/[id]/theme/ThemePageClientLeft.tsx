@@ -145,7 +145,7 @@ export default function ThemePageClientLeft({
         {saveStatus && (
           <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65, color: '#111827' }}>
             {saveStatus === 'saving'
-              ? 'A guardar…'
+              ? t('dashboard.saving')
               : saveStatus === 'saved'
               ? 'Guardado ✅'
               : saveStatus === 'error'

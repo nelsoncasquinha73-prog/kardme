@@ -45,6 +45,12 @@
     "logout": "Abmelden"
   },
   "dashboard": {
+    "save_as_template": "Als Vorlage speichern",
+
+    "duplicate": "Karte duplizieren",
+    "edit_details": "Details bearbeiten",
+    "edit_template": "Vorlage bearbeiten",
+
     "edit": "Bearbeiten",
     "view": "Anzeigen",
     "delete": "Löschen",

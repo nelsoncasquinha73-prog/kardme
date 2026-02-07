@@ -45,6 +45,12 @@
     "logout": "Esci"
   },
   "dashboard": {
+    "save_as_template": "Salva come modello",
+
+    "duplicate": "Duplica cartone",
+    "edit_details": "Modifica Dettagli",
+    "edit_template": "Modifica modello",
+
     "edit": "Modifica",
     "view": "Visualizza",
     "delete": "Elimina",

@@ -1,5 +1,6 @@
 'use client'
 
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -55,6 +56,7 @@ function getPricingDisplay(tier: string | null, price: number | null) {
 
 
 export default function AdminTemplatesPage() {
+  const { t: tl } = useLanguage()
   const router = useRouter()
 
   const [checkingAuth, setCheckingAuth] = useState(true)
@@ -657,7 +659,7 @@ export default function AdminTemplatesPage() {
                       disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
                       title="Editar template no editor (atualiza o template original)"
                     >
-                      {openingId === t.id ? 'A abrir…' : 'Editar'}
+                      {openingId === t.id ? tl('dashboard.opening') : tl('dashboard.edit')}
                     </button>
 
                     <button
@@ -666,7 +668,7 @@ export default function AdminTemplatesPage() {
                       disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
                       title="Duplicar este template como um cartão novo"
                     >
-                      {openingId === t.id ? 'A abrir…' : 'Duplicar cartão'}
+                      {openingId === t.id ? tl('dashboard.opening') : 'Duplicar cartão'}
                     </button>
                   </div>
                 </div>
@@ -843,7 +845,7 @@ export default function AdminTemplatesPage() {
                         Cancelar
                       </button>
                       <button className="btn-primary" onClick={saveEdit} disabled={savingId === t.id}>
-                        {savingId === t.id ? 'A guardar…' : 'Guardar'}
+                        {savingId === t.id ? tl('dashboard.saving') : tl('dashboard.save')}
                       </button>
                     </>
                   ) : (

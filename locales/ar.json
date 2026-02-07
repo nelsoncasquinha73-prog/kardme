@@ -45,6 +45,12 @@
     "logout": "تسجيل الخروج"
   },
   "dashboard": {
+    "save_as_template": "حفظ كنموذج",
+
+    "duplicate": "نسخ البطاقة",
+    "edit_details": "تعديل التفاصيل",
+    "edit_template": "تعديل النموذج",
+
     "edit": "تعديل",
     "view": "عرض",
     "delete": "حذف",

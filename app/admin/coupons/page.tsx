@@ -323,7 +323,7 @@ export default function CouponsPage() {
 
             <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
               <button onClick={() => { setShowModal(false); resetForm() }} style={{ flex: 1, padding: '12px 24px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
-                Cancelar
+                {t('dashboard.cancel')}
               </button>
               <button onClick={saveCoupon} disabled={saving} style={{ flex: 1, padding: '12px 24px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
                 {saving ? t('common.saving') : t('common.save')}
