@@ -5,7 +5,6 @@ import { CSS } from '@dnd-kit/utilities'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { BlockIcon } from '@/components/editor/BlockIcon'
-import { getBlockName } from './blockNameHelper'
 
 export type BlockItem = {
   id: string
@@ -18,7 +17,7 @@ export type BlockItem = {
 }
 
 export default function BlocksRailSortable({
-  t,
+  blockNames,
   blocks,
   selectedId,
   onSelect,
@@ -26,7 +25,7 @@ export default function BlocksRailSortable({
   onReorder,
   onDelete,
 }: {
-  t: (key: string) => string
+  blockNames?: Record<string, string>
   blocks: BlockItem[]
   selectedId: string | null
   onSelect: (id: string) => void
@@ -62,7 +61,7 @@ export default function BlocksRailSortable({
         <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {blocks.map((b) => (
             <SortableRow
-              t={t}
+              blockNames={blockNames}
               key={b.id}
               block={b}
               active={b.id === selectedId}
@@ -78,14 +77,15 @@ export default function BlocksRailSortable({
 }
 
 function SortableRow({
-  t,
+  blockNames,
+  blockNames,
   block,
   active,
   onSelect,
   onToggle,
   onDelete,
 }: {
-  t: (key: string) => string
+  blockNames?: Record<string, string>
   block: BlockItem
   active: boolean
   onSelect: () => void
@@ -193,7 +193,7 @@ function SortableRow({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {block.type === 'header' ? 'TEST_HEADER' : (block.title || getBlockName(block.type, t) || block.type)}
+                {block.title || blockNames?.[block.type] || block.type}
               </div>
               <div style={{ fontSize: 12, color: 'rgba(17,24,39,0.55)' }}>{block.type}</div>
             </div>
