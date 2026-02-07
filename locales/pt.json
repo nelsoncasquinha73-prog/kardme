@@ -75,6 +75,10 @@
     "owned": "Adquirido"
   },
   "auth": {
+    "or_continue_with": "Ou continuar com",
+    "enter_email": "Introduza o endereço de email",
+    "or_continue_with": "Ou continuar com",
+    "enter_email": "Introduza o endereço de email",
     "login": "Entrar",
     "signup": "Registar",
     "email": "Email",

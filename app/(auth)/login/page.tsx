@@ -91,7 +91,7 @@ export default function LoginPage() {
 
                       <div className="text-social-area">
                         <hr />
-                        <span>Or continue with</span>
+                        <span>{t("auth.or_continue_with")}</span>
                         <hr />
                       </div>
 
@@ -102,7 +102,7 @@ export default function LoginPage() {
                           </div>
                           <input
                             type="email"
-                            placeholder="Enter email address"
+                            placeholder={t("auth.enter_email")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
