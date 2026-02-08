@@ -19,14 +19,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'userId é obrigatório' }, { status: 400 })
     }
 
-    const { data: sessionData } = await supabaseServer.auth.getSession()
-    const currentUserId = sessionData?.session?.user?.id
-
-    if (!currentUserId) {
+    // Obter o token do Authorization header
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
     }
 
-    const { data: adminProfile, error: adminError } = await supabaseServer
+    // Validar o token com o supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''))
+    
+    if (userError || !userData?.user?.id) {
+      return NextResponse.json({ success: false, error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const currentUserId = userData.user.id
+
+    // Verificar se é admin
+    const { data: adminProfile, error: adminError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', currentUserId)
@@ -36,6 +45,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Sem permissões' }, { status: 403 })
     }
 
+    // Eliminar cards, profile e user
     await supabaseAdmin.from('cards').delete().eq('user_id', userId)
     await supabaseAdmin.from('profiles').delete().eq('id', userId)
 
