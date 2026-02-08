@@ -98,8 +98,7 @@ export default function NewCardPage() {
   .from('cards')
   .insert({
     user_id: userId,
-    name: template.name,
-    slug: `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    name: 'Novo cartão',
     template_id: template.id,
     theme: template.theme_json,
   })
