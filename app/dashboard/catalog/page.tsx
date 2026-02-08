@@ -509,7 +509,7 @@ export default function CatalogPage() {
         ) : filtered.length === 0 ? (
           <p style={{ color: 'rgba(255,255,255,0.6)' }}>Nenhum template encontrado.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+          <div className='catalog-grid'>
             {filtered.map((template) => {
               const free = isFree(template)
               const owned = ownedTemplates.has(template.id)
@@ -528,7 +528,7 @@ export default function CatalogPage() {
                     flexDirection: 'column',
                   }}
                 >
-                  <div style={{ position: 'relative', height: 320, background: '#111' }}>
+                  <div style={{ position: 'relative', height: 623, background: '#111' }}>
                     <TemplateMiniPreview template={template} height={300} />
                     <div
                       style={{
