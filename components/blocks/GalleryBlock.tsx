@@ -48,6 +48,11 @@ type GalleryStyle = {
     borderColor?: string
     enabled?: boolean
   }
+
+  carouselArrowsBg?: string
+  carouselArrowsIconColor?: string
+  carouselDotsColor?: string
+  carouselDotsActiveColor?: string
 }
 
 type Props = {
@@ -162,6 +167,11 @@ export default function GalleryBlock({ settings, style }: Props) {
     }
   }, [emblaApi])
 
+  const arrowsBg = st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'
+  const arrowsIcon = st.carouselArrowsIconColor ?? '#111827'
+  const dotsColor = st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'
+  const dotsActiveColor = st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'
+
   const canUseCarouselUi = visibleItems.length > 1
   const showArrowsNow = canUseCarouselUi && showArrows && (!arrowsDesktopOnly || isDesktop)
   const prev = () => emblaApi?.scrollPrev()
@@ -260,10 +270,10 @@ export default function GalleryBlock({ settings, style }: Props) {
 
         {showArrowsNow && (
           <>
-            <button type="button" onClick={prev} aria-label="Anterior" style={arrowStyle('left')} data-no-block-select="1">
+            <button type="button" onClick={prev} aria-label="Anterior" style={arrowStyle('left', arrowsBg, arrowsIcon)} data-no-block-select="1">
               ‹
             </button>
-            <button type="button" onClick={next} aria-label="Seguinte" style={arrowStyle('right')} data-no-block-select="1">
+            <button type="button" onClick={next} aria-label="Seguinte" style={arrowStyle('right', arrowsBg, arrowsIcon)} data-no-block-select="1">
               ›
             </button>
           </>
@@ -286,7 +296,7 @@ export default function GalleryBlock({ settings, style }: Props) {
                     border: 'none',
                     padding: 0,
                     cursor: 'pointer',
-                    backgroundColor: active ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.25)',
+                    backgroundColor: active ? dotsActiveColor : dotsColor,
                     transform: active ? 'scale(1.15)' : 'scale(1)',
                     transition: 'transform 120ms ease, background-color 120ms ease',
                   }}
@@ -309,7 +319,7 @@ export default function GalleryBlock({ settings, style }: Props) {
   )
 }
 
-function arrowStyle(side: 'left' | 'right'): React.CSSProperties {
+function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSSProperties {
   return {
     position: 'absolute',
     top: '50%',
@@ -319,8 +329,8 @@ function arrowStyle(side: 'left' | 'right'): React.CSSProperties {
     height: 34,
     borderRadius: 999,
     border: '1px solid rgba(0,0,0,0.10)',
-    background: 'rgba(255,255,255,0.9)',
-    color: '#111827',
+    background: bg,
+    color: icon,
     display: 'grid',
     placeItems: 'center',
     cursor: 'pointer',

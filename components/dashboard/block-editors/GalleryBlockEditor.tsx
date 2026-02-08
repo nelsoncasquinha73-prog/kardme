@@ -51,6 +51,11 @@ type GalleryStyle = {
     borderWidth?: number
     borderColor?: string
   }
+
+  carouselArrowsBg?: string
+  carouselArrowsIconColor?: string
+  carouselDotsColor?: string
+  carouselDotsActiveColor?: string
 }
 
 type Props = {
@@ -467,6 +472,40 @@ export default function GalleryBlockEditor({
 
         <Row label="Mostrar pontos">
           <Toggle active={layout.showDots !== false} onClick={() => setLayout({ showDots: !(layout.showDots !== false) })} />
+        </Row>
+      </Section>
+
+      <Section title="Cores do Carrossel">
+        <Row label="Fundo das setas">
+          <SwatchRow
+            value={st.carouselArrowsBg ?? 'rgba(255,255,255,0.9)'}
+            onChange={(hex) => setStyle({ carouselArrowsBg: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ carouselArrowsBg: hex }))}
+          />
+        </Row>
+
+        <Row label="Cor dos ícones (setas)">
+          <SwatchRow
+            value={st.carouselArrowsIconColor ?? '#111827'}
+            onChange={(hex) => setStyle({ carouselArrowsIconColor: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ carouselArrowsIconColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Cor dos pontos (inativo)">
+          <SwatchRow
+            value={st.carouselDotsColor ?? 'rgba(0,0,0,0.25)'}
+            onChange={(hex) => setStyle({ carouselDotsColor: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ carouselDotsColor: hex }))}
+          />
+        </Row>
+
+        <Row label="Cor dos pontos (ativo)">
+          <SwatchRow
+            value={st.carouselDotsActiveColor ?? 'rgba(0,0,0,0.65)'}
+            onChange={(hex) => setStyle({ carouselDotsActiveColor: hex })}
+            onEyedropper={() => pick((hex) => setStyle({ carouselDotsActiveColor: hex }))}
+          />
         </Row>
       </Section>
 
