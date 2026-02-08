@@ -35,7 +35,9 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    // Redireciona admin para /admin/templates, users para /dashboard
+    const isAdmin = email.trim() === 'admin@kardme.com'
+    router.push(isAdmin ? '/admin/templates' : '/dashboard')
   }
 
   return (
