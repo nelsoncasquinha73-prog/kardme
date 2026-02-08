@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
 import DeleteCardModal from '@/components/DeleteCardModal'
+import RenameCardModal, { CardNameWithEdit } from './RenameCardModal'
 
 import { useLanguage } from '@/components/language/LanguageProvider'
 const ADMIN_EMAILS = ['admin@kardme.com', 'nelson@kardme.com']
@@ -75,6 +76,9 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [renameModalOpen, setRenameModalOpen] = useState(false)
+  const [renamingCard, setRenamingCard] = useState<any>(null)
+  const [newName, setNewName] = useState('')
   const [cardToDelete, setCardToDelete] = useState<Card | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
@@ -185,6 +189,23 @@ export default function DashboardPage() {
     closeDeleteModal()
   }
 
+  const handleRename = async () => {
+    if (!renamingCard || !newName.trim()) return
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update({ name: newName.trim() })
+        .eq('id', renamingCard.id)
+      if (error) throw error
+      setCards(cards.map(c => c.id === renamingCard.id ? { ...c, name: newName.trim() } : c))
+      setRenameModalOpen(false)
+      setRenamingCard(null)
+      setNewName('')
+    } catch (e: any) {
+      alert('Erro ao renomear: ' + e.message)
+    }
+  }
+
   if (loading) return <p style={{ padding: 24 }}>{t('dashboard.loading')}</p>
 
   // Admin Dashboard - Motivational
@@ -194,6 +215,21 @@ export default function DashboardPage() {
     if (hour < 12) greeting = 'Bom dia'
     else if (hour < 19) greeting = 'Boa tarde'
     else greeting = 'Boa noite'
+
+  
+  {/* Rename Modal */}
+  <RenameCardModal
+    isOpen={renameModalOpen}
+    card={renamingCard}
+    newName={newName}
+    onNameChange={setNewName}
+    onSave={handleRename}
+    onClose={() => {
+      setRenameModalOpen(false)
+      setRenamingCard(null)
+      setNewName('')
+    }}
+  />
 
     return (
       <div className="dashboard-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 200px)' }}>
@@ -248,7 +284,22 @@ export default function DashboardPage() {
   }
 
   // Regular User Dashboard
-  return (
+
+  {/* Rename Modal */}
+  <RenameCardModal
+    isOpen={renameModalOpen}
+    card={renamingCard}
+    newName={newName}
+    onNameChange={setNewName}
+    onSave={handleRename}
+    onClose={() => {
+      setRenameModalOpen(false)
+      setRenamingCard(null)
+      setNewName('')
+    }}
+  />
+
+    return (
     <div className="dashboard-wrap">
       <div className="dashboard-header">
         <div>
@@ -293,7 +344,14 @@ export default function DashboardPage() {
             <div key={card.id} className="card-tile-premium">
               <div className="card-tile-top">
                 <div className="card-tile-titleWrap">
-                  <p className="card-name">{card.name}</p>
+                  <CardNameWithEdit
+                    name={card.name}
+                    onEdit={() => {
+                      setRenamingCard(card)
+                      setNewName(card.name || '')
+                      setRenameModalOpen(true)
+                    }}
+                  />
                   <p className="card-meta">
                     {(card.job || '—')}
                     {card.company ? ` · ${card.company}` : ''}
