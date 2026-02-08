@@ -27,6 +27,9 @@ type GallerySettings = {
     objectFit?: 'cover' | 'contain'
     autoplay?: boolean
     autoplayIntervalMs?: number
+    showDots?: boolean
+    showArrows?: boolean
+    arrowsDesktopOnly?: boolean
   }
 }
 
@@ -450,6 +453,20 @@ export default function GalleryBlockEditor({
             onPointerDown={stop}
             onMouseDown={stop}
           />
+        </Row>
+      </Section>
+
+      <Section title="Controles do Carrossel">
+        <Row label="Mostrar setas">
+          <Toggle active={layout.showArrows === true} onClick={() => setLayout({ showArrows: !(layout.showArrows === true) })} />
+        </Row>
+
+        <Row label="Setas só em desktop">
+          <Toggle active={layout.arrowsDesktopOnly !== false} onClick={() => setLayout({ arrowsDesktopOnly: !(layout.arrowsDesktopOnly !== false) })} />
+        </Row>
+
+        <Row label="Mostrar pontos">
+          <Toggle active={layout.showDots !== false} onClick={() => setLayout({ showDots: !(layout.showDots !== false) })} />
         </Row>
       </Section>
 
