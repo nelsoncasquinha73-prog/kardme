@@ -384,6 +384,8 @@ export default function DashboardPage() {
         </div>
       )}
 
+      <RenameCardModal isOpen={renameModalOpen} card={renamingCard} newName={newName} onNameChange={setNewName} onSave={handleRename} onClose={() => { setRenameModalOpen(false); setRenamingCard(null); setNewName(''); }} />
+
       <DeleteCardModal
         isOpen={modalOpen}
         cardName={cardToDelete?.name || ''}
