@@ -444,12 +444,18 @@ export default function CatalogPage() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
+              flex: 'none',
+              padding: '0 16px',
+              height: 44,
+              lineHeight: '44px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(30,30,50,0.95)',
               color: '#fff',
               fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              minWidth: 300,
             }}
           >
             {categories.map((c) => (
@@ -462,12 +468,18 @@ export default function CatalogPage() {
             value={priceFilter}
             onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
             style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
+              flex: 'none',
+              padding: '0 16px',
+              height: 44,
+              lineHeight: '44px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(30,30,50,0.95)',
               color: '#fff',
               fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              minWidth: 260,
             }}
           >
             <option value="all" style={{ background: '#1a1a2e' }}>Todos preços</option>
