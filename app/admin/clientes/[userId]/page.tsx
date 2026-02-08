@@ -126,7 +126,9 @@ export default function AdminClienteDetailPage() {
     if (!confirm('ÚLTIMA CONFIRMAÇÃO: Todos os dados serão eliminados.')) return
     setDeleting(true)
     try {
-      const res = await fetch('/api/admin/users/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId }) })
+      const token = (await supabase.auth.getSession())?.data?.session?.access_token
+      if (!token) { alert('Sem autenticação'); setDeleting(false); return }
+      const res = await fetch('/api/admin/users/delete', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ userId }) })
       const json = await res.json()
       if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao eliminar')
       alert('Conta eliminada!')
