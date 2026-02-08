@@ -481,7 +481,7 @@ export default function CatalogPage() {
         ) : filtered.length === 0 ? (
           <p style={{ color: 'rgba(255,255,255,0.6)' }}>Nenhum template encontrado.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 20 }}>
             {filtered.map((template) => {
               const free = isFree(template)
               const owned = ownedTemplates.has(template.id)
