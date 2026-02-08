@@ -499,7 +499,7 @@ export default function CatalogPage() {
                     flexDirection: 'column',
                   }}
                 >
-                  <div style={{ position: 'relative', height: 320, background: '#111' }}>
+                  <div style={{ position: 'relative', height: 623, background: '#111' }}>
                     <div style={{ transform: "translateY(65px)" }}>
                       <TemplateMiniPreview template={template} height={504} />
                     </div>
