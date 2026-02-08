@@ -851,7 +851,7 @@ export default function AdminTemplatesPage() {
                   ) : (
                     <>
                       <button className="btn-secondary" onClick={() => startEdit(t)}>
-                        {tl('dashboard.edit_details')}
+                        Editar detalhes
                       </button>
                       <button
                         className="btn-danger"
