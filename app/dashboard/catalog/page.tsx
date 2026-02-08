@@ -529,7 +529,9 @@ export default function CatalogPage() {
                   }}
                 >
                   <div style={{ position: 'relative', height: 623, background: '#111' }}>
-                    <TemplateMiniPreview template={template} height={420} />
+                    <div style={{ transform: 'translateY(18px)' }}>
+                      <TemplateMiniPreview template={template} height={504} />
+                    </div>
                     <div
                       style={{
               flex: 'none',
