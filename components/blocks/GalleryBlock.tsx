@@ -25,6 +25,9 @@ type GallerySettings = {
     objectFit?: 'cover' | 'contain'
     autoplay?: boolean
     autoplayIntervalMs?: number
+    showDots?: boolean
+    showArrows?: boolean
+    arrowsDesktopOnly?: boolean
   }
 }
 
@@ -111,7 +114,7 @@ export default function GalleryBlock({ settings, style }: Props) {
   const plugins = autoplayEnabled && loop && autoplay.current ? [autoplay.current] : []
 
   // ✅ IMPORTANTÍSSIMO: hook é sempre chamado (nunca pode ficar depois de um return condicional)
-  const [emblaRef] = useEmblaCarousel(
+  const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop,
       align: 'center',
@@ -120,6 +123,50 @@ export default function GalleryBlock({ settings, style }: Props) {
     },
     plugins
   )
+
+  // ===== UI do Carrossel (setas + dots) =====
+  const showDots = s.layout?.showDots !== false
+  const showArrows = s.layout?.showArrows !== false
+  const arrowsDesktopOnly = s.layout?.arrowsDesktopOnly !== false
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [snapCount, setSnapCount] = useState(0)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsDesktop(mq.matches)
+    update()
+    mq.addEventListener?.('change', update)
+    return () => mq.removeEventListener?.('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (!emblaApi) return
+
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap() || 0)
+    const onReInit = () => {
+      setSnapCount(emblaApi.scrollSnapList().length)
+      onSelect()
+    }
+
+    setSnapCount(emblaApi.scrollSnapList().length)
+    onSelect()
+
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onReInit)
+
+    return () => {
+      emblaApi.off('select', onSelect)
+      emblaApi.off('reInit', onReInit)
+    }
+  }, [emblaApi])
+
+  const canUseCarouselUi = visibleItems.length > 1
+  const showArrowsNow = canUseCarouselUi && showArrows && (!arrowsDesktopOnly || isDesktop)
+  const prev = () => emblaApi?.scrollPrev()
+  const next = () => emblaApi?.scrollNext()
+  const goTo = (idx: number) => emblaApi?.scrollTo(idx)
 
   // ✅ agora sim: se não há items, não renderiza (mas hooks já foram chamados)
   if (visibleItems.length === 0) return null
@@ -153,7 +200,8 @@ export default function GalleryBlock({ settings, style }: Props) {
         </div>
       )}
 
-      <div style={viewportStyle} ref={emblaRef}>
+      <div style={{ position: 'relative' }}>
+        <div style={viewportStyle} ref={emblaRef}>
         <div
           style={{
             display: 'flex',
@@ -208,6 +256,45 @@ export default function GalleryBlock({ settings, style }: Props) {
             </div>
           ))}
         </div>
+        </div>
+
+        {showArrowsNow && (
+          <>
+            <button type="button" onClick={prev} aria-label="Anterior" style={arrowStyle('left')} data-no-block-select="1">
+              ‹
+            </button>
+            <button type="button" onClick={next} aria-label="Seguinte" style={arrowStyle('right')} data-no-block-select="1">
+              ›
+            </button>
+          </>
+        )}
+
+        {canUseCarouselUi && showDots && snapCount > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 10, userSelect: 'none' }} data-no-block-select="1">
+            {Array.from({ length: snapCount }).map((_, i) => {
+              const active = i === selectedIndex
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`Ir para a imagem ${i + 1}`}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    backgroundColor: active ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.25)',
+                    transform: active ? 'scale(1.15)' : 'scale(1)',
+                    transition: 'transform 120ms ease, background-color 120ms ease',
+                  }}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {lightboxIndex !== null && (
@@ -220,6 +307,29 @@ export default function GalleryBlock({ settings, style }: Props) {
       )}
     </section>
   )
+}
+
+function arrowStyle(side: 'left' | 'right'): React.CSSProperties {
+  return {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    [side]: 6,
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    border: '1px solid rgba(0,0,0,0.10)',
+    background: 'rgba(255,255,255,0.9)',
+    color: '#111827',
+    display: 'grid',
+    placeItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+    boxShadow: '0 10px 26px rgba(0,0,0,0.10)',
+    fontSize: 22,
+    lineHeight: 1,
+    zIndex: 5,
+  }
 }
 
 /* ===== Lightbox ===== */
