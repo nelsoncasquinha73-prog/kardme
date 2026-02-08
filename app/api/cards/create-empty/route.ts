@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         is_template: false,
         published: false,
         theme: {},
-        title: null,
+        title: 'Novo cartão',
         template_id: null,
       })
       .select()
