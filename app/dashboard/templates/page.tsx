@@ -159,7 +159,7 @@ export default function MyTemplatesPage() {
         .from('cards')
         .insert({
           user_id: userId,
-          name: t.name,
+          name: 'Novo cartão',
           slug: `card-${Date.now()}`,
           template_id: t.id,
           theme: t.theme_json,

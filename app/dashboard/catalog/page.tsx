@@ -195,7 +195,7 @@ export default function CatalogPage() {
         .from('cards')
         .insert({
           user_id: uid,
-          name: template.name,
+          name: 'Novo cartão',
           slug: `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           template_id: template.id,
           theme: template.theme_json,
