@@ -434,7 +434,7 @@ export default function CatalogPage() {
             onChange={(e) => setQuery(e.target.value)}
             style={{
               flex: 1,
-              minWidth: 200,
+              minWidth: 220,
               overflow: 'visible',
               textOverflow: 'clip',
               whiteSpace: 'nowrap',
@@ -459,7 +459,7 @@ export default function CatalogPage() {
               fontSize: 14,
               fontWeight: 500,
               cursor: 'pointer',
-              minWidth: 200,
+              minWidth: 260,
               overflow: 'visible',
               textOverflow: 'clip',
               whiteSpace: 'nowrap',
@@ -488,7 +488,7 @@ export default function CatalogPage() {
               fontSize: 14,
               fontWeight: 500,
               cursor: 'pointer',
-              minWidth: 160,
+              minWidth: 220,
               overflow: 'visible',
               textOverflow: 'clip',
               whiteSpace: 'nowrap',
