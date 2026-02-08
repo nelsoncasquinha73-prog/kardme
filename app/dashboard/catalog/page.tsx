@@ -397,7 +397,9 @@ export default function CatalogPage() {
               background: 'rgba(34,197,94,0.15)',
               border: '1px solid rgba(34,197,94,0.3)',
               borderRadius: 12,
-              padding: '12px 16px',
+              height: 44,
+              lineHeight: '44px',
+              padding: '0 16px',
               marginBottom: 16,
               color: '#22c55e',
               display: 'flex',
@@ -417,7 +419,9 @@ export default function CatalogPage() {
               background: 'rgba(239,68,68,0.15)',
               border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12,
-              padding: '12px 16px',
+              height: 44,
+              lineHeight: '44px',
+              padding: '0 16px',
               marginBottom: 16,
               color: '#ef4444',
             }}
@@ -451,7 +455,9 @@ export default function CatalogPage() {
             onChange={(e) => setCategory(e.target.value)}
             style={{
               flex: 'none',
-              padding: '12px 16px',
+              height: 44,
+              lineHeight: '44px',
+              padding: '0 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
               background: 'rgba(30,30,50,0.95)',
@@ -480,7 +486,9 @@ export default function CatalogPage() {
             onChange={(e) => setPriceFilter(e.target.value as PriceFilter)}
             style={{
               flex: 'none',
-              padding: '12px 16px',
+              height: 44,
+              lineHeight: '44px',
+              padding: '0 16px',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.2)',
               background: 'rgba(30,30,50,0.95)',
