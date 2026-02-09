@@ -331,6 +331,7 @@
     "last_30_days": "Last 30 days",
     "last_90_days": "Last 90 days",
     "loading": "Loading analytics…",
-    "no_data": "No analytics data."
+    "no_data": "No analytics data.",
+    "days": "days"
   }
 }

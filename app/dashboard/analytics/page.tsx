@@ -255,7 +255,7 @@ export default function UserAnalyticsPage() {
               cursor: 'pointer',
             }}
           >
-            {d} dias
+            {d} {t('analytics.days')}
           </button>
         ))}
       </div>
@@ -307,10 +307,10 @@ export default function UserAnalyticsPage() {
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <p style={{ margin: 0, color: '#22c55e', fontWeight: 700 }}>
-                          {card.total_leads} leads
+                          {card.total_leads} {t('analytics.leads_form')}
                         </p>
                         <p style={{ margin: '4px 0 0 0', color: 'rgba(96, 165, 250, 0.6)', fontSize: 12 }}>
-                          {card.total_views} aberturas • Form {card.conversion_form.toFixed(1)}% • Guardar {card.conversion_save.toFixed(1)}%
+                          {card.total_views} {t('analytics.opens')} • Form {card.conversion_form.toFixed(1)}% • {t('analytics.conv_save')} {card.conversion_save.toFixed(1)}%
                         </p>
                       </div>
                     </div>

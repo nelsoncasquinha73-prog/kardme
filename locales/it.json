@@ -329,6 +329,7 @@
     "last_30_days": "Ultimi 30 giorni",
     "last_90_days": "Ultimi 90 giorni",
     "loading": "Caricamento analytics…",
-    "no_data": "Nessun dato analytics."
+    "no_data": "Nessun dato analytics.",
+    "days": "giorni"
   }
 }
