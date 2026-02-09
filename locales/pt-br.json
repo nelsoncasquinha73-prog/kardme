@@ -324,5 +324,29 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Visualize visualizações, leads e contatos salvos dos seus cartões",
+    "opens": "Aberturas",
+    "leads_form": "Leads (Formulário)",
+    "saved_contacts": "Contatos Salvos",
+    "conv_form": "Conv. Formulário",
+    "conv_save": "Conv. Salvar",
+    "active_cards": "Cartões Ativos",
+    "last_7_days": "Últimos 7 dias",
+    "last_30_days": "Últimos 30 dias",
+    "last_90_days": "Últimos 90 dias",
+    "loading": "Carregando analytics…",
+    "no_data": "Sem dados de analytics.",
+    "activity_chart": "📊 Atividade: Aberturas vs Leads",
+    "top_cards": "🏆 Meus Cartões (por Leads)",
+    "cards_ranking": "🧾 Ranking de Cartões",
+    "card": "Cartão",
+    "leads": "Leads",
+    "saved": "Salvos",
+    "conv": "Conv.",
+    "back": "← Voltar",
+    "refresh": "Recarregar"
   }
 }

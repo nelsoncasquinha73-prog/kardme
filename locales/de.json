@@ -324,5 +324,29 @@
     "copy_link": "Copy link",
     "copied": "Copied!",
     "default_title": "See my digital card"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Verfolgen Sie Aufrufe, Leads und gespeicherte Kontakte Ihrer Karten",
+    "opens": "Aufrufe",
+    "leads_form": "Leads (Formular)",
+    "saved_contacts": "Gespeicherte Kontakte",
+    "conv_form": "Conv. Formular",
+    "conv_save": "Conv. Speichern",
+    "active_cards": "Aktive Karten",
+    "last_7_days": "Letzte 7 Tage",
+    "last_30_days": "Letzte 30 Tage",
+    "last_90_days": "Letzte 90 Tage",
+    "loading": "Analytics werden geladen…",
+    "no_data": "Keine Analytics-Daten.",
+    "activity_chart": "📊 Aktivität: Aufrufe vs Leads",
+    "top_cards": "🏆 Meine Karten (nach Leads)",
+    "cards_ranking": "🧾 Karteneinstufung",
+    "card": "Karte",
+    "leads": "Leads",
+    "saved": "Gespeichert",
+    "conv": "Conv.",
+    "back": "← Zurück",
+    "refresh": "Aktualisieren"
   }
 }

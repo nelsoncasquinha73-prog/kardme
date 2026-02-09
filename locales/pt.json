@@ -309,5 +309,29 @@
     "copy_link": "Copiar link",
     "copied": "Copiado!",
     "default_title": "Vê o meu cartão digital"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Visualiza views, leads e contactos guardados dos teus cartões",
+    "opens": "Aberturas",
+    "leads_form": "Leads (Form)",
+    "saved_contacts": "Contactos Guardados",
+    "conv_form": "Conv. Form",
+    "conv_save": "Conv. Guardar",
+    "active_cards": "Cartões Ativos",
+    "last_7_days": "Últimos 7 dias",
+    "last_30_days": "Últimos 30 dias",
+    "last_90_days": "Últimos 90 dias",
+    "loading": "A carregar analytics…",
+    "no_data": "Sem dados de analytics.",
+    "activity_chart": "📊 Atividade: Aberturas vs Leads",
+    "top_cards": "🏆 Meus Cartões (por Leads)",
+    "cards_ranking": "🧾 Ranking de Cartões",
+    "card": "Cartão",
+    "leads": "Leads",
+    "saved": "Guardados",
+    "conv": "Conv.",
+    "back": "← Voltar",
+    "refresh": "Recarregar"
   }
 }
