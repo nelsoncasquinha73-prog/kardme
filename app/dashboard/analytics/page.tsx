@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useLanguage } from '@/components/i18n/LanguageProvider'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { supabase } from '@/lib/supabaseClient'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
@@ -55,13 +55,7 @@ function KPICard({ label, value, trend, unit = '', color }: any) {
 }
 
 export default function UserAnalyticsPage() {
-  const { language } = useLanguage()
-  const t = (key: string) => {
-    const keys = key.split('.')
-    let value: any = require(`@/locales/${language.code}.json`)
-    for (const k of keys) value = value?.[k]
-    return value || key
-  }
+  const { t } = useLanguage()
   const [days, setDays] = useState(7)
   const [loading, setLoading] = useState(false)
   const [chartData, setChartData] = useState<AnalyticsData[]>([])
@@ -271,10 +265,10 @@ export default function UserAnalyticsPage() {
       ) : (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            <KPICard label=t('analytics.opens') value={kpis.totalViews} trend={viewsTrend} color="#3b82f6" />
-            <KPICard label=t('analytics.leads_form') value={kpis.totalLeads} trend={leadsTrend} color="#22c55e" />
-            <KPICard label=t('analytics.saved_contacts') value={kpis.totalSaves} trend={savesTrend} color="#f59e0b" />
-            <KPICard label=t('analytics.conv_form') value={kpis.conversionForm.toFixed(1)} unit="%" color="#a855f7" />
+            <KPICard label={t('analytics.opens')} value={kpis.totalViews} trend={viewsTrend} color="#3b82f6" />
+            <KPICard label={t('analytics.leads_form')} value={kpis.totalLeads} trend={leadsTrend} color="#22c55e" />
+            <KPICard label={t('analytics.saved_contacts')} value={kpis.totalSaves} trend={savesTrend} color="#f59e0b" />
+            <KPICard label={t('analytics.conv_form')} value={kpis.conversionForm.toFixed(1)} unit="%" color="#a855f7" />
           </div>
 
           {chartData.length > 0 && (
@@ -289,9 +283,9 @@ export default function UserAnalyticsPage() {
                   <YAxis stroke="rgba(96, 165, 250, 0.6)" />
                   <Tooltip contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(96, 165, 250, 0.3)', borderRadius: 8, color: '#60a5fa' }} />
                   <Legend wrapperStyle={{ color: '#60a5fa' }} />
-                  <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} name=t('analytics.opens') />
-                  <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} name=t('analytics.leads_form') />
-                  <Line type="monotone" dataKey="saves" stroke="#f59e0b" strokeWidth={2} name=t('analytics.saved_contacts') />
+                  <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} name={t('analytics.opens')} />
+                  <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} name={t('analytics.leads_form')} />
+                  <Line type="monotone" dataKey="saves" stroke="#f59e0b" strokeWidth={2} name={t('analytics.saved_contacts')} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
