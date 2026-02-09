@@ -655,6 +655,15 @@ export default function AdminTemplatesPage() {
 
                     <button
                       className="btn-secondary"
+                      onClick={() => startEdit(t)}
+                      disabled={savingId === t.id || deletingId === t.id}
+                      title="Editar nome, tipo e preço"
+                    >
+                      ✏️ Meta
+                    </button>
+
+                    <button
+                      className="btn-secondary"
                       onClick={() => editTemplate(t.id)}
                       disabled={openingId === t.id || deletingId === t.id || savingId === t.id}
                       title="Editar template no editor (atualiza o template original)"
