@@ -143,6 +143,18 @@ export async function GET(
 
   const vCard = lines.join('\r\n')
 
+  // Registar evento de guardar contacto (save_contact)
+  try {
+    await supabaseServer
+      .from('card_events')
+      .insert({
+        card_id: cardId,
+        event_type: 'save_contact',
+      })
+  } catch (err) {
+    // ignore - não bloqueia o download
+  }
+
   // Retornar como ficheiro .vcf
   return new NextResponse(vCard, {
     status: 200,
