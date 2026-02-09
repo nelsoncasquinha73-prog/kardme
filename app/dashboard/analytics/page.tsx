@@ -130,6 +130,11 @@ export default function UserAnalyticsPage() {
         .gte('created_at', startIso)
         .order('created_at', { ascending: true })
 
+
+      console.log('[analytics] userCardIds', userCardIds)
+      console.log('[analytics] events length', events?.length)
+      console.log('[analytics] saves in events', (events || []).filter((e:any) => e.event_type === 'save_contact').length)
+
       const { data: prevEvents } = await supabase
         .from('card_events')
         .select('card_id, event_type, created_at')
