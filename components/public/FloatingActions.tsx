@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 import { FiShare2, FiX, FiUpload } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import { HiOutlineUserAdd } from 'react-icons/hi'
@@ -46,6 +47,13 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
   if (!s.showShare && !s.showQR && !s.showSaveContact) return null
 
   const handleSaveContact = () => {
+    // Registar evento de guardar contacto (fire-and-forget)
+    void supabase.from('card_events').insert({
+      card_id: cardId,
+      event_type: 'save_contact',
+      created_at: new Date().toISOString(),
+    })
+    
     window.location.href = `/api/vcard/${cardId}`
   }
 
