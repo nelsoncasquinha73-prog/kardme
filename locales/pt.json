@@ -36,7 +36,8 @@
     "affiliates": "Afiliados",
     "nfc": "NFC",
     "files": "Ficheiros",
-    "logout": "Sair"
+    "logout": "Sair",
+    "billing": "Faturação"
   },
   "dashboard": {
     "pricing_free": "Grátis",

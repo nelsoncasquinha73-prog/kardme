@@ -40,7 +40,8 @@
     "affiliates": "الشركاء",
     "nfc": "NFC",
     "files": "الملفات",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "billing": "الفواتير"
   },
   "dashboard": {
     "pricing_free": "مجاني",

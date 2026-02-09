@@ -40,7 +40,8 @@
     "affiliates": "Partner",
     "nfc": "NFC",
     "files": "Dateien",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "billing": "Abrechnung"
   },
   "dashboard": {
     "pricing_free": "Kostenlos",

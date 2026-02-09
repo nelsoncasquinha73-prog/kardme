@@ -40,7 +40,8 @@
     "affiliates": "Affiliati",
     "nfc": "NFC",
     "files": "File",
-    "logout": "Esci"
+    "logout": "Esci",
+    "billing": "Fatturazione"
   },
   "dashboard": {
     "loading": "Caricamento…",

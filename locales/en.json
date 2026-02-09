@@ -40,7 +40,8 @@
     "affiliates": "Affiliates",
     "nfc": "NFC",
     "files": "Files",
-    "logout": "Logout"
+    "logout": "Logout",
+    "billing": "Billing"
   },
   "dashboard": {
     "pricing_free": "Free",

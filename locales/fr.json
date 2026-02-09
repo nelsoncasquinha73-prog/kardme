@@ -40,7 +40,8 @@
     "affiliates": "Affiliés",
     "nfc": "NFC",
     "files": "Fichiers",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "billing": "Facturation"
   },
   "dashboard": {
     "loading": "Chargement…",
