@@ -48,7 +48,8 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
 
   const handleSaveContact = () => {
     // Registar evento de guardar contacto (fire-and-forget)
-    void supabase.from('card_events').insert({
+    console.log('📥 Saving contact for card:', cardId)
+    supabase.from('card_events').insert({
       card_id: cardId,
       event_type: 'save_contact',
       created_at: new Date().toISOString(),
