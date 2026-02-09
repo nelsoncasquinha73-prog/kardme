@@ -1,16 +1,29 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuth } from '@/lib/auth'
+import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 export default function BillingPage() {
-  const { user } = useAuth()
+  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUserId(data.user?.id || null)
+    }
+    getUser()
+  }, [])
+
   const handleManageBilling = async () => {
-    if (!user?.id) return
+    if (!userId) return
 
     setLoading(true)
     setError('')
@@ -19,7 +32,7 @@ export default function BillingPage() {
       const res = await fetch('/api/stripe/customer-portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({ userId }),
       })
 
       if (!res.ok) {
@@ -47,7 +60,7 @@ export default function BillingPage() {
 
         <Button
           onClick={handleManageBilling}
-          disabled={loading}
+          disabled={loading || !userId}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
         >
           {loading ? 'Abrindo...' : 'Gerir Faturação'}
