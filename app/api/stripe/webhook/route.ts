@@ -134,6 +134,43 @@ export async function POST(req: Request) {
       }
     }
 
+
+    if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string | null
+
+      if (customerId) {
+        const email =
+          (invoice.customer_email as string | null) ||
+          (invoice as any).customer_details?.email ||
+          null
+
+        await supabaseAdmin
+          .from('user_subscriptions')
+          .update({
+            status: 'past_due',
+            billing_email: email,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_customer_id', customerId)
+
+        if (email) {
+          const appUrl = process.env.APP_URL || 'https://kardme.com'
+          const subject = 'Falha no pagamento — atualize o seu método de pagamento'
+          const html = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5">
+              <h2>Falha no pagamento</h2>
+              <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
+              <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
+              <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
+              <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
+            </div>
+          `
+          await sendEmail({ to: email, subject, html })
+        }
+      }
+    }
+
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
