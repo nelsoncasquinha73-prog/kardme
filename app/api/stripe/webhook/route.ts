@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
+import { sendEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 
@@ -136,6 +137,48 @@ export async function POST(req: Request) {
 
     if (
       event.type === 'customer.subscription.created' ||
+    if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string | null
+
+      if (customerId) {
+        const { data: row } = await supabaseAdmin
+          .from('user_subscriptions')
+          .select('user_id, stripe_customer_id')
+          .eq('stripe_customer_id', customerId)
+          .maybeSingle()
+
+        const email =
+          (invoice.customer_email as string | null) ||
+          (invoice as any).customer_details?.email ||
+          null
+
+        await supabaseAdmin
+          .from('user_subscriptions')
+          .update({
+            status: 'past_due',
+            billing_email: email,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_customer_id', customerId)
+
+        if (email) {
+          const appUrl = process.env.APP_URL || 'https://kardme.com'
+          const subject = 'Falha no pagamento — atualize o seu método de pagamento'
+          const html = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5">
+              <h2>Falha no pagamento</h2>
+              <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
+              <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
+              <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
+              <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
+            </div>
+          `
+          await sendEmail({ to: email, subject, html })
+        }
+      }
+    }
+
       event.type === 'customer.subscription.updated' ||
       event.type === 'customer.subscription.deleted'
     ) {
