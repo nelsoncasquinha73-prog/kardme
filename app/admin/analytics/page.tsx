@@ -35,6 +35,7 @@ export default function AdminAnalyticsPage() {
   const [chartData, setChartData] = useState<AnalyticsData[]>([])
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([])
   const [clientSummary, setClientSummary] = useState<ClientSummary[]>([])
+  const [selectedClientEmail, setSelectedClientEmail] = useState<string | null>(null)
 
   useEffect(() => {
     loadAnalytics()
@@ -186,6 +187,37 @@ export default function AdminAnalyticsPage() {
         <p style={{ color: '#60a5fa', textAlign: 'center', padding: 40 }}>A carregar analytics…</p>
       ) : (
         <>
+
+          {/* KPIs Globais */}
+          {(chartData.length > 0 || cardSummary.length > 0) && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              <div style={{ background: 'rgba(59, 130, 246, 0.1)', borderRadius: 12, padding: 16, border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                <p style={{ color: 'rgba(96, 165, 250, 0.7)', fontSize: 12, margin: 0, marginBottom: 8 }}>Total Views</p>
+                <p style={{ color: '#3b82f6', fontSize: 28, fontWeight: 800, margin: 0 }}>
+                  {cardSummary.reduce((sum, c) => sum + c.total_views, 0)}
+                </p>
+              </div>
+              <div style={{ background: 'rgba(168, 85, 247, 0.1)', borderRadius: 12, padding: 16, border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                <p style={{ color: 'rgba(96, 165, 250, 0.7)', fontSize: 12, margin: 0, marginBottom: 8 }}>Total Clicks</p>
+                <p style={{ color: '#a855f7', fontSize: 28, fontWeight: 800, margin: 0 }}>
+                  {cardSummary.reduce((sum, c) => sum + c.total_clicks, 0)}
+                </p>
+              </div>
+              <div style={{ background: 'rgba(34, 197, 94, 0.1)', borderRadius: 12, padding: 16, border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                <p style={{ color: 'rgba(96, 165, 250, 0.7)', fontSize: 12, margin: 0, marginBottom: 8 }}>Total Leads</p>
+                <p style={{ color: '#22c55e', fontSize: 28, fontWeight: 800, margin: 0 }}>
+                  {cardSummary.reduce((sum, c) => sum + c.total_leads, 0)}
+                </p>
+              </div>
+              <div style={{ background: 'rgba(96, 165, 250, 0.1)', borderRadius: 12, padding: 16, border: '1px solid rgba(96, 165, 250, 0.3)' }}>
+                <p style={{ color: 'rgba(96, 165, 250, 0.7)', fontSize: 12, margin: 0, marginBottom: 8 }}>Total Clientes</p>
+                <p style={{ color: '#60a5fa', fontSize: 28, fontWeight: 800, margin: 0 }}>
+                  {clientSummary.length}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Gráfico de Linha */}
           {chartData.length > 0 && (
             <div
@@ -293,9 +325,12 @@ export default function AdminAnalyticsPage() {
                     {clientSummary.map((client, idx) => (
                       <tr
                         key={client.user_email}
+                        onClick={() => setSelectedClientEmail(selectedClientEmail === client.user_email ? null : client.user_email)}
                         style={{
                           borderBottom: '1px solid rgba(96, 165, 250, 0.1)',
-                          background: idx % 2 === 0 ? 'rgba(96, 165, 250, 0.05)' : 'transparent',
+                          background: selectedClientEmail === client.user_email ? 'rgba(96, 165, 250, 0.15)' : idx % 2 === 0 ? 'rgba(96, 165, 250, 0.05)' : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s ease',
                         }}
                       >
                         <td style={{ padding: 12, color: '#e0e7ff' }}>{client.user_email}</td>
@@ -305,6 +340,57 @@ export default function AdminAnalyticsPage() {
                         <td style={{ padding: 12, color: '#22c55e', fontWeight: 700 }}>{client.total_leads}</td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+
+          {/* Drill-down: Cartões do Cliente Selecionado */}
+          {selectedClientEmail && (
+            <div>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', marginBottom: 16 }}>
+                Cartões de {selectedClientEmail}
+              </h2>
+              <div
+                style={{
+                  overflowX: 'auto',
+                  background: 'rgba(15, 23, 42, 0.4)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 18,
+                  border: '1px solid rgba(96, 165, 250, 0.2)',
+                  padding: 24,
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(96, 165, 250, 0.2)' }}>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Cartão</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Views</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Clicks</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cardSummary
+                      .filter((card) => card.user_email === selectedClientEmail)
+                      .sort((a, b) => b.total_views - a.total_views)
+                      .map((card, idx) => (
+                        <tr
+                          key={card.card_id}
+                          style={{
+                            borderBottom: '1px solid rgba(96, 165, 250, 0.1)',
+                            background: idx % 2 === 0 ? 'rgba(96, 165, 250, 0.05)' : 'transparent',
+                          }}
+                        >
+                          <td style={{ padding: 12, color: '#e0e7ff' }}>{card.card_name}</td>
+                          <td style={{ padding: 12, color: '#3b82f6', fontWeight: 700 }}>{card.total_views}</td>
+                          <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{card.total_clicks}</td>
+                          <td style={{ padding: 12, color: '#22c55e', fontWeight: 700 }}>{card.total_leads}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
