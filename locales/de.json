@@ -336,7 +336,13 @@
     "activity_chart": "📊 Aktivität: Aufrufe vs Leads",
     "top_cards": "🏆 Meine Karten (nach Leads)",
     "cards_ranking": "🧾 Karteneinstufung",
+    "card": "Karte",
     "back": "← Zurück",
-    "refresh": "Aktualisieren"
+    "refresh": "Aktualisieren",
+    "last_7_days": "Letzte 7 Tage",
+    "last_30_days": "Letzte 30 Tage",
+    "last_90_days": "Letzte 90 Tage",
+    "loading": "Analytics werden geladen…",
+    "no_data": "Keine Analytics-Daten."
   }
 }
