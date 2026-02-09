@@ -274,7 +274,7 @@ export default function UserAnalyticsPage() {
           {chartData.length > 0 && (
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', borderRadius: 18, border: '1px solid rgba(96, 165, 250, 0.2)', padding: 24 }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', margin: '0 0 20px 0' }}>
-                📊 Atividade: Aberturas vs Leads
+                {t('analytics.activity_chart')}
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
@@ -294,7 +294,7 @@ export default function UserAnalyticsPage() {
           {cardSummary.length > 0 && (
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', borderRadius: 18, border: '1px solid rgba(96, 165, 250, 0.2)', padding: 24 }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', margin: '0 0 20px 0' }}>
-                🏆 Meus Cartões (por Leads)
+                {t('analytics.top_cards')}
               </h2>
               <div style={{ display: 'grid', gap: 12 }}>
                 {cardSummary.slice(0, 5).map((card, idx) => (
@@ -324,18 +324,18 @@ export default function UserAnalyticsPage() {
           {cardSummary.length > 0 && (
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', borderRadius: 18, border: '1px solid rgba(96, 165, 250, 0.2)', padding: 24 }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', margin: '0 0 20px 0' }}>
-                🧾 Ranking de Cartões
+                {t('analytics.cards_ranking')}
               </h2>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
                   <thead>
                     <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(96, 165, 250, 0.2)' }}>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Cartão</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Aberturas</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads (Form)</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Guardados</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Form</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Guardar</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.card')}</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.opens')}</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.leads_form')}</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.saved_contacts')}</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.conv_form')}</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{t('analytics.conv_save')}</th>
                     </tr>
                   </thead>
                   <tbody>
