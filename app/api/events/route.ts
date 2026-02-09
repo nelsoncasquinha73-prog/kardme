@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     const { error } = await supabase.from('card_events').insert({
       card_id,
       event_type,
+      user_id: null,
     })
 
     if (error) {
