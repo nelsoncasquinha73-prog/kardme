@@ -316,15 +316,13 @@ export default function AnalyticsPage() {
                     <Legend />
                     <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
                     <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e', r: 4 }} />
-                    <Line type="monotone" dataKey="saves" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 4 }} />
+<Line type="monotone" dataKey="saves" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
 
-            {/* Gráfico de Bar
-cat >> app/dashboard/analytics/page.tsx << 'ENDFILE'
-ras — Top Cartões */}
+            {/* Gráfico de Barras — Top Cartões */}
             {cardSummary.length > 0 && (
               <div style={{ marginBottom: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.10)', padding: 24 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginTop: 0, marginBottom: 20 }}>
