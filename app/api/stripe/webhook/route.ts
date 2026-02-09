@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 
+import { sendEmail } from '@/lib/email'
 export const runtime = 'nodejs'
 
 const supabaseAdmin = createClient(
