@@ -57,6 +57,7 @@ export default function AdminAnalyticsPage() {
         .order('created_at', { ascending: true })
 
       if (eventsErr) throw new Error(eventsErr.message)
+      console.log('events', events?.length)
 
       // 2) Carregar cards com user_id
       const { data: cards, error: cardsErr } = await supabase
@@ -64,6 +65,7 @@ export default function AdminAnalyticsPage() {
         .select('id, title, user_id')
 
       if (cardsErr) throw new Error(cardsErr.message)
+      console.log('cards', cards?.length)
 
       // 3) Carregar profiles para emails
       const { data: profiles, error: profilesErr } = await supabase
@@ -71,6 +73,7 @@ export default function AdminAnalyticsPage() {
         .select('id, email')
 
       if (profilesErr) throw new Error(profilesErr.message)
+      console.log('profiles', profiles?.length)
 
       // Maps para lookup rápido
       const cardMap = new Map(cards?.map((c: any) => [c.id, c]) || [])
@@ -124,6 +127,7 @@ export default function AdminAnalyticsPage() {
       })
 
       const cardArray = Array.from(cardMap2.values()).sort((a, b) => b.total_views - a.total_views)
+      console.log('cardArray', cardArray.length)
       setCardSummary(cardArray)
 
       // 6) Resumo por cliente
@@ -148,6 +152,7 @@ export default function AdminAnalyticsPage() {
       })
 
       const clientArray = Array.from(clientMap.values()).sort((a, b) => b.total_views - a.total_views)
+      console.log('clientArray', clientArray.length)
       setClientSummary(clientArray)
     } catch (err) {
       console.error('Erro ao carregar analytics:', err)
