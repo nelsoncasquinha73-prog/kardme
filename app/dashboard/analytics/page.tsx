@@ -13,6 +13,7 @@ type DailyStats = {
   views: number
   clicks: number
   leads: number
+  saves: number
 }
 
 type CardSummary = {
@@ -21,6 +22,7 @@ type CardSummary = {
   total_views: number
   total_clicks: number
   total_leads: number
+  total_saves: number
 }
 
 type ChartData = {
@@ -28,12 +30,22 @@ type ChartData = {
   views: number
   clicks: number
   leads: number
+  saves: number
+}
+
+type KPIData = {
+  totalViews: number
+  totalLeads: number
+  totalSaves: number
+  formConversion: number
+  saveConversion: number
 }
 
 export default function AnalyticsPage() {
   const [stats, setStats] = useState<DailyStats[]>([])
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([])
   const [chartData, setChartData] = useState<ChartData[]>([])
+  const [kpi, setKpi] = useState<KPIData>({ totalViews: 0, totalLeads: 0, totalSaves: 0, formConversion: 0, saveConversion: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [days, setDays] = useState(7)
@@ -58,32 +70,77 @@ export default function AnalyticsPage() {
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - days)
 
-      // Stats diários com nome do cartão
-      const { data: dailyData, error: dailyError } = await supabase
-        .from('card_daily_stats')
-        .select('day, card_id, views, clicks, leads, cards(name)')
+      // 1. Buscar cartões do user
+      const { data: userCards } = await supabase
+        .from('cards')
+        .select('id, name')
         .eq('user_id', userId)
-        .gte('day', startDate.toISOString().split('T')[0])
-        .order('day', { ascending: false })
 
-      if (dailyError) {
-        setError(dailyError.message)
+      const cardIds = (userCards || []).map((c: any) => c.id)
+      const cardNameMap: { [key: string]: string } = {}
+      userCards?.forEach((c: any) => {
+        cardNameMap[c.id] = c.name
+      })
+
+      if (cardIds.length === 0) {
+        setStats([])
+        setChartData([])
+        setCardSummary([])
+        setKpi({ totalViews: 0, totalLeads: 0, totalSaves: 0, formConversion: 0, saveConversion: 0 })
         setLoading(false)
         return
       }
 
-      const formattedDaily = (dailyData || []).map((d: any) => ({
-        day: d.day,
-        card_id: d.card_id,
-        card_name: Array.isArray(d.cards) ? d.cards[0]?.name : d.cards?.name || 'Sem nome',
-        views: d.views,
-        clicks: d.clicks,
-        leads: d.leads,
-      }))
+      // 2. Buscar eventos (views, leads, saves)
+      const { data: events } = await supabase
+        .from('card_events')
+        .select('card_id, event_type, created_at')
+        .in('card_id', cardIds)
+        .gte('created_at', startDate.toISOString())
+
+      // Agregar eventos por dia
+      const eventsByDay: { [key: string]: { [cardId: string]: { views: number; leads: number; saves: number } } } = {}
+      const eventTotals = { views: 0, leads: 0, saves: 0 }
+
+      for (const evt of events || []) {
+        const day = evt.created_at.split('T')[0]
+        if (!eventsByDay[day]) eventsByDay[day] = {}
+        if (!eventsByDay[day][evt.card_id]) {
+          eventsByDay[day][evt.card_id] = { views: 0, leads: 0, saves: 0 }
+        }
+
+        if (evt.event_type === 'view') {
+          eventsByDay[day][evt.card_id].views++
+          eventTotals.views++
+        } else if (evt.event_type === 'lead') {
+          eventsByDay[day][evt.card_id].leads++
+          eventTotals.leads++
+        } else if (evt.event_type === 'save_contact') {
+          eventsByDay[day][evt.card_id].saves++
+          eventTotals.saves++
+        }
+      }
+
+      // 3. Construir formattedDaily
+      const formattedDaily: DailyStats[] = []
+      for (const day in eventsByDay) {
+        for (const cardId in eventsByDay[day]) {
+          const evt = eventsByDay[day][cardId]
+          formattedDaily.push({
+            day,
+            card_id: cardId,
+            card_name: cardNameMap[cardId] || 'Sem nome',
+            views: evt.views,
+            clicks: 0,
+            leads: evt.leads,
+            saves: evt.saves,
+          })
+        }
+      }
 
       setStats(formattedDaily)
 
-      // Agregar dados por dia para o gráfico
+      // 4. Agregar para gráfico
       const chartMap: { [key: string]: ChartData } = {}
       for (const row of formattedDaily) {
         if (!chartMap[row.day]) {
@@ -92,11 +149,13 @@ export default function AnalyticsPage() {
             views: 0,
             clicks: 0,
             leads: 0,
+            saves: 0,
           }
         }
         chartMap[row.day].views += row.views
         chartMap[row.day].clicks += row.clicks
         chartMap[row.day].leads += row.leads
+        chartMap[row.day].saves += row.saves
       }
 
       const sortedChartData = Object.values(chartMap).sort((a, b) => {
@@ -107,56 +166,40 @@ export default function AnalyticsPage() {
 
       setChartData(sortedChartData)
 
-      // Resumo por cartão (últimos N dias)
-      const { data: summaryData, error: summaryError } = await supabase
-        .from('card_daily_stats')
-        .select('card_id, views, clicks, leads')
-        .eq('user_id', userId)
-        .gte('day', startDate.toISOString().split('T')[0])
-
-      if (summaryError) {
-        setError(summaryError.message)
-        setLoading(false)
-        return
-      }
-
-      // Agregar por card_id
+      // 5. Resumo por cartão
       const summary: { [key: string]: CardSummary } = {}
-
-      // Primeiro, preenche com nomes dos dados diários
       for (const row of formattedDaily) {
         const key = row.card_id
         if (!summary[key]) {
           summary[key] = {
             card_id: row.card_id,
-            card_name: row.card_name,
+            card_name: row.card_name || 'Sem nome',
             total_views: 0,
             total_clicks: 0,
             total_leads: 0,
-          }
-        }
-      }
-
-      // Depois agrega
-      for (const row of summaryData || []) {
-        const key = row.card_id
-        if (!summary[key]) {
-          summary[key] = {
-            card_id: row.card_id,
-            card_name: 'Sem nome',
-            total_views: 0,
-            total_clicks: 0,
-            total_leads: 0,
+            total_saves: 0,
           }
         }
         summary[key].total_views += row.views
         summary[key].total_clicks += row.clicks
         summary[key].total_leads += row.leads
+        summary[key].total_saves += row.saves
       }
 
-      setCardSummary(
-        Object.values(summary).sort((a, b) => b.total_views - a.total_views)
-      )
+      setCardSummary(Object.values(summary).sort((a, b) => b.total_views - a.total_views))
+
+      // 6. KPIs
+      const formConv = eventTotals.views > 0 ? ((eventTotals.leads / eventTotals.views) * 100).toFixed(1) : 0
+      const saveConv = eventTotals.views > 0 ? ((eventTotals.saves / eventTotals.views) * 100).toFixed(1) : 0
+
+      setKpi({
+        totalViews: eventTotals.views,
+        totalLeads: eventTotals.leads,
+        totalSaves: eventTotals.saves,
+        formConversion: parseFloat(formConv as string),
+        saveConversion: parseFloat(saveConv as string),
+      })
+
       setLoading(false)
     } catch (err: any) {
       setError(err?.message || 'Erro ao carregar analytics')
@@ -171,7 +214,7 @@ export default function AnalyticsPage() {
           <div>
             <h1 className="dashboard-title">Analytics</h1>
             <p className="dashboard-subtitle">
-              Visualiza views, clicks e leads dos teus cartões.
+              Visualiza views, leads e contactos guardados dos teus cartões.
             </p>
           </div>
 
@@ -227,6 +270,30 @@ export default function AnalyticsPage() {
           <p style={{ padding: 24, color: 'rgba(255,255,255,0.7)' }}>A carregar analytics…</p>
         ) : (
           <>
+            {/* KPIs */}
+            <div style={{ marginBottom: 40, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              <div style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Aberturas</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'rgba(59,130,246,0.95)' }}>{kpi.totalViews}</div>
+              </div>
+              <div style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Leads (Form)</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'rgba(34,197,94,0.95)' }}>{kpi.totalLeads}</div>
+              </div>
+              <div style={{ background: 'rgba(236,72,153,0.15)', border: '1px solid rgba(236,72,153,0.3)', borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Contactos Guardados</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'rgba(236,72,153,0.95)' }}>{kpi.totalSaves}</div>
+              </div>
+              <div style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Conversão (Form %)</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'rgba(168,85,247,0.95)' }}>{kpi.formConversion}%</div>
+              </div>
+              <div style={{ background: 'rgba(14,165,233,0.15)', border: '1px solid rgba(14,165,233,0.3)', borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Conversão (Guardar %)</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'rgba(14,165,233,0.95)' }}>{kpi.saveConversion}%</div>
+              </div>
+            </div>
+
             {/* Gráfico de Linha — Histórico Diário */}
             {chartData.length > 0 && (
               <div style={{ marginBottom: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.10)', padding: 24 }}>
@@ -248,14 +315,16 @@ export default function AnalyticsPage() {
                     />
                     <Legend />
                     <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
-                    <Line type="monotone" dataKey="clicks" stroke="#a855f7" strokeWidth={2} dot={{ fill: '#a855f7', r: 4 }} />
                     <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e', r: 4 }} />
+                    <Line type="monotone" dataKey="saves" stroke="#ec4899" strokeWidth={2} dot={{ fill: '#ec4899', r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
 
-            {/* Gráfico de Barras — Top Cartões */}
+            {/* Gráfico de Bar
+cat >> app/dashboard/analytics/page.tsx << 'ENDFILE'
+ras — Top Cartões */}
             {cardSummary.length > 0 && (
               <div style={{ marginBottom: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.10)', padding: 24 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginTop: 0, marginBottom: 20 }}>
@@ -276,8 +345,8 @@ export default function AnalyticsPage() {
                     />
                     <Legend />
                     <Bar dataKey="total_views" fill="#3b82f6" />
-                    <Bar dataKey="total_clicks" fill="#a855f7" />
                     <Bar dataKey="total_leads" fill="#22c55e" />
+                    <Bar dataKey="total_saves" fill="#ec4899" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -301,7 +370,7 @@ export default function AnalyticsPage() {
                   {cardSummary.map((card) => (
                     <Link
                       key={card.card_id}
-                      href={`/dashboard/cards/\${card.card_id}/analytics`}
+                      href={`/dashboard/cards/${card.card_id}/analytics`}
                       style={{ textDecoration: 'none' }}
                     >
                       <div
@@ -335,7 +404,7 @@ export default function AnalyticsPage() {
                           {card.card_name}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
                           <div>
                             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
                               Views
@@ -347,19 +416,28 @@ export default function AnalyticsPage() {
 
                           <div>
                             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
-                              Clicks
-                            </div>
-                            <div style={{ fontSize: 20, fontWeight: 900, color: 'rgba(168,85,247,0.95)' }}>
-                              {card.total_clicks}
-                            </div>
-                          </div>
-
-                                                    <div>
-                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
                               Leads
                             </div>
                             <div style={{ fontSize: 20, fontWeight: 900, color: 'rgba(34,197,94,0.95)' }}>
                               {card.total_leads}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
+                              Saves
+                            </div>
+                            <div style={{ fontSize: 20, fontWeight: 900, color: 'rgba(236,72,153,0.95)' }}>
+                              {card.total_saves}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>
+                              Conv. %
+                            </div>
+                            <div style={{ fontSize: 20, fontWeight: 900, color: 'rgba(168,85,247,0.95)' }}>
+                              {card.total_views > 0 ? ((card.total_leads / card.total_views) * 100).toFixed(0) : 0}%
                             </div>
                           </div>
                         </div>
@@ -370,8 +448,8 @@ export default function AnalyticsPage() {
               )}
             </div>
 
-            {/* Daily Stats Table */}
-            <div>
+            {/* Histórico Detalhado */}
+            <div style={{ marginBottom: 40 }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,0.95)', marginBottom: 16 }}>
                 Histórico Detalhado
               </h2>
@@ -404,10 +482,10 @@ export default function AnalyticsPage() {
                           Views
                         </th>
                         <th style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-                          Clicks
+                          Leads
                         </th>
                         <th style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-                          Leads
+                          Saves
                         </th>
                       </tr>
                     </thead>
@@ -434,11 +512,11 @@ export default function AnalyticsPage() {
                           <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(59,130,246,0.95)', fontWeight: 600 }}>
                             {stat.views}
                           </td>
-                          <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(168,85,247,0.95)', fontWeight: 600 }}>
-                            {stat.clicks}
-                          </td>
                           <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(34,197,94,0.95)', fontWeight: 600 }}>
                             {stat.leads}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(236,72,153,0.95)', fontWeight: 600 }}>
+                            {stat.saves}
                           </td>
                         </tr>
                       ))}
