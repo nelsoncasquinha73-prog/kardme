@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Button } from '@/components/ui/button'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,23 +49,31 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Faturação</h1>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '24px' }}>Faturação</h1>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600 mb-6">
+      <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '24px' }}>
+        <p style={{ color: '#666', marginBottom: '24px' }}>
           Gerencie sua subscrição, método de pagamento, faturas e histórico de pagamentos.
         </p>
 
-        <Button
+        <button
           onClick={handleManageBilling}
           disabled={loading || !userId}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+          style={{
+            background: '#2563eb',
+            color: 'white',
+            padding: '8px 24px',
+            borderRadius: '4px',
+            border: 'none',
+            cursor: loading || !userId ? 'not-allowed' : 'pointer',
+            opacity: loading || !userId ? 0.5 : 1,
+          }}
         >
           {loading ? 'Abrindo...' : 'Gerir Faturação'}
-        </Button>
+        </button>
 
-        {error && <p className="text-red-600 mt-4">{error}</p>}
+        {error && <p style={{ color: '#dc2626', marginTop: '16px' }}>{error}</p>}
       </div>
     </div>
   )
