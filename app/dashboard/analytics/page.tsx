@@ -314,6 +314,49 @@ export default function UserAnalyticsPage() {
             </div>
           )}
 
+          {cardSummary.length > 0 && (
+            <div style={{ background: 'rgba(15, 23, 42, 0.4)', borderRadius: 18, border: '1px solid rgba(96, 165, 250, 0.2)', padding: 24 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#60a5fa', margin: '0 0 20px 0' }}>
+                🧾 Ranking de Cartões
+              </h2>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(96, 165, 250, 0.2)' }}>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Cartão</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Aberturas</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads (Form)</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Guardados</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Form</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Guardar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cardSummary.map((card, idx) => (
+                      <tr
+                        key={card.card_id}
+                        style={{
+                          borderBottom: '1px solid rgba(96, 165, 250, 0.1)',
+                          background: idx % 2 === 0 ? 'rgba(96, 165, 250, 0.05)' : 'transparent',
+                        }}
+                      >
+                        <td style={{ padding: 12, color: '#e0e7ff' }}>
+                          {idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : ''}
+                          {card.card_name}
+                        </td>
+                        <td style={{ padding: 12, color: '#3b82f6', fontWeight: 700 }}>{card.total_views}</td>
+                        <td style={{ padding: 12, color: '#22c55e', fontWeight: 700 }}>{card.total_leads}</td>
+                        <td style={{ padding: 12, color: '#f59e0b', fontWeight: 700 }}>{card.total_saves}</td>
+                        <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{card.conversion_form.toFixed(1)}%</td>
+                        <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{card.conversion_save.toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {chartData.length === 0 && cardSummary.length === 0 && (
             <p style={{ color: 'rgba(96, 165, 250, 0.55)', textAlign: 'center', padding: 40 }}>Sem dados de analytics.</p>
           )}
