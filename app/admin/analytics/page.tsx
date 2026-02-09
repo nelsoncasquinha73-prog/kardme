@@ -7,7 +7,8 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Responsi
 type AnalyticsData = {
   date: string
   views: number
-  leads: number
+  leads: number // form
+  saves: number // vCard
 }
 
 type CardSummary = {
@@ -15,25 +16,32 @@ type CardSummary = {
   card_name: string
   user_email: string
   total_views: number
-  total_leads: number
-  conversion: number
+  total_leads: number // form
+  total_saves: number // vCard
+  conversion_form: number
+  conversion_save: number
 }
 
 type ClientSummary = {
   user_email: string
   total_views: number
-  total_leads: number
-  conversion: number
+  total_leads: number // form
+  total_saves: number // vCard
+  conversion_form: number
+  conversion_save: number
   card_count: number
 }
 
 type KPIData = {
   totalViews: number
-  totalLeads: number
-  conversionRate: number
+  totalLeads: number // form
+  totalSaves: number // vCard
+  conversionForm: number
+  conversionSave: number
   activeCards: number
   prevViews: number
   prevLeads: number
+  prevSaves: number
 }
 
 function KPICard({ label, value, trend, unit = '', color }: any) {
@@ -65,10 +73,13 @@ export default function AdminAnalyticsPage() {
   const [kpis, setKpis] = useState<KPIData>({
     totalViews: 0,
     totalLeads: 0,
-    conversionRate: 0,
+    totalSaves: 0,
+    conversionForm: 0,
+    conversionSave: 0,
     activeCards: 0,
     prevViews: 0,
     prevLeads: 0,
+    prevSaves: 0,
   })
 
   useEffect(() => {
@@ -106,15 +117,16 @@ export default function AdminAnalyticsPage() {
       const cardMap = new Map(cards?.map((c: any) => [c.id, c]) || [])
       const profileMap = new Map(profiles?.map((p: any) => [p.id, p]) || [])
 
-      const dateMap = new Map<string, { views: number; leads: number }>()
+      const dateMap = new Map<string, { views: number; leads: number; saves: number }>()
       const cardMap2 = new Map<string, CardSummary>()
       let totalViews = 0
-      let totalLeads = 0
+      let totalLeads = 0 // form
+      let totalSaves = 0 // vCard
       const activeCardIds = new Set<string>()
 
       events?.forEach((e: any) => {
         const date = new Date(e.created_at).toLocaleDateString('pt-PT')
-        const current = dateMap.get(date) || { views: 0, leads: 0 }
+          const current = dateMap.get(date) || { views: 0, leads: 0, saves: 0 }
 
         if (e.event_type === 'view') {
           current.views++
@@ -123,6 +135,9 @@ export default function AdminAnalyticsPage() {
         } else if (e.event_type === 'lead') {
           current.leads++
           totalLeads++
+        } else if (e.event_type === 'save_contact') {
+          current.saves++
+          totalSaves++
         }
 
         dateMap.set(date, current)
@@ -137,23 +152,29 @@ export default function AdminAnalyticsPage() {
             user_email: profile?.email || 'Desconhecido',
             total_views: 0,
             total_leads: 0,
-            conversion: 0,
+            total_saves: 0,
+            conversion_form: 0,
+            conversion_save: 0,
           }
 
           if (e.event_type === 'view') current.total_views++
           else if (e.event_type === 'lead') current.total_leads++
+          else if (e.event_type === 'save_contact') current.total_saves++
 
-          current.conversion = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
+          current.conversion_form = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
+          current.conversion_save = current.total_views > 0 ? (current.total_saves / current.total_views) * 100 : 0
           cardMap2.set(key, current)
         }
       })
 
       let prevViews = 0
       let prevLeads = 0
+      let prevSaves = 0
 
       prevEvents?.forEach((e: any) => {
         if (e.event_type === 'view') prevViews++
         else if (e.event_type === 'lead') prevLeads++
+        else if (e.event_type === 'save_contact') prevSaves++
       })
 
       const clientMap = new Map<string, ClientSummary>()
@@ -162,14 +183,18 @@ export default function AdminAnalyticsPage() {
           user_email: card.user_email,
           total_views: 0,
           total_leads: 0,
-          conversion: 0,
+          total_saves: 0,
+          conversion_form: 0,
+          conversion_save: 0,
           card_count: 0,
         }
 
         current.total_views += card.total_views
         current.total_leads += card.total_leads
+        current.total_saves += card.total_saves
         current.card_count++
-        current.conversion = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
+        current.conversion_form = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
+        current.conversion_save = current.total_views > 0 ? (current.total_saves / current.total_views) * 100 : 0
 
         clientMap.set(card.user_email, current)
       })
@@ -184,10 +209,13 @@ export default function AdminAnalyticsPage() {
       setKpis({
         totalViews,
         totalLeads,
-        conversionRate: totalViews > 0 ? (totalLeads / totalViews) * 100 : 0,
+        totalSaves,
+        conversionForm: totalViews > 0 ? (totalLeads / totalViews) * 100 : 0,
+        conversionSave: totalViews > 0 ? (totalSaves / totalViews) * 100 : 0,
         activeCards: activeCardIds.size,
         prevViews,
         prevLeads,
+        prevSaves,
       })
     } catch (err) {
       console.error('Erro ao carregar analytics:', err)
@@ -198,6 +226,7 @@ export default function AdminAnalyticsPage() {
 
   const viewsTrend = kpis.prevViews > 0 ? ((kpis.totalViews - kpis.prevViews) / kpis.prevViews) * 100 : 0
   const leadsTrend = kpis.prevLeads > 0 ? ((kpis.totalLeads - kpis.prevLeads) / kpis.prevLeads) * 100 : 0
+  const savesTrend = kpis.prevSaves > 0 ? ((kpis.totalSaves - kpis.prevSaves) / kpis.prevSaves) * 100 : 0
 
   return (
     <div style={{ display: 'grid', gap: 24, padding: '24px 0' }}>
@@ -228,9 +257,9 @@ export default function AdminAnalyticsPage() {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <KPICard label="Aberturas" value={kpis.totalViews} trend={viewsTrend} color="#3b82f6" />
-            <KPICard label="Leads" value={kpis.totalLeads} trend={leadsTrend} color="#22c55e" />
-            <KPICard label="Conversão" value={kpis.conversionRate.toFixed(1)} unit="%" color="#a855f7" />
-            <KPICard label="Cartões Ativos" value={kpis.activeCards} color="#f59e0b" />
+            <KPICard label="Leads (Form)" value={kpis.totalLeads} trend={leadsTrend} color="#22c55e" />
+            <KPICard label="Contactos guardados" value={kpis.totalSaves} trend={savesTrend} color="#f59e0b" />
+            <KPICard label="Conv. Form" value={kpis.conversionForm.toFixed(1)} unit="%" color="#a855f7" />
           </div>
 
           {chartData.length > 0 && (
@@ -246,7 +275,8 @@ export default function AdminAnalyticsPage() {
                   <Tooltip contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(96, 165, 250, 0.3)', borderRadius: 8, color: '#60a5fa' }} />
                   <Legend wrapperStyle={{ color: '#60a5fa' }} />
                   <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} name="Aberturas" />
-                  <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} name="Leads" />
+                  <Line type="monotone" dataKey="leads" stroke="#22c55e" strokeWidth={2} name="Leads (Form)" />
+                  <Line type="monotone" dataKey="saves" stroke="#f59e0b" strokeWidth={2} name="Contactos guardados" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -274,7 +304,7 @@ export default function AdminAnalyticsPage() {
                           {card.total_leads} leads
                         </p>
                         <p style={{ margin: '4px 0 0 0', color: 'rgba(96, 165, 250, 0.6)', fontSize: 12 }}>
-                          {card.total_views} aberturas • {card.conversion.toFixed(1)}%
+                          {card.total_views} aberturas • Form {card.conversion_form.toFixed(1)}% • Guardar {card.conversion_save.toFixed(1)}%
                         </p>
                       </div>
                     </div>
@@ -296,8 +326,10 @@ export default function AdminAnalyticsPage() {
                       <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Email</th>
                       <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Cartões</th>
                       <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Aberturas</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads</th>
-                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conversão</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Leads (Form)</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Guardados</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Form</th>
+                      <th style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>Conv. Guardar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -316,7 +348,9 @@ export default function AdminAnalyticsPage() {
                         <td style={{ padding: 12, color: '#60a5fa', fontWeight: 700 }}>{client.card_count}</td>
                         <td style={{ padding: 12, color: '#3b82f6', fontWeight: 700 }}>{client.total_views}</td>
                         <td style={{ padding: 12, color: '#22c55e', fontWeight: 700 }}>{client.total_leads}</td>
-                        <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{client.conversion.toFixed(1)}%</td>
+                        <td style={{ padding: 12, color: '#f59e0b', fontWeight: 700 }}>{client.total_saves}</td>
+                        <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{client.conversion_form.toFixed(1)}%</td>
+                        <td style={{ padding: 12, color: '#a855f7', fontWeight: 700 }}>{client.conversion_save.toFixed(1)}%</td>
                       </tr>
                     ))}
                   </tbody>
