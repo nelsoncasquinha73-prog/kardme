@@ -54,6 +54,13 @@ export async function POST(req: Request) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId)
           const plan = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
 
+          // Atualizar customer com email (importante para webhooks posteriores)
+          if (session.customer_details?.email) {
+            await stripe.customers.update(customerId, {
+              email: session.customer_details.email,
+            })
+          }
+
           await supabaseAdmin.from('user_subscriptions').upsert({
             user_id: userId,
             stripe_customer_id: customerId,
