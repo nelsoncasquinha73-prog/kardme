@@ -12,6 +12,30 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+async function getUserEmailByCustomerId(customerId: string): Promise<string | null> {
+  try {
+    const { data: subRow } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('user_id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle()
+
+    const userId = (subRow as any)?.user_id
+    if (!userId) return null
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .maybeSingle()
+
+    return (profile as any)?.email || null
+  } catch (err) {
+    console.error('Error fetching user email:', err)
+    return null
+  }
+}
+
 function paymentFailedEmailHtml(appUrl: string) {
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.5">
@@ -54,7 +78,6 @@ export async function POST(req: Request) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId)
           const plan = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
 
-          // Atualizar customer com email (importante para webhooks posteriores)
           if (session.customer_details?.email) {
             await stripe.customers.update(customerId, {
               email: session.customer_details.email,
@@ -165,7 +188,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2) Payment failed (robust): PaymentIntent
+    // 2) Payment failed: PaymentIntent
     if (event.type === 'payment_intent.payment_failed') {
       const pi = event.data.object as Stripe.PaymentIntent
       const customerId = (pi.customer as string | null) || null
@@ -173,12 +196,7 @@ export async function POST(req: Request) {
       let email: string | null = (pi as any).receipt_email || null
 
       if (!email && customerId) {
-        try {
-          const customer = await stripe.customers.retrieve(customerId)
-          email = (customer as any).email || null
-        } catch (err) {
-          console.error('Error fetching customer:', err)
-        }
+        email = await getUserEmailByCustomerId(customerId)
       }
 
       if (customerId) {
@@ -194,6 +212,7 @@ export async function POST(req: Request) {
 
       if (email) {
         const appUrl = process.env.APP_URL || 'https://kardme.com'
+        console.log('RESEND_SEND_ATTEMPT', { to: email, subject: 'Falha no pagamento' })
         await sendEmail({
           to: email,
           subject: 'Falha no pagamento — atualize o seu método de pagamento',
@@ -202,15 +221,19 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3) Payment failed: Invoice (backup)
+    // 3) Payment failed: Invoice
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string | null
 
-      const email =
+      let email: string | null =
         (invoice.customer_email as string | null) ||
         (invoice as any).customer_details?.email ||
         null
+
+      if (!email && customerId) {
+        email = await getUserEmailByCustomerId(customerId)
+      }
 
       if (customerId) {
         await supabaseAdmin
@@ -225,6 +248,7 @@ export async function POST(req: Request) {
 
       if (email) {
         const appUrl = process.env.APP_URL || 'https://kardme.com'
+        console.log('RESEND_SEND_ATTEMPT', { to: email, subject: 'Falha no pagamento' })
         await sendEmail({
           to: email,
           subject: 'Falha no pagamento — atualize o seu método de pagamento',
@@ -244,7 +268,7 @@ export async function POST(req: Request) {
 
       const { data: row } = await supabaseAdmin
         .from('user_subscriptions')
-        .select('user_id, plan')
+        .select('user_id')
         .eq('stripe_customer_id', customerId)
         .maybeSingle()
 
