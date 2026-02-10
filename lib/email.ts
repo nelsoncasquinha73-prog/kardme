@@ -7,8 +7,18 @@ export async function sendEmail(params: {
   subject: string
   html: string
 }) {
-  if (!process.env.RESEND_API_KEY) throw new Error('Missing RESEND_API_KEY')
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_CONFIG_ERROR: Missing RESEND_API_KEY')
+    throw new Error('Missing RESEND_API_KEY')
+  }
+  
   const from = process.env.RESEND_FROM || 'Kardme <onboarding@resend.dev>'
+  
+  console.log('RESEND_SEND_ATTEMPT', {
+    to: params.to,
+    from,
+    subject: params.subject,
+  })
 
   try {
     const result = await resend.emails.send({
@@ -17,16 +27,13 @@ export async function sendEmail(params: {
       subject: params.subject,
       html: params.html,
     })
+    console.log('RESEND_SEND_SUCCESS', result)
     return result
   } catch (err: any) {
     console.error('RESEND_SEND_ERROR', {
       message: err?.message,
-      name: err?.name,
       statusCode: err?.statusCode,
-      response: err?.response,
       to: params.to,
-      from,
-      subject: params.subject,
     })
     throw err
   }
