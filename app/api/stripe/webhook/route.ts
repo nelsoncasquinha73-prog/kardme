@@ -2,15 +2,27 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
+import { sendEmail } from '@/lib/email'
 import { createClient } from '@supabase/supabase-js'
 
-import { sendEmail } from '@/lib/email'
 export const runtime = 'nodejs'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+function paymentFailedEmailHtml(appUrl: string) {
+  return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.5">
+      <h2>Falha no pagamento</h2>
+      <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
+      <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
+      <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
+      <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
+    </div>
+  `
+}
 
 export async function POST(req: Request) {
   const sig = (await headers()).get('stripe-signature')
@@ -26,10 +38,12 @@ export async function POST(req: Request) {
   }
 
   try {
+    // 1) Checkout completed
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
       const purchaseType = session.metadata?.purchase_type
 
+      // Pro subscription
       if (purchaseType === 'pro_subscription') {
         const userId = session.metadata?.user_id
         const billing = session.metadata?.billing
@@ -46,12 +60,20 @@ export async function POST(req: Request) {
             stripe_subscription_id: subscriptionId,
             plan,
             status: sub.status,
-            current_period_end: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000).toISOString() : null,
+            cancel_at_period_end: sub.cancel_at_period_end,
+            next_billing_date: (sub as any).current_period_end
+              ? new Date((sub as any).current_period_end * 1000).toISOString()
+              : null,
+            current_period_end: (sub as any).current_period_end
+              ? new Date((sub as any).current_period_end * 1000).toISOString()
+              : null,
+            billing_email: session.customer_details?.email || null,
             updated_at: new Date().toISOString(),
           })
         }
       }
 
+      // NFC order
       if (purchaseType === 'nfc_order') {
         const orderId = session.metadata?.order_id
         const paymentIntentId = session.payment_intent as string | null
@@ -98,6 +120,7 @@ export async function POST(req: Request) {
         }
       }
 
+      // Template purchase
       if (purchaseType === 'template_purchase') {
         const templateId = session.metadata?.template_id
         const userId = session.metadata?.user_id
@@ -135,17 +158,13 @@ export async function POST(req: Request) {
       }
     }
 
-
+    // 2) Payment failed (robust): PaymentIntent
     if (event.type === 'payment_intent.payment_failed') {
       const pi = event.data.object as Stripe.PaymentIntent
       const customerId = (pi.customer as string | null) || null
 
-      let email: string | null = null
+      let email: string | null = (pi as any).receipt_email || null
 
-      // Tenta obter email do PaymentIntent
-      email = (pi as any).receipt_email || null
-
-      // Se não tiver, tenta via Customer
       if (!email && customerId) {
         try {
           const customer = await stripe.customers.retrieve(customerId)
@@ -155,7 +174,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Marca subscrição como past_due
       if (customerId) {
         await supabaseAdmin
           .from('user_subscriptions')
@@ -167,49 +185,27 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customerId)
       }
 
-      // Envia email
       if (email) {
         const appUrl = process.env.APP_URL || 'https://kardme.com'
-        const subject = 'Falha no pagamento — atualize o seu método de pagamento'
-        const html = `
-          <div style="font-family: Arial, sans-serif; line-height: 1.5">
-            <h2>Falha no pagamento</h2>
-            <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
-            <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
-            <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
-            <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
-          </div>
-        `
-        await sendEmail({ to: email, subject, html })
+        await sendEmail({
+          to: email,
+          subject: 'Falha no pagamento — atualize o seu método de pagamento',
+          html: paymentFailedEmailHtml(appUrl),
+        })
       }
     }
 
-        const html = `
-          <div style="font-family: Arial, sans-serif; line-height: 1.5">
-            <h2>Falha no pagamento</h2>
-            <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
-            <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
-            <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
-            <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
-          </div>
-        `
-        await sendEmail({ to: email, subject, html })
-      }
-    }
-
-
-
-
+    // 3) Payment failed: Invoice (backup)
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string | null
 
-      if (customerId) {
-        const email =
-          (invoice.customer_email as string | null) ||
-          (invoice as any).customer_details?.email ||
-          null
+      const email =
+        (invoice.customer_email as string | null) ||
+        (invoice as any).customer_details?.email ||
+        null
 
+      if (customerId) {
         await supabaseAdmin
           .from('user_subscriptions')
           .update({
@@ -218,24 +214,19 @@ export async function POST(req: Request) {
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_customer_id', customerId)
+      }
 
-        if (email) {
-          const appUrl = process.env.APP_URL || 'https://kardme.com'
-          const subject = 'Falha no pagamento — atualize o seu método de pagamento'
-          const html = `
-            <div style="font-family: Arial, sans-serif; line-height: 1.5">
-              <h2>Falha no pagamento</h2>
-              <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
-              <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
-              <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
-              <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
-            </div>
-          `
-          await sendEmail({ to: email, subject, html })
-        }
+      if (email) {
+        const appUrl = process.env.APP_URL || 'https://kardme.com'
+        await sendEmail({
+          to: email,
+          subject: 'Falha no pagamento — atualize o seu método de pagamento',
+          html: paymentFailedEmailHtml(appUrl),
+        })
       }
     }
 
+    // 4) Subscription lifecycle
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
@@ -251,16 +242,26 @@ export async function POST(req: Request) {
         .maybeSingle()
 
       if (row?.user_id) {
-        await supabaseAdmin.from('user_subscriptions').update({
-          status: sub.status,
-          current_period_end: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000).toISOString() : null,
-          updated_at: new Date().toISOString(),
-        }).eq('user_id', row.user_id)
+        await supabaseAdmin
+          .from('user_subscriptions')
+          .update({
+            status: sub.status,
+            cancel_at_period_end: sub.cancel_at_period_end,
+            next_billing_date: (sub as any).current_period_end
+              ? new Date((sub as any).current_period_end * 1000).toISOString()
+              : null,
+            current_period_end: (sub as any).current_period_end
+              ? new Date((sub as any).current_period_end * 1000).toISOString()
+              : null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', row.user_id)
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (e: any) {
+    console.error('Webhook handler error:', e)
     return NextResponse.json({ error: e?.message || 'Webhook handler error' }, { status: 500 })
   }
 }
