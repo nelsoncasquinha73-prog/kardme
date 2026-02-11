@@ -7,6 +7,15 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+function isProActive(sub: any) {
+  if (!sub) return false
+  const status = sub.status
+  const plan = sub.plan
+  const okStatus = status === 'active' || status === 'trialing'
+  const okPlan = plan === 'pro_monthly' || plan === 'pro_yearly'
+  return okStatus && okPlan
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { templateId, userId, couponCode } = await req.json()
@@ -26,10 +35,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Template não encontrado' }, { status: 404 })
     }
 
-    if (template.pricing_tier === 'free' || template.pricing_tier === 'paid') {
-      return NextResponse.json({ error: 'Este template é gratuito' }, { status: 400 })
+    // Buscar subscrição do user (para templates incluídos no plano)
+    const { data: subRow } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('plan, status')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    const hasPro = isProActive(subRow)
+
+    // 1) FREE: acesso direto (sempre)
+    if (template.pricing_tier === 'free') {
+      await supabaseAdmin.from('user_templates').upsert({
+        user_id: userId,
+        template_id: templateId,
+      })
+      return NextResponse.json({ success: true, free: true })
     }
 
+    // 2) PAID (plan included): só com Pro ativo
+    if (template.pricing_tier === 'paid') {
+      if (!hasPro) {
+        return NextResponse.json(
+          { error: 'Este template está incluído no plano Pro. Ativa o Pro para desbloquear.' },
+          { status: 403 }
+        )
+      }
+
+      await supabaseAdmin.from('user_templates').upsert({
+        user_id: userId,
+        template_id: templateId,
+      })
+
+      return NextResponse.json({ success: true, included: true })
+    }
+
+    // 3) PREMIUM: compra avulso (Stripe)
     let finalPrice = template.price || 0
     let couponId: string | null = null
 
@@ -77,9 +118,17 @@ export async function POST(req: NextRequest) {
     if (finalPrice <= 0) {
       // Registar uso do cupão
       if (couponId) {
+        // Nota: isto estava estranho no teu código original (rpc increment dentro de update).
+        // Mantive simples para não rebentar: increment manual.
+        const { data: coupon } = await supabaseAdmin
+          .from('coupons')
+          .select('uses_count')
+          .eq('id', couponId)
+          .single()
+
         await supabaseAdmin
           .from('coupons')
-          .update({ uses_count: supabaseAdmin.rpc('increment', { x: 1 }) })
+          .update({ uses_count: (coupon?.uses_count || 0) + 1 })
           .eq('id', couponId)
 
         await supabaseAdmin.from('coupon_uses').insert({
@@ -92,7 +141,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Dar acesso ao template
-      await supabaseAdmin.from('user_templates').insert({
+      await supabaseAdmin.from('user_templates').upsert({
         user_id: userId,
         template_id: templateId,
       })
