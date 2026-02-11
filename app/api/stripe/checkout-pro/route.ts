@@ -10,7 +10,12 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { user_id, billing } = body as { user_id: string; billing: 'monthly' | 'yearly' }
+    const { user_id, billing, setupFee, setupLabel } = body as {
+      user_id: string
+      billing: 'monthly' | 'yearly'
+      setupFee?: number
+      setupLabel?: string
+    }
 
     if (!user_id) return NextResponse.json({ error: 'Missing user_id' }, { status: 400 })
     if (billing !== 'monthly' && billing !== 'yearly')
@@ -47,11 +52,29 @@ export async function POST(req: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-    // 2) create checkout session (subscription)
+    // 2) build line items: recorrente + opcional one-time
+    const lineItems: any[] = [{ price: priceId, quantity: 1 }]
+
+    if (setupFee && setupFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: setupLabel || 'Serviço de setup',
+            description: 'Taxa única de configuração',
+          },
+          unit_amount: Math.round(setupFee * 100),
+          recurring: undefined,
+        },
+        quantity: 1,
+      })
+    }
+
+    // 3) create checkout session (subscription)
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: lineItems,
       allow_promotion_codes: true,
       success_url: `${siteUrl}/dashboard?checkout=success`,
       cancel_url: `${siteUrl}/dashboard?checkout=cancel`,
@@ -59,6 +82,7 @@ export async function POST(req: Request) {
         user_id,
         purchase_type: 'pro_subscription',
         billing,
+        setupFee: setupFee ? String(setupFee) : '0',
       },
     })
 
