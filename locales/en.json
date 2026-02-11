@@ -334,5 +334,30 @@
     "loading": "Loading analytics…",
     "no_data": "No analytics data.",
     "days": "days"
+  },
+  "plans": {
+    "title": "Choose your plan",
+    "subtitle": "Unlock premium templates, analytics and more.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "month": "month",
+    "year": "year",
+    "then": "then",
+    "save_2_months": "Save 2 months! 🎉",
+    "include_setup": "Include card setup",
+    "subscribe": "Subscribe",
+    "loading": "Opening...",
+    "recommended": "⭐ Recommended",
+    "whats_included": "What's included",
+    "benefit_templates": "30+ templates included",
+    "benefit_analytics": "Full analytics",
+    "benefit_leads": "Lead/contact management",
+    "benefit_nfc": "NFC available (one-time purchase)",
+    "benefit_billing": "Billing & customer portal",
+    "nfc_note": "NFC is a one-time purchase per card and requires active Pro.",
+    "error_no_session": "No session. Please log in again.",
+    "error_checkout": "Error starting checkout.",
+    "error_no_url": "Checkout without URL.",
+    "setup_label": "Card setup service"
   }
 }

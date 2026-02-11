@@ -346,5 +346,30 @@
     "loading": "Analytics werden geladen…",
     "no_data": "Keine Analytics-Daten.",
     "days": "Tage"
+  },
+  "plans": {
+    "title": "Wähle deinen Plan",
+    "subtitle": "Schalte Premium-Vorlagen, Analytics und mehr frei.",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "month": "Monat",
+    "year": "Jahr",
+    "then": "danach",
+    "save_2_months": "Spare 2 Monate! 🎉",
+    "include_setup": "Kartenerstellung einschließen",
+    "subscribe": "Abonnieren",
+    "loading": "Wird geöffnet...",
+    "recommended": "⭐ Empfohlen",
+    "whats_included": "Was enthalten ist",
+    "benefit_templates": "30+ Vorlagen inklusive",
+    "benefit_analytics": "Vollständige Analytics",
+    "benefit_leads": "Lead-/Kontaktverwaltung",
+    "benefit_nfc": "NFC verfügbar (Einmalkauf)",
+    "benefit_billing": "Abrechnung & Kundenportal",
+    "nfc_note": "NFC ist ein Einmalkauf pro Karte und erfordert aktives Pro.",
+    "error_no_session": "Keine Sitzung. Bitte erneut anmelden.",
+    "error_checkout": "Fehler beim Starten des Checkouts.",
+    "error_no_url": "Checkout ohne URL.",
+    "setup_label": "Kartenerstellungsservice"
   }
 }

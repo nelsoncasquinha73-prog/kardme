@@ -332,5 +332,30 @@
     "loading": "Caricamento analytics…",
     "no_data": "Nessun dato analytics.",
     "days": "giorni"
+  },
+  "plans": {
+    "title": "Scegli il tuo piano",
+    "subtitle": "Sblocca template premium, analytics e altro.",
+    "monthly": "Mensile",
+    "yearly": "Annuale",
+    "month": "mese",
+    "year": "anno",
+    "then": "poi",
+    "save_2_months": "Risparmia 2 mesi! 🎉",
+    "include_setup": "Includi creazione carta",
+    "subscribe": "Abbonati",
+    "loading": "Apertura...",
+    "recommended": "⭐ Consigliato",
+    "whats_included": "Cosa è incluso",
+    "benefit_templates": "30+ template inclusi",
+    "benefit_analytics": "Analytics completo",
+    "benefit_leads": "Gestione lead/contatti",
+    "benefit_nfc": "NFC disponibile (acquisto singolo)",
+    "benefit_billing": "Fatturazione e portale cliente",
+    "nfc_note": "NFC è un acquisto singolo per carta e richiede Pro attivo.",
+    "error_no_session": "Nessuna sessione. Accedi di nuovo.",
+    "error_checkout": "Errore durante il checkout.",
+    "error_no_url": "Checkout senza URL.",
+    "setup_label": "Servizio di creazione carta"
   }
 }

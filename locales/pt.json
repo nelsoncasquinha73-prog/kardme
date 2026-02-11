@@ -331,5 +331,30 @@
     "loading": "A carregar analytics…",
     "no_data": "Sem dados de analytics.",
     "days": "dias"
+  },
+  "plans": {
+    "title": "Escolhe o teu plano",
+    "subtitle": "Desbloqueia templates premium, analytics e muito mais.",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "month": "mês",
+    "year": "ano",
+    "then": "depois",
+    "save_2_months": "Poupa 2 meses! 🎉",
+    "include_setup": "Incluir criação do cartão",
+    "subscribe": "Subscrever",
+    "loading": "A abrir...",
+    "recommended": "⭐ Recomendado",
+    "whats_included": "O que está incluído",
+    "benefit_templates": "30+ templates incluídos",
+    "benefit_analytics": "Analytics completo",
+    "benefit_leads": "Gestão de leads/contactos",
+    "benefit_nfc": "NFC disponível (compra única)",
+    "benefit_billing": "Faturação e portal de cliente",
+    "nfc_note": "NFC é uma compra única por cartão e requer Pro ativo.",
+    "error_no_session": "Sem sessão. Faz login novamente.",
+    "error_checkout": "Erro ao iniciar checkout.",
+    "error_no_url": "Checkout sem URL.",
+    "setup_label": "Serviço de criação do cartão"
   }
 }
