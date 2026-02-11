@@ -1,9 +1,11 @@
+// app/api/stripe/webhook/route.ts
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
 import { createClient } from '@supabase/supabase-js'
+import { getLang, paymentFailedEmail, paymentSucceededEmail } from '@/lib/emailTemplates'
 
 export const runtime = 'nodejs'
 
@@ -12,7 +14,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function getUserEmailByCustomerId(customerId: string): Promise<string | null> {
+async function getUserByCustomerId(customerId: string) {
   try {
     const { data: subRow } = await supabaseAdmin
       .from('user_subscriptions')
@@ -25,27 +27,52 @@ async function getUserEmailByCustomerId(customerId: string): Promise<string | nu
 
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('email')
+      .select('email, language')
       .eq('id', userId)
       .maybeSingle()
 
-    return (profile as any)?.email || null
+    if (!profile?.email) return null
+
+    return {
+      userId: profile.id as string,
+      email: profile.email as string,
+      lang: getLang((profile as any)?.language as string | null),
+    }
+  } catch (err) {
+    console.error('Error fetching user by customerId:', err)
+    return null
+  }
+}
+
+async function getUserEmailByCustomerId(customerId: string): Promise<string | null> {
+  try {
+    const user = await getUserByCustomerId(customerId)
+    return user?.email || null
   } catch (err) {
     console.error('Error fetching user email:', err)
     return null
   }
 }
 
-function paymentFailedEmailHtml(appUrl: string) {
-  return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.5">
-      <h2>Falha no pagamento</h2>
-      <p>Não foi possível processar o pagamento da sua subscrição Kardme.</p>
-      <p>Para evitar interrupção do seu cartão, atualize o seu método de pagamento:</p>
-      <p><a href="${appUrl}/dashboard/settings/billing">Gerir faturação</a></p>
-      <p style="color:#666;font-size:12px">Se já atualizou, pode ignorar este email.</p>
-    </div>
-  `
+function planLabelFromInvoice(invoice: Stripe.Invoice): string {
+  const line = invoice.lines?.data?.[0]
+  const price = (line as any)?.price as Stripe.Price | undefined
+  const interval = price?.recurring?.interval
+
+  if (interval === 'year') return 'Kardme Pro (Anual)'
+  if (interval === 'month') return 'Kardme Pro (Mensal)'
+  return 'Kardme Pro'
+}
+
+function formatDatePT(date: Date): string {
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${dd}/${mm}/${yyyy}`
+}
+
+function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://new.kardme.com'
 }
 
 export async function POST(req: Request) {
@@ -58,10 +85,15 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: any) {
-    return NextResponse.json({ error: `Webhook signature verification failed: ${err.message}` }, { status: 400 })
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${err.message}` },
+      { status: 400 }
+    )
   }
 
   try {
+    const appUrl = getAppUrl()
+
     // 1) Checkout completed
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
@@ -210,14 +242,18 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customerId)
       }
 
-      if (email) {
-        const appUrl = process.env.APP_URL || 'https://kardme.com'
-        console.log('RESEND_SEND_ATTEMPT', { to: email, subject: 'Falha no pagamento' })
-        await sendEmail({
-          to: email,
-          subject: 'Falha no pagamento — atualize o seu método de pagamento',
-          html: paymentFailedEmailHtml(appUrl),
-        })
+      // Enviar email traduzido
+      if (email && customerId) {
+        const user = await getUserByCustomerId(customerId)
+        if (user) {
+          const tpl = paymentFailedEmail({ lang: user.lang, appUrl })
+          console.log('RESEND_SEND_ATTEMPT', { to: email, subject: tpl.subject })
+          await sendEmail({
+            to: email,
+            subject: tpl.subject,
+            html: tpl.html,
+          })
+        }
       }
     }
 
@@ -246,18 +282,55 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customerId)
       }
 
-      if (email) {
-        const appUrl = process.env.APP_URL || 'https://kardme.com'
-        console.log('RESEND_SEND_ATTEMPT', { to: email, subject: 'Falha no pagamento' })
-        await sendEmail({
-          to: email,
-          subject: 'Falha no pagamento — atualize o seu método de pagamento',
-          html: paymentFailedEmailHtml(appUrl),
-        })
+      // Enviar email traduzido
+      if (email && customerId) {
+        const user = await getUserByCustomerId(customerId)
+        if (user) {
+          const tpl = paymentFailedEmail({ lang: user.lang, appUrl })
+          console.log('RESEND_SEND_ATTEMPT', { to: email, subject: tpl.subject })
+          await sendEmail({
+            to: email,
+            subject: tpl.subject,
+            html: tpl.html,
+          })
+        }
       }
     }
 
-    // 4) Subscription lifecycle
+    // 4) Payment succeeded: Invoice (confirmação de pagamento)
+    if (event.type === 'invoice.payment_succeeded') {
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string | null
+
+      if (customerId) {
+        const user = await getUserByCustomerId(customerId)
+        if (user) {
+          const planLabel = planLabelFromInvoice(invoice)
+
+          let nextBillingDateText: string | null = null
+          const nextTs = (invoice as any)?.lines?.data?.[0]?.period?.end as number | undefined
+          if (nextTs) {
+            nextBillingDateText = formatDatePT(new Date(nextTs * 1000))
+          }
+
+          const tpl = paymentSucceededEmail({
+            lang: user.lang,
+            appUrl,
+            planLabel,
+            nextBillingDateText,
+          })
+
+          console.log('RESEND_SEND_ATTEMPT', { to: user.email, subject: tpl.subject })
+          await sendEmail({
+            to: user.email,
+            subject: tpl.subject,
+            html: tpl.html,
+          })
+        }
+      }
+    }
+
+    // 5) Subscription lifecycle
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
