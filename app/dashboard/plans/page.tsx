@@ -118,9 +118,11 @@ export default function PlansPage() {
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
                 €{includeSetupMonthly ? '11,99' : '6,99'}
               </span>
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
-                /{t('plans.month') || 'mês'}
-              </span>
+              {!includeSetupMonthly && (
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                  /{t('plans.month') || 'mês'}
+                </span>
+              )}
             </div>
             {includeSetupMonthly && (
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
@@ -176,9 +178,11 @@ export default function PlansPage() {
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
                 €{includeSetupYearly ? '74' : '69'}
               </span>
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
-                /{t('plans.year') || 'ano'}
-              </span>
+              {!includeSetupYearly && (
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                  /{t('plans.year') || 'ano'}
+                </span>
+              )}
             </div>
             <div style={{ fontSize: 12, color: '#22c55e', fontWeight: 600, marginTop: 4 }}>
               {t('plans.save_2_months') || 'Poupa 2 meses! 🎉'}
