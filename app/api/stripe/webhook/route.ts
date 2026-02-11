@@ -1,4 +1,3 @@
-// app/api/stripe/webhook/route.ts
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
@@ -31,12 +30,11 @@ async function getUserByCustomerId(customerId: string) {
       .eq('id', userId)
       .maybeSingle()
 
-    if (!profile?.email) return null
+    if (!(profile as any)?.email) return null
 
     return {
-      userId: profile.id as string,
-      email: profile.email as string,
-      lang: getLang((profile as any)?.language as string | null),
+      email: (profile as any).email as string,
+      lang: getLang((profile as any).language as string | null),
     }
   } catch (err) {
     console.error('Error fetching user by customerId:', err)
@@ -94,12 +92,10 @@ export async function POST(req: Request) {
   try {
     const appUrl = getAppUrl()
 
-    // 1) Checkout completed
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
       const purchaseType = session.metadata?.purchase_type
 
-      // Pro subscription
       if (purchaseType === 'pro_subscription') {
         const userId = session.metadata?.user_id
         const billing = session.metadata?.billing
@@ -135,7 +131,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // NFC order
       if (purchaseType === 'nfc_order') {
         const orderId = session.metadata?.order_id
         const paymentIntentId = session.payment_intent as string | null
@@ -182,7 +177,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Template purchase
       if (purchaseType === 'template_purchase') {
         const templateId = session.metadata?.template_id
         const userId = session.metadata?.user_id
@@ -220,7 +214,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2) Payment failed: PaymentIntent
     if (event.type === 'payment_intent.payment_failed') {
       const pi = event.data.object as Stripe.PaymentIntent
       const customerId = (pi.customer as string | null) || null
@@ -242,7 +235,6 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customerId)
       }
 
-      // Enviar email traduzido
       if (email && customerId) {
         const user = await getUserByCustomerId(customerId)
         if (user) {
@@ -257,7 +249,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3) Payment failed: Invoice
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string | null
@@ -282,7 +273,6 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customerId)
       }
 
-      // Enviar email traduzido
       if (email && customerId) {
         const user = await getUserByCustomerId(customerId)
         if (user) {
@@ -297,7 +287,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4) Payment succeeded: Invoice (confirmação de pagamento)
     if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string | null
@@ -330,7 +319,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 5) Subscription lifecycle
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
