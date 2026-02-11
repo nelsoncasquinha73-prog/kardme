@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
 import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiHardDrive, FiSettings, FiBarChart2, FiCreditCard } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
+import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
 
 type Role = 'admin' | 'user' | string
 
@@ -122,6 +123,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <LanguageProvider>
+    <SyncLanguageToProfile />
     <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
       {children}
     </AppChrome>
