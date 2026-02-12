@@ -301,7 +301,6 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
         <Row label="Cor">
           <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.textFontWeight ?? 600)} onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>

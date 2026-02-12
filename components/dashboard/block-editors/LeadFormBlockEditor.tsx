@@ -121,7 +121,6 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         <Row label="Cor">
           <ColorPickerPro value={heading.color ?? '#111827'} onChange={(hex) => setHeading({ color: hex })} onEyedropper={() => pickEyedropper((hex) => setHeading({ color: hex }))} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={heading.fontFamily ?? ""} onChange={(v) => setHeading({ fontFamily: v || "" })} /></Row>
         <Row label="Peso">
           <select value={String(heading.fontWeight ?? 900)} onChange={(e) => setHeading({ fontWeight: Number(e.target.value) })} style={selectStyle}>

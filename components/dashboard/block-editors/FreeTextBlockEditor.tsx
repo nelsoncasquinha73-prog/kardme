@@ -63,7 +63,6 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
           </div>
         </Row>
         <Row label="Negrito"><Toggle active={st.titleBold !== false} onClick={() => setStyle({ titleBold: !(st.titleBold !== false) })} /></Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.titleFontFamily ?? ""} onChange={(v) => setStyle({ titleFontFamily: v || undefined })} /></Row>
       </CollapsibleSection>
 

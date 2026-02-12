@@ -219,7 +219,6 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
         <Row label="Negrito">
           <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => setStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })} style={selectStyle}>

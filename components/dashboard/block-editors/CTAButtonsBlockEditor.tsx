@@ -425,7 +425,6 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => updateBtnStyle({ fontFamily: v || undefined })} /></Row>
-        </Row>
 
         <Row label="Tamanho do texto (px)">
           <input type="range" min={11} max={22} step={1} value={btn.fontSize ?? 14} onChange={(e) => updateBtnStyle({ fontSize: Number(e.target.value) })} />

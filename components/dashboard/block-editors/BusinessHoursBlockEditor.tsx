@@ -118,7 +118,6 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
         <Row label="Negrito">
           <Toggle active={st.headingBold !== false} onClick={() => setStyle({ headingBold: !(st.headingBold !== false) })} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => setStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>

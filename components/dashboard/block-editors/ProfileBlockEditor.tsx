@@ -423,7 +423,6 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <select
             <FontPicker value={local.name?.style?.fontFamily ?? ""} onChange={(v) => patch((d) => { d.name.style = d.name.style || {}; d.name.style.fontFamily = v || undefined })} />
 
             <SegmentedSize

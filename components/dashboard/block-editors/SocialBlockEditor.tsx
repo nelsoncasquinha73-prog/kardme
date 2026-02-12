@@ -243,7 +243,6 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         <Row label="Negrito">
           <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => patch((d) => (d.style.headingFontFamily = v || ""))} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => patch((d) => (d.style.headingFontWeight = clampNum(e.target.value, 900)))} style={selectStyle}>
