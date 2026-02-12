@@ -147,6 +147,8 @@ export default function PerfilPage() {
     transition: 'border-color 0.2s' 
   }
   const selectStyle: React.CSSProperties = { 
+    height: 46,
+    lineHeight: '20px',
     ...inputStyle,
     appearance: 'none',
     cursor: 'pointer',
