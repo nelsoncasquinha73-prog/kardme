@@ -4,13 +4,9 @@ import { useRef, useState } from 'react'
 import { ProfileSettings } from '@/components/blocks/types/profile'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import { uploadCardImage } from '@/lib/uploadCardImage'
-import SwatchRow from '@/components/editor/SwatchRow'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { FONT_OPTIONS } from '@/lib/fontes'
-import { Section, Row, Toggle } from '@/components/editor/ui'
 import { useLanguage } from '@/components/language/LanguageProvider'
-
-
-
 
 type Props = {
   cardId: string
@@ -26,16 +22,11 @@ type LayoutWithAlign = {
 function normalize(input: Partial<ProfileSettings>): ProfileSettings {
   return {
     enabled: input.enabled ?? true,
-
-
-
     layout: {
       lineGap: input.layout?.lineGap ?? 10,
       align: (input.layout && 'align' in input.layout ? input.layout.align : 'center') as 'left' | 'center' | 'right',
     } as LayoutWithAlign,
-
-
-  avatar: {
+    avatar: {
       enabled: input.avatar?.enabled ?? true,
       image: input.avatar?.image ?? '',
       shape: input.avatar?.shape ?? 'circle',
@@ -49,7 +40,6 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       shadow: input.avatar?.shadow ?? undefined,
       effect3d: input.avatar?.effect3d ?? undefined,
     },
-
     name: {
       enabled: input.name?.enabled ?? true,
       text: input.name?.text ?? '',
@@ -60,7 +50,6 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.name?.style?.fontWeight ?? 700,
       },
     },
-
     profession: {
       enabled: input.profession?.enabled ?? false,
       text: input.profession?.text ?? '',
@@ -71,7 +60,6 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.profession?.style?.fontWeight ?? 400,
       },
     },
-
     company: {
       enabled: input.company?.enabled ?? true,
       text: input.company?.text ?? '',
@@ -82,17 +70,14 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.company?.style?.fontWeight ?? 400,
       },
     },
-
     typography: {
       fontFamily: input.typography?.fontFamily ?? 'System',
     },
-
     background: {
       enabled: input.background?.enabled ?? false,
       color: input.background?.color ?? '#FFFFFF',
       style: input.background?.style ?? 'rounded',
     },
-
     offset: {
       x: input.offset?.x ?? 0,
       y: input.offset?.y ?? 0,
@@ -100,34 +85,10 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
   }
 }
 
-function stop(e: any) {
-  e.preventDefault?.()
-  e.stopPropagation?.()
-}
-
-const pillBtn: React.CSSProperties = {
-  height: 26,
-  minWidth: 26,
-  padding: '0 10px',
-  paddingTop: 0,
-  paddingBottom: 0,
-  borderRadius: 999,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 6,
-  lineHeight: '26px',
-  fontSize: 12,
-  fontWeight: 800,
-  cursor: 'pointer',
-  userSelect: 'none',
-}
-
 export default function ProfileBlockEditor({ cardId, settings, onChange }: Props) {
   const [local, setLocal] = useState<ProfileSettings>(() => normalize(settings))
   const [uploading, setUploading] = useState(false)
+  const [activeSection, setActiveSection] = useState<string | null>('avatar')
   const avatarRef = useRef<HTMLInputElement>(null)
 
   const { t } = useLanguage()
@@ -140,30 +101,8 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     onChange(next)
   }
 
-  function stepFromEvent(e: React.MouseEvent) {
-    return e.shiftKey ? 10 : 2
-  }
-
-  function openEyedropperFor(target: 'name' | 'profession' | 'company') {
-    openPicker({
-      mode: 'eyedropper' as any,
-      onPick: (hex: string) => {
-        patch((d) => {
-          d[target].color = hex
-        })
-      },
-    } as any)
-  }
-
-  function openEyedropperBorder() {
-    openPicker({
-      mode: 'eyedropper' as any,
-      onPick: (hex: string) => {
-        patch((d) => {
-          d.avatar!.borderColor = hex
-        })
-      },
-    } as any)
+  function pickEyedropper(apply: (hex: string) => void) {
+    openPicker({ mode: 'eyedropper', onPick: apply })
   }
 
   async function onPickAvatar(file: File) {
@@ -171,12 +110,10 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
     try {
       const { publicUrl } = await uploadCardImage({ cardId, file, kind: 'avatar' })
       patch((d) => {
-  d.avatar = d.avatar || ({} as any)
-  d.avatar!.enabled = true
-  d.avatar!.image = publicUrl
-})
-
-
+        d.avatar = d.avatar || ({} as any)
+        d.avatar!.enabled = true
+        d.avatar!.image = publicUrl
+      })
     } catch (err: any) {
       console.error(err)
       alert(err?.message || 'Erro no upload do avatar')
@@ -186,378 +123,523 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <Section title={t('editor.avatar')}>
-        <div className="flex justify-between items-center">
-          <span className="text-sm">Mostrar avatar</span>
-          <input
-            type="checkbox"
-            checked={local.avatar?.enabled ?? false}
-            onChange={(e) => patch((d) => (d.avatar!.enabled = e.target.checked))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <input
+        ref={avatarRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) onPickAvatar(f)
+        }}
+      />
+
+      {/* ========== SECÇÃO 1: AVATAR ========== */}
+      <CollapsibleSection
+        title="👤 Avatar"
+        subtitle="Imagem, tamanho, forma"
+        isOpen={activeSection === 'avatar'}
+        onToggle={() => setActiveSection(activeSection === 'avatar' ? null : 'avatar')}
+      >
+        <Row label="Mostrar avatar">
+          <Toggle
+            active={local.avatar?.enabled ?? false}
+            onClick={() => patch((d) => (d.avatar!.enabled = !(d.avatar?.enabled ?? false)))}
           />
-        </div>
+        </Row>
 
-        <div className="flex gap-2 items-center flex-wrap">
-          <button
-            type="button"
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-            onClick={(e) => {
-              stop(e)
-              avatarRef.current?.click()
-            }}
-            className="h-7 rounded-xl border border-black/10 px-3"
-            disabled={uploading}
-          >
-            {uploading ? 'A enviar...' : 'Alterar avatar'}
-          </button>
+        {(local.avatar?.enabled ?? false) && (
+          <>
+            <Row label="Imagem">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button onClick={() => avatarRef.current?.click()}>
+                  {uploading ? 'A enviar...' : '📷 Alterar'}
+                </Button>
+                {local.avatar?.image && (
+                  <img
+                    src={local.avatar.image}
+                    alt="Avatar"
+                    style={{ width: 32, height: 32, borderRadius: 10, objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
+                  />
+                )}
+              </div>
+            </Row>
 
-          {local.avatar?.image ? (
-            <img
-              src={local.avatar.image}
-              alt="Avatar preview"
-              style={{ width: 32, height: 32, borderRadius: 10, objectFit: 'cover' }}
+            <Row label="Tamanho">
+              <input
+                type="range"
+                min={48}
+                max={200}
+                step={4}
+                value={local.avatar?.sizePx ?? 108}
+                onChange={(e) => patch((d) => (d.avatar!.sizePx = Number(e.target.value)))}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.avatar?.sizePx ?? 108}px</span>
+            </Row>
+
+            <Row label="Forma">
+              <div style={{ display: 'flex', gap: 6 }}>
+                {(['circle', 'rounded', 'square'] as const).map((shape) => (
+                  <MiniButton
+                    key={shape}
+                    active={local.avatar?.shape === shape}
+                    onClick={() => patch((d) => (d.avatar!.shape = shape))}
+                  >
+                    <ShapeIcon kind={shape} />
+                  </MiniButton>
+                ))}
+              </div>
+            </Row>
+
+            <Row label="Borda">
+              <input
+                type="range"
+                min={0}
+                max={12}
+                step={1}
+                value={local.avatar?.borderWidth ?? 0}
+                onChange={(e) => patch((d) => (d.avatar!.borderWidth = Number(e.target.value)))}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.avatar?.borderWidth ?? 0}px</span>
+            </Row>
+
+            {(local.avatar?.borderWidth ?? 0) > 0 && (
+              <Row label="Cor da borda">
+                <ColorPickerPro
+                  value={local.avatar?.borderColor ?? '#FFFFFF'}
+                  onChange={(hex) => patch((d) => (d.avatar!.borderColor = hex))}
+                  onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.avatar!.borderColor = hex)))}
+                />
+              </Row>
+            )}
+
+            <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+
+            <Row label="Posição X">
+              <input
+                type="range"
+                min={-50}
+                max={50}
+                step={2}
+                value={local.avatar?.offsetX ?? 0}
+                onChange={(e) => patch((d) => (d.avatar!.offsetX = Number(e.target.value)))}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.avatar?.offsetX ?? 0}px</span>
+            </Row>
+
+            <Row label="Posição Y">
+              <input
+                type="range"
+                min={-80}
+                max={80}
+                step={2}
+                value={local.avatar?.offsetY ?? 0}
+                onChange={(e) => patch((d) => (d.avatar!.offsetY = Number(e.target.value)))}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.avatar?.offsetY ?? 0}px</span>
+            </Row>
+
+            <Row label="">
+              <Button onClick={() => patch((d) => { d.avatar!.offsetX = 0; d.avatar!.offsetY = null })}>
+                Reset posição
+              </Button>
+            </Row>
+          </>
+        )}
+      </CollapsibleSection>
+
+      {/* ========== SECÇÃO 2: EFEITOS DO AVATAR ========== */}
+      <CollapsibleSection
+        title="✨ Efeitos do avatar"
+        subtitle="Glow, sombra, 3D"
+        isOpen={activeSection === 'effects'}
+        onToggle={() => setActiveSection(activeSection === 'effects' ? null : 'effects')}
+      >
+        {/* GLOW */}
+        <Row label="Glow (halo)">
+          <Toggle
+            active={(local.avatar?.glow as any)?.enabled ?? false}
+            onClick={() => patch((d) => {
+              d.avatar = d.avatar || {}
+              d.avatar.glow = d.avatar.glow || { enabled: false, color: 'rgba(59,130,246,0.25)', size: 8 }
+              d.avatar.glow.enabled = !d.avatar.glow.enabled
+            })}
+          />
+        </Row>
+
+        {((local.avatar?.glow as any)?.enabled ?? false) && (
+          <>
+            <Row label="Tamanho glow">
+              <input
+                type="range"
+                min={2}
+                max={30}
+                step={1}
+                value={(local.avatar?.glow as any)?.size ?? 8}
+                onChange={(e) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.25)', size: 8 }
+                  d.avatar.glow.size = Number(e.target.value)
+                })}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{(local.avatar?.glow as any)?.size ?? 8}px</span>
+            </Row>
+
+            <Row label="Cor glow">
+              <ColorPickerPro
+                value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.25)'}
+                onChange={(hex) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.25)', size: 8 }
+                  d.avatar.glow.color = hex
+                })}
+                onEyedropper={() => pickEyedropper((hex) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.25)', size: 8 }
+                  d.avatar.glow.color = hex
+                }))}
+              />
+            </Row>
+          </>
+        )}
+
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+
+        {/* SOMBRA */}
+        <Row label="Sombra">
+          <Toggle
+            active={(local.avatar?.shadow as any)?.enabled ?? false}
+            onClick={() => patch((d) => {
+              d.avatar = d.avatar || {}
+              d.avatar.shadow = d.avatar.shadow || { enabled: false, intensity: 0.2 }
+              d.avatar.shadow.enabled = !d.avatar.shadow.enabled
+            })}
+          />
+        </Row>
+
+        {((local.avatar?.shadow as any)?.enabled ?? false) && (
+          <Row label="Intensidade">
+            <input
+              type="range"
+              min={0}
+              max={0.8}
+              step={0.05}
+              value={(local.avatar?.shadow as any)?.intensity ?? 0.2}
+              onChange={(e) => patch((d) => {
+                d.avatar = d.avatar || {}
+                d.avatar.shadow = d.avatar.shadow || { enabled: true, intensity: 0.2 }
+                d.avatar.shadow.intensity = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
             />
-          ) : (
-            <span className="text-xs text-black/50">Sem avatar</span>
-          )}
+            <span style={rightNum}>{Math.round(((local.avatar?.shadow as any)?.intensity ?? 0.2) * 100)}%</span>
+          </Row>
+        )}
+
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+
+        {/* EFEITO 3D */}
+        <Row label="Efeito 3D">
+          <Toggle
+            active={(local.avatar?.effect3d as any)?.enabled ?? false}
+            onClick={() => patch((d) => {
+              d.avatar = d.avatar || {}
+              d.avatar.effect3d = d.avatar.effect3d || { enabled: false, bgColor: '#ffffff', scale: 1.15 }
+              d.avatar.effect3d.enabled = !d.avatar.effect3d.enabled
+            })}
+          />
+        </Row>
+
+        {((local.avatar?.effect3d as any)?.enabled ?? false) && (
+          <>
+            <Row label="Cor moldura">
+              <ColorPickerPro
+                value={(local.avatar?.effect3d as any)?.bgColor ?? '#ffffff'}
+                onChange={(hex) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: '#ffffff', scale: 1.15 }
+                  d.avatar.effect3d.bgColor = hex
+                })}
+                onEyedropper={() => pickEyedropper((hex) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: '#ffffff', scale: 1.15 }
+                  d.avatar.effect3d.bgColor = hex
+                }))}
+              />
+            </Row>
+
+            <Row label="Escala">
+              <input
+                type="range"
+                min={1}
+                max={1.5}
+                step={0.05}
+                value={(local.avatar?.effect3d as any)?.scale ?? 1.15}
+                onChange={(e) => patch((d) => {
+                  d.avatar = d.avatar || {}
+                  d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: '#ffffff', scale: 1.15 }
+                  d.avatar.effect3d.scale = Number(e.target.value)
+                })}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{((local.avatar?.effect3d as any)?.scale ?? 1.15).toFixed(2)}x</span>
+            </Row>
+          </>
+        )}
+
+        <div style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>
+          💡 Ativa apenas um efeito de cada vez para melhor resultado.
+        </div>
+      </CollapsibleSection>
+
+      {/* ========== SECÇÃO 3: IDENTIDADE ========== */}
+      <CollapsibleSection
+        title="📝 Identidade"
+        subtitle="Nome, profissão, empresa"
+        isOpen={activeSection === 'identity'}
+        onToggle={() => setActiveSection(activeSection === 'identity' ? null : 'identity')}
+      >
+        {/* NOME */}
+        <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Row label="Nome">
+            <Toggle
+              active={local.name?.enabled ?? true}
+              onClick={() => patch((d) => (d.name.enabled = !(d.name?.enabled ?? true)))}
+            />
+          </Row>
 
           <input
-            ref={avatarRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) onPickAvatar(f)
-            }}
+            type="text"
+            value={local.name?.text ?? ''}
+            onChange={(e) => patch((d) => (d.name.text = e.target.value))}
+            placeholder="Nome completo"
+            style={inputStyle}
           />
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select
+              value={local.name?.style?.fontFamily ?? ''}
+              onChange={(e) => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.fontFamily = e.target.value || undefined
+              })}
+              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
+            >
+              <option value="">Fonte padrão</option>
+              {FONT_OPTIONS.map((o) => (
+                <option key={o.label} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+
+            <SegmentedSize
+              value={(local.name?.size ?? 'md') as 'sm' | 'md' | 'lg'}
+              onChange={(s) => patch((d) => (d.name.size = s))}
+            />
+
+            <MiniButton
+              active={(local.name?.style?.fontWeight ?? 700) === 700}
+              onClick={() => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.fontWeight = d.name.style.fontWeight === 700 ? 400 : 700
+              })}
+            >
+              B
+            </MiniButton>
+          </div>
+
+          <Row label="Cor">
+            <ColorPickerPro
+              value={local.name?.color ?? '#0B1220'}
+              onChange={(hex) => patch((d) => (d.name.color = hex))}
+              onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.name.color = hex)))}
+            />
+          </Row>
         </div>
 
-        <div className="flex flex-col gap-2">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">{t('editor.size')}</span>
-    <span className="text-xs text-black/50">{local.avatar?.sizePx ?? 108}px</span>
-  </div>
+        {/* PROFISSÃO */}
+        <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Row label="Profissão">
+            <Toggle
+              active={local.profession?.enabled ?? false}
+              onClick={() => patch((d) => (d.profession.enabled = !(d.profession?.enabled ?? false)))}
+            />
+          </Row>
 
-  <input
-    type="range"
-    min={72}
-    max={180}
-    step={1}
-    value={(local.avatar as any)?.sizePx ?? 108}
-    onChange={(e) =>
-      patch((d) => {
-        d.avatar!.sizePx = Number(e.target.value)
-      })
-    }
-  />
-</div>
+          <input
+            type="text"
+            value={local.profession?.text ?? ''}
+            onChange={(e) => patch((d) => {
+              d.profession.text = e.target.value
+              if (e.target.value.trim()) d.profession.enabled = true
+            })}
+            placeholder="Ex: Designer, CEO, etc."
+            style={inputStyle}
+          />
 
-        {/* Forma do avatar */}
-        <div className="flex flex-col gap-2">
-          <span className="text-sm">{t('editor.shape')}</span>
-          <div className="flex gap-2">
-            {(["circle", "rounded", "square"] as const).map((shape) => (
-              <button
-                key={shape}
-                type="button"
-                onClick={() => patch((d) => { d.avatar!.shape = shape })}
-                className={`h-8 w-8 flex items-center justify-center rounded-lg border ${
-                  local.avatar?.shape === shape ? "border-blue-500 bg-blue-50" : "border-black/10"
-                }`}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select
+              value={local.profession?.style?.fontFamily ?? ''}
+              onChange={(e) => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.fontFamily = e.target.value || undefined
+              })}
+              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
+            >
+              <option value="">Fonte padrão</option>
+              {FONT_OPTIONS.map((o) => (
+                <option key={o.label} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+
+            <SegmentedSize
+              value={(local.profession?.size ?? 'sm') as 'sm' | 'md' | 'lg'}
+              onChange={(s) => patch((d) => (d.profession.size = s))}
+            />
+
+            <MiniButton
+              active={(local.profession?.style?.fontWeight ?? 400) === 700}
+              onClick={() => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.fontWeight = d.profession.style.fontWeight === 700 ? 400 : 700
+              })}
+            >
+              B
+            </MiniButton>
+          </div>
+
+          <Row label="Cor">
+            <ColorPickerPro
+              value={local.profession?.color ?? '#374151'}
+              onChange={(hex) => patch((d) => (d.profession.color = hex))}
+              onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.profession.color = hex)))}
+            />
+          </Row>
+        </div>
+
+        {/* EMPRESA */}
+        <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Row label="Empresa">
+            <Toggle
+              active={local.company?.enabled ?? true}
+              onClick={() => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.enabled = !d.company.enabled
+              })}
+            />
+          </Row>
+
+          <input
+            type="text"
+            value={local.company?.text ?? ''}
+            onChange={(e) => patch((d) => {
+              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+              d.company.text = e.target.value
+              if (e.target.value.trim()) d.company.enabled = true
+            })}
+            placeholder="Nome da empresa"
+            style={inputStyle}
+          />
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select
+              value={local.company?.style?.fontFamily ?? ''}
+              onChange={(e) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.fontFamily = e.target.value || undefined
+              })}
+              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
+            >
+              <option value="">Fonte padrão</option>
+              {FONT_OPTIONS.map((o) => (
+                <option key={o.label} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+
+            <SegmentedSize
+              value={(local.company?.size ?? 'sm') as 'sm' | 'md' | 'lg'}
+              onChange={(s) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.size = s
+              })}
+            />
+
+            <MiniButton
+              active={(local.company?.style?.fontWeight ?? 400) === 700}
+              onClick={() => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.fontWeight = d.company.style.fontWeight === 700 ? 400 : 700
+              })}
+            >
+              B
+            </MiniButton>
+          </div>
+
+          <Row label="Cor">
+            <ColorPickerPro
+              value={local.company?.color ?? '#6B7280'}
+              onChange={(hex) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.color = hex
+              })}
+              onEyedropper={() => pickEyedropper((hex) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.color = hex
+              }))}
+            />
+          </Row>
+        </div>
+
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['left', 'center', 'right'] as const).map((align) => (
+              <MiniButton
+                key={align}
+                active={((local.layout as any)?.align ?? 'center') === align}
+                onClick={() => patch((d) => {
+                  d.layout = d.layout || {}
+                  ;(d.layout as any).align = align
+                })}
               >
-                <ShapeIcon kind={shape} />
-              </button>
+                {align === 'left' ? '◀' : align === 'center' ? '●' : '▶'}
+              </MiniButton>
             ))}
           </div>
-        </div>
+        </Row>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm">{t('editor.border')}</span>
-            <span className="text-xs text-black/50">{local.avatar?.borderWidth ?? 0}px</span>
-          </div>
-
+        <Row label="Espaço entre linhas">
           <input
             type="range"
             min={0}
-            max={10}
-            step={1}
-            value={local.avatar?.borderWidth ?? 0}
-            onChange={(e) => patch((d) => (d.avatar!.borderWidth = Number(e.target.value)))}
+            max={24}
+            step={2}
+            value={local.layout?.lineGap ?? 10}
+            onChange={(e) => patch((d) => {
+              d.layout = d.layout || {}
+              ;(d.layout as any).lineGap = Number(e.target.value)
+            })}
+            style={{ flex: 1 }}
           />
+          <span style={rightNum}>{local.layout?.lineGap ?? 10}px</span>
+        </Row>
+      </CollapsibleSection>
 
-          <SwatchRow
-            value={local.avatar?.borderColor ?? '#FFFFFF'}
-            onChange={(hex) =>
-              patch((d) => {
-                d.avatar!.borderColor = hex
-              })
-            }
-            onEyedropper={openEyedropperBorder}
-          />
-        </div>
-{/* ✅ NOVO: Glow/Halo */}
-<div className="flex flex-col gap-2">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">Glow (halo)</span>
-    <input
-      type="checkbox"
-      checked={(local.avatar?.glow as any)?.enabled ?? false}
-      onChange={(e) =>
-        patch((d) => {
-          d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: false, color: 'rgba(59,130,246,0.18)', size: 6 }
-          d.avatar!.glow!.enabled = e.target.checked
-        })
-      }
-    />
-  </div>
-
-  {((local.avatar?.glow as any)?.enabled ?? false) && (
-    <>
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-black/50">{t('editor.size')}</span>
-        <span className="text-xs text-black/50">{(local.avatar?.glow as any)?.size ?? 6}px</span>
-      </div>
-
-      <input
-        type="range"
-        min={2}
-        max={20}
-        step={1}
-        value={(local.avatar?.glow as any)?.size ?? 6}
-        onChange={(e) =>
-          patch((d) => {
-            d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
-            d.avatar!.glow!.size = Number(e.target.value)
-          })
-        }
-      />
-
-      <SwatchRow
-        value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.18)'}
-        onChange={(hex) =>
-          patch((d) => {
-            d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
-            d.avatar!.glow!.color = hex
-          })
-        }
-        onEyedropper={() =>
-          openPicker({
-            mode: 'eyedropper' as any,
-            onPick: (hex: string) => {
-              patch((d) => {
-                d.avatar = d.avatar || {}; d.avatar.glow = d.avatar.glow || { enabled: true, color: 'rgba(59,130,246,0.18)', size: 6 }
-                d.avatar!.glow!.color = hex
-              })
-            },
-          } as any)
-        }
-      />
-    </>
-  )}
-</div>
-
-{/* ✅ NOVO: Sombra */}
-<div className="flex flex-col gap-2">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">Sombra</span>
-    <input
-      type="checkbox"
-      checked={(local.avatar?.shadow as any)?.enabled ?? false}
-      onChange={(e) =>
-        patch((d) => {
-          d.avatar!.shadow = d.avatar!.shadow || { enabled: false, intensity: 0.18 }
-          d.avatar!.shadow!.enabled = e.target.checked
-        })
-      }
-    />
-  </div>
-
-  {((local.avatar?.shadow as any)?.enabled ?? false) && (
-    <>
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-black/50">Intensidade</span>
-        <span className="text-xs text-black/50">
-          {(((local.avatar?.shadow as any)?.intensity ?? 0.18) * 100).toFixed(0)}%
-        </span>
-      </div>
-
-      <input
-        type="range"
-        min={0}
-        max={0.6}
-        step={0.05}
-        value={(local.avatar?.shadow as any)?.intensity ?? 0.18}
-        onChange={(e) =>
-          patch((d) => {
-            d.avatar!.shadow = d.avatar!.shadow || { enabled: true, intensity: 0.18 }
-            d.avatar!.shadow!.intensity = Number(e.target.value)
-          })
-        }
-      />
-    </>
-  )}
-</div>
-
-{/* Efeito 3D (foto sai da moldura) */}
-<div className="flex flex-col gap-2">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">Efeito 3D</span>
-    <input
-      type="checkbox"
-      checked={(local.avatar?.effect3d as any)?.enabled ?? false}
-      onChange={(e) =>
-        patch((d) => {
-          d.avatar = d.avatar || {}
-          d.avatar.effect3d = d.avatar.effect3d || { enabled: false, bgColor: "#ffffff", scale: 1.15 }
-          d.avatar.effect3d.enabled = e.target.checked
-        })
-      }
-    />
-  </div>
-
-  {((local.avatar?.effect3d as any)?.enabled ?? false) && (
-    <>
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-black/50">Cor da moldura</span>
-      </div>
-      <SwatchRow
-        value={(local.avatar?.effect3d as any)?.bgColor ?? "#ffffff"}
-        onChange={(hex) =>
-          patch((d) => {
-            d.avatar = d.avatar || {}
-            d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
-            d.avatar.effect3d.bgColor = hex
-          })
-        }
-        onEyedropper={() =>
-          openPicker({
-            mode: "eyedropper" as any,
-            onPick: (hex: string) => {
-              patch((d) => {
-                d.avatar = d.avatar || {}
-                d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
-                d.avatar.effect3d.bgColor = hex
-              })
-            },
-          } as any)
-        }
-      />
-
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-black/50">Escala</span>
-        <span className="text-xs text-black/50">{((local.avatar?.effect3d as any)?.scale ?? 1.15).toFixed(2)}x</span>
-      </div>
-      <input
-        type="range"
-        min={1}
-        max={1.5}
-        step={0.05}
-        value={(local.avatar?.effect3d as any)?.scale ?? 1.15}
-        onChange={(e) =>
-          patch((d) => {
-            d.avatar = d.avatar || {}
-            d.avatar.effect3d = d.avatar.effect3d || { enabled: true, bgColor: "#ffffff", scale: 1.15 }
-            d.avatar.effect3d.scale = Number(e.target.value); console.log("SCALE:", e.target.value, d.avatar.effect3d)
-          })
-        }
-      />
-    </>
-  )}
-</div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Posição do avatar (offset)</span>
-
-            <button
-              type="button"
-              className="h-7 rounded-xl border border-black/10 px-3"
-              onClick={() =>
-                patch((d) => {
-                  d.avatar!.offsetX = 0
-                  d.avatar!.offsetY = null
-                })
-              }
-              title="Reset (auto)"
-            >
-              Reset
-            </button>
-          </div>
-
-          <div className="flex gap-2 items-center flex-wrap">
-            <button
-              type="button"
-              className="h-7 w-7 rounded-xl border border-black/10"
-              onClick={(e) =>
-                patch((d) => {
-                  d.avatar!.offsetX = (d.avatar!.offsetX ?? 0) - stepFromEvent(e)
-                })
-              }
-              title="Esquerda (Shift = 10px)"
-            >
-              ⬅️
-            </button>
-
-            <button
-              type="button"
-              className="h-7 w-7 rounded-xl border border-black/10"
-              onClick={(e) =>
-                patch((d) => {
-                  d.avatar!.offsetX = (d.avatar!.offsetX ?? 0) + stepFromEvent(e)
-                })
-              }
-              title="Direita (Shift = 10px)"
-            >
-              ➡️
-            </button>
-
-            <button
-              type="button"
-              className="h-7 w-7 rounded-xl border border-black/10"
-              onClick={(e) =>
-                patch((d) => {
-                  const current = d.avatar!.offsetY == null ? 0 : (d.avatar!.offsetY as number)
-                  d.avatar!.offsetY = current - stepFromEvent(e)
-                })
-              }
-              title="Cima (Shift = 10px)"
-            >
-              ⬆️
-            </button>
-
-            <button
-              type="button"
-              className="h-7 w-7 rounded-xl border border-black/10"
-              onClick={(e) =>
-                patch((d) => {
-                  const current = d.avatar!.offsetY == null ? 0 : (d.avatar!.offsetY as number)
-                  d.avatar!.offsetY = current + stepFromEvent(e)
-                })
-              }
-              title="Baixo (Shift = 10px)"
-            >
-              ⬇️
-            </button>
-
-            <span className="text-xs text-black/50">
-              X: {local.avatar?.offsetX ?? 0}px · Y:{' '}
-              {local.avatar?.offsetY == null ? 'auto' : `\${local.avatar?.offsetY}px`}
-            </span>
-          </div>
-
-          <span className="text-xs text-black/40 leading-tight">
-            Dica: mantém Shift pressionado para mover 10px.
-          </span>
-        </div>
-      </Section>
-
-
-
-      <Section title="Container">
+      {/* ========== SECÇÃO 4: CONTAINER ========== */}
+      <CollapsibleSection
+        title="📦 Container"
+        subtitle="Fundo, borda, padding"
+        isOpen={activeSection === 'container'}
+        onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}
+      >
         <Row label="Ativar container">
           <Toggle
             active={local.container?.enabled ?? false}
@@ -571,19 +653,16 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         {(local.container?.enabled ?? false) && (
           <>
             <Row label="Cor do fundo">
-              <SwatchRow
-                value={local.container?.bgColor ?? "#ffffff"}
+              <ColorPickerPro
+                value={local.container?.bgColor ?? '#ffffff'}
                 onChange={(hex) => patch((d) => {
                   d.container = d.container || {}
                   d.container.bgColor = hex
                 })}
-                onEyedropper={() => openPicker({
-                  mode: "eyedropper",
-                  onPick: (hex) => patch((d) => {
-                    d.container = d.container || {}
-                    d.container.bgColor = hex
-                  })
-                })}
+                onEyedropper={() => pickEyedropper((hex) => patch((d) => {
+                  d.container = d.container || {}
+                  d.container.bgColor = hex
+                }))}
               />
             </Row>
 
@@ -597,7 +676,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               />
             </Row>
 
-            <Row label={t('editor.border')}>
+            <Row label="Borda">
               <Toggle
                 active={(local.container?.borderWidth ?? 0) > 0}
                 onClick={() => patch((d) => {
@@ -620,23 +699,22 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
                       d.container = d.container || {}
                       d.container.borderWidth = Number(e.target.value)
                     })}
+                    style={{ flex: 1 }}
                   />
-                  <span className="text-xs text-black/50">{local.container?.borderWidth ?? 1}px</span>
+                  <span style={rightNum}>{local.container?.borderWidth ?? 1}px</span>
                 </Row>
+
                 <Row label="Cor da borda">
-                  <SwatchRow
-                    value={local.container?.borderColor ?? "rgba(0,0,0,0.12)"}
+                  <ColorPickerPro
+                    value={local.container?.borderColor ?? 'rgba(0,0,0,0.12)'}
                     onChange={(hex) => patch((d) => {
                       d.container = d.container || {}
                       d.container.borderColor = hex
                     })}
-                    onEyedropper={() => openPicker({
-                      mode: "eyedropper",
-                      onPick: (hex) => patch((d) => {
-                        d.container = d.container || {}
-                        d.container.borderColor = hex
-                      })
-                    })}
+                    onEyedropper={() => pickEyedropper((hex) => patch((d) => {
+                      d.container = d.container || {}
+                      d.container.borderColor = hex
+                    }))}
                   />
                 </Row>
               </>
@@ -647,555 +725,339 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
                 type="range"
                 min={0}
                 max={32}
-                step={1}
+                step={2}
                 value={local.container?.radius ?? 16}
                 onChange={(e) => patch((d) => {
                   d.container = d.container || {}
                   d.container.radius = Number(e.target.value)
                 })}
+                style={{ flex: 1 }}
               />
-              <span className="text-xs text-black/50">{local.container?.radius ?? 16}px</span>
+              <span style={rightNum}>{local.container?.radius ?? 16}px</span>
             </Row>
 
             <Row label="Padding">
               <input
                 type="range"
                 min={0}
-                max={28}
-                step={1}
+                max={32}
+                step={2}
                 value={local.container?.padding ?? 12}
                 onChange={(e) => patch((d) => {
                   d.container = d.container || {}
                   d.container.padding = Number(e.target.value)
                 })}
+                style={{ flex: 1 }}
               />
-              <span className="text-xs text-black/50">{local.container?.padding ?? 12}px</span>
+              <span style={rightNum}>{local.container?.padding ?? 12}px</span>
             </Row>
 
             <Row label="Largura">
               <select
-                className="h-8 rounded-lg border border-black/10 px-2 text-sm"
-                value={local.container?.widthMode ?? "full"}
+                value={local.container?.widthMode ?? 'full'}
                 onChange={(e) => patch((d) => {
                   d.container = d.container || {}
                   d.container.widthMode = e.target.value as any
                 })}
+                style={selectStyle}
               >
                 <option value="full">100%</option>
                 <option value="custom">Personalizada</option>
               </select>
             </Row>
 
-            {local.container?.widthMode === "custom" && (
+            {local.container?.widthMode === 'custom' && (
               <Row label="Largura (px)">
                 <input
                   type="range"
                   min={200}
                   max={400}
-                  step={5}
+                  step={10}
                   value={local.container?.customWidthPx ?? 320}
                   onChange={(e) => patch((d) => {
                     d.container = d.container || {}
                     d.container.customWidthPx = Number(e.target.value)
                   })}
+                  style={{ flex: 1 }}
                 />
-                <span className="text-xs text-black/50">{local.container?.customWidthPx ?? 320}px</span>
+                <span style={rightNum}>{local.container?.customWidthPx ?? 320}px</span>
               </Row>
             )}
           </>
         )}
-      </Section>
 
-      <Section title="Posição do bloco">
-        <div className="flex justify-between items-center">
-          <span className="text-sm">Offset X / Y</span>
-          <button
-            type="button"
-            className="h-7 rounded-xl border border-black/10 px-2"
-            onClick={() =>
-              patch((d) => {
-                d.offset = { x: 0, y: 0 }
-              })
-            }
-            title="Reset"
-          >
-            Reset
-          </button>
+        {!(local.container?.enabled ?? false) && (
+          <div style={{ fontSize: 11, opacity: 0.6 }}>
+            Ativa para adicionar um fundo ao bloco de perfil.
+          </div>
+        )}
+      </CollapsibleSection>
+
+      {/* ========== SECÇÃO 5: LAYOUT & POSIÇÃO ========== */}
+      <CollapsibleSection
+        title="📐 Layout & Posição"
+        subtitle="Offset do bloco"
+        isOpen={activeSection === 'position'}
+        onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}
+      >
+        <Row label="Offset X">
+          <input
+            type="range"
+            min={-80}
+            max={80}
+            step={2}
+            value={local.offset?.x ?? 0}
+            onChange={(e) => patch((d) => {
+              d.offset = d.offset || { x: 0, y: 0 }
+              d.offset.x = Number(e.target.value)
+            })}
+            style={{ flex: 1 }}
+          />
+          <span style={rightNum}>{local.offset?.x ?? 0}px</span>
+        </Row>
+
+        <Row label="Offset Y">
+          <input
+            type="range"
+            min={-80}
+            max={80}
+            step={2}
+            value={local.offset?.y ?? 0}
+            onChange={(e) => patch((d) => {
+              d.offset = d.offset || { x: 0, y: 0 }
+              d.offset.y = Number(e.target.value)
+            })}
+            style={{ flex: 1 }}
+          />
+          <span style={rightNum}>{local.offset?.y ?? 0}px</span>
+        </Row>
+
+        <Row label="">
+          <Button onClick={() => patch((d) => { d.offset = { x: 0, y: 0 } })}>
+            Reset posição
+          </Button>
+        </Row>
+
+        <div style={{ fontSize: 11, opacity: 0.6 }}>
+          Move o bloco Perfil inteiro. Útil para ajustes finos.
         </div>
+      </CollapsibleSection>
 
-        <div className="flex gap-2 items-center flex-wrap">
-          <button
-            type="button"
-            className="h-7 w-7 rounded-xl border border-black/10"
-            onClick={(e) =>
-              patch((d) => {
-                const off = d.offset ?? { x: 0, y: 0 }
-                off.x = (off.x ?? 0) - stepFromEvent(e)
-                d.offset = off
-              })
-            }
-            title="Esquerda (Shift = 10px)"
-          >
-            ⬅️
-          </button>
-
-          <button
-            type="button"
-            className="h-7 w-7 rounded-xl border border-black/10"
-            onClick={(e) =>
-              patch((d) => {
-                const off = d.offset ?? { x: 0, y: 0 }
-                off.x = (off.x ?? 0) + stepFromEvent(e)
-                d.offset = off
-              })
-            }
-            title="Direita (Shift = 10px)"
-          >
-            ➡️
-          </button>
-
-          <button
-            type="button"
-            className="h-7 w-7 rounded-xl border border-black/10"
-            onClick={(e) =>
-              patch((d) => {
-                const off = d.offset ?? { x: 0, y: 0 }
-                off.y = (off.y ?? 0) - stepFromEvent(e)
-                d.offset = off
-              })
-            }
-            title="Subir (Shift = 10px)"
-          >
-            ⬆️
-          </button>
-
-          <button
-            type="button"
-            className="h-7 w-7 rounded-xl border border-black/10"
-            onClick={(e) =>
-              patch((d) => {
-                const off = d.offset ?? { x: 0, y: 0 }
-                off.y = (off.y ?? 0) + stepFromEvent(e)
-                d.offset = off
-              })
-            }
-            title="Descer (Shift = 10px)"
-          >
-            ⬇️
-          </button>
-
-          <span className="text-xs text-black/50">X: {local.offset?.x ?? 0}px · Y: {local.offset?.y ?? 0}px</span>
-        </div>
-
-        <span className="text-xs text-black/40 leading-tight">
-          Move o bloco Perfil inteiro. Shift = 10px.
-        </span>
-      </Section>
-
-<Section title="Layout">
-  <div className="flex justify-between items-center">
-    <span className="text-sm">Espaçamento entre linhas</span>
-    <span className="text-xs text-black/50">{local.layout?.lineGap ?? 10}px</span>
-  </div>
-
-  <input
-    type="range"
-    min={1}
-    max={20}
-    step={1}
-    value={local.layout?.lineGap ?? 10}
-    onChange={(e) =>
-      patch((d) => {
-  const layout = d.layout || ({} as any)
-  layout.lineGap = Number(e.target.value)
-  d.layout = layout
-})
-
-    }
-  />
-
-  <span className="text-xs text-black/40 leading-tight">
-    Controla o espaço entre Nome, Profissão e Empresa.
-  </span>
-</Section>
-
-      <Section title="Identidade">
-        <TextLine
-          label={t('editor.name')}
-          value={local.name.text}
-          color={local.name.color ?? '#0B1220'}
-          enabled={local.name.enabled}
-          fontFamily={local.name.style?.fontFamily ?? ''}
-          bold={(local.name.style?.fontWeight ?? 700) === 700}
-          size={(local.name.size ?? 'md') as any}
-          onToggle={(v) => patch((d) => (d.name.enabled = v))}
-          onText={(v) => patch((d) => (d.name.text = v))}
-          onColor={(hex) => patch((d) => (d.name.color = hex))}
-          onFontFamily={(ff) =>
-            patch((d) => {
-  const style = d.name.style || ({} as any)
-  style.fontFamily = ff || undefined
-  d.name.style = style
-})
-
-          }
-          onBold={(b) =>
-            patch((d) => {
-  const style = d.name.style || ({} as any)
-  style.fontWeight = b ? 700 : 400
-  d.name.style = style
-})
-
-          }
-          onSize={(s) => patch((d) => (d.name.size = s as any))}
-          onEyedropper={() => openEyedropperFor('name')}
-        />
-<div className="flex justify-between items-center">
-  <span className="text-sm">Alinhamento</span>
-
-  <Segmented
-    value={((local.layout as any)?.align) ?? 'center'}
-
-    options={[
-      { key: 'left', label: 'Esq' },
-      { key: 'center', label: 'Centro' },
-      { key: 'right', label: 'Dir' },
-    ]}
-    onChange={(k) =>
-      patch((d) => {
-  const layout = d.layout || ({} as any)
-  layout.align = k as any
-  d.layout = layout
-})
-
-    }
-  />
-</div>
-
-        <TextLine
-          label="Profissão"
-          value={local.profession.text}
-          color={local.profession.color ?? '#374151'}
-          enabled={local.profession.enabled}
-          fontFamily={local.profession.style?.fontFamily ?? ''}
-          bold={(local.profession.style?.fontWeight ?? 400) === 700}
-          size={(local.profession.size ?? 'sm') as any}
-          onToggle={(v) => patch((d) => (d.profession.enabled = v))}
-          onText={(v) =>
-            patch((d) => {
-              d.profession.text = v
-              if (v.trim()) d.profession.enabled = true
-            })
-          }
-          onColor={(hex) => patch((d) => (d.profession.color = hex))}
-          onFontFamily={(ff) =>
-            patch((d) => {
-  const style = d.profession.style || ({} as any)
-  style.fontFamily = ff || undefined
-  d.profession.style = style
-})
-
-          }
-          onBold={(b) =>
-            patch((d) => {
-  const style = d.profession.style || ({} as any)
-  style.fontWeight = b ? 700 : 400
-  d.profession.style = style
-})
-
-          }
-          onSize={(s) => patch((d) => (d.profession.size = s as any))}
-          onEyedropper={() => openEyedropperFor('profession')}
-        />
-
-        <TextLine
-          label={t('editor.company')}
-          value={local.company?.text ?? ''}
-          color={local.company?.color ?? '#6B7280'}
-          enabled={local.company?.enabled ?? true}
-          fontFamily={local.company?.style?.fontFamily ?? ''}
-          bold={(local.company?.style?.fontWeight ?? 400) === 700}
-          size={((local.company?.size ?? 'sm') as any)}
-          onToggle={(v) =>
-            patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.enabled = v
-            })
-          }
-          onText={(v) =>
-            patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.text = v
-              d.company.enabled = true
-            })
-          }
-          onColor={(hex) =>
-            patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.color = hex
-            })
-          }
-          onFontFamily={(ff) =>
-            patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.style
-              const style = d.company.style || ({} as any)
-  style.fontFamily = ff || undefined
-  d.company.style = style
-})
-          }
-          onBold={(b) =>
-            patch((d) => {
-  d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-  const style = d.company.style || ({} as any)
-  style.fontWeight = b ? 700 : 400
-  d.company.style = style
-})
-
-          }
-          onSize={(s) =>
-            patch((d) => {
-              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-              d.company.size = s as any
-            })
-          }
-          onEyedropper={() => openEyedropperFor('company')}
-        />
-      </Section>
     </div>
+  )
+}
+
+// =======================
+// Componentes auxiliares
+// =======================
+
+const rightNum: React.CSSProperties = {
+  fontSize: 12,
+  opacity: 0.7,
+  minWidth: 45,
+  textAlign: 'right',
+}
+
+const selectStyle: React.CSSProperties = {
+  padding: '8px 10px',
+  borderRadius: 12,
+  border: '1px solid rgba(0,0,0,0.12)',
+  background: '#fff',
+  fontWeight: 600,
+  fontSize: 12,
+  minWidth: 100,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 12px',
+  borderRadius: 12,
+  border: '1px solid rgba(0,0,0,0.12)',
+  background: '#fff',
+  fontSize: 13,
+  fontWeight: 500,
+}
+
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: {
+  title: string
+  subtitle?: string
+  isOpen: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: '1px solid rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+      }}
+    >
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          padding: '14px 16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
+        </div>
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 8,
+            background: 'rgba(0,0,0,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            transition: 'transform 0.2s',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
+          ▼
+        </div>
+      </button>
+      {isOpen && (
+        <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{children}</div>
+    </div>
+  )
+}
+
+function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '8px 14px',
+        borderRadius: 12,
+        border: '1px solid rgba(0,0,0,0.10)',
+        background: '#fff',
+        cursor: 'pointer',
+        fontWeight: 700,
+        fontSize: 12,
+        transition: 'all 0.15s',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '6px 12px',
+        borderRadius: 10,
+        border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)',
+        background: active ? 'rgba(59,130,246,0.1)' : '#fff',
+        cursor: 'pointer',
+        fontWeight: 700,
+        fontSize: 11,
+        color: active ? '#3b82f6' : '#333',
+        transition: 'all 0.15s',
+        minWidth: 32,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: 44,
+        height: 24,
+        borderRadius: 999,
+        background: active ? '#3b82f6' : '#e5e7eb',
+        position: 'relative',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'background 0.2s',
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 2,
+          left: active ? 22 : 2,
+          width: 20,
+          height: 20,
+          borderRadius: '50%',
+          background: '#fff',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+          transition: 'left 0.2s',
+        }}
+      />
+    </button>
   )
 }
 
 function ShapeIcon({ kind }: { kind: 'circle' | 'rounded' | 'square' }) {
-  const common: React.CSSProperties = {
-    width: 14,
-    height: 14,
-    display: 'inline-block',
+  const base: React.CSSProperties = {
+    width: 16,
+    height: 16,
     background: 'currentColor',
-    flex: '0 0 auto',
   }
-
-  if (kind === 'circle') return <span aria-hidden style={{ ...common, borderRadius: 999 }} />
-  if (kind === 'rounded') return <span aria-hidden style={{ ...common, borderRadius: 4 }} />
-  return <span aria-hidden style={{ ...common, borderRadius: 0 }} />
+  if (kind === 'circle') return <span style={{ ...base, borderRadius: 999 }} />
+  if (kind === 'rounded') return <span style={{ ...base, borderRadius: 4 }} />
+  return <span style={{ ...base, borderRadius: 0 }} />
 }
 
-function Segmented({
-  value,
-  options,
-  onChange,
-}: {
-  value: string
-  options: { key: string; label: React.ReactNode }[]
-  onChange: (key: string) => void
-}) {
+function SegmentedSize({ value, onChange }: { value: 'sm' | 'md' | 'lg'; onChange: (s: 'sm' | 'md' | 'lg') => void }) {
   return (
-    <div
-      data-no-block-select="1"
-      onPointerDown={stop}
-      onMouseDown={stop}
-      style={{
-        display: 'inline-flex',
-        gap: 6,
-        padding: 4,
-        borderRadius: 999,
-        border: '1px solid rgba(0,0,0,0.10)',
-        background: 'rgba(255,255,255,0.75)',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.03)',
-      }}
-    >
-      {options.map((o) => {
-        const selected = o.key === value
-        return (
-          <button
-            key={o.key}
-            type="button"
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-            onClick={(e) => {
-              stop(e)
-              onChange(o.key)
-            }}
-            style={{
-              ...pillBtn,
-              minWidth: 30,
-              border: selected ? '1px solid rgba(0,0,0,0.18)' : '1px solid transparent',
-              background: selected ? '#0B1220' : 'transparent',
-              color: selected ? '#fff' : '#0B1220',
-              boxShadow: selected ? '0 6px 16px rgba(0,0,0,0.12)' : 'none',
-            }}
-            aria-pressed={selected}
-            title={o.key}
-          >
-            {o.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-function TextLine({
-  label,
-  value,
-  color,
-  enabled,
-  fontFamily,
-  bold,
-  size,
-  onToggle,
-  onText,
-  onColor,
-  onFontFamily,
-  onBold,
-  onSize,
-  onEyedropper,
-}: {
-  label: string
-  value: string
-  color: string
-  enabled: boolean
-  fontFamily: string
-  bold: boolean
-  size: 'sm' | 'md' | 'lg'
-  onToggle: (v: boolean) => void
-  onText: (v: string) => void
-  onColor: (hex: string) => void
-  onFontFamily: (ff: string) => void
-  onBold: (b: boolean) => void
-  onSize: (s: 'sm' | 'md' | 'lg') => void
-  onEyedropper: () => void
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-between items-center">
-        <span className="text-sm">{label}</span>
-
-        <input
-          type="checkbox"
-          checked={enabled}
-          data-no-block-select="1"
-          onPointerDown={stop}
-          onMouseDown={stop}
-          onChange={(e) => onToggle(e.target.checked)}
-          title="Ativar/desativar"
-        />
-      </div>
-
-      <input
-        value={value}
-        onChange={(e) => onText(e.target.value)}
-        disabled={false}
-        className="h-7 rounded-xl border border-black/10 px-3"
-      />
-
-      {/* Grupo compacto: Fonte + Tam. + Bold */}
-      <div
-        className="flex items-center gap-2 flex-wrap"
-        style={{
-          padding: 6,
-          borderRadius: 12,
-          border: '1px solid rgba(0,0,0,0.08)',
-          background: 'rgba(255,255,255,0.7)',
-        }}
-      >
-        <div className="flex items-center gap-2" style={{ flex: '1 1 200px', minWidth: 180 }}>
-          <span className="text-xs text-black/50" style={{ width: 34 }}>
-            Fonte
-          </span>
-
-          <select
-            value={fontFamily}
-            onChange={(e) => onFontFamily(e.target.value)}
-            className="h-7 rounded-lg border border-black/10 px-2 text-sm"
-            style={{ flex: 1, minWidth: 140 }}
-            title="Fonte"
-          >
-            <option value="">Tema</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-black/50">Tam.</span>
-
-          <div
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-            style={{
-              display: 'inline-flex',
-              gap: 4,
-              padding: 3,
-              borderRadius: 999,
-              border: '1px solid rgba(0,0,0,0.10)',
-              background: '#fff',
-            }}
-          >
-            {(['sm', 'md', 'lg'] as const).map((k) => {
-              const selected = k === size
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={(e) => {
-                    stop(e)
-                    onSize(k)
-                  }}
-                  style={{
-                    height: 24,
-                    minWidth: 28,
-                    padding: '0 8px',
-                    borderRadius: 999,
-                    border: selected ? '1px solid rgba(0,0,0,0.18)' : '1px solid transparent',
-                    background: selected ? '#0B1220' : 'transparent',
-                    color: selected ? '#fff' : '#0B1220',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                  aria-pressed={selected}
-                  title={k.toUpperCase()}
-                >
-                  {k.toUpperCase()}
-                </button>
-              )
-            })}
-          </div>
-
-          <button
-            type="button"
-            data-no-block-select="1"
-            onPointerDown={stop}
-            onMouseDown={stop}
-            onClick={(e) => {
-              stop(e)
-              onBold(!bold)
-            }}
-            title="Bold"
-            aria-pressed={bold}
-            style={{
-              height: 28,
-              width: 34,
-              borderRadius: 10,
-              border: '1px solid rgba(0,0,0,0.10)',
-              background: bold ? '#0B1220' : '#fff',
-              color: bold ? '#fff' : '#0B1220',
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
-          >
-            B
-          </button>
-        </div>
-      </div>
-
-      <SwatchRow value={color} onChange={onColor} onEyedropper={onEyedropper} />
+    <div style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, border: '1px solid rgba(0,0,0,0.10)', background: '#fff' }}>
+      {(['sm', 'md', 'lg'] as const).map((s) => (
+        <button
+          key={s}
+          onClick={() => onChange(s)}
+          style={{
+            height: 24,
+            minWidth: 28,
+            padding: '0 8px',
+            borderRadius: 8,
+            border: value === s ? '1px solid rgba(0,0,0,0.18)' : '1px solid transparent',
+            background: value === s ? '#0B1220' : 'transparent',
+            color: value === s ? '#fff' : '#0B1220',
+            fontSize: 10,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          {s.toUpperCase()}
+        </button>
+      ))}
     </div>
   )
 }
