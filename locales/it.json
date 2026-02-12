@@ -41,7 +41,8 @@
     "nfc": "NFC",
     "files": "File",
     "logout": "Esci",
-    "billing": "Fatturazione"
+    "billing": "Fatturazione",
+    "profile": "Profilo"
   },
   "dashboard": {
     "loading": "Caricamento…",

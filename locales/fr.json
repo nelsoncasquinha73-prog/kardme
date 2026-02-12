@@ -41,7 +41,8 @@
     "nfc": "NFC",
     "files": "Fichiers",
     "logout": "Déconnexion",
-    "billing": "Facturation"
+    "billing": "Facturation",
+    "profile": "Profil"
   },
   "dashboard": {
     "loading": "Chargement…",

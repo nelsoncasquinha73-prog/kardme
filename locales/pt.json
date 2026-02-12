@@ -37,7 +37,8 @@
     "nfc": "NFC",
     "files": "Ficheiros",
     "logout": "Sair",
-    "billing": "Faturação"
+    "billing": "Faturação",
+    "profile": "Perfil"
   },
   "dashboard": {
     "pricing_free": "Grátis",

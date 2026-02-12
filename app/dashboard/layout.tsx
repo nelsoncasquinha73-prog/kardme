@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
-import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiHardDrive, FiSettings, FiBarChart2, FiCreditCard } from 'react-icons/fi'
+import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiHardDrive, FiSettings, FiBarChart2, FiCreditCard, FiUser } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
 
@@ -80,6 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: 'nav.affiliates', href: '/dashboard/affiliate', icon: FiUsers },
         { label: 'nav.nfc', href: '/dashboard/nfc', icon: FiZap },
         { label: 'nav.files', href: '/dashboard/storage', icon: FiHardDrive },
+        { label: 'nav.profile', href: '/dashboard/perfil', icon: FiUser },
         { label: 'nav.settings', href: '/dashboard/settings', icon: FiSettings },
         { label: 'nav.billing', href: '/dashboard/settings/billing', icon: FiCreditCard },
       ]

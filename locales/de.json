@@ -41,7 +41,8 @@
     "nfc": "NFC",
     "files": "Dateien",
     "logout": "Abmelden",
-    "billing": "Abrechnung"
+    "billing": "Abrechnung",
+    "profile": "Profil"
   },
   "dashboard": {
     "pricing_free": "Kostenlos",
