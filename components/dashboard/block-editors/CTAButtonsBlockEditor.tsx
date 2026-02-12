@@ -412,7 +412,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
             value={btn.bgColor ?? '#111827'}
             onChange={(val) => updateBtnStyle({ bgColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ bgColor: hex }))}
-            gradientEnabled
+            
           />
         </Row>
 
@@ -500,7 +500,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
               value={container.bgColor ?? "#ffffff"}
               onChange={(val) => updateContainer({ bgColor: val })}
               onEyedropper={() => pickEyedropper((hex) => updateContainer({ bgColor: hex }))}
-              gradientEnabled
+              
             />
           </Row>
         )}
