@@ -17,7 +17,7 @@ type BusinessHoursSettings = {
 
 type BusinessHoursStyle = {
   offsetY?: number
-  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
+  container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string; widthMode?: "full" | "custom"; customWidthPx?: number }
   headingColor?: string
   headingBold?: boolean
   headingFontFamily?: string
@@ -245,6 +245,18 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
           <input type="range" min={0} max={28} value={container.padding ?? 16} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
+        <Row label="Largura">
+          <select value={container.widthMode ?? "full"} onChange={(e) => setContainer({ widthMode: e.target.value as any })} style={{ flex: 1, padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", fontSize: 13 }}>
+            <option value="full">100%</option>
+            <option value="custom">Personalizada</option>
+          </select>
+        </Row>
+        {container.widthMode === "custom" && (
+          <Row label="Largura (px)">
+            <input type="range" min={200} max={500} step={10} value={container.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} />
+            <span style={rightNum}>{container.customWidthPx ?? 320}px</span>
+          </Row>
+        )}
       </CollapsibleSection>
 
       {/* ========== POSIÇÃO ========== */}

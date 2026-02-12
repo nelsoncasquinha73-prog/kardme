@@ -31,6 +31,8 @@ export type BusinessHoursStyle = {
     shadow?: boolean
     borderWidth?: number
     borderColor?: string
+    widthMode?: "full" | "custom"
+    customWidthPx?: number
   }
 
   headingColor?: string
@@ -133,6 +135,11 @@ export default function BusinessHoursBlock({ settings, style }: Props) {
     borderStyle: hasBorder ? 'solid' : undefined,
     borderWidth: hasBorder ? `${container.borderWidth}px` : undefined,
     borderColor: hasBorder ? (container.borderColor ?? undefined) : undefined,
+
+    width: container.widthMode === "custom" && container.customWidthPx ? container.customWidthPx : undefined,
+    maxWidth: container.widthMode === "custom" ? "100%" : undefined,
+    alignSelf: container.widthMode === "custom" ? "center" : undefined,
+    boxSizing: "border-box",
   }
 
   const heading = s.heading ?? 'Horário'
