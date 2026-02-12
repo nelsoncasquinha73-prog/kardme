@@ -262,10 +262,10 @@ inputStyle} /></div>
         </div>
         <div style={{ marginTop: 16, position: 'relative' }}>
           <label style={labelStyle}>País</label>
-          <select value={pais} onChange={(e) => setPais(e.target.value)} style={selectStyle}>
-            <option value="">Seleciona o país</option>
+          <select value={pais} onChange={(e) => setPais(e.target.value)} style={{...selectStyle}}>
+            <option value="" style={{background: "#1a1a2e", color: "#fff"}}>Seleciona o país</option>
             {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.name}>{c.name}</option>
+              <option key={c.code} value={c.name} style={{background: "#1a1a2e", color: "#fff"}}>{c.name}</option>
             ))}
           </select>
           <FiChevronDown size={18} style={{ position: 'absolute', right: 14, top: 38, color: 'rgba(255,255,255,0.5)', pointerEvents: 'none' }} />
