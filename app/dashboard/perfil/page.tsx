@@ -150,7 +150,7 @@ export default function PerfilPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Plano atual</div>
-            {getPlanBadge(profile?.plan)}
+            {getPlanBadge(profile?.plan ?? null)}
           </div>
           {profile?.plan?.toLowerCase() === 'free' && (
             <a href="/dashboard/plans" style={{ padding: '10px 20px', borderRadius: 12, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>Fazer Upgrade</a>
