@@ -3,9 +3,9 @@
 import React, { useState, useMemo } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import { uploadCardVideo } from '@/lib/uploadCardVideo'
 
 type VideoSettings = { url: string; title?: string; thumbnailUrl?: string }
-
 type VideoStyle = {
   offsetY?: number
   aspectRatio?: '16:9' | '9:16' | '4:3' | '1:1'
@@ -17,13 +17,7 @@ type VideoStyle = {
   titleAlign?: 'left' | 'center' | 'right'
   showTitle?: boolean
 }
-
-type Props = {
-  settings: VideoSettings
-  style?: VideoStyle
-  onChangeSettings: (s: VideoSettings) => void
-  onChangeStyle: (s: VideoStyle) => void
-}
+type Props = { cardId: string; settings: VideoSettings; style?: VideoStyle; onChangeSettings: (s: VideoSettings) => void; onChangeStyle: (s: VideoStyle) => void }
 
 function parseVideoUrl(url: string): { type: string; videoId?: string; thumbnailUrl?: string } {
   if (!url) return { type: 'unknown' }
@@ -31,161 +25,104 @@ function parseVideoUrl(url: string): { type: string; videoId?: string; thumbnail
   if (ytMatch) return { type: 'youtube', videoId: ytMatch[1], thumbnailUrl: `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` }
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
   if (vimeoMatch) return { type: 'vimeo', videoId: vimeoMatch[1] }
-  if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) return { type: 'direct' }
+  if (url.match(/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i)) return { type: 'direct' }
   return { type: 'unknown' }
 }
 
-export default function VideoBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
+export default function VideoBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
   const s: VideoStyle = style || {}
   const c = s.container || {}
-
   const [activeSection, setActiveSection] = useState<string | null>('video')
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const videoInfo = useMemo(() => parseVideoUrl(settings?.url || ''), [settings?.url])
-
   const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
-
   const setStyle = (patch: Partial<VideoStyle>) => onChangeStyle({ ...s, ...patch })
   const setSettings = (patch: Partial<VideoSettings>) => onChangeSettings({ ...settings, ...patch })
   const setContainer = (patch: Partial<NonNullable<VideoStyle['container']>>) => setStyle({ container: { ...c, ...patch } })
-
   const bgEnabled = (c.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (c.borderWidth ?? 0) > 0
   const widthCustom = c.widthMode === 'custom'
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const { publicUrl } = await uploadCardVideo({ cardId, file })
+      setSettings({ url: publicUrl })
+    } catch (err: any) {
+      setUploadError(err.message || 'Erro ao enviar vídeo')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-      {/* ========== VÍDEO ========== */}
-      <CollapsibleSection title="🎬 Vídeo" subtitle="URL, título, thumbnail" isOpen={activeSection === 'video'} onToggle={() => setActiveSection(activeSection === 'video' ? null : 'video')}>
-        <Row label="URL">
+      <CollapsibleSection title="🎬 Vídeo" subtitle="Upload ou URL" isOpen={activeSection === 'video'} onToggle={() => setActiveSection(activeSection === 'video' ? null : 'video')}>
+        <Row label="Upload">
+          <input type="file" accept=".mp4,.webm,.mov,.m4v,.ogg,video/*" onChange={handleFileUpload} disabled={uploading} style={{ fontSize: 11, maxWidth: 180 }} />
+        </Row>
+        {uploading && <div style={{ fontSize: 11, color: '#3b82f6' }}>⏳ A enviar vídeo...</div>}
+        {uploadError && <div style={{ fontSize: 11, color: '#ef4444' }}>❌ {uploadError}</div>}
+        <div style={{ fontSize: 10, opacity: 0.5 }}>Máx: 50MB • mp4, webm, mov, m4v, ogg</div>
+        <Row label="Ou URL">
           <input value={settings.url || ''} onChange={(e) => setSettings({ url: e.target.value })} placeholder="https://youtube.com/watch?v=..." style={inputStyle} />
         </Row>
-        {videoInfo.type !== 'unknown' && settings.url && (
-          <div style={{ fontSize: 11, color: '#22c55e' }}>✓ {videoInfo.type === 'youtube' ? 'YouTube' : videoInfo.type === 'vimeo' ? 'Vimeo' : 'Vídeo direto'} detetado</div>
-        )}
-        {settings.url && videoInfo.type === 'unknown' && (
-          <div style={{ fontSize: 11, color: '#ef4444' }}>⚠ URL não reconhecido</div>
-        )}
-        <Row label="Título">
-          <input value={settings.title || ''} onChange={(e) => setSettings({ title: e.target.value })} placeholder="Título do vídeo" style={inputStyle} />
-        </Row>
-        <Row label="Thumbnail">
-          <input value={settings.thumbnailUrl || ''} onChange={(e) => setSettings({ thumbnailUrl: e.target.value })} placeholder="URL da imagem de capa" style={inputStyle} />
-        </Row>
-        {videoInfo.thumbnailUrl && !settings.thumbnailUrl && (
-          <div style={{ fontSize: 10, opacity: 0.5 }}>Thumbnail automática do YouTube será usada</div>
-        )}
+        {videoInfo.type !== 'unknown' && settings.url && <div style={{ fontSize: 11, color: '#22c55e' }}>✓ {videoInfo.type === 'youtube' ? 'YouTube' : videoInfo.type === 'vimeo' ? 'Vimeo' : 'Vídeo direto'} detetado</div>}
+        {settings.url && videoInfo.type === 'unknown' && <div style={{ fontSize: 11, color: '#ef4444' }}>⚠ URL não reconhecido</div>}
+        <Row label="Título"><input value={settings.title || ''} onChange={(e) => setSettings({ title: e.target.value })} placeholder="Título do vídeo" style={inputStyle} /></Row>
+        <Row label="Thumbnail"><input value={settings.thumbnailUrl || ''} onChange={(e) => setSettings({ thumbnailUrl: e.target.value })} placeholder="URL da imagem de capa" style={inputStyle} /></Row>
+        {videoInfo.thumbnailUrl && !settings.thumbnailUrl && <div style={{ fontSize: 10, opacity: 0.5 }}>Thumbnail automática do YouTube será usada</div>}
       </CollapsibleSection>
 
-      {/* ========== APARÊNCIA ========== */}
       <CollapsibleSection title="🎨 Aparência" subtitle="Proporção, cantos, sombra" isOpen={activeSection === 'appearance'} onToggle={() => setActiveSection(activeSection === 'appearance' ? null : 'appearance')}>
         <Row label="Proporção">
           <select value={s.aspectRatio ?? '16:9'} onChange={(e) => setStyle({ aspectRatio: e.target.value as any })} style={selectStyle}>
-            <option value="16:9">16:9 Paisagem</option>
-            <option value="9:16">9:16 Vertical</option>
-            <option value="4:3">4:3 Clássico</option>
-            <option value="1:1">1:1 Quadrado</option>
+            <option value="16:9">16:9 Paisagem</option><option value="9:16">9:16 Vertical</option><option value="4:3">4:3 Clássico</option><option value="1:1">1:1 Quadrado</option>
           </select>
         </Row>
-        <Row label="Cantos">
-          <input type="range" min={0} max={32} value={s.borderRadius ?? 12} onChange={(e) => setStyle({ borderRadius: Number(e.target.value) })} style={{ flex: 1 }} />
-          <span style={rightNum}>{s.borderRadius ?? 12}px</span>
-        </Row>
-        <Row label="Sombra">
-          <Toggle active={s.shadow !== false} onClick={() => setStyle({ shadow: s.shadow === false })} />
-        </Row>
+        <Row label="Cantos"><input type="range" min={0} max={32} value={s.borderRadius ?? 12} onChange={(e) => setStyle({ borderRadius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{s.borderRadius ?? 12}px</span></Row>
+        <Row label="Sombra"><Toggle active={s.shadow !== false} onClick={() => setStyle({ shadow: s.shadow === false })} /></Row>
       </CollapsibleSection>
 
-      {/* ========== TÍTULO ========== */}
       {settings.title && (
         <CollapsibleSection title="📝 Título" subtitle="Cor, tamanho, alinhamento" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
-          <Row label="Mostrar">
-            <Toggle active={s.showTitle !== false} onClick={() => setStyle({ showTitle: s.showTitle === false })} />
-          </Row>
-          {s.showTitle !== false && (
-            <>
-              <Row label="Cor">
-                <ColorPickerPro value={s.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} />
-              </Row>
-              <Row label="Tamanho">
-                <input type="range" min={12} max={24} value={s.titleFontSize ?? 14} onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
-                <span style={rightNum}>{s.titleFontSize ?? 14}px</span>
-              </Row>
-              <Row label="Alinhamento">
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {(['left', 'center', 'right'] as const).map((a) => (
-                    <MiniButton key={a} active={(s.titleAlign ?? 'left') === a} onClick={() => setStyle({ titleAlign: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>
-                  ))}
-                </div>
-              </Row>
-            </>
-          )}
+          <Row label="Mostrar"><Toggle active={s.showTitle !== false} onClick={() => setStyle({ showTitle: s.showTitle === false })} /></Row>
+          {s.showTitle !== false && (<>
+            <Row label="Cor"><ColorPickerPro value={s.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} /></Row>
+            <Row label="Tamanho"><input type="range" min={12} max={24} value={s.titleFontSize ?? 14} onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{s.titleFontSize ?? 14}px</span></Row>
+            <Row label="Alinhamento"><div style={{ display: 'flex', gap: 6 }}>{(['left', 'center', 'right'] as const).map((a) => (<MiniButton key={a} active={(s.titleAlign ?? 'left') === a} onClick={() => setStyle({ titleAlign: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>))}</div></Row>
+          </>)}
         </CollapsibleSection>
       )}
 
-      {/* ========== CONTAINER ========== */}
       <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
-        <Row label="Fundo">
-          <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
-        </Row>
-        {bgEnabled && (
-          <Row label="Cor fundo">
-            <ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
-          </Row>
-        )}
-        <Row label="Borda">
-          <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
-        </Row>
-        {borderEnabled && (
-          <>
-            <Row label="Espessura">
-              <input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
-              <span style={rightNum}>{c.borderWidth ?? 1}px</span>
-            </Row>
-            <Row label="Cor borda">
-              <ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
-            </Row>
-          </>
-        )}
-        <Row label="Sombra">
-          <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} />
-        </Row>
-        <Row label="Raio">
-          <input type="range" min={0} max={32} value={c.radius ?? 0} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
-          <span style={rightNum}>{c.radius ?? 0}px</span>
-        </Row>
-        <Row label="Padding">
-          <input type="range" min={0} max={28} value={c.padding ?? 0} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} />
-          <span style={rightNum}>{c.padding ?? 0}px</span>
-        </Row>
-        <Row label="Largura custom">
-          <Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} />
-        </Row>
-        {widthCustom && (
-          <Row label="Largura">
-            <input type="range" min={200} max={400} step={10} value={c.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} />
-            <span style={rightNum}>{c.customWidthPx ?? 320}px</span>
-          </Row>
-        )}
+        <Row label="Fundo"><Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} /></Row>
+        {bgEnabled && <Row label="Cor fundo"><ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} /></Row>}
+        <Row label="Borda"><Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} /></Row>
+        {borderEnabled && (<>
+          <Row label="Espessura"><input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.borderWidth ?? 1}px</span></Row>
+          <Row label="Cor borda"><ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} /></Row>
+        </>)}
+        <Row label="Sombra"><Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} /></Row>
+        <Row label="Raio"><input type="range" min={0} max={32} value={c.radius ?? 0} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.radius ?? 0}px</span></Row>
+        <Row label="Padding"><input type="range" min={0} max={28} value={c.padding ?? 0} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.padding ?? 0}px</span></Row>
+        <Row label="Largura custom"><Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} /></Row>
+        {widthCustom && <Row label="Largura"><input type="range" min={200} max={400} step={10} value={c.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.customWidthPx ?? 320}px</span></Row>}
       </CollapsibleSection>
 
-      {/* ========== POSIÇÃO ========== */}
       <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
-        <Row label="Offset Y">
-          <input type="range" min={-80} max={80} step={4} value={s.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
-          <span style={rightNum}>{s.offsetY ?? 0}px</span>
-        </Row>
-        <Row label="">
-          <Button onClick={() => setStyle({ offsetY: 0 })}>Reset</Button>
-        </Row>
+        <Row label="Offset Y"><input type="range" min={-80} max={80} step={4} value={s.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{s.offsetY ?? 0}px</span></Row>
+        <Row label=""><Button onClick={() => setStyle({ offsetY: 0 })}>Reset</Button></Row>
       </CollapsibleSection>
-
     </div>
   )
 }
-
-// ===== COMPONENTES AUXILIARES =====
 
 const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
 const selectStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 110 }

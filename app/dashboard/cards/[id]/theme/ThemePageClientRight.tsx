@@ -287,6 +287,7 @@ export default function ThemePageClientRight({
 
         {activeBlock?.type === 'video' && (
           <VideoBlockEditor
+            cardId={card.id}
             settings={activeBlock.settings || {}}
             style={activeBlock.style || {}}
             onChangeSettings={onChangeSettings}
