@@ -160,13 +160,8 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   const [localStyle, setLocalStyle] = useState<ContactStyle>(() => normalizeContactStyle(style))
   const [activeSection, setActiveSection] = useState<string | null>('channels')
 
-  useEffect(() => {
-    setLocalSettings(normalizeContactSettings(settings))
-  }, [settings])
-
-  useEffect(() => {
-    setLocalStyle(normalizeContactStyle(style))
-  }, [style])
+  useEffect(() => { setLocalSettings(normalizeContactSettings(settings)) }, [settings])
+  useEffect(() => { setLocalStyle(normalizeContactStyle(style)) }, [style])
 
   function patchSettings(fn: (s: ContactSettings) => void) {
     const next = structuredClone(localSettings)
@@ -193,17 +188,12 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
   const setSettings = (patch: Partial<ContactSettings>) => patchSettings((s) => Object.assign(s, patch))
-  const setLayout = (patch: Partial<NonNullable<ContactSettings['layout']>>) =>
-    patchSettings((s) => { s.layout = { ...s.layout, ...patch } })
-  const setItem = (ch: ContactChannel, patch: Partial<ContactItem>) =>
-    patchSettings((s) => { s.items = { ...s.items, [ch]: { ...s.items?.[ch], ...patch } } })
+  const setLayout = (patch: Partial<NonNullable<ContactSettings['layout']>>) => patchSettings((s) => { s.layout = { ...s.layout, ...patch } })
+  const setItem = (ch: ContactChannel, patch: Partial<ContactItem>) => patchSettings((s) => { s.items = { ...s.items, [ch]: { ...s.items?.[ch], ...patch } } })
   const setStyle = (patch: Partial<ContactStyle>) => patchStyle((s) => Object.assign(s, patch))
-  const setContainer = (patch: Partial<NonNullable<ContactStyle['container']>>) =>
-    patchStyle((s) => { s.container = { ...s.container, ...patch } })
-  const setBtnDefaults = (patch: Partial<ButtonStyle>) =>
-    patchStyle((s) => { s.buttonDefaults = { ...s.buttonDefaults, ...patch } })
-  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) =>
-    patchStyle((s) => { s.buttons = { ...s.buttons, [ch]: { ...(s.buttons?.[ch] || {}), ...patch } } })
+  const setContainer = (patch: Partial<NonNullable<ContactStyle['container']>>) => patchStyle((s) => { s.container = { ...s.container, ...patch } })
+  const setBtnDefaults = (patch: Partial<ButtonStyle>) => patchStyle((s) => { s.buttonDefaults = { ...s.buttonDefaults, ...patch } })
+  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) => patchStyle((s) => { s.buttons = { ...s.buttons, [ch]: { ...(s.buttons?.[ch] || {}), ...patch } } })
 
   const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (container.borderWidth ?? 0) > 0
@@ -213,462 +203,251 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-      {/* ========== SECÇÃO 4: CONTAINER ========== */}
-      <CollapsibleSection
-        title="📦 Container"
-        subtitle="Fundo, borda, padding"
-        isOpen={activeSection === 'container'}
-        onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}
-      >
-        <Row label="Fundo">
-          <Toggle
-            active={bgEnabled}
-            onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })}
-          />
+      {/* ========== SECÇÃO 1: TÍTULO ========== */}
+      <CollapsibleSection title="📝 Título" subtitle="Texto, cor, fonte" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
+        <Row label="Texto">
+          <input type="text" value={s.heading ?? 'Contacto'} onChange={(e) => setSettings({ heading: e.target.value })} placeholder="Contacto" style={inputStyle} />
         </Row>
-
-        {bgEnabled && (
-          <Row label="Cor fundo">
-            <ColorPickerPro
-              value={container.bgColor ?? '#ffffff'}
-              onChange={(hex) => setContainer({ bgColor: hex })}
-              onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))}
-            />
-          </Row>
-        )}
-
-        <Row label="Sombra">
-          <Toggle
-            active={container.shadow ?? false}
-            onClick={() => setContainer({ shadow: !(container.shadow ?? false) })}
-          />
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['left', 'center', 'right'] as const).map((align) => (
+              <MiniButton key={align} active={(st.headingAlign ?? 'left') === align} onClick={() => setStyle({ headingAlign: align })}>
+                {align === 'left' ? '◀' : align === 'center' ? '●' : '▶'}
+              </MiniButton>
+            ))}
+          </div>
         </Row>
-
-        <Row label="Borda">
-          <Toggle
-            active={borderEnabled}
-            onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })}
-          />
+        <Row label="Cor">
+          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => setStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ headingColor: hex }))} />
         </Row>
+        <Row label="Negrito">
+          <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
+        </Row>
+        <Row label="Fonte">
+          <select value={st.headingFontFamily ?? ''} onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })} style={selectStyle}>
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
+          </select>
+        </Row>
+        <Row label="Tamanho">
+          <input type="range" min={10} max={28} step={1} value={st.headingFontSize ?? 13} onChange={(e) => setStyle({ headingFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.headingFontSize ?? 13}px</span>
+        </Row>
+      </CollapsibleSection>
 
-        {borderEnabled && (
+      {/* ========== SECÇÃO 2: CANAIS DE CONTACTO ========== */}
+      <CollapsibleSection title="📞 Canais de contacto" subtitle="Telefone, email, WhatsApp, Telegram" isOpen={activeSection === 'channels'} onToggle={() => setActiveSection(activeSection === 'channels' ? null : 'channels')}>
+        {CHANNELS.map((cdef) => {
+          const it = items[cdef.key] || {}
+          const isEnabled = it.enabled ?? true
+          return (
+            <div key={cdef.key} style={{ padding: 12, background: isEnabled ? 'rgba(59,130,246,0.05)' : 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, border: isEnabled ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(0,0,0,0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{cdef.icon} {cdef.title}</span>
+                <Toggle active={isEnabled} onClick={() => setItem(cdef.key, { enabled: !isEnabled })} />
+              </div>
+              {isEnabled && (
+                <>
+                  <Row label="Valor"><input type="text" value={it.value ?? ''} onChange={(e) => setItem(cdef.key, { value: e.target.value })} placeholder={cdef.placeholder} style={inputStyle} /></Row>
+                  <Row label="Label"><input type="text" value={it.label ?? ''} onChange={(e) => setItem(cdef.key, { label: e.target.value })} placeholder={cdef.title} style={inputStyle} /></Row>
+                </>
+              )}
+            </div>
+          )
+        })}
+      </CollapsibleSection>
+
+      {/* ========== SECÇÃO 3: LAYOUT DOS BOTÕES ========== */}
+      <CollapsibleSection title="🎛 Layout dos botões" subtitle="Direção, espaçamento" isOpen={activeSection === 'layout'} onToggle={() => setActiveSection(activeSection === 'layout' ? null : 'layout')}>
+        <Row label="Direção">
+          <div style={{ display: 'flex', gap: 6 }}>
+            <MiniButton active={(layout.direction ?? 'row') === 'row'} onClick={() => setLayout({ direction: 'row' })}>Linha</MiniButton>
+            <MiniButton active={(layout.direction ?? 'row') === 'column'} onClick={() => setLayout({ direction: 'column' })}>Coluna</MiniButton>
+          </div>
+        </Row>
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['left', 'center', 'right'] as const).map((align) => (<MiniButton key={align} active={(layout.align ?? 'center') === align} onClick={() => setLayout({ align })}>{align === 'left' ? '◀' : align === 'center' ? '●' : '▶'}</MiniButton>))}
+          </div>
+        </Row>
+        <Row label="Espaçamento">
+          <input type="range" min={0} max={28} step={2} value={layout.gapPx ?? 10} onChange={(e) => setLayout({ g
+cat >> components/dashboard/block-editors/ContactBlockEditor.tsx << 'ENDOFFILE'
+apPx: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{layout.gapPx ?? 10}px</span>
+        </Row>
+        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+        <Row label="Mostrar texto">
+          <Toggle active={st.showLabel ?? true} onClick={() => setStyle({ showLabel: !(st.showLabel ?? true) })} />
+        </Row>
+        <Row label="Tamanho uniforme">
+          <Toggle active={st.uniformButtons ?? false} onClick={() => setStyle({ uniformButtons: !(st.uniformButtons ?? false) })} />
+        </Row>
+        {(st.uniformButtons ?? false) && (
           <>
-            <Row label="Espessura">
-              <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={container.borderWidth ?? 1}
-                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
-                style={{ flex: 1 }}
-              />
-              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
+            <Row label="Largura">
+              <input type="range" min={80} max={300} step={10} value={st.uniformWidthPx ?? 160} onChange={(e) => setStyle({ uniformWidthPx: Number(e.target.value) })} style={{ flex: 1 }} />
+              <span style={rightNum}>{st.uniformWidthPx ?? 160}px</span>
             </Row>
-
-            <Row label="Cor borda">
-              <ColorPickerPro
-                value={container.borderColor ?? 'rgba(0,0,0,0.08)'}
-                onChange={(hex) => setContainer({ borderColor: hex })}
-                onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))}
-              />
+            <Row label="Altura">
+              <input type="range" min={32} max={80} step={4} value={st.uniformHeightPx ?? 52} onChange={(e) => setStyle({ uniformHeightPx: Number(e.target.value) })} style={{ flex: 1 }} />
+              <span style={rightNum}>{st.uniformHeightPx ?? 52}px</span>
             </Row>
           </>
         )}
+      </CollapsibleSection>
 
+      {/* ========== SECÇÃO 4: CONTAINER ========== */}
+      <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, padding" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
+        <Row label="Fundo">
+          <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
+        </Row>
+        {bgEnabled && (
+          <Row label="Cor fundo">
+            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
+          </Row>
+        )}
+        <Row label="Sombra">
+          <Toggle active={container.shadow ?? false} onClick={() => setContainer({ shadow: !(container.shadow ?? false) })} />
+        </Row>
+        <Row label="Borda">
+          <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
+        </Row>
+        {borderEnabled && (
+          <>
+            <Row label="Espessura">
+              <input type="range" min={1} max={6} step={1} value={container.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
+            </Row>
+            <Row label="Cor borda">
+              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
+            </Row>
+          </>
+        )}
         <Row label="Raio">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={2}
-            value={container.radius ?? 14}
-            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={0} max={32} step={2} value={container.radius ?? 14} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
-
         <Row label="Padding">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={2}
-            value={container.padding ?? 16}
-            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={0} max={32} step={2} value={container.padding ?? 16} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
       </CollapsibleSection>
 
-      {/* ========== SECÇÃO 5: ESTILO DOS BOTÕES (DEFAULTS) ========== */}
-      <CollapsibleSection
-        title="🎨 Estilo dos botões"
-        subtitle="Cores, tamanhos, degradê"
-        isOpen={activeSection === 'btnDefaults'}
-        onToggle={() => setActiveSection(activeSection === 'btnDefaults' ? null : 'btnDefaults')}
-      >
+      {/* ========== SECÇÃO 5: ESTILO DOS BOTÕES ========== */}
+      <CollapsibleSection title="🎨 Estilo dos botões" subtitle="Cores, tamanhos, degradê" isOpen={activeSection === 'btnDefaults'} onToggle={() => setActiveSection(activeSection === 'btnDefaults' ? null : 'btnDefaults')}>
         <Row label="Tamanho">
-          <input
-            type="range"
-            min={32}
-            max={64}
-            step={2}
-            value={btnDefaults.sizePx ?? 44}
-            onChange={(e) => setBtnDefaults({ sizePx: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={32} max={64} step={2} value={btnDefaults.sizePx ?? 44} onChange={(e) => setBtnDefaults({ sizePx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.sizePx ?? 44}px</span>
         </Row>
-
         <Row label="Raio">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={2}
-            value={btnDefaults.radius ?? 14}
-            onChange={(e) => setBtnDefaults({ radius: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={0} max={32} step={2} value={btnDefaults.radius ?? 14} onChange={(e) => setBtnDefaults({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.radius ?? 14}px</span>
         </Row>
-
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
-
         <Row label="Modo fundo">
           <div style={{ display: 'flex', gap: 6 }}>
-            <MiniButton
-              active={defaultsBgMode === 'solid'}
-              onClick={() => setBtnDefaults({ bgMode: 'solid' })}
-            >
-              Sólido
-            </MiniButton>
-            <MiniButton
-              active={defaultsBgMode === 'gradient'}
-              onClick={() => setBtnDefaults({ bgMode: 'gradient' })}
-            >
-              Degradê
-            </MiniButton>
+            <MiniButton active={defaultsBgMode === 'solid'} onClick={() => setBtnDefaults({ bgMode: 'solid' })}>Sólido</MiniButton>
+            <MiniButton active={defaultsBgMode === 'gradient'} onClick={() => setBtnDefaults({ bgMode: 'gradient' })}>Degradê</MiniButton>
           </div>
         </Row>
-
         {defaultsBgMode === 'solid' && (
           <Row label="Cor fundo">
-            <ColorPickerPro
-              value={btnDefaults.bgColor ?? '#ffffff'}
-              onChange={(hex) => setBtnDefaults({ bgColor: hex })}
-              onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgColor: hex }))}
-            />
+            <ColorPickerPro value={btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtnDefaults({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgColor: hex }))} />
           </Row>
         )}
-
         {defaultsBgMode === 'gradient' && (
           <>
             <Row label="Cor inicial">
-              <ColorPickerPro
-                value={btnDefaults.bgGradient?.from ?? '#111827'}
-                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })}
-                onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))}
-              />
+              <ColorPickerPro value={btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))} />
             </Row>
-
             <Row label="Cor final">
-              <ColorPickerPro
-                value={btnDefaults.bgGradient?.to ?? '#374151'}
-                onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })}
-                onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))}
-              />
+              <ColorPickerPro value={btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))} />
             </Row>
-
             <Row label="Ângulo">
-              <input
-                type="range"
-                min={0}
-                max={360}
-                step={15}
-                value={btnDefaults.bgGradient?.angle ?? 135}
-                onChange={(e) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })}
-                style={{ flex: 1 }}
-              />
+              <input type="range" min={0} max={360} step={15} value={btnDefaults.bgGradient?.angle ?? 135} onChange={(e) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })} style={{ flex: 1 }} />
               <span style={rightNum}>{btnDefaults.bgGradient?.angle ?? 135}°</span>
             </Row>
           </>
         )}
-
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
-
         <Row label="Borda">
-          <Toggle
-            active={defaultsBorderEnabled}
-            onClick={() => setBtnDefaults({ borderEnabled: !defaultsBorderEnabled })}
-          />
+          <Toggle active={defaultsBorderEnabled} onClick={() => setBtnDefaults({ borderEnabled: !defaultsBorderEnabled })} />
         </Row>
-
         {defaultsBorderEnabled && (
           <>
             <Row label="Espessura">
-              <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={btnDefaults.borderWidth ?? 1}
-                onChange={(e) => setBtnDefaults({ borderWidth: Number(e.target.value) })}
-                style={{ flex: 1 }}
-              />
+              <input type="range" min={1} max={6} step={1} value={btnDefaults.borderWidth ?? 1} onChange={(e) => setBtnDefaults({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
               <span style={rightNum}>{btnDefaults.borderWidth ?? 1}px</span>
             </Row>
-
             <Row label="Cor borda">
-              <ColorPickerPro
-                value={btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'}
-                onChange={(hex) => setBtnDefaults({ borderColor: hex })}
-                onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ borderColor: hex }))}
-              />
+              <ColorPickerPro value={btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => setBtnDefaults({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ borderColor: hex }))} />
             </Row>
           </>
         )}
-
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
-
         <Row label="Cor ícone">
-          <ColorPickerPro
-            value={btnDefaults.iconColor ?? '#111827'}
-            onChange={(hex) => setBtnDefaults({ iconColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ iconColor: hex }))}
-          />
+          <ColorPickerPro value={btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ iconColor: hex }))} />
         </Row>
-
         <Row label="Cor texto">
-          <ColorPickerPro
-            value={btnDefaults.textColor ?? '#111827'}
-            onChange={(hex) => setBtnDefaults({ textColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))}
-          />
+          <ColorPickerPro value={btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))} />
         </Row>
-
         <Row label="Fonte">
-          <select
-            value={btnDefaults.fontFamily ?? ''}
-            onChange={(e) => setBtnDefaults({ fontFamily: e.target.value || undefined })}
-            style={selectStyle}
-          >
+          <select value={btnDefaults.fontFamily ?? ''} onChange={(e) => setBtnDefaults({ fontFamily: e.target.value || undefined })} style={selectStyle}>
             <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>{o.label}</option>
-            ))}
+            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
           </select>
         </Row>
-
-        <Row label="Peso texto">
-          <select
-            value={String(btnDefaults.fontWeight ?? 800)}
-            onChange={(e) => setBtnDefaults({ fontWeight: Number(e.target.value) })}
-            style={selectStyle}
-          >
-            <option value="400">Normal</option>
-            <option value="600">Semi</option>
-            <option value="700">Bold</option>
-            <option value="800">Extra</option>
-            <option value="900">Black</option>
-          </select>
-        </Row>
-
         <Row label="Tamanho texto">
-          <input
-            type="range"
-            min={10}
-            max={20}
-            step={1}
-            value={btnDefaults.labelFontSize ?? 13}
-            onChange={(e) => setBtnDefaults({ labelFontSize: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={10} max={20} step={1} value={btnDefaults.labelFontSize ?? 13} onChange={(e) => setBtnDefaults({ labelFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.labelFontSize ?? 13}px</span>
         </Row>
-
-        <Row label="Escala ícone">
-          <input
-            type="range"
-            min={0.4}
-            max={0.9}
-            step={0.05}
-            value={btnDefaults.iconScale ?? 0.58}
-            onChange={(e) => setBtnDefaults({ iconScale: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
-          <span style={rightNum}>{(btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
-        </Row>
-
-        <Row label="Padding Y">
-          <input
-            type="range"
-            min={0}
-            max={24}
-            step={2}
-            value={btnDefaults.paddingY ?? 10}
-            onChange={(e) => setBtnDefaults({ paddingY: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
-          <span style={rightNum}>{btnDefaults.paddingY ?? 10}px</span>
-        </Row>
-
-        <Row label="Padding X">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={2}
-            value={btnDefaults.paddingX ?? 12}
-            onChange={(e) => setBtnDefaults({ paddingX: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
-          <span style={rightNum}>{btnDefaults.paddingX ?? 12}px</span>
-        </Row>
-
         <Row label="Sombra">
-          <Toggle
-            active={btnDefaults.shadow ?? false}
-            onClick={() => setBtnDefaults({ shadow: !(btnDefaults.shadow ?? false) })}
-          />
+          <Toggle active={btnDefaults.shadow ?? false} onClick={() => setBtnDefaults({ shadow: !(btnDefaults.shadow ?? false) })} />
         </Row>
       </CollapsibleSection>
 
       {/* ========== SECÇÃO 6: OVERRIDE POR BOTÃO ========== */}
-      <CollapsibleSection
-        title="🔧 Personalizar por botão"
-        subtitle="Override individual"
-        isOpen={activeSection === 'btnOverride'}
-        onToggle={() => setActiveSection(activeSection === 'btnOverride' ? null : 'btnOverride')}
-      >
-        <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8 }}>
-          Personaliza cada botão individualmente. Deixa vazio para usar os defaults.
-        </div>
-
+      <CollapsibleSection title="🔧 Personalizar por botão" subtitle="Override individual" isOpen={activeSection === 'btnOverride'} onToggle={() => setActiveSection(activeSection === 'btnOverride' ? null : 'btnOverride')}>
+        <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8 }}>Personaliza cada botão individualmente.</div>
         {CHANNELS.map(({ key, title, icon }) => {
           const b = btns[key] || {}
           const bBorderEnabled = b.borderEnabled ?? defaultsBorderEnabled
           const bBgMode = (b.bgMode ?? defaultsBgMode) as 'solid' | 'gradient'
           const isEnabled = (items[key]?.enabled ?? true)
-
           if (!isEnabled) return null
-
           return (
-            <div
-              key={key}
-              style={{
-                padding: 12,
-                background: 'rgba(0,0,0,0.02)',
-                borderRadius: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                border: '1px solid rgba(0,0,0,0.06)',
-              }}
-            >
+            <div key={key} style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid rgba(0,0,0,0.06)', marginBottom: 8 }}>
               <span style={{ fontWeight: 700, fontSize: 13 }}>{icon} {title}</span>
-
               <Row label="Modo fundo">
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <MiniButton
-                    active={bBgMode === 'solid'}
-                    onClick={() => setBtn(key, { bgMode: 'solid' })}
-                  >
-                    Sólido
-                  </MiniButton>
-                  <MiniButton
-                    active={bBgMode === 'gradient'}
-                    onClick={() => setBtn(key, { bgMode: 'gradient' })}
-                  >
-                    Degradê
-                  </MiniButton>
+                  <MiniButton active={bBgMode === 'solid'} onClick={() => setBtn(key, { bgMode: 'solid' })}>Sólido</MiniButton>
+                  <MiniButton active={bBgMode === 'gradient'} onClick={() => setBtn(key, { bgMode: 'gradient' })}>Degradê</MiniButton>
                 </div>
               </Row>
-
               {bBgMode === 'solid' && (
                 <Row label="Cor fundo">
-                  <ColorPickerPro
-                    value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'}
-                    onChange={(hex) => setBtn(key, { bgColor: hex })}
-                    onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))}
-                  />
+                  <ColorPickerPro value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} />
                 </Row>
               )}
-
               {bBgMode === 'gradient' && (
                 <>
                   <Row label="Cor inicial">
-                    <ColorPickerPro
-                      value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'}
-                      onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })}
-                      onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))}
-                    />
+                    <ColorPickerPro value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))} />
                   </Row>
-
                   <Row label="Cor final">
-                    <ColorPickerPro
-                      value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'}
-                      onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })}
-                      onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))}
-                    />
-                  </Row>
-
-                  <Row label="Ângulo">
-                    <input
-                      type="range"
-                      min={0}
-                      max={360}
-                      step={15}
-                      value={b.bgGradient?.angle ?? btnDefaults.bgGradient?.angle ?? 135}
-                      onChange={(e) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), angle: Number(e.target.value) } })}
-                      style={{ flex: 1 }}
-                    />
-                    <span style={rightNum}>{b.bgGradient?.angle ?? btnDefaults.bgGradient?.angle ?? 135}°</span>
+                    <ColorPickerPro value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))} />
                   </Row>
                 </>
               )}
-
-              <Row label="Borda">
-                <Toggle
-                  active={bBorderEnabled}
-                  onClick={() => setBtn(key, { borderEnabled: !bBorderEnabled })}
-                />
-              </Row>
-
-              {bBorderEnabled && (
-                <Row label="Cor borda">
-                  <ColorPickerPro
-                    value={b.borderColor ?? btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'}
-                    onChange={(hex) => setBtn(key, { borderColor: hex })}
-                    onEyedropper={() => pickEyedropper((hex) => setBtn(key, { borderColor: hex }))}
-                  />
-                </Row>
-              )}
-
               <Row label="Cor ícone">
-                <ColorPickerPro
-                  value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'}
-                  onChange={(hex) => setBtn(key, { iconColor: hex })}
-                  onEyedropper={() => pickEyedropper((hex) => setBtn(key, { iconColor: hex }))}
-                />
+                <ColorPickerPro value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtn(key, { iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { iconColor: hex }))} />
               </Row>
-
               <Row label="Cor texto">
-                <ColorPickerPro
-                  value={b.textColor ?? btnDefaults.textColor ?? '#111827'}
-                  onChange={(hex) => setBtn(key, { textColor: hex })}
-                  onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))}
-                />
+                <ColorPickerPro value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
               </Row>
-
               <Row label="Sombra">
-                <Toggle
-                  active={b.shadow ?? btnDefaults.shadow ?? false}
-                  onClick={() => setBtn(key, { shadow: !(b.shadow ?? btnDefaults.shadow ?? false) })}
-                />
+                <Toggle active={b.shadow ?? btnDefaults.shadow ?? false} onClick={() => setBtn(key, { shadow: !(b.shadow ?? btnDefaults.shadow ?? false) })} />
               </Row>
             </div>
           )
@@ -676,25 +455,11 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
       </CollapsibleSection>
 
       {/* ========== SECÇÃO 7: POSIÇÃO ========== */}
-      <CollapsibleSection
-        title="📍 Posição"
-        subtitle="Offset do bloco"
-        isOpen={activeSection === 'position'}
-        onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}
-      >
+      <CollapsibleSection title="📍 Posição" subtitle="Offset do bloco" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
         <Row label="Offset Y">
-          <input
-            type="range"
-            min={-80}
-            max={80}
-            step={4}
-            value={st.offsetY ?? 0}
-            onChange={(e) => setStyle({ offsetY: Number(e.target.value) })}
-            style={{ flex: 1 }}
-          />
+          <input type="range" min={-80} max={80} step={4} value={st.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.offsetY ?? 0}px</span>
         </Row>
-
         <Row label="">
           <Button onClick={() => setStyle({ offsetY: 0 })}>Reset</Button>
         </Row>
@@ -708,89 +473,21 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
 // Componentes auxiliares
 // =======================
 
-const rightNum: React.CSSProperties = {
-  fontSize: 12,
-  opacity: 0.7,
-  minWidth: 45,
-  textAlign: 'right',
-}
+const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
+const selectStyle: React.CSSProperties = { padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 100 }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13, fontWeight: 500 }
 
-const selectStyle: React.CSSProperties = {
-  padding: '8px 10px',
-  borderRadius: 12,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  fontWeight: 600,
-  fontSize: 12,
-  minWidth: 100,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 12,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  fontSize: 13,
-  fontWeight: 500,
-}
-
-function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: {
-  title: string
-  subtitle?: string
-  isOpen: boolean
-  onToggle: () => void
-  children: React.ReactNode
-}) {
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: '1px solid rgba(0,0,0,0.08)',
-        overflow: 'hidden',
-      }}
-    >
-      <button
-        onClick={onToggle}
-        style={{
-          width: '100%',
-          padding: '14px 16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+      <button onClick={onToggle} style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
           {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
         </div>
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 8,
-            background: 'rgba(0,0,0,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 12,
-            transition: 'transform 0.2s',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        >
-          ▼
-        </div>
+        <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</div>
       </button>
-      {isOpen && (
-        <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {children}
-        </div>
-      )}
+      {isOpen && <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>}
     </div>
   )
 }
@@ -806,77 +503,20 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '8px 14px',
-        borderRadius: 12,
-        border: '1px solid rgba(0,0,0,0.10)',
-        background: '#fff',
-        cursor: 'pointer',
-        fontWeight: 700,
-        fontSize: 12,
-        transition: 'all 0.15s',
-      }}
-    >
-      {children}
-    </button>
+    <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>{children}</button>
   )
 }
 
 function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '6px 12px',
-        borderRadius: 10,
-        border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)',
-        background: active ? 'rgba(59,130,246,0.1)' : '#fff',
-        cursor: 'pointer',
-        fontWeight: 700,
-        fontSize: 11,
-        color: active ? '#3b82f6' : '#333',
-        transition: 'all 0.15s',
-        minWidth: 32,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {children}
-    </button>
+    <button onClick={onClick} style={{ padding: '6px 12px', borderRadius: 10, border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)', background: active ? 'rgba(59,130,246,0.1)' : '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11, color: active ? '#3b82f6' : '#333', minWidth: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{children}</button>
   )
 }
 
 function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        width: 44,
-        height: 24,
-        borderRadius: 999,
-        background: active ? '#3b82f6' : '#e5e7eb',
-        position: 'relative',
-        border: 'none',
-        cursor: 'pointer',
-        transition: 'background 0.2s',
-      }}
-    >
-      <span
-        style={{
-          position: 'absolute',
-          top: 2,
-          left: active ? 22 : 2,
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#fff',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-          transition: 'left 0.2s',
-        }}
-      />
+    <button onClick={onClick} style={{ width: 44, height: 24, borderRadius: 999, background: active ? '#3b82f6' : '#e5e7eb', position: 'relative', border: 'none', cursor: 'pointer' }}>
+      <span style={{ position: 'absolute', top: 2, left: active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
     </button>
   )
 }
