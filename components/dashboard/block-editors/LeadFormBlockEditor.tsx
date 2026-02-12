@@ -19,7 +19,17 @@ type LeadFormStyle = {
   heading?: { fontFamily?: string; fontWeight?: number; color?: string; align?: 'left' | 'center' | 'right'; fontSize?: number }
   container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; borderWidth?: number; borderColor?: string; shadow?: boolean; widthMode?: 'full' | 'custom'; customWidthPx?: number }
   inputs?: { bgColor?: string; textColor?: string; borderColor?: string; radius?: number; fontSize?: number; paddingY?: number; paddingX?: number; labelColor?: string; labelSize?: number; placeholderColor?: string }
-   button?: { bgColor?: string; textColor?: string; radius?: number; height?: number; fontWeight?: number; borderWidth?: number; borderColor?: string; shadow?: boolean }
+     button?: {
+    bgColor?: string
+    textColor?: string
+    radius?: number
+    height?: number
+    fontWeight?: number
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+  }
+
 }
 
 type Props = {

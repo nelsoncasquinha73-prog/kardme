@@ -61,6 +61,9 @@ type LeadFormStyle = {
     placeholderColor?: string
   }
   button?: {
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
     bgColor?: string
     textColor?: string
     radius?: number
@@ -142,12 +145,13 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   const btnStyle: React.CSSProperties = {
     height: st.button?.height ?? 44,
     borderRadius: st.button?.radius ?? 14,
-    border: 'none',
+    border: (st.button?.borderWidth ?? 0) > 0 ? `${st.button?.borderWidth}px solid ${st.button?.borderColor ?? 'rgba(0,0,0,0.15)'}` : 'none',
     background: st.button?.bgColor ?? 'var(--color-primary)',
     color: st.button?.textColor ?? '#fff',
     fontWeight: st.button?.fontWeight ?? 800,
     cursor: status === 'sending' ? 'not-allowed' : 'pointer',
     opacity: status === 'sending' ? 0.8 : 1,
+    boxShadow: st.button?.shadow ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
   }
 
   React.useEffect(() => {
