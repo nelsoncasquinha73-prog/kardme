@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 
 type BioSettings = { text: string }
 type BioStyle = {
@@ -57,12 +57,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           </div>
         </Row>
         <Row label="Negrito"><Toggle active={s.bold === true} onClick={() => setStyle({ bold: !s.bold })} /></Row>
-        <Row label="Fonte">
-          <select value={s.fontFamily ?? ''} onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}
@@ -92,7 +87,6 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
 }
 
 const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
-const selectStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 110 }
 
 function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
