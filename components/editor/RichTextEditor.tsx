@@ -3,8 +3,9 @@
 import React, { useCallback } from 'react'
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { Extension } from '@tiptap/core'
 import TextStyle from '@tiptap/extension-text-style'
-import Color from '@tiptap/extension-color'
+import { Color } from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
@@ -52,7 +53,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escreve
 
   if (!editor) return null
 
-  const btn = (active: boolean) => ({
+  const btnStyle = (active: boolean): React.CSSProperties => ({
     padding: '4px 8px',
     borderRadius: 6,
     border: 'none',
@@ -65,7 +66,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escreve
   })
 
   const ToolbarButton = ({ active, onClick, children, title }: { active?: boolean; onClick: () => void; children: React.ReactNode; title?: string }) => (
-    <button type="button" onClick={onClick} style={btn(active || false)} title={title}>{children}</button>
+    <button type="button" onClick={onClick} style={btnStyle(active || false)} title={title}>{children}</button>
   )
 
   const Toolbar = () => (
@@ -132,10 +133,10 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escreve
       
       <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
         <div style={{ display: 'flex', gap: 2, padding: 6, background: '#1f2937', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} style={{ ...btn(editor.isActive('bold')), color: '#fff', background: editor.isActive('bold') ? 'rgba(255,255,255,0.2)' : 'transparent' }}>B</button>
-          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} style={{ ...btn(editor.isActive('italic')), color: '#fff', background: editor.isActive('italic') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><i>I</i></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} style={{ ...btn(editor.isActive('underline')), color: '#fff', background: editor.isActive('underline') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><u>U</u></button>
-          <button type="button" onClick={setLink} style={{ ...btn(editor.isActive('link')), color: '#fff', background: editor.isActive('link') ? 'rgba(255,255,255,0.2)' : 'transparent' }}>🔗</button>
+          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} style={{ ...btnStyle(editor.isActive('bold')), color: '#fff', background: editor.isActive('bold') ? 'rgba(255,255,255,0.2)' : 'transparent' }}>B</button>
+          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} style={{ ...btnStyle(editor.isActive('italic')), color: '#fff', background: editor.isActive('italic') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><i>I</i></button>
+          <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} style={{ ...btnStyle(editor.isActive('underline')), color: '#fff', background: editor.isActive('underline') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><u>U</u></button>
+          <button type="button" onClick={setLink} style={{ ...btnStyle(editor.isActive('link')), color: '#fff', background: editor.isActive('link') ? 'rgba(255,255,255,0.2)' : 'transparent' }}>🔗</button>
         </div>
       </BubbleMenu>
       
