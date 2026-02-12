@@ -1,363 +1,135 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { useLanguage } from '@/components/language/LanguageProvider'
 import { FONT_OPTIONS } from '@/lib/fontes'
 
-type BioSettings = {
-  text: string
-}
-
+type BioSettings = { text: string }
 type BioStyle = {
   offsetY?: number
-
   textColor?: string
   fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
   align?: 'left' | 'center' | 'right'
-
-  container?: {
-    enabled?: boolean
-    bgColor?: string
-    radius?: number
-    padding?: number
-    shadow?: boolean
-    borderWidth?: number
-    borderColor?: string
-    widthMode?: 'full' | 'custom'
-    customWidthPx?: number
-  }
+  container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string; widthMode?: 'full' | 'custom'; customWidthPx?: number }
 }
-
-type Props = {
-  settings: BioSettings
-  style?: BioStyle
-  onChangeSettings: (s: BioSettings) => void
-  onChangeStyle: (s: BioStyle) => void
-}
+type Props = { settings: BioSettings; style?: BioStyle; onChangeSettings: (s: BioSettings) => void; onChangeStyle: (s: BioStyle) => void }
 
 export default function BioBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
-  const { t } = useLanguage()
-
   const s: BioStyle = style || {}
   const c = s.container || {}
+  const [activeSection, setActiveSection] = useState<string | null>('text')
 
-  const pickEyedropper = (apply: (hex: string) => void) =>
-    openPicker({
-      mode: 'eyedropper',
-      onPick: apply,
-    })
-
-  const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => {
-    onChangeStyle({
-      ...s,
-      container: {
-        ...c,
-        ...patch,
-      },
-    })
-  }
-
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
   const setStyle = (patch: Partial<BioStyle>) => onChangeStyle({ ...s, ...patch })
+  const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => setStyle({ container: { ...c, ...patch } })
 
   const bgEnabled = (c.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (c.borderWidth ?? 0) > 0
   const widthCustom = c.widthMode === 'custom'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title={t('editor.text')}>
-        <label style={{ fontSize: 12, opacity: 0.7 }}>Bio</label>
-        <textarea
-          value={settings.text || ''}
-          onChange={(e) => onChangeSettings({ text: e.target.value })}
-          rows={6}
-          style={{
-            width: '100%',
-            fontSize: 14,
-            padding: 10,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            outline: 'none',
-            resize: 'vertical',
-          }}
-        />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        <Row label={t('editor.alignment')}>
-          <Button onClick={() => setStyle({ align: 'left' })} active={s.align === 'left'}>
-            Esquerda
-          </Button>
-          <Button onClick={() => setStyle({ align: 'center' })} active={(s.align ?? 'center') === 'center'}>
-            Centro
-          </Button>
-          <Button onClick={() => setStyle({ align: 'right' })} active={s.align === 'right'}>
-            Direita
-          </Button>
+      {/* ========== TEXTO ========== */}
+      <CollapsibleSection title="📝 Texto" subtitle="Bio, cor, fonte" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
+        <textarea value={settings.text || ''} onChange={(e) => onChangeSettings({ text: e.target.value })} rows={5} placeholder="Escreve a tua bio..." style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, resize: 'vertical', outline: 'none' }} />
+        <Row label="Cor">
+          <ColorPickerPro value={s.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} supportsGradient={false} />
         </Row>
-
-        <Row label={t('editor.font')}>
-          <select
-            value={s.fontFamily ?? ''}
-            onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })}
-            style={{ fontSize: 14, padding: 6, borderRadius: 6 }}
-          >
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
+        <Row label="Tamanho">
+          <input type="range" min={12} max={22} value={s.fontSize ?? 15} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{s.fontSize ?? 15}px</span>
+        </Row>
+        <Row label="Altura linha">
+          <input type="range" min={1.1} max={2.2} step={0.05} value={s.lineHeight ?? 1.6} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{(s.lineHeight ?? 1.6).toFixed(2)}</span>
+        </Row>
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['left', 'center', 'right'] as const).map((a) => (
+              <MiniButton key={a} active={(s.align ?? 'center') === a} onClick={() => setStyle({ align: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>
             ))}
-          </select>
-        </Row>
-
-        <Row label={t('editor.bold')}>
-          <Toggle active={s.bold === true} onClick={() => setStyle({ bold: !(s.bold === true) })} />
-        </Row>
-
-        <Row label={t('editor.text_color')}>
-          <ColorPickerPro
-            value={s.textColor ?? '#111827'}
-            onChange={(hex) => setStyle({ textColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))}
-            supportsGradient={false}
-          />
-        </Row>
-
-        <Row label={t('editor.size')}>
-          <input
-            type="range"
-            min={12}
-            max={22}
-            step={1}
-            value={s.fontSize ?? 15}
-            onChange={(e) => setStyle({ fontSize: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{s.fontSize ?? 15}px</span>
-        </Row>
-
-        <Row label={t('editor.line_height')}>
-          <input
-            type="range"
-            min={1.1}
-            max={2.2}
-            step={0.05}
-            value={s.lineHeight ?? 1.6}
-            onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>
-            {(s.lineHeight ?? 1.6).toFixed(2)}
-          </span>
-        </Row>
-      </Section>
-
-      <Section title={t('editor.block_style')}>
-        <Row label={t('editor.background')}>
-          <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
-        </Row>
-
-        {bgEnabled && (
-          <Row label={t('editor.bg_color')}>
-            <ColorPickerPro
-              value={c.bgColor ?? '#ffffff'}
-              onChange={(hex) => setContainer({ bgColor: hex })}
-              onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))}
-              supportsGradient={true}
-            />
-          </Row>
-        )}
-
-        <Row label={t('editor.shadow')}>
-          <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !(c.shadow === true) })} />
-        </Row>
-
-        <Row label={t('editor.border')}>
-          <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
-        </Row>
-
-        {borderEnabled && (
-          <>
-            <Row label={t('editor.thickness')}>
-              <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={c.borderWidth ?? 1}
-                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
-              />
-              <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>
-                {c.borderWidth ?? 1}px
-              </span>
-            </Row>
-
-            <Row label={t('editor.border_color')}>
-              <ColorPickerPro
-                value={c.borderColor ?? '#e5e7eb'}
-                onChange={(hex) => setContainer({ borderColor: hex })}
-                onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))}
-                supportsGradient={false}
-              />
-            </Row>
-          </>
-        )}
-
-        <Row label={t('editor.radius')}>
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={c.radius ?? 18}
-            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.radius ?? 18}px</span>
-        </Row>
-
-        <Row label="Padding">
-          <input
-            type="range"
-            min={0}
-            max={28}
-            step={1}
-            value={c.padding ?? 16}
-            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.padding ?? 16}px</span>
-        </Row>
-
-        <Row label="Largura personalizada">
-          <Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} />
-        </Row>
-
-        {widthCustom && (
-          <Row label="Largura">
-            <input
-              type="range"
-              min={200}
-              max={400}
-              step={10}
-              value={c.customWidthPx ?? 320}
-              onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })}
-            />
-            <span style={{ width: 42, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.customWidthPx ?? 320}px</span>
-          </Row>
-        )}
-      </Section>
-
-      <Section title="Posição">
-        <Row label="Mover (Y)">
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) - 4 })} style={miniBtn}>
-              ⬆️
-            </button>
-            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) + 4 })} style={miniBtn}>
-              ⬇️
-            </button>
-            <button type="button" onClick={() => setStyle({ offsetY: 0 })} style={miniBtn}>
-              Reset
-            </button>
-            <span style={{ fontSize: 12, opacity: 0.7, width: 70, textAlign: 'right' }}>
-              {s.offsetY ?? 0}px
-            </span>
           </div>
         </Row>
-      </Section>
+        <Row label="Negrito"><Toggle active={s.bold === true} onClick={() => setStyle({ bold: !s.bold })} /></Row>
+        <Row label="Fonte">
+          <select value={s.fontFamily ?? ''} onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })} style={selectStyle}>
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
+          </select>
+        </Row>
+      </CollapsibleSection>
+
+      {/* ========== CONTAINER ========== */}
+      <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
+        <Row label="Fundo"><Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} /></Row>
+        {bgEnabled && <Row label="Cor fundo"><ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} supportsGradient={true} /></Row>}
+        <Row label="Borda"><Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} /></Row>
+        {borderEnabled && (<>
+          <Row label="Espessura"><input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.borderWidth ?? 1}px</span></Row>
+          <Row label="Cor borda"><ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} supportsGradient={false} /></Row>
+        </>)}
+        <Row label="Sombra"><Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} /></Row>
+        <Row label="Raio"><input type="range" min={0} max={32} value={c.radius ?? 18} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.radius ?? 18}px</span></Row>
+        <Row label="Padding"><input type="range" min={0} max={28} value={c.padding ?? 16} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.padding ?? 16}px</span></Row>
+        <Row label="Largura custom"><Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} /></Row>
+        {widthCustom && <Row label="Largura"><input type="range" min={200} max={400} step={10} value={c.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.customWidthPx ?? 320}px</span></Row>}
+      </CollapsibleSection>
+
+      {/* ========== POSIÇÃO ========== */}
+      <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
+        <Row label="Offset Y"><input type="range" min={-80} max={80} step={4} value={s.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{s.offsetY ?? 0}px</span></Row>
+        <Row label=""><Button onClick={() => setStyle({ offsetY: 0 })}>Reset</Button></Row>
+      </CollapsibleSection>
+
     </div>
   )
 }
 
-function Section({ title, children }: any) {
+const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
+const selectStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 110 }
+
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        padding: 14,
-        border: '1px solid rgba(0,0,0,0.08)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-      }}
-    >
-      <strong style={{ fontSize: 13 }}>{title}</strong>
-      {children}
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+      <button onClick={onToggle} style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
+        </div>
+        <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</div>
+      </button>
+      {isOpen && <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>}
     </div>
   )
 }
 
-function Row({ label, children }: any) {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{children}</div>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, minWidth: 80 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>{children}</div>
     </div>
   )
 }
 
-function Button({ children, onClick, active }: any) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        padding: '8px 10px',
-        borderRadius: 12,
-        border: '1px solid rgba(0,0,0,0.12)',
-        background: active ? 'rgba(0,0,0,0.06)' : '#fff',
-        cursor: 'pointer',
-        fontWeight: 800,
-        fontSize: 12,
-      }}
-    >
-      {children}
-    </button>
-  )
+function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>{children}</button>
 }
 
-function Toggle({ active, onClick }: any) {
-  return (
-    <button
-      type="button"
-      onPointerDown={(e) => {
-        e.preventDefault()
-      }}
-      onClick={() => onClick?.()}
-      style={{
-        width: 46,
-        height: 26,
-        borderRadius: 999,
-        background: active ? 'var(--color-primary)' : '#e5e7eb',
-        position: 'relative',
-        border: 'none',
-        cursor: 'pointer',
-      }}
-    >
-      <span
-        style={{
-          position: 'absolute',
-          top: 3,
-          left: active ? 22 : 4,
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#fff',
-        }}
-      />
-    </button>
-  )
+function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
+  return <button onClick={onClick} style={{ padding: '6px 14px', borderRadius: 10, border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)', background: active ? 'rgba(59,130,246,0.1)' : '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11, color: active ? '#3b82f6' : '#333', minWidth: 50, whiteSpace: 'nowrap' }}>{children}</button>
 }
 
-const miniBtn: React.CSSProperties = {
-  padding: '6px 8px',
-  borderRadius: 10,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  cursor: 'pointer',
-  fontWeight: 800,
-  fontSize: 12,
+function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ width: 44, height: 24, borderRadius: 999, background: active ? '#3b82f6' : '#e5e7eb', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}>
+      <span style={{ position: 'absolute', top: 2, left: active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
+    </button>
+  )
 }
