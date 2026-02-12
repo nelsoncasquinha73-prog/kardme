@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import type { DecorationItem, DecorationSettings } from '@/components/blocks/DecorationBlock'
 
@@ -14,48 +14,23 @@ type Props = {
   onSelectDeco: (id: string | null) => void
 }
 
-function uid(prefix = 'deco') {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
-}
+function uid(prefix = 'deco') { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}` }
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)) }
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
-}
-
-export default function DecorationBlockEditor({
-  cardId,
-  settings,
-  onChangeSettings,
-  onChangeStyle,
-  activeDecoId,
-  onSelectDeco,
-}: Props) {
+export default function DecorationBlockEditor({ cardId, settings, onChangeSettings, activeDecoId, onSelectDeco }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [activeSection, setActiveSection] = useState<string | null>('list')
+  const [uploading, setUploading] = useState(false)
 
   const decorations = useMemo<DecorationItem[]>(() => settings?.decorations ?? [], [settings?.decorations])
   const active = decorations.find((d) => d.id === activeDecoId) ?? null
 
   const updateAll = (next: DecorationItem[]) => onChangeSettings({ ...settings, decorations: next })
-
-  const patchDecoration = (id: string, patch: Partial<DecorationItem>) => {
-    updateAll(decorations.map((d) => (d.id === id ? { ...d, ...patch } : d)))
-  }
+  const patchDecoration = (id: string, patch: Partial<DecorationItem>) => updateAll(decorations.map((d) => (d.id === id ? { ...d, ...patch } : d)))
 
   const addDecoration = () => {
     const id = uid()
-    const next: DecorationItem = {
-      id,
-      src: '',
-      alt: '',
-      x: 50,
-      y: 35,
-      width: 180,
-      height: 180,
-      rotation: 0,
-      opacity: 0.6,
-      zIndex: decorations.reduce((max, d) => Math.max(max, d.zIndex ?? 0), 0) + 1,
-      enabled: true,
-    }
+    const next: DecorationItem = { id, src: '', alt: '', x: 50, y: 35, width: 180, height: 180, rotation: 0, opacity: 0.6, zIndex: decorations.reduce((max, d) => Math.max(max, d.zIndex ?? 0), 0) + 1, enabled: true }
     updateAll([...decorations, next])
     onSelectDeco(id)
   }
@@ -63,13 +38,7 @@ export default function DecorationBlockEditor({
   const duplicateDecoration = (id: string) => {
     const base = decorations.find((d) => d.id === id)
     if (!base) return
-    const copy: DecorationItem = {
-      ...base,
-      id: uid(),
-      x: clamp(base.x + 2, 0, 100),
-      y: clamp(base.y + 2, 0, 100),
-      zIndex: decorations.reduce((max, d) => Math.max(max, d.zIndex ?? 0), 0) + 1,
-    }
+    const copy: DecorationItem = { ...base, id: uid(), x: clamp(base.x + 2, 0, 100), y: clamp(base.y + 2, 0, 100), zIndex: decorations.reduce((max, d) => Math.max(max, d.zIndex ?? 0), 0) + 1 }
     updateAll([...decorations, copy])
     onSelectDeco(copy.id)
   }
@@ -80,17 +49,8 @@ export default function DecorationBlockEditor({
     if (activeDecoId === id) onSelectDeco(next[0]?.id ?? null)
   }
 
-  const bringForward = (id: string) => {
-    const cur = decorations.find((d) => d.id === id)
-    if (!cur) return
-    patchDecoration(id, { zIndex: Number(cur.zIndex ?? 0) + 1 })
-  }
-
-  const sendBackward = (id: string) => {
-    const cur = decorations.find((d) => d.id === id)
-    if (!cur) return
-    patchDecoration(id, { zIndex: Number(cur.zIndex ?? 0) - 1 })
-  }
+  const bringForward = (id: string) => { const cur = decorations.find((d) => d.id === id); if (cur) patchDecoration(id, { zIndex: (cur.zIndex ?? 0) + 1 }) }
+  const sendBackward = (id: string) => { const cur = decorations.find((d) => d.id === id); if (cur) patchDecoration(id, { zIndex: (cur.zIndex ?? 0) - 1 }) }
 
   const pickFileFor = (id: string) => {
     if (!fileInputRef.current) return
@@ -103,305 +63,111 @@ export default function DecorationBlockEditor({
     const file = e.target.files?.[0]
     const targetId = e.target.dataset.targetId
     if (!file || !targetId) return
-
+    if (!file.type.startsWith('image/')) { alert('Escolhe uma imagem (png/jpg/webp/svg).'); return }
+    setUploading(true)
     try {
-      if (!file.type.startsWith('image/')) {
-        alert('Escolhe um ficheiro de imagem (png/jpg/webp/svg).')
-        return
-      }
-
-      const bucket = 'decorations'
       const ext = (file.name.split('.').pop() || 'png').toLowerCase()
       const path = `${cardId || 'no-card'}/${targetId}.${ext}`
-
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-        upsert: true,
-        contentType: file.type,
-        cacheControl: '3600',
-      })
-      if (upErr) throw upErr
-
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path)
-      const publicUrl = data?.publicUrl
-      if (!publicUrl) throw new Error('Não foi possível obter o URL público da imagem.')
-
-      patchDecoration(targetId, { src: publicUrl, enabled: true })
-    } catch (err: any) {
-      console.error(err)
-      alert(err?.message || 'Erro no upload da imagem.')
-    }
+      const { error } = await supabase.storage.from('decorations').upload(path, file, { upsert: true, contentType: file.type, cacheControl: '3600' })
+      if (error) throw error
+      const { data } = supabase.storage.from('decorations').getPublicUrl(path)
+      patchDecoration(targetId, { src: data?.publicUrl, enabled: true })
+    } catch (err: any) { alert(err?.message || 'Erro no upload.') }
+    finally { setUploading(false) }
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
 
-      <div style={section}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-          <strong style={title}>Decorações</strong>
-          <button type="button" onClick={addDecoration} style={btnPrimary}>
-            + Adicionar
-          </button>
-        </div>
-        <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.35 }}>
-          Seleciona uma decoração na lista para editar.
-        </div>
-      </div>
-
-      {decorations.length === 0 && (
-        <div style={{ fontSize: 13, opacity: 0.7 }}>Ainda não tens decorações.</div>
-      )}
-
-      {decorations.map((d, idx) => (
-        <div
-          key={d.id}
-          onClick={() => onSelectDeco(d.id)}
-          style={{
-            ...card,
-            borderColor: d.id === activeDecoId ? 'var(--color-primary)' : 'rgba(0,0,0,0.08)',
-            cursor: 'pointer',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-            <strong style={{ fontSize: 13 }}>Decoração #{idx + 1}</strong>
-
-            <button type="button" onClick={() => removeDecoration(d.id)} style={btnDanger}>
-              Remover
-            </button>
-          </div>
-
-          <label style={label}>
-            <span style={labelText}>Ativa</span>
-            <input
-              type="checkbox"
-              checked={d.enabled !== false}
-              onChange={(e) => patchDecoration(d.id, { enabled: e.target.checked })}
-            />
-          </label>
-
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button type="button" onClick={() => pickFileFor(d.id)} style={btnSecondary}>
-              Upload imagem
-            </button>
-
-            <div style={{ fontSize: 12, opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {d.src ? '✅ imagem definida' : '⚠️ sem imagem (faz upload ou cola URL)'}
+      {/* ========== LISTA ========== */}
+      <CollapsibleSection title="🎨 Decorações" subtitle={`${decorations.length} item(s)`} isOpen={activeSection === 'list'} onToggle={() => setActiveSection(activeSection === 'list' ? null : 'list')}>
+        <Row label="">
+          <Button onClick={addDecoration}>+ Adicionar</Button>
+        </Row>
+        {decorations.length === 0 && <div style={{ fontSize: 12, opacity: 0.6 }}>Ainda não tens decorações.</div>}
+        {decorations.map((d, idx) => (
+          <div key={d.id} onClick={() => onSelectDeco(d.id)} style={{ padding: '10px 12px', borderRadius: 12, border: d.id === activeDecoId ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.1)', background: d.id === activeDecoId ? 'rgba(59,130,246,0.05)' : '#fff', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, fontWeight: 600 }}>#{idx + 1} {d.src ? '✅' : '⚠️'}</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <MiniButton onClick={(e) => { e.stopPropagation(); duplicateDecoration(d.id) }}>📋</MiniButton>
+              <MiniButton onClick={(e) => { e.stopPropagation(); removeDecoration(d.id) }}>🗑️</MiniButton>
             </div>
           </div>
+        ))}
+      </CollapsibleSection>
 
-          <label style={label}>
-            <span style={labelText}>URL (opcional)</span>
-            <input
-              value={d.src || ''}
-              onChange={(e) => patchDecoration(d.id, { src: e.target.value })}
-              placeholder="https://..."
-              style={input}
-            />
-          </label>
-
-          <label style={label}>
-            <span style={labelText}>Alt (acessibilidade)</span>
-            <input
-              value={d.alt || ''}
-              onChange={(e) => patchDecoration(d.id, { alt: e.target.value })}
-              placeholder="ex: tesoura, doodle, logo"
-              style={input}
-            />
-          </label>
-
-          <div style={grid2}>
-            <label style={label}>
-              <span style={labelText}>X (%)</span>
-              <input
-                type="number"
-                value={d.x}
-                min={0}
-                max={100}
-                onChange={(e) => patchDecoration(d.id, { x: clamp(Number(e.target.value), 0, 100) })}
-                style={input}
-              />
-            </label>
-
-            <label style={label}>
-              <span style={labelText}>Y (%)</span>
-              <input
-                type="number"
-                value={d.y}
-                min={0}
-                max={100}
-                onChange={(e) => patchDecoration(d.id, { y: clamp(Number(e.target.value), 0, 100) })}
-                style={input}
-              />
-            </label>
+      {/* ========== EDITAR ATIVA ========== */}
+      {active && (
+        <CollapsibleSection title={`✏️ Decoração #${decorations.findIndex(d => d.id === active.id) + 1}`} subtitle="Imagem, posição, tamanho" isOpen={activeSection === 'edit'} onToggle={() => setActiveSection(activeSection === 'edit' ? null : 'edit')}>
+          <Row label="Ativa"><Toggle active={active.enabled !== false} onClick={() => patchDecoration(active.id, { enabled: !active.enabled })} /></Row>
+          <Row label="Imagem">
+            <Button onClick={() => pickFileFor(active.id)}>{uploading ? '⏳...' : 'Upload'}</Button>
+          </Row>
+          {active.src && <div style={{ fontSize: 10, color: '#22c55e' }}>✅ Imagem definida</div>}
+          <Row label="URL">
+            <input value={active.src || ''} onChange={(e) => patchDecoration(active.id, { src: e.target.value })} placeholder="https://..." style={inputStyle} />
+          </Row>
+          <Row label="Alt">
+            <input value={active.alt || ''} onChange={(e) => patchDecoration(active.id, { alt: e.target.value })} placeholder="Descrição" style={inputStyle} />
+          </Row>
+          <Row label="X (%)"><input type="range" min={0} max={100} value={active.x} onChange={(e) => patchDecoration(active.id, { x: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.x}%</span></Row>
+          <Row label="Y (%)"><input type="range" min={0} max={100} value={active.y} onChange={(e) => patchDecoration(active.id, { y: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.y}%</span></Row>
+          <Row label="Largura"><input type="range" min={20} max={500} value={active.width} onChange={(e) => patchDecoration(active.id, { width: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.width}px</span></Row>
+          <Row label="Altura"><input type="range" min={20} max={500} value={active.height} onChange={(e) => patchDecoration(active.id, { height: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.height}px</span></Row>
+          <Row label="Rotação"><input type="range" min={-180} max={180} value={active.rotation} onChange={(e) => patchDecoration(active.id, { rotation: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.rotation}°</span></Row>
+          <Row label="Opacidade"><input type="range" min={0} max={100} value={Math.round((active.opacity ?? 1) * 100)} onChange={(e) => patchDecoration(active.id, { opacity: Number(e.target.value) / 100 })} style={{ flex: 1 }} /><span style={rightNum}>{Math.round((active.opacity ?? 1) * 100)}%</span></Row>
+          <Row label="Z-index"><input type="range" min={-10} max={50} value={active.zIndex ?? 0} onChange={(e) => patchDecoration(active.id, { zIndex: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.zIndex ?? 0}</span></Row>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <MiniButton onClick={() => bringForward(active.id)}>⬆️ Frente</MiniButton>
+            <MiniButton onClick={() => sendBackward(active.id)}>⬇️ Trás</MiniButton>
           </div>
-
-          <div style={grid2}>
-            <label style={label}>
-              <span style={labelText}>Largura (px)</span>
-              <input
-                type="number"
-                value={d.width}
-                min={1}
-                max={2000}
-                onChange={(e) => patchDecoration(d.id, { width: Number(e.target.value) })}
-                style={input}
-              />
-            </label>
-
-            <label style={label}>
-              <span style={labelText}>Altura (px)</span>
-              <input
-                type="number"
-                value={d.height}
-                min={1}
-                max={2000}
-                onChange={(e) => patchDecoration(d.id, { height: Number(e.target.value) })}
-                style={input}
-              />
-            </label>
-          </div>
-
-          <div style={grid2}>
-            <label style={label}>
-              <span style={labelText}>Rotação (°)</span>
-              <input
-                type="number"
-                value={d.rotation}
-                min={-360}
-                max={360}
-                onChange={(e) => patchDecoration(d.id, { rotation: Number(e.target.value) })}
-                style={input}
-              />
-            </label>
-
-            <label style={label}>
-              <span style={labelText}>Opacidade (0–1)</span>
-              <input
-                type="number"
-                step={0.05}
-                value={d.opacity}
-                min={0}
-                max={1}
-                onChange={(e) => patchDecoration(d.id, { opacity: clamp(Number(e.target.value), 0, 1) })}
-                style={input}
-              />
-            </label>
-          </div>
-
-          <label style={label}>
-            <span style={labelText}>Z-index</span>
-            <input
-              type="number"
-              value={d.zIndex}
-              onChange={(e) => patchDecoration(d.id, { zIndex: Number(e.target.value) })}
-              style={input}
-            />
-          </label>
-
-          <div style={{ fontSize: 12, opacity: 0.65, lineHeight: 1.35 }}>
-            Dica: usa PNG com transparência + opacidade ~0.2–0.6 para ficar “premium”.
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-            <button type="button" onClick={() => duplicateDecoration(d.id)} style={btnSecondary}>
-              Duplicar
-            </button>
-            <button type="button" onClick={() => bringForward(d.id)} style={btnSecondary}>
-              Trazer à frente
-            </button>
-            <button type="button" onClick={() => sendBackward(d.id)} style={btnSecondary}>
-              Enviar para trás
-            </button>
-          </div>
-        </div>
-      ))}
+          <div style={{ fontSize: 10, opacity: 0.5, marginTop: 8 }}>Dica: PNG com transparência + opacidade ~20-60% fica premium.</div>
+        </CollapsibleSection>
+      )}
     </div>
   )
 }
 
-const section: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: 16,
-  padding: 14,
-  border: '1px solid rgba(0,0,0,0.08)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 10,
+const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13 }
+
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+      <button onClick={onToggle} style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
+        </div>
+        <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</div>
+      </button>
+      {isOpen && <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>}
+    </div>
+  )
 }
 
-const title: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 800,
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, minWidth: 70 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>{children}</div>
+    </div>
+  )
 }
 
-const card: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: 16,
-  padding: 14,
-  border: '1px solid rgba(0,0,0,0.08)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 10,
-  cursor: 'pointer',
+function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>{children}</button>
 }
 
-const grid2: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: 10,
+function MiniButton({ children, onClick }: { children: React.ReactNode; onClick: (e: React.MouseEvent) => void }) {
+  return <button onClick={onClick} style={{ padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>{children}</button>
 }
 
-const label: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 6,
-}
-
-const labelText: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 700,
-  opacity: 0.75,
-}
-
-const input: React.CSSProperties = {
-  width: '100%',
-  height: 38,
-  borderRadius: 12,
-  border: '1px solid rgba(0,0,0,0.12)',
-  padding: '0 10px',
-  fontSize: 13,
-  outline: 'none',
-}
-
-const btnPrimary: React.CSSProperties = {
-  height: 40,
-  borderRadius: 12,
-  border: 'none',
-  background: 'var(--color-primary)',
-  color: '#fff',
-  fontWeight: 800,
-  cursor: 'pointer',
-  padding: '0 12px',
-  width: 'fit-content',
-}
-
-const btnSecondary: React.CSSProperties = {
-  height: 36,
-  borderRadius: 12,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  fontWeight: 800,
-  cursor: 'pointer',
-  padding: '0 12px',
-}
-
-const btnDanger: React.CSSProperties = {
-  height: 34,
-  borderRadius: 12,
-  border: '1px solid rgba(229,62,62,0.35)',
-  background: '#fff',
-  color: '#e53e3e',
-  fontWeight: 900,
-  cursor: 'pointer',
-  padding: '0 10px',
+function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ width: 44, height: 24, borderRadius: 999, background: active ? '#3b82f6' : '#e5e7eb', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}>
+      <span style={{ position: 'absolute', top: 2, left: active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
+    </button>
+  )
 }
