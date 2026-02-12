@@ -3,7 +3,7 @@
 import React from 'react'
 
 type IconMode = 'none' | 'library' | 'upload'
-type ActionType = 'link' | 'phone' | 'whatsapp'
+type ActionType = 'link' | 'phone' | 'whatsapp' | 'email' | 'sms' | 'file' | 'maps' | 'calendar'
 
 type CtaButton = {
   id: string
@@ -13,6 +13,16 @@ type CtaButton = {
   actionType?: ActionType
   phone?: string
   whatsappMessage?: string
+  email?: string
+  emailSubject?: string
+  emailBody?: string
+  smsMessage?: string
+  fileUrl?: string
+  mapsAddress?: string
+  calendarTitle?: string
+  calendarDate?: string
+  calendarTime?: string
+  calendarDuration?: number
   widthMode?: '100%' | 'auto' | 'custom'
   customWidthPx?: number
   icon?: {
@@ -33,7 +43,6 @@ type CTAButtonsSettings = {
 
 type CTAButtonsStyle = {
   offsetY?: number
-
   button?: {
     heightPx?: number
     radius?: number
@@ -50,7 +59,6 @@ type CTAButtonsStyle = {
     widthMode?: '100%' | 'auto' | 'custom'
     customWidthPx?: number
   }
-
   container?: {
     enabled?: boolean
     bgColor?: string
@@ -70,15 +78,8 @@ type Props = {
   style?: CTAButtonsStyle
 }
 
-const FONT_MAP: Record<string, string> = {
-  System: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  Serif: 'serif',
-  Monospace: 'monospace',
-}
-
 function resolveFont(fontFamily?: string) {
   if (!fontFamily) return undefined
-  if (FONT_MAP[fontFamily]) return FONT_MAP[fontFamily]
   return fontFamily
 }
 
@@ -93,18 +94,85 @@ function normalizeUrl(url: string) {
   return u
 }
 
+function generateCalendarUrl(b: CtaButton): string {
+  const title = encodeURIComponent(b.calendarTitle || 'Evento')
+  const date = b.calendarDate || ''
+  const time = b.calendarTime || '09:00'
+  const duration = b.calendarDuration || 60
+  
+  if (!date) return '#'
+  
+  // Format: YYYYMMDDTHHMMSS
+  const startDate = date.replace(/-/g, '')
+  const startTime = time.replace(/:/g, '') + '00'
+  const start = `${startDate}T${startTime}`
+  
+  // Calculate end time
+  const [hours, minutes] = time.split(':').map(Number)
+  const endMinutes = hours * 60 + minutes + duration
+  const endHours = Math.floor(endMinutes / 60) % 24
+  const endMins = endMinutes % 60
+  const endTime = `${String(endHours).padStart(2, '0')}${String(endMins).padStart(2, '0')}00`
+  const end = `${startDate}T${endTime}`
+  
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}`
+}
+
 function getButtonHref(b: CtaButton): string {
   const actionType = b.actionType || 'link'
-  if (actionType === 'phone' && b.phone) {
-    const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
-    return `tel:${cleanPhone}`
+  
+  switch (actionType) {
+    case 'phone':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
+        return `tel:${cleanPhone}`
+      }
+      return '#'
+      
+    case 'whatsapp':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9]/g, '')
+        const message = b.whatsappMessage ? encodeURIComponent(b.whatsappMessage) : ''
+        return `https://wa.me/${cleanPhone}${message ? '?text=' + message : ''}`
+      }
+      return '#'
+      
+    case 'email':
+      if (b.email) {
+        let mailto = `mailto:${b.email}`
+        const params: string[] = []
+        if (b.emailSubject) params.push(`subject=${encodeURIComponent(b.emailSubject)}`)
+        if (b.emailBody) params.push(`body=${encodeURIComponent(b.emailBody)}`)
+        if (params.length > 0) mailto += '?' + params.join('&')
+        return mailto
+      }
+      return '#'
+      
+    case 'sms':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
+        const message = b.smsMessage ? encodeURIComponent(b.smsMessage) : ''
+        // sms: protocol with body parameter
+        return `sms:${cleanPhone}${message ? '?body=' + message : ''}`
+      }
+      return '#'
+      
+    case 'file':
+      return b.fileUrl || '#'
+      
+    case 'maps':
+      if (b.mapsAddress) {
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.mapsAddress)}`
+      }
+      return '#'
+      
+    case 'calendar':
+      return generateCalendarUrl(b)
+      
+    case 'link':
+    default:
+      return normalizeUrl(b.url || '')
   }
-  if (actionType === 'whatsapp' && b.phone) {
-    const cleanPhone = b.phone.replace(/[^0-9]/g, '')
-    const message = b.whatsappMessage ? encodeURIComponent(b.whatsappMessage) : ''
-    return `https://wa.me/${cleanPhone}${message ? '?text=' + message : ''}`
-  }
-  return normalizeUrl(b.url || '')
 }
 
 function mapAlign(align?: 'left' | 'center' | 'right') {
@@ -178,20 +246,12 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
   const renderIcon = (b: CtaButton) => {
     const ic = b.icon
     if (!ic || ic.mode === 'none') return null
-
     const size = ic.sizePx ?? 18
-
     if (ic.mode === 'upload' && ic.uploadUrl) {
       return (
-        <img
-          src={ic.uploadUrl}
-          alt=""
-          style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
-          data-no-block-select="1"
-        />
+        <img src={ic.uploadUrl} alt="" style={{ width: size, height: size, objectFit: 'contain', display: 'block' }} data-no-block-select="1" />
       )
     }
-
     return null
   }
 
@@ -199,21 +259,17 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
     <div style={wrap}>
       {buttons.map((b) => {
         const href = getButtonHref(b)
-        const isHttp = href.startsWith('http://') || href.startsWith('https://')
         const actionType = b.actionType || 'link'
-        const target = actionType === 'link' && b.openInNewTab && isHttp ? '_blank' : undefined
+        const isExternal = href.startsWith('http://') || href.startsWith('https://')
+        const shouldOpenNewTab = actionType === 'link' ? b.openInNewTab : ['file', 'maps', 'calendar'].includes(actionType)
+        const target = shouldOpenNewTab && isExternal ? '_blank' : undefined
         const rel = target ? 'noreferrer' : undefined
 
         const icon = renderIcon(b)
         const iconPos = b.icon?.position ?? 'left'
-        const hasIcon = !!icon
 
-        const btnStyle: React.CSSProperties = {
-          ...baseBtn,
-          width: getButtonWidth(b),
-        }
+        const btnStyle: React.CSSProperties = { ...baseBtn, width: getButtonWidth(b) }
 
-        // If iconWidthPx is set, use fixed-width icon container for alignment
         if (iconWidthPx > 0) {
           const iconContainerStyle: React.CSSProperties = {
             width: iconWidthPx,
@@ -225,49 +281,16 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
           }
 
           return (
-            <a
-              key={b.id}
-              href={href || '#'}
-              target={target}
-              rel={rel}
-              style={btnStyle}
-              data-no-block-select="1"
-              onClick={(e) => {
-                if (!href) e.preventDefault()
-                void cardId
-              }}
-            >
-              {iconPos === 'left' && (
-                <>
-                  <span style={iconContainerStyle}>{icon}</span>
-                  <span style={{ width: iconGapPx, flexShrink: 0 }} />
-                </>
-              )}
+            <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
+              {iconPos === 'left' && (<><span style={iconContainerStyle}>{icon}</span><span style={{ width: iconGapPx, flexShrink: 0 }} /></>)}
               <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
-              {iconPos === 'right' && (
-                <>
-                  <span style={{ width: iconGapPx, flexShrink: 0 }} />
-                  <span style={iconContainerStyle}>{icon}</span>
-                </>
-              )}
+              {iconPos === 'right' && (<><span style={{ width: iconGapPx, flexShrink: 0 }} /><span style={iconContainerStyle}>{icon}</span></>)}
             </a>
           )
         }
 
-        // Default behavior (no fixed icon width)
         return (
-          <a
-            key={b.id}
-            href={href || '#'}
-            target={target}
-            rel={rel}
-            style={btnStyle}
-            data-no-block-select="1"
-            onClick={(e) => {
-              if (!href) e.preventDefault()
-              void cardId
-            }}
-          >
+          <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
             {icon && iconPos === 'left' ? icon : null}
             <span style={{ lineHeight: 1.1 }}>{b.label || 'Botão'}</span>
             {icon && iconPos === 'right' ? icon : null}

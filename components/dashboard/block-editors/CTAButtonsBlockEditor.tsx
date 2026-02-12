@@ -9,12 +9,22 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 type IconMode = 'none' | 'library' | 'upload'
 
-type ActionType = 'link' | 'phone' | 'whatsapp'
+type ActionType = 'link' | 'phone' | 'whatsapp' | 'email' | 'sms' | 'file' | 'maps' | 'calendar'
 
 type CtaButton = {
   actionType?: ActionType
   phone?: string
   whatsappMessage?: string
+  email?: string
+  emailSubject?: string
+  emailBody?: string
+  smsMessage?: string
+  fileUrl?: string
+  mapsAddress?: string
+  calendarTitle?: string
+  calendarDate?: string
+  calendarTime?: string
+  calendarDuration?: number
   id: string
   label: string
   url: string
@@ -275,6 +285,11 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   <option value="link">Link (URL)</option>
                   <option value="phone">Ligar (Telefone)</option>
                   <option value="whatsapp">WhatsApp</option>
+                  <option value="email">Email</option>
+                  <option value="sms">SMS</option>
+                  <option value="file">Ficheiro (PDF)</option>
+                  <option value="maps">Google Maps</option>
+                  <option value="calendar">Calendário</option>
                 </select>
               </Row>
 
@@ -302,6 +317,63 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   </Row>
                   <Row label="Mensagem pré-definida">
                     <input value={b.whatsappMessage ?? ""} onChange={(e) => updateButton(b.id, { whatsappMessage: e.target.value })} style={input} placeholder="Olá, gostava de saber mais..." />
+                  </Row>
+                </>
+              )}
+
+              {b.actionType === "email" && (
+                <>
+                  <Row label="Email">
+                    <input value={b.email ?? ""} onChange={(e) => updateButton(b.id, { email: e.target.value })} style={input} placeholder="exemplo@email.com" />
+                  </Row>
+                  <Row label="Assunto">
+                    <input value={b.emailSubject ?? ""} onChange={(e) => updateButton(b.id, { emailSubject: e.target.value })} style={input} placeholder="Assunto do email" />
+                  </Row>
+                  <Row label="Mensagem">
+                    <input value={b.emailBody ?? ""} onChange={(e) => updateButton(b.id, { emailBody: e.target.value })} style={input} placeholder="Corpo do email (opcional)" />
+                  </Row>
+                </>
+              )}
+
+              {b.actionType === "sms" && (
+                <>
+                  <Row label="Número">
+                    <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351912345678" />
+                  </Row>
+                  <Row label="Mensagem">
+                    <input value={b.smsMessage ?? ""} onChange={(e) => updateButton(b.id, { smsMessage: e.target.value })} style={input} placeholder="Mensagem pré-definida" />
+                  </Row>
+                </>
+              )}
+
+              {b.actionType === "file" && (
+                <>
+                  <Row label="URL do ficheiro">
+                    <input value={b.fileUrl ?? ""} onChange={(e) => updateButton(b.id, { fileUrl: e.target.value })} style={input} placeholder="https://exemplo.com/ficheiro.pdf" />
+                  </Row>
+                  <div style={{ fontSize: 11, opacity: 0.6, marginTop: -8 }}>Faz upload do PDF e cola aqui o link</div>
+                </>
+              )}
+
+              {b.actionType === "maps" && (
+                <Row label="Morada">
+                  <input value={b.mapsAddress ?? ""} onChange={(e) => updateButton(b.id, { mapsAddress: e.target.value })} style={input} placeholder="Rua Example 123, Lisboa" />
+                </Row>
+              )}
+
+              {b.actionType === "calendar" && (
+                <>
+                  <Row label="Título do evento">
+                    <input value={b.calendarTitle ?? ""} onChange={(e) => updateButton(b.id, { calendarTitle: e.target.value })} style={input} placeholder="Reunião com..." />
+                  </Row>
+                  <Row label="Data">
+                    <input type="date" value={b.calendarDate ?? ""} onChange={(e) => updateButton(b.id, { calendarDate: e.target.value })} style={input} />
+                  </Row>
+                  <Row label="Hora">
+                    <input type="time" value={b.calendarTime ?? ""} onChange={(e) => updateButton(b.id, { calendarTime: e.target.value })} style={input} />
+                  </Row>
+                  <Row label="Duração (min)">
+                    <input type="number" value={b.calendarDuration ?? 60} onChange={(e) => updateButton(b.id, { calendarDuration: Number(e.target.value) })} style={input} min={15} step={15} />
                   </Row>
                 </>
               )}
