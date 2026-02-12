@@ -1,12 +1,14 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { FONT_OPTIONS, FONT_OPTIONS_BY_CATEGORY, CATEGORY_LABELS, FontCategory } from '@/lib/fontes'
+import { FONT_OPTIONS, CATEGORY_LABELS } from '@/lib/fontes'
 
 type Props = {
   value: string
   onChange: (value: string) => void
 }
+
+const CATEGORIES = ['sans-serif', 'serif', 'display', 'handwriting', 'monospace'] as const
 
 export default function FontPicker({ value, onChange }: Props) {
   const [isOpen, setIsOpen] = useState(false)
@@ -23,16 +25,18 @@ export default function FontPicker({ value, onChange }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const filteredByCategory = Object.entries(FONT_OPTIONS_BY_CATEGORY).reduce((acc, [cat, fonts]) => {
-    const filtered = fonts.filter(f => f.label.toLowerCase().includes(search.toLowerCase()))
-    if (filtered.length > 0) acc[cat as FontCategory] = filtered
-    return acc
-  }, {} as Record<FontCategory, typeof FONT_OPTIONS>)
+  const filteredFonts = FONT_OPTIONS.filter(f => 
+    f.label.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div ref={ref} style={{ position: 'relative', minWidth: 160 }}>
       {/* Trigger */}
-      <button onClick={() => setIsOpen(!isOpen)} style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)} 
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
+      >
         <span style={{ fontFamily: selectedFont.value || 'inherit', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selectedFont.label}
         </span>
@@ -41,7 +45,19 @@ export default function FontPicker({ value, onChange }: Props) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: 9999, maxHeight: 350, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          position: 'absolute', 
+          top: '100%', 
+          left: 0, 
+          right: 0, 
+          marginTop: 4, 
+          background: '#fff', 
+          borderRadius: 14, 
+          border: '1px solid rgba(0,0,0,0.1)', 
+          boxShadow: '0 10px 40px rgba(0,0,0,0.15)', 
+          zIndex: 9999,
+          overflow: 'hidden'
+        }}>
           {/* Search */}
           <div style={{ padding: 10, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
             <input
@@ -55,43 +71,43 @@ export default function FontPicker({ value, onChange }: Props) {
           </div>
 
           {/* Font List */}
-          <div style={{ overflowY: 'auto', flex: 1 }}>
-            {Object.entries(filteredByCategory).map(([category, fonts]) => (
-              <div key={category}>
-                {/* Category Header */}
-                <div style={{ padding: '10px 14px 6px', fontSize: 11, fontWeight: 700, color: '#666', background: 'rgba(0,0,0,0.03)', position: 'sticky', top: 0 }}>
-                  {CATEGORY_LABELS[category as FontCategory]}
+          <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+            {CATEGORIES.map(category => {
+              const fontsInCategory = filteredFonts.filter(f => f.category === category)
+              if (fontsInCategory.length === 0) return null
+              
+              return (
+                <div key={category}>
+                  <div style={{ padding: '10px 14px 6px', fontSize: 11, fontWeight: 700, color: '#666', background: 'rgba(0,0,0,0.03)', position: 'sticky', top: 0, zIndex: 1 }}>
+                    {CATEGORY_LABELS[category]}
+                  </div>
+                  {fontsInCategory.map((font) => (
+                    <button
+                      key={font.value || 'default'}
+                      type="button"
+                      onClick={() => { onChange(font.value); setIsOpen(false); setSearch('') }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        border: 'none',
+                        background: value === font.value ? 'rgba(59,130,246,0.1)' : 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontFamily: font.value || 'inherit',
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: value === font.value ? '#3b82f6' : '#333',
+                        borderLeft: value === font.value ? '3px solid #3b82f6' : '3px solid transparent',
+                      }}
+                    >
+                      {font.label}
+                    </button>
+                  ))}
                 </div>
+              )
+            })}
 
-                {/* Fonts */}
-                {fonts.map((font) => (
-                  <button
-                    key={font.value || 'default'}
-                    onClick={() => { onChange(font.value); setIsOpen(false); setSearch('') }}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      border: 'none',
-                      background: value === font.value ? 'rgba(59,130,246,0.1)' : 'transparent',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      fontFamily: font.value || 'inherit',
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: value === font.value ? '#3b82f6' : '#333',
-                      borderLeft: value === font.value ? '3px solid #3b82f6' : '3px solid transparent',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={(e) => { if (value !== font.value) e.currentTarget.style.background = 'rgba(0,0,0,0.04)' }}
-                    onMouseLeave={(e) => { if (value !== font.value) e.currentTarget.style.background = 'transparent' }}
-                  >
-                    {font.label}
-                  </button>
-                ))}
-              </div>
-            ))}
-
-            {Object.keys(filteredByCategory).length === 0 && (
+            {filteredFonts.length === 0 && (
               <div style={{ padding: 20, textAlign: 'center', fontSize: 12, opacity: 0.5 }}>
                 Nenhuma fonte encontrada
               </div>
