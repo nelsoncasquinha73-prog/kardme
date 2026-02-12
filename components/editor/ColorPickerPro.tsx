@@ -3,6 +3,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
+// Ícone SVG de Pipeta (Eyedropper)
+function EyedropperIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 22l1-1h3l9-9" />
+      <path d="M3 21v-3l9-9" />
+      <path d="M14.5 5.5l4 4" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3l-3 3-4-4 3-3z" />
+    </svg>
+  )
+}
+
 const BASE_COLORS = [
   '#0B1220', '#111827', '#374151', '#6B7280', '#9CA3AF', '#FFFFFF',
   '#2563EB', '#3B82F6', '#60A5FA', '#22C55E', '#4ADE80',
@@ -64,7 +85,6 @@ export default function ColorPickerPro({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
 
-  // Parse gradient value on mount
   useEffect(() => {
     if (value?.includes('linear-gradient')) {
       const match = value.match(/linear-gradient$(\d+deg),\s*([^,]+),\s*([^)]+)$/)
@@ -77,7 +97,6 @@ export default function ColorPickerPro({
     }
   }, [])
 
-  // Load recent colors from localStorage
   useEffect(() => {
     const stored = localStorage.getItem('kardme_recent_colors')
     if (stored) {
@@ -111,7 +130,6 @@ export default function ColorPickerPro({
     handleGradientChange(start, end, dir)
   }
 
-  // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -133,7 +151,7 @@ export default function ColorPickerPro({
   const displayColor = isGradient ? value : value || '#ffffff'
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       {label && (
         <span style={{ fontSize: 12, opacity: 0.75, marginRight: 8 }}>{label}</span>
       )}
@@ -161,16 +179,21 @@ export default function ColorPickerPro({
           onClick={() => !disabled && onEyedropper()}
           disabled={disabled}
           style={{
-            marginLeft: 6,
-            fontSize: 13,
-            cursor: disabled ? 'not-allowed' : 'crosshair',
-            background: 'none',
-            border: 'none',
-            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: '#fff',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.5 : 1,
+            transition: 'all 0.15s',
           }}
-          title="Pipeta"
+          title="Pipeta - escolher do preview"
         >
-          🎯
+          <EyedropperIcon size={16} />
         </button>
       )}
 
@@ -208,7 +231,6 @@ export default function ColorPickerPro({
             </button>
           </div>
 
-          {/* Tabs */}
           {supportsGradient && (
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               <TabButton active={tab === 'solid'} onClick={() => setTab('solid')}>
@@ -222,7 +244,6 @@ export default function ColorPickerPro({
 
           {tab === 'solid' ? (
             <>
-              {/* Color Input */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 6 }}>
                   Código HEX
@@ -243,7 +264,6 @@ export default function ColorPickerPro({
                 />
               </div>
 
-              {/* Recent Colors */}
               {recentColors.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 8 }}>
@@ -262,7 +282,6 @@ export default function ColorPickerPro({
                 </div>
               )}
 
-              {/* Base Colors */}
               <div>
                 <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 8 }}>
                   Paleta
@@ -281,7 +300,6 @@ export default function ColorPickerPro({
             </>
           ) : (
             <>
-              {/* Gradient Presets */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 8 }}>
                   Presets
@@ -306,7 +324,6 @@ export default function ColorPickerPro({
                 </div>
               </div>
 
-              {/* Custom Gradient */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 8 }}>
                   Personalizado
@@ -337,15 +354,14 @@ export default function ColorPickerPro({
                   </div>
                 </div>
 
-                {/* Direction */}
                 <label style={{ fontSize: 11, opacity: 0.6, display: 'block', marginBottom: 6 }}>
                   Direção
                 </label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  
-{DIRECTIONS.map((d) => (
+                  {DIRECTIONS.map((d) => (
                     <button
-                      key={d.value}
+                      key={d.value
+}
                       type="button"
                       onClick={() => updateGradient(gradientStart, gradientEnd, d.value)}
                       style={{
@@ -363,7 +379,6 @@ export default function ColorPickerPro({
                   ))}
                 </div>
 
-                {/* Preview */}
                 <div style={{ marginTop: 12 }}>
                   <label style={{ fontSize: 11, opacity: 0.6, display: 'block', marginBottom: 6 }}>
                     Preview
