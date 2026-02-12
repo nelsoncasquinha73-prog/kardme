@@ -49,6 +49,7 @@ type CTAButtonsStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    iconWidthPx?: number
     iconGapPx?: number
     widthMode?: "full" | "auto" | "custom"
     customWidthPx?: number
@@ -452,6 +453,11 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           />
         </Row>
 
+
+        <Row label="Largura área ícone (px)">
+          <input type="range" min={0} max={60} step={2} value={btn.iconWidthPx ?? 0} onChange={(e) => updateBtnStyle({ iconWidthPx: Number(e.target.value) })} />
+          <span style={rightNum}>{btn.iconWidthPx ?? 0}px</span>
+        </Row>
         <Row label="Espaço ícone–texto (px)">
           <input type="range" min={4} max={20} step={1} value={btn.iconGapPx ?? 10} onChange={(e) => updateBtnStyle({ iconGapPx: Number(e.target.value) })} />
           <span style={rightNum}>{btn.iconGapPx ?? 10}px</span>

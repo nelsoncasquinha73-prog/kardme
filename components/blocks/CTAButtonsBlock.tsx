@@ -45,6 +45,7 @@ type CTAButtonsStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    iconWidthPx?: number
     iconGapPx?: number
     widthMode?: '100%' | 'auto' | 'custom'
     customWidthPx?: number
@@ -150,6 +151,9 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
     return layout === 'row' ? 'auto' : '100%'
   }
 
+  const iconWidthPx = btn.iconWidthPx ?? 0
+  const iconGapPx = btn.iconGapPx ?? 10
+
   const baseBtn: React.CSSProperties = {
     height: btn.heightPx ?? 44,
     borderRadius: btn.radius ?? 14,
@@ -161,7 +165,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: btn.iconGapPx ?? 10,
+    gap: iconWidthPx > 0 ? 0 : iconGapPx,
     textDecoration: 'none',
     fontFamily: resolveFont(btn.fontFamily),
     fontSize: btn.fontSize ?? 14,
@@ -202,12 +206,55 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
         const icon = renderIcon(b)
         const iconPos = b.icon?.position ?? 'left'
+        const hasIcon = !!icon
 
         const btnStyle: React.CSSProperties = {
           ...baseBtn,
           width: getButtonWidth(b),
         }
 
+        // If iconWidthPx is set, use fixed-width icon container for alignment
+        if (iconWidthPx > 0) {
+          const iconContainerStyle: React.CSSProperties = {
+            width: iconWidthPx,
+            minWidth: iconWidthPx,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }
+
+          return (
+            <a
+              key={b.id}
+              href={href || '#'}
+              target={target}
+              rel={rel}
+              style={btnStyle}
+              data-no-block-select="1"
+              onClick={(e) => {
+                if (!href) e.preventDefault()
+                void cardId
+              }}
+            >
+              {iconPos === 'left' && (
+                <>
+                  <span style={iconContainerStyle}>{icon}</span>
+                  <span style={{ width: iconGapPx, flexShrink: 0 }} />
+                </>
+              )}
+              <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
+              {iconPos === 'right' && (
+                <>
+                  <span style={{ width: iconGapPx, flexShrink: 0 }} />
+                  <span style={iconContainerStyle}>{icon}</span>
+                </>
+              )}
+            </a>
+          )
+        }
+
+        // Default behavior (no fixed icon width)
         return (
           <a
             key={b.id}
