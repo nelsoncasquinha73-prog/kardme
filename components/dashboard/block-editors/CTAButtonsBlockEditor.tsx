@@ -485,6 +485,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
             value={btn.bgColor ?? '#111827'}
             onChange={(val) => updateBtnStyle({ bgColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ bgColor: hex }))}
+            supportsGradient={true}
             
           />
         </Row>
