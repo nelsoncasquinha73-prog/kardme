@@ -1,33 +1,17 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import SwatchRow from '@/components/editor/SwatchRow'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 
-type VideoSettings = {
-  url: string
-  title?: string
-  thumbnailUrl?: string
-}
+type VideoSettings = { url: string; title?: string; thumbnailUrl?: string }
 
 type VideoStyle = {
   offsetY?: number
   aspectRatio?: '16:9' | '9:16' | '4:3' | '1:1'
   borderRadius?: number
   shadow?: boolean
-
-  container?: {
-    enabled?: boolean
-    bgColor?: string
-    radius?: number
-    padding?: number
-    shadow?: boolean
-    borderWidth?: number
-    borderColor?: string
-    widthMode?: 'full' | 'custom'
-    customWidthPx?: number
-  }
-
+  container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string; widthMode?: 'full' | 'custom'; customWidthPx?: number }
   titleColor?: string
   titleFontSize?: number
   titleAlign?: 'left' | 'center' | 'right'
@@ -43,395 +27,206 @@ type Props = {
 
 function parseVideoUrl(url: string): { type: string; videoId?: string; thumbnailUrl?: string } {
   if (!url) return { type: 'unknown' }
-
   const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
-  if (ytMatch) {
-    return {
-      type: 'youtube',
-      videoId: ytMatch[1],
-      thumbnailUrl: `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`,
-    }
-  }
-
+  if (ytMatch) return { type: 'youtube', videoId: ytMatch[1], thumbnailUrl: `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` }
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
-  if (vimeoMatch) {
-    return { type: 'vimeo', videoId: vimeoMatch[1] }
-  }
-
-  if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
-    return { type: 'direct' }
-  }
-
+  if (vimeoMatch) return { type: 'vimeo', videoId: vimeoMatch[1] }
+  if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) return { type: 'direct' }
   return { type: 'unknown' }
 }
 
 export default function VideoBlockEditor({ settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
-
   const s: VideoStyle = style || {}
   const c = s.container || {}
 
+  const [activeSection, setActiveSection] = useState<string | null>('video')
   const videoInfo = useMemo(() => parseVideoUrl(settings?.url || ''), [settings?.url])
 
-  const pickEyedropper = (apply: (hex: string) => void) =>
-    openPicker({
-      mode: 'eyedropper',
-      onPick: apply,
-    })
-
-  const setContainer = (patch: Partial<NonNullable<VideoStyle['container']>>) => {
-    onChangeStyle({
-      ...s,
-      container: { ...c, ...patch },
-    })
-  }
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
 
   const setStyle = (patch: Partial<VideoStyle>) => onChangeStyle({ ...s, ...patch })
   const setSettings = (patch: Partial<VideoSettings>) => onChangeSettings({ ...settings, ...patch })
+  const setContainer = (patch: Partial<NonNullable<VideoStyle['container']>>) => setStyle({ container: { ...c, ...patch } })
 
   const bgEnabled = (c.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (c.borderWidth ?? 0) > 0
   const widthCustom = c.widthMode === 'custom'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Section title="Vídeo">
-        <label style={{ fontSize: 12, opacity: 0.7 }}>URL do vídeo</label>
-        <input
-          type="text"
-          value={settings.url || ''}
-          onChange={(e) => setSettings({ url: e.target.value })}
-          placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
-          style={{
-            width: '100%',
-            fontSize: 14,
-            padding: 10,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            outline: 'none',
-          }}
-        />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
+      {/* ========== VÍDEO ========== */}
+      <CollapsibleSection title="🎬 Vídeo" subtitle="URL, título, thumbnail" isOpen={activeSection === 'video'} onToggle={() => setActiveSection(activeSection === 'video' ? null : 'video')}>
+        <Row label="URL">
+          <input value={settings.url || ''} onChange={(e) => setSettings({ url: e.target.value })} placeholder="https://youtube.com/watch?v=..." style={inputStyle} />
+        </Row>
         {videoInfo.type !== 'unknown' && settings.url && (
-          <div style={{ fontSize: 12, color: '#22c55e', marginTop: 4 }}>
-            ✓ {videoInfo.type === 'youtube' ? 'YouTube' : videoInfo.type === 'vimeo' ? 'Vimeo' : 'Vídeo direto'} detetado
-          </div>
+          <div style={{ fontSize: 11, color: '#22c55e' }}>✓ {videoInfo.type === 'youtube' ? 'YouTube' : videoInfo.type === 'vimeo' ? 'Vimeo' : 'Vídeo direto'} detetado</div>
         )}
-
         {settings.url && videoInfo.type === 'unknown' && (
-          <div style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>
-            ⚠ URL não reconhecido. Usa YouTube, Vimeo ou link direto (.mp4, .webm)
-          </div>
+          <div style={{ fontSize: 11, color: '#ef4444' }}>⚠ URL não reconhecido</div>
         )}
-
-        <label style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>Título (opcional)</label>
-        <input
-          type="text"
-          value={settings.title || ''}
-          onChange={(e) => setSettings({ title: e.target.value })}
-          placeholder="Título do vídeo"
-          style={{
-            width: '100%',
-            fontSize: 14,
-            padding: 10,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            outline: 'none',
-          }}
-        />
-
-        <label style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>Thumbnail personalizada (opcional)</label>
-        <input
-          type="text"
-          value={settings.thumbnailUrl || ''}
-          onChange={(e) => setSettings({ thumbnailUrl: e.target.value })}
-          placeholder="URL da imagem de capa"
-          style={{
-            width: '100%',
-            fontSize: 14,
-            padding: 10,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            outline: 'none',
-          }}
-        />
+        <Row label="Título">
+          <input value={settings.title || ''} onChange={(e) => setSettings({ title: e.target.value })} placeholder="Título do vídeo" style={inputStyle} />
+        </Row>
+        <Row label="Thumbnail">
+          <input value={settings.thumbnailUrl || ''} onChange={(e) => setSettings({ thumbnailUrl: e.target.value })} placeholder="URL da imagem de capa" style={inputStyle} />
+        </Row>
         {videoInfo.thumbnailUrl && !settings.thumbnailUrl && (
-          <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>
-            Thumbnail automática do YouTube será usada
-          </div>
+          <div style={{ fontSize: 10, opacity: 0.5 }}>Thumbnail automática do YouTube será usada</div>
         )}
-      </Section>
+      </CollapsibleSection>
 
-      <Section title="Aparência">
+      {/* ========== APARÊNCIA ========== */}
+      <CollapsibleSection title="🎨 Aparência" subtitle="Proporção, cantos, sombra" isOpen={activeSection === 'appearance'} onToggle={() => setActiveSection(activeSection === 'appearance' ? null : 'appearance')}>
         <Row label="Proporção">
-          <select
-            value={s.aspectRatio ?? '16:9'}
-            onChange={(e) => setStyle({ aspectRatio: e.target.value as any })}
-            style={{ fontSize: 14, padding: 6, borderRadius: 6 }}
-          >
-            <option value="16:9">16:9 (Paisagem)</option>
-            <option value="9:16">9:16 (Vertical)</option>
-            <option value="4:3">4:3 (Clássico)</option>
-            <option value="1:1">1:1 (Quadrado)</option>
+          <select value={s.aspectRatio ?? '16:9'} onChange={(e) => setStyle({ aspectRatio: e.target.value as any })} style={selectStyle}>
+            <option value="16:9">16:9 Paisagem</option>
+            <option value="9:16">9:16 Vertical</option>
+            <option value="4:3">4:3 Clássico</option>
+            <option value="1:1">1:1 Quadrado</option>
           </select>
         </Row>
-
-        <Row label="Cantos arredondados">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={s.borderRadius ?? 12}
-            onChange={(e) => setStyle({ borderRadius: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{s.borderRadius ?? 12}px</span>
+        <Row label="Cantos">
+          <input type="range" min={0} max={32} value={s.borderRadius ?? 12} onChange={(e) => setStyle({ borderRadius: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{s.borderRadius ?? 12}px</span>
         </Row>
-
         <Row label="Sombra">
           <Toggle active={s.shadow !== false} onClick={() => setStyle({ shadow: s.shadow === false })} />
         </Row>
-      </Section>
+      </CollapsibleSection>
 
+      {/* ========== TÍTULO ========== */}
       {settings.title && (
-        <Section title="Título">
-          <Row label="Mostrar título">
+        <CollapsibleSection title="📝 Título" subtitle="Cor, tamanho, alinhamento" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
+          <Row label="Mostrar">
             <Toggle active={s.showTitle !== false} onClick={() => setStyle({ showTitle: s.showTitle === false })} />
           </Row>
-
           {s.showTitle !== false && (
             <>
               <Row label="Cor">
-                <SwatchRow
-                  value={s.titleColor ?? '#111827'}
-                  onChange={(hex) => setStyle({ titleColor: hex })}
-                  onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))}
-                />
+                <ColorPickerPro value={s.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} />
               </Row>
-
               <Row label="Tamanho">
-                <input
-                  type="range"
-                  min={12}
-                  max={24}
-                  step={1}
-                  value={s.titleFontSize ?? 14}
-                  onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })}
-                />
-                <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{s.titleFontSize ?? 14}px</span>
+                <input type="range" min={12} max={24} value={s.titleFontSize ?? 14} onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+                <span style={rightNum}>{s.titleFontSize ?? 14}px</span>
               </Row>
-
               <Row label="Alinhamento">
-                <Button onClick={() => setStyle({ titleAlign: 'left' })} active={s.titleAlign === 'left'}>
-                  Esq
-                </Button>
-                <Button onClick={() => setStyle({ titleAlign: 'center' })} active={(s.titleAlign ?? 'left') === 'center'}>
-                  Centro
-                </Button>
-                <Button onClick={() => setStyle({ titleAlign: 'right' })} active={s.titleAlign === 'right'}>
-                  Dir
-                </Button>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {(['left', 'center', 'right'] as const).map((a) => (
+                    <MiniButton key={a} active={(s.titleAlign ?? 'left') === a} onClick={() => setStyle({ titleAlign: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>
+                  ))}
+                </div>
               </Row>
             </>
           )}
-        </Section>
+        </CollapsibleSection>
       )}
 
-      <Section title="Bloco (fundo, borda)">
+      {/* ========== CONTAINER ========== */}
+      <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
         <Row label="Fundo">
           <Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} />
         </Row>
-
         {bgEnabled && (
           <Row label="Cor fundo">
-            <SwatchRow
-              value={c.bgColor ?? '#ffffff'}
-              onChange={(hex) => setContainer({ bgColor: hex })}
-              onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))}
-            />
+            <ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
           </Row>
         )}
-
-        <Row label="Sombra bloco">
-          <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !(c.shadow === true) })} />
-        </Row>
-
         <Row label="Borda">
           <Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} />
         </Row>
-
         {borderEnabled && (
           <>
             <Row label="Espessura">
-              <input
-                type="range"
-                min={1}
-                max={6}
-                step={1}
-                value={c.borderWidth ?? 1}
-                onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })}
-              />
-              <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.borderWidth ?? 1}px</span>
+              <input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
+              <span style={rightNum}>{c.borderWidth ?? 1}px</span>
             </Row>
-
             <Row label="Cor borda">
-              <SwatchRow
-                value={c.borderColor ?? '#e5e7eb'}
-                onChange={(hex) => setContainer({ borderColor: hex })}
-                onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))}
-              />
+              <ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
             </Row>
           </>
         )}
-
-        <Row label="Raio bloco">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={c.radius ?? 0}
-            onChange={(e) => setContainer({ radius: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.radius ?? 0}px</span>
+        <Row label="Sombra">
+          <Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} />
         </Row>
-
+        <Row label="Raio">
+          <input type="range" min={0} max={32} value={c.radius ?? 0} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{c.radius ?? 0}px</span>
+        </Row>
         <Row label="Padding">
-          <input
-            type="range"
-            min={0}
-            max={28}
-            step={1}
-            value={c.padding ?? 0}
-            onChange={(e) => setContainer({ padding: Number(e.target.value) })}
-          />
-          <span style={{ width: 36, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.padding ?? 0}px</span>
+          <input type="range" min={0} max={28} value={c.padding ?? 0} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{c.padding ?? 0}px</span>
         </Row>
-
-        <Row label="Largura personalizada">
+        <Row label="Largura custom">
           <Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} />
         </Row>
-
         {widthCustom && (
           <Row label="Largura">
-            <input
-              type="range"
-              min={200}
-              max={400}
-              step={10}
-              value={c.customWidthPx ?? 320}
-              onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })}
-            />
-            <span style={{ width: 42, textAlign: 'right', fontSize: 12, opacity: 0.7 }}>{c.customWidthPx ?? 320}px</span>
+            <input type="range" min={200} max={400} step={10} value={c.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} />
+            <span style={rightNum}>{c.customWidthPx ?? 320}px</span>
           </Row>
         )}
-      </Section>
+      </CollapsibleSection>
 
-      <Section title="Posição">
-        <Row label="Mover (Y)">
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) - 4 })} style={miniBtn}>
-              ⬆️
-            </button>
-            <button type="button" onClick={() => setStyle({ offsetY: (s.offsetY ?? 0) + 4 })} style={miniBtn}>
-              ⬇️
-            </button>
-            <button type="button" onClick={() => setStyle({ offsetY: 0 })} style={miniBtn}>
-              Reset
-            </button>
-            <span style={{ fontSize: 12, opacity: 0.7, width: 70, textAlign: 'right' }}>{s.offsetY ?? 0}px</span>
-          </div>
+      {/* ========== POSIÇÃO ========== */}
+      <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
+        <Row label="Offset Y">
+          <input type="range" min={-80} max={80} step={4} value={s.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{s.offsetY ?? 0}px</span>
         </Row>
-      </Section>
+        <Row label="">
+          <Button onClick={() => setStyle({ offsetY: 0 })}>Reset</Button>
+        </Row>
+      </CollapsibleSection>
+
     </div>
   )
 }
 
-function Section({ title, children }: any) {
+// ===== COMPONENTES AUXILIARES =====
+
+const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
+const selectStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 110 }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13 }
+
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        padding: 14,
-        border: '1px solid rgba(0,0,0,0.08)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-      }}
-    >
-      <strong style={{ fontSize: 13 }}>{title}</strong>
-      {children}
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+      <button onClick={onToggle} style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
+        </div>
+        <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</div>
+      </button>
+      {isOpen && <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>}
     </div>
   )
 }
 
-function Row({ label, children }: any) {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{children}</div>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, minWidth: 80 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>{children}</div>
     </div>
   )
 }
 
-function Button({ children, onClick, active }: any) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        padding: '8px 10px',
-        borderRadius: 12,
-        border: '1px solid rgba(0,0,0,0.12)',
-        background: active ? 'rgba(0,0,0,0.06)' : '#fff',
-        cursor: 'pointer',
-        fontWeight: 800,
-        fontSize: 12,
-      }}
-    >
-      {children}
-    </button>
-  )
+function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>{children}</button>
 }
 
-function Toggle({ active, onClick }: any) {
-  return (
-    <button
-      type="button"
-      onPointerDown={(e) => e.preventDefault()}
-      onClick={() => onClick?.()}
-      style={{
-        width: 46,
-        height: 26,
-        borderRadius: 999,
-        background: active ? 'var(--color-primary)' : '#e5e7eb',
-        position: 'relative',
-        border: 'none',
-        cursor: 'pointer',
-      }}
-    >
-      <span
-        style={{
-          position: 'absolute',
-          top: 3,
-          left: active ? 22 : 4,
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#fff',
-        }}
-      />
-    </button>
-  )
+function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
+  return <button onClick={onClick} style={{ padding: '6px 14px', borderRadius: 10, border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)', background: active ? 'rgba(59,130,246,0.1)' : '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11, color: active ? '#3b82f6' : '#333', minWidth: 50, whiteSpace: 'nowrap' }}>{children}</button>
 }
 
-const miniBtn: React.CSSProperties = {
-  padding: '6px 8px',
-  borderRadius: 10,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  cursor: 'pointer',
-  fontWeight: 800,
-  fontSize: 12,
+function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ width: 44, height: 24, borderRadius: 999, background: active ? '#3b82f6' : '#e5e7eb', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}>
+      <span style={{ position: 'absolute', top: 2, left: active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
+    </button>
+  )
 }
