@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/extension-bubble-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
@@ -74,16 +75,6 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escreve
         
         <button type="button" onClick={setLink} style={btnStyle(editor.isActive('link'))} title="Link">🔗</button>
       </div>
-      
-      {/* Bubble Menu */}
-      <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-        <div style={{ display: 'flex', gap: 2, padding: 6, background: '#1f2937', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} style={{ ...btnStyle(editor.isActive('bold')), color: '#fff', background: editor.isActive('bold') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><strong>B</strong></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} style={{ ...btnStyle(editor.isActive('italic')), color: '#fff', background: editor.isActive('italic') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><em>I</em></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} style={{ ...btnStyle(editor.isActive('underline')), color: '#fff', background: editor.isActive('underline') ? 'rgba(255,255,255,0.2)' : 'transparent' }}><u>U</u></button>
-          <button type="button" onClick={setLink} style={{ ...btnStyle(editor.isActive('link')), color: '#fff', background: editor.isActive('link') ? 'rgba(255,255,255,0.2)' : 'transparent' }}>🔗</button>
-        </div>
-      </BubbleMenu>
       
       {/* Editor */}
       <EditorContent editor={editor} />
