@@ -19,7 +19,7 @@ type LeadFormStyle = {
   heading?: { fontFamily?: string; fontWeight?: number; color?: string; align?: 'left' | 'center' | 'right'; fontSize?: number }
   container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; borderWidth?: number; borderColor?: string; shadow?: boolean; widthMode?: 'full' | 'custom'; customWidthPx?: number }
   inputs?: { bgColor?: string; textColor?: string; borderColor?: string; radius?: number; fontSize?: number; paddingY?: number; paddingX?: number; labelColor?: string; labelSize?: number; placeholderColor?: string }
-  button?: { bgColor?: string; textColor?: string; radius?: number; height?: number; fontWeight?: number }
+   button?: { bgColor?: string; textColor?: string; radius?: number; height?: number; fontWeight?: number; borderWidth?: number; borderColor?: string; shadow?: boolean }
 }
 
 type Props = {
@@ -215,8 +215,8 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         </Row>
       </CollapsibleSection>
 
-      {/* ========== BOTÃO ========== */}
-      <CollapsibleSection title="🔘 Botão" subtitle="Cor, altura, raio" isOpen={activeSection === 'button'} onToggle={() => setActiveSection(activeSection === 'button' ? null : 'button')}>
+             {/* ========== BOTÃO ========== */}
+      <CollapsibleSection title="🔘 Botão" subtitle="Cor, altura, raio, borda, sombra" isOpen={activeSection === 'button'} onToggle={() => setActiveSection(activeSection === 'button' ? null : 'button')}>
         <Row label="Cor fundo">
           <ColorPickerPro value={button.bgColor ?? '#3b82f6'} onChange={(hex) => setButton({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ bgColor: hex }))} />
         </Row>
@@ -231,7 +231,25 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
           <input type="range" min={8} max={24} value={button.radius ?? 14} onChange={(e) => setButton({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{button.radius ?? 14}px</span>
         </Row>
+        <Row label="Borda">
+          <Toggle active={(button.borderWidth ?? 0) > 0} onClick={() => setButton({ borderWidth: (button.borderWidth ?? 0) > 0 ? 0 : 1 })} />
+        </Row>
+        {(button.borderWidth ?? 0) > 0 && (
+          <>
+            <Row label="Espessura">
+              <input type="range" min={1} max={4} value={button.borderWidth ?? 1} onChange={(e) => setButton({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
+              <span style={rightNum}>{button.borderWidth ?? 1}px</span>
+            </Row>
+            <Row label="Cor borda">
+              <ColorPickerPro value={button.borderColor ?? 'rgba(0,0,0,0.15)'} onChange={(hex) => setButton({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ borderColor: hex }))} />
+            </Row>
+          </>
+        )}
+        <Row label="Sombra">
+          <Toggle active={button.shadow ?? false} onClick={() => setButton({ shadow: !button.shadow })} />
+        </Row>
       </CollapsibleSection>
+
 
       {/* ========== POSIÇÃO ========== */}
       <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
