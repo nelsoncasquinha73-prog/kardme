@@ -31,7 +31,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
   const c = st.container || {}
   const [activeSection, setActiveSection] = useState<string | null>('content')
 
-  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
   const setSettings = (patch: Partial<FreeTextSettings>) => onChangeSettings({ ...s, ...patch })
   const setStyle = (patch: Partial<FreeTextStyle>) => onChangeStyle({ ...st, ...patch })
   const setContainer = (patch: Partial<NonNullable<FreeTextStyle['container']>>) => setStyle({ container: { ...c, ...patch } })

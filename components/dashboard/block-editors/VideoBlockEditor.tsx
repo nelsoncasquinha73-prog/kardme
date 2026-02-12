@@ -37,7 +37,7 @@ export default function VideoBlockEditor({ cardId, settings, style, onChangeSett
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const videoInfo = useMemo(() => parseVideoUrl(settings?.url || ''), [settings?.url])
-  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
   const setStyle = (patch: Partial<VideoStyle>) => onChangeStyle({ ...s, ...patch })
   const setSettings = (patch: Partial<VideoSettings>) => onChangeSettings({ ...settings, ...patch })
   const setContainer = (patch: Partial<NonNullable<VideoStyle['container']>>) => setStyle({ container: { ...c, ...patch } })

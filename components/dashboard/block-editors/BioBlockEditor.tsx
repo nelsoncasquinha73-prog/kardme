@@ -25,7 +25,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const c = s.container || {}
   const [activeSection, setActiveSection] = useState<string | null>('text')
 
-  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
   const setStyle = (patch: Partial<BioStyle>) => onChangeStyle({ ...s, ...patch })
   const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => setStyle({ container: { ...c, ...patch } })
 

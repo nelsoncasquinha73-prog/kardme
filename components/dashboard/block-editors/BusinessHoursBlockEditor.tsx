@@ -73,7 +73,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
 
   const [activeSection, setActiveSection] = useState<string | null>('title')
 
-  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ onPick: apply })
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
   const setSettings = (patch: Partial<BusinessHoursSettings>) => onChangeSettings({ ...s, ...patch })
   const setStyle = (patch: Partial<BusinessHoursStyle>) => onChangeStyle({ ...st, ...patch })
