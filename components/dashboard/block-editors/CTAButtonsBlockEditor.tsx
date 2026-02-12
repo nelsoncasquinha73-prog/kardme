@@ -3,7 +3,7 @@
 import React, { useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
-import SwatchRow from '@/components/editor/SwatchRow'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
@@ -76,7 +76,7 @@ type Props = {
 }
 
 function uid(prefix = 'cta') {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+  return `\${prefix}-\${Date.now().toString(36)}-\${Math.random().toString(36).slice(2, 9)}`
 }
 
 function safeSeg(v: any) {
@@ -119,7 +119,6 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
 
   const removeButton = (id: string) => updateSettings({ buttons: buttons.filter((b) => b.id !== id) })
 
-  // Upload icon
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const pickFileFor = (buttonId: string) => {
@@ -145,7 +144,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
       const ext = (file.name.split('.').pop() || 'png').toLowerCase()
       const safeCardId = safeSeg(cardId || 'no-card')
       const safeTargetId = safeSeg(targetId)
-      const path = `cards/${safeCardId}/cta-icons/${safeTargetId}-${Date.now()}.${ext}`
+      const path = `cards/\${safeCardId}/cta-icons/\${safeTargetId}-\${Date.now()}.\${ext}`
 
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
         upsert: true,
@@ -270,7 +269,6 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                 <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder="Ex.: Marcar visita" />
               </Row>
 
-
               <Row label="Tipo de ação">
                 <select value={b.actionType ?? "link"} onChange={(e) => updateButton(b.id, { actionType: e.target.value as any })} style={select}>
                   <option value="link">Link (URL)</option>
@@ -306,6 +304,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   </Row>
                 </>
               )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 800, opacity: 0.75 }}>Ícone</span>
 
@@ -409,17 +408,18 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label="Cor de fundo">
-          <SwatchRow
+          <ColorPickerPro
             value={btn.bgColor ?? '#111827'}
-            onChange={(hex) => updateBtnStyle({ bgColor: hex })}
+            onChange={(val) => updateBtnStyle({ bgColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ bgColor: hex }))}
+            gradientEnabled
           />
         </Row>
 
         <Row label="Cor do texto">
-          <SwatchRow
+          <ColorPickerPro
             value={btn.textColor ?? '#ffffff'}
-            onChange={(hex) => updateBtnStyle({ textColor: hex })}
+            onChange={(val) => updateBtnStyle({ textColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ textColor: hex }))}
           />
         </Row>
@@ -454,9 +454,9 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label="Cor da borda">
-          <SwatchRow
+          <ColorPickerPro
             value={btn.borderColor ?? 'rgba(255,255,255,0.25)'}
-            onChange={(hex) => updateBtnStyle({ borderColor: hex })}
+            onChange={(val) => updateBtnStyle({ borderColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ borderColor: hex }))}
           />
         </Row>
@@ -482,7 +482,6 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         )}
       </Section>
 
-
       <Section title="Container">
         <Row label="Ativar container">
           <Toggle active={container.enabled !== false} onClick={() => updateContainer({ enabled: !(container.enabled !== false) })} />
@@ -497,10 +496,11 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
 
         {(container.bgColor ?? "transparent") !== "transparent" && (
           <Row label="Cor do fundo">
-            <SwatchRow
+            <ColorPickerPro
               value={container.bgColor ?? "#ffffff"}
-              onChange={(hex) => updateContainer({ bgColor: hex })}
+              onChange={(val) => updateContainer({ bgColor: val })}
               onEyedropper={() => pickEyedropper((hex) => updateContainer({ bgColor: hex }))}
+              gradientEnabled
             />
           </Row>
         )}
@@ -523,9 +523,9 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor da borda">
-              <SwatchRow
+              <ColorPickerPro
                 value={container.borderColor ?? "rgba(0,0,0,0.12)"}
-                onChange={(hex) => updateContainer({ borderColor: hex })}
+                onChange={(val) => updateContainer({ borderColor: val })}
                 onEyedropper={() => pickEyedropper((hex) => updateContainer({ borderColor: hex }))}
               />
             </Row>
@@ -556,6 +556,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           </Row>
         )}
       </Section>
+
       <Section title="Posição">
         <Row label="Deslocamento Y (px)">
           <input type="range" min={-80} max={80} step={1} value={st.offsetY ?? 0} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} />
