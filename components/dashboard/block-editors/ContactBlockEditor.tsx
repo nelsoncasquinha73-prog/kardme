@@ -459,7 +459,6 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               <Row label="Cor texto">
                 <ColorPickerPro value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
               </Row>
-              <Row label="Fonte">
               <Row label="Fonte"><FontPicker value={b.fontFamily ?? btnDefaults.fontFamily ?? ""} onChange={(v) => setBtn(key, { fontFamily: v || undefined })} /></Row>
               <Row label="Peso">
                 <select value={String(b.fontWeight ?? btnDefaults.fontWeight ?? 800)} onChange={(e) => setBtn(key, { fontWeight: clampNum(e.target.value, 800) })} style={selectStyle}>
