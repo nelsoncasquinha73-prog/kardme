@@ -190,7 +190,6 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
           <input type="range" min={10} max={22} value={st.textFontSize ?? 13} onChange={(e) => setStyle({ textFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.textFontSize ?? 13}px</span>
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => setStyle({ textFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.textFontWeight ?? 700)} onChange={(e) => setStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>

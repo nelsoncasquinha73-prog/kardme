@@ -280,7 +280,6 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
         <Row label="Negrito">
           <Toggle active={st.headingBold !== false} onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => updateStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>

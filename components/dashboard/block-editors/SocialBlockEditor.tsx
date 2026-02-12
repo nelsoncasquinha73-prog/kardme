@@ -409,7 +409,6 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         <Row label="Cor texto">
           <ColorPickerPro value={btn.textColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))} />
         </Row>
-        <Row label="Fonte">
         <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: v || "" }))} /></Row>
         <Row label="Peso">
           <select value={String(btn.fontWeight ?? 800)} onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontWeight: clampNum(e.target.value, 800) }))} style={selectStyle}>
