@@ -157,11 +157,11 @@ export default function PerfilPage() {
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-          <div><div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Início do plano</div><div style={{ fontSize: 14, fontWeight: 600 }}>{formatDate(profile?.plan_started_at)}</div></div>
+          <div><div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Início do plano</div><div style={{ fontSize: 14, fontWeight: 600 }}>{formatDate(profile?.plan_started_at ?? null)}</div></div>
           <div>
             <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>{isExpired ? 'Expirou em' : 'Renova em'}</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: isExpired ? '#DC2626' : 'inherit' }}>
-              {formatDate(profile?.plan_expires_at)}
+              {formatDate(profile?.plan_expires_at ?? null)}
               {isExpired && <span style={{ marginLeft: 8, fontSize: 11, color: '#DC2626' }}>⚠️ Expirado</span>}
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function PerfilPage() {
         </div>
         <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Membro desde</div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>{formatDate(profile?.created_at)}</div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{formatDate(profile?.created_at ?? null)}</div>
         </div>
       </div>
     </div>
