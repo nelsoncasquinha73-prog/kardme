@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import SwatchRow from '@/components/editor/SwatchRow'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { FONT_OPTIONS } from '@/lib/fontes'
 
@@ -120,10 +120,11 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
         </Row>
 
         <Row label={t('editor.text_color')}>
-          <SwatchRow
+          <ColorPickerPro
             value={s.textColor ?? '#111827'}
             onChange={(hex) => setStyle({ textColor: hex })}
             onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))}
+            supportsGradient={false}
           />
         </Row>
 
@@ -161,10 +162,11 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
 
         {bgEnabled && (
           <Row label={t('editor.bg_color')}>
-            <SwatchRow
+            <ColorPickerPro
               value={c.bgColor ?? '#ffffff'}
               onChange={(hex) => setContainer({ bgColor: hex })}
               onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))}
+              supportsGradient={true}
             />
           </Row>
         )}
@@ -194,10 +196,11 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
             </Row>
 
             <Row label={t('editor.border_color')}>
-              <SwatchRow
+              <ColorPickerPro
                 value={c.borderColor ?? '#e5e7eb'}
                 onChange={(hex) => setContainer({ borderColor: hex })}
                 onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))}
+                supportsGradient={false}
               />
             </Row>
           </>
