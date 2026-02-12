@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
@@ -244,11 +244,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
         </Row>
         <Row label="Fonte">
-          <select value={st.headingFontFamily ?? ''} onChange={(e) => patch((d) => (d.style.headingFontFamily = e.target.value || ''))} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => patch((d) => (d.style.headingFontFamily = v || ""))} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => patch((d) => (d.style.headingFontWeight = clampNum(e.target.value, 900)))} style={selectStyle}>
             <option value="400">Normal</option>
@@ -415,11 +411,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           <ColorPickerPro value={btn.textColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))} />
         </Row>
         <Row label="Fonte">
-          <select value={btn.fontFamily ?? ''} onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: e.target.value || '' }))} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: v || "" }))} /></Row>
         <Row label="Peso">
           <select value={String(btn.fontWeight ?? 800)} onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, fontWeight: clampNum(e.target.value, 800) }))} style={selectStyle}>
             <option value="400">Normal</option>

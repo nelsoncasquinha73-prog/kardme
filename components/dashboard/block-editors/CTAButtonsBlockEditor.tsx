@@ -4,7 +4,7 @@ import React, { useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 type IconMode = 'none' | 'library' | 'upload'
@@ -424,15 +424,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           />
         </Row>
 
-        <Row label="Fonte">
-          <select value={btn.fontFamily ?? ''} onChange={(e) => updateBtnStyle({ fontFamily: e.target.value || undefined })} style={select}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => updateBtnStyle({ fontFamily: v || undefined })} /></Row>
         </Row>
 
         <Row label="Tamanho do texto (px)">

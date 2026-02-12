@@ -5,7 +5,7 @@ import { ProfileSettings } from '@/components/blocks/types/profile'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 type Props = {
@@ -424,18 +424,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
             <select
-              value={local.name?.style?.fontFamily ?? ''}
-              onChange={(e) => patch((d) => {
-                d.name.style = d.name.style || {}
-                d.name.style.fontFamily = e.target.value || undefined
-              })}
-              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
-            >
-              <option value="">Fonte padrão</option>
-              {FONT_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <FontPicker value={local.name?.style?.fontFamily ?? ""} onChange={(v) => patch((d) => { d.name.style = d.name.style || {}; d.name.style.fontFamily = v || undefined })} />
 
             <SegmentedSize
               value={(local.name?.size ?? 'md') as 'sm' | 'md' | 'lg'}
@@ -483,19 +472,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <select
-              value={local.profession?.style?.fontFamily ?? ''}
-              onChange={(e) => patch((d) => {
-                d.profession.style = d.profession.style || {}
-                d.profession.style.fontFamily = e.target.value || undefined
-              })}
-              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
-            >
-              <option value="">Fonte padrão</option>
-              {FONT_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <FontPicker value={local.profession?.style?.fontFamily ?? ""} onChange={(v) => patch((d) => { d.profession.style = d.profession.style || {}; d.profession.style.fontFamily = v || undefined })} />
 
             <SegmentedSize
               value={(local.profession?.size ?? 'sm') as 'sm' | 'md' | 'lg'}
@@ -547,20 +524,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <select
-              value={local.company?.style?.fontFamily ?? ''}
-              onChange={(e) => patch((d) => {
-                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
-                d.company.style = d.company.style || {}
-                d.company.style.fontFamily = e.target.value || undefined
-              })}
-              style={{ ...selectStyle, flex: 1, minWidth: 120 }}
-            >
-              <option value="">Fonte padrão</option>
-              {FONT_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <FontPicker value={local.company?.style?.fontFamily ?? ""} onChange={(v) => patch((d) => { d.company = d.company || { enabled: true, text: "", size: "sm", color: "#6B7280" }; d.company.style = d.company.style || {}; d.company.style.fontFamily = v || undefined })} />
 
             <SegmentedSize
               value={(local.company?.size ?? 'sm') as 'sm' | 'md' | 'lg'}

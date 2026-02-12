@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 
 type LeadFormSettings = {
   title?: string
@@ -122,11 +122,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
           <ColorPickerPro value={heading.color ?? '#111827'} onChange={(hex) => setHeading({ color: hex })} onEyedropper={() => pickEyedropper((hex) => setHeading({ color: hex }))} />
         </Row>
         <Row label="Fonte">
-          <select value={heading.fontFamily ?? ''} onChange={(e) => setHeading({ fontFamily: e.target.value || '' })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={heading.fontFamily ?? ""} onChange={(v) => setHeading({ fontFamily: v || "" })} /></Row>
         <Row label="Peso">
           <select value={String(heading.fontWeight ?? 900)} onChange={(e) => setHeading({ fontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 
 type FreeTextSettings = { title?: string; text: string }
 type FreeTextStyle = {
@@ -64,11 +64,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
         </Row>
         <Row label="Negrito"><Toggle active={st.titleBold !== false} onClick={() => setStyle({ titleBold: !(st.titleBold !== false) })} /></Row>
         <Row label="Fonte">
-          <select value={st.titleFontFamily ?? ''} onChange={(e) => setStyle({ titleFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.titleFontFamily ?? ""} onChange={(v) => setStyle({ titleFontFamily: v || undefined })} /></Row>
       </CollapsibleSection>
 
       {/* ========== TEXTO ========== */}
@@ -84,12 +80,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
           </div>
         </Row>
         <Row label="Negrito"><Toggle active={st.bold === true} onClick={() => setStyle({ bold: !st.bold })} /></Row>
-        <Row label="Fonte">
-          <select value={st.fontFamily ?? ''} onChange={(e) => setStyle({ fontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}

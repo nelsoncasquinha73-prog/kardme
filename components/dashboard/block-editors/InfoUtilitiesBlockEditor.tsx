@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 export type InfoItemType = 'address' | 'wifi' | 'image_button' | 'link' | 'hours_text' | 'reviews_embed'
@@ -281,11 +281,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
           <Toggle active={st.headingBold !== false} onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })} />
         </Row>
         <Row label="Fonte">
-          <select value={st.headingFontFamily ?? ''} onChange={(e) => updateStyle({ headingFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => updateStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="500">Medium</option>
@@ -306,11 +302,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
           <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
         </Row>
         <Row label="Fonte">
-          <select value={st.textFontFamily ?? ''} onChange={(e) => updateStyle({ textFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.textFontWeight ?? 600)} onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>

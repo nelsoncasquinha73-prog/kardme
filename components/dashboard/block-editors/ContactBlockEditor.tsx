@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 type ContactChannel = 'phone' | 'email' | 'whatsapp' | 'telegram'
@@ -220,11 +220,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
         </Row>
         <Row label="Fonte">
-          <select value={st.headingFontFamily ?? ''} onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => setStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => setStyle({ headingFontWeight: clampNum(e.target.value, 900) })} style={selectStyle}>
             <option value="400">Normal</option>
@@ -380,11 +376,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           <ColorPickerPro value={btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))} />
         </Row>
         <Row label="Fonte">
-          <select value={btnDefaults.fontFamily ?? ''} onChange={(e) => setBtnDefaults({ fontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={btnDefaults.fontFamily ?? ""} onChange={(v) => setBtnDefaults({ fontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(btnDefaults.fontWeight ?? 800)} onChange={(e) => setBtnDefaults({ fontWeight: clampNum(e.target.value, 800) })} style={selectStyle}>
             <option value="400">Normal</option>
@@ -470,11 +462,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                 <ColorPickerPro value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
               </Row>
               <Row label="Fonte">
-                <select value={b.fontFamily ?? btnDefaults.fontFamily ?? ''} onChange={(e) => setBtn(key, { fontFamily: e.target.value || undefined })} style={selectStyle}>
-                  <option value="">Padrão</option>
-                  {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-                </select>
-              </Row>
+              <Row label="Fonte"><FontPicker value={b.fontFamily ?? btnDefaults.fontFamily ?? ""} onChange={(v) => setBtn(key, { fontFamily: v || undefined })} /></Row>
               <Row label="Peso">
                 <select value={String(b.fontWeight ?? btnDefaults.fontWeight ?? 800)} onChange={(e) => setBtn(key, { fontWeight: clampNum(e.target.value, 800) })} style={selectStyle}>
                   <option value="400">Normal</option>

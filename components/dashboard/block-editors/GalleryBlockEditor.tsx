@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 type GalleryItem = {
@@ -174,11 +174,7 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
           <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
         </Row>
         <Row label="Fonte">
-          <select value={st.headingFontFamily ?? ''} onChange={(e) => setStyle({ headingFontFamily: e.target.value || '' })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => setStyle({ headingFontFamily: v || "" })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>

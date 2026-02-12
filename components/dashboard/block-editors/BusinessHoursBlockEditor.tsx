@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 
 type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 type TimeRange = { from: string; to: string; label?: string }
@@ -119,11 +119,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
           <Toggle active={st.headingBold !== false} onClick={() => setStyle({ headingBold: !(st.headingBold !== false) })} />
         </Row>
         <Row label="Fonte">
-          <select value={st.headingFontFamily ?? ''} onChange={(e) => setStyle({ headingFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => setStyle({ headingFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => setStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>
@@ -196,11 +192,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
           <span style={rightNum}>{st.textFontSize ?? 13}px</span>
         </Row>
         <Row label="Fonte">
-          <select value={st.textFontFamily ?? ''} onChange={(e) => setStyle({ textFontFamily: e.target.value || undefined })} style={selectStyle}>
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
-          </select>
-        </Row>
+        <Row label="Fonte"><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => setStyle({ textFontFamily: v || undefined })} /></Row>
         <Row label="Peso">
           <select value={String(st.textFontWeight ?? 700)} onChange={(e) => setStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>

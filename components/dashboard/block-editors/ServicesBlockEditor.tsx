@@ -6,7 +6,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import SwatchRow from '@/components/editor/SwatchRow'
-import { FONT_OPTIONS } from '@/lib/fontes'
+import FontPicker from '@/components/editor/FontPicker'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 
 export type ServiceItem = {
@@ -357,20 +357,7 @@ export default function ServicesBlockEditor({
         </Row>
 
         <Row label="Fonte do título">
-          <select
-            value={st.headingFontFamily ?? ''}
-            onChange={(e) => updateStyle({ headingFontFamily: e.target.value || '' })}
-            style={select}
-            data-no-block-select="1"
-            {...editEvents}
-          >
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <Row label="Fonte do título"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => updateStyle({ headingFontFamily: v || "" })} /></Row>
         </Row>
 
         <Row label="Peso do título">
