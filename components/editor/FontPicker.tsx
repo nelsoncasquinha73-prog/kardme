@@ -41,7 +41,7 @@ export default function FontPicker({ value, onChange }: Props) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: 1000, maxHeight: 350, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: 9999, maxHeight: 350, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Search */}
           <div style={{ padding: 10, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
             <input
