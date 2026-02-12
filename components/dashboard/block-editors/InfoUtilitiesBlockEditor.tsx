@@ -1,20 +1,13 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
-import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
-import SwatchRow from '@/components/editor/SwatchRow'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { FONT_OPTIONS } from '@/lib/fontes'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
-export type InfoItemType =
-  | 'address'
-  | 'wifi'
-  | 'image_button'
-  | 'link'
-  | 'hours_text'
-  | 'reviews_embed'
+export type InfoItemType = 'address' | 'wifi' | 'image_button' | 'link' | 'hours_text' | 'reviews_embed'
 
 export type InfoItem = {
   id: string
@@ -28,7 +21,6 @@ export type InfoItem = {
   imageSrc?: string
   imageAlt?: string
   embedHtml?: string
-
   iconMode?: 'default' | 'image'
   iconImageSrc?: string
 }
@@ -41,7 +33,6 @@ export type InfoUtilitiesSettings = {
 
 export type InfoUtilitiesStyle = {
   offsetY?: number
-
   container?: {
     bgColor?: string
     radius?: number
@@ -52,33 +43,26 @@ export type InfoUtilitiesStyle = {
     widthMode?: 'full' | 'custom'
     customWidthPx?: number
   }
-
   headingColor?: string
   headingBold?: boolean
   headingFontFamily?: string
   headingFontWeight?: number
   headingFontSize?: number
   headingAlign?: 'left' | 'center' | 'right'
-
   textColor?: string
   textFontFamily?: string
   textFontWeight?: number
   textFontSize?: number
-
   iconSizePx?: number
   iconColor?: string
   iconBgColor?: string
   iconRadiusPx?: number
-
   rowGapPx?: number
   rowPaddingPx?: number
   rowBorderWidth?: number
   rowBorderColor?: string
   rowRadiusPx?: number
-
-  // compat (o bloco usa isto)
   rowBgColor?: string
-
   buttonBgColor?: string
   buttonTextColor?: string
   buttonBorderWidth?: number
@@ -94,71 +78,40 @@ type Props = {
   onChangeStyle?: (s: InfoUtilitiesStyle) => void
 }
 
-
-const miniBtn: React.CSSProperties = {
-  padding: '6px 10px',
-  borderRadius: 10,
-  border: '1px solid rgba(0,0,0,0.12)',
-  background: '#fff',
-  cursor: 'pointer',
-  fontWeight: 700,
-  fontSize: 13,
-}
-
 function uid(prefix = 'info') {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
 }
 
-export default function InfoUtilitiesBlockEditor({
-  cardId,
-  settings,
-  style,
-  onChangeSettings,
-  onChangeStyle,
-}: Props) {
+const ITEM_TYPES: Array<{ value: InfoItemType; label: string; icon: string }> = [
+  { value: 'address', label: 'Morada', icon: '📍' },
+  { value: 'wifi', label: 'WiFi', icon: '📶' },
+  { value: 'image_button', label: 'Botão com imagem', icon: '🖼️' },
+  { value: 'link', label: 'Link simples', icon: '🔗' },
+  { value: 'hours_text', label: 'Texto horário', icon: '🕐' },
+  { value: 'reviews_embed', label: 'Avaliações Google', icon: '⭐' },
+]
+
+export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
+  const [activeSection, setActiveSection] = useState<string | null>('items')
 
   const s = settings || {}
   const st = style || {}
   const items = useMemo(() => s.items || [], [s.items])
 
-  // ✅ helper: abre SEMPRE o eyedropper com lupa
-  const pickEyedropper = (apply: (hex: string) => void) =>
-    openPicker({
-      mode: 'eyedropper',
-      onPick: apply,
-    })
+  const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
 
-  const updateSettings = (patch: Partial<InfoUtilitiesSettings>) => {
-    onChangeSettings({ ...s, ...patch })
-  }
-
-  const updateStyle = (patch: Partial<InfoUtilitiesStyle>) => {
-    if (!onChangeStyle) return
-    onChangeStyle({ ...st, ...patch })
-  }
+  const updateSettings = (patch: Partial<InfoUtilitiesSettings>) => onChangeSettings({ ...s, ...patch })
+  const updateStyle = (patch: Partial<InfoUtilitiesStyle>) => onChangeStyle?.({ ...st, ...patch })
 
   const addItem = (type: InfoItemType) => {
-    const newItem: InfoItem = {
-      id: uid(),
-      type,
-      enabled: true,
-      label: '',
-      iconMode: 'default',
-      iconImageSrc: '',
-    }
+    const newItem: InfoItem = { id: uid(), type, enabled: true, label: '', iconMode: 'default', iconImageSrc: '' }
     updateSettings({ items: [...items, newItem] })
   }
 
-  const removeItem = (id: string) => {
-    updateSettings({ items: items.filter((i) => i.id !== id) })
-  }
+  const removeItem = (id: string) => updateSettings({ items: items.filter((i) => i.id !== id) })
+  const updateItem = (id: string, patch: Partial<InfoItem>) => updateSettings({ items: items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })
 
-  const updateItem = (id: string, patch: Partial<InfoItem>) => {
-    updateSettings({ items: items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })
-  }
-
-  // Upload image (igual ao DecorationBlockEditor)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const pickFileFor = (id: string) => {
@@ -179,18 +132,13 @@ export default function InfoUtilitiesBlockEditor({
         alert('Escolhe um ficheiro de imagem (png/jpg/webp/svg).')
         return
       }
-
       const bucket = 'decorations'
       const ext = (file.name.split('.').pop() || 'png').toLowerCase()
       const safeCardId = String(cardId || 'no-card').replace(/[^a-zA-Z0-9/_-]/g, '-')
       const safeTargetId = String(targetId).replace(/[^a-zA-Z0-9/_-]/g, '-')
       const path = `${safeCardId}/${safeTargetId}.${ext}`
 
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-        upsert: true,
-        contentType: file.type,
-        cacheControl: '3600',
-      })
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type, cacheControl: '3600' })
       if (upErr) throw upErr
 
       const { data } = supabase.storage.from(bucket).getPublicUrl(path)
@@ -198,12 +146,9 @@ export default function InfoUtilitiesBlockEditor({
       if (!publicUrl) throw new Error('Não foi possível obter o URL público da imagem.')
 
       const current = items.find((i) => i.id === targetId)
-
-      // Se o item estiver em modo "imagem", grava em iconImageSrc
       if ((current?.iconMode ?? 'default') === 'image') {
         updateItem(targetId, { iconImageSrc: publicUrl })
       } else {
-        // mantém compatibilidade com image_button (e outros usos antigos)
         updateItem(targetId, { imageSrc: publicUrl })
       }
     } catch (err: any) {
@@ -212,678 +157,351 @@ export default function InfoUtilitiesBlockEditor({
     }
   }
 
+  const container = st.container || {}
+  const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
+  const borderEnabled = (container.borderWidth ?? 0) > 0
+  const customWidth = (container.widthMode ?? 'full') === 'custom'
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
 
-
-      <Section title="Posição">
-        <Row label="Mover (Y)">
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button type="button" onClick={() => updateStyle({ offsetY: (st.offsetY ?? 0) - 4 })} style={miniBtn}>⬆️</button>
-            <button type="button" onClick={() => updateStyle({ offsetY: (st.offsetY ?? 0) + 4 })} style={miniBtn}>⬇️</button>
-            <button type="button" onClick={() => updateStyle({ offsetY: 0 })} style={miniBtn}>Reset</button>
-            <span style={{ fontSize: 12, opacity: 0.7, width: 60, textAlign: 'right' }}>{st.offsetY ?? 0}px</span>
+      {/* ========== ITEMS ========== */}
+      <CollapsibleSection title="📋 Items" subtitle="Morada, WiFi, links, etc." isOpen={activeSection === 'items'} onToggle={() => setActiveSection(activeSection === 'items' ? null : 'items')}>
+        <Row label="Título">
+          <input type="text" value={s.heading ?? 'Utilidades'} onChange={(e) => updateSettings({ heading: e.target.value })} placeholder="Título do bloco" style={inputStyle} />
+        </Row>
+        <Row label="Layout">
+          <div style={{ display: 'flex', gap: 6 }}>
+            <MiniButton active={(s.layout ?? 'grid') === 'grid'} onClick={() => updateSettings({ layout: 'grid' })}>Grelha</MiniButton>
+            <MiniButton active={s.layout === 'list'} onClick={() => updateSettings({ layout: 'list' })}>Lista</MiniButton>
           </div>
         </Row>
-      </Section>
-
-      <Section title="Conteúdo">
-        <Row label="Título">
-          <input
-            value={s.heading ?? 'Utilidades'}
-            onChange={(e) => updateSettings({ heading: e.target.value })}
-            style={input}
-            placeholder="Título do bloco"
-          />
-        </Row>
-
-        <Row label="Layout">
-          <select
-            value={s.layout ?? 'grid'}
-            onChange={(e) => updateSettings({ layout: e.target.value as 'grid' | 'list' })}
-            style={select}
-          >
-            <option value="grid">Grelha</option>
-            <option value="list">Lista</option>
+        <Row label="Adicionar">
+          <select onChange={(e) => { if (e.target.value) { addItem(e.target.value as InfoItemType); e.target.value = '' } }} style={selectStyle} defaultValue="">
+            <option value="" disabled>Seleciona tipo...</option>
+            {ITEM_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.icon} {t.label}</option>))}
           </select>
         </Row>
 
-        <Row label="Adicionar item">
-          <select
-            onChange={(e) => {
-              if (e.target.value) {
-                addItem(e.target.value as InfoItemType)
-                e.target.value = ''
-              }
-            }}
-            style={select}
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Seleciona tipo...
-            </option>
-            <option value="address">Morada</option>
-            <option value="wifi">WiFi</option>
-            <option value="image_button">Botão com imagem</option>
-            <option value="link">Link simples</option>
-            <option value="hours_text">Texto horário</option>
-            <option value="reviews_embed">Avaliações Google</option>
-          </select>
-        </Row>
-
-        {items.length === 0 && <div style={{ opacity: 0.7 }}>Nenhum item adicionado.</div>}
+        {items.length === 0 && <div style={{ opacity: 0.6, fontSize: 13 }}>Nenhum item adicionado.</div>}
 
         {items.map((item, idx) => {
           const enabled = item.enabled !== false
           const iconMode = item.iconMode ?? 'default'
           const hasIconImage = typeof item.iconImageSrc === 'string' && item.iconImageSrc.trim().length > 0
+          const typeInfo = ITEM_TYPES.find((t) => t.value === item.type)
 
           return (
-            <div
-              key={item.id}
-              style={{
-                border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: 12,
-                padding: 12,
-                marginBottom: 12,
-                backgroundColor: '#fff',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-              }}
-            >
+            <div key={item.id} style={{ padding: 12, background: enabled ? 'rgba(59,130,246,0.05)' : 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, border: enabled ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(0,0,0,0.06)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ fontSize: 14 }}>
-                  {String(item?.type || 'item').replace('_', ' ').replace(/^\w/, (c) => c.toUpperCase())} #{idx + 1}
-                </strong>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  style={{
-                    cursor: 'pointer',
-                    color: '#e53e3e',
-                    border: 'none',
-                    background: 'none',
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                  }}
-                  title="Remover item"
-                >
-                  ×
-                </button>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{typeInfo?.icon} {typeInfo?.label} #{idx + 1}</span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <Toggle active={enabled} onClick={() => updateItem(item.id, { enabled: !enabled })} />
+                  <button onClick={() => removeItem(item.id)} style={{ color: '#e53e3e', border: 'none', background: 'none', fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}>×</button>
+                </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={(e) => updateItem(item.id, { enabled: e.target.checked })}
-                />
-                <span>Ativo</span>
-              </label>
-
-              {/* Ícone custom (para TODOS os tipos) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, opacity: 0.75 }}>Ícone</span>
-
-                <select
-                  value={iconMode}
-                  onChange={(e) => updateItem(item.id, { iconMode: e.target.value as any })}
-                  style={select}
-                >
-                  <option value="default">Padrão</option>
-                  <option value="image">Imagem (upload)</option>
-                </select>
-
-                {iconMode === 'image' && (
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <button
-                      type="button"
-                      onClick={() => pickFileFor(item.id)}
-                      style={{
-                        height: 36,
-                        padding: '0 12px',
-                        borderRadius: 10,
-                        border: '1px solid rgba(0,0,0,0.12)',
-                        background: '#fff',
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                        fontSize: 12,
-                      }}
-                    >
-                      Upload ícone
-                    </button>
-
-                    <div style={{ fontSize: 12, opacity: 0.7 }}>
-                      {hasIconImage ? '✅ imagem definida' : '⚠️ sem imagem'}
-                    </div>
-
-                    {hasIconImage ? (
-                      <button
-                        type="button"
-                        onClick={() => updateItem(item.id, { iconImageSrc: '' })}
-                        style={{
-                          height: 36,
-                          padding: '0 12px',
-                          borderRadius: 10,
-                          border: '1px solid rgba(229, 62, 62, 0.25)',
-                          background: 'rgba(229, 62, 62, 0.08)',
-                          cursor: 'pointer',
-                          fontWeight: 800,
-                          fontSize: 12,
-                          color: '#e53e3e',
-                        }}
-                      >
-                        Limpar
-                      </button>
-                    ) : null}
+              {/* Ícone custom */}
+              <Row label="Ícone">
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <MiniButton active={iconMode === 'default'} onClick={() => updateItem(item.id, { iconMode: 'default' })}>Padrão</MiniButton>
+                  <MiniButton active={iconMode === 'image'} onClick={() => updateItem(item.id, { iconMode: 'image' })}>Imagem</MiniButton>
+                </div>
+              </Row>
+              {iconMode === 'image' && (
+                <Row label="">
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Button onClick={() => pickFileFor(item.id)}>Upload</Button>
+                    {hasIconImage && <Button onClick={() => updateItem(item.id, { iconImageSrc: '' })}>Limpar</Button>}
+                    <span style={{ fontSize: 11, opacity: 0.6 }}>{hasIconImage ? '✅' : '⚠️'}</span>
                   </div>
-                )}
+                </Row>
+              )}
+              {iconMode === 'image' && hasIconImage && (
+                <img src={item.iconImageSrc} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', border: '1px solid rgba(0,0,0,0.08)' }} />
+              )}
 
-                {iconMode === 'image' && hasIconImage ? (
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <img
-                      src={item.iconImageSrc}
-                      alt=""
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 10,
-                        objectFit: 'cover',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                      }}
-                    />
-                    <div style={{ fontSize: 12, opacity: 0.7, wordBreak: 'break-all' }}>{item.iconImageSrc}</div>
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Campos específicos por tipo */}
+              {/* Campos por tipo */}
               {item.type === 'address' && (
                 <>
-                  <label>
-                    <span>Texto da morada</span>
-                    <input
-                      type="text"
-                      value={item.value ?? ''}
-                      onChange={(e) => updateItem(item.id, { value: e.target.value })}
-                      style={input}
-                      placeholder="Ex: Rua ABC, 123, Lisboa"
-                    />
-                  </label>
-                  <label>
-                    <span>Link Google Maps (opcional)</span>
-                    <input
-                      type="url"
-                      value={item.url ?? ''}
-                      onChange={(e) => updateItem(item.id, { url: e.target.value })}
-                      style={input}
-                      placeholder="https://maps.google.com/..."
-                    />
-                  </label>
+                  <Row label="Morada"><input type="text" value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder="Rua ABC, 123, Lisboa" style={inputStyle} /></Row>
+                  <Row label="Maps URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://maps.google.com/..." style={inputStyle} /></Row>
                 </>
               )}
-
               {item.type === 'wifi' && (
                 <>
-                  <label>
-                    <span>SSID (nome da rede)</span>
-                    <input
-                      type="text"
-                      value={item.ssid ?? ''}
-                      onChange={(e) => updateItem(item.id, { ssid: e.target.value })}
-                      style={input}
-                      placeholder="Ex: MinhaRedeWifi"
-                    />
-                  </label>
-                  <label>
-                    <span>Senha</span>
-                    <input
-                      type="text"
-                      value={item.password ?? ''}
-                      onChange={(e) => updateItem(item.id, { password: e.target.value })}
-                      style={input}
-                      placeholder="Senha WiFi"
-                    />
-                  </label>
+                  <Row label="SSID"><input type="text" value={item.ssid ?? ''} onChange={(e) => updateItem(item.id, { ssid: e.target.value })} placeholder="Nome da rede" style={inputStyle} /></Row>
+                  <Row label="Senha"><input type="text" value={item.password ?? ''} onChange={(e) => updateItem(item.id, { password: e.target.value })} placeholder="Senha WiFi" style={inputStyle} /></Row>
                 </>
               )}
-
               {item.type === 'image_button' && (
                 <>
-                  <button type="button" onClick={() => pickFileFor(item.id)} style={{ marginBottom: 8 }}>
-                    Upload de imagem
-                  </button>
-                  {item.imageSrc && (
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt ?? ''}
-                      width={60}
-                      height={60}
-                      style={{ borderRadius: 8 }}
-                    />
-                  )}
-                  <label>
-                    <span>Texto do botão</span>
-                    <input
-                      type="text"
-                      value={item.label ?? ''}
-                      onChange={(e) => updateItem(item.id, { label: e.target.value })}
-                      style={input}
-                      placeholder="Ex: Visitar site"
-                    />
-                  </label>
-                  <label>
-                    <span>URL do botão</span>
-                    <input
-                      type="url"
-                      value={item.url ?? ''}
-                      onChange={(e) => updateItem(item.id, { url: e.target.value })}
-                      style={input}
-                      placeholder="https://..."
-                    />
-                  </label>
+                  <Row label="Imagem"><Button onClick={() => pickFileFor(item.id)}>Upload</Button></Row>
+                  {item.imageSrc && <Image src={item.imageSrc} alt={item.imageAlt ?? ''} width={60} height={60} style={{ borderRadius: 8 }} />}
+                  <Row label="Texto"><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder="Visitar site" style={inputStyle} /></Row>
+                  <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
-
               {item.type === 'link' && (
                 <>
-                  <label>
-                    <span>Texto do link</span>
-                    <input
-                      type="text"
-                      value={item.label ?? ''}
-                      onChange={(e) => updateItem(item.id, { label: e.target.value })}
-                      style={input}
-                      placeholder="Ex: Site oficial"
-                    />
-                  </label>
-                  <label>
-                    <span>URL do link</span>
-                    <input
-                      type="url"
-                      value={item.url ?? ''}
-                      onChange={(e) => updateItem(item.id, { url: e.target.value })}
-                      style={input}
-                      placeholder="https://..."
-                    />
-                  </label>
+                  <Row label="Texto"><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder="Site oficial" style={inputStyle} /></Row>
+                  <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
-
               {item.type === 'hours_text' && (
-                <label>
-                  <span>Texto do horário</span>
-                  <textarea
-                    value={item.value ?? ''}
-                    onChange={(e) => updateItem(item.id, { value: e.target.value })}
-                    style={{ ...input, height: 60, resize: 'vertical' }}
-                    placeholder="Ex: Segunda a Sexta, 09h às 18h"
-                  />
-                </label>
+                <Row label="Horário"><textarea value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder="Segunda a Sexta, 09h às 18h" style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
               )}
-
               {item.type === 'reviews_embed' && (
                 <>
-                  <label>
-                    <span>Embed HTML (iframe do Google Reviews)</span>
-                    <textarea
-                      value={item.embedHtml ?? ''}
-                      onChange={(e) => updateItem(item.id, { embedHtml: e.target.value })}
-                      style={{ ...input, height: 80, resize: 'vertical' }}
-                      placeholder="Cole o iframe aqui"
-                    />
-                  </label>
-                  <label>
-                    <span>Link para avaliações no Google</span>
-                    <input
-                      type="url"
-                      value={item.url ?? ''}
-                      onChange={(e) => updateItem(item.id, { url: e.target.value })}
-                      style={input}
-                      placeholder="https://..."
-                    />
-                  </label>
+                  <Row label="Embed"><textarea value={item.embedHtml ?? ''} onChange={(e) => updateItem(item.id, { embedHtml: e.target.value })} placeholder="Cole o iframe aqui" style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
+                  <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
             </div>
           )
         })}
-      </Section>
+      </CollapsibleSection>
 
-
-      <Section title="Aparência do bloco">
-        <Row label="Fundo">
-          <Toggle
-            active={(st.container?.bgColor ?? 'transparent') !== 'transparent'}
-            onClick={() => updateStyle({ container: { ...st.container, bgColor: (st.container?.bgColor ?? 'transparent') !== 'transparent' ? 'transparent' : '#ffffff' } })}
-          />
+      {/* ========== TÍTULO ========== */}
+      <CollapsibleSection title="📝 Título" subtitle="Cor, fonte, alinhamento" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
+        <Row label="Cor">
+          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => updateStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))} />
         </Row>
-        {(st.container?.bgColor ?? 'transparent') !== 'transparent' && (
-          <Row label="Cor do fundo">
-            <SwatchRow
-              value={st.container?.bgColor ?? '#ffffff'}
-              onChange={(hex) => updateStyle({ container: { ...st.container, bgColor: hex } })}
-              onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...st.container, bgColor: hex } }))}
-            />
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['left', 'center', 'right'] as const).map((a) => (
+              <MiniButton key={a} active={(st.headingAlign ?? 'left') === a} onClick={() => updateStyle({ headingAlign: a })}>
+                {a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}
+              </MiniButton>
+            ))}
+          </div>
+        </Row>
+        <Row label="Negrito">
+          <Toggle active={st.headingBold !== false} onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })} />
+        </Row>
+        <Row label="Fonte">
+          <select value={st.headingFontFamily ?? ''} onChange={(e) => updateStyle({ headingFontFamily: e.target.value || undefined })} style={selectStyle}>
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
+          </select>
+        </Row>
+        <Row label="Peso">
+          <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>
+            <option value="500">Medium</option>
+            <option value="700">Bold</option>
+            <option value="800">Extra</option>
+            <option value="900">Black</option>
+          </select>
+        </Row>
+        <Row label="Tamanho">
+          <input type="range" min={10} max={32} value={st.headingFontSize ?? 16} onChange={(e) => updateStyle({ headingFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.headingFontSize ?? 16}px</span>
+        </Row>
+      </CollapsibleSection>
+
+      {/* ========== TEXTO ========== */}
+      <CollapsibleSection title="✏️ Texto" subtitle="Cor, fonte, tamanho" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
+        <Row label="Cor">
+          <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
+        </Row>
+        <Row label="Fonte">
+          <select value={st.textFontFamily ?? ''} onChange={(e) => updateStyle({ textFontFamily: e.target.value || undefined })} style={selectStyle}>
+            <option value="">Padrão</option>
+            {FONT_OPTIONS.map((o) => (<option key={o.label} value={o.value}>{o.label}</option>))}
+          </select>
+        </Row>
+        <Row label="Peso">
+          <select value={String(st.textFontWeight ?? 600)} onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>
+            <option value="400">Normal</option>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+            <option value="800">Extra</option>
+          </select>
+        </Row>
+        <Row label="Tamanho">
+          <input type="range" min={10} max={22} value={st.textFontSize ?? 14} onChange={(e) => updateStyle({ textFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.textFontSize ?? 14}px</span>
+        </Row>
+      </CollapsibleSection>
+
+      {/* ========== CONTAINER ========== */}
+      <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, padding" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
+        <Row label="Fundo">
+          <Toggle active={bgEnabled} onClick={() => updateStyle({ container: { ...container, bgColor: bgEnabled ? 'transparent' : '#ffffff' } })} />
+        </Row>
+        {bgEnabled && (
+          <Row label="Cor">
+            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => updateStyle({ container: { ...container, bgColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, bgColor: hex } }))} />
           </Row>
         )}
         <Row label="Sombra">
-          <Toggle
-            active={st.container?.shadow ?? false}
-            onClick={() => updateStyle({ container: { ...st.container, shadow: !(st.container?.shadow ?? false) } })}
-          />
+          <Toggle active={container.shadow ?? false} onClick={() => updateStyle({ container: { ...container, shadow: !container.shadow } })} />
         </Row>
         <Row label="Borda">
-          <Toggle
-            active={(st.container?.borderWidth ?? 0) > 0}
-            onClick={() => updateStyle({ container: { ...st.container, borderWidth: (st.container?.borderWidth ?? 0) > 0 ? 0 : 1 } })}
-          />
+          <Toggle active={borderEnabled} onClick={() => updateStyle({ container: { ...container, borderWidth: borderEnabled ? 0 : 1 } })} />
         </Row>
-        {(st.container?.borderWidth ?? 0) > 0 && (
+        {borderEnabled && (
           <>
             <Row label="Espessura">
-              <input type="range" min={1} max={6} step={1} value={st.container?.borderWidth ?? 1} onChange={(e) => updateStyle({ container: { ...st.container, borderWidth: Number(e.target.value) } })} />
-              <span style={rightNum}>{st.container?.borderWidth ?? 1}px</span>
+              <input type="range" min={1} max={6} value={container.borderWidth ?? 1} onChange={(e) => updateStyle({ container: { ...container, borderWidth: Number(e.target.value) } })} style={{ flex: 1 }} />
+              <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
-            <Row label="Cor da borda">
-              <SwatchRow
-                value={st.container?.borderColor ?? 'rgba(0,0,0,0.08)'}
-                onChange={(hex) => updateStyle({ container: { ...st.container, borderColor: hex } })}
-                onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...st.container, borderColor: hex } }))}
-              />
+            <Row label="Cor borda">
+              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => updateStyle({ container: { ...container, borderColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, borderColor: hex } }))} />
             </Row>
           </>
         )}
         <Row label="Raio">
-          <input type="range" min={0} max={32} step={1} value={st.container?.radius ?? 14} onChange={(e) => updateStyle({ container: { ...st.container, radius: Number(e.target.value) } })} />
-          <span style={rightNum}>{st.container?.radius ?? 14}px</span>
+          <input type="range" min={0} max={32} value={container.radius ?? 14} onChange={(e) => updateStyle({ container: { ...container, radius: Number(e.target.value) } })} style={{ flex: 1 }} />
+          <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
         <Row label="Padding">
-          <input type="range" min={0} max={28} step={1} value={st.container?.padding ?? 16} onChange={(e) => updateStyle({ container: { ...st.container, padding: Number(e.target.value) } })} />
-          <span style={rightNum}>{st.container?.padding ?? 16}px</span>
+          <input type="range" min={0} max={28} value={container.padding ?? 16} onChange={(e) => updateStyle({ container: { ...container, padding: Number(e.target.value) } })} style={{ flex: 1 }} />
+          <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
-        <Row label="Largura personalizada">
-          <Toggle
-            active={(st.container?.widthMode ?? 'full') === 'custom'}
-            onClick={() => updateStyle({ container: { ...st.container, widthMode: (st.container?.widthMode ?? 'full') === 'custom' ? 'full' : 'custom', customWidthPx: st.container?.customWidthPx ?? 340 } })}
-          />
+        <Row label="Largura custom">
+          <Toggle active={customWidth} onClick={() => updateStyle({ container: { ...container, widthMode: customWidth ? 'full' : 'custom', customWidthPx: container.customWidthPx ?? 340 } })} />
         </Row>
-        {(st.container?.widthMode ?? 'full') === 'custom' && (
-          <Row label="Largura (px)">
-            <input type="range" min={200} max={400} step={5} value={st.container?.customWidthPx ?? 340} onChange={(e) => updateStyle({ container: { ...st.container, customWidthPx: Number(e.target.value) } })} />
-            <span style={rightNum}>{st.container?.customWidthPx ?? 340}px</span>
+        {customWidth && (
+          <Row label="Largura">
+            <input type="range" min={200} max={400} step={5} value={container.customWidthPx ?? 340} onChange={(e) => updateStyle({ container: { ...container, customWidthPx: Number(e.target.value) } })} style={{ flex: 1 }} />
+            <span style={rightNum}>{container.customWidthPx ?? 340}px</span>
           </Row>
         )}
+      </CollapsibleSection>
 
-      </Section>
-
-      <Section title="Título">
-        <Row label="Cor do título">
-          <SwatchRow
-            value={st.headingColor ?? '#111827'}
-            onChange={(hex) => updateStyle({ headingColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))}
-          />
-        </Row>
-
-        <Row label="Tamanho do título (px)">
-          <input
-            type="number"
-            min={10}
-            max={40}
-            value={st.headingFontSize ?? 16}
-            onChange={(e) => updateStyle({ headingFontSize: Number(e.target.value) })}
-            style={input}
-          />
-        </Row>
-
-        <Row label="Alinhamento do título">
-          <select
-            value={st.headingAlign ?? 'left'}
-            onChange={(e) => updateStyle({ headingAlign: e.target.value as 'left' | 'center' | 'right' })}
-            style={select}
-          >
-            <option value="left">Esquerda</option>
-            <option value="center">Centro</option>
-            <option value="right">Direita</option>
-          </select>
-        </Row>
-
-        <Row label="Fonte do título">
-          <select
-            value={st.headingFontFamily ?? ''}
-            onChange={(e) => updateStyle({ headingFontFamily: e.target.value || undefined })}
-            style={select}
-          >
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </Row>
-
-        <Row label="Negrito">
-          <Toggle
-            active={st.headingBold !== false}
-            onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })}
-          />
-        </Row>
-
-        <Row label="Peso do título">
-          <select
-            value={String(st.headingFontWeight ?? 900)}
-            onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })}
-            style={select}
-          >
-            <option value="500">Medium (500)</option>
-            <option value="700">Bold (700)</option>
-            <option value="800">Extra (800)</option>
-            <option value="900">Black (900)</option>
-          </select>
-        </Row>
-      </Section>
-
-      <Section title="Tipografia (texto)">
-        <Row label="Cor do texto">
-          <SwatchRow
-            value={st.textColor ?? '#111827'}
-            onChange={(hex) => updateStyle({ textColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))}
-          />
-        </Row>
-
-        <Row label="Tamanho do texto (px)">
-          <input
-            type="number"
-            min={10}
-            max={22}
-            value={st.textFontSize ?? 14}
-            onChange={(e) => updateStyle({ textFontSize: Number(e.target.value) })}
-            style={input}
-          />
-        </Row>
-
-        <Row label="Fonte do texto">
-          <select
-            value={st.textFontFamily ?? ''}
-            onChange={(e) => updateStyle({ textFontFamily: e.target.value || undefined })}
-            style={select}
-          >
-            <option value="">Padrão</option>
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.label} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </Row>
-
-        <Row label="Peso do texto">
-          <select
-            value={String(st.textFontWeight ?? 600)}
-            onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })}
-            style={select}
-          >
-            <option value="400">Normal (400)</option>
-            <option value="600">Semi (600)</option>
-            <option value="700">Bold (700)</option>
-            <option value="800">Extra (800)</option>
-            <option value="900">Black (900)</option>
-          </select>
-        </Row>
-      </Section>
-
-      <Section title="Linhas e ícones">
-        <Row label="Espaçamento entre linhas (px)">
-          <input
-            type="range"
-            min={4}
-            max={18}
-            step={1}
-            value={st.rowGapPx ?? 12}
-            onChange={(e) => updateStyle({ rowGapPx: Number(e.target.value) })}
-          />
+      {/* ========== LINHAS ========== */}
+      <CollapsibleSection title="📏 Linhas" subtitle="Espaçamento, borda, raio" isOpen={activeSection === 'rows'} onToggle={() => setActiveSection(activeSection === 'rows' ? null : 'rows')}>
+        <Row label="Espaçamento">
+          <input type="range" min={4} max={18} value={st.rowGapPx ?? 12} onChange={(e) => updateStyle({ rowGapPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowGapPx ?? 12}px</span>
         </Row>
-
-        <Row label="Padding das linhas (px)">
-          <input
-            type="range"
-            min={0}
-            max={20}
-            step={1}
-            value={st.rowPaddingPx ?? 8}
-            onChange={(e) => updateStyle({ rowPaddingPx: Number(e.target.value) })}
-          />
+        <Row label="Padding">
+          <input type="range" min={0} max={20} value={st.rowPaddingPx ?? 8} onChange={(e) => updateStyle({ rowPaddingPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowPaddingPx ?? 8}px</span>
         </Row>
-
-        <Row label="Borda das linhas (px)">
-          <input
-            type="range"
-            min={0}
-            max={4}
-            step={1}
-            value={st.rowBorderWidth ?? 0}
-            onChange={(e) => updateStyle({ rowBorderWidth: Number(e.target.value) })}
-          />
+        <Row label="Borda">
+          <input type="range" min={0} max={4} value={st.rowBorderWidth ?? 0} onChange={(e) => updateStyle({ rowBorderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowBorderWidth ?? 0}px</span>
         </Row>
-
-        <Row label="Cor da borda das linhas">
-          <SwatchRow
-            value={st.rowBorderColor ?? '#e5e7eb'}
-            onChange={(hex) => updateStyle({ rowBorderColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))}
-          />
-        </Row>
-
-        <Row label="Raio das linhas (px)">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={st.rowRadiusPx ?? 10}
-            onChange={(e) => updateStyle({ rowRadiusPx: Number(e.target.value) })}
-          />
+        {(st.rowBorderWidth ?? 0) > 0 && (
+          <Row label="Cor borda">
+            <ColorPickerPro value={st.rowBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ rowBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))} />
+          </Row>
+        )}
+        <Row label="Raio">
+          <input type="range" min={0} max={32} value={st.rowRadiusPx ?? 10} onChange={(e) => updateStyle({ rowRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowRadiusPx ?? 10}px</span>
         </Row>
+      </CollapsibleSection>
 
-        <Row label="Tamanho do ícone (px)">
-          <input
-            type="range"
-            min={12}
-            max={48}
-            step={1}
-            value={st.iconSizePx ?? 24}
-            onChange={(e) => updateStyle({ iconSizePx: Number(e.target.value) })}
-          />
+      {/* ========== ÍCONES ========== */}
+      <CollapsibleSection title="🎯 Ícones" subtitle="Tamanho, cor, fundo" isOpen={activeSection === 'icons'} onToggle={() => setActiveSection(activeSection === 'icons' ? null : 'icons')}>
+        <Row label="Tamanho">
+          <input type="range" min={12} max={48} value={st.iconSizePx ?? 24} onChange={(e) => updateStyle({ iconSizePx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.iconSizePx ?? 24}px</span>
         </Row>
-
-        <Row label="Cor do ícone">
-          <SwatchRow
-            value={st.iconColor ?? '#111827'}
-            onChange={(hex) => updateStyle({ iconColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))}
-          />
+        <Row label="Cor">
+          <ColorPickerPro value={st.iconColor ?? '#111827'} onChange={(hex) => updateStyle({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))} />
         </Row>
-
-        <Row label="Fundo do ícone">
-          <SwatchRow
-            value={st.iconBgColor ?? 'transparent'}
-            onChange={(hex) => updateStyle({ iconBgColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))}
-          />
+        <Row label="Fundo">
+          <ColorPickerPro value={st.iconBgColor ?? 'transparent'} onChange={(hex) => updateStyle({ iconBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))} />
         </Row>
-
-        <Row label="Raio do ícone (px)">
-          <input
-            type="range"
-            min={0}
-            max={24}
-            step={1}
-            value={st.iconRadiusPx ?? 6}
-            onChange={(e) => updateStyle({ iconRadiusPx: Number(e.target.value) })}
-          />
+        <Row label="Raio">
+          <input type="range" min={0} max={24} value={st.iconRadiusPx ?? 6} onChange={(e) => updateStyle({ iconRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.iconRadiusPx ?? 6}px</span>
         </Row>
-      </Section>
+      </CollapsibleSection>
 
-      <Section title="Botões (se aplicável)">
-        <Row label="Cor do texto do botão">
-          <SwatchRow
-            value={st.buttonTextColor ?? '#111827'}
-            onChange={(hex) => updateStyle({ buttonTextColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))}
-          />
+      {/* ========== BOTÕES ========== */}
+      <CollapsibleSection title="🔘 Botões" subtitle="Cor, borda, raio" isOpen={activeSection === 'buttons'} onToggle={() => setActiveSection(activeSection === 'buttons' ? null : 'buttons')}>
+        <Row label="Cor texto">
+          <ColorPickerPro value={st.buttonTextColor ?? '#111827'} onChange={(hex) => updateStyle({ buttonTextColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))} />
         </Row>
-
-        <Row label="Fundo do botão">
-          <SwatchRow
-            value={st.buttonBgColor ?? '#f0f0f0'}
-            onChange={(hex) => updateStyle({ buttonBgColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))}
-          />
+        <Row label="Fundo">
+          <ColorPickerPro value={st.buttonBgColor ?? '#f0f0f0'} onChange={(hex) => updateStyle({ buttonBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))} />
         </Row>
-
-        <Row label="Borda do botão (px)">
-          <input
-            type="range"
-            min={0}
-            max={6}
-            step={1}
-            value={st.buttonBorderWidth ?? 0}
-            onChange={(e) => updateStyle({ buttonBorderWidth: Number(e.target.value) })}
-          />
+        <Row label="Borda">
+          <input type="range" min={0} max={6} value={st.buttonBorderWidth ?? 0} onChange={(e) => updateStyle({ buttonBorderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.buttonBorderWidth ?? 0}px</span>
         </Row>
-
-        <Row label="Cor da borda do botão">
-          <SwatchRow
-            value={st.buttonBorderColor ?? '#e5e7eb'}
-            onChange={(hex) => updateStyle({ buttonBorderColor: hex })}
-            onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))}
-          />
-        </Row>
-
-        <Row label="Raio do botão (px)">
-          <input
-            type="range"
-            min={0}
-            max={32}
-            step={1}
-            value={st.buttonRadiusPx ?? 10}
-            onChange={(e) => updateStyle({ buttonRadiusPx: Number(e.target.value) })}
-          />
+        {(st.buttonBorderWidth ?? 0) > 0 && (
+          <Row label="Cor borda">
+            <ColorPickerPro value={st.buttonBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ buttonBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))} />
+          </Row>
+        )}
+        <Row label="Raio">
+          <input type="range" min={0} max={32} value={st.buttonRadiusPx ?? 10} onChange={(e) => updateStyle({ buttonRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.buttonRadiusPx ?? 10}px</span>
         </Row>
-      </Section>
+      </CollapsibleSection>
+
+      {/* ========== POSIÇÃO ========== */}
+      <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
+        <Row label="Offset Y">
+          <input type="range" min={-80} max={80} step={4} value={st.offsetY ?? 0} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.offsetY ?? 0}px</span>
+        </Row>
+        <Row label="">
+          <Button onClick={() => updateStyle({ offsetY: 0 })}>Reset</Button>
+        </Row>
+      </CollapsibleSection>
+
     </div>
+  )
+}
+
+// ===== COMPONENTES AUXILIARES =====
+
+const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
+const selectStyle: React.CSSProperties = { padding: '8px 10px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 90 }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13 }
+
+function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+      <button onClick={onToggle} style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+          {subtitle && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{subtitle}</div>}
+        </div>
+        <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</div>
+      </button>
+      {isOpen && <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>}
+    </div>
+  )
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, minWidth: 80 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>{children}</div>
+    </div>
+  )
+}
+
+function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
+      {children}
+    </button>
+  )
+}
+
+function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
+  return (
+    <button onClick={onClick} style={{ padding: '6px 12px', borderRadius: 10, border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)', background: active ? 'rgba(59,130,246,0.1)' : '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11, color: active ? '#3b82f6' : '#333', minWidth: 32 }}>
+      {children}
+    </button>
+  )
+}
+
+function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ width: 44, height: 24, borderRadius: 999, background: active ? '#3b82f6' : '#e5e7eb', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}>
+      <span style={{ position: 'absolute', top: 2, left: active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
+    </button>
   )
 }
