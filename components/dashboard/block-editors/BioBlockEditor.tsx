@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
+import RichTextEditor from '@/components/editor/RichTextEditor'
 
 type BioSettings = { text: string }
 type BioStyle = {
@@ -36,12 +37,10 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
       {/* ========== TEXTO ========== */}
-      <CollapsibleSection title="📝 Texto" subtitle="Bio, cor, fonte" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
-        <textarea value={settings.text || ''} onChange={(e) => onChangeSettings({ text: e.target.value })} rows={5} placeholder="Escreve a tua bio..." style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, resize: 'vertical', outline: 'none' }} />
-        <Row label="Cor">
-          <ColorPickerPro value={s.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} supportsGradient={false} />
-        </Row>
-        <Row label="Tamanho">
+      <CollapsibleSection title="📝 Texto" subtitle="Bio com formatação" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
+        <RichTextEditor value={settings.text || ''} onChange={(html) => onChangeSettings({ text: html })} placeholder="Escreve a tua bio..." minHeight={120} />
+        <Row label="Fonte base"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
+        <Row label="Tamanho base">
           <input type="range" min={12} max={22} value={s.fontSize ?? 15} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{s.fontSize ?? 15}px</span>
         </Row>
@@ -49,15 +48,6 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           <input type="range" min={1.1} max={2.2} step={0.05} value={s.lineHeight ?? 1.6} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{(s.lineHeight ?? 1.6).toFixed(2)}</span>
         </Row>
-        <Row label="Alinhamento">
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['left', 'center', 'right'] as const).map((a) => (
-              <MiniButton key={a} active={(s.align ?? 'center') === a} onClick={() => setStyle({ align: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>
-            ))}
-          </div>
-        </Row>
-        <Row label="Negrito"><Toggle active={s.bold === true} onClick={() => setStyle({ bold: !s.bold })} /></Row>
-        <Row label="Fonte"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}
@@ -114,10 +104,6 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Button({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return <button onClick={onClick} style={{ padding: '8px 14px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>{children}</button>
-}
-
-function MiniButton({ children, onClick, active }: { children: React.ReactNode; onClick: () => void; active?: boolean }) {
-  return <button onClick={onClick} style={{ padding: '6px 14px', borderRadius: 10, border: active ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.10)', background: active ? 'rgba(59,130,246,0.1)' : '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 11, color: active ? '#3b82f6' : '#333', minWidth: 50, whiteSpace: 'nowrap' }}>{children}</button>
 }
 
 function Toggle({ active, onClick }: { active: boolean; onClick: () => void }) {
