@@ -5,9 +5,7 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Variáveis das fontes usadas */
-  --font-geist-sans: 'Geist Sans', sans-serif;
-  --font-geist-mono: 'Geist Mono', monospace;
+  /* === SANS-SERIF (Modernas) === */
   --font-inter: 'Inter', sans-serif;
   --font-poppins: 'Poppins', sans-serif;
   --font-montserrat: 'Montserrat', sans-serif;
@@ -15,8 +13,67 @@
   --font-open-sans: 'Open Sans', sans-serif;
   --font-lato: 'Lato', sans-serif;
   --font-nunito: 'Nunito', sans-serif;
+  --font-raleway: 'Raleway', sans-serif;
+  --font-work-sans: 'Work Sans', sans-serif;
+  --font-dm-sans: 'DM Sans', sans-serif;
+  --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-sora: 'Sora', sans-serif;
+  --font-manrope: 'Manrope', sans-serif;
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-quicksand: 'Quicksand', sans-serif;
+  --font-rubik: 'Rubik', sans-serif;
+  --font-karla: 'Karla', sans-serif;
+  --font-barlow: 'Barlow', sans-serif;
+  --font-josefin-sans: 'Josefin Sans', sans-serif;
+
+  /* === SERIF (Elegantes) === */
   --font-playfair: 'Playfair Display', serif;
+  --font-merriweather: 'Merriweather', serif;
+  --font-lora: 'Lora', serif;
+  --font-cormorant: 'Cormorant', serif;
+  --font-libre-baskerville: 'Libre Baskerville', serif;
+  --font-crimson-text: 'Crimson Text', serif;
+  --font-source-serif: 'Source Serif Pro', serif;
+  --font-eb-garamond: 'EB Garamond', serif;
+  --font-bitter: 'Bitter', serif;
+  --font-spectral: 'Spectral', serif;
+  --font-pt-serif: 'PT Serif', serif;
+
+  /* === DISPLAY (Impacto) === */
+  --font-oswald: 'Oswald', sans-serif;
+  --font-bebas-neue: 'Bebas Neue', sans-serif;
+  --font-anton: 'Anton', sans-serif;
+  --font-archivo-black: 'Archivo Black', sans-serif;
+  --font-righteous: 'Righteous', cursive;
+  --font-passion-one: 'Passion One', cursive;
+  --font-russo-one: 'Russo One', sans-serif;
+  --font-alfa-slab: 'Alfa Slab One', cursive;
+
+  /* === HANDWRITING (Pessoais) === */
   --font-dancing: 'Dancing Script', cursive;
+  --font-pacifico: 'Pacifico', cursive;
+  --font-caveat: 'Caveat', cursive;
+  --font-satisfy: 'Satisfy', cursive;
+  --font-great-vibes: 'Great Vibes', cursive;
+  --font-sacramento: 'Sacramento', cursive;
+  --font-kaushan: 'Kaushan Script', cursive;
+  --font-lobster: 'Lobster', cursive;
+  --font-courgette: 'Courgette', cursive;
+  --font-permanent-marker: 'Permanent Marker', cursive;
+  --font-shadows-into-light: 'Shadows Into Light', cursive;
+  --font-indie-flower: 'Indie Flower', cursive;
+
+  /* === MONOSPACE (Tech) === */
+  --font-fira-code: 'Fira Code', monospace;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-source-code-pro: 'Source Code Pro', monospace;
+  --font-ibm-plex-mono: 'IBM Plex Mono', monospace;
+  --font-space-mono: 'Space Mono', monospace;
+
+  /* === SYSTEM === */
+  --font-geist-sans: 'Geist Sans', sans-serif;
+  --font-geist-mono: 'Geist Mono', monospace;
 }
 
 html, body {
@@ -52,5 +109,3 @@ body {
     margin-right: auto !important;
   }
 }
-
-
