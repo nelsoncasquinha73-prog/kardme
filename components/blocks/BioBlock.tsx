@@ -34,57 +34,42 @@ type Props = {
   style?: BioStyle
 }
 
-const FONT_MAP: Record<string, string> = {
-  System: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  Serif: 'serif',
-  Monospace: 'monospace',
-}
-
 function mapGoogleFont(ff?: string) {
   if (!ff) return undefined
-
   if (ff.startsWith('var(--font-')) return ff
-
-  switch (ff) {
-    case 'Inter':
-      return 'var(--font-inter)'
-    case 'Poppins':
-      return 'var(--font-poppins)'
-    case 'Montserrat':
-      return 'var(--font-montserrat)'
-    case 'Roboto':
-      return 'var(--font-roboto)'
-    case 'Open Sans':
-      return 'var(--font-open-sans)'
-    case 'Lato':
-      return 'var(--font-lato)'
-    case 'Nunito':
-      return 'var(--font-nunito)'
-    case 'Playfair Display':
-      return 'var(--font-playfair)'
-    case 'Dancing Script':
-      return 'var(--font-dancing)'
-    default:
-      return undefined
-  }
+  return undefined
 }
 
 export default function BioBlock({ settings, style }: Props) {
   if (!settings?.text) return null
 
-  const globalFontFamily = FONT_MAP.System
   const resolvedFont = mapGoogleFont(style?.fontFamily)
 
-  const textStyle: React.CSSProperties = {
+  const containerStyle: React.CSSProperties = {
     color: style?.textColor ?? '#111827',
-    fontFamily: resolvedFont ?? style?.fontFamily ?? globalFontFamily,
+    fontFamily: resolvedFont ?? style?.fontFamily ?? 'inherit',
     fontWeight: style?.bold ? 700 : 400,
     fontSize: style?.fontSize != null ? `${style.fontSize}px` : '15px',
     lineHeight: style?.lineHeight ?? 1.6,
     textAlign: style?.align ?? 'center',
-    whiteSpace: 'pre-wrap',
-    margin: 0,
   }
 
-  return <p style={textStyle}>{settings.text}</p>
+  // Check if text contains HTML tags
+  const isHTML = /<[a-z][\s\S]*>/i.test(settings.text)
+
+  if (isHTML) {
+    return (
+      <div 
+        style={containerStyle} 
+        dangerouslySetInnerHTML={{ __html: settings.text }} 
+      />
+    )
+  }
+
+  // Plain text fallback (for old cards)
+  return (
+    <p style={{ ...containerStyle, whiteSpace: 'pre-wrap', margin: 0 }}>
+      {settings.text}
+    </p>
+  )
 }
