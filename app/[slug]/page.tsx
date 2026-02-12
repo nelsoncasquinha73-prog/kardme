@@ -207,8 +207,8 @@ export default async function CardPage({ params }: Props) {
     <>
       <style>{`html, body { background-color: ${barColor} !important; }`}</style>
       <TrackingWrapper cardId={card.id}>
-        <div style={{ minHeight: "100dvh", width: "100%", backgroundColor: barColor, paddingBottom: "env(safe-area-inset-bottom)" }}>
-          <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
+        <div style={{ minHeight: "100dvh", width: "100%", backgroundColor: barColor, paddingBottom: "env(safe-area-inset-bottom)", overflowX: "hidden" }}>
+          <div style={{ minHeight: "100dvh", width: "100%", maxWidth: "420px", margin: "0 auto", overflowX: "hidden" }}>
             <LanguageProvider>
               <ThemeProvider theme={card.theme}>
                 <CardPreview
