@@ -445,6 +445,25 @@
     "label_border_color": "لون الحدود",
     "label_radius": "نصف القطر",
     "label_padding": "الحشو",
-    "placeholder_contact": "اتصال"
+    "placeholder_contact": "اتصال",
+    "section_btn_style": "نمط الأزرار",
+    "section_btn_style_subtitle": "الألوان، الأحجام، الخط",
+    "section_per_button": "لكل زر",
+    "section_per_button_subtitle": "تخصيص كل قناة",
+    "section_position": "الموضع",
+    "section_position_subtitle": "إزاحة الكتلة",
+    "label_bg_mode": "وضع الخلفية",
+    "label_bg_color": "لون الخلفية",
+    "label_gradient_start": "اللون الأولي",
+    "label_gradient_end": "اللون النهائي",
+    "label_icon_color": "لون الأيقونة",
+    "label_text_color": "لون النص",
+    "label_text_size": "حجم النص",
+    "label_icon_scale": "مقياس الأيقونة",
+    "label_padding_y": "الحشو Y",
+    "label_padding_x": "الحشو X",
+    "label_offset_y": "الإزاحة Y",
+    "option_solid": "صلب",
+    "option_gradient": "متدرج"
   }
 }

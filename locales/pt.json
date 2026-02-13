@@ -431,6 +431,25 @@
     "label_border_color": "Cor borda",
     "label_radius": "Raio",
     "label_padding": "Padding",
-    "placeholder_contact": "Contacto"
+    "placeholder_contact": "Contacto",
+    "section_btn_style": "Estilo dos botões",
+    "section_btn_style_subtitle": "Cores, tamanhos, fonte",
+    "section_per_button": "Por botão",
+    "section_per_button_subtitle": "Personalizar cada canal",
+    "section_position": "Posição",
+    "section_position_subtitle": "Offset do bloco",
+    "label_bg_mode": "Modo fundo",
+    "label_bg_color": "Cor fundo",
+    "label_gradient_start": "Cor inicial",
+    "label_gradient_end": "Cor final",
+    "label_icon_color": "Cor ícone",
+    "label_text_color": "Cor texto",
+    "label_text_size": "Tamanho texto",
+    "label_icon_scale": "Escala ícone",
+    "label_padding_y": "Padding Y",
+    "label_padding_x": "Padding X",
+    "label_offset_y": "Offset Y",
+    "option_solid": "Sólido",
+    "option_gradient": "Gradiente"
   }
 }

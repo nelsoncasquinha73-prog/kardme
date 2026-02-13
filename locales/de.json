@@ -446,6 +446,25 @@
     "label_border_color": "Rahmenfarbe",
     "label_radius": "Radius",
     "label_padding": "Innenabstand",
-    "placeholder_contact": "Kontakt"
+    "placeholder_contact": "Kontakt",
+    "section_btn_style": "Button-Stil",
+    "section_btn_style_subtitle": "Farben, Größen, Schrift",
+    "section_per_button": "Pro Button",
+    "section_per_button_subtitle": "Jeden Kanal anpassen",
+    "section_position": "Position",
+    "section_position_subtitle": "Block-Versatz",
+    "label_bg_mode": "Hintergrundmodus",
+    "label_bg_color": "Hintergrundfarbe",
+    "label_gradient_start": "Startfarbe",
+    "label_gradient_end": "Endfarbe",
+    "label_icon_color": "Icon-Farbe",
+    "label_text_color": "Textfarbe",
+    "label_text_size": "Textgröße",
+    "label_icon_scale": "Icon-Skalierung",
+    "label_padding_y": "Padding Y",
+    "label_padding_x": "Padding X",
+    "label_offset_y": "Versatz Y",
+    "option_solid": "Einfarbig",
+    "option_gradient": "Verlauf"
   }
 }

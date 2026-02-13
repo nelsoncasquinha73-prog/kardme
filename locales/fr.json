@@ -432,6 +432,25 @@
     "label_border_color": "Couleur de bordure",
     "label_radius": "Rayon",
     "label_padding": "Padding",
-    "placeholder_contact": "Contact"
+    "placeholder_contact": "Contact",
+    "section_btn_style": "Style des boutons",
+    "section_btn_style_subtitle": "Couleurs, tailles, police",
+    "section_per_button": "Par bouton",
+    "section_per_button_subtitle": "Personnaliser chaque canal",
+    "section_position": "Position",
+    "section_position_subtitle": "Décalage du bloc",
+    "label_bg_mode": "Mode d'arrière-plan",
+    "label_bg_color": "Couleur d'arrière-plan",
+    "label_gradient_start": "Couleur de départ",
+    "label_gradient_end": "Couleur de fin",
+    "label_icon_color": "Couleur de l'icône",
+    "label_text_color": "Couleur du texte",
+    "label_text_size": "Taille du texte",
+    "label_icon_scale": "Échelle de l'icône",
+    "label_padding_y": "Padding Y",
+    "label_padding_x": "Padding X",
+    "label_offset_y": "Décalage Y",
+    "option_solid": "Solide",
+    "option_gradient": "Dégradé"
   }
 }

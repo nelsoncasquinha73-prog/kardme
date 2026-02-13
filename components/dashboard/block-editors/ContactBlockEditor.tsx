@@ -320,7 +320,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
       </CollapsibleSection>
 
       {/* ========== ESTILO DOS BOTÕES (DEFAULTS) ========== */}
-      <CollapsibleSection title="🎨 Estilo dos botões" subtitle="Cores, tamanhos, fonte" isOpen={activeSection === 'btnDefaults'} onToggle={() => setActiveSection(activeSection === 'btnDefaults' ? null : 'btnDefaults')}>
+      <CollapsibleSection title={`🎨 ${t('contact_editor.section_btn_style')}`} subtitle={t('contact_editor.section_btn_style_subtitle')} isOpen={activeSection === 'btnDefaults'} onToggle={() => setActiveSection(activeSection === 'btnDefaults' ? null : 'btnDefaults')}>
         <Row label={t('contact_editor.label_size')}>
           <input type="range" min={24} max={64} value={btnDefaults.sizePx ?? 44} onChange={(e) => setBtnDefaults({ sizePx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.sizePx ?? 44}px</span>
@@ -329,23 +329,23 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           <input type="range" min={0} max={32} value={btnDefaults.radius ?? 14} onChange={(e) => setBtnDefaults({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.radius ?? 14}px</span>
         </Row>
-        <Row label="Modo fundo">
+        <Row label={t('contact_editor.label_bg_mode')}>
           <div style={{ display: 'flex', gap: 6 }}>
             <MiniButton active={defaultsBgMode === 'solid'} onClick={() => setBtnDefaults({ bgMode: 'solid' })}>Sólido</MiniButton>
             <MiniButton active={defaultsBgMode === 'gradient'} onClick={() => setBtnDefaults({ bgMode: 'gradient' })}>Degradê</MiniButton>
           </div>
         </Row>
         {defaultsBgMode === 'solid' && (
-          <Row label="Cor fundo">
+          <Row label={t('contact_editor.label_bg_color')}>
             <ColorPickerPro value={btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtnDefaults({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgColor: hex }))} />
           </Row>
         )}
         {defaultsBgMode === 'gradient' && (
           <>
-            <Row label="Cor inicial">
+            <Row label={t('contact_editor.label_gradient_start')}>
               <ColorPickerPro value={btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))} />
             </Row>
-            <Row label="Cor final">
+            <Row label={t('contact_editor.label_gradient_end')}>
               <ColorPickerPro value={btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))} />
             </Row>
             <Row label="Ângulo">
@@ -368,10 +368,10 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             </Row>
           </>
         )}
-        <Row label="Cor ícone">
+        <Row label={t('contact_editor.label_icon_color')}>
           <ColorPickerPro value={btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ iconColor: hex }))} />
         </Row>
-        <Row label="Cor texto">
+        <Row label={t('contact_editor.label_text_color')}>
           <ColorPickerPro value={btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))} />
         </Row>
         <Row label={t('contact_editor.label_font')}><FontPicker value={btnDefaults.fontFamily ?? ""} onChange={(v) => setBtnDefaults({ fontFamily: v || undefined })} /></Row>
@@ -384,19 +384,19 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
             <option value="900">Black</option>
           </select>
         </Row>
-        <Row label="Tamanho texto">
+        <Row label={t('contact_editor.label_text_size')}>
           <input type="range" min={8} max={24} value={btnDefaults.labelFontSize ?? 13} onChange={(e) => setBtnDefaults({ labelFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.labelFontSize ?? 13}px</span>
         </Row>
-        <Row label="Escala ícone">
+        <Row label={t('contact_editor.label_icon_scale')}>
           <input type="range" min={0.4} max={0.9} step={0.02} value={btnDefaults.iconScale ?? 0.58} onChange={(e) => setBtnDefaults({ iconScale: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{(btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
         </Row>
-        <Row label="Padding Y">
+        <Row label={t('contact_editor.label_padding_y')}>
           <input type="range" min={0} max={24} value={btnDefaults.paddingY ?? 10} onChange={(e) => setBtnDefaults({ paddingY: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.paddingY ?? 10}px</span>
         </Row>
-        <Row label="Padding X">
+        <Row label={t('contact_editor.label_padding_x')}>
           <input type="range" min={0} max={32} value={btnDefaults.paddingX ?? 12} onChange={(e) => setBtnDefaults({ paddingX: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{btnDefaults.paddingX ?? 12}px</span>
         </Row>
@@ -406,7 +406,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
       </CollapsibleSection>
 
       {/* ========== OVERRIDE POR BOTÃO ========== */}
-      <CollapsibleSection title="🔧 Por botão" subtitle="Override individual" isOpen={activeSection === 'btnOverride'} onToggle={() => setActiveSection(activeSection === 'btnOverride' ? null : 'btnOverride')}>
+      <CollapsibleSection title={`🔧 ${t('contact_editor.section_per_button')}`} subtitle={t('contact_editor.section_per_button_subtitle')} isOpen={activeSection === 'btnOverride'} onToggle={() => setActiveSection(activeSection === 'btnOverride' ? null : 'btnOverride')}>
         {CHANNELS.filter((c) => items[c.key]?.enabled !== false).map(({ key, title, icon }) => {
           const b = btns[key] || {}
           const bBgMode = (b.bgMode ?? defaultsBgMode) as 'solid' | 'gradient'
@@ -414,23 +414,23 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           return (
             <div key={key} style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid rgba(0,0,0,0.06)', marginBottom: 8 }}>
               <span style={{ fontWeight: 700, fontSize: 13 }}>{icon} {title}</span>
-              <Row label="Modo fundo">
+              <Row label={t('contact_editor.label_bg_mode')}>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <MiniButton active={bBgMode === 'solid'} onClick={() => setBtn(key, { bgMode: 'solid' })}>Sólido</MiniButton>
                   <MiniButton active={bBgMode === 'gradient'} onClick={() => setBtn(key, { bgMode: 'gradient' })}>Degradê</MiniButton>
                 </div>
               </Row>
               {bBgMode === 'solid' && (
-                <Row label="Cor fundo">
+                <Row label={t('contact_editor.label_bg_color')}>
                   <ColorPickerPro value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} />
                 </Row>
               )}
               {bBgMode === 'gradient' && (
                 <>
-                  <Row label="Cor inicial">
+                  <Row label={t('contact_editor.label_gradient_start')}>
                     <ColorPickerPro value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))} />
                   </Row>
-                  <Row label="Cor final">
+                  <Row label={t('contact_editor.label_gradient_end')}>
                     <ColorPickerPro value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))} />
                   </Row>
                   <Row label="Ângulo">
@@ -453,10 +453,10 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   </Row>
                 </>
               )}
-              <Row label="Cor ícone">
+              <Row label={t('contact_editor.label_icon_color')}>
                 <ColorPickerPro value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtn(key, { iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { iconColor: hex }))} />
               </Row>
-              <Row label="Cor texto">
+              <Row label={t('contact_editor.label_text_color')}>
                 <ColorPickerPro value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
               </Row>
               <Row label={t('contact_editor.label_font')}><FontPicker value={b.fontFamily ?? btnDefaults.fontFamily ?? ""} onChange={(v) => setBtn(key, { fontFamily: v || undefined })} /></Row>
@@ -469,20 +469,20 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                   <option value="900">Black</option>
                 </select>
               </Row>
-              <Row label="Tamanho texto">
+              <Row label={t('contact_editor.label_text_size')}>
                 <input type="range" min={8} max={24} value={b.labelFontSize ?? btnDefaults.labelFontSize ?? 13} onChange={(e) => setBtn(key, { labelFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
                 <span style={rightNum}>{b.labelFontSize ?? btnDefaults.labelFontSize ?? 13}px</span>
               </Row>
-              <Row label="Escala ícone">
+              <Row label={t('contact_editor.label_icon_scale')}>
                 <input type="range" min={0.4} max={0.9} step={0.02} value={b.iconScale ?? btnDefaults.iconScale ?? 0.58} onChange={(e) => setBtn(key, { iconScale: Number(e.target.value) })} style={{ flex: 1 }} />
                 <span style={rightNum}>{(b.iconScale ?? btnDefaults.iconScale ?? 0.58).toFixed(2)}</span>
               </Row>
-              <Row label="Padding Y">
+              <Row label={t('contact_editor.label_padding_y')}>
                 <input type="range" min={0} max={24} value={b.paddingY ?? btnDefaults.paddingY ?? 10} onChange={(e) => setBtn(key, { paddingY: Number(
 e.target.value) })} style={{ flex: 1 }} />
                 <span style={rightNum}>{b.paddingY ?? btnDefaults.paddingY ?? 10}px</span>
               </Row>
-              <Row label="Padding X">
+              <Row label={t('contact_editor.label_padding_x')}>
                 <input type="range" min={0} max={32} value={b.paddingX ?? btnDefaults.paddingX ?? 12} onChange={(e) => setBtn(key, { paddingX: Number(e.target.value) })} style={{ flex: 1 }} />
                 <span style={rightNum}>{b.paddingX ?? btnDefaults.paddingX ?? 12}px</span>
               </Row>
@@ -495,8 +495,8 @@ e.target.value) })} style={{ flex: 1 }} />
       </CollapsibleSection>
 
       {/* ========== POSIÇÃO ========== */}
-      <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
-        <Row label="Offset Y">
+      <CollapsibleSection title={`📍 ${t('contact_editor.section_position')}`} subtitle={t('contact_editor.section_position_subtitle')} isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
+        <Row label={t('contact_editor.label_offset_y')}>
           <input type="range" min={-80} max={80} step={4} value={st.offsetY ?? 0} onChange={(e) => setStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.offsetY ?? 0}px</span>
         </Row>

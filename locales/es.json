@@ -446,6 +446,25 @@
     "label_border_color": "Color del borde",
     "label_radius": "Radio",
     "label_padding": "Relleno",
-    "placeholder_contact": "Contacto"
+    "placeholder_contact": "Contacto",
+    "section_btn_style": "Estilo de botones",
+    "section_btn_style_subtitle": "Colores, tamaños, fuente",
+    "section_per_button": "Por botón",
+    "section_per_button_subtitle": "Personalizar cada canal",
+    "section_position": "Posición",
+    "section_position_subtitle": "Desplazamiento del bloque",
+    "label_bg_mode": "Modo de fondo",
+    "label_bg_color": "Color de fondo",
+    "label_gradient_start": "Color inicial",
+    "label_gradient_end": "Color final",
+    "label_icon_color": "Color de icono",
+    "label_text_color": "Color de texto",
+    "label_text_size": "Tamaño de texto",
+    "label_icon_scale": "Escala de icono",
+    "label_padding_y": "Relleno Y",
+    "label_padding_x": "Relleno X",
+    "label_offset_y": "Desplazamiento Y",
+    "option_solid": "Sólido",
+    "option_gradient": "Degradado"
   }
 }

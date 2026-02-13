@@ -432,6 +432,25 @@
     "label_border_color": "Colore bordo",
     "label_radius": "Raggio",
     "label_padding": "Padding",
-    "placeholder_contact": "Contatto"
+    "placeholder_contact": "Contatto",
+    "section_btn_style": "Stile pulsanti",
+    "section_btn_style_subtitle": "Colori, dimensioni, carattere",
+    "section_per_button": "Per pulsante",
+    "section_per_button_subtitle": "Personalizza ogni canale",
+    "section_position": "Posizione",
+    "section_position_subtitle": "Offset del blocco",
+    "label_bg_mode": "Modalità sfondo",
+    "label_bg_color": "Colore sfondo",
+    "label_gradient_start": "Colore iniziale",
+    "label_gradient_end": "Colore finale",
+    "label_icon_color": "Colore icona",
+    "label_text_color": "Colore testo",
+    "label_text_size": "Dimensione testo",
+    "label_icon_scale": "Scala icona",
+    "label_padding_y": "Padding Y",
+    "label_padding_x": "Padding X",
+    "label_offset_y": "Offset Y",
+    "option_solid": "Solido",
+    "option_gradient": "Gradiente"
   }
 }
