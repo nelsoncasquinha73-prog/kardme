@@ -590,5 +590,79 @@
     "label_width": "العرض",
     "section_position": "الموضع",
     "label_offset_y": "الإزاحة Y (px)"
+  },
+  "header_editor": {
+    "section_base": "الأساس",
+    "section_base_subtitle": "لون، تدرج أو صورة",
+    "section_patterns": "الأنماط",
+    "section_patterns_subtitle": "نقاط، خطوط، ضوضاء، إلخ.",
+    "section_presets": "الإعدادات المسبقة",
+    "section_presets_subtitle": "تركيبات جاهزة",
+    "section_cover": "الغلاف",
+    "section_cover_subtitle": "صورة، إطار، تراكب",
+    "label_type": "النوع",
+    "label_color": "اللون",
+    "label_start_color": "اللون الأولي",
+    "label_end_color": "اللون النهائي",
+    "label_upload": "رفع",
+    "label_fill": "التعبئة",
+    "label_position": "الموضع",
+    "label_zoom": "التكبير",
+    "label_blur": "الضبابية",
+    "label_darken_image": "تعتيم الصورة",
+    "label_overlay_color": "لون التراكب",
+    "label_opacity": "الشفافية",
+    "label_overall_intensity": "الشدة العامة",
+    "label_mobile_bar_color": "لون شريط الجوال",
+    "label_effect": "التأثير",
+    "label_color_a": "اللون A",
+    "label_color_b": "اللون B",
+    "label_blend_mode": "وضع المزج",
+    "label_density": "الكثافة",
+    "label_scale": "المقياس",
+    "label_smoothness": "النعومة",
+    "label_show_cover": "إظهار الغلاف",
+    "label_image": "الصورة",
+    "label_mode": "الوضع",
+    "label_radius": "نصف القطر",
+    "label_padding": "الحشو",
+    "label_height": "الارتفاع",
+    "label_dark_overlay": "تراكب داكن",
+    "label_gradient": "تدرج",
+    "label_fade_down": "تلاشي للأسفل",
+    "label_fade_color": "لون التلاشي",
+    "option_solid": "صلب",
+    "option_gradient": "تدرج",
+    "option_image": "صورة",
+    "option_cover": "تغطية",
+    "option_contain": "احتواء",
+    "option_none": "بدون",
+    "option_dots": "نقاط",
+    "option_lines": "خطوط",
+    "option_noise": "ضوضاء",
+    "option_circles": "دوائر",
+    "option_frame": "إطار",
+    "option_full": "كامل",
+    "tip_dots": "💡 نصيحة: \"نقاط\" + Soft Light يبدو فاخرًا جدًا!",
+    "tip_presets": "انقر على إعداد مسبق لتطبيقه. ثم خصص في أقسام \"الأساس\" و\"الأنماط\".",
+    "button_change": "تغيير",
+    "button_uploading": "جارٍ الرفع...",
+    "label_intensity": "الشدة",
+    "label_fade_height": "ارتفاع التلاشي",
+    "label_width": "العرض",
+    "label_width_px": "العرض (px)",
+    "section_backdrop": "الخلفية",
+    "section_backdrop_subtitle": "اللون خلف الغلاف",
+    "label_enable": "تفعيل",
+    "section_watermark": "العلامة المائية",
+    "section_watermark_subtitle": "علامة فوق الرأس",
+    "label_size": "الحجم",
+    "label_offset_x": "الإزاحة X",
+    "label_offset_y": "الإزاحة Y",
+    "label_pill_bg": "الخلفية (حبة)",
+    "label_bg_color": "لون الخلفية",
+    "label_shadow": "الظل",
+    "section_avatar_position": "موضع الصورة الرمزية",
+    "section_avatar_position_subtitle": "موضع الصورة الرمزية"
   }
 }

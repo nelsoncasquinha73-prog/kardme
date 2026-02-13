@@ -216,12 +216,12 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {cardBg && onChangeCardBg && (
         <CollapsibleSection
           title="🎨 Base do fundo"
-          subtitle="Cor, degradê ou imagem"
+          subtitle={t('header_editor.section_base_subtitle')}
           isOpen={activeSection === 'base'}
           onToggle={() => setActiveSection(activeSection === 'base' ? null : 'base')}
         >
           {/* Tipo de fundo */}
-          <Row label="Tipo">
+          <Row label={t('header_editor.label_type')}>
             <div style={{ display: 'flex', gap: 6 }}>
               <MiniButton
                 active={v1.base.kind === 'solid'}
@@ -266,7 +266,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
           {/* Cor sólida */}
           {v1.base.kind === 'solid' && (
-            <Row label="Cor">
+            <Row label={t('header_editor.label_color')}>
               <ColorPickerPro
                 value={v1.base.color ?? '#ffffff'}
                 onChange={(val) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: val } })}
@@ -278,7 +278,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           {/* Degradê */}
           {v1.base.kind === 'gradient' && (
             <>
-              <Row label="Cor inicial">
+              <Row label={t('header_editor.label_start_color')}>
                 <ColorPickerPro
                   value={gBase.stops?.[0]?.color ?? '#ffffff'}
                   onChange={(hex) => {
@@ -298,7 +298,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 />
               </Row>
 
-              <Row label="Cor final">
+              <Row label={t('header_editor.label_end_color')}>
                 <ColorPickerPro
                   value={gBase.stops?.[gBase.stops.length - 1]?.color ?? '#f3f4f6'}
                   onChange={(hex) => {
@@ -336,7 +336,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           {/* Imagem */}
           {v1.base.kind === 'image' && (
             <>
-              <Row label="Upload">
+              <Row label={t('header_editor.label_upload')}>
                 <input
                   type="file"
                   accept="image/*"
@@ -354,20 +354,20 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 />
               </Row>
 
-              <Row label="Preenchimento">
+              <Row label={t('header_editor.label_fill')}>
                 <select
                   value={(v1.base as any).fit ?? 'cover'}
                   onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), fit: e.target.value } })}
                   style={selectStyle}
                 >
-                  <option value="cover">Cover</option>
+                  <option value="cover">{t('header_editor.option_cover')}</option>
                   <option value="fixed">Fixo (parallax)</option>
                   <option value="tile">Repetir</option>
                   <option value="top-fade">Topo + Fade</option>
                 </select>
               </Row>
 
-              <Row label="Posição">
+              <Row label={t('header_editor.label_position')}>
                 <select
                   value={(v1.base as any).position ?? 'center'}
                   onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), position: e.target.value } })}
@@ -379,7 +379,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 </select>
               </Row>
 
-              <Row label="Zoom">
+              <Row label={t('header_editor.label_zoom')}>
                 <input
                   type="range"
                   min={0.5}
@@ -392,7 +392,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <span style={rightNum}>{Math.round(((v1.base as any).zoom ?? 1) * 100)}%</span>
               </Row>
 
-              <Row label="Blur">
+              <Row label={t('header_editor.label_blur')}>
                 <input
                   type="range"
                   min={0}
@@ -407,7 +407,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
               {/* Image overlay */}
               <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
-              <Row label="Escurecer imagem">
+              <Row label={t('header_editor.label_darken_image')}>
                 <Toggle
                   active={v1.imageOverlay?.enabled ?? false}
                   onClick={() => onChangeCardBg({ ...v1, imageOverlay: { ...v1.imageOverlay, enabled: !(v1.imageOverlay?.enabled ?? false) } })}
@@ -416,14 +416,14 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
               {v1.imageOverlay?.enabled && (
                 <>
-                  <Row label="Cor overlay">
+                  <Row label={t('header_editor.label_overlay_color')}>
                     <ColorPickerPro
                       value={v1.imageOverlay?.color ?? '#000000'}
                       onChange={(hex) => onChangeCardBg({ ...v1, imageOverlay: { ...v1.imageOverlay, color: hex } })}
                       onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...v1, imageOverlay: { ...v1.imageOverlay, color: hex } }))}
                     />
                   </Row>
-                  <Row label="Opacidade">
+                  <Row label={t('header_editor.label_opacity')}>
                     <input
                       type="range"
                       min={0}
@@ -441,7 +441,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           )}
 
           {/* Opacidade geral */}
-          <Row label="Intensidade geral">
+          <Row label={t('header_editor.label_overall_intensity')}>
             <input
               type="range"
               min={0}
@@ -455,7 +455,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           </Row>
 
           {/* Cor da barra do browser */}
-          <Row label="Cor barra (mobile)">
+          <Row label={t('header_editor.label_mobile_bar_color')}>
             <ColorPickerPro
               value={v1.browserBarColor ?? '#000000'}
               onChange={(hex) => onChangeCardBg({ ...v1, browserBarColor: hex })}
@@ -469,18 +469,18 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {cardBg && onChangeCardBg && (
         <CollapsibleSection
           title="✨ Patterns & Efeitos"
-          subtitle="Dots, linhas, noise, etc."
+          subtitle={t('header_editor.section_patterns_subtitle')}
           isOpen={activeSection === 'patterns'}
           onToggle={() => setActiveSection(activeSection === 'patterns' ? null : 'patterns')}
         >
-          <Row label="Efeito">
+          <Row label={t('header_editor.label_effect')}>
             <select
               value={currentKind}
               onChange={(e) => setEffectKind(e.target.value)}
               style={{ ...selectStyle, width: '100%' }}
             >
               <optgroup label="— Sem efeito —">
-                <option value="none">Nenhum</option>
+                <option value="none">{t('header_editor.option_none')}</option>
               </optgroup>
               <optgroup label="🔷 Geométricos">
                 {PATTERN_OPTIONS.filter(p => p.category === 'geometric').map(p => (
@@ -509,7 +509,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             <>
               <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-              <Row label="Cor A">
+              <Row label={t('header_editor.label_color_a')}>
                 <ColorPickerPro
                   value={currentColorA}
                   onChange={(hex) => patchOverlay({ colorA: hex })}
@@ -517,7 +517,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 />
               </Row>
 
-              <Row label="Cor B">
+              <Row label={t('header_editor.label_color_b')}>
                 <ColorPickerPro
                   value={currentColorB}
                   onChange={(hex) => patchOverlay({ colorB: hex })}
@@ -525,7 +525,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 />
               </Row>
 
-              <Row label="Blend mode">
+              <Row label={t('header_editor.label_blend_mode')}>
                 <select
                   value={currentBlendMode}
                   onChange={(e) => patchOverlay({ blendMode: e.target.value })}
@@ -537,7 +537,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 </select>
               </Row>
 
-              <Row label="Opacidade">
+              <Row label={t('header_editor.label_opacity')}>
                 <input
                   type="range"
                   min={0}
@@ -550,7 +550,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <span style={rightNum}>{Math.round(currentOpacity * 100)}%</span>
               </Row>
 
-              <Row label="Densidade">
+              <Row label={t('header_editor.label_density')}>
                 <input
                   type="range"
                   min={0.1}
@@ -563,7 +563,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <span style={rightNum}>{Math.round(currentDensity * 100)}%</span>
               </Row>
 
-              <Row label="Escala">
+              <Row label={t('header_editor.label_scale')}>
                 <input
                   type="range"
                   min={0.3}
@@ -576,7 +576,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <span style={rightNum}>{currentScale.toFixed(1)}x</span>
               </Row>
 
-              <Row label="Suavidade">
+              <Row label={t('header_editor.label_smoothness')}>
                 <input
                   type="range"
                   min={0}
@@ -603,7 +603,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </Row>
 
               <div style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>
-                💡 Dica: "Pontinhos" + Soft Light fica muito premium!
+                {t('header_editor.tip_dots')}
               </div>
             </>
           )}
@@ -614,7 +614,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {cardBg && onChangeCardBg && (
         <CollapsibleSection
           title="⚡ Presets rápidos"
-          subtitle="Combinações prontas"
+          subtitle={t('header_editor.section_presets_subtitle')}
           isOpen={activeSection === 'presets'}
           onToggle={() => setActiveSection(activeSection === 'presets' ? null : 'presets')}
         >
@@ -657,7 +657,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             })}
           </div>
           <div style={{ fontSize: 11, opacity: 0.6, marginTop: 8 }}>
-            Clica num preset para aplicar. Depois podes personalizar na secção "Base" e "Patterns".
+            {t('header_editor.tip_presets')}
           </div>
         </CollapsibleSection>
       )}
@@ -665,17 +665,17 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* ========== SECÇÃO 4: COVER (IMAGEM DO HEADER) ========== */}
       <CollapsibleSection
         title="🖼 Cover do header"
-        subtitle="Imagem, moldura, overlay"
+        subtitle={t('header_editor.section_cover_subtitle')}
         isOpen={activeSection === 'cover'}
         onToggle={() => setActiveSection(activeSection === 'cover' ? null : 'cover')}
       >
-        <Row label="Mostrar cover">
+        <Row label={t('header_editor.label_show_cover')}>
           <Toggle active={layout?.showCover !== false} onClick={() => setLayout({ showCover: !(layout?.showCover !== false) })} />
         </Row>
 
         {layout?.showCover !== false && (
           <>
-            <Row label="Imagem">
+            <Row label={t('header_editor.label_image')}>
               <Button onClick={() => coverRef.current?.click()}>
                 {uploading ? 'A enviar...' : '📷 Alterar'}
               </Button>
@@ -691,7 +691,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
-            <Row label="Modo">
+            <Row label={t('header_editor.label_mode')}>
               <div style={{ display: 'flex', gap: 6 }}>
                 <MiniButton active={coverMode === 'full'} onClick={() => setLayout({ ...(layout as any), coverMode: 'full' } as any)}>Full</MiniButton>
                 <MiniButton active={coverMode === 'tile'} onClick={() => setLayout({ ...(layout as any), coverMode: 'tile' } as any)}>Moldura</MiniButton>
@@ -701,7 +701,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             {coverMode === 'tile' && (
               <>
-                <Row label="Radius">
+                <Row label={t('header_editor.label_radius')}>
                   <input
                     type="range"
                     min={0}
@@ -713,7 +713,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   />
                   <span style={rightNum}>{tileRadius}px</span>
                 </Row>
-                <Row label="Padding">
+                <Row label={t('header_editor.label_padding')}>
                   <input
                     type="range"
                     min={0}
@@ -728,7 +728,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </>
             )}
 
-            <Row label="Altura">
+            <Row label={t('header_editor.label_height')}>
               <input
                 type="range"
                 min={120}
@@ -743,13 +743,13 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-            <Row label="Overlay escuro">
+            <Row label={t('header_editor.label_dark_overlay')}>
               <Toggle active={overlayEnabled} onClick={() => setLayout({ overlay: !overlayEnabled } as any)} />
             </Row>
 
             {overlayEnabled && (
               <>
-                <Row label="Cor overlay">
+                <Row label={t('header_editor.label_overlay_color')}>
                   <ColorPickerPro
                     value={overlayColor}
                     onChange={(hex) => setLayout({ ...(layout as any), overlayColor: hex } as any)}
@@ -757,7 +757,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   />
                 </Row>
 
-                <Row label="Opacidade">
+                <Row label={t('header_editor.label_opacity')}>
                   <input
                     type="range"
                     min={0}
@@ -770,7 +770,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   <span style={rightNum}>{Math.round(overlayOpacity * 100)}%</span>
                 </Row>
 
-                <Row label="Degradê">
+                <Row label={t('header_editor.label_gradient')}>
                   <Toggle
                     active={overlayGradient}
                     onClick={() => setLayout({ ...(layout as any), overlayGradient: !overlayGradient } as any)}
@@ -781,7 +781,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-            <Row label="Fade para baixo">
+            <Row label={t('header_editor.label_fade_down')}>
               <Toggle
                 active={coverFadeEnabled}
                 onClick={() => setLayout({ ...(layout as any), coverFadeEnabled: !coverFadeEnabled } as any)}
@@ -790,7 +790,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             {coverFadeEnabled && (
               <>
-                <Row label="Cor do fade">
+                <Row label={t('header_editor.label_fade_color')}>
                   <ColorPickerPro
                     value={coverFadeColor}
                     onChange={(hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any)}
@@ -798,7 +798,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   />
                 </Row>
 
-                <Row label="Intensidade">
+                <Row label={t('header_editor.label_intensity')}>
                   <input
                     type="range"
                     min={0}
@@ -811,7 +811,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   <span style={rightNum}>{coverFadeStrength}%</span>
                 </Row>
 
-                <Row label="Altura fade">
+                <Row label={t('header_editor.label_fade_height')}>
                   <input
                     type="range"
                     min={20}
@@ -828,7 +828,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-            <Row label="Largura">
+            <Row label={t('header_editor.label_width')}>
               <div style={{ display: 'flex', gap: 6 }}>
                 <MiniButton active={widthMode === 'full'} onClick={() => setLayout({ widthMode: 'full' } as any)}>Full</MiniButton>
                 <MiniButton active={widthMode === 'fixed'} onClick={() => setLayout({ widthMode: 'fixed' } as any)}>Fixa</MiniButton>
@@ -837,7 +837,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </Row>
 
             {widthMode === 'custom' && (
-              <Row label="Largura (px)">
+              <Row label={t('header_editor.label_width_px')}>
                 <input
                   type="number"
                   min={200}
@@ -855,11 +855,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* ========== SECÇÃO 5: FUNDO DO HEADER (BLOCO) ========== */}
       <CollapsibleSection
         title="🎯 Fundo do bloco header"
-        subtitle="Cor por trás do cover"
+        subtitle={t('header_editor.section_backdrop_subtitle')}
         isOpen={activeSection === 'headerBg'}
         onToggle={() => setActiveSection(activeSection === 'headerBg' ? null : 'headerBg')}
       >
-        <Row label="Ativar">
+        <Row label={t('header_editor.label_enable')}>
           <Toggle
             active={headerBgEnabled}
             onClick={() => setLayout({ ...(layout as any), headerBgEnabled: !headerBgEnabled } as any)}
@@ -867,7 +867,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
         </Row>
 
         {headerBgEnabled && (
-          <Row label="Cor">
+          <Row label={t('header_editor.label_color')}>
             <ColorPickerPro
               value={headerBgColor}
               onChange={(hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any)}
@@ -886,11 +886,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* ========== SECÇÃO 6: BADGE ========== */}
       <CollapsibleSection
         title="🏷 Badge / Logo"
-        subtitle="Marca por cima do header"
+        subtitle={t('header_editor.section_watermark_subtitle')}
         isOpen={activeSection === 'badge'}
         onToggle={() => setActiveSection(activeSection === 'badge' ? null : 'badge')}
       >
-        <Row label="Ativar">
+        <Row label={t('header_editor.label_enable')}>
           <Toggle
             active={badgeEnabled}
             onClick={() => setLayout({ ...(layout as any), badge: { ...badge, enabled: !badgeEnabled } } as any)}
@@ -899,7 +899,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
         {badgeEnabled ? (
           <>
-            <Row label="Upload">
+            <Row label={t('header_editor.label_upload')}>
               <Button onClick={() => badgeRef.current?.click()}>
                 {uploadingBadge ? 'A enviar...' : '📷 Upload'}
               </Button>
@@ -924,7 +924,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
-            <Row label="Posição">
+            <Row label={t('header_editor.label_position')}>
               <select
                 value={badgePos}
                 onChange={(e) => setLayout({ ...(layout as any), badge: { ...badge, position: e.target.value } } as any)}
@@ -937,7 +937,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </select>
             </Row>
 
-            <Row label="Tamanho">
+            <Row label={t('header_editor.label_size')}>
               <input
                 type="range"
                 min={24}
@@ -950,7 +950,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <span style={rightNum}>{badgeSizePx}px</span>
             </Row>
 
-            <Row label="Offset X">
+            <Row label={t('header_editor.label_offset_x')}>
               <input
                 type="range"
                 min={-20}
@@ -963,7 +963,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <span style={rightNum}>{badgeOffsetX}px</span>
             </Row>
 
-            <Row label="Offset Y">
+            <Row label={t('header_editor.label_offset_y')}>
               <input
                 type="range"
                 min={-20}
@@ -978,7 +978,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-            <Row label="Fundo (pill)">
+            <Row label={t('header_editor.label_pill_bg')}>
               <Toggle
                 active={badgeBgEnabled}
                 onClick={() => setLayout({ ...(layout as any), badge: { ...badge, bgEnabled: !badgeBgEnabled } } as any)}
@@ -986,7 +986,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </Row>
 
             {badgeBgEnabled && (
-              <Row label="Cor fundo">
+              <Row label={t('header_editor.label_bg_color')}>
                 <ColorPickerPro
                   value={badgeBgColor}
                   onChange={(hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)}
@@ -995,7 +995,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </Row>
             )}
 
-            <Row label="Radius">
+            <Row label={t('header_editor.label_radius')}>
               <input
                 type="range"
                 min={0}
@@ -1008,7 +1008,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <span style={rightNum}>{badgeRadiusPx}px</span>
             </Row>
 
-            <Row label="Sombra">
+            <Row label={t('header_editor.label_shadow')}>
               <Toggle
                 active={badgeShadow}
                 onClick={() => setLayout({ ...(layout as any), badge: { ...badge, shadow: !badgeShadow } } as any)}
@@ -1025,11 +1025,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       {/* ========== SECÇÃO 7: AVATAR LAYOUT ========== */}
       <CollapsibleSection
         title="👤 Layout do avatar"
-        subtitle="Posição do avatar"
+        subtitle={t('header_editor.section_avatar_position_subtitle')}
         isOpen={activeSection === 'avatar'}
         onToggle={() => setActiveSection(activeSection === 'avatar' ? null : 'avatar')}
       >
-        <Row label="Posição">
+        <Row label={t('header_editor.label_position')}>
           <div style={{ display: 'flex', gap: 6 }}>
             <MiniButton
               active={(layout as any)?.avatarDock === 'overlap' || !(layout as any)?.avatarDock}
