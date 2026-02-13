@@ -411,7 +411,17 @@
     "auto_renew": "التجديد التلقائي",
     "auto_renew_on": "✅ نشط",
     "auto_renew_off": "❌ معطل",
-    "member_since": "عضو منذ"
+    "member_since": "عضو منذ",
+    "security_section": "الأمان",
+    "current_password": "كلمة المرور الحالية",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "change_password_button": "تغيير كلمة المرور",
+    "password_changed_success": "تم تغيير كلمة المرور بنجاح!",
+    "password_mismatch": "كلمات المرور غير متطابقة",
+    "password_too_short": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+    "wrong_current_password": "كلمة المرور الحالية غير صحيحة",
+    "password_change_error": "خطأ في تغيير كلمة المرور"
   },
   "contact_editor": {
     "section_channels": "قنوات الاتصال",

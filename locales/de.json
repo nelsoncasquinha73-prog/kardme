@@ -412,7 +412,17 @@
     "auto_renew": "Automatische Verlängerung",
     "auto_renew_on": "✅ Aktiv",
     "auto_renew_off": "❌ Deaktiviert",
-    "member_since": "Mitglied seit"
+    "member_since": "Mitglied seit",
+    "security_section": "Sicherheit",
+    "current_password": "Aktuelles Passwort",
+    "new_password": "Neues Passwort",
+    "confirm_password": "Passwort bestätigen",
+    "change_password_button": "Passwort ändern",
+    "password_changed_success": "Passwort erfolgreich geändert!",
+    "password_mismatch": "Passwörter stimmen nicht überein",
+    "password_too_short": "Passwort muss mindestens 6 Zeichen haben",
+    "wrong_current_password": "Aktuelles Passwort ist falsch",
+    "password_change_error": "Fehler beim Ändern des Passworts"
   },
   "contact_editor": {
     "section_channels": "Kontaktkanäle",

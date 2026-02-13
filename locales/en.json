@@ -400,7 +400,17 @@
     "auto_renew": "Auto-renewal",
     "auto_renew_on": "✅ Active",
     "auto_renew_off": "❌ Disabled",
-    "member_since": "Member since"
+    "member_since": "Member since",
+    "security_section": "Security",
+    "current_password": "Current password",
+    "new_password": "New password",
+    "confirm_password": "Confirm password",
+    "change_password_button": "Change password",
+    "password_changed_success": "Password changed successfully!",
+    "password_mismatch": "Passwords do not match",
+    "password_too_short": "Password must be at least 6 characters",
+    "wrong_current_password": "Current password is incorrect",
+    "password_change_error": "Error changing password"
   },
   "contact_editor": {
     "section_channels": "Contact channels",

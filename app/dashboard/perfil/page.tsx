@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useLanguage } from '@/components/language/LanguageProvider'
-import { FiUser, FiCheck, FiAlertCircle, FiMapPin, FiCreditCard, FiChevronDown } from 'react-icons/fi'
+import { FiUser, FiCheck, FiAlertCircle, FiMapPin, FiCreditCard, FiChevronDown, FiLock } from 'react-icons/fi'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
@@ -82,6 +82,11 @@ export default function PerfilPage() {
   const [codigoPostal, setCodigoPostal] = useState('')
   const [pais, setPais] = useState('')
 
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordChanging, setPasswordChanging] = useState(false)
+
   useEffect(() => { loadProfile() }, [])
 
   const loadProfile = async () => {
@@ -112,6 +117,39 @@ export default function PerfilPage() {
     setSaving(false)
     if (error) { setMessage({ type: 'error', text: t('profile.save_error') }); console.error(error) }
     else { setMessage({ type: 'success', text: t('profile.save_success') }); setTimeout(() => setMessage(null), 3000) }
+  }
+
+  const handleChangePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      setMessage({ type: 'error', text: t('profile.password_change_error') })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: t('profile.password_mismatch') })
+      return
+    }
+    if (newPassword.length < 6) {
+      setMessage({ type: 'error', text: t('profile.password_too_short') })
+      return
+    }
+
+    setPasswordChanging(true)
+    setMessage(null)
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+
+    setPasswordChanging(false)
+
+    if (error) {
+      setMessage({ type: 'error', text: t('profile.password_change_error') })
+      console.error(error)
+    } else {
+      setMessage({ type: 'success', text: t('profile.password_changed_success') })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setTimeout(() => setMessage(null), 3000)
+    }
   }
 
   const formatDate = (dateStr: string | null) => {
@@ -185,6 +223,23 @@ export default function PerfilPage() {
         </div>
       </div>
 
+
+      <div style={sectionStyle}>
+        <div style={sectionTitleStyle}><FiLock size={20} /> {t('profile.security_section')}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16 }}>
+          <div>
+            <label style={labelStyle}>{t('profile.new_password')}</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>{t('profile.confirm_password')}</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+          </div>
+        </div>
+        <button onClick={handleChangePassword} disabled={passwordChanging || !newPassword || !confirmPassword} style={{ marginTop: 20, padding: '12px 24px', borderRadius: 12, border: 'none', background: passwordChanging ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', fontWeight: 700, cursor: passwordChanging ? 'not-allowed' : 'pointer', opacity: passwordChanging || !newPassword || !confirmPassword ? 0.5 : 1 }}>
+          {passwordChanging ? t('common.saving') : t('profile.change_password_button')}
+        </button>
+      </div>
       <div style={sectionStyle}>
         <div style={sectionTitleStyle}><FiMapPin size={20} /> {t('profile.address_section')}</div>
         <div><label style={labelStyle}>{t('profile.address')}</label><input type="text" value={morada} onChange={(e) => setMorada(e.target.value)} placeholder={t('profile.address_placeholder')} style={inputStyle} /></div>
