@@ -96,13 +96,29 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   const { t } = useLanguage()
   const { openPicker } = useColorPicker()
 
-  function patch(fn: (d: ProfileSettings) => void) {
-    const next = structuredClone(localRef.current)
-    fn(next)
-    setLocal(next)
-    onChange(next)
-  }
 
+  function patch(fn: (d: ProfileSettings) => void) {
+    try {
+      const next = structuredClone(localRef.current)
+      fn(next)
+      setLocal(next)
+      onChange(next)
+    } catch (err) {
+      console.error('❌ ProfileBlock patch error:', err)
+      console.error('localRef.current:', localRef.current)
+      // Fallback: tentar normalizar e aplicar novamente
+      try {
+        const normalized = normalize(localRef.current)
+        const next = structuredClone(normalized)
+        fn(next)
+        setLocal(next)
+        onChange(next)
+      } catch (err2) {
+        console.error('❌ ProfileBlock patch fallback failed:', err2)
+        alert('Erro ao atualizar ProfileBlock. Por favor refresca a página.')
+      }
+    }
+  }
   function pickEyedropper(apply: (hex: string) => void) {
     openPicker({ mode: 'eyedropper', onPick: apply })
   }
