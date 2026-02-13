@@ -76,7 +76,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
           <RichTextEditor value={s.text ?? ''} onChange={(html) => setSettings({ text: html })} placeholder="Escreve aqui..." minHeight={80} />
           {modalKeys.length > 0 && (
             <div style={{ marginTop: 8, padding: '8px 10px', background: 'rgba(59,130,246,0.06)', borderRadius: 10, fontSize: 11, color: '#3b82f6' }}>
-              Para usar um modal, seleciona a palavra no texto, clica no link e cola: <strong>#modal:ID</strong>
+              Para usar um modal, seleciona a palavra no texto, clica no link e cola o ID abaixo:
               {modalKeys.map((k) => (
                 <div key={k} style={{ marginTop: 2 }}>
                   <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 4px', borderRadius: 4 }}>#modal:{k}</code> {modals[k].label}
@@ -92,12 +92,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
         {modalKeys.map((id) => (
           <div key={id} style={{ background: 'rgba(0,0,0,0.03)', borderRadius: 12, padding: 12, marginBottom: 8, border: '1px solid rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <input
-                value={modals[id].label}
-                onChange={(e) => updateModal(id, { label: e.target.value })}
-                placeholder="Nome do link"
-                style={{ ...inputStyle, fontWeight: 700, fontSize: 13 }}
-              />
+              <input value={modals[id].label} onChange={(e) => updateModal(id, { label: e.target.value })} placeholder="Nome do link" style={{ ...inputStyle, fontWeight: 700, fontSize: 13 }} />
               <button onClick={() => removeModal(id)} style={{ marginLeft: 8, padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#EF4444', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>X</button>
             </div>
             <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
@@ -109,15 +104,11 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
                 <button onClick={() => setEditingModal(null)} style={{ marginTop: 8, padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.1)', background: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Fechar editor</button>
               </div>
             ) : (
-              <button onClick={() => setEditingModal(id)} style={{ padding: '8px 14px', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', background: 'rgba(59,130,246,0.06)', color: '#3b82f6', cursor: 'pointer', fontSize: 12, fontWeight: 600, width: '100%' }}>
-                Editar conteudo do modal
-              </button>
+              <button onClick={() => setEditingModal(id)} style={{ padding: '8px 14px', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', background: 'rgba(59,130,246,0.06)', color: '#3b82f6', cursor: 'pointer', fontSize: 12, fontWeight: 600, width: '100%' }}>Editar conteudo do modal</button>
             )}
           </div>
         ))}
-        <button onClick={addModal} style={{ padding: '10px 16px', borderRadius: 12, border: '2px dashed rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.04)', color: '#3b82f6', cursor: 'pointer', fontSize: 13, fontWeight: 700, width: '100%' }}>
-          + Adicionar Modal
-        </button>
+        <button onClick={addModal} style={{ padding: '10px 16px', borderRadius: 12, border: '2px dashed rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.04)', color: '#3b82f6', cursor: 'pointer', fontSize: 13, fontWeight: 700, width: '100%' }}>+ Adicionar Modal</button>
       </CollapsibleSection>
 
       <CollapsibleSection title="Titulo" subtitle="Cor, tamanho, fonte" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
@@ -172,10 +163,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
 }
 
 const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
-const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12,
-cat >> /tmp/fte.tsx << 'XEOF'
- border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13 }
-
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontSize: 13 }
 function CollapsibleSection({ title, subtitle, isOpen, onToggle, children }: { title: string; subtitle?: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
