@@ -1,30 +1,29 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+
+type ModalItem = { label: string; content: string }
 
 type FreeTextSettings = {
   title?: string
   text: string
+  modals?: Record<string, ModalItem>
 }
 
 type FreeTextStyle = {
   offsetY?: number
-
   titleColor?: string
   titleFontFamily?: string
   titleBold?: boolean
   titleFontSize?: number
   titleAlign?: 'left' | 'center' | 'right'
-
   textColor?: string
   fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
   align?: 'left' | 'center' | 'right'
-
   compact?: boolean
-
   container?: {
     bgColor?: string
     radius?: number
@@ -52,61 +51,25 @@ function resolveFont(fontFamily?: string) {
   return fontFamily
 }
 
-function normalizeUrl(url: string) {
-  const u = (url || '').trim()
-  if (!u) return ''
-  if (u.startsWith('http://') || u.startsWith('https://')) return u
-  if (u.startsWith('mailto:') || u.startsWith('tel:')) return u
-  // permitir links tipo "www." ou domínio
-  if (u.startsWith('www.')) return `https://${u}`
-  if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(u)) return `https://${u}`
-  return u
-}
-
-// transforma URLs em anchors simples (sem markdown, leve e seguro)
-function linkify(text: string) {
-  const t = text || ''
-  const re = /(https?:\/\/[^\s]+|www\.[^\s]+|mailto:[^\s]+|tel:[^\s]+)/g
-  const parts = t.split(re)
-
-  return parts.map((part, idx) => {
-    if (re.test(part)) {
-      const href = normalizeUrl(part)
-      return (
-        <a
-          key={idx}
-          href={href}
-          target={href.startsWith('http') ? '_blank' : undefined}
-          rel={href.startsWith('http') ? 'noreferrer' : undefined}
-          style={{ color: 'inherit', textDecoration: 'underline' }}
-          data-no-block-select="1"
-        >
-          {part}
-        </a>
-      )
-    }
-    return <React.Fragment key={idx}>{part}</React.Fragment>
-  })
-}
-
 export default function FreeTextBlock({ settings, style }: Props) {
   const s = settings || { text: '' }
   const st: FreeTextStyle = style || {}
   const c = st.container || {}
+  const modals = s.modals || {}
+  const [openModal, setOpenModal] = useState<string | null>(null)
 
   const compact = st.compact === true
-
   const title = (s.title ?? '').trim()
   const text = (s.text ?? '').trim()
-
   const pad = c.padding ?? (compact ? 10 : 14)
+  const isHtml = text.includes('<')
 
   const wrap: React.CSSProperties = {
     transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined,
   }
 
   const containerStyle: React.CSSProperties = {
-    background: c.bgColor ?? (compact ? 'transparent' : 'transparent'),
+    background: c.bgColor ?? 'transparent',
     borderRadius: c.radius ?? (compact ? 12 : 14),
     padding: pad,
     boxShadow: c.shadow ? '0 16px 40px rgba(0,0,0,0.12)' : undefined,
@@ -132,24 +95,96 @@ export default function FreeTextBlock({ settings, style }: Props) {
     fontSize: st.fontSize ?? (compact ? 12 : 14),
     lineHeight: st.lineHeight ?? (compact ? 1.35 : 1.5),
     textAlign: st.align ?? 'left',
-    whiteSpace: 'pre-wrap',
+    whiteSpace: isHtml ? undefined : 'pre-wrap',
     opacity: compact ? 0.85 : 1,
   }
 
   if (!title && !text) {
     return (
       <div style={wrap}>
-        <div style={{ ...containerStyle, opacity: 0.6, fontSize: 13 }}>Sem conteúdo</div>
+        <div style={{ ...containerStyle, opacity: 0.6, fontSize: 13 }}>Sem conteudo</div>
       </div>
     )
   }
+
+  const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.tagName === 'A') {
+      const href = target.getAttribute('href') || ''
+      if (href.startsWith('#modal:')) {
+        e.preventDefault()
+        e.stopPropagation()
+        const modalId = href.replace('#modal:', '')
+        if (modals[modalId]) setOpenModal(modalId)
+      }
+    }
+  }
+
+  const activeModal = openModal ? modals[openModal] : null
 
   return (
     <div style={wrap}>
       <div style={containerStyle}>
         {title ? <h3 style={titleStyle}>{title}</h3> : null}
-        {text ? <p style={textStyle}>{linkify(text)}</p> : null}
+        {text ? (
+          isHtml ? (
+            <div
+              style={textStyle}
+              dangerouslySetInnerHTML={{ __html: text }}
+              onClick={handleClick}
+              data-no-block-select="1"
+            />
+          ) : (
+            <p style={textStyle}>{text}</p>
+          )
+        ) : null}
       </div>
+
+      {activeModal && (
+        <div
+          onClick={() => setOpenModal(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#fff',
+              borderRadius: 20,
+              maxWidth: 500,
+              width: '100%',
+              maxHeight: '80vh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#111827' }}>{activeModal.label}</h3>
+              <button
+                onClick={() => setOpenModal(null)}
+                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                X
+              </button>
+            </div>
+            <div
+              style={{ padding: 20, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
+              dangerouslySetInnerHTML={{ __html: activeModal.content }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
