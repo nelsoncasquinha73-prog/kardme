@@ -465,5 +465,57 @@
     "label_offset_y": "الإزاحة Y",
     "option_solid": "صلب",
     "option_gradient": "متدرج"
+  },
+  "profile_editor": {
+    "section_avatar": "الصورة الرمزية",
+    "section_avatar_subtitle": "الصورة، الحجم، الشكل",
+    "section_effects": "تأثيرات الصورة الرمزية",
+    "section_effects_subtitle": "التوهج، الظل، 3D",
+    "section_identity": "الهوية",
+    "section_identity_subtitle": "الاسم، المهنة، الشركة",
+    "section_container": "الحاوية",
+    "section_container_subtitle": "الخلفية، الحدود، الحشو",
+    "section_position": "التخطيط والموضع",
+    "section_position_subtitle": "إزاحة الكتلة",
+    "label_show_avatar": "إظهار الصورة الرمزية",
+    "label_image": "الصورة",
+    "label_size": "الحجم",
+    "label_shape": "الشكل",
+    "label_border": "الحدود",
+    "label_border_color": "لون الحدود",
+    "label_position_x": "الموضع X",
+    "label_position_y": "الموضع Y",
+    "label_glow": "التوهج (الهالة)",
+    "label_glow_size": "حجم التوهج",
+    "label_glow_color": "لون التوهج",
+    "label_shadow": "الظل",
+    "label_intensity": "الشدة",
+    "label_effect_3d": "تأثير ثلاثي الأبعاد",
+    "label_frame_color": "لون الإطار",
+    "label_scale": "المقياس",
+    "label_name": "الاسم",
+    "label_profession": "المهنة",
+    "label_company": "الشركة",
+    "label_color": "اللون",
+    "label_alignment": "المحاذاة",
+    "label_line_spacing": "تباعد الأسطر",
+    "label_enable_container": "تفعيل الحاوية",
+    "label_bg_color": "لون الخلفية",
+    "label_thickness": "السمك",
+    "label_radius": "نصف القطر",
+    "label_padding": "الحشو",
+    "label_offset_x": "الإزاحة X",
+    "label_offset_y": "الإزاحة Y",
+    "placeholder_full_name": "الاسم الكامل",
+    "placeholder_profession": "مثال: مصمم، مدير تنفيذي، إلخ.",
+    "placeholder_company": "اسم الشركة",
+    "button_change": "تغيير",
+    "button_uploading": "جارٍ الرفع...",
+    "button_reset_position": "إعادة تعيين الموضع",
+    "tip_one_effect": "💡 قم بتفعيل تأثير واحد فقط في كل مرة للحصول على أفضل النتائج.",
+    "tip_enable_container": "قم بالتفعيل لإضافة خلفية لكتلة الملف الشخصي.",
+    "tip_offset": "ينقل كتلة الملف الشخصي بالكامل. مفيد للتعديلات الدقيقة.",
+    "label_width": "العرض",
+    "label_width_px": "العرض (px)"
   }
 }

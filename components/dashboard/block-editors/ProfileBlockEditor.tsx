@@ -155,12 +155,12 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
       {/* ========== SECÇÃO 1: AVATAR ========== */}
       <CollapsibleSection
-        title="👤 Avatar"
-        subtitle="Imagem, tamanho, forma"
+        title={`👤 ${t('profile_editor.section_avatar')}`}
+        subtitle={t('profile_editor.section_avatar_subtitle')}
         isOpen={activeSection === 'avatar'}
         onToggle={() => setActiveSection(activeSection === 'avatar' ? null : 'avatar')}
       >
-        <Row label="Mostrar avatar">
+        <Row label={t('profile_editor.label_show_avatar')}>
           <Toggle
             active={local.avatar?.enabled ?? false}
             onClick={() => patch((d) => (d.avatar!.enabled = !(d.avatar?.enabled ?? false)))}
@@ -169,10 +169,10 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {(local.avatar?.enabled ?? false) && (
           <>
-            <Row label="Imagem">
+            <Row label={t('profile_editor.label_image')}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <Button onClick={() => avatarRef.current?.click()}>
-                  {uploading ? 'A enviar...' : '📷 Alterar'}
+                  {uploading ? t('profile_editor.button_uploading') : `📷 ${t('profile_editor.button_change')}`}
                 </Button>
                 {local.avatar?.image && (
                   <img
@@ -184,7 +184,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               </div>
             </Row>
 
-            <Row label="Tamanho">
+            <Row label={t('profile_editor.label_size')}>
               <input
                 type="range"
                 min={48}
@@ -197,7 +197,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               <span style={rightNum}>{local.avatar?.sizePx ?? 108}px</span>
             </Row>
 
-            <Row label="Forma">
+            <Row label={t('profile_editor.label_shape')}>
               <div style={{ display: 'flex', gap: 6 }}>
                 {(['circle', 'rounded', 'square'] as const).map((shape) => (
                   <MiniButton
@@ -211,7 +211,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               </div>
             </Row>
 
-            <Row label="Borda">
+            <Row label={t('profile_editor.label_border')}>
               <input
                 type="range"
                 min={0}
@@ -225,7 +225,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </Row>
 
             {(local.avatar?.borderWidth ?? 0) > 0 && (
-              <Row label="Cor da borda">
+              <Row label={t('profile_editor.label_border_color')}>
                 <ColorPickerPro
                   value={local.avatar?.borderColor ?? '#FFFFFF'}
                   onChange={(hex) => patch((d) => (d.avatar!.borderColor = hex))}
@@ -236,7 +236,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-            <Row label="Posição X">
+            <Row label={t('profile_editor.label_position_x')}>
               <input
                 type="range"
                 min={-50}
@@ -249,7 +249,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               <span style={rightNum}>{local.avatar?.offsetX ?? 0}px</span>
             </Row>
 
-            <Row label="Posição Y">
+            <Row label={t('profile_editor.label_position_y')}>
               <input
                 type="range"
                 min={-80}
@@ -273,13 +273,13 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
       {/* ========== SECÇÃO 2: EFEITOS DO AVATAR ========== */}
       <CollapsibleSection
-        title="✨ Efeitos do avatar"
-        subtitle="Glow, sombra, 3D"
+        title={`✨ ${t('profile_editor.section_effects')}`}
+        subtitle={t('profile_editor.section_effects_subtitle')}
         isOpen={activeSection === 'effects'}
         onToggle={() => setActiveSection(activeSection === 'effects' ? null : 'effects')}
       >
         {/* GLOW */}
-        <Row label="Glow (halo)">
+        <Row label={t('profile_editor.label_glow')}>
           <Toggle
             active={(local.avatar?.glow as any)?.enabled ?? false}
             onClick={() => patch((d) => {
@@ -292,7 +292,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {((local.avatar?.glow as any)?.enabled ?? false) && (
           <>
-            <Row label="Tamanho glow">
+            <Row label={t('profile_editor.label_glow_size')}>
               <input
                 type="range"
                 min={2}
@@ -309,7 +309,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               <span style={rightNum}>{(local.avatar?.glow as any)?.size ?? 8}px</span>
             </Row>
 
-            <Row label="Cor glow">
+            <Row label={t('profile_editor.label_glow_color')}>
               <ColorPickerPro
                 value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.25)'}
                 onChange={(hex) => patch((d) => {
@@ -330,7 +330,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
         {/* SOMBRA */}
-        <Row label="Sombra">
+        <Row label={t('profile_editor.label_shadow')}>
           <Toggle
             active={(local.avatar?.shadow as any)?.enabled ?? false}
             onClick={() => patch((d) => {
@@ -342,7 +342,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         </Row>
 
         {((local.avatar?.shadow as any)?.enabled ?? false) && (
-          <Row label="Intensidade">
+          <Row label={t('profile_editor.label_intensity')}>
             <input
               type="range"
               min={0}
@@ -363,7 +363,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
         {/* EFEITO 3D */}
-        <Row label="Efeito 3D">
+        <Row label={t('profile_editor.label_effect_3d')}>
           <Toggle
             active={(local.avatar?.effect3d as any)?.enabled ?? false}
             onClick={() => patch((d) => {
@@ -376,7 +376,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {((local.avatar?.effect3d as any)?.enabled ?? false) && (
           <>
-            <Row label="Cor moldura">
+            <Row label={t('profile_editor.label_frame_color')}>
               <ColorPickerPro
                 value={(local.avatar?.effect3d as any)?.bgColor ?? '#ffffff'}
                 onChange={(hex) => patch((d) => {
@@ -392,7 +392,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               />
             </Row>
 
-            <Row label="Escala">
+            <Row label={t('profile_editor.label_scale')}>
               <input
                 type="range"
                 min={1}
@@ -412,20 +412,20 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         )}
 
         <div style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>
-          💡 Ativa apenas um efeito de cada vez para melhor resultado.
+          {t('profile_editor.tip_one_effect')}
         </div>
       </CollapsibleSection>
 
       {/* ========== SECÇÃO 3: IDENTIDADE ========== */}
       <CollapsibleSection
-        title="📝 Identidade"
-        subtitle="Nome, profissão, empresa"
+        title={`📝 ${t('profile_editor.section_identity')}`}
+        subtitle={t('profile_editor.section_identity_subtitle')}
         isOpen={activeSection === 'identity'}
         onToggle={() => setActiveSection(activeSection === 'identity' ? null : 'identity')}
       >
         {/* NOME */}
         <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Row label="Nome">
+          <Row label={t('profile_editor.label_name')}>
             <Toggle
               active={local.name?.enabled ?? true}
               onClick={() => patch((d) => (d.name.enabled = !(d.name?.enabled ?? true)))}
@@ -436,7 +436,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             type="text"
             value={local.name?.text ?? ''}
             onChange={(e) => patch((d) => (d.name.text = e.target.value))}
-            placeholder="Nome completo"
+            placeholder={t('profile_editor.placeholder_full_name')}
             style={inputStyle}
           />
 
@@ -459,7 +459,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </MiniButton>
           </div>
 
-          <Row label="Cor">
+          <Row label={t('profile_editor.label_color')}>
             <ColorPickerPro
               value={local.name?.color ?? '#0B1220'}
               onChange={(hex) => patch((d) => (d.name.color = hex))}
@@ -470,7 +470,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {/* PROFISSÃO */}
         <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Row label="Profissão">
+          <Row label={t('profile_editor.label_profession')}>
             <Toggle
               active={local.profession?.enabled ?? false}
               onClick={() => patch((d) => (d.profession.enabled = !(d.profession?.enabled ?? false)))}
@@ -484,7 +484,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               d.profession.text = e.target.value
               if (e.target.value.trim()) d.profession.enabled = true
             })}
-            placeholder="Ex: Designer, CEO, etc."
+            placeholder={t('profile_editor.placeholder_profession')}
             style={inputStyle}
           />
 
@@ -507,7 +507,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </MiniButton>
           </div>
 
-          <Row label="Cor">
+          <Row label={t('profile_editor.label_color')}>
             <ColorPickerPro
               value={local.profession?.color ?? '#374151'}
               onChange={(hex) => patch((d) => (d.profession.color = hex))}
@@ -518,7 +518,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {/* EMPRESA */}
         <div style={{ padding: 12, background: 'rgba(0,0,0,0.02)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Row label="Empresa">
+          <Row label={t('profile_editor.label_company')}>
             <Toggle
               active={local.company?.enabled ?? true}
               onClick={() => patch((d) => {
@@ -536,7 +536,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               d.company.text = e.target.value
               if (e.target.value.trim()) d.company.enabled = true
             })}
-            placeholder="Nome da empresa"
+            placeholder={t('profile_editor.placeholder_company')}
             style={inputStyle}
           />
 
@@ -563,7 +563,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </MiniButton>
           </div>
 
-          <Row label="Cor">
+          <Row label={t('profile_editor.label_color')}>
             <ColorPickerPro
               value={local.company?.color ?? '#6B7280'}
               onChange={(hex) => patch((d) => {
@@ -580,7 +580,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
-        <Row label="Alinhamento">
+        <Row label={t('profile_editor.label_alignment')}>
           <div style={{ display: 'flex', gap: 6 }}>
             {(['left', 'center', 'right'] as const).map((align) => (
               <MiniButton
@@ -597,7 +597,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           </div>
         </Row>
 
-        <Row label="Espaço entre linhas">
+        <Row label={t('profile_editor.label_line_spacing')}>
           <input
             type="range"
             min={0}
@@ -616,12 +616,12 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
       {/* ========== SECÇÃO 4: CONTAINER ========== */}
       <CollapsibleSection
-        title="📦 Container"
-        subtitle="Fundo, borda, padding"
+        title={`📦 ${t('profile_editor.section_container')}`}
+        subtitle={t('profile_editor.section_container_subtitle')}
         isOpen={activeSection === 'container'}
         onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}
       >
-        <Row label="Ativar container">
+        <Row label={t('profile_editor.label_enable_container')}>
           <Toggle
             active={local.container?.enabled ?? false}
             onClick={() => patch((d) => {
@@ -633,7 +633,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {(local.container?.enabled ?? false) && (
           <>
-            <Row label="Cor do fundo">
+            <Row label={t('profile_editor.label_bg_color')}>
               <ColorPickerPro
                 value={local.container?.bgColor ?? '#ffffff'}
                 onChange={(hex) => patch((d) => {
@@ -647,7 +647,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               />
             </Row>
 
-            <Row label="Sombra">
+            <Row label={t('profile_editor.label_shadow')}>
               <Toggle
                 active={local.container?.shadow ?? false}
                 onClick={() => patch((d) => {
@@ -657,7 +657,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               />
             </Row>
 
-            <Row label="Borda">
+            <Row label={t('profile_editor.label_border')}>
               <Toggle
                 active={(local.container?.borderWidth ?? 0) > 0}
                 onClick={() => patch((d) => {
@@ -669,7 +669,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
             {(local.container?.borderWidth ?? 0) > 0 && (
               <>
-                <Row label="Espessura">
+                <Row label={t('profile_editor.label_thickness')}>
                   <input
                     type="range"
                     min={1}
@@ -685,7 +685,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
                   <span style={rightNum}>{local.container?.borderWidth ?? 1}px</span>
                 </Row>
 
-                <Row label="Cor da borda">
+                <Row label={t('profile_editor.label_border_color')}>
                   <ColorPickerPro
                     value={local.container?.borderColor ?? 'rgba(0,0,0,0.12)'}
                     onChange={(hex) => patch((d) => {
@@ -701,7 +701,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               </>
             )}
 
-            <Row label="Raio">
+            <Row label={t('profile_editor.label_radius')}>
               <input
                 type="range"
                 min={0}
@@ -717,7 +717,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               <span style={rightNum}>{local.container?.radius ?? 16}px</span>
             </Row>
 
-            <Row label="Padding">
+            <Row label={t('profile_editor.label_padding')}>
               <input
                 type="range"
                 min={0}
@@ -733,7 +733,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
               <span style={rightNum}>{local.container?.padding ?? 12}px</span>
             </Row>
 
-            <Row label="Largura">
+            <Row label={t('profile_editor.label_width')}>
               <select
                 value={local.container?.widthMode ?? 'full'}
                 onChange={(e) => patch((d) => {
@@ -748,7 +748,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </Row>
 
             {local.container?.widthMode === 'custom' && (
-              <Row label="Largura (px)">
+              <Row label={t('profile_editor.label_width_px')}>
                 <input
                   type="range"
                   min={200}
@@ -769,19 +769,19 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
         {!(local.container?.enabled ?? false) && (
           <div style={{ fontSize: 11, opacity: 0.6 }}>
-            Ativa para adicionar um fundo ao bloco de perfil.
+            {t('profile_editor.tip_enable_container')}
           </div>
         )}
       </CollapsibleSection>
 
       {/* ========== SECÇÃO 5: LAYOUT & POSIÇÃO ========== */}
       <CollapsibleSection
-        title="📐 Layout & Posição"
-        subtitle="Offset do bloco"
+        title={`📐 ${t('profile_editor.section_position')}`}
+        subtitle={t('profile_editor.section_position_subtitle')}
         isOpen={activeSection === 'position'}
         onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}
       >
-        <Row label="Offset X">
+        <Row label={t('profile_editor.label_offset_x')}>
           <input
             type="range"
             min={-80}
@@ -797,7 +797,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           <span style={rightNum}>{local.offset?.x ?? 0}px</span>
         </Row>
 
-        <Row label="Offset Y">
+        <Row label={t('profile_editor.label_offset_y')}>
           <input
             type="range"
             min={-80}
@@ -820,7 +820,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         </Row>
 
         <div style={{ fontSize: 11, opacity: 0.6 }}>
-          Move o bloco Perfil inteiro. Útil para ajustes finos.
+          {t('profile_editor.tip_offset')}
         </div>
       </CollapsibleSection>
 
