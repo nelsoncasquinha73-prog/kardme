@@ -6,6 +6,7 @@ import Image from 'next/image'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import { useLanguage } from '@/components/language/LanguageProvider'
 
 export type InfoItemType = 'address' | 'wifi' | 'image_button' | 'link' | 'hours_text' | 'reviews_embed'
 
@@ -93,6 +94,7 @@ const ITEM_TYPES: Array<{ value: InfoItemType; label: string; icon: string }> = 
 
 export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
   const { openPicker } = useColorPicker()
+  const { t } = useLanguage()
   const [activeSection, setActiveSection] = useState<string | null>('items')
 
   const s = settings || {}
@@ -167,19 +169,19 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
 
       {/* ========== ITEMS ========== */}
-      <CollapsibleSection title="📋 Items" subtitle="Morada, WiFi, links, etc." isOpen={activeSection === 'items'} onToggle={() => setActiveSection(activeSection === 'items' ? null : 'items')}>
-        <Row label="Título">
-          <input type="text" value={s.heading ?? 'Utilidades'} onChange={(e) => updateSettings({ heading: e.target.value })} placeholder="Título do bloco" style={inputStyle} />
+      <CollapsibleSection title={`📋 ${t('info_utilities_editor.section_items')}`} subtitle={t('info_utilities_editor.section_items_subtitle')} isOpen={activeSection === 'items'} onToggle={() => setActiveSection(activeSection === 'items' ? null : 'items')}>
+        <Row label={t('info_utilities_editor.label_title')}>
+          <input type="text" value={s.heading ?? 'Utilidades'} onChange={(e) => updateSettings({ heading: e.target.value })} placeholder={t('info_utilities_editor.placeholder_block_title')} style={inputStyle} />
         </Row>
-        <Row label="Layout">
+        <Row label={t('info_utilities_editor.label_layout')}>
           <div style={{ display: 'flex', gap: 6 }}>
             <MiniButton active={(s.layout ?? 'grid') === 'grid'} onClick={() => updateSettings({ layout: 'grid' })}>Grelha</MiniButton>
             <MiniButton active={s.layout === 'list'} onClick={() => updateSettings({ layout: 'list' })}>Lista</MiniButton>
           </div>
         </Row>
-        <Row label="Adicionar">
+        <Row label={t('info_utilities_editor.label_add')}>
           <select onChange={(e) => { if (e.target.value) { addItem(e.target.value as InfoItemType); e.target.value = '' } }} style={selectStyle} defaultValue="">
-            <option value="" disabled>Seleciona tipo...</option>
+            <option value="" disabled>{`${t('info_utilities_editor.placeholder_select_type')}`}</option>
             {ITEM_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.icon} {t.label}</option>))}
           </select>
         </Row>
@@ -203,7 +205,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
               </div>
 
               {/* Ícone custom */}
-              <Row label="Ícone">
+              <Row label={t('info_utilities_editor.label_icon')}>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <MiniButton active={iconMode === 'default'} onClick={() => updateItem(item.id, { iconMode: 'default' })}>Padrão</MiniButton>
                   <MiniButton active={iconMode === 'image'} onClick={() => updateItem(item.id, { iconMode: 'image' })}>Imagem</MiniButton>
@@ -212,7 +214,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
               {iconMode === 'image' && (
                 <Row label="">
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <Button onClick={() => pickFileFor(item.id)}>Upload</Button>
+                    <Button onClick={() => pickFileFor(item.id)}>{`${t('info_utilities_editor.button_upload')}`}</Button>
                     {hasIconImage && <Button onClick={() => updateItem(item.id, { iconImageSrc: '' })}>Limpar</Button>}
                     <span style={{ fontSize: 11, opacity: 0.6 }}>{hasIconImage ? '✅' : '⚠️'}</span>
                   </div>
@@ -225,36 +227,36 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
               {/* Campos por tipo */}
               {item.type === 'address' && (
                 <>
-                  <Row label="Morada"><input type="text" value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder="Rua ABC, 123, Lisboa" style={inputStyle} /></Row>
-                  <Row label="Maps URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://maps.google.com/..." style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_address')}><input type="text" value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder={t('info_utilities_editor.placeholder_address')} style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_maps_url')}><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder={t('info_utilities_editor.placeholder_maps_url')} style={inputStyle} /></Row>
                 </>
               )}
               {item.type === 'wifi' && (
                 <>
-                  <Row label="SSID"><input type="text" value={item.ssid ?? ''} onChange={(e) => updateItem(item.id, { ssid: e.target.value })} placeholder="Nome da rede" style={inputStyle} /></Row>
-                  <Row label="Senha"><input type="text" value={item.password ?? ''} onChange={(e) => updateItem(item.id, { password: e.target.value })} placeholder="Senha WiFi" style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_ssid')}><input type="text" value={item.ssid ?? ''} onChange={(e) => updateItem(item.id, { ssid: e.target.value })} placeholder={t('info_utilities_editor.placeholder_network_name')} style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_password')}><input type="text" value={item.password ?? ''} onChange={(e) => updateItem(item.id, { password: e.target.value })} placeholder={t('info_utilities_editor.placeholder_wifi_password')} style={inputStyle} /></Row>
                 </>
               )}
               {item.type === 'image_button' && (
                 <>
-                  <Row label="Imagem"><Button onClick={() => pickFileFor(item.id)}>Upload</Button></Row>
+                  <Row label={t('info_utilities_editor.label_image')}><Button onClick={() => pickFileFor(item.id)}>{`${t('info_utilities_editor.button_upload')}`}</Button></Row>
                   {item.imageSrc && <Image src={item.imageSrc} alt={item.imageAlt ?? ''} width={60} height={60} style={{ borderRadius: 8 }} />}
-                  <Row label="Texto"><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder="Visitar site" style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_text')}><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder={t('info_utilities_editor.placeholder_visit_site')} style={inputStyle} /></Row>
                   <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
               {item.type === 'link' && (
                 <>
-                  <Row label="Texto"><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder="Site oficial" style={inputStyle} /></Row>
+                  <Row label={t('info_utilities_editor.label_text')}><input type="text" value={item.label ?? ''} onChange={(e) => updateItem(item.id, { label: e.target.value })} placeholder={t('info_utilities_editor.placeholder_official_site')} style={inputStyle} /></Row>
                   <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
               {item.type === 'hours_text' && (
-                <Row label="Horário"><textarea value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder="Segunda a Sexta, 09h às 18h" style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
+                <Row label={t('info_utilities_editor.label_schedule')}><textarea value={item.value ?? ''} onChange={(e) => updateItem(item.id, { value: e.target.value })} placeholder={t('info_utilities_editor.placeholder_schedule')} style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
               )}
               {item.type === 'reviews_embed' && (
                 <>
-                  <Row label="Embed"><textarea value={item.embedHtml ?? ''} onChange={(e) => updateItem(item.id, { embedHtml: e.target.value })} placeholder="Cole o iframe aqui" style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
+                  <Row label={t('info_utilities_editor.label_embed')}><textarea value={item.embedHtml ?? ''} onChange={(e) => updateItem(item.id, { embedHtml: e.target.value })} placeholder={t('info_utilities_editor.placeholder_embed')} style={{ ...inputStyle, height: 60, resize: 'vertical' }} /></Row>
                   <Row label="URL"><input type="url" value={item.url ?? ''} onChange={(e) => updateItem(item.id, { url: e.target.value })} placeholder="https://..." style={inputStyle} /></Row>
                 </>
               )}
@@ -264,11 +266,11 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       </CollapsibleSection>
 
       {/* ========== TÍTULO ========== */}
-      <CollapsibleSection title="📝 Título" subtitle="Cor, fonte, alinhamento" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
-        <Row label="Cor">
+      <CollapsibleSection title={`📝 ${t('info_utilities_editor.section_title')}`} subtitle={t('info_utilities_editor.section_title_subtitle')} isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
+        <Row label={t('info_utilities_editor.label_color')}>
           <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => updateStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))} />
         </Row>
-        <Row label="Alinhamento">
+        <Row label={t('info_utilities_editor.label_alignment')}>
           <div style={{ display: 'flex', gap: 6 }}>
             {(['left', 'center', 'right'] as const).map((a) => (
               <MiniButton key={a} active={(st.headingAlign ?? 'left') === a} onClick={() => updateStyle({ headingAlign: a })}>
@@ -277,11 +279,11 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
             ))}
           </div>
         </Row>
-        <Row label="Negrito">
+        <Row label={t('info_utilities_editor.label_bold')}>
           <Toggle active={st.headingBold !== false} onClick={() => updateStyle({ headingBold: !(st.headingBold !== false) })} />
         </Row>
-        <Row label="Fonte"><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => updateStyle({ headingFontFamily: v || undefined })} /></Row>
-        <Row label="Peso">
+        <Row label={t('info_utilities_editor.label_font')}><FontPicker value={st.headingFontFamily ?? ""} onChange={(v) => updateStyle({ headingFontFamily: v || undefined })} /></Row>
+        <Row label={t('info_utilities_editor.label_weight')}>
           <select value={String(st.headingFontWeight ?? 900)} onChange={(e) => updateStyle({ headingFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="500">Medium</option>
             <option value="700">Bold</option>
@@ -289,19 +291,19 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
             <option value="900">Black</option>
           </select>
         </Row>
-        <Row label="Tamanho">
+        <Row label={t('info_utilities_editor.label_size')}>
           <input type="range" min={10} max={32} value={st.headingFontSize ?? 16} onChange={(e) => updateStyle({ headingFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.headingFontSize ?? 16}px</span>
         </Row>
       </CollapsibleSection>
 
       {/* ========== TEXTO ========== */}
-      <CollapsibleSection title="✏️ Texto" subtitle="Cor, fonte, tamanho" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
-        <Row label="Cor">
+      <CollapsibleSection title={`✏️ ${t('info_utilities_editor.section_text')}`} subtitle={t('info_utilities_editor.section_text_subtitle')} isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
+        <Row label={t('info_utilities_editor.label_color')}>
           <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
         </Row>
-        <Row label="Fonte"><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || undefined })} /></Row>
-        <Row label="Peso">
+        <Row label={t('info_utilities_editor.label_font')}><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || undefined })} /></Row>
+        <Row label={t('info_utilities_editor.label_weight')}>
           <select value={String(st.textFontWeight ?? 600)} onChange={(e) => updateStyle({ textFontWeight: Number(e.target.value) })} style={selectStyle}>
             <option value="400">Normal</option>
             <option value="600">Semi</option>
@@ -309,52 +311,52 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
             <option value="800">Extra</option>
           </select>
         </Row>
-        <Row label="Tamanho">
+        <Row label={t('info_utilities_editor.label_size')}>
           <input type="range" min={10} max={22} value={st.textFontSize ?? 14} onChange={(e) => updateStyle({ textFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.textFontSize ?? 14}px</span>
         </Row>
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}
-      <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, padding" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
-        <Row label="Fundo">
+      <CollapsibleSection title={`📦 ${t('info_utilities_editor.section_container')}`} subtitle={t('info_utilities_editor.section_container_subtitle')} isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
+        <Row label={t('info_utilities_editor.label_background')}>
           <Toggle active={bgEnabled} onClick={() => updateStyle({ container: { ...container, bgColor: bgEnabled ? 'transparent' : '#ffffff' } })} />
         </Row>
         {bgEnabled && (
-          <Row label="Cor">
+          <Row label={t('info_utilities_editor.label_color')}>
             <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => updateStyle({ container: { ...container, bgColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, bgColor: hex } }))} />
           </Row>
         )}
-        <Row label="Sombra">
+        <Row label={t('info_utilities_editor.label_shadow')}>
           <Toggle active={container.shadow ?? false} onClick={() => updateStyle({ container: { ...container, shadow: !container.shadow } })} />
         </Row>
-        <Row label="Borda">
+        <Row label={t('info_utilities_editor.label_border')}>
           <Toggle active={borderEnabled} onClick={() => updateStyle({ container: { ...container, borderWidth: borderEnabled ? 0 : 1 } })} />
         </Row>
         {borderEnabled && (
           <>
-            <Row label="Espessura">
+            <Row label={t('info_utilities_editor.label_thickness')}>
               <input type="range" min={1} max={6} value={container.borderWidth ?? 1} onChange={(e) => updateStyle({ container: { ...container, borderWidth: Number(e.target.value) } })} style={{ flex: 1 }} />
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
-            <Row label="Cor borda">
+            <Row label={t('info_utilities_editor.label_border_color')}>
               <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => updateStyle({ container: { ...container, borderColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, borderColor: hex } }))} />
             </Row>
           </>
         )}
-        <Row label="Raio">
+        <Row label={t('info_utilities_editor.label_radius')}>
           <input type="range" min={0} max={32} value={container.radius ?? 14} onChange={(e) => updateStyle({ container: { ...container, radius: Number(e.target.value) } })} style={{ flex: 1 }} />
           <span style={rightNum}>{container.radius ?? 14}px</span>
         </Row>
-        <Row label="Padding">
+        <Row label={t('info_utilities_editor.label_padding')}>
           <input type="range" min={0} max={28} value={container.padding ?? 16} onChange={(e) => updateStyle({ container: { ...container, padding: Number(e.target.value) } })} style={{ flex: 1 }} />
           <span style={rightNum}>{container.padding ?? 16}px</span>
         </Row>
-        <Row label="Largura custom">
+        <Row label={t('info_utilities_editor.label_custom_width')}>
           <Toggle active={customWidth} onClick={() => updateStyle({ container: { ...container, widthMode: customWidth ? 'full' : 'custom', customWidthPx: container.customWidthPx ?? 340 } })} />
         </Row>
         {customWidth && (
-          <Row label="Largura">
+          <Row label={t('info_utilities_editor.label_width')}>
             <input type="range" min={200} max={400} step={5} value={container.customWidthPx ?? 340} onChange={(e) => updateStyle({ container: { ...container, customWidthPx: Number(e.target.value) } })} style={{ flex: 1 }} />
             <span style={rightNum}>{container.customWidthPx ?? 340}px</span>
           </Row>
@@ -362,74 +364,74 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       </CollapsibleSection>
 
       {/* ========== LINHAS ========== */}
-      <CollapsibleSection title="📏 Linhas" subtitle="Espaçamento, borda, raio" isOpen={activeSection === 'rows'} onToggle={() => setActiveSection(activeSection === 'rows' ? null : 'rows')}>
-        <Row label="Espaçamento">
+      <CollapsibleSection title={`📏 ${t('info_utilities_editor.section_rows')}`} subtitle={t('info_utilities_editor.section_rows_subtitle')} isOpen={activeSection === 'rows'} onToggle={() => setActiveSection(activeSection === 'rows' ? null : 'rows')}>
+        <Row label={t('info_utilities_editor.label_spacing')}>
           <input type="range" min={4} max={18} value={st.rowGapPx ?? 12} onChange={(e) => updateStyle({ rowGapPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowGapPx ?? 12}px</span>
         </Row>
-        <Row label="Padding">
+        <Row label={t('info_utilities_editor.label_padding')}>
           <input type="range" min={0} max={20} value={st.rowPaddingPx ?? 8} onChange={(e) => updateStyle({ rowPaddingPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowPaddingPx ?? 8}px</span>
         </Row>
-        <Row label="Borda">
+        <Row label={t('info_utilities_editor.label_border')}>
           <input type="range" min={0} max={4} value={st.rowBorderWidth ?? 0} onChange={(e) => updateStyle({ rowBorderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowBorderWidth ?? 0}px</span>
         </Row>
         {(st.rowBorderWidth ?? 0) > 0 && (
-          <Row label="Cor borda">
+          <Row label={t('info_utilities_editor.label_border_color')}>
             <ColorPickerPro value={st.rowBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ rowBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))} />
           </Row>
         )}
-        <Row label="Raio">
+        <Row label={t('info_utilities_editor.label_radius')}>
           <input type="range" min={0} max={32} value={st.rowRadiusPx ?? 10} onChange={(e) => updateStyle({ rowRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.rowRadiusPx ?? 10}px</span>
         </Row>
       </CollapsibleSection>
 
       {/* ========== ÍCONES ========== */}
-      <CollapsibleSection title="🎯 Ícones" subtitle="Tamanho, cor, fundo" isOpen={activeSection === 'icons'} onToggle={() => setActiveSection(activeSection === 'icons' ? null : 'icons')}>
-        <Row label="Tamanho">
+      <CollapsibleSection title={`🎯 ${t('info_utilities_editor.section_icons')}`} subtitle={t('info_utilities_editor.section_icons_subtitle')} isOpen={activeSection === 'icons'} onToggle={() => setActiveSection(activeSection === 'icons' ? null : 'icons')}>
+        <Row label={t('info_utilities_editor.label_size')}>
           <input type="range" min={12} max={48} value={st.iconSizePx ?? 24} onChange={(e) => updateStyle({ iconSizePx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.iconSizePx ?? 24}px</span>
         </Row>
-        <Row label="Cor">
+        <Row label={t('info_utilities_editor.label_color')}>
           <ColorPickerPro value={st.iconColor ?? '#111827'} onChange={(hex) => updateStyle({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))} />
         </Row>
-        <Row label="Fundo">
+        <Row label={t('info_utilities_editor.label_background')}>
           <ColorPickerPro value={st.iconBgColor ?? 'transparent'} onChange={(hex) => updateStyle({ iconBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))} />
         </Row>
-        <Row label="Raio">
+        <Row label={t('info_utilities_editor.label_radius')}>
           <input type="range" min={0} max={24} value={st.iconRadiusPx ?? 6} onChange={(e) => updateStyle({ iconRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.iconRadiusPx ?? 6}px</span>
         </Row>
       </CollapsibleSection>
 
       {/* ========== BOTÕES ========== */}
-      <CollapsibleSection title="🔘 Botões" subtitle="Cor, borda, raio" isOpen={activeSection === 'buttons'} onToggle={() => setActiveSection(activeSection === 'buttons' ? null : 'buttons')}>
-        <Row label="Cor texto">
+      <CollapsibleSection title={`🔘 ${t('info_utilities_editor.section_buttons')}`} subtitle={t('info_utilities_editor.section_buttons_subtitle')} isOpen={activeSection === 'buttons'} onToggle={() => setActiveSection(activeSection === 'buttons' ? null : 'buttons')}>
+        <Row label={t('info_utilities_editor.label_text_color')}>
           <ColorPickerPro value={st.buttonTextColor ?? '#111827'} onChange={(hex) => updateStyle({ buttonTextColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))} />
         </Row>
-        <Row label="Fundo">
+        <Row label={t('info_utilities_editor.label_background')}>
           <ColorPickerPro value={st.buttonBgColor ?? '#f0f0f0'} onChange={(hex) => updateStyle({ buttonBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))} />
         </Row>
-        <Row label="Borda">
+        <Row label={t('info_utilities_editor.label_border')}>
           <input type="range" min={0} max={6} value={st.buttonBorderWidth ?? 0} onChange={(e) => updateStyle({ buttonBorderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.buttonBorderWidth ?? 0}px</span>
         </Row>
         {(st.buttonBorderWidth ?? 0) > 0 && (
-          <Row label="Cor borda">
+          <Row label={t('info_utilities_editor.label_border_color')}>
             <ColorPickerPro value={st.buttonBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ buttonBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))} />
           </Row>
         )}
-        <Row label="Raio">
+        <Row label={t('info_utilities_editor.label_radius')}>
           <input type="range" min={0} max={32} value={st.buttonRadiusPx ?? 10} onChange={(e) => updateStyle({ buttonRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.buttonRadiusPx ?? 10}px</span>
         </Row>
       </CollapsibleSection>
 
       {/* ========== POSIÇÃO ========== */}
-      <CollapsibleSection title="📍 Posição" subtitle="Offset vertical" isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
-        <Row label="Offset Y">
+      <CollapsibleSection title={`📍 ${t('info_utilities_editor.section_position')}`} subtitle={t('info_utilities_editor.section_position_subtitle')} isOpen={activeSection === 'position'} onToggle={() => setActiveSection(activeSection === 'position' ? null : 'position')}>
+        <Row label={t('info_utilities_editor.label_offset_y')}>
           <input type="range" min={-80} max={80} step={4} value={st.offsetY ?? 0} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{st.offsetY ?? 0}px</span>
         </Row>
