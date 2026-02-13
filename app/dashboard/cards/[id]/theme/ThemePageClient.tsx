@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 import AddBlockModal from '@/components/editor/AddBlockModal'
@@ -55,6 +55,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
   const [toast, setToast] = useState<ToastType>(null)
 
+
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const enabledBlocksSorted = useMemo(
     () => localBlocks.filter((b) => b.enabled).sort((a, b) => a.order - b.order),
     [localBlocks]
@@ -104,7 +106,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
     setLocalBlocks((prev) => prev.map((b) => (b.id === activeBlock.id ? { ...b, style: nextStyle } : b)))
   }
 
-  async function saveChanges(): Promise<void> {
+
+  const saveChanges = useCallback(async () => {
     setSaveStatus('saving')
 
     try {
@@ -204,7 +207,24 @@ export default function ThemePageClient({ card, blocks }: Props) {
       setSaveStatus('error')
       setToast({ message: 'Erro ao guardar: ' + (err instanceof Error ? err.message : 'Desconhecido'), type: 'error' })
     }
-  }
+  }, [localBlocks, initialBlockIds, card.id, cardBg, themeDecorations, localTheme])
+
+  // Autosave: quando fica dirty, espera 1.5s e grava
+  useEffect(() => {
+    if (saveStatus === 'dirty') {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
+      
+      autosaveTimerRef.current = setTimeout(() => {
+        console.log('🔄 Autosave triggered')
+        saveChanges()
+      }, 1500)
+    }
+
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
+    }
+  }, [saveStatus, localBlocks, saveChanges])
+
 
   const [slugEdit, setSlugEdit] = useState(card.slug)
   const [slugSaving, setSlugSaving] = useState(false)

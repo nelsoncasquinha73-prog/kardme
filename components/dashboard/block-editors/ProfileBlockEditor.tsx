@@ -91,11 +91,13 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
   const [activeSection, setActiveSection] = useState<string | null>('avatar')
   const avatarRef = useRef<HTMLInputElement>(null)
 
+  const localRef = useRef(local)
+  localRef.current = local
   const { t } = useLanguage()
   const { openPicker } = useColorPicker()
 
   function patch(fn: (d: ProfileSettings) => void) {
-    const next = structuredClone(local)
+    const next = structuredClone(localRef.current)
     fn(next)
     setLocal(next)
     onChange(next)
