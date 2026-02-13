@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 
 type IconMode = 'none' | 'library' | 'upload'
@@ -95,6 +96,7 @@ function safeSeg(v: any) {
 }
 
 export default function CTAButtonsBlockEditor({ cardId, settings, style, onChangeSettings, onChangeStyle }: Props) {
+  const { t } = useLanguage()
   const { openPicker } = useColorPicker()
 
   const s: CTAButtonsSettings = settings || { buttons: [] }
@@ -196,23 +198,23 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
 
-      <Section title="Botões">
-        <Row label="Disposição">
+      <Section title={t('cta_editor.section_buttons')}>
+        <Row label={t('cta_editor.label_layout')}>
           <select value={s.layout ?? 'stack'} onChange={(e) => updateSettings({ layout: e.target.value as any })} style={select}>
-            <option value="stack">Vertical</option>
-            <option value="row">Horizontal</option>
+            <option value="stack">{t('cta_editor.option_vertical')}</option>
+            <option value="row">{t('cta_editor.option_horizontal')}</option>
           </select>
         </Row>
 
-        <Row label="Alinhamento">
+        <Row label={t('cta_editor.label_alignment')}>
           <select value={s.align ?? 'center'} onChange={(e) => updateSettings({ align: e.target.value as any })} style={select}>
-            <option value="left">Esquerda</option>
-            <option value="center">Centro</option>
-            <option value="right">Direita</option>
+            <option value="left">{t('cta_editor.option_left')}</option>
+            <option value="center">{t('cta_editor.option_center')}</option>
+            <option value="right">{t('cta_editor.option_right')}</option>
           </select>
         </Row>
 
-        <Row label="Espaçamento entre botões (px)">
+        <Row label={t('cta_editor.label_spacing')}>
           <input
             type="range"
             min={4}
@@ -224,7 +226,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           <span style={rightNum}>{s.gapPx ?? 10}px</span>
         </Row>
 
-        <Row label="Adicionar botão">
+        <Row label={t('cta_editor.label_add_button')}>
           <button
             type="button"
             onClick={addButton}
@@ -270,26 +272,26 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   type="button"
                   onClick={() => removeButton(b.id)}
                   style={{ cursor: 'pointer', color: '#e53e3e', border: 'none', background: 'none', fontWeight: 'bold', fontSize: 16 }}
-                  title="Remover botão"
+                  title={t('cta_editor.button_remove')}
                 >
                   ×
                 </button>
               </div>
 
-              <Row label="Texto do botão">
-                <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder="Ex.: Marcar visita" />
+              <Row label={t('cta_editor.label_button_text')}>
+                <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_button_text')} />
               </Row>
 
-              <Row label="Tipo de ação">
+              <Row label={t('cta_editor.label_action_type')}>
                 <select value={b.actionType ?? "link"} onChange={(e) => updateButton(b.id, { actionType: e.target.value as any })} style={select}>
-                  <option value="link">Link (URL)</option>
-                  <option value="phone">Ligar (Telefone)</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                  <option value="file">Ficheiro (PDF)</option>
-                  <option value="maps">Google Maps</option>
-                  <option value="calendar">Calendário</option>
+                  <option value="link">{t('cta_editor.option_url')}</option>
+                  <option value="phone">{t('cta_editor.option_phone')}</option>
+                  <option value="whatsapp">{t('cta_editor.option_whatsapp')}</option>
+                  <option value="email">{t('cta_editor.option_email')}</option>
+                  <option value="sms">{t('cta_editor.option_sms')}</option>
+                  <option value="file">{t('cta_editor.option_file')}</option>
+                  <option value="maps">{t('cta_editor.option_maps')}</option>
+                  <option value="calendar">{t('cta_editor.option_calendar')}</option>
                 </select>
               </Row>
 
@@ -298,50 +300,50 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   <Row label="URL">
                     <input value={b.url ?? ""} onChange={(e) => updateButton(b.id, { url: e.target.value })} style={input} placeholder="https://exemplo.com" />
                   </Row>
-                  <Row label="Abrir em nova aba">
+                  <Row label={t('cta_editor.label_open_new_tab')}>
                     <Toggle active={b.openInNewTab === true} onClick={() => updateButton(b.id, { openInNewTab: !(b.openInNewTab === true) })} />
                   </Row>
                 </>
               )}
 
               {b.actionType === "phone" && (
-                <Row label="Número de telefone">
+                <Row label={t('cta_editor.label_phone_number')}>
                   <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351 912 345 678" />
                 </Row>
               )}
 
               {b.actionType === "whatsapp" && (
                 <>
-                  <Row label="Número WhatsApp">
+                  <Row label={t('cta_editor.label_whatsapp_number')}>
                     <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351912345678" />
                   </Row>
-                  <Row label="Mensagem pré-definida">
-                    <input value={b.whatsappMessage ?? ""} onChange={(e) => updateButton(b.id, { whatsappMessage: e.target.value })} style={input} placeholder="Olá, gostava de saber mais..." />
+                  <Row label={t('cta_editor.label_predefined_message')}>
+                    <input value={b.whatsappMessage ?? ""} onChange={(e) => updateButton(b.id, { whatsappMessage: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_whatsapp_message')} />
                   </Row>
                 </>
               )}
 
               {b.actionType === "email" && (
                 <>
-                  <Row label="Email">
+                  <Row label={t('cta_editor.label_email')}>
                     <input value={b.email ?? ""} onChange={(e) => updateButton(b.id, { email: e.target.value })} style={input} placeholder="exemplo@email.com" />
                   </Row>
-                  <Row label="Assunto">
-                    <input value={b.emailSubject ?? ""} onChange={(e) => updateButton(b.id, { emailSubject: e.target.value })} style={input} placeholder="Assunto do email" />
+                  <Row label={t('cta_editor.label_subject')}>
+                    <input value={b.emailSubject ?? ""} onChange={(e) => updateButton(b.id, { emailSubject: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_email_subject')} />
                   </Row>
-                  <Row label="Mensagem">
-                    <input value={b.emailBody ?? ""} onChange={(e) => updateButton(b.id, { emailBody: e.target.value })} style={input} placeholder="Corpo do email (opcional)" />
+                  <Row label={t('cta_editor.label_message')}>
+                    <input value={b.emailBody ?? ""} onChange={(e) => updateButton(b.id, { emailBody: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_email_body')} />
                   </Row>
                 </>
               )}
 
               {b.actionType === "sms" && (
                 <>
-                  <Row label="Número">
+                  <Row label={t('cta_editor.label_number')}>
                     <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351912345678" />
                   </Row>
-                  <Row label="Mensagem">
-                    <input value={b.smsMessage ?? ""} onChange={(e) => updateButton(b.id, { smsMessage: e.target.value })} style={input} placeholder="Mensagem pré-definida" />
+                  <Row label={t('cta_editor.label_message')}>
+                    <input value={b.smsMessage ?? ""} onChange={(e) => updateButton(b.id, { smsMessage: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_sms_message')} />
                   </Row>
                 </>
               )}
@@ -356,23 +358,23 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
               )}
 
               {b.actionType === "maps" && (
-                <Row label="Morada">
-                  <input value={b.mapsAddress ?? ""} onChange={(e) => updateButton(b.id, { mapsAddress: e.target.value })} style={input} placeholder="Rua Example 123, Lisboa" />
+                <Row label={t('cta_editor.label_address')}>
+                  <input value={b.mapsAddress ?? ""} onChange={(e) => updateButton(b.id, { mapsAddress: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_address')} />
                 </Row>
               )}
 
               {b.actionType === "calendar" && (
                 <>
-                  <Row label="Título do evento">
-                    <input value={b.calendarTitle ?? ""} onChange={(e) => updateButton(b.id, { calendarTitle: e.target.value })} style={input} placeholder="Reunião com..." />
+                  <Row label={t('cta_editor.label_event_title')}>
+                    <input value={b.calendarTitle ?? ""} onChange={(e) => updateButton(b.id, { calendarTitle: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_event_title')} />
                   </Row>
-                  <Row label="Data">
+                  <Row label={t('cta_editor.label_date')}>
                     <input type="date" value={b.calendarDate ?? ""} onChange={(e) => updateButton(b.id, { calendarDate: e.target.value })} style={input} />
                   </Row>
-                  <Row label="Hora">
+                  <Row label={t('cta_editor.label_time')}>
                     <input type="time" value={b.calendarTime ?? ""} onChange={(e) => updateButton(b.id, { calendarTime: e.target.value })} style={input} />
                   </Row>
-                  <Row label="Duração (min)">
+                  <Row label={t('cta_editor.label_duration')}>
                     <input type="number" value={b.calendarDuration ?? 60} onChange={(e) => updateButton(b.id, { calendarDuration: Number(e.target.value) })} style={input} min={15} step={15} />
                   </Row>
                 </>
@@ -386,8 +388,8 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   onChange={(e) => updateButton(b.id, { icon: { ...icon, mode: e.target.value as any } })}
                   style={select}
                 >
-                  <option value="none">Sem ícone</option>
-                  <option value="upload">Upload</option>
+                  <option value="none">{t('cta_editor.option_no_icon')}</option>
+                  <option value="upload">{t('cta_editor.option_upload')}</option>
                   <option value="library">Biblioteca (em breve)</option>
                 </select>
 
@@ -445,7 +447,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   </div>
                 ) : null}
 
-                <Row label="Tamanho do ícone (px)">
+                <Row label={t('cta_editor.label_icon_size')}>
                   <input
                     type="range"
                     min={12}
@@ -457,10 +459,10 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   <span style={rightNum}>{icon.sizePx ?? 18}px</span>
                 </Row>
 
-                <Row label="Posição">
+                <Row label={t('cta_editor.label_position')}>
                   <select value={icon.position ?? 'left'} onChange={(e) => updateButton(b.id, { icon: { ...icon, position: e.target.value as any } })} style={select}>
-                    <option value="left">Esquerda</option>
-                    <option value="right">Direita</option>
+                    <option value="left">{t('cta_editor.option_left')}</option>
+                    <option value="right">{t('cta_editor.option_right')}</option>
                   </select>
                 </Row>
               </div>
@@ -469,18 +471,18 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         })}
       </Section>
 
-      <Section title="Estilo do botão">
-        <Row label="Altura (px)">
+      <Section title={t('cta_editor.section_button_style')}>
+        <Row label={t('cta_editor.label_height')}>
           <input type="range" min={32} max={64} step={1} value={btn.heightPx ?? 44} onChange={(e) => updateBtnStyle({ heightPx: Number(e.target.value) })} />
           <span style={rightNum}>{btn.heightPx ?? 44}px</span>
         </Row>
 
-        <Row label="Raio (px)">
+        <Row label={t('cta_editor.label_radius')}>
           <input type="range" min={0} max={32} step={1} value={btn.radius ?? 14} onChange={(e) => updateBtnStyle({ radius: Number(e.target.value) })} />
           <span style={rightNum}>{btn.radius ?? 14}px</span>
         </Row>
 
-        <Row label="Cor de fundo">
+        <Row label={t('cta_editor.label_bg_color')}>
           <ColorPickerPro
             value={btn.bgColor ?? '#111827'}
             onChange={(val) => updateBtnStyle({ bgColor: val })}
@@ -490,7 +492,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           />
         </Row>
 
-        <Row label="Cor do texto">
+        <Row label={t('cta_editor.label_text_color')}>
           <ColorPickerPro
             value={btn.textColor ?? '#ffffff'}
             onChange={(val) => updateBtnStyle({ textColor: val })}
@@ -498,27 +500,27 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           />
         </Row>
 
-        <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => updateBtnStyle({ fontFamily: v || undefined })} /></Row>
+        <Row label={t('cta_editor.label_font')}><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => updateBtnStyle({ fontFamily: v || undefined })} /></Row>
 
-        <Row label="Tamanho do texto (px)">
+        <Row label={t('cta_editor.label_text_size')}>
           <input type="range" min={11} max={22} step={1} value={btn.fontSize ?? 14} onChange={(e) => updateBtnStyle({ fontSize: Number(e.target.value) })} />
           <span style={rightNum}>{btn.fontSize ?? 14}px</span>
         </Row>
 
-        <Row label="Negrito">
+        <Row label={t('cta_editor.label_bold')}>
           <Toggle active={btn.bold === true} onClick={() => updateBtnStyle({ bold: !(btn.bold === true) })} />
         </Row>
 
-        <Row label="Sombra">
+        <Row label={t('cta_editor.label_shadow')}>
           <Toggle active={btn.shadow === true} onClick={() => updateBtnStyle({ shadow: !(btn.shadow === true) })} />
         </Row>
 
-        <Row label="Borda (px)">
+        <Row label={t('cta_editor.label_border')}>
           <input type="range" min={0} max={6} step={1} value={btn.borderWidth ?? 0} onChange={(e) => updateBtnStyle({ borderWidth: Number(e.target.value) })} />
           <span style={rightNum}>{btn.borderWidth ?? 0}px</span>
         </Row>
 
-        <Row label="Cor da borda">
+        <Row label={t('cta_editor.label_border_color')}>
           <ColorPickerPro
             value={btn.borderColor ?? 'rgba(255,255,255,0.25)'}
             onChange={(val) => updateBtnStyle({ borderColor: val })}
@@ -527,16 +529,16 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
 
-        <Row label="Largura área ícone (px)">
+        <Row label={t('cta_editor.label_icon_area_width')}>
           <input type="range" min={0} max={60} step={2} value={btn.iconWidthPx ?? 0} onChange={(e) => updateBtnStyle({ iconWidthPx: Number(e.target.value) })} />
           <span style={rightNum}>{btn.iconWidthPx ?? 0}px</span>
         </Row>
-        <Row label="Espaço ícone–texto (px)">
+        <Row label={t('cta_editor.label_icon_text_spacing')}>
           <input type="range" min={4} max={20} step={1} value={btn.iconGapPx ?? 10} onChange={(e) => updateBtnStyle({ iconGapPx: Number(e.target.value) })} />
           <span style={rightNum}>{btn.iconGapPx ?? 10}px</span>
         </Row>
 
-        <Row label="Largura do botão">
+        <Row label={t('cta_editor.label_button_width')}>
           <select value={btn.widthMode ?? "full"} onChange={(e) => updateBtnStyle({ widthMode: e.target.value as any })} style={select}>
             <option value="full">100%</option>
             <option value="auto">Automática</option>
@@ -545,19 +547,19 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         {btn.widthMode === "custom" && (
-          <Row label="Largura (px)">
+          <Row label={t('cta_editor.label_width_px')}>
             <input type="range" min={100} max={350} step={5} value={btn.customWidthPx ?? 200} onChange={(e) => updateBtnStyle({ customWidthPx: Number(e.target.value) })} />
             <span style={rightNum}>{btn.customWidthPx ?? 200}px</span>
           </Row>
         )}
       </Section>
 
-      <Section title="Container">
-        <Row label="Ativar container">
+      <Section title={t('cta_editor.section_container')}>
+        <Row label={t('cta_editor.label_enable_container')}>
           <Toggle active={container.enabled !== false} onClick={() => updateContainer({ enabled: !(container.enabled !== false) })} />
         </Row>
 
-        <Row label="Fundo">
+        <Row label={t('cta_editor.label_background')}>
           <Toggle
             active={(container.bgColor ?? "transparent") !== "transparent"}
             onClick={() => updateContainer({ bgColor: (container.bgColor ?? "transparent") !== "transparent" ? "transparent" : "#ffffff" })}
@@ -565,7 +567,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         {(container.bgColor ?? "transparent") !== "transparent" && (
-          <Row label="Cor do fundo">
+          <Row label={t('cta_editor.label_bg_color_container')}>
             <ColorPickerPro
               value={container.bgColor ?? "#ffffff"}
               onChange={(val) => updateContainer({ bgColor: val })}
@@ -575,11 +577,11 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           </Row>
         )}
 
-        <Row label="Sombra">
+        <Row label={t('cta_editor.label_shadow')}>
           <Toggle active={container.shadow ?? false} onClick={() => updateContainer({ shadow: !(container.shadow ?? false) })} />
         </Row>
 
-        <Row label="Borda">
+        <Row label={t('cta_editor.label_border_toggle')}>
           <Toggle
             active={(container.borderWidth ?? 0) > 0}
             onClick={() => updateContainer({ borderWidth: (container.borderWidth ?? 0) > 0 ? 0 : 1 })}
@@ -588,11 +590,11 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
 
         {(container.borderWidth ?? 0) > 0 && (
           <>
-            <Row label="Espessura">
+            <Row label={t('cta_editor.label_thickness')}>
               <input type="range" min={1} max={6} step={1} value={container.borderWidth ?? 1} onChange={(e) => updateContainer({ borderWidth: Number(e.target.value) })} />
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
-            <Row label="Cor da borda">
+            <Row label={t('cta_editor.label_border_color')}>
               <ColorPickerPro
                 value={container.borderColor ?? "rgba(0,0,0,0.12)"}
                 onChange={(val) => updateContainer({ borderColor: val })}
@@ -602,17 +604,17 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           </>
         )}
 
-        <Row label="Raio">
+        <Row label={t('cta_editor.label_radius_container')}>
           <input type="range" min={0} max={32} step={1} value={container.radius ?? 16} onChange={(e) => updateContainer({ radius: Number(e.target.value) })} />
           <span style={rightNum}>{container.radius ?? 16}px</span>
         </Row>
 
-        <Row label="Padding">
+        <Row label={t('cta_editor.label_padding')}>
           <input type="range" min={0} max={28} step={1} value={container.padding ?? 12} onChange={(e) => updateContainer({ padding: Number(e.target.value) })} />
           <span style={rightNum}>{container.padding ?? 12}px</span>
         </Row>
 
-        <Row label="Largura">
+        <Row label={t('cta_editor.label_width')}>
           <select value={container.widthMode ?? "full"} onChange={(e) => updateContainer({ widthMode: e.target.value as any })} style={select}>
             <option value="full">100%</option>
             <option value="custom">Personalizada</option>
@@ -620,15 +622,15 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         {container.widthMode === "custom" && (
-          <Row label="Largura (px)">
+          <Row label={t('cta_editor.label_width_px')}>
             <input type="range" min={200} max={400} step={5} value={container.customWidthPx ?? 320} onChange={(e) => updateContainer({ customWidthPx: Number(e.target.value) })} />
             <span style={rightNum}>{container.customWidthPx ?? 320}px</span>
           </Row>
         )}
       </Section>
 
-      <Section title="Posição">
-        <Row label="Deslocamento Y (px)">
+      <Section title={t('cta_editor.section_position')}>
+        <Row label={t('cta_editor.label_offset_y')}>
           <input type="range" min={-80} max={80} step={1} value={st.offsetY ?? 0} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} />
           <span style={rightNum}>{st.offsetY ?? 0}px</span>
         </Row>
