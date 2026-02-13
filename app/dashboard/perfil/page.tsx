@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useLanguage } from '@/components/language/LanguageProvider'
-import { FiUser, FiCheck, FiAlertCircle, FiMapPin, FiCreditCard, FiChevronDown, FiLock } from 'react-icons/fi'
+import { FiUser, FiCheck, FiAlertCircle, FiMapPin, FiCreditCard, FiChevronDown, FiLock, FiEye, FiEyeOff } from 'react-icons/fi'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
@@ -85,6 +85,8 @@ export default function PerfilPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordChanging, setPasswordChanging] = useState(false)
 
   useEffect(() => { loadProfile() }, [])
@@ -229,11 +231,21 @@ export default function PerfilPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16 }}>
           <div>
             <label style={labelStyle}>{t('profile.new_password')}</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+            <div style={{ position: 'relative' }}>
+              <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: 4 }}>
+                {showNewPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
           <div>
             <label style={labelStyle}>{t('profile.confirm_password')}</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+            <div style={{ position: 'relative' }}>
+              <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••" style={inputStyle} />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: 4 }}>
+                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
         </div>
         <button onClick={handleChangePassword} disabled={passwordChanging || !newPassword || !confirmPassword} style={{ marginTop: 20, padding: '12px 24px', borderRadius: 12, border: 'none', background: passwordChanging ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', fontWeight: 700, cursor: passwordChanging ? 'not-allowed' : 'pointer', opacity: passwordChanging || !newPassword || !confirmPassword ? 0.5 : 1 }}>
