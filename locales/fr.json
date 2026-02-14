@@ -171,7 +171,19 @@
     "side_padding": "Marge latérale (px)",
     "width_auto": "Largeur (px) - Auto Adapter uniquement",
     "height_auto": "Hauteur (px) - Auto Adapter uniquement",
-    "object_fit": "Object Fit - Auto Adapter uniquement"
+    "object_fit": "Object Fit - Auto Adapter uniquement",
+    "text_font_family": "Police",
+    "text_size": "Taille (px)",
+    "text_weight": "Poids",
+    "subtitle_color": "Couleur du sous-titre",
+    "subtitle_size": "Taille du sous-titre (px)",
+    "subtitle_weight": "Poids du sous-titre",
+    "price_color": "Couleur du prix",
+    "price_size": "Taille du prix (px)",
+    "price_weight": "Poids du prix",
+    "description_color": "Couleur de la description",
+    "description_size": "Taille de la description (px)",
+    "description_weight": "Poids de la description"
   },
   "catalog": {
     "title": "Catalogue de Modèles",

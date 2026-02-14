@@ -184,7 +184,19 @@
     "side_padding": "الهامش الجانبي (px)",
     "width_auto": "العرض (px) - Auto Adapter فقط",
     "height_auto": "الارتفاع (px) - Auto Adapter فقط",
-    "object_fit": "Object Fit - Auto Adapter فقط"
+    "object_fit": "Object Fit - Auto Adapter فقط",
+    "text_font_family": "الخط",
+    "text_size": "الحجم (px)",
+    "text_weight": "الوزن",
+    "subtitle_color": "لون العنوان الفرعي",
+    "subtitle_size": "حجم العنوان الفرعي (px)",
+    "subtitle_weight": "وزن العنوان الفرعي",
+    "price_color": "لون السعر",
+    "price_size": "حجم السعر (px)",
+    "price_weight": "وزن السعر",
+    "description_color": "لون الوصف",
+    "description_size": "حجم الوصف (px)",
+    "description_weight": "وزن الوصف"
   },
   "catalog": {
     "title": "كتالوج القوالب",

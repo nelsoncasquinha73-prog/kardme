@@ -185,7 +185,19 @@
     "side_padding": "Relleno lateral (px)",
     "width_auto": "Ancho (px) - solo Auto Adapter",
     "height_auto": "Altura (px) - solo Auto Adapter",
-    "object_fit": "Object Fit - solo Auto Adapter"
+    "object_fit": "Object Fit - solo Auto Adapter",
+    "text_font_family": "Fuente",
+    "text_size": "Tamaño (px)",
+    "text_weight": "Peso",
+    "subtitle_color": "Color del subtítulo",
+    "subtitle_size": "Tamaño del subtítulo (px)",
+    "subtitle_weight": "Peso del subtítulo",
+    "price_color": "Color del precio",
+    "price_size": "Tamaño del precio (px)",
+    "price_weight": "Peso del precio",
+    "description_color": "Color de la descripción",
+    "description_size": "Tamaño de la descripción (px)",
+    "description_weight": "Peso de la descripción"
   },
   "catalog": {
     "title": "Catálogo de Plantillas",

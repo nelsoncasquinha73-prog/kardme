@@ -184,7 +184,19 @@
     "side_padding": "Margem lateral (px)",
     "width_auto": "Largura (px) - só Auto Adapter",
     "height_auto": "Altura (px) - só Auto Adapter",
-    "object_fit": "Object Fit - só Auto Adapter"
+    "object_fit": "Object Fit - só Auto Adapter",
+    "text_font_family": "Fonte",
+    "text_size": "Tamanho (px)",
+    "text_weight": "Peso",
+    "subtitle_color": "Cor do subtítulo",
+    "subtitle_size": "Tamanho do subtítulo (px)",
+    "subtitle_weight": "Peso do subtítulo",
+    "price_color": "Cor do preço",
+    "price_size": "Tamanho do preço (px)",
+    "price_weight": "Peso do preço",
+    "description_color": "Cor da descrição",
+    "description_size": "Tamanho da descrição (px)",
+    "description_weight": "Peso da descrição"
   },
   "catalog": {
     "title": "Catálogo de Templates",
