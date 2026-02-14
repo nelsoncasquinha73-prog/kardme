@@ -70,7 +70,7 @@ function formatDatePT(date: Date): string {
 }
 
 function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://new.kardme.com'
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kardme.com'
 }
 
 export async function POST(req: Request) {
