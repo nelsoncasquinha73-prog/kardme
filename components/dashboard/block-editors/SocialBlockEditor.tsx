@@ -304,15 +304,6 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             </Row>
           </>
         )}
-        <Row label="Cores de marca">
-          <Toggle active={st.brandColors ?? false} onClick={() => patch((d) => (d.style.brandColors = !(st.brandColors ?? false)))} />
-        </Row>
-        {st.brandColors && (
-          <Row label="Modo">
-            <div style={{ display: 'flex', gap: 6 }}>
-              <MiniButton active={(st.brandMode ?? 'bg') === 'bg'} onClick={() => patch((d) => (d.style.brandMode = 'bg'))}>Fundo</MiniButton>
-              <MiniButton active={st.brandMode === 'icon'} onClick={() => patch((d) => (d.style.brandMode = 'icon'))}>Ícone</MiniButton>
-            </div>
           </Row>
         )}
       </CollapsibleSection>
@@ -448,9 +439,21 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
         <Row label="">
           <Button onClick={() => patch((d) => (d.style.offsetY = 0))}>Reset</Button>
-        </Row>
-      </CollapsibleSection>
 
+      {/* ========== CORES DE MARCA ========== */}
+      <CollapsibleSection title="🎨 Cores de marca" subtitle="Usar cores originais das redes sociais" isOpen={activeSection === 'brandColors'} onToggle={() => setActiveSection(activeSection === 'brandColors' ? null : 'brandColors')}>
+        <Row label="Ativar">
+          <Toggle active={st.brandColors ?? false} onClick={() => patch((d) => (d.style.brandColors = !(st.brandColors ?? false)))} />
+        </Row>
+        {st.brandColors && (
+          <Row label="Modo">
+            <div style={{ display: 'flex', gap: 6 }}>
+              <MiniButton active={(st.brandMode ?? 'bg') === 'bg'} onClick={() => patch((d) => (d.style.brandMode = 'bg'))}>Fundo</MiniButton>
+              <MiniButton active={st.brandMode === 'icon'} onClick={() => patch((d) => (d.style.brandMode = 'icon'))}>Ícone</MiniButton>
+            </div>
+          </Row>
+        )}
+      </CollapsibleSection>
     </div>
   )
 }
