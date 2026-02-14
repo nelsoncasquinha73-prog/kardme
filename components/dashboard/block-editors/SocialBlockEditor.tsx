@@ -438,6 +438,8 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         <Row label="">
           <Button onClick={() => patch((d) => (d.style.offsetY = 0))}>Reset</Button>
 
+        </Row>
+      </CollapsibleSection>
       {/* ========== CORES DE MARCA ========== */}
       <CollapsibleSection title="🎨 Cores de marca" subtitle="Usar cores originais das redes sociais" isOpen={activeSection === 'brandColors'} onToggle={() => setActiveSection(activeSection === 'brandColors' ? null : 'brandColors')}>
         <Row label="Ativar">
