@@ -94,6 +94,8 @@ export type ServicesStyle = {
   buttonRadiusPx?: number
 
   imageRadiusPx?: number
+  imageObjectFit?: 'cover' | 'contain'
+  carouselImageAspectRatio?: number
   imageAspectRatio?: number
 
   imageFocusX?: number
@@ -166,6 +168,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const buttonRadius = st.buttonRadiusPx ?? 8
 
   const imageAspectRatio = clamp(clampNum(st.imageAspectRatio, 1.5), 0.5, 3)
+  const carouselImageAspectRatio = layout === 'carousel' ? clamp(clampNum(st.carouselImageAspectRatio, 0.5625), 0.4, 2) : imageAspectRatio
   const imageRadius = st.imageRadiusPx ?? 10
 
   // foco imagem
@@ -303,7 +306,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
                     buttonBorderWidth={buttonBorderWidth}
                     buttonBorderColor={buttonBorderColor}
                     buttonRadius={buttonRadius}
-                    imageAspectRatio={imageAspectRatio}
+                    imageAspectRatio={carouselImageAspectRatio}
                     imageRadius={imageRadius}
                     onOpenModal={() => setModalOpen(item.id)}
                   />
