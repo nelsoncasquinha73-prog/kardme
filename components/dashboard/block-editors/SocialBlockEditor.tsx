@@ -304,8 +304,6 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
             </Row>
           </>
         )}
-          </Row>
-        )}
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}
