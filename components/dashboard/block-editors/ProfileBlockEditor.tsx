@@ -237,27 +237,28 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
             <Row label={t('profile_editor.label_position_x')}>
+            <Row label={t('profile_editor.label_position_x')}>
               <input
-                type="range"
-                min={-50}
-                max={50}
-                step={2}
+                type="number"
+                min={-300}
+                max={300}
+                step={1}
                 value={local.avatar?.offsetX ?? 0}
                 onChange={(e) => patch((d) => (d.avatar!.offsetX = Number(e.target.value)))}
-                style={{ flex: 1 }}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14 }}
               />
               <span style={rightNum}>{local.avatar?.offsetX ?? 0}px</span>
             </Row>
 
             <Row label={t('profile_editor.label_position_y')}>
               <input
-                type="range"
-                min={-80}
-                max={80}
-                step={2}
+                type="number"
+                min={-300}
+                max={300}
+                step={1}
                 value={local.avatar?.offsetY ?? 0}
                 onChange={(e) => patch((d) => (d.avatar!.offsetY = Number(e.target.value)))}
-                style={{ flex: 1 }}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14 }}
               />
               <span style={rightNum}>{local.avatar?.offsetY ?? 0}px</span>
             </Row>
