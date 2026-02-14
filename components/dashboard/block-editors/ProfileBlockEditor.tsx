@@ -237,7 +237,6 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
             <Row label={t('profile_editor.label_position_x')}>
-            <Row label={t('profile_editor.label_position_x')}>
               <input
                 type="number"
                 min={-300}
