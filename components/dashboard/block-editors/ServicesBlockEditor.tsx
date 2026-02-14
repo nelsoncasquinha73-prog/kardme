@@ -79,6 +79,8 @@ export type ServicesStyle = {
 
   imageRadiusPx?: number
   imageAspectRatio?: number
+  imageObjectFit?: 'cover' | 'contain'
+  carouselImageAspectRatio?: number
 
   // carrossel
   carouselCardWidthPx?: number // 260–360
