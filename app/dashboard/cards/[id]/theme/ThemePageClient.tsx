@@ -134,7 +134,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           .from('card_blocks')
           .upsert({
             id: block.id,
-            card_id: card.id,
+            card_id: (block as any).card_id ?? card.id,
             type: block.type,
             settings: block.settings,
             style: block.style,
