@@ -5,8 +5,10 @@ import React, { useMemo, useRef, useState } from 'react'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import { useLanguage } from '@/components/language/LanguageProvider'
 import SwatchRow from '@/components/editor/SwatchRow'
 import FontPicker from '@/components/editor/FontPicker'
+import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 
 export type ServiceItem = {
@@ -62,6 +64,19 @@ export type ServicesStyle = {
   textFontWeight?: number
   textFontSize?: number
 
+  textFontFamily?: string
+  titleColor?: string
+  titleFontWeight?: number
+  titleFontSize?: number
+  subtitleColor?: string
+  subtitleFontWeight?: number
+  subtitleFontSize?: number
+  priceColor?: string
+  priceFontWeight?: number
+  priceFontSize?: number
+  descriptionColor?: string
+  descriptionFontWeight?: number
+  descriptionFontSize?: number
   cardRadiusPx?: number
   cardBorderWidth?: number
   cardBorderColor?: string
@@ -190,6 +205,7 @@ export default function ServicesBlockEditor({
   onChangeStyle,
 }: Props) {
   const { openPicker } = useColorPicker()
+  const { t } = useLanguage()
 
   // 🔒 evita resets enquanto estás a escrever
   const isEditingRef = useRef(false)
@@ -1105,6 +1121,95 @@ export default function ServicesBlockEditor({
         ))}
       </Section>
 {/* ================== ESTILOS DO CARD ================== */}
+      {/* ========== TEXT ========== */}
+      <Section title="🔤 Text">
+        <Row label={t("editor.text_font_family")}>
+          <FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || "" })} />
+        </Row>
+        <Row label={t("editor.text_size")}>
+          <input type="range" min={10} max={20} value={st.textFontSize ?? 14} onChange={(e) => updateStyle({ textFontSize: clampNum(e.target.value, 14) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.textFontSize ?? 14}px</span>
+        </Row>
+        <Row label={t("editor.text_weight")}>
+          <select value={String(st.textFontWeight ?? 600)} onChange={(e) => updateStyle({ textFontWeight: clampNum(e.target.value, 600) })} style={select}>
+            <option value="400">Normal</option>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+            <option value="800">Extra</option>
+          </select>
+        </Row>
+
+        <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
+
+        <Row label={t("editor.title_color")}>
+          <ColorPickerPro value={st.titleColor ?? "#111827"} onChange={(hex) => updateStyle({ titleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ titleColor: hex }))} supportsGradient={false} />
+        </Row>
+        <Row label={t("editor.title_size")}>
+          <input type="range" min={14} max={28} value={st.titleFontSize ?? 18} onChange={(e) => updateStyle({ titleFontSize: clampNum(e.target.value, 18) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.titleFontSize ?? 18}px</span>
+        </Row>
+        <Row label={t("editor.title_weight")}>
+          <select value={String(st.titleFontWeight ?? 800)} onChange={(e) => updateStyle({ titleFontWeight: clampNum(e.target.value, 800) })} style={select}>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+            <option value="800">Extra</option>
+            <option value="900">Black</option>
+          </select>
+        </Row>
+
+        <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
+
+        <Row label={t("editor.subtitle_color")}>
+          <ColorPickerPro value={st.subtitleColor ?? "#4b5563"} onChange={(hex) => updateStyle({ subtitleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ subtitleColor: hex }))} supportsGradient={false} />
+        </Row>
+        <Row label={t("editor.subtitle_size")}>
+          <input type="range" min={12} max={18} value={st.subtitleFontSize ?? 14} onChange={(e) => updateStyle({ subtitleFontSize: clampNum(e.target.value, 14) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.subtitleFontSize ?? 14}px</span>
+        </Row>
+        <Row label={t("editor.subtitle_weight")}>
+          <select value={String(st.subtitleFontWeight ?? 600)} onChange={(e) => updateStyle({ subtitleFontWeight: clampNum(e.target.value, 600) })} style={select}>
+            <option value="400">Normal</option>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+          </select>
+        </Row>
+
+        <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
+
+        <Row label={t("editor.price_color")}>
+          <ColorPickerPro value={st.priceColor ?? "#111827"} onChange={(hex) => updateStyle({ priceColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ priceColor: hex }))} supportsGradient={false} />
+        </Row>
+        <Row label={t("editor.price_size")}>
+          <input type="range" min={12} max={24} value={st.priceFontSize ?? 16} onChange={(e) => updateStyle({ priceFontSize: clampNum(e.target.value, 16) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.priceFontSize ?? 16}px</span>
+        </Row>
+        <Row label={t("editor.price_weight")}>
+          <select value={String(st.priceFontWeight ?? 800)} onChange={(e) => updateStyle({ priceFontWeight: clampNum(e.target.value, 800) })} style={select}>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+            <option value="800">Extra</option>
+            <option value="900">Black</option>
+          </select>
+        </Row>
+
+        <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
+
+        <Row label={t("editor.description_color")}>
+          <ColorPickerPro value={st.descriptionColor ?? "#374151"} onChange={(hex) => updateStyle({ descriptionColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ descriptionColor: hex }))} supportsGradient={false} />
+        </Row>
+        <Row label={t("editor.description_size")}>
+          <input type="range" min={12} max={18} value={st.descriptionFontSize ?? 14} onChange={(e) => updateStyle({ descriptionFontSize: clampNum(e.target.value, 14) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{st.descriptionFontSize ?? 14}px</span>
+        </Row>
+        <Row label={t("editor.description_weight")}>
+          <select value={String(st.descriptionFontWeight ?? 500)} onChange={(e) => updateStyle({ descriptionFontWeight: clampNum(e.target.value, 500) })} style={select}>
+            <option value="400">Normal</option>
+            <option value="500">Medium</option>
+            <option value="600">Semi</option>
+          </select>
+        </Row>
+      </Section>
+
 <Section title="Estilos do card">
   <Row label="Fundo do card">
     <Toggle
