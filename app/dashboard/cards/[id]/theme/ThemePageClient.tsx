@@ -132,13 +132,15 @@ export default function ThemePageClient({ card, blocks }: Props) {
       for (const block of localBlocks) {
         const { error, data } = await supabase
           .from('card_blocks')
-          .update({
+          .upsert({
+            id: block.id,
+            card_id: card.id,
+            type: block.type,
             settings: block.settings,
             style: block.style,
             enabled: block.enabled,
             order: block.order,
-          })
-          .eq('id', block.id)
+          }, { onConflict: 'id' })
           .select('id, card_id, type')
 
         if (error) {
