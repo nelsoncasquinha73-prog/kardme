@@ -21,6 +21,7 @@ type GalleryItem = {
     modalTitle?: string
     modalHtml?: string
     facts?: string[]
+    factsText?: string
     videoUrl?: string
     videoType?: 'youtube' | 'vimeo' | 'upload'
   }
@@ -234,7 +235,19 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
                   </Row>
 
                   <Row label="Facts (badges)">
-                    <input type="text" value={(Array.isArray(it?.action?.facts) ? it.action.facts : []).join(' | ')} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), facts: e.target.value.split('|').map(f => f.trim()).filter(Boolean) } })} onBlur={() => onBlurFlushSave?.()} placeholder="T3 | 120m² | Garagem" style={inputStyle} />
+                    <input
+                      type="text"
+                      value={it?.action?.factsText ?? (Array.isArray(it?.action?.facts) ? it.action.facts : []).join(' | ')}
+                      onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), factsText: e.target.value } })}
+                      onBlur={() => {
+                        const raw = (it?.action?.factsText ?? '').trim()
+                        const facts = raw ? raw.split('|').map(f => f.trim()).filter(Boolean) : []
+                        updateItem(it.uid, { action: { ...(it?.action || {}), facts, factsText: raw } })
+                        onBlurFlushSave?.()
+                      }}
+                      placeholder="T3 | 120m² | Garagem"
+                      style={inputStyle}
+                    />
                   </Row>
 
                   <Row label="Vídeo">

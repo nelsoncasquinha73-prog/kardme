@@ -20,6 +20,7 @@ type GalleryItem = {
     modalTitle?: string
     modalHtml?: string
     facts?: string[]
+    factsText?: string
   }
 }
 
