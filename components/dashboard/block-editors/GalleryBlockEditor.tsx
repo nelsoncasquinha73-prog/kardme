@@ -234,7 +234,7 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
                   </Row>
 
                   <Row label="Facts (badges)">
-                    <textarea value={(Array.isArray(it?.action?.facts) ? it.action.facts : []).join('\n')} onKeyDown={(e) => { e.stopPropagation() }} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), facts: e.target.value.split('\n').map(f => f.trim()).filter(Boolean) } })} onBlur={() => onBlurFlushSave?.()} placeholder="T3\n120m²\nGaragem" style={{ ...inputStyle, minHeight: 60, fontFamily: 'monospace', fontSize: 11 }} />
+                    <input type="text" value={(Array.isArray(it?.action?.facts) ? it.action.facts : []).join(' | ')} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), facts: e.target.value.split('|').map(f => f.trim()).filter(Boolean) } })} onBlur={() => onBlurFlushSave?.()} placeholder="T3 | 120m² | Garagem" style={inputStyle} />
                   </Row>
 
                   <Row label="Vídeo">
