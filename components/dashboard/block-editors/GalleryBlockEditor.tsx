@@ -21,6 +21,8 @@ type GalleryItem = {
     modalTitle?: string
     modalHtml?: string
     facts?: string[]
+    videoUrl?: string
+    videoType?: 'youtube' | 'vimeo' | 'upload'
   }
 }
 
