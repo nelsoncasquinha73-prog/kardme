@@ -79,6 +79,32 @@ function generateUid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+
+// ===== FactsTextarea (workaround for flex layout issue) =====
+function FactsTextarea({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur: () => void }) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
+      placeholder="T3\n120m²\nGaragem"
+      style={{
+        width: '100%',
+        padding: '10px 12px',
+        borderRadius: 12,
+        border: '1px solid rgba(0,0,0,0.12)',
+        background: '#fff',
+        fontSize: 11,
+        fontFamily: 'monospace',
+        minHeight: 60,
+        resize: 'vertical',
+        boxSizing: 'border-box',
+      }}
+    />
+  )
+}
+
+
 export default function GalleryBlockEditor({ settings, style, onChangeSettings, onChangeStyle, onBlurFlushSave }: Props) {
   const { openPicker } = useColorPicker()
   const { t } = useLanguage()
