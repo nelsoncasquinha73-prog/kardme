@@ -256,9 +256,10 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
                     </>
                   )}
 
-                  <Row label="HTML (conteúdo)">
-                    <textarea value={it?.action?.modalHtml ?? ''} onKeyDown={(e) => { e.stopPropagation() }} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), modalHtml: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="<p>Descrição...</p>" style={{ ...inputStyle, minHeight: 80, fontFamily: 'monospace', fontSize: 11 }} />
-                  </Row>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8 }}>HTML (conteúdo)</span>
+                    <textarea value={it?.action?.modalHtml ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), modalHtml: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="<p>Descrição...</p>" style={{ ...inputStyle, minHeight: 80, fontFamily: 'monospace', fontSize: 11 }} />
+                  </div>
                 </>
               )}
             </div>
