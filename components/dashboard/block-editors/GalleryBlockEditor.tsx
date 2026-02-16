@@ -12,6 +12,16 @@ type GalleryItem = {
   url: string
   caption?: string
   enabled?: boolean
+  action?: {
+    type?: 'none' | 'external' | 'modal'
+    url?: string
+    newTab?: boolean
+    buttonEnabled?: boolean
+    buttonText?: string
+    modalTitle?: string
+    modalHtml?: string
+    facts?: string[]
+  }
 }
 
 type GallerySettings = {
@@ -149,6 +159,59 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
             <Row label="Legenda">
               <input type="text" value={it.caption ?? ''} onChange={(e) => updateItem(it.uid, { caption: e.target.value })} onBlur={() => onBlurFlushSave?.()} placeholder="Legenda" style={inputStyle} />
             </Row>
+
+            {/* ===== AÇÕES (Ver mais / Link) ===== */}
+            <div style={{ borderTop: '1px solid rgba(59,130,246,0.15)', paddingTop: 10, marginTop: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, opacity: 0.9 }}>⚡ Ações</div>
+
+              <Row label="Tipo">
+                <select value={it?.action?.type ?? 'none'} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), type: e.target.value as any } })} onBlur={() => onBlurFlushSave?.()} style={selectStyle}>
+                  <option value="none">Nenhuma</option>
+                  <option value="external">Link externo</option>
+                  <option value="modal">Modal (Ver mais)</option>
+                </select>
+              </Row>
+
+              {(it?.action?.type === 'external' || it?.action?.type === 'modal') && (
+                <>
+                  <Row label="Botão">
+                    <Toggle active={it?.action?.buttonEnabled ?? false} onClick={() => updateItem(it.uid, { action: { ...(it?.action || {}), buttonEnabled: !(it?.action?.buttonEnabled ?? false) } })} />
+                  </Row>
+                  {it?.action?.buttonEnabled && (
+                    <Row label="Texto botão">
+                      <input type="text" value={it?.action?.buttonText ?? 'Ver mais'} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), buttonText: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="Ver mais" style={inputStyle} />
+                    </Row>
+                  )}
+                </>
+              )}
+
+              {it?.action?.type === 'external' && (
+                <>
+                  <Row label="URL">
+                    <input type="text" value={it?.action?.url ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), url: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="https://..." style={inputStyle} />
+                  </Row>
+                  <Row label="Nova aba">
+                    <Toggle active={it?.action?.newTab !== false} onClick={() => updateItem(it.uid, { action: { ...(it?.action || {}), newTab: !(it?.action?.newTab !== false) } })} />
+                  </Row>
+                </>
+              )}
+
+              {it?.action?.type === 'modal' && (
+                <>
+                  <Row label="Título modal">
+                    <input type="text" value={it?.action?.modalTitle ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), modalTitle: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="Detalhes" style={inputStyle} />
+                  </Row>
+
+                  <Row label="Facts (badges)">
+                    <textarea value={(Array.isArray(it?.action?.facts) ? it.action.facts : []).join('\n')} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), facts: e.target.value.split('\n').map(f => f.trim()).filter(Boolean) } })} onBlur={() => onBlurFlushSave?.()} placeholder="T3\n120m²\nGaragem" style={{ ...inputStyle, minHeight: 60, fontFamily: 'monospace', fontSize: 11 }} />
+                  </Row>
+
+                  <Row label="HTML (conteúdo)">
+                    <textarea value={it?.action?.modalHtml ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), modalHtml: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="<p>Descrição...</p>" style={{ ...inputStyle, minHeight: 80, fontFamily: 'monospace', fontSize: 11 }} />
+                  </Row>
+                </>
+              )}
+            </div>
           </div>
         ))}
       </CollapsibleSection>

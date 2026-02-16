@@ -11,6 +11,16 @@ type GalleryItem = {
   url: string
   caption?: string
   enabled?: boolean
+  action?: {
+    type?: 'none' | 'external' | 'modal'
+    url?: string
+    newTab?: boolean
+    buttonEnabled?: boolean
+    buttonText?: string
+    modalTitle?: string
+    modalHtml?: string
+    facts?: string[]
+  }
 }
 
 type GallerySettings = {
@@ -103,6 +113,7 @@ export default function GalleryBlock({ settings, style }: Props) {
   const autoplayIntervalMs = s.layout?.autoplayIntervalMs ?? 3500
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [modalIndex, setModalIndex] = useState<number | null>(null)
 
   const visibleItems = useMemo(() => {
     const arr = Array.isArray(s.items) ? s.items : []
@@ -110,6 +121,21 @@ export default function GalleryBlock({ settings, style }: Props) {
   }, [s.items])
 
   const loop = visibleItems.length > 1
+
+  const openAction = (item: GalleryItem, idx: number) => {
+    const a = item?.action || {}
+    const type = a.type || 'none'
+    if (type === 'external' && a.url) {
+      const target = a.newTab === false ? '_self' : '_blank'
+      try { window.open(a.url, target, 'noopener,noreferrer') } catch {}
+      return
+    }
+    if (type === 'modal') {
+      setModalIndex(idx)
+      return
+    }
+  }
+
 
   // ✅ Autoplay (safe)
   const autoplay = useRef<any>(null)
@@ -245,6 +271,36 @@ export default function GalleryBlock({ settings, style }: Props) {
                   draggable={false}
                 />
 
+                {item?.action?.buttonEnabled && (item?.action?.type === 'external' || item?.action?.type === 'modal') && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      openAction(item, i)
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      background: 'rgba(17,24,39,0.88)',
+                      color: 'white',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      borderRadius: 999,
+                      padding: '6px 10px',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      boxShadow: '0 10px 26px rgba(0,0,0,0.18)',
+                    }}
+                    data-no-block-select="1"
+                    aria-label={item?.action?.buttonText || 'Ver mais'}
+                  >
+                    {item?.action?.buttonText || 'Ver mais'}
+                  </button>
+                )}
+
                 {isNonEmpty(item.caption) && (
                   <div
                     style={{
@@ -307,6 +363,13 @@ export default function GalleryBlock({ settings, style }: Props) {
         )}
       </div>
 
+      {modalIndex !== null && (
+        <GalleryItemModal
+          item={visibleItems[Math.max(0, Math.min(visibleItems.length - 1, modalIndex))]}
+          onClose={() => setModalIndex(null)}
+        />
+      )}
+
       {lightboxIndex !== null && (
         <Lightbox
           items={visibleItems}
@@ -318,6 +381,97 @@ export default function GalleryBlock({ settings, style }: Props) {
     </section>
   )
 }
+
+
+/* ===== Item Modal (Ver mais) ===== */
+
+function GalleryItemModal({ item, onClose }: { item: any; onClose: () => void }) {
+  const a = item?.action || {}
+  const title = a.modalTitle || item?.caption || 'Detalhes'
+  const facts: string[] = Array.isArray(a.facts) ? a.facts.filter(Boolean) : []
+  const html = typeof a.modalHtml === 'string' ? a.modalHtml : ''
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.72)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 18,
+        zIndex: 9999,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(720px, 100%)',
+          maxHeight: '85vh',
+          overflow: 'auto',
+          background: '#0b1220',
+          color: 'white',
+          borderRadius: 16,
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.45)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
+          <div style={{ fontWeight: 900, fontSize: 14, opacity: 0.95 }}>{title}</div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              color: 'rgba(255,255,255,0.85)',
+              border: 'none',
+              fontSize: 18,
+              cursor: 'pointer',
+              padding: 6,
+              lineHeight: 1,
+            }}
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {facts.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '12px 16px' }}>
+            {facts.map((f, idx) => (
+              <span key={idx} style={{ fontSize: 12, fontWeight: 800, padding: '6px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.18)', border: '1px solid rgba(96,165,250,0.25)' }}>
+                {f}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {html && (
+          <div style={{ padding: '0 16px 16px 16px', fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
+            <div dangerouslySetInnerHTML={{ __html: html }} />
+          </div>
+        )}
+
+        {!html && facts.length === 0 && (
+          <div style={{ padding: '16px', fontSize: 13, opacity: 0.75 }}>
+            Sem detalhes configurados.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 
 function arrowStyle(side: 'left' | 'right', bg: string, icon: string): React.CSSProperties {
   return {
