@@ -206,6 +206,54 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
                     <textarea value={(Array.isArray(it?.action?.facts) ? it.action.facts : []).join('\n')} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), facts: e.target.value.split('\n').map(f => f.trim()).filter(Boolean) } })} onBlur={() => onBlurFlushSave?.()} placeholder="T3\n120m²\nGaragem" style={{ ...inputStyle, minHeight: 60, fontFamily: 'monospace', fontSize: 11 }} />
                   </Row>
 
+                  <Row label="Vídeo">
+                    <select value={it?.action?.videoType ?? 'youtube'} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), videoType: e.target.value as any } })} onBlur={() => onBlurFlushSave?.()} style={selectStyle}>
+                      <option value="youtube">YouTube</option>
+                      <option value="vimeo">Vimeo</option>
+                      <option value="upload">Upload</option>
+                    </select>
+                  </Row>
+
+                  {(it?.action?.videoType === 'youtube' || it?.action?.videoType === 'vimeo') && (
+                    <Row label="URL vídeo">
+                      <input type="text" value={it?.action?.videoUrl ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), videoUrl: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="https://youtube.com/watch?v=..." style={inputStyle} />
+                    </Row>
+                  )}
+
+                  {it?.action?.videoType === 'upload' && (
+                    <>
+                      <Row label="Upload vídeo">
+                        <input type="file" accept="video/*" onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          const MAX_MB = 50
+                          const MAX_BYTES = MAX_MB * 1024 * 1024
+                          if (file.size > MAX_BYTES) {
+                            alert(`Vídeo demasiado grande. Máximo: ${MAX_MB}MB.`)
+                            e.currentTarget.value = ''
+                            return
+                          }
+                          try {
+                            const ext = (file.name.split('.').pop() || 'mp4').toLowerCase()
+                            const fileName = `${generateUid()}.${ext}`
+                            const filePath = `gallery-videos/${fileName}`
+                            const { error } = await supabase.storage.from('card-assets').upload(filePath, file, { cacheControl: '3600', upsert: false })
+                            if (error) { alert('Erro ao enviar vídeo'); return }
+                            const { data } = supabase.storage.from('card-assets').getPublicUrl(filePath)
+                            const url = data?.publicUrl ?? null
+                            if (url) updateItem(it.uid, { action: { ...(it?.action || {}), videoUrl: url } })
+                            onBlurFlushSave?.()
+                          } catch (err) { alert('Erro ao enviar vídeo'); console.error(err) }
+                        }} style={{ fontSize: 12 }} />
+                      </Row>
+                      {it?.action?.videoUrl && (
+                        <Row label="Vídeo">
+                          <video src={it.action.videoUrl} controls style={{ width: '100%', maxHeight: 120, borderRadius: 8 }} />
+                        </Row>
+                      )}
+                    </>
+                  )}
+
                   <Row label="HTML (conteúdo)">
                     <textarea value={it?.action?.modalHtml ?? ''} onChange={(e) => updateItem(it.uid, { action: { ...(it?.action || {}), modalHtml: e.target.value } })} onBlur={() => onBlurFlushSave?.()} placeholder="<p>Descrição...</p>" style={{ ...inputStyle, minHeight: 80, fontFamily: 'monospace', fontSize: 11 }} />
                   </Row>
