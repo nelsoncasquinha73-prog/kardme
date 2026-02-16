@@ -109,6 +109,9 @@ export default function GalleryBlockEditor({ settings, style, onChangeSettings, 
   const { openPicker } = useColorPicker()
   const { t } = useLanguage()
   const [uploading, setUploading] = useState(false)
+  const [factsEditingUid, setFactsEditingUid] = useState<string | null>(null)
+  const [factsRawText, setFactsRawText] = useState<string>('')
+
   const [activeSection, setActiveSection] = useState<string | null>('images')
 
   const s = settings || ({ items: [] } as any)
