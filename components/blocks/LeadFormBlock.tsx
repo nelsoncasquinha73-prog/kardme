@@ -14,6 +14,8 @@ type LeadFormSettings = {
     message?: boolean
   }
   buttonLabel?: string
+  consentCheckboxEnabled?: boolean
+  consentCheckboxText?: string
   labels?: {
     name?: string
     email?: string
@@ -113,6 +115,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   }
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
+  const [consentChecked, setConsentChecked] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -173,7 +176,24 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     `
   }, [st.inputs?.placeholderColor, cardId])
 
+  const consentTexts: Record<string, string> = {
+    'pt': 'Aceito o tratamento dos meus dados pessoais de acordo com a Política de Privacidade.',
+    'pt-br': 'Aceito o tratamento dos meus dados pessoais de acordo com a Política de Privacidade.',
+    'en': 'I accept the processing of my personal data in accordance with the Privacy Policy.',
+    'es': 'Acepto el tratamiento de mis datos personales de acuerdo con la Política de Privacidad.',
+    'fr': "J'accepte le traitement de mes données personnelles conformément à la Politique de Confidentialité.",
+    'de': 'Ich akzeptiere die Verarbeitung meiner persönlichen Daten gemäß der Datenschutzrichtlinie.',
+    'it': "Accetto il trattamento dei miei dati personali in conformità con l'Informativa sulla Privacy.",
+    'ar': 'أوافق على معالجة بياناتي الشخصية وفقاً لسياسة الخصوصية.',
+  }
+
+  const consentText = s.consentCheckboxText || consentTexts[t('language') as string] || consentTexts['en']
+
   async function handleSubmit(e: React.FormEvent) {
+    if ((s.consentCheckboxEnabled ?? true) && !consentChecked) {
+      setErrorMsg('Deve aceitar o tratamento de dados para continuar.')
+      return
+    }
     e.preventDefault()
     setStatus('sending')
     setErrorMsg(null)
@@ -275,7 +295,22 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
           </div>
         )}
 
-        <button type="submit" disabled={status === 'sending'} style={btnStyle}>
+        {(s.consentCheckboxEnabled ?? true) && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 4 }}>
+            <input
+              type="checkbox"
+              id={`consent-${cardId}`}
+              checked={consentChecked}
+              onChange={(e) => setConsentChecked(e.target.checked)}
+              style={{ marginTop: 4, cursor: 'pointer', accentColor: st.button?.bgColor ?? 'var(--color-primary)' }}
+            />
+            <label htmlFor={`consent-${cardId}`} style={{ fontSize: 11, opacity: 0.75, cursor: 'pointer', lineHeight: 1.4 }}>
+              {consentText}
+            </label>
+          </div>
+        )}
+
+        <button type="submit" disabled={status === 'sending' || ((s.consentCheckboxEnabled ?? true) && !consentChecked)} style={btnStyle}>
           {status === 'sending' ? 'A enviar…' : s.buttonLabel ?? 'Enviar'}
         </button>
 
