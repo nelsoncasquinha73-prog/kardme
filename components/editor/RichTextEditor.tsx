@@ -3,6 +3,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Bold from '@tiptap/extension-bold'
+import Italic from '@tiptap/extension-italic'
+import Strike from '@tiptap/extension-strike'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
@@ -33,7 +36,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
   
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false, underline: false, link: false }),
+      StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false, bold: false, italic: false, strike: false, underline: false, link: false }),
       TextStyle,
       Color,
       Underline,
@@ -89,9 +92,16 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.02)' }}>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
-          console.log('[RTE] Before toggleBold:', editor.isActive('bold'))
+          console.log('[RTE] toggleBold clicked')
+          console.log('[RTE] editor.isEditable:', editor.isEditable)
+          console.log('[RTE] editor.isFocused:', editor.isFocused)
+          console.log('[RTE] selection:', editor.state.selection)
+          console.log('[RTE] selection.$from:', editor.state.selection.$from.pos)
+          console.log('[RTE] selection.$to:', editor.state.selection.$to.pos)
+          editor.view.focus()
           const result = editor.chain().focus().toggleBold().run()
-          console.log('[RTE] After toggleBold:', editor.isActive('bold'), 'result:', result)
+          console.log('[RTE] toggleBold result:', result)
+          console.log('[RTE] after toggleBold, isActive:', editor.isActive('bold'))
         }} style={btnStyle(editor.isActive('bold'))} title="Negrito"><strong>B</strong></button>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
           editor.view.focus()
