@@ -109,52 +109,8 @@ export default function FreeTextBlock({ settings, style }: Props) {
   }
 
 
-  React.useEffect(() => {
-    const styleId = `freetext-html-${Math.random().toString(36).slice(2, 9)}`
-    let styleEl = document.getElementById(styleId)
-    
-    if (!styleEl) {
-      styleEl = document.createElement('style')
-      styleEl.id = styleId
-      document.head.appendChild(styleEl)
-    }
-    
-    const textColor = st.textColor ?? '#111827'
-    styleEl.textContent = `
-      [data-freetext-html] {
-        color: ${textColor} !important;
-      }
-      [data-freetext-html] a {
-        color: ${textColor};
-        text-decoration: underline;
-        cursor: pointer;
-      }
-    `
-  }, [st.textColor])
 
 
-  React.useEffect(() => {
-    const styleId = `freetext-html-${Math.random().toString(36).slice(2, 9)}`
-    let styleEl = document.getElementById(styleId)
-    
-    if (!styleEl) {
-      styleEl = document.createElement('style')
-      styleEl.id = styleId
-      document.head.appendChild(styleEl)
-    }
-    
-    const textColor = st.textColor ?? '#111827'
-    styleEl.textContent = `
-      [data-freetext-html] {
-        color: ${textColor} !important;
-      }
-      [data-freetext-html] a {
-        color: ${textColor};
-        text-decoration: underline;
-        cursor: pointer;
-      }
-    `
-  }, [st.textColor])
 
   const handleClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
