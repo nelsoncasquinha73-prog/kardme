@@ -11,6 +11,7 @@ import { TextStyle, Color } from '@tiptap/extension-text-style'
 type Props = {
   value: string
   onChange: (html: string) => void
+  onBlur?: () => void
   placeholder?: string
   minHeight?: number
 }
@@ -27,7 +28,7 @@ const COLORS = [
   { label: 'Rosa', value: '#EC4899' },
 ]
 
-export default function RichTextEditor({ value, onChange, placeholder = 'Escreve aqui...', minHeight = 100 }: Props) {
+export default function RichTextEditor({ value, onChange, onBlur, placeholder = 'Escreve aqui...', minHeight = 100 }: Props) {
   const [showColors, setShowColors] = useState(false)
   
   const editor = useEditor({
@@ -160,7 +161,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escreve
       </div>
       
       {/* Editor */}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} onBlur={onBlur} />
     </div>
   )
 }
