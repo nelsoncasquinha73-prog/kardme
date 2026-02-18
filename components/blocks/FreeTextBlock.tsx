@@ -175,9 +175,10 @@ export default function FreeTextBlock({ settings, style }: Props) {
             backdropFilter: 'blur(4px)',
             zIndex: 9999,
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
-            padding: 20,
+            padding: '60px 20px 20px',
+            overflowY: 'auto',
           }}
         >
           <div
@@ -187,8 +188,8 @@ export default function FreeTextBlock({ settings, style }: Props) {
               borderRadius: 20,
               maxWidth: 500,
               width: '100%',
-              maxHeight: '80vh',
-              overflow: 'hidden',
+              maxHeight: '70vh',
+              overflow: 'auto',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
