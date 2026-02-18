@@ -196,6 +196,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              marginTop: 0,
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
@@ -208,7 +209,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
               </button>
             </div>
             <div
-              style={{ padding: 20, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
+              style={{ padding: 12, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
               dangerouslySetInnerHTML={{ __html: activeModal.content }}
             />
           </div>
