@@ -88,7 +88,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   const s: LeadFormSettings = settings ?? {}
   const st: LeadFormStyle = style ?? {}
 
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
 
   const fields = useMemo(
     () => ({
@@ -187,7 +187,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     'ar': 'أوافق على معالجة بياناتي الشخصية وفقاً لسياسة الخصوصية.',
   }
 
-  const consentText = s.consentCheckboxText || consentTexts[t('language') as string] || consentTexts['en']
+  const consentText = s.consentCheckboxText || consentTexts[lang] || consentTexts['pt']
 
   async function handleSubmit(e: React.FormEvent) {
     if ((s.consentCheckboxEnabled ?? true) && !consentChecked) {
