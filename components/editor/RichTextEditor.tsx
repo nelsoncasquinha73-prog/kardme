@@ -77,8 +77,6 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     }
     const id = window.prompt('ID do modal (ex: modal_1771436285651):', '')
     if (!id) return
-
-    const selectedText = editor.state.doc.textBetween(from, to)
     editor.chain().focus().setMark('modalSpan', { modalId: id }).run()
   }, [editor])
 
