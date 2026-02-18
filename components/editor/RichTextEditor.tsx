@@ -77,9 +77,12 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     const id = window.prompt('ID do modal (ex: modal_123):', 'modal_')
     if (!id) return
 
-    // Envolve a seleção num span clicável (sem URL, sem normalização)
+    // Envolve a seleção num <a> com data-modal-id (o FreeTextBlock abre o modal por este atributo)
     const selectedText = editor.state.doc.textBetween(from, to, ' ')
-    editor.chain().focus().insertContentAt({ from, to }, `<span data-modal-id="${id}" style="text-decoration: underline; cursor: pointer;">${selectedText}</span>`).run()
+    editor.chain().focus().insertContentAt(
+      { from, to },
+      `<a href="#modal:${id}" data-modal-id="${id}" style="text-decoration: underline; cursor: pointer;">${selectedText}</a>`
+    ).run()
   }, [editor])
 
   const setLink = useCallback(() => {
