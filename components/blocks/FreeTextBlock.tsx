@@ -113,6 +113,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
 
 
   const handleClick = (e: React.MouseEvent) => {
+    console.log('[FreeTextBlock] click', e.target, (e.target as HTMLElement).closest?.('[data-modal-id]'))
     const target = e.target as HTMLElement
     
     // Procura SPAN com data-modal-id
