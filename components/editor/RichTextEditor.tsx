@@ -41,7 +41,11 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
       Color,
       Underline,
       TextAlign.configure({ types: ['paragraph'] }),
-      Link.configure({ openOnClick: false }),
+      Link.configure({
+        openOnClick: false,
+        autolink: false,
+        linkOnPaste: false,
+      }),
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),

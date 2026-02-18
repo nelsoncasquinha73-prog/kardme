@@ -116,10 +116,11 @@ export default function FreeTextBlock({ settings, style }: Props) {
     const target = e.target as HTMLElement
     if (target.tagName === 'A') {
       const href = target.getAttribute('href') || ''
-      if (href.startsWith('#modal:')) {
+      // Aceita #modal:id ou qualquer URL que contenha #modal:id
+      if (href.includes('#modal:')) {
         e.preventDefault()
         e.stopPropagation()
-        const modalId = href.replace('#modal:', '')
+        const modalId = href.split('#modal:')[1]
         if (modals[modalId]) setOpenModal(modalId)
       }
     }
