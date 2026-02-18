@@ -113,19 +113,27 @@ export default function FreeTextBlock({ settings, style }: Props) {
 
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log('[FreeTextBlock] handleClick fired')
     const target = e.target as HTMLElement
-    console.log('[FreeTextBlock] target.tagName:', target.tagName)
+    
+    // Procura SPAN com data-modal-id
+    const modalSpan = target.closest('[data-modal-id]')
+    if (modalSpan) {
+      const modalId = modalSpan.getAttribute('data-modal-id') || ''
+      if (modals[modalId]) {
+        e.preventDefault()
+        e.stopPropagation()
+        setOpenModal(modalId)
+      }
+      return
+    }
+    
+    // Procura A com href #modal:
     if (target.tagName === 'A') {
       const href = target.getAttribute('href') || ''
-      console.log('[FreeTextBlock] link href:', href)
-      // Aceita #modal:id ou qualquer URL que contenha #modal:id
       if (href.includes('#modal:')) {
-        console.log('[FreeTextBlock] opening modal for href:', href)
         e.preventDefault()
         e.stopPropagation()
         const modalId = href.split('#modal:')[1]
-        console.log('[FreeTextBlock] modalId:', modalId, 'exists:', !!modals[modalId])
         if (modals[modalId]) setOpenModal(modalId)
       }
     }
