@@ -63,7 +63,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
   const title = (s.title ?? '').trim()
   const text = (s.text ?? '').trim()
   const pad = c.padding ?? (compact ? 10 : 14)
-  const isHtml = text.includes('<')
+  const isHtml = true  // Always render as HTML (FreeText uses RichTextEditor)
 
   const wrap: React.CSSProperties = {
     transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined,
@@ -153,7 +153,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
                 #${htmlScopeId} { color: ${st.textColor ?? '#111827'}; }
                 #${htmlScopeId} * { color: inherit; }
                 #${htmlScopeId} a { color: inherit; text-decoration: underline; cursor: pointer; }
-                #${htmlScopeId} span[data-modal-id] { text-decoration: underline; cursor: pointer; }
+                #${htmlScopeId} span[data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }
                 #${htmlScopeId} p { margin: 0 0 10px 0; }
                 #${htmlScopeId} ul, #${htmlScopeId} ol { margin: 8px 0 8px 18px; padding: 0; }
               `}</style>
