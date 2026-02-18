@@ -175,9 +175,9 @@ export default function FreeTextBlock({ settings, style }: Props) {
             backdropFilter: 'blur(4px)',
             zIndex: 9999,
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
-            padding: '20px',
+            padding: '24px 20px 20px',
           }}
         >
           <div
@@ -187,18 +187,18 @@ export default function FreeTextBlock({ settings, style }: Props) {
               borderRadius: 20,
               maxWidth: 500,
               width: '100%',
-              maxHeight: '60vh',
+              maxHeight: '80vh',
               overflow: 'auto',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#111827' }}>{activeModal.label}</h3>
               <button
                 onClick={() => setOpenModal(null)}
-                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}
               >
                 X
               </button>
