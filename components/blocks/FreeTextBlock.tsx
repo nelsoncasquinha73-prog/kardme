@@ -113,6 +113,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
 
 
   const handleClick = (e: React.MouseEvent) => {
+    console.log('[FreeTextBlock] handleClick fired', e.target)
     const target = e.target as HTMLElement
     
     // Procura SPAN com data-modal-id
@@ -122,6 +123,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
       e.stopPropagation()
       const modalId = modalSpan.getAttribute('data-modal-id') || ''
       if (modals[modalId]) {
+        console.log('[FreeTextBlock] opening modal:', modalId)
         setOpenModal(modalId)
       }
       return
@@ -134,7 +136,8 @@ export default function FreeTextBlock({ settings, style }: Props) {
         e.preventDefault()
         e.stopPropagation()
         const modalId = href.split('#modal:')[1]
-        if (modals[modalId]) setOpenModal(modalId)
+        if (modals[modalId]) console.log('[FreeTextBlock] opening modal:', modalId)
+        setOpenModal(modalId)
       }
     }
   }
