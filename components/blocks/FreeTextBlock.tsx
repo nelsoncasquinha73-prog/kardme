@@ -152,6 +152,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
                 #${htmlScopeId} { color: ${st.textColor ?? '#111827'}; }
                 #${htmlScopeId} * { color: inherit; }
                 #${htmlScopeId} a { color: inherit; text-decoration: underline; cursor: pointer; }
+                #${htmlScopeId} span[data-modal-id] { text-decoration: underline; cursor: pointer; }
                 #${htmlScopeId} p { margin: 0 0 10px 0; }
                 #${htmlScopeId} ul, #${htmlScopeId} ol { margin: 8px 0 8px 18px; padding: 0; }
               `}</style>
