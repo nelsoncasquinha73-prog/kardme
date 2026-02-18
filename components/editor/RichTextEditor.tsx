@@ -88,7 +88,11 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.02)' }}>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBold().run()} style={btnStyle(editor.isActive('bold'))} title="Negrito"><strong>B</strong></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          console.log('[RTE] Before toggleBold:', editor.isActive('bold'))
+          const result = editor.chain().focus().toggleBold().run()
+          console.log('[RTE] After toggleBold:', editor.isActive('bold'), 'result:', result)
+        }} style={btnStyle(editor.isActive('bold'))} title="Negrito"><strong>B</strong></button>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleItalic().run()} style={btnStyle(editor.isActive('italic'))} title="Itálico"><em>I</em></button>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleUnderline().run()} style={btnStyle(editor.isActive('underline'))} title="Sublinhado"><u>U</u></button>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleStrike().run()} style={btnStyle(editor.isActive('strike'))} title="Riscado"><s>S</s></button>
@@ -137,7 +141,12 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
                 <button
                   key={color.value}
                   type="button"
-                  onClick={() => { editor.chain().focus().setColor(color.value).run(); setShowColors(false) }}
+                  onClick={() => {
+                  console.log('[RTE] Before setColor:', color.value, 'current:', currentColor)
+                  editor.chain().focus().setColor(color.value).run()
+                  console.log('[RTE] After setColor:', editor.getAttributes('textStyle').color)
+                  setShowColors(false)
+                }}
                   style={{
                     width: 24,
                     height: 24,
