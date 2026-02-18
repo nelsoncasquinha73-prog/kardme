@@ -113,16 +113,15 @@ export default function FreeTextBlock({ settings, style }: Props) {
 
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log('[FreeTextBlock] click', e.target, (e.target as HTMLElement).closest?.('[data-modal-id]'))
     const target = e.target as HTMLElement
     
     // Procura SPAN com data-modal-id
     const modalSpan = target.closest('[data-modal-id]')
     if (modalSpan) {
+      e.preventDefault()
+      e.stopPropagation()
       const modalId = modalSpan.getAttribute('data-modal-id') || ''
       if (modals[modalId]) {
-        e.preventDefault()
-        e.stopPropagation()
         setOpenModal(modalId)
       }
       return
