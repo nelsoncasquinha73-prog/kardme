@@ -57,6 +57,10 @@ export default function FreeTextBlock({ settings, style }: Props) {
   const c = st.container || {}
   const modals = s.modals || {}
   const [openModal, setOpenModal] = useState<string | null>(null)
+  
+  useEffect(() => {
+    console.log('[FreeTextBlock] modals:', modals)
+  }, [modals])
   const htmlScopeId = useId()
 
   const compact = st.compact === true
