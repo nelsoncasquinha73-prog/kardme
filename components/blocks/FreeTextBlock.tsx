@@ -170,14 +170,18 @@ export default function FreeTextBlock({ settings, style }: Props) {
           onClick={() => setOpenModal(null)}
           style={{
             position: 'fixed',
-            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             background: 'rgba(0,0,0,0.6)',
             backdropFilter: 'blur(4px)',
             zIndex: 9999,
             display: 'flex',
-            alignItems: 'flex-start',
             justifyContent: 'center',
-            padding: '24px 20px 20px',
+            paddingTop: '40px',
+            paddingBottom: '20px',
+            overflow: 'auto',
           }}
         >
           <div
@@ -187,7 +191,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
               borderRadius: 20,
               maxWidth: 500,
               width: '100%',
-              maxHeight: '80vh',
+              maxHeight: '90vh',
               overflow: 'auto',
               display: 'flex',
               flexDirection: 'column',
