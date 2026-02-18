@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 
 type ModalItem = { label: string; content: string }
 
@@ -57,6 +57,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
   const c = st.container || {}
   const modals = s.modals || {}
   const [openModal, setOpenModal] = useState<string | null>(null)
+  const htmlScopeId = useId()
 
   const compact = st.compact === true
   const title = (s.title ?? '').trim()
@@ -176,13 +177,16 @@ export default function FreeTextBlock({ settings, style }: Props) {
         {title ? <h3 style={titleStyle}>{title}</h3> : null}
         {text ? (
           isHtml ? (
-            <div
-              style={textStyle}
-              data-freetext-html
-              dangerouslySetInnerHTML={{ __html: text }}
-              onClick={handleClick}
-              data-no-block-select="1"
-            />
+            <div id={htmlScopeId} style={textStyle} onClick={handleClick} data-no-block-select="1">
+              <style>{`
+                #${htmlScopeId} { color: ${st.textColor ?? '#111827'}; }
+                #${htmlScopeId} * { color: inherit; }
+                #${htmlScopeId} a { color: inherit; text-decoration: underline; cursor: pointer; }
+                #${htmlScopeId} p { margin: 0 0 10px 0; }
+                #${htmlScopeId} ul, #${htmlScopeId} ol { margin: 8px 0 8px 18px; padding: 0; }
+              `}</style>
+              <div dangerouslySetInnerHTML={{ __html: text }} />
+            </div>
           ) : (
             <p style={textStyle}>{text}</p>
           )
