@@ -93,15 +93,33 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
           const result = editor.chain().focus().toggleBold().run()
           console.log('[RTE] After toggleBold:', editor.isActive('bold'), 'result:', result)
         }} style={btnStyle(editor.isActive('bold'))} title="Negrito"><strong>B</strong></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleItalic().run()} style={btnStyle(editor.isActive('italic'))} title="Itálico"><em>I</em></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleUnderline().run()} style={btnStyle(editor.isActive('underline'))} title="Sublinhado"><u>U</u></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleStrike().run()} style={btnStyle(editor.isActive('strike'))} title="Riscado"><s>S</s></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().toggleItalic().run()
+        }} style={btnStyle(editor.isActive('italic'))} title="Itálico"><em>I</em></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().toggleUnderline().run()
+        }} style={btnStyle(editor.isActive('underline'))} title="Sublinhado"><u>U</u></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().toggleStrike().run()
+        }} style={btnStyle(editor.isActive('strike'))} title="Riscado"><s>S</s></button>
         
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign('left').run()} style={btnStyle(editor.isActive({ textAlign: 'left' }))} title="Esquerda">◀</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign('center').run()} style={btnStyle(editor.isActive({ textAlign: 'center' }))} title="Centro">●</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign('right').run()} style={btnStyle(editor.isActive({ textAlign: 'right' }))} title="Direita">▶</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().setTextAlign('left').run()
+        }} style={btnStyle(editor.isActive({ textAlign: 'left' }))} title="Esquerda">◀</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().setTextAlign('center').run()
+        }} style={btnStyle(editor.isActive({ textAlign: 'center' }))} title="Centro">●</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+          editor.view.focus()
+          editor.chain().focus().setTextAlign('right').run()
+        }} style={btnStyle(editor.isActive({ textAlign: 'right' }))} title="Direita">▶</button>
         
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
@@ -143,6 +161,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
                   type="button"
                   onClick={() => {
                   console.log('[RTE] Before setColor:', color.value, 'current:', currentColor)
+                  editor.view.focus()
                   editor.chain().focus().setColor(color.value).run()
                   console.log('[RTE] After setColor:', editor.getAttributes('textStyle').color)
                   setShowColors(false)
@@ -161,7 +180,11 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
               ))}
               <button
                 type="button"
-                onClick={() => { editor.chain().focus().unsetColor().run(); setShowColors(false) }}
+                onClick={() => {
+                  editor.view.focus()
+                  editor.chain().focus().unsetColor().run()
+                  setShowColors(false)
+                }}
                 style={{
                   width: 24,
                   height: 24,
