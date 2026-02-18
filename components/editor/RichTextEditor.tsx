@@ -10,6 +10,7 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
+import { ModalSpan } from '@/components/editor/tiptap/ModalSpan'
 
 type Props = {
   value: string
@@ -78,7 +79,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     if (!id) return
 
     const selectedText = editor.state.doc.textBetween(from, to)
-    editor.chain().focus().deleteSelection().insertContent(`<a href="#modal:${id}" style="text-decoration: underline; cursor: pointer; color: #3b82f6;">${selectedText}</a>`).run()
+    editor.chain().focus().deleteSelection().insertContent(`<span data-modal-id="${id}">${selectedText}</span>`).run()
   }, [editor])
 
   const setLink = useCallback(() => {
