@@ -186,6 +186,14 @@ export default function CardPreview({
     if (target.closest('a')) {
       const link = target.closest('a') as HTMLAnchorElement
       const href = link.getAttribute('href') || ''
+      
+      // Bloqueia navegação para links de modal (deixa o FreeTextBlock interceptar)
+      if (href.includes('#modal:')) {
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      
       const key = link.getAttribute('data-track-key') || href.split('/').pop() || 'link'
       trackEvent(card.id, 'click', key)
     }
