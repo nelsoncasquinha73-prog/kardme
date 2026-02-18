@@ -178,7 +178,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
             zIndex: 9999,
             display: 'flex',
             justifyContent: 'center',
-            paddingTop: '40px',
+            
             paddingBottom: '20px',
             overflow: 'auto',
           }}
@@ -198,17 +198,17 @@ export default function FreeTextBlock({ settings, style }: Props) {
               marginTop: 0,
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#111827' }}>{activeModal.label}</h3>
               <button
                 onClick={() => setOpenModal(null)}
-                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}
+                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 X
               </button>
             </div>
             <div
-              style={{ padding: 12, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
+              style={{ padding: 20, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
               dangerouslySetInnerHTML={{ __html: activeModal.content }}
             />
           </div>
