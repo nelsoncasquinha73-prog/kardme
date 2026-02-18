@@ -79,7 +79,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     if (!id) return
 
     const selectedText = editor.state.doc.textBetween(from, to)
-    editor.chain().focus().deleteSelection().insertContent(`<span data-modal-id="${id}">${selectedText}</span>`).run()
+    editor.chain().focus().setMark('modalSpan', { modalId: id }).run()
   }, [editor])
 
   const setLink = useCallback(() => {
