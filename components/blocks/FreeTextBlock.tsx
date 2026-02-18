@@ -113,14 +113,19 @@ export default function FreeTextBlock({ settings, style }: Props) {
 
 
   const handleClick = (e: React.MouseEvent) => {
+    console.log('[FreeTextBlock] handleClick fired')
     const target = e.target as HTMLElement
+    console.log('[FreeTextBlock] target.tagName:', target.tagName)
     if (target.tagName === 'A') {
       const href = target.getAttribute('href') || ''
+      console.log('[FreeTextBlock] link href:', href)
       // Aceita #modal:id ou qualquer URL que contenha #modal:id
       if (href.includes('#modal:')) {
+        console.log('[FreeTextBlock] opening modal for href:', href)
         e.preventDefault()
         e.stopPropagation()
         const modalId = href.split('#modal:')[1]
+        console.log('[FreeTextBlock] modalId:', modalId, 'exists:', !!modals[modalId])
         if (modals[modalId]) setOpenModal(modalId)
       }
     }
@@ -134,7 +139,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
         {title ? <h3 style={titleStyle}>{title}</h3> : null}
         {text ? (
           isHtml ? (
-            <div id={htmlScopeId} style={textStyle} onClick={handleClick} data-no-block-select="1">
+            <div id={htmlScopeId} style={textStyle} onClickCapture={handleClick} data-no-block-select="1">
               <style>{`
                 #${htmlScopeId} { color: ${st.textColor ?? '#111827'}; }
                 #${htmlScopeId} * { color: inherit; }

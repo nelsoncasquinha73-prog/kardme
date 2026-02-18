@@ -64,7 +64,7 @@ type Props = {
 
 function toPx(v: any) {
   if (v === null || v === undefined || v === '') return undefined
-  if (typeof v === 'number') return `\${v}px`
+  if (typeof v === 'number') return `${v}px`
   return v
 }
 
@@ -135,11 +135,11 @@ function ThemeDecorationsLayer({
           }}
           style={{
             position: 'absolute',
-            left: `\${deco.x}%`,
-            top: `\${deco.y}%`,
+            left: `${deco.x}%`,
+            top: `${deco.y}%`,
             width: deco.width,
             height: deco.height,
-            transform: `translate(-50%, -50%) rotate(\${deco.rotation || 0}deg)`,
+            transform: `translate(-50%, -50%) rotate(${deco.rotation || 0}deg)`,
             opacity: deco.opacity ?? 1,
             zIndex: deco.zIndex ?? 1,
             pointerEvents: isEditing ? 'auto' : 'none',
@@ -180,31 +180,12 @@ export default function CardPreview({
   const allThemeDecorations: DecorationItem[] = themeDecorations ?? card?.theme?.decorations ?? []
   const isEditingThemeDecos = !activeBlockId && !!onSelectDeco
 
-  const handleMainClickCapture = (e: React.MouseEvent<HTMLElement> | React.PointerEvent<HTMLElement>) => {
-    const target = e.target as HTMLElement
-    const link = target?.closest?.('a') as HTMLAnchorElement | null
-    if (!link) return
-    const href = link.getAttribute('href') || ''
-    if (href.includes('#modal:')) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
-
   const handleMainClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement
 
     if (target.closest('a')) {
       const link = target.closest('a') as HTMLAnchorElement
       const href = link.getAttribute('href') || ''
-      
-      // Bloqueia navegação para links de modal (deixa o FreeTextBlock interceptar)
-      if (href.includes('#modal:')) {
-        e.preventDefault()
-        e.stopPropagation()
-        return
-      }
-      
       const key = link.getAttribute('data-track-key') || href.split('/').pop() || 'link'
       trackEvent(card.id, 'click', key)
     }
@@ -251,8 +232,6 @@ export default function CardPreview({
           padding: 0,
           boxSizing: 'border-box',
         }}
-        onClickCapture={handleMainClickCapture}
-        onPointerDownCapture={handleMainClickCapture}
         onClick={handleMainClick}
       >
         <div
@@ -391,14 +370,14 @@ export default function CardPreview({
                   padding: c.padding != null ? c.padding : undefined,
                   border:
                     (c.borderWidth ?? 0) > 0
-                      ? `\${c.borderWidth}px solid \${c.borderColor ?? 'rgba(0,0,0,0.12)'}`
+                      ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}`
                       : undefined,
                   boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
                   boxSizing: 'border-box',
-                  width: c.widthMode === 'custom' && c.customWidthPx ? `\${c.customWidthPx}px` : undefined,
+                  width: c.widthMode === 'custom' && c.customWidthPx ? `${c.customWidthPx}px` : undefined,
                   maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
                   alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
-                  marginTop: block.style?.offsetY ? `\${block.style.offsetY}px` : undefined,
+                  marginTop: block.style?.offsetY ? `${block.style.offsetY}px` : undefined,
                 }
 
                 const Highlight = selected ? (
@@ -420,7 +399,7 @@ export default function CardPreview({
                       if (shouldIgnoreBlockSelect(e)) return
                       onSelectBlock?.(block)
                     }}
- >
+                  >
                     {Highlight}
 
                     {block.type === 'contact' ? (
