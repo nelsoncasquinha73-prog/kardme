@@ -181,7 +181,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
+            padding: '40px 20px',
             overflow: 'auto',
           }}
         >
@@ -192,7 +192,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
               borderRadius: 20,
               maxWidth: 500,
               width: '100%',
-              maxHeight: '90vh',
+              maxHeight: '85vh',
               overflow: 'auto',
               display: 'flex',
               flexDirection: 'column',
