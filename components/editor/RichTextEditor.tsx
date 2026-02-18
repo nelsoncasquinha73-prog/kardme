@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -50,6 +50,15 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     },
     immediatelyRender: false,
   })
+
+
+  useEffect(() => {
+    if (!editor) return
+    const current = editor.getHTML()
+    if (value !== current) {
+      editor.commands.setContent(value)
+    }
+  }, [value, editor])
 
   const setLink = useCallback(() => {
     if (!editor) return

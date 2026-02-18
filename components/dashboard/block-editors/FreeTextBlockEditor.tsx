@@ -34,8 +34,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
   const modals = s.modals || {}
   const [activeSection, setActiveSection] = useState<string | null>('content')
   const [editingModal, setEditingModal] = useState<string | null>(null)
-  const [localText, setLocalText] = useState(s.text ?? '')
-
+  
   const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
   const setSettings = (patch: Partial<FreeTextSettings>) => onChangeSettings({ ...s, ...patch })
   const setStyle = (patch: Partial<FreeTextStyle>) => onChangeStyle({ ...st, ...patch })
@@ -74,7 +73,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
         </Row>
         <div style={{ marginTop: 4 }}>
           <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, marginBottom: 6 }}>Texto</div>
-          <RichTextEditor value={localText} onChange={(html) => setLocalText(html)} onBlur={() => setSettings({ text: localText })} placeholder="Escreve aqui..." minHeight={80} />
+          <RichTextEditor value={s.text ?? ''} onChange={(html) => setSettings({ text: html })} placeholder="Escreve aqui..." minHeight={80} />
           {modalKeys.length > 0 && (
             <div style={{ marginTop: 8, padding: '8px 10px', background: 'rgba(59,130,246,0.06)', borderRadius: 10, fontSize: 11, color: '#3b82f6' }}>
               Para usar um modal, seleciona a palavra no texto, clica no link e cola o ID abaixo:
