@@ -67,6 +67,21 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     }
   }, [value, editor])
 
+  const setModalLink = useCallback(() => {
+    if (!editor) return
+    const { from, to } = editor.state.selection
+    if (from === to) {
+      window.alert('Seleciona uma palavra/frase primeiro.')
+      return
+    }
+    const id = window.prompt('ID do modal (ex: modal_123):', 'modal_')
+    if (!id) return
+
+    // Envolve a seleção num span clicável (sem URL, sem normalização)
+    const selectedText = editor.state.doc.textBetween(from, to, ' ')
+    editor.chain().focus().insertContentAt({ from, to }, `<span data-modal-id="${id}" style="text-decoration: underline; cursor: pointer;">${selectedText}</span>`).run()
+  }, [editor])
+
   const setLink = useCallback(() => {
     if (!editor) return
     const url = window.prompt('URL:', editor.getAttributes('link').href || 'https://')
@@ -138,6 +153,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={setLink} style={btnStyle(editor.isActive('link'))} title="Link">🔗</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={setModalLink} style={btnStyle(false)} title="Modal">🪟</button>
         
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
