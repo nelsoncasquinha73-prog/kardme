@@ -179,9 +179,9 @@ export default function FreeTextBlock({ settings, style }: Props) {
             backdropFilter: 'blur(4px)',
             zIndex: 9999,
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            
-            paddingBottom: '20px',
+            padding: '20px',
             overflow: 'auto',
           }}
         >
