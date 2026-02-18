@@ -33,7 +33,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
   
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false }),
+      StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false, underline: false, link: false }),
       TextStyle,
       Color,
       Underline,
@@ -179,7 +179,14 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
       </div>
       
       {/* Editor */}
-      <EditorContent editor={editor} onBlur={onBlur} />
+      <div
+        data-no-block-select="1"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <EditorContent editor={editor} onBlur={onBlur} />
+      </div>
     </div>
   )
 }
