@@ -78,7 +78,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     if (!id) return
 
     const selectedText = editor.state.doc.textBetween(from, to)
-    editor.chain().focus().deleteSelection().insertContent(`<span data-modal-id="${id}" style="text-decoration: underline; cursor: pointer; color: #3b82f6;">${selectedText}</span>`).run()
+    editor.chain().focus().deleteSelection().insertContent(`<a href="#modal:${id}" style="text-decoration: underline; cursor: pointer; color: #3b82f6;">${selectedText}</a>`).run()
   }, [editor])
 
   const setLink = useCallback(() => {
