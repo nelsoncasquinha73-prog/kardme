@@ -159,7 +159,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
               <div dangerouslySetInnerHTML={{ __html: text }} />
             </div>
           ) : (
-            <p style={textStyle}>{text}</p>
+            <p style={textStyle} onClickCapture={handleClick} data-no-block-select="1">{text}</p>
           )
         ) : null}
       </div>
