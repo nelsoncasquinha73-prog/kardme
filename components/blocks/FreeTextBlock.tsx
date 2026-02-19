@@ -67,7 +67,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
   const isHtml = true  // Always render as HTML (FreeText uses RichTextEditor)
 
   const wrap: React.CSSProperties = {
-    transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined,
+    transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined, position: 'relative', zIndex: 1,
   }
 
   const containerStyle: React.CSSProperties = {
@@ -177,7 +177,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
             bottom: 0,
             background: 'rgba(0,0,0,0.6)',
             backdropFilter: 'blur(4px)',
-            zIndex: 9999,
+            zIndex: 99999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
