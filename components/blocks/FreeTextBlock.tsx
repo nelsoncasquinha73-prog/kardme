@@ -169,56 +169,87 @@ export default function FreeTextBlock({ settings, style }: Props) {
         ) : null}
       </div>
 
-      {activeModal && (
+      {mounted && activeModal
+    ? createPortal(
         <div
           onClick={() => setOpenModal(null)}
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 99999,
+            inset: 0,
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 2147483647,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '40px 20px',
-            overflow: 'auto',
+            padding: '24px 16px',
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               background: '#fff',
-              borderRadius: 20,
-              maxWidth: 500,
+              borderRadius: 18,
+              maxWidth: 560,
               width: '100%',
               maxHeight: '85vh',
-              overflow: 'auto',
+              overflow: 'hidden',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-              marginTop: 0,
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#111827' }}>{activeModal.label}</h3>
+            <div
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 1,
+                background: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '14px 16px',
+                borderBottom: '1px solid rgba(0,0,0,0.08)',
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#111827' }}>
+                {activeModal.label}
+              </h3>
               <button
                 onClick={() => setOpenModal(null)}
-                style={{ width: 32, height: 32, borderRadius: 10, border: 'none', background: 'rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Fechar"
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 10,
+                  border: 'none',
+                  background: 'rgba(0,0,0,0.06)',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                X
+                ✕
               </button>
             </div>
             <div
-              style={{ padding: 20, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, color: '#374151' }}
+              style={{
+                padding: 16,
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: '#374151',
+              }}
               dangerouslySetInnerHTML={{ __html: activeModal.content }}
             />
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null}
     </div>
   )
 }
