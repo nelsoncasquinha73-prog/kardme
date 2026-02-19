@@ -21,7 +21,9 @@
     "confirm": "Bestätigen",
     "saving": "Speichern...",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "powered_by": "Powered by KARDME"
   },
   "nav": {
     "dashboard": "Dashboard",

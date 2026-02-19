@@ -21,7 +21,9 @@
     "confirm": "Confirmer",
     "saving": "Enregistrement...",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "privacy_policy": "Politique de Confidentialité",
+    "powered_by": "Powered by KARDME"
   },
   "nav": {
     "dashboard": "Tableau de bord",

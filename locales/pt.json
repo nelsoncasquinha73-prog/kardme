@@ -17,7 +17,9 @@
     "confirm": "Confirmar",
     "saving": "A guardar...",
     "yes": "Sim",
-    "no": "Não"
+    "no": "Não",
+    "privacy_policy": "Política de Privacidade",
+    "powered_by": "Powered by KARDME"
   },
   "nav": {
     "dashboard": "Dashboard",

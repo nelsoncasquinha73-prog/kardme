@@ -21,7 +21,9 @@
     "confirm": "تأكيد",
     "saving": "جاري الحفظ...",
     "yes": "نعم",
-    "no": "لا"
+    "no": "لا",
+    "privacy_policy": "سياسة الخصوصية",
+    "powered_by": "Powered by KARDME"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
