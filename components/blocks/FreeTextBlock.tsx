@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useId, useState } from 'react'
+import React, { useId, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type ModalItem = { label: string; content: string }
 
@@ -57,6 +58,8 @@ export default function FreeTextBlock({ settings, style }: Props) {
   const c = st.container || {}
   const modals = s.modals || {}
   const [openModal, setOpenModal] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  React.useEffect(() => setMounted(true), [])
 
   const htmlScopeId = useId()
 
