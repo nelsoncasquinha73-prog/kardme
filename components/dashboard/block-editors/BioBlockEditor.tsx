@@ -6,7 +6,9 @@ import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 
-type BioSettings = { text: string }
+type ModalItem = { label: string; content: string }
+
+type BioSettings = { text: string; modals?: Record<string, ModalItem> }
 type BioStyle = {
   offsetY?: number
   textColor?: string
@@ -25,6 +27,22 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const c = s.container || {}
   const [activeSection, setActiveSection] = useState<string | null>('text')
 
+  const modals = settings.modals || {}
+  const setSettings = (patch: Partial<BioSettings>) => onChangeSettings({ ...settings, ...patch })
+  const upsertModal = (id: string, patch: Partial<ModalItem>) => {
+    const prev = modals[id] || { label: '', content: '' }
+    setSettings({ modals: { ...modals, [id]: { ...prev, ...patch } } })
+  }
+  const removeModal = (id: string) => {
+    const next = { ...modals }
+    delete next[id]
+    setSettings({ modals: next })
+  }
+  const addModal = () => {
+    const id = `modal_${Date.now()}`
+    upsertModal(id, { label: 'Novo modal', content: '<p>Escreve aqui...</p>' })
+  }
+
   const pickEyedropper = (apply: (hex: string) => void) => openPicker({ mode: 'eyedropper', onPick: apply })
   const setStyle = (patch: Partial<BioStyle>) => onChangeStyle({ ...s, ...patch })
   const setContainer = (patch: Partial<NonNullable<BioStyle['container']>>) => setStyle({ container: { ...c, ...patch } })
@@ -38,7 +56,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
 
       {/* ========== TEXTO ========== */}
       <CollapsibleSection title="📝 Texto" subtitle="Bio com formatação" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
-        <RichTextEditor value={settings.text || ''} onChange={(html) => onChangeSettings({ text: html })} placeholder="Escreve a tua bio..." minHeight={120} />
+        <RichTextEditor value={settings.text || ''} onChange={(html) => setSettings({ text: html })} placeholder="Escreve a tua bio..." minHeight={120} />
         <Row label="Fonte base"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
         <Row label="Tamanho base">
           <input type="range" min={12} max={22} value={s.fontSize ?? 15} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -64,6 +82,47 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
         <Row label="Padding"><input type="range" min={0} max={28} value={c.padding ?? 16} onChange={(e) => setContainer({ padding: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.padding ?? 16}px</span></Row>
         <Row label="Largura custom"><Toggle active={widthCustom} onClick={() => setContainer({ widthMode: widthCustom ? 'full' : 'custom', customWidthPx: widthCustom ? undefined : 320 })} /></Row>
         {widthCustom && <Row label="Largura"><input type="range" min={200} max={400} step={10} value={c.customWidthPx ?? 320} onChange={(e) => setContainer({ customWidthPx: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.customWidthPx ?? 320}px</span></Row>}
+      </CollapsibleSection>
+
+
+      {/* ========== MODAIS ========== */}
+      <CollapsibleSection title="🪟 Modais" subtitle="Criar e editar popups" isOpen={activeSection === 'modals'} onToggle={() => setActiveSection(activeSection === 'modals' ? null : 'modals')}>
+        <Row label="">
+          <Button onClick={addModal}>+ Novo modal</Button>
+        </Row>
+
+        {Object.keys(modals).length === 0 ? (
+          <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>
+            Cria um modal aqui e depois, no texto acima, seleciona uma palavra e clica no botão 🪟 para ligar ao modal (usa o ID).
+          </div>
+        ) : null}
+
+        {Object.entries(modals).map(([id, m]) => (
+          <div key={id} style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, opacity: 0.8 }}>ID: {id}</div>
+              <Button onClick={() => { navigator.clipboard?.writeText(id) }}>Copiar ID</Button>
+              <Button onClick={() => removeModal(id)}>Remover</Button>
+            </div>
+
+            <Row label="Título">
+              <input
+                value={m.label || ''}
+                onChange={(e) => upsertModal(id, { label: e.target.value })}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)' }}
+                placeholder="Título do modal"
+              />
+            </Row>
+
+            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.8 }}>Conteúdo</div>
+            <RichTextEditor
+              value={m.content || ''}
+              onChange={(html) => upsertModal(id, { content: html })}
+              placeholder="Conteúdo do modal..."
+              minHeight={120}
+            />
+          </div>
+        ))}
       </CollapsibleSection>
 
       {/* ========== POSIÇÃO ========== */}
