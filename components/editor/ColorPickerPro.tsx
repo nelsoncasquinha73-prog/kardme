@@ -87,9 +87,9 @@ export default function ColorPickerPro({
 
   useEffect(() => {
     if (value?.includes('linear-gradient')) {
-      const match = value.match(/linear-gradient$(\d+deg),\s*([^,]+),\s*([^)]+)$/)
+      const match = value.match(/linear-gradient\$([^,]+),\s*([^,]+),\s*([^)]+)\$/)
       if (match) {
-        setGradientDirection(match[1])
+        setGradientDirection(match[1].trim())
         setGradientStart(match[2].trim())
         setGradientEnd(match[3].trim())
         setTab('gradient')
@@ -119,7 +119,7 @@ export default function ColorPickerPro({
   }
 
   const handleGradientChange = (start: string, end: string, dir: string) => {
-    const gradient = `linear-gradient(\${dir}, \${start}, \${end})`
+    const gradient = `linear-gradient(${dir}, ${start}, ${end})`
     onChange(gradient)
   }
 
