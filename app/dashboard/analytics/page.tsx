@@ -256,7 +256,7 @@ export default function UserAnalyticsPage() {
 
   return (
     <div style={{ display: 'grid', gap: 24, padding: '24px 0' }}>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {[7, 30, 90, 'lifetime'].map((d) => (
           <button
             key={String(d)}
