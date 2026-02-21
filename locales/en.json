@@ -349,7 +349,8 @@
     "last_90_days": "Last 90 days",
     "loading": "Loading analytics…",
     "no_data": "No analytics data.",
-    "days": "days"
+    "days": "days",
+    "lifetime": "Lifetime"
   },
   "plans": {
     "title": "Choose your plan",

@@ -360,7 +360,8 @@
     "last_90_days": "Últimos 90 dias",
     "loading": "Carregando analytics…",
     "no_data": "Sem dados de analytics.",
-    "days": "dias"
+    "days": "dias",
+    "lifetime": "Tudo"
   },
   "plans": {
     "title": "Escolha seu plano",

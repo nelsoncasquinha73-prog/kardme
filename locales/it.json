@@ -347,7 +347,8 @@
     "last_90_days": "Ultimi 90 giorni",
     "loading": "Caricamento analytics…",
     "no_data": "Nessun dato analytics.",
-    "days": "giorni"
+    "days": "giorni",
+    "lifetime": "Tutto"
   },
   "plans": {
     "title": "Scegli il tuo piano",

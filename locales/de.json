@@ -361,7 +361,8 @@
     "last_90_days": "Letzte 90 Tage",
     "loading": "Analytics werden geladen…",
     "no_data": "Keine Analytics-Daten.",
-    "days": "Tage"
+    "days": "Tage",
+    "lifetime": "Gesamt"
   },
   "plans": {
     "title": "Wähle deinen Plan",

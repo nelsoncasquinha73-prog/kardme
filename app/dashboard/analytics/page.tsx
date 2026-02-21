@@ -141,11 +141,13 @@ export default function UserAnalyticsPage() {
       
       if (startIso) eventsQuery = eventsQuery.gte('created_at', startIso)
       
-      const { data: events } = await eventsQuery.order('created_at', { ascending: true })
+      const { data: eventsRaw, error: eventsErr } = await eventsQuery.order('created_at', { ascending: true })
+      if (eventsErr) console.error('[analytics] events error', eventsErr)
+      const events = eventsRaw || []
 
 
       console.log('[analytics] userCardIds', userCardIds)
-      console.log('[analytics] events length', events?.length)
+      console.log('[analytics] events length', events.length)
       console.log('[analytics] saves in events', (events || []).filter((e:any) => e.event_type === 'save_contact').length)
 
       let prevEvents: any[] = []
@@ -257,7 +259,7 @@ export default function UserAnalyticsPage() {
       <div style={{ display: 'flex', gap: 8 }}>
         {[7, 30, 90, 'lifetime'].map((d) => (
           <button
-            key={d}
+            key={String(d)}
             onClick={() => setDays(d as any)}
             style={{
               padding: '8px 16px',
@@ -270,7 +272,7 @@ export default function UserAnalyticsPage() {
               cursor: 'pointer',
             }}
           >
-{typeof d === 'number' ? `${d} ${t('analytics.days')}` : 'Lifetime'}
+{typeof d === 'number' ? `${d} ${t('analytics.days')}` : (t('analytics.lifetime') || 'Tudo')}
           </button>
         ))}
       </div>
