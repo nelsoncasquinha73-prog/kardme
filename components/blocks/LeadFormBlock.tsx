@@ -306,7 +306,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
               onChange={(e) => setConsentChecked(e.target.checked)}
               style={{ marginTop: 4, cursor: 'pointer', accentColor: st.button?.bgColor ?? 'var(--color-primary)' }}
             />
-            <label htmlFor={`consent-${cardId}`} style={{ fontSize: 11, opacity: 0.75, cursor: 'pointer', lineHeight: 1.4 }}>
+            <label htmlFor={`consent-${cardId}`} style={{ ...consentStyle, cursor: 'pointer', lineHeight: 1.4 }}>
               {consentText}
             </label>
           </div>
