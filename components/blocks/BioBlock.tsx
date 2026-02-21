@@ -1,9 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
+
+type ModalItem = { label: string; content: string }
 
 type BioSettings = {
   text: string
+  modals?: Record<string, ModalItem>
 }
 
 type BioStyle = {
@@ -41,9 +45,29 @@ function mapGoogleFont(ff?: string) {
 }
 
 export default function BioBlock({ settings, style }: Props) {
+  const modals = settings?.modals || {}
+  const [openModal, setOpenModal] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  React.useEffect(() => setMounted(true), [])
   if (!settings?.text) return null
 
   const resolvedFont = mapGoogleFont(style?.fontFamily)
+
+  const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    const modalSpan = target.closest('[data-modal-id]')
+    if (modalSpan) {
+      e.preventDefault()
+      e.stopPropagation()
+      const modalId = modalSpan.getAttribute('data-modal-id') || ''
+      if (modals[modalId]) {
+        setOpenModal(modalId)
+      }
+      return
+    }
+  }
+
+  const activeModal = openModal ? modals[openModal] : null
 
   const containerStyle: React.CSSProperties = {
     color: style?.textColor ?? '#111827',
@@ -59,10 +83,100 @@ export default function BioBlock({ settings, style }: Props) {
 
   if (isHTML) {
     return (
-      <div 
-        style={containerStyle} 
-        dangerouslySetInnerHTML={{ __html: settings.text }} 
-      />
+      <>
+        <div 
+          style={containerStyle}
+          onClickCapture={handleClick}
+          data-no-block-select="1"
+        >
+          <style>{`
+            [data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }
+          `}</style>
+          <div dangerouslySetInnerHTML={{ __html: settings.text }} />
+        </div>
+
+        {mounted && activeModal
+          ? createPortal(
+              <div
+                onClick={() => setOpenModal(null)}
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(0,0,0,0.65)',
+                  backdropFilter: 'blur(6px)',
+                  zIndex: 2147483647,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '24px 16px',
+                }}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    background: '#fff',
+                    borderRadius: 18,
+                    maxWidth: 560,
+                    width: '100%',
+                    maxHeight: '85vh',
+                    overflow: 'hidden',
+                    boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1,
+                      background: '#fff',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '14px 16px',
+                      borderBottom: '1px solid rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#111827' }}>
+                      {activeModal.label}
+                    </h3>
+                    <button
+                      onClick={() => setOpenModal(null)}
+                      aria-label="Fechar"
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 10,
+                        border: 'none',
+                        background: 'rgba(0,0,0,0.06)',
+                        cursor: 'pointer',
+                        fontSize: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      padding: 16,
+                      overflowY: 'auto',
+                      WebkitOverflowScrolling: 'touch',
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      color: '#374151',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: activeModal.content }}
+                  />
+                </div>
+              </div>,
+              document.body
+            )
+          : null}
+      </>
     )
   }
 
