@@ -157,7 +157,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
       const ext = (file.name.split('.').pop() || 'png').toLowerCase()
       const safeCardId = cardId && cardId.trim() ? safeSeg(cardId) : 'temp'
       const safeTargetId = safeSeg(targetId)
-      const path = `cards/\${safeCardId}/cta-icons/\${safeTargetId}-\${Date.now()}.\${ext}`
+      const path = `cards/${safeCardId}/cta-icons/${safeTargetId}-${Date.now()}.${ext}`
 
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
         upsert: true,
