@@ -147,7 +147,9 @@ export default function UserAnalyticsPage() {
 
 
       console.log('[analytics] userCardIds', userCardIds)
+      console.log('[analytics] userCardIds', userCardIds)
       console.log('[analytics] events length', events.length)
+      console.log('[analytics] first 3 events', events.slice(0, 3))
       console.log('[analytics] saves in events', (events || []).filter((e:any) => e.event_type === 'save_contact').length)
 
       let prevEvents: any[] = []

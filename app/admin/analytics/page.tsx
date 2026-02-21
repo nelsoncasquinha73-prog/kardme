@@ -65,7 +65,7 @@ function KPICard({ label, value, trend, unit = '', color }: any) {
 }
 
 export default function AdminAnalyticsPage() {
-  const [days, setDays] = useState(7)
+  const [days, setDays] = useState<number | 'lifetime'>(7)
   const [loading, setLoading] = useState(false)
   const [chartData, setChartData] = useState<AnalyticsData[]>([])
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([])
@@ -90,26 +90,43 @@ export default function AdminAnalyticsPage() {
     setLoading(true)
 
     try {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - days)
-      const startIso = startDate.toISOString()
+      let startIso: string | null = null
+      let prevStartIso: string | null = null
+      let prevEndIso: string | null = null
 
-      const prevStartDate = new Date()
-      prevStartDate.setDate(prevStartDate.getDate() - days * 2)
-      const prevStartIso = prevStartDate.toISOString()
-      const prevEndIso = startDate.toISOString()
+      if (days !== 'lifetime') {
+        const startDate = new Date()
+        startDate.setUTCDate(startDate.getUTCDate() - (days as number))
+        startIso = startDate.toISOString()
 
-      const { data: events } = await supabase
+        const prevStartDate = new Date()
+        prevStartDate.setUTCDate(prevStartDate.getUTCDate() - ((days as number) * 2))
+        prevStartIso = prevStartDate.toISOString()
+        
+        const prevEndDate = new Date()
+        prevEndDate.setUTCDate(prevEndDate.getUTCDate() - (days as number))
+        prevEndIso = prevEndDate.toISOString()
+      }
+
+      let eventsQuery = supabase
         .from('card_events')
         .select('card_id, event_type, created_at')
-        .gte('created_at', startIso)
-        .order('created_at', { ascending: true })
+      
+      if (startIso) eventsQuery = eventsQuery.gte('created_at', startIso)
+      
+      const { data: eventsRaw, error: eventsErr } = await eventsQuery.order('created_at', { ascending: true })
+      if (eventsErr) console.error('[admin-analytics] events error', eventsErr)
+      const events = eventsRaw || []
 
-      const { data: prevEvents } = await supabase
-        .from('card_events')
-        .select('card_id, event_type, created_at')
-        .gte('created_at', prevStartIso)
-        .lt('created_at', prevEndIso)
+      let prevEvents: any[] = []
+      if (prevStartIso && prevEndIso) {
+        const result = await supabase
+          .from('card_events')
+          .select('card_id, event_type, created_at')
+          .gte('created_at', prevStartIso)
+          .lt('created_at', prevEndIso)
+        prevEvents = result.data || []
+      }
 
       const { data: cards } = await supabase.from('cards').select('id, name, user_id')
       const { data: profiles } = await supabase.from('profiles').select('id, email')
@@ -125,7 +142,7 @@ export default function AdminAnalyticsPage() {
       const activeCardIds = new Set<string>()
 
       events?.forEach((e: any) => {
-        const date = new Date(e.created_at).toLocaleDateString('pt-PT')
+        const date = new Date(e.created_at).toISOString().split('T')[0]
           const current = dateMap.get(date) || { views: 0, leads: 0, saves: 0 }
 
         if (e.event_type === 'view') {
@@ -231,22 +248,22 @@ export default function AdminAnalyticsPage() {
   return (
     <div style={{ display: 'grid', gap: 24, padding: '24px 0' }}>
       <div style={{ display: 'flex', gap: 8 }}>
-        {[7, 30, 90].map((d) => (
+        {[{ label: 'Hoje', value: 1 }, { label: '7 dias', value: 7 }, { label: '30 dias', value: 30 }, { label: '90 dias', value: 90 }, { label: 'Lifetime', value: 'lifetime' }].map((item) => (
           <button
-            key={d}
-            onClick={() => setDays(d)}
+            key={String(item.value)}
+            onClick={() => setDays(item.value as any)}
             style={{
               padding: '8px 16px',
               borderRadius: 12,
-              border: days === d ? '2px solid #60a5fa' : '1px solid rgba(96, 165, 250, 0.2)',
-              background: days === d ? 'rgba(96, 165, 250, 0.2)' : 'rgba(30, 58, 138, 0.1)',
+              border: days === item.value ? '2px solid #60a5fa' : '1px solid rgba(96, 165, 250, 0.2)',
+              background: days === item.value ? 'rgba(96, 165, 250, 0.2)' : 'rgba(30, 58, 138, 0.1)',
               color: '#60a5fa',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
             }}
           >
-            {d} dias
+            {item.label}
           </button>
         ))}
       </div>
