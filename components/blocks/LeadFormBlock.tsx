@@ -72,6 +72,12 @@ type LeadFormStyle = {
     height?: number
     fontWeight?: number
   }
+  consentCheckbox?: {
+    textColor?: string
+    fontSize?: number
+    fontFamily?: string
+    fontWeight?: number
+  }
 }
 
 type Props = {
@@ -127,6 +133,13 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     fontSize: st.heading?.fontSize ?? 14,
   }
 
+  const consentStyle: React.CSSProperties = {
+    fontSize: st.consentCheckbox?.fontSize ?? 12,
+    color: st.consentCheckbox?.textColor ?? 'rgba(17,24,39,0.75)',
+    fontFamily: st.consentCheckbox?.fontFamily || undefined,
+    fontWeight: st.consentCheckbox?.fontWeight ?? 500,
+  }
+
   const labelStyle: React.CSSProperties = {
     fontSize: st.inputs?.labelSize ?? 12,
     color: st.inputs?.labelColor ?? 'rgba(17,24,39,0.75)',
@@ -176,18 +189,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     `
   }, [st.inputs?.placeholderColor, cardId])
 
-  const consentTexts: Record<string, string> = {
-    'pt': 'Aceito o tratamento dos meus dados pessoais de acordo com a Política de Privacidade.',
-    'pt-br': 'Aceito o tratamento dos meus dados pessoais de acordo com a Política de Privacidade.',
-    'en': 'I accept the processing of my personal data in accordance with the Privacy Policy.',
-    'es': 'Acepto el tratamiento de mis datos personales de acuerdo con la Política de Privacidad.',
-    'fr': "J'accepte le traitement de mes données personnelles conformément à la Politique de Confidentialité.",
-    'de': 'Ich akzeptiere die Verarbeitung meiner persönlichen Daten gemäß der Datenschutzrichtlinie.',
-    'it': "Accetto il trattamento dei miei dati personali in conformità con l'Informativa sulla Privacy.",
-    'ar': 'أوافق على معالجة بياناتي الشخصية وفقاً لسياسة الخصوصية.',
-  }
-
-  const consentText = s.consentCheckboxText || consentTexts[lang] || consentTexts['pt']
+  const consentText = s.consentCheckboxText || t('common.consent_checkbox_text')
 
   async function handleSubmit(e: React.FormEvent) {
     if ((s.consentCheckboxEnabled ?? true) && !consentChecked) {

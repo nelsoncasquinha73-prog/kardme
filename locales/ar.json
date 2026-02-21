@@ -23,7 +23,8 @@
     "yes": "نعم",
     "no": "لا",
     "privacy_policy": "سياسة الخصوصية",
-    "powered_by": "Powered by KARDME"
+    "powered_by": "Powered by KARDME",
+    "consent_checkbox_text": "أوافق على معالجة بياناتي الشخصية وفقاً لسياسة الخصوصية."
   },
   "nav": {
     "dashboard": "لوحة التحكم",

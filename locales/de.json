@@ -23,7 +23,8 @@
     "yes": "Ja",
     "no": "Nein",
     "privacy_policy": "Datenschutzrichtlinie",
-    "powered_by": "Powered by KARDME"
+    "powered_by": "Powered by KARDME",
+    "consent_checkbox_text": "Ich akzeptiere die Verarbeitung meiner persönlichen Daten gemäß der Datenschutzrichtlinie."
   },
   "nav": {
     "dashboard": "Dashboard",

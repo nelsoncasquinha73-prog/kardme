@@ -29,7 +29,12 @@ type LeadFormStyle = {
     borderColor?: string
     shadow?: boolean
   }
-
+  consentCheckbox?: {
+    textColor?: string
+    fontSize?: number
+    fontFamily?: string
+    fontWeight?: number
+  }
 }
 
 type Props = {
@@ -62,6 +67,8 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
   const setContainer = (patch: Partial<LeadFormStyle['container']>) => setStyle({ container: { ...container, ...patch } })
   const setInputs = (patch: Partial<LeadFormStyle['inputs']>) => setStyle({ inputs: { ...inputs, ...patch } })
   const setButton = (patch: Partial<LeadFormStyle['button']>) => setStyle({ button: { ...button, ...patch } })
+  const consentCheckbox = st.consentCheckbox || {}
+  const setConsentCheckbox = (patch: Partial<LeadFormStyle['consentCheckbox']>) => setStyle({ consentCheckbox: { ...consentCheckbox, ...patch } })
   const setFields = (patch: Partial<LeadFormSettings['fields']>) => setSettings({ fields: { ...fields, ...patch } })
   const setLabels = (patch: Partial<LeadFormSettings['labels']>) => setSettings({ labels: { ...labels, ...patch } })
   const setPlaceholders = (patch: Partial<LeadFormSettings['placeholders']>) => setSettings({ placeholders: { ...placeholders, ...patch } })
@@ -220,7 +227,30 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         </Row>
       </CollapsibleSection>
 
-             {/* ========== BOTÃO ========== */}
+       
+      {/* ========== CHECKBOX CONSENTIMENTO ========== */}
+      <CollapsibleSection title="✅ Checkbox Consentimento" subtitle="Cor, fonte, tamanho" isOpen={activeSection === 'consent'} onToggle={() => setActiveSection(activeSection === 'consent' ? null : 'consent')}>
+        <Row label="Cor">
+          <ColorPickerPro value={consentCheckbox.textColor ?? 'rgba(17,24,39,0.75)'} onChange={(hex) => setConsentCheckbox({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setConsentCheckbox({ textColor: hex }))} />
+        </Row>
+        <Row label="Fonte">
+          <FontPicker value={consentCheckbox.fontFamily ?? ""} onChange={(v) => setConsentCheckbox({ fontFamily: v || "" })} />
+        </Row>
+        <Row label="Tamanho">
+          <input type="range" min={10} max={18} value={consentCheckbox.fontSize ?? 12} onChange={(e) => setConsentCheckbox({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
+          <span style={rightNum}>{consentCheckbox.fontSize ?? 12}px</span>
+        </Row>
+        <Row label="Peso">
+          <select value={String(consentCheckbox.fontWeight ?? 500)} onChange={(e) => setConsentCheckbox({ fontWeight: Number(e.target.value) })} style={selectStyle}>
+            <option value="400">Normal</option>
+            <option value="500">Medium</option>
+            <option value="600">Semi</option>
+            <option value="700">Bold</option>
+          </select>
+        </Row>
+      </CollapsibleSection>
+
+      {/* ========== BOTÃO ========== */}
       <CollapsibleSection title="🔘 Botão" subtitle="Cor, altura, raio, borda, sombra" isOpen={activeSection === 'button'} onToggle={() => setActiveSection(activeSection === 'button' ? null : 'button')}>
         <Row label="Cor fundo">
           <ColorPickerPro value={button.bgColor ?? '#3b82f6'} onChange={(hex) => setButton({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ bgColor: hex }))} />
