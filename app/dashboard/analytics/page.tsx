@@ -56,7 +56,7 @@ function KPICard({ label, value, trend, unit = '', color }: any) {
 
 export default function UserAnalyticsPage() {
   const { t } = useLanguage()
-  const [days, setDays] = useState(7)
+  const [days, setDays] = useState<number | 'lifetime'>(7)
   const [loading, setLoading] = useState(false)
   const [chartData, setChartData] = useState<AnalyticsData[]>([])
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([])
@@ -115,34 +115,49 @@ export default function UserAnalyticsPage() {
         return
       }
 
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - days)
-      const startIso = startDate.toISOString()
+      let startIso: string | null = null
+      let prevStartIso: string | null = null
+      let prevEndIso: string | null = null
 
-      const prevStartDate = new Date()
-      prevStartDate.setDate(prevStartDate.getDate() - days * 2)
-      const prevStartIso = prevStartDate.toISOString()
-      const prevEndIso = startDate.toISOString()
+      if (days !== 'lifetime') {
+        const startDate = new Date()
+        startDate.setUTCDate(startDate.getUTCDate() - (days as number))
+        startIso = startDate.toISOString()
+
+        const prevStartDate = new Date()
+        prevStartDate.setUTCDate(prevStartDate.getUTCDate() - ((days as number) * 2))
+        prevStartIso = prevStartDate.toISOString()
+        
+        const prevEndDate = new Date()
+        prevEndDate.setUTCDate(prevEndDate.getUTCDate() - (days as number))
+        prevEndIso = prevEndDate.toISOString()
+      }
 
       // 3. Buscar eventos do user (filtrado por card_ids)
-      const { data: events } = await supabase
+      let eventsQuery = supabase
         .from('card_events')
         .select('card_id, event_type, created_at')
         .in('card_id', userCardIds)
-        .gte('created_at', startIso)
-        .order('created_at', { ascending: true })
+      
+      if (startIso) eventsQuery = eventsQuery.gte('created_at', startIso)
+      
+      const { data: events } = await eventsQuery.order('created_at', { ascending: true })
 
 
       console.log('[analytics] userCardIds', userCardIds)
       console.log('[analytics] events length', events?.length)
       console.log('[analytics] saves in events', (events || []).filter((e:any) => e.event_type === 'save_contact').length)
 
-      const { data: prevEvents } = await supabase
-        .from('card_events')
-        .select('card_id, event_type, created_at')
-        .in('card_id', userCardIds)
-        .gte('created_at', prevStartIso)
-        .lt('created_at', prevEndIso)
+      let prevEvents: any[] = []
+      if (prevStartIso && prevEndIso) {
+        const result = await supabase
+          .from('card_events')
+          .select('card_id, event_type, created_at')
+          .in('card_id', userCardIds)
+          .gte('created_at', prevStartIso)
+          .lt('created_at', prevEndIso)
+        prevEvents = result.data || []
+      }
 
       // 4. Buscar nomes dos cartões
       const { data: cards } = await supabase
@@ -160,7 +175,7 @@ export default function UserAnalyticsPage() {
       const activeCardIds = new Set<string>()
 
       events?.forEach((e: any) => {
-        const date = new Date(e.created_at).toLocaleDateString('pt-PT')
+        const date = new Date(e.created_at).toISOString().split('T')[0]
         const current = dateMap.get(date) || { views: 0, leads: 0, saves: 0 }
 
         if (e.event_type === 'view') {
@@ -240,10 +255,10 @@ export default function UserAnalyticsPage() {
   return (
     <div style={{ display: 'grid', gap: 24, padding: '24px 0' }}>
       <div style={{ display: 'flex', gap: 8 }}>
-        {[7, 30, 90].map((d) => (
+        {[7, 30, 90, 'lifetime'].map((d) => (
           <button
             key={d}
-            onClick={() => setDays(d)}
+            onClick={() => setDays(d as any)}
             style={{
               padding: '8px 16px',
               borderRadius: 12,
@@ -255,7 +270,7 @@ export default function UserAnalyticsPage() {
               cursor: 'pointer',
             }}
           >
-            {d} {t('analytics.days')}
+{typeof d === 'number' ? `${d} ${t('analytics.days')}` : 'Lifetime'}
           </button>
         ))}
       </div>
