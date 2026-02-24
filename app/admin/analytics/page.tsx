@@ -102,58 +102,66 @@ export default function AdminAnalyticsPage() {
         const prevStartDate = new Date()
         prevStartDate.setUTCDate(prevStartDate.getUTCDate() - ((days as number) * 2))
         prevStartIso = prevStartDate.toISOString()
-        
+
         const prevEndDate = new Date()
         prevEndDate.setUTCDate(prevEndDate.getUTCDate() - (days as number))
         prevEndIso = prevEndDate.toISOString()
       }
 
-      // KPIs agregados (evita limites/paginacao do select de eventos)
-      async function getCounts(fromIso: string | null, toIso: string | null) {
-        let q = supabase
-          .from('card_events')
-          .select('event_type, created_at')
+      // KPIs via RPC (sem limites/paginacao)
+      const { data: kpiRows, error: kpiErr } = await supabase.rpc('admin_event_kpis', {
+        from_ts: startIso,
+        to_ts: null,
+      })
+      if (kpiErr) console.error('[admin-analytics] kpi rpc error', kpiErr)
 
-        if (fromIso) q = q.gte('created_at', fromIso)
-        if (toIso) q = q.lt('created_at', toIso)
+      const kpi = Array.isArray(kpiRows) ? kpiRows[0] : kpiRows
+      const totalViews = Number(kpi?.views || 0)
+      const totalLeads = Number(kpi?.leads || 0)
+      const totalSaves = Number(kpi?.saves || 0)
 
-        const { data, error } = await q
-        if (error) console.error('[admin-analytics] counts error', error)
+      // Prev KPIs (trend)
+      let prevViews = 0
+      let prevLeads = 0
+      let prevSaves = 0
 
-        const counts = (data || []).reduce((acc: any, r: any) => {
-          acc[r.event_type] = (acc[r.event_type] || 0) + 1
-          return acc
-        }, {})
-
-        return {
-          views: counts['view'] || 0,
-          leads: counts['lead'] || 0,
-          saves: counts['save_contact'] || 0,
-        }
+      if (prevStartIso && prevEndIso) {
+        const { data: prevRows, error: prevErr } = await supabase.rpc('admin_event_kpis', {
+          from_ts: prevStartIso,
+          to_ts: prevEndIso,
+        })
+        if (prevErr) console.error('[admin-analytics] prev kpi rpc error', prevErr)
+        const prev = Array.isArray(prevRows) ? prevRows[0] : prevRows
+        prevViews = Number(prev?.views || 0)
+        prevLeads = Number(prev?.leads || 0)
+        prevSaves = Number(prev?.saves || 0)
       }
 
-      const currentCounts = await getCounts(startIso, null)
-      const prevCounts = prevStartIso && prevEndIso ? await getCounts(prevStartIso, prevEndIso) : { views: 0, leads: 0, saves: 0 }
+      // Chart via RPC
+      const { data: chartRows, error: chartErr } = await supabase.rpc('admin_event_chart', {
+        from_ts: startIso,
+        to_ts: null,
+      })
+      if (chartErr) console.error('[admin-analytics] chart rpc error', chartErr)
 
+      const chartArray = (chartRows || []).map((r: any) => ({
+        date: r.date,
+        views: Number(r.views || 0),
+        leads: Number(r.leads || 0),
+        saves: Number(r.saves || 0),
+      }))
+
+      // Ranking por cartão (ainda usa eventos com card_id)
       let eventsQuery = supabase
         .from('card_events')
         .select('card_id, event_type, created_at')
-      
+        .order('created_at', { ascending: true })
+
       if (startIso) eventsQuery = eventsQuery.gte('created_at', startIso)
-      
-      const { data: eventsRaw, error: eventsErr } = await eventsQuery.order('created_at', { ascending: true })
+
+      const { data: eventsRaw, error: eventsErr } = await eventsQuery
       if (eventsErr) console.error('[admin-analytics] events error', eventsErr)
       const events = eventsRaw || []
-
-      let prevEvents: any[] = []
-      if (prevStartIso && prevEndIso) {
-        const result = await supabase
-          .from('card_events')
-          .select('card_id, event_type, created_at')
-          .gte('created_at', prevStartIso)
-          .lt('created_at', prevEndIso)
-        prevEvents = result.data || []
-      }
 
       const { data: cards } = await supabase.from('cards').select('id, name, user_id')
       const { data: profiles } = await supabase.from('profiles').select('id, email')
@@ -161,56 +169,38 @@ export default function AdminAnalyticsPage() {
       const cardMap = new Map(cards?.map((c: any) => [c.id, c]) || [])
       const profileMap = new Map(profiles?.map((p: any) => [p.id, p]) || [])
 
-      const dateMap = new Map<string, { views: number; leads: number; saves: number }>()
       const cardMap2 = new Map<string, CardSummary>()
-            let totalViews = currentCounts.views
-      let totalLeads = currentCounts.leads // form
-      let totalSaves = currentCounts.saves // vCard
       const activeCardIds = new Set<string>()
 
-      events?.forEach((e: any) => {
-        const date = new Date(e.created_at).toISOString().split('T')[0]
-          const current = dateMap.get(date) || { views: 0, leads: 0, saves: 0 }
-
-        if (e.event_type === 'view') {
-          current.views++
-          activeCardIds.add(e.card_id)
-        } else if (e.event_type === 'lead') {
-          current.leads++
-        } else if (e.event_type === 'save_contact') {
-          current.saves++
-        }
-
-        dateMap.set(date, current)
+      events.forEach((e: any) => {
+        if (e.event_type === 'view') activeCardIds.add(e.card_id)
 
         const card = cardMap.get(e.card_id)
-        if (card) {
-          const profile = profileMap.get(card.user_id)
-          const key = e.card_id
-          const current = cardMap2.get(key) || {
-            card_id: e.card_id,
-            card_name: card.name || 'Sem título',
-            user_email: profile?.email || 'Desconhecido',
-            total_views: 0,
-            total_leads: 0,
-            total_saves: 0,
-            conversion_form: 0,
-            conversion_save: 0,
-          }
+        if (!card) return
 
-          if (e.event_type === 'view') current.total_views++
-          else if (e.event_type === 'lead') current.total_leads++
-          else if (e.event_type === 'save_contact') current.total_saves++
+        const profile = profileMap.get(card.user_id)
+        const key = e.card_id
 
-          current.conversion_form = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
-          current.conversion_save = current.total_views > 0 ? (current.total_saves / current.total_views) * 100 : 0
-          cardMap2.set(key, current)
+        const current = cardMap2.get(key) || {
+          card_id: e.card_id,
+          card_name: card.name || 'Sem título',
+          user_email: profile?.email || 'Desconhecido',
+          total_views: 0,
+          total_leads: 0,
+          total_saves: 0,
+          conversion_form: 0,
+          conversion_save: 0,
         }
-      })
 
-            let prevViews = prevCounts.views
-      let prevLeads = prevCounts.leads
-      let prevSaves = prevCounts.saves
+        if (e.event_type === 'view') current.total_views++
+        else if (e.event_type === 'lead') current.total_leads++
+        else if (e.event_type === 'save_contact') current.total_saves++
+
+        current.conversion_form = current.total_views > 0 ? (current.total_leads / current.total_views) * 100 : 0
+        current.conversion_save = current.total_views > 0 ? (current.total_saves / current.total_views) * 100 : 0
+
+        cardMap2.set(key, current)
+      })
 
       const clientMap = new Map<string, ClientSummary>()
       Array.from(cardMap2.values()).forEach((card) => {
@@ -234,7 +224,6 @@ export default function AdminAnalyticsPage() {
         clientMap.set(card.user_email, current)
       })
 
-      const chartArray = Array.from(dateMap.entries()).map(([date, data]) => ({ date, ...data }))
       const cardArray = Array.from(cardMap2.values()).sort((a, b) => b.total_leads - a.total_leads)
       const clientArray = Array.from(clientMap.values()).sort((a, b) => b.total_leads - a.total_leads)
 
@@ -258,6 +247,7 @@ export default function AdminAnalyticsPage() {
       setLoading(false)
     }
   }
+
 
   const viewsTrend = kpis.prevViews > 0 ? ((kpis.totalViews - kpis.prevViews) / kpis.prevViews) * 100 : 0
   const leadsTrend = kpis.prevLeads > 0 ? ((kpis.totalLeads - kpis.prevLeads) / kpis.prevLeads) * 100 : 0
