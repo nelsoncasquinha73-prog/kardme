@@ -108,6 +108,33 @@ export default function AdminAnalyticsPage() {
         prevEndIso = prevEndDate.toISOString()
       }
 
+      // KPIs agregados (evita limites/paginacao do select de eventos)
+      async function getCounts(fromIso: string | null, toIso: string | null) {
+        let q = supabase
+          .from('card_events')
+          .select('event_type, created_at')
+
+        if (fromIso) q = q.gte('created_at', fromIso)
+        if (toIso) q = q.lt('created_at', toIso)
+
+        const { data, error } = await q
+        if (error) console.error('[admin-analytics] counts error', error)
+
+        const counts = (data || []).reduce((acc: any, r: any) => {
+          acc[r.event_type] = (acc[r.event_type] || 0) + 1
+          return acc
+        }, {})
+
+        return {
+          views: counts['view'] || 0,
+          leads: counts['lead'] || 0,
+          saves: counts['save_contact'] || 0,
+        }
+      }
+
+      const currentCounts = await getCounts(startIso, null)
+      const prevCounts = prevStartIso && prevEndIso ? await getCounts(prevStartIso, prevEndIso) : { views: 0, leads: 0, saves: 0 }
+
       let eventsQuery = supabase
         .from('card_events')
         .select('card_id, event_type, created_at')
@@ -136,9 +163,9 @@ export default function AdminAnalyticsPage() {
 
       const dateMap = new Map<string, { views: number; leads: number; saves: number }>()
       const cardMap2 = new Map<string, CardSummary>()
-      let totalViews = 0
-      let totalLeads = 0 // form
-      let totalSaves = 0 // vCard
+            let totalViews = currentCounts.views
+      let totalLeads = currentCounts.leads // form
+      let totalSaves = currentCounts.saves // vCard
       const activeCardIds = new Set<string>()
 
       events?.forEach((e: any) => {
@@ -147,14 +174,11 @@ export default function AdminAnalyticsPage() {
 
         if (e.event_type === 'view') {
           current.views++
-          totalViews++
           activeCardIds.add(e.card_id)
         } else if (e.event_type === 'lead') {
           current.leads++
-          totalLeads++
         } else if (e.event_type === 'save_contact') {
           current.saves++
-          totalSaves++
         }
 
         dateMap.set(date, current)
@@ -184,15 +208,9 @@ export default function AdminAnalyticsPage() {
         }
       })
 
-      let prevViews = 0
-      let prevLeads = 0
-      let prevSaves = 0
-
-      prevEvents?.forEach((e: any) => {
-        if (e.event_type === 'view') prevViews++
-        else if (e.event_type === 'lead') prevLeads++
-        else if (e.event_type === 'save_contact') prevSaves++
-      })
+            let prevViews = prevCounts.views
+      let prevLeads = prevCounts.leads
+      let prevSaves = prevCounts.saves
 
       const clientMap = new Map<string, ClientSummary>()
       Array.from(cardMap2.values()).forEach((card) => {
