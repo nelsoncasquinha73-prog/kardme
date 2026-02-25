@@ -166,6 +166,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     })
   } catch (err: any) {
     console.error('[vcard] fatal error', err)
-    return NextResponse.json({ error: 'Failed to generate vCard' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to generate vCard', message: err?.message || String(err) }, { status: 500 })
   }
 }
