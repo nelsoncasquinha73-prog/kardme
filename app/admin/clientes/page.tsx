@@ -93,9 +93,13 @@ export default function AdminClientesPage() {
     }
     setCreating(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) throw new Error('Sessão expirada. Faz login novamente.')
+
       const res = await fetch('/api/admin/users/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(newClient),
       })
       const json = await res.json()
