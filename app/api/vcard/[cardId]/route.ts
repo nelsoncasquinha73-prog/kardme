@@ -160,7 +160,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       status: 200,
       headers: {
         'Content-Type': 'text/vcard; charset=utf-8',
-        'Content-Disposition': `attachment; filename="${filename}.vcf"`,
+        'Content-Disposition': buildContentDisposition(filename),
         'Cache-Control': 'no-store',
       },
     })
@@ -168,4 +168,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     console.error('[vcard] fatal error', err)
     return NextResponse.json({ error: 'Failed to generate vCard', message: err?.message || String(err) }, { status: 500 })
   }
+}
+
+
+function buildContentDisposition(rawBaseName: string) {
+  // ASCII fallback avoids ByteString errors in headers (emoji/unicode)
+  const fallback = 'contact.vcf'
+
+  // RFC 5987 filename* (UTF-8 percent-encoded)
+  const base = (rawBaseName || 'contact').trim() || 'contact'
+  const encoded = encodeURIComponent(base)
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}.vcf`
 }
