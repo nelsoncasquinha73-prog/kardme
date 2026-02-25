@@ -154,15 +154,18 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     const filename = safeFilename(rawName)
 
-    return new NextResponse(vCard, {
+    const bytes = new TextEncoder().encode(vCard)
+
+    return new NextResponse(bytes, {
       status: 200,
       headers: {
         'Content-Type': 'text/vcard; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}.vcf"`,
+        'Cache-Control': 'no-store',
       },
     })
   } catch (err: any) {
     console.error('[vcard] fatal error', err)
-    return NextResponse.json({ error: 'Failed to generate vCard', message: err?.message || String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to generate vCard' }, { status: 500 })
   }
 }
