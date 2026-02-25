@@ -1,14 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+// Client com service role (NUNCA expor no client)
+const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+})
+
+// Client "normal" para ler a sessão do requester (cookies)
+const supabaseAnon = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  auth: { autoRefreshToken: false, persistSession: false },
+})
+
+async function isRequesterAdmin(req: NextRequest) {
+  const authHeader = req.headers.get('authorization')
+  const cookieHeader = req.headers.get('cookie')
+
+  // Tenta obter user via Authorization Bearer (se o teu frontend enviar)
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice('Bearer '.length)
+    const { data } = await supabaseAnon.auth.getUser(token)
+    const email = data.user?.email || ''
+    return email === 'admin@kardme.com' || email === 'nelson@kardme.com'
+  }
+
+  // Fallback: tenta ler sessão via cookies (SSR)
+  if (cookieHeader) {
+    // Nota: supabase-js não lê cookies automaticamente aqui sem helpers,
+    // então este fallback pode não funcionar. A solução robusta é enviar Bearer token do client.
+    return false
+  }
+
+  return false
+}
 
 export async function POST(req: NextRequest) {
   try {
+    // ✅ Segurança: só admin pode criar clientes
+    const ok = await isRequesterAdmin(req)
+    if (!ok) {
+      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 })
+    }
+
     const body = await req.json()
     const { email, password, nome, apelido, plan, published_card_limit } = body
 
@@ -28,18 +63,23 @@ export async function POST(req: NextRequest) {
 
     const userId = authData.user.id
 
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .update({
+    // ✅ Upsert no profile (cria se não existir)
+    const { error: profileError } = await supabaseAdmin.from('profiles').upsert(
+      {
+        id: userId,
+        email,
         nome: nome || null,
         apelido: apelido || null,
         plan: plan || 'free',
         published_card_limit: published_card_limit ?? 1,
-      })
-      .eq('id', userId)
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    )
 
     if (profileError) {
-      console.error('Erro ao atualizar profile:', profileError)
+      console.error('Erro ao upsert profile:', profileError)
+      // não falhar criação do user, mas reportar
     }
 
     return NextResponse.json({ success: true, userId, message: 'Cliente criado com sucesso' })
