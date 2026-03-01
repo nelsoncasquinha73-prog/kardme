@@ -356,9 +356,30 @@ export default function ThemePageClient({ card, blocks }: Props) {
           existingBlocks={allBlocksSorted}
           onClose={() => setAddOpen(false)}
           onCreated={(newBlock) => {
-            setLocalBlocks((prev) => [...prev, { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }])
-            setActiveBlockId(newBlock.id)
-            setSaveStatus('idle')
+            const normalized = { ...newBlock, style: newBlock.style ?? {}, settings: newBlock.settings ?? {} }
+
+            // Prevent duplicates of the same logical block (type + title)
+            const keyType = normalized.type
+            const keyTitle = (normalized.title ?? '').trim()
+
+            const existing = allBlocksSorted.find((b) => {
+              if (b.type !== keyType) return false
+              const t = (b.title ?? '').trim()
+              return t === keyTitle
+            })
+
+            if (existing) {
+              // Instead of creating a duplicate, just select the existing one
+              setActiveBlockId(existing.id)
+              setAddOpen(false)
+              setToast({ message: `Este bloco já existe (${keyTitle || keyType}).`, type: 'error' })
+              return
+            }
+
+            setLocalBlocks((prev) => [...prev, normalized])
+            setActiveBlockId(normalized.id)
+            setAddOpen(false)
+            setSaveStatus('dirty')
           }}
         />
 
