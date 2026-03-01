@@ -305,7 +305,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
         const btnStyle: React.CSSProperties = { ...baseBtn, width: getButtonWidth(b) }
 
-        const isAttention = attention !== 'none'
+        const isAttention = attention !== 'none' && !!attentionButtonId && b.id === attentionButtonId
         if (isAttention) {
           btnStyle.animation =
             attention === 'pulse'
