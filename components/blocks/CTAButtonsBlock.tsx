@@ -58,6 +58,8 @@ type CTAButtonsStyle = {
     iconGapPx?: number
     widthMode?: '100%' | 'auto' | 'custom'
     customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
   }
   container?: {
     enabled?: boolean
@@ -69,6 +71,8 @@ type CTAButtonsStyle = {
     shadow?: boolean
     widthMode?: 'full' | 'custom'
     customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
   }
 }
 
@@ -187,6 +191,32 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
   const btn = st.button || {}
   const c = st.container || {}
 
+  const attention = btn.attention ?? 'none'
+  const attentionButtonId = btn.attentionButtonId ?? null
+
+  const attentionCss = `
+@media (prefers-reduced-motion: reduce) {
+  .kardme-cta-attention { animation: none !important; }
+}
+
+@keyframes kardmeCtaPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.035); filter: brightness(1.06); }
+}
+
+@keyframes kardmeCtaGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(96,165,250,0.0); }
+  50% { box-shadow: 0 0 18px rgba(96,165,250,0.55); }
+}
+
+@keyframes kardmeCtaWiggle {
+  0%, 92%, 100% { transform: rotate(0deg); }
+  94% { transform: rotate(-1.2deg); }
+  96% { transform: rotate(1.2deg); }
+  98% { transform: rotate(-0.8deg); }
+}
+`
+
   const buttons = Array.isArray(s.buttons) ? s.buttons : []
   if (buttons.length === 0) {
     return <div style={{ opacity: 0.6, fontSize: 13 }}>Sem botões — adiciona o primeiro CTA</div>
@@ -257,6 +287,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
   return (
     <div style={wrap}>
+      <style>{attentionCss}</style>
       {buttons.map((b) => {
         const href = getButtonHref(b)
         const actionType = b.actionType || 'link'
@@ -270,6 +301,18 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
         const btnStyle: React.CSSProperties = { ...baseBtn, width: getButtonWidth(b) }
 
+        const isAttention = attention !== 'none' && attentionButtonId && b.id === attentionButtonId
+        if (isAttention) {
+          btnStyle.animation =
+            attention === 'pulse'
+              ? 'kardmeCtaPulse 1.8s ease-in-out infinite'
+              : attention === 'glow'
+                ? 'kardmeCtaGlow 1.8s ease-in-out infinite'
+                : attention === 'wiggle'
+                  ? 'kardmeCtaWiggle 6.5s ease-in-out infinite'
+                  : undefined
+        }
+
         if (iconWidthPx > 0) {
           const iconContainerStyle: React.CSSProperties = {
             width: iconWidthPx,
@@ -281,7 +324,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
           }
 
           return (
-            <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
+            <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
               {iconPos === 'left' && (<><span style={iconContainerStyle}>{icon}</span><span style={{ width: iconGapPx, flexShrink: 0 }} /></>)}
               <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
               {iconPos === 'right' && (<><span style={{ width: iconGapPx, flexShrink: 0 }} /><span style={iconContainerStyle}>{icon}</span></>)}
@@ -290,7 +333,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
         }
 
         return (
-          <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
+          <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
             {icon && iconPos === 'left' ? icon : null}
             <span style={{ lineHeight: 1.1 }}>{b.label || 'Botão'}</span>
             {icon && iconPos === 'right' ? icon : null}
