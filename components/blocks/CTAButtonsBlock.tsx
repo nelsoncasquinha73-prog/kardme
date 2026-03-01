@@ -196,7 +196,11 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
   const attentionCss = `
 @media (prefers-reduced-motion: reduce) {
-  .kardme-cta-attention { animation: none !important; }
+  .kardme-cta-attention {
+    animation: none !important;
+    filter: brightness(1.06);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.26);
+  }
 }
 
 @keyframes kardmeCtaPulse {
