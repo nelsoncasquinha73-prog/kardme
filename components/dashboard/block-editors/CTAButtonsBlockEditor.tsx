@@ -64,6 +64,8 @@ type CTAButtonsStyle = {
     iconGapPx?: number
     widthMode?: "full" | "auto" | "custom"
     customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
   }
 
   container?: {
@@ -76,6 +78,8 @@ type CTAButtonsStyle = {
     shadow?: boolean
     widthMode?: "full" | "custom"
     customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
   }
 }
 
@@ -246,6 +250,23 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           <div style={{ marginLeft: 10, fontSize: 12, opacity: 0.7 }}>Até 4 botões</div>
         </Row>
 
+        <Row label="Animação (chamar atenção)">
+          <select
+            value={(st.button as any)?.attention ?? 'none'}
+            onChange={(e) => updateBtnStyle({ attention: e.target.value as any })}
+            style={select}
+          >
+            <option value="none">Nenhuma</option>
+            <option value="pulse">Pulse (suave)</option>
+            <option value="glow">Glow</option>
+            <option value="wiggle">Wiggle</option>
+          </select>
+        </Row>
+
+        <div style={{ fontSize: 12, opacity: 0.65, marginTop: -6 }}>
+          Dica: escolhe 1 botão para destacar (abaixo).
+        </div>
+
         {buttons.length === 0 && <div style={{ opacity: 0.7 }}>Sem botões — adiciona o primeiro CTA</div>}
 
         {buttons.map((b, idx) => {
@@ -280,6 +301,16 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
 
               <Row label={t('cta_editor.label_button_text')}>
                 <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_button_text')} />
+              </Row>
+
+              <Row label="Destacar este botão">
+                <Toggle
+                  active={(st.button as any)?.attentionButtonId === b.id}
+                  onClick={() => {
+                    const current = (st.button as any)?.attentionButtonId ?? null
+                    updateBtnStyle({ attentionButtonId: current === b.id ? null : b.id })
+                  }}
+                />
               </Row>
 
               <Row label={t('cta_editor.label_action_type')}>
