@@ -41,6 +41,9 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
       TextStyle,
       Color,
       Underline,
+      Bold,
+      Italic,
+      Strike,
       TextAlign.configure({ types: ['paragraph'] }),
       ModalSpan,
       Link.configure({
