@@ -54,7 +54,7 @@ export default function AddBlockModal({
       { type: 'business_hours', title: 'Horário', description: 'Horário de funcionamento', defaultSettings: {}, defaultStyle: {} },
       { type: 'free_text', title: 'Texto livre', description: 'Texto extra, notas legais ou mensagens personalizadas', defaultSettings: { text: '' }, defaultStyle: {} },
       { type: 'cta_buttons', title: 'Botões/CTA', description: 'Botões com link para ações rápidas', defaultSettings: { buttons: [], layout: 'stack', align: 'center', gapPx: 10 }, defaultStyle: {} },
-      { type: 'shape_canvas', title: 'Shapes / Promo', description: 'Bolas, estrelas e selos arrastáveis com texto e ação (promoções, links, contactos)', defaultSettings: { items: [] }, defaultStyle: { canvas: { heightPx: 360, bgColor: '#f3f4f6', radius: 18, padding: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)', shadow: false } } },
+      { type: 'shape_canvas', title: 'Shapes / Promo', description: 'Bolas, estrelas e selos arrastáveis com texto e ação (promoções, links, contactos)', defaultSettings: { items: [] }, defaultStyle: { canvas: { heightPx: 880, bgColor: 'transparent', radius: 18, padding: 0, borderWidth: 0, borderColor: 'transparent', shadow: false } } },
     ],
     []
   )
@@ -127,7 +127,7 @@ export default function AddBlockModal({
       >
         <div
           style={{
-            padding: 14,
+            padding: 0,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -151,7 +151,7 @@ export default function AddBlockModal({
           </button>
         </div>
 
-        <div style={{ padding: 14 }}>
+        <div style={{ padding: 0 }}>
           <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 12 }}>
             Escolhe um bloco para adicionar ao cartão.
           </p>
@@ -185,7 +185,7 @@ export default function AddBlockModal({
 
         <div
           style={{
-            padding: 14,
+            padding: 0,
             borderTop: '1px solid rgba(0,0,0,0.08)',
             display: 'flex',
             justifyContent: 'flex-end',

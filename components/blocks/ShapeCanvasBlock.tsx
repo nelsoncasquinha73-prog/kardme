@@ -77,12 +77,12 @@ export default function ShapeCanvasBlock({ settings, style, editable = false, on
   const st = style || {}
 
   const canvas = st.canvas || {}
-  const heightPx = canvas.heightPx ?? 360
-  const bgColor = canvas.bgColor ?? '#f3f4f6'
+  const heightPx = canvas.heightPx ?? 880
+  const bgColor = canvas.bgColor ?? 'transparent'
   const radius = canvas.radius ?? 18
-  const padding = canvas.padding ?? 14
-  const borderWidth = canvas.borderWidth ?? 1
-  const borderColor = canvas.borderColor ?? 'rgba(0,0,0,0.08)'
+  const padding = canvas.padding ?? 0
+  const borderWidth = canvas.borderWidth ?? 0
+  const borderColor = canvas.borderColor ?? 'transparent'
   const shadow = canvas.shadow ?? false
 
   const items = useMemo(() => (Array.isArray(s.items) ? s.items : []), [s.items])
