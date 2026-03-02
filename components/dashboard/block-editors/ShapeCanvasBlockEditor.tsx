@@ -147,6 +147,23 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
     updateSettings({ items: items.filter((i) => i.id !== selectedId), selectedId: null })
   }
 
+
+  const reindexZ = (arr: ShapeCanvasItem[]) =>
+    arr.map((it, idx) => ({ ...it, zIndex: idx + 1 }))
+
+  const moveItem = (id: string, dir: -1 | 1) => {
+    const idx = items.findIndex((i) => i.id === id)
+    if (idx === -1) return
+    const nextIdx = idx + dir
+    if (nextIdx < 0 || nextIdx >= items.length) return
+    const next = [...items]
+    const tmp = next[idx]
+    next[idx] = next[nextIdx]
+    next[nextIdx] = tmp
+    updateSettings({ items: reindexZ(next) })
+  }
+
+
   const onDragEnd = (e: DragEndEvent) => {
     const id = String(e.active.id || '')
     if (!id) return
@@ -400,6 +417,105 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
           >
             Apagar
           </button>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <strong style={{ fontSize: 12, opacity: 0.75 }}>Itens</strong>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+            {items.map((it, idx) => {
+              const isActive = it.id === selectedId
+              return (
+                <div
+                  key={it.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 10px',
+                    borderRadius: 12,
+                    border: isActive ? '1px solid rgba(59,130,246,0.45)' : '1px solid rgba(0,0,0,0.10)',
+                    background: isActive ? 'rgba(59,130,246,0.06)' : '#fff',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 8,
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontSize: 12,
+                      fontWeight: 900,
+                      background: 'rgba(0,0,0,0.05)',
+                    }}
+                    title="Ordem"
+                  >
+                    {idx + 1}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => selectItem(it.id)}
+                    style={{
+                      flex: 1,
+                      textAlign: 'left',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      fontWeight: 800,
+                      fontSize: 12,
+                      color: '#111827',
+                      padding: 0,
+                    }}
+                    title="Selecionar"
+                  >
+                    {it.shapeType === 'circle' ? 'Círculo' : it.shapeType}
+                    <span style={{ opacity: 0.6, fontWeight: 700 }}> • z {it.zIndex ?? (idx + 1)}</span>
+                  </button>
+
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => moveItem(it.id, -1)}
+                      disabled={idx === 0}
+                      style={{
+                        width: 30,
+                        height: 28,
+                        borderRadius: 10,
+                        border: '1px solid rgba(0,0,0,0.12)',
+                        background: idx === 0 ? 'rgba(255,255,255,0.6)' : '#fff',
+                        cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                        fontWeight: 900,
+                        opacity: idx === 0 ? 0.5 : 1,
+                      }}
+                      title="Subir"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveItem(it.id, 1)}
+                      disabled={idx === items.length - 1}
+                      style={{
+                        width: 30,
+                        height: 28,
+                        borderRadius: 10,
+                        border: '1px solid rgba(0,0,0,0.12)',
+                        background: idx === items.length - 1 ? 'rgba(255,255,255,0.6)' : '#fff',
+                        cursor: idx === items.length - 1 ? 'not-allowed' : 'pointer',
+                        fontWeight: 900,
+                        opacity: idx === items.length - 1 ? 0.5 : 1,
+                      }}
+                      title="Descer"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div style={{ marginTop: 12 }}>
