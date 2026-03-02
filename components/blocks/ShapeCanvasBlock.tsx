@@ -185,7 +185,7 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
                 overflow: 'hidden',
               }}
             >
-              <style jsx>{`strong,b{font-weight:800;} em,i{font-style:italic;} s,del{text-decoration:line-through;}`}</style>
+              <style jsx>{`strong,b{font-weight:800;} em,i{font-style:italic;} s,del{text-decoration:line-through;}; p{margin:0; line-height:inherit;}`}</style>
               <div
                 style={{
                   fontFamily: it.fontFamily || undefined,
