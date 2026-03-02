@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient'
 
 // EDITORS
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
+import ShapeCanvasBlockEditor from '@/components/dashboard/block-editors/ShapeCanvasBlockEditor'
 
 type Props = {
   cardId: string // adiciona esta prop para receber o cardId

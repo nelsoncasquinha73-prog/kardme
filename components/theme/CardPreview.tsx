@@ -18,6 +18,7 @@ import CardBackground from '@/components/theme/CardBackground'
 import BioBlock from '@/components/blocks/BioBlock'
 import FreeTextBlock from '@/components/blocks/FreeTextBlock'
 import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
+import ShapeCanvasBlock from '@/components/blocks/ShapeCanvasBlock'
 import VideoBlock from '@/components/blocks/VideoBlock'
 import { trackEvent } from '@/lib/trackEvent'
 import { migrateCardBg, type CardBg } from '@/lib/cardBg'
@@ -421,6 +422,8 @@ export default function CardPreview({
                       <BioBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'free_text' ? (
                       <FreeTextBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'shape_canvas' ? (
+                      <ShapeCanvasBlock cardId={card.id} settings={block.settings} style={block.style} />
                     ) : block.type === 'cta_buttons' ? (
                       <CTAButtonsBlock cardId={card.id} settings={block.settings} style={block.style} />
                     ) : block.type === 'video' ? (
