@@ -461,7 +461,7 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                   <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
                     {selected.fontSizePx ?? 16}px
                   </div>
-                
+                </Row>
 
                 <Row label="Espaço entre linhas">
                   <input
@@ -492,8 +492,6 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                     {selected.paragraphGapPx ?? 0}px
                   </div>
                 </Row>
-
-</Row>
 
               <Section title="Posição do texto">
                 <Row label="Alinhamento">
