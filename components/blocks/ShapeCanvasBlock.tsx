@@ -199,6 +199,7 @@ p{margin:0 0 var(--p-gap, 0px) 0 !important; line-height:inherit !important;}
                   fontFamily: it.fontFamily || undefined,
                   fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
                   lineHeight: it.lineHeight ?? 1.15,
+                  ['--p-gap' as any]: `${it.paragraphGapPx ?? 0}px`,
                   textAlign: it.textAlign ?? 'center',
                   transform: `translate(${it.textOffsetX ?? 0}px, ${it.textOffsetY ?? 0}px)`,
                 }}
