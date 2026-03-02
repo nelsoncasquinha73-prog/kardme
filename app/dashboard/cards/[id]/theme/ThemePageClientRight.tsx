@@ -395,6 +395,7 @@ export default function ThemePageClientRight({
             'decorations',
             'business_hours',
             'free_text',
+            'shape_canvas',
             'cta_buttons',
           ].includes(activeBlock.type) && (
             <p style={{ fontSize: 14, opacity: 0.65 }}>
