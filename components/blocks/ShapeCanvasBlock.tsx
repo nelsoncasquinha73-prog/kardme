@@ -111,6 +111,7 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
         boxShadow: shadow ? '0 10px 30px rgba(0,0,0,0.12)' : undefined,
         position: 'relative',
         overflow: 'hidden',
+                ['--p-gap' as any]: `${it.paragraphGapPx ?? 0}px`,
       }}
       onPointerDownCapture={(e) => {
         if (!editable) return
