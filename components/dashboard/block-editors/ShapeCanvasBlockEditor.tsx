@@ -28,6 +28,11 @@ type ShapeCanvasItem = {
   textHtml?: string
   fontFamily?: string
   fontSizePx?: number
+  textAlign?: 'left' | 'center' | 'right'
+  vAlign?: 'top' | 'center' | 'bottom'
+  paddingPx?: number
+  textOffsetX?: number
+  textOffsetY?: number
   actionType?: ActionType
   url?: string
   openInNewTab?: boolean
@@ -448,6 +453,75 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                     {selected.fontSizePx ?? 16}px
                   </div>
                 </Row>
+
+              <Section title="Posição do texto">
+                <Row label="Alinhamento">
+                  <select
+                    value={selected.textAlign ?? 'center'}
+                    onChange={(e) => updateItem(selected.id, { textAlign: e.target.value as any })}
+                    style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)' }}
+                  >
+                    <option value="left">Esquerda</option>
+                    <option value="center">Centro</option>
+                    <option value="right">Direita</option>
+                  </select>
+                </Row>
+
+                <Row label="Vertical">
+                  <select
+                    value={selected.vAlign ?? 'center'}
+                    onChange={(e) => updateItem(selected.id, { vAlign: e.target.value as any })}
+                    style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)' }}
+                  >
+                    <option value="top">Topo</option>
+                    <option value="center">Centro</option>
+                    <option value="bottom">Baixo</option>
+                  </select>
+                </Row>
+
+                <Row label="Padding">
+                  <input
+                    type="range"
+                    min={0}
+                    max={40}
+                    value={selected.paddingPx ?? 0}
+                    onChange={(e) => updateItem(selected.id, { paddingPx: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    {selected.paddingPx ?? 0}px
+                  </div>
+                </Row>
+
+                <Row label="Offset X">
+                  <input
+                    type="range"
+                    min={-160}
+                    max={160}
+                    value={selected.textOffsetX ?? 0}
+                    onChange={(e) => updateItem(selected.id, { textOffsetX: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    {selected.textOffsetX ?? 0}px
+                  </div>
+                </Row>
+
+                <Row label="Offset Y">
+                  <input
+                    type="range"
+                    min={-160}
+                    max={160}
+                    value={selected.textOffsetY ?? 0}
+                    onChange={(e) => updateItem(selected.id, { textOffsetY: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    {selected.textOffsetY ?? 0}px
+                  </div>
+                </Row>
+              </Section>
+
               </div>
 
             </div>

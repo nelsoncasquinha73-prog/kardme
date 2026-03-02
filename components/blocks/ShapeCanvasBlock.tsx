@@ -25,6 +25,11 @@ export type ShapeCanvasItem = {
   textHtml?: string
   fontFamily?: string
   fontSizePx?: number
+  textAlign?: 'left' | 'center' | 'right'
+  vAlign?: 'top' | 'center' | 'bottom'
+  paddingPx?: number
+  textOffsetX?: number
+  textOffsetY?: number
 
   actionType?: ActionType
   url?: string
@@ -168,16 +173,28 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
             <div
               style={{
                 width: '100%',
-                fontFamily: it.fontFamily || undefined,
-                fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
-                lineHeight: 1.15,
-                textAlign: 'center',
+                height: '100%',
+                display: 'flex',
+                justifyContent:
+                  it.textAlign === 'left' ? 'flex-start' : it.textAlign === 'right' ? 'flex-end' : 'center',
+                alignItems:
+                  it.vAlign === 'top' ? 'flex-start' : it.vAlign === 'bottom' ? 'flex-end' : 'center',
+                padding: it.paddingPx ? `${it.paddingPx}px` : 0,
                 color: '#111827',
                 overflow: 'hidden',
               }}
             >
-              <style jsx>{`strong{font-weight:800;}`}</style>
-              <div dangerouslySetInnerHTML={{ __html: it.textHtml || '' }} />
+              <style jsx>{`strong,b{font-weight:800;} em,i{font-style:italic;} s,del{text-decoration:line-through;}`}</style>
+              <div
+                style={{
+                  fontFamily: it.fontFamily || undefined,
+                  fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
+                  lineHeight: 1.15,
+                  textAlign: it.textAlign ?? 'center',
+                  transform: `translate(${it.textOffsetX ?? 0}px, ${it.textOffsetY ?? 0}px)`,
+                }}
+                dangerouslySetInnerHTML={{ __html: it.textHtml || '' }}
+              />
             </div>
           </div>
         )
