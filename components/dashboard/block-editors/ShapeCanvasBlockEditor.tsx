@@ -471,7 +471,7 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                   </div>
                 </Row>
 
-                <Row label="Espaço entre linhas">
+                <Row label="Altura da linha">
                   <input
                     type="range"
                     min={0.9}
@@ -486,7 +486,7 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                   </div>
                 </Row>
 
-                <Row label="Espaço entre parágrafos">
+                <Row label="Espaço entre linhas">
                   <input
                     type="range"
                     min={0}
