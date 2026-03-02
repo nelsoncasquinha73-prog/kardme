@@ -542,6 +542,98 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                 <span style={rightNum}>{selected.hPx ?? 170}px</span>
               </Row>
 
+              <Row label="Posição X (%)">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={selected.xPct ?? 10}
+                  onChange={(e) => updateItem(selected.id, { xPct: Number(e.target.value) })}
+                />
+                <span style={rightNum}>{selected.xPct ?? 10}%</span>
+              </Row>
+
+              <Row label="Posição Y (%)">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={selected.yPct ?? 12}
+                  onChange={(e) => updateItem(selected.id, { yPct: Number(e.target.value) })}
+                />
+                <span style={rightNum}>{selected.yPct ?? 12}%</span>
+              </Row>
+
+              <Row label="Mover (1% | Shift=5%)">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 34px)', gap: 6 }}>
+                  <div />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const step = (e as any).shiftKey ? 5 : 1
+                      updateItem(selected.id, { yPct: Math.max(0, (selected.yPct ?? 0) - step) })
+                    }}
+                    style={{ width: 34, height: 30, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 900 }}
+                    title="Cima"
+                  >
+                    ↑
+                  </button>
+                  <div />
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const step = (e as any).shiftKey ? 5 : 1
+                      updateItem(selected.id, { xPct: Math.max(0, (selected.xPct ?? 0) - step) })
+                    }}
+                    style={{ width: 34, height: 30, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 900 }}
+                    title="Esquerda"
+                  >
+                    ←
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // reset offsets rápido
+                      updateItem(selected.id, { xPct: selected.xPct ?? 10, yPct: selected.yPct ?? 12 })
+                    }}
+                    style={{ width: 34, height: 30, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: 'rgba(0,0,0,0.03)', cursor: 'pointer', fontWeight: 900 }}
+                    title="Centro (não altera nada, só placeholder)"
+                  >
+                    •
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const step = (e as any).shiftKey ? 5 : 1
+                      updateItem(selected.id, { xPct: Math.min(100, (selected.xPct ?? 0) + step) })
+                    }}
+                    style={{ width: 34, height: 30, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 900 }}
+                    title="Direita"
+                  >
+                    →
+                  </button>
+
+                  <div />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const step = (e as any).shiftKey ? 5 : 1
+                      updateItem(selected.id, { yPct: Math.min(100, (selected.yPct ?? 0) + step) })
+                    }}
+                    style={{ width: 34, height: 30, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', cursor: 'pointer', fontWeight: 900 }}
+                    title="Baixo"
+                  >
+                    ↓
+                  </button>
+                  <div />
+                </div>
+              </Row>
+
               <Row label="Cor">
                 <ColorPickerPro
                   value={selected.bgColor ?? '#ffffff'}
