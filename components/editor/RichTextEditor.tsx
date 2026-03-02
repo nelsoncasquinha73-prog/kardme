@@ -7,7 +7,6 @@ import Bold from '@tiptap/extension-bold'
 import Italic from '@tiptap/extension-italic'
 import Strike from '@tiptap/extension-strike'
 import Underline from '@tiptap/extension-underline'
-import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import { ModalSpan } from '@/components/editor/tiptap/ModalSpan'
@@ -44,7 +43,6 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
       Bold,
       Italic,
       Strike,
-      TextAlign.configure({ types: ['paragraph'] }),
       ModalSpan,
       Link.configure({
         openOnClick: false,
@@ -57,7 +55,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
     editorProps: {
       attributes: {
         class: 'outline-none',
-        style: `min-height: ${minHeight}px; padding: 12px; font-size: 14px; line-height: 1.6;`,
+        style: `min-height: ${minHeight}px; padding: 12px; font-size: 14px;`,
       },
     },
     immediatelyRender: false,
@@ -139,18 +137,6 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
         
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
-          editor.view.focus()
-          editor.chain().focus().setTextAlign('left').run()
-        }} style={btnStyle(editor.isActive({ textAlign: 'left' }))} title="Esquerda">◀</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
-          editor.view.focus()
-          editor.chain().focus().setTextAlign('center').run()
-        }} style={btnStyle(editor.isActive({ textAlign: 'center' }))} title="Centro">●</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
-          editor.view.focus()
-          editor.chain().focus().setTextAlign('right').run()
-        }} style={btnStyle(editor.isActive({ textAlign: 'right' }))} title="Direita">▶</button>
         
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
         
