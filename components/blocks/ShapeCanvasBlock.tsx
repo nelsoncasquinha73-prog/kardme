@@ -191,8 +191,8 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
 em,i{font-style:italic !important;}
 s,del{text-decoration:line-through !important;}
 u{text-decoration:underline !important;}
-:global(p){margin:0 0 var(--p-gap, 0px) 0 !important; line-height:inherit !important;}
-                :global(p:last-child){margin-bottom:0 !important;}
+:global(p){margin:0 !important; line-height:inherit !important;}
+                :global(p + p){margin-top: var(--p-gap, 0px) !important;}
 *{line-height:inherit !important;}`}</style>
               <div
                 style={{
