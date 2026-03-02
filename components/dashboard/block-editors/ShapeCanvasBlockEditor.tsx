@@ -7,6 +7,7 @@ import { Section, Row, Toggle, input, select, rightNum } from '@/components/edit
 import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import RichTextEditor from '@/components/editor/RichTextEditor'
+import FontPicker from '@/components/editor/FontPicker'
 
 type ShapeType = 'circle' | 'pill' | 'roundedSquare'
 
@@ -25,6 +26,8 @@ type ShapeCanvasItem = {
   borderWidth?: number
   shadow?: boolean
   textHtml?: string
+  fontFamily?: string
+  fontSizePx?: number
   actionType?: ActionType
   url?: string
   openInNewTab?: boolean
@@ -52,6 +55,7 @@ type ShapeCanvasStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    showCanvas?: boolean
   }
 }
 
@@ -238,6 +242,10 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Section title="Canvas">
+        <Row label="Mostrar fundo do canvas">
+          <Toggle active={canvas.showCanvas === true} onClick={() => updateCanvas({ showCanvas: !(canvas.showCanvas === true) })} />
+        </Row>
+
         <Row label="Altura (px)">
           <input
             type="range"
@@ -418,6 +426,30 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
 
               <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75 }}>Texto</div>
               <RichTextEditor value={selected.textHtml ?? ''} onChange={(html) => updateItem(selected.id, { textHtml: html })} placeholder="Escreve o texto..." minHeight={120} />
+
+              <div style={{ marginTop: 10 }}>
+                <Row label="Fonte">
+                  <FontPicker
+                    value={selected.fontFamily || ''}
+                    onChange={(v) => updateItem(selected.id, { fontFamily: v || undefined })}
+                  />
+                </Row>
+
+                <Row label="Tamanho do texto">
+                  <input
+                    type="range"
+                    min={10}
+                    max={34}
+                    value={selected.fontSizePx ?? 16}
+                    onChange={(e) => updateItem(selected.id, { fontSizePx: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    {selected.fontSizePx ?? 16}px
+                  </div>
+                </Row>
+              </div>
+
             </div>
           )}
         </div>

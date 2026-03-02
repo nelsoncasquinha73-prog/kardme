@@ -23,6 +23,8 @@ export type ShapeCanvasItem = {
   shadow?: boolean
 
   textHtml?: string
+  fontFamily?: string
+  fontSizePx?: number
 
   actionType?: ActionType
   url?: string
@@ -49,6 +51,7 @@ type ShapeCanvasStyle = {
     borderWidth?: number
     borderColor?: string
     shadow?: boolean
+    showCanvas?: boolean
   }
 }
 
@@ -78,12 +81,13 @@ export default function ShapeCanvasBlock({ settings, style, editable = false, on
 
   const canvas = st.canvas || {}
   const heightPx = canvas.heightPx ?? 880
-  const bgColor = canvas.bgColor ?? 'transparent'
+  const showCanvas = canvas.showCanvas === true
+const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
   const radius = canvas.radius ?? 18
-  const padding = canvas.padding ?? 0
-  const borderWidth = canvas.borderWidth ?? 0
-  const borderColor = canvas.borderColor ?? 'transparent'
-  const shadow = canvas.shadow ?? false
+  const padding = showCanvas ? (canvas.padding ?? 0) : 0
+  const borderWidth = showCanvas ? (canvas.borderWidth ?? 0) : 0
+  const borderColor = showCanvas ? (canvas.borderColor ?? 'transparent') : 'transparent'
+  const shadow = showCanvas ? (canvas.shadow ?? false) : false
 
   const items = useMemo(() => (Array.isArray(s.items) ? s.items : []), [s.items])
   const selectedId = s.selectedId ?? null
@@ -164,14 +168,17 @@ export default function ShapeCanvasBlock({ settings, style, editable = false, on
             <div
               style={{
                 width: '100%',
-                fontSize: 13,
-                lineHeight: 1.2,
+                fontFamily: it.fontFamily || undefined,
+                fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
+                lineHeight: 1.15,
                 textAlign: 'center',
                 color: '#111827',
                 overflow: 'hidden',
               }}
-              dangerouslySetInnerHTML={{ __html: it.textHtml || '' }}
-            />
+            >
+              <style jsx>{`strong{font-weight:800;}`}</style>
+              <div dangerouslySetInnerHTML={{ __html: it.textHtml || '' }} />
+            </div>
           </div>
         )
       })}
