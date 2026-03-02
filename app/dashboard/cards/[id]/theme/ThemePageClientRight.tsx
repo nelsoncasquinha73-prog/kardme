@@ -17,6 +17,7 @@ import DecorationBlockEditor from '@/components/dashboard/block-editors/Decorati
 import BusinessHoursBlockEditor from '@/components/dashboard/block-editors/BusinessHoursBlockEditor'
 import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBlockEditor'
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
+import ShapeCanvasBlockEditor from '@/components/dashboard/block-editors/ShapeCanvasBlockEditor'
 import VideoBlockEditor from '@/components/dashboard/block-editors/VideoBlockEditor'
 import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
 import ThemeDecorationsEditor from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
@@ -354,6 +355,15 @@ export default function ThemePageClientRight({
         {activeBlock?.type === 'free_text' && (
           <FreeTextBlockEditor
             settings={activeBlock.settings || { text: '' }}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'shape_canvas' && (
+          <ShapeCanvasBlockEditor
+            settings={activeBlock.settings || { items: [] }}
             style={activeBlock.style || {}}
             onChangeSettings={onChangeSettings}
             onChangeStyle={onChangeStyle}
