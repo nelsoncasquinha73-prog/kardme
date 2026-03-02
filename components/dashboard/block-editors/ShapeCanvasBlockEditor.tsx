@@ -431,7 +431,14 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
               </Row>
 
               <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75 }}>Texto</div>
-              <RichTextEditor value={selected.textHtml ?? ''} onChange={(html) => updateItem(selected.id, { textHtml: html })} placeholder="Escreve o texto..." minHeight={120} />
+              <RichTextEditor value={selected.textHtml ?? ''} onChange={(html) => {
+                const cleaned = html
+                  // remove text-align inline nos <p>
+                  .replace(/<p\s+style="text-align:\s*(left|center|right);?">/g, '<p>')
+                  // remove line-height inline se aparecer
+                  .replace(/line-height:\s*[^;"]+;?/g, '')
+                updateItem(selected.id, { textHtml: cleaned })
+              }} placeholder="Escreve o texto..." minHeight={120} />
 
               <div style={{ marginTop: 10 }}>
                 <Row label="Fonte">
