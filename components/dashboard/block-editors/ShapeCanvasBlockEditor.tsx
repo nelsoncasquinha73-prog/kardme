@@ -29,6 +29,7 @@ type ShapeCanvasItem = {
   fontFamily?: string
   fontSizePx?: number
   lineHeight?: number
+  paragraphGapPx?: number
   textAlign?: 'left' | 'center' | 'right'
   vAlign?: 'top' | 'center' | 'bottom'
   paddingPx?: number
@@ -476,6 +477,22 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
                     {(selected.lineHeight ?? 1.15).toFixed(2)}
                   </div>
                 </Row>
+
+                <Row label="Espaço entre parágrafos">
+                  <input
+                    type="range"
+                    min={0}
+                    max={26}
+                    step={1}
+                    value={selected.paragraphGapPx ?? 0}
+                    onChange={(e) => updateItem(selected.id, { paragraphGapPx: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    {selected.paragraphGapPx ?? 0}px
+                  </div>
+                </Row>
+
 </Row>
 
               <Section title="Posição do texto">

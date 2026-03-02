@@ -26,6 +26,7 @@ export type ShapeCanvasItem = {
   fontFamily?: string
   fontSizePx?: number
   lineHeight?: number
+  paragraphGapPx?: number
   textAlign?: 'left' | 'center' | 'right'
   vAlign?: 'top' | 'center' | 'bottom'
   paddingPx?: number
@@ -189,7 +190,7 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
 em,i{font-style:italic !important;}
 s,del{text-decoration:line-through !important;}
 u{text-decoration:underline !important;}
-p{margin:0 !important; line-height:inherit !important;}
+p{margin:0 0 ${(it.paragraphGapPx ?? 0)}px 0 !important; line-height:inherit !important;}\n                p:last-child{margin-bottom:0 !important;}
 *{line-height:inherit !important;}`}</style>
               <div
                 style={{
