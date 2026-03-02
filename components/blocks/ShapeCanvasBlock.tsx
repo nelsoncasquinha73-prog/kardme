@@ -191,7 +191,7 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
 em,i{font-style:italic !important;}
 s,del{text-decoration:line-through !important;}
 u{text-decoration:underline !important;}
-:global(p){margin:0 !important; line-height:inherit !important;}
+:global(p){margin:0 !important; line-height: var(--lh, 1.15) !important;}
                 :global(p + p){margin-top: var(--p-gap, 0px) !important;}
 *{line-height:inherit !important;}`}</style>
               <div
@@ -199,6 +199,7 @@ u{text-decoration:underline !important;}
                   fontFamily: it.fontFamily || undefined,
                   fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
                   lineHeight: it.lineHeight ?? 1.15,
+                  ['--lh' as any]: String(it.lineHeight ?? 1.15),
                   ['--p-gap' as any]: `${it.paragraphGapPx ?? 0}px`,
                   textAlign: it.textAlign ?? 'center',
                   transform: `translate(${it.textOffsetX ?? 0}px, ${it.textOffsetY ?? 0}px)`,
