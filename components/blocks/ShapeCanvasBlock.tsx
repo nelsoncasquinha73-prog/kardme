@@ -25,6 +25,7 @@ export type ShapeCanvasItem = {
   textHtml?: string
   fontFamily?: string
   fontSizePx?: number
+  lineHeight?: number
   textAlign?: 'left' | 'center' | 'right'
   vAlign?: 'top' | 'center' | 'bottom'
   paddingPx?: number
@@ -189,7 +190,7 @@ const bgColor = showCanvas ? (canvas.bgColor ?? 'transparent') : 'transparent'
                 style={{
                   fontFamily: it.fontFamily || undefined,
                   fontSize: it.fontSizePx ? `${it.fontSizePx}px` : 13,
-                  lineHeight: 1.15,
+                  lineHeight: it.lineHeight ?? 1.15,
                   textAlign: it.textAlign ?? 'center',
                   transform: `translate(${it.textOffsetX ?? 0}px, ${it.textOffsetY ?? 0}px)`,
                 }}
