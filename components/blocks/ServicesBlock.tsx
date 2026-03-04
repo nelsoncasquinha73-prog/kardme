@@ -168,7 +168,11 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
   const buttonRadius = st.buttonRadiusPx ?? 8
 
   const imageAspectRatio = clamp(clampNum(st.imageAspectRatio, 1.5), 0.5, 3)
-  const carouselImageAspectRatio = layout === 'carousel' ? clamp(clampNum(st.carouselImageAspectRatio, 0.5625), 0.4, 2) : imageAspectRatio
+  const carouselImageAspectRatio =
+  layout === 'carousel'
+    ? clamp(clampNum(st.carouselImageAspectRatio, 1.7778), 0.8, 3)
+    : imageAspectRatio
+
   const imageRadius = st.imageRadiusPx ?? 10
 
   // foco imagem

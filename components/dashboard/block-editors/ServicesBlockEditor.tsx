@@ -185,6 +185,9 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
 
     imageRadiusPx: st.imageRadiusPx ?? 8,
     imageAspectRatio: st.imageAspectRatio ?? 1.5,
+    imageObjectFit: st.imageObjectFit ?? 'cover',
+carouselImageAspectRatio: st.carouselImageAspectRatio ?? 1.7778,
+
 
     // carrossel
     carouselCardWidthPx: clamp(st.carouselCardWidthPx ?? 320, 260, 360),
