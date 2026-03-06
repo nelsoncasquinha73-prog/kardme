@@ -97,6 +97,9 @@ export type ServicesStyle = {
   imageObjectFit?: 'cover' | 'contain'
   carouselImageAspectRatio?: number
 
+  imageFocusX?: number
+  imageFocusY?: number
+
   // carrossel
   carouselCardWidthPx?: number // 260–360
   carouselGapPx?: number
@@ -186,6 +189,9 @@ function normalizeStyle(input?: ServicesStyle): ServicesStyle {
     imageRadiusPx: st.imageRadiusPx ?? 8,
     imageAspectRatio: st.imageAspectRatio ?? 1.5,
     imageObjectFit: st.imageObjectFit ?? 'cover',
+    imageFocusX: clampNum(st.imageFocusX, 50),
+    imageFocusY: clampNum(st.imageFocusY, 50),
+
 carouselImageAspectRatio: st.carouselImageAspectRatio ?? 1.7778,
 
 
@@ -427,6 +433,93 @@ export default function ServicesBlockEditor({
             <option value="carousel">Carrossel</option>
           </select>
         </Row>
+      <Section title="🖼 Imagem">
+        <Row label="Modo (encaixe)">
+          <select
+            value={st.imageObjectFit ?? 'cover'}
+            onChange={(e) => updateStyle({ imageObjectFit: e.target.value as any })}
+            style={select}
+            data-no-block-select="1"
+            {...editEvents}
+          >
+            <option value="cover">Cover (corta para preencher)</option>
+            <option value="contain">Contain (mostra tudo)</option>
+          </select>
+        </Row>
+
+        <Row label="Formato da imagem (grid/list)">
+          <select
+            value={String(st.imageAspectRatio ?? 1.5)}
+            onChange={(e) => updateStyle({ imageAspectRatio: Number(e.target.value) })}
+            style={select}
+            data-no-block-select="1"
+            {...editEvents}
+          >
+            <option value="1.7778">16:9 (paisagem)</option>
+            <option value="1.5">3:2</option>
+            <option value="1.3333">4:3</option>
+            <option value="1">1:1 (quadrado)</option>
+            <option value="0.75">3:4 (retrato)</option>
+          </select>
+        </Row>
+
+        {isCarousel && (
+          <Row label="Formato da imagem (carrossel)">
+            <select
+              value={String(st.carouselImageAspectRatio ?? 1.7778)}
+              onChange={(e) => updateStyle({ carouselImageAspectRatio: Number(e.target.value) })}
+              style={select}
+              data-no-block-select="1"
+              {...editEvents}
+            >
+              <option value="1.7778">16:9 (paisagem)</option>
+              <option value="1.5">3:2</option>
+              <option value="1.3333">4:3</option>
+              <option value="1">1:1 (quadrado)</option>
+              <option value="0.75">3:4 (retrato)</option>
+            </select>
+          </Row>
+        )}
+
+        <Row label="Foco horizontal (X)">
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={st.imageFocusX ?? 50}
+            onChange={(e) => updateStyle({ imageFocusX: clamp(clampNum(e.target.value, 50), 0, 100) })}
+            data-no-block-select="1"
+          />
+          <span style={rightNum}>{st.imageFocusX ?? 50}%</span>
+        </Row>
+
+        <Row label="Foco vertical (Y)">
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={st.imageFocusY ?? 50}
+            onChange={(e) => updateStyle({ imageFocusY: clamp(clampNum(e.target.value, 50), 0, 100) })}
+            data-no-block-select="1"
+          />
+          <span style={rightNum}>{st.imageFocusY ?? 50}%</span>
+        </Row>
+
+        <Row label="Raio da imagem (px)">
+          <input
+            type="range"
+            min={0}
+            max={32}
+            step={1}
+            value={st.imageRadiusPx ?? 8}
+            onChange={(e) => updateStyle({ imageRadiusPx: clamp(clampNum(e.target.value, 8), 0, 32) })}
+            data-no-block-select="1"
+          />
+          <span style={rightNum}>{st.imageRadiusPx ?? 8}px</span>
+        </Row>
+      </Section>
 
         {isCarousel && (
           <>
