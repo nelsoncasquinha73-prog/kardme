@@ -185,6 +185,8 @@ export default function CrmProPage() {
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            color: '#111827',
+            fontWeight: 600,
             cursor: 'pointer',
           }}
         >
@@ -206,6 +208,8 @@ export default function CrmProPage() {
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            color: '#111827',
+            fontWeight: 600,
             cursor: 'pointer',
           }}
         >
