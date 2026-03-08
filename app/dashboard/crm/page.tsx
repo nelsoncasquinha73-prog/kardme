@@ -187,6 +187,7 @@ export default function CrmProPage() {
             background: '#fff',
             color: '#111827',
             fontWeight: 600,
+            minWidth: 180,
             cursor: 'pointer',
           }}
         >
@@ -210,6 +211,7 @@ export default function CrmProPage() {
             background: '#fff',
             color: '#111827',
             fontWeight: 600,
+            minWidth: 180,
             cursor: 'pointer',
           }}
         >
