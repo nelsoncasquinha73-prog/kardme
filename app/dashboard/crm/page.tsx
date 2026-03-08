@@ -180,7 +180,9 @@ export default function CrmProPage() {
           value={filterStep || ''}
           onChange={(e) => setFilterStep(e.target.value || null)}
           style={{
-            padding: '10px 12px',
+            padding: '0 12px',
+            height: 44,
+            lineHeight: '44px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
@@ -204,7 +206,9 @@ export default function CrmProPage() {
             else setFilterMarketing(e.target.value === 'true')
           }}
           style={{
-            padding: '10px 12px',
+            padding: '0 12px',
+            height: 44,
+            lineHeight: '44px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
