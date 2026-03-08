@@ -90,15 +90,15 @@ export default function CrmProPage() {
     loadLeads()
   }, [filterMarketing, filterStep])
 
-  const updateStep = async (id: string, novaEtapa: string) => {
+  const updateStep = async (id: string, newStep: string) => {
     await supabase
       .from('leads')
-      .update({ etapa: novaEtapa })
+      .update({ step: newStep })
       .eq('id', id)
 
     setLeads(prev =>
       prev.map(l =>
-        l.id === id ? { ...l, etapa: novaEtapa } : l
+        l.id === id ? { ...l, step: newStep } : l
       )
     )
   }
@@ -140,7 +140,7 @@ export default function CrmProPage() {
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
-  const etapaColor = (step: string) => {
+  const stepColor = (step: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
       'Novo': { bg: '#dbeafe', text: '#0c4a6e' },
       'Contactado': { bg: '#fef3c7', text: '#78350f' },
@@ -180,20 +180,15 @@ export default function CrmProPage() {
           value={filterStep || ''}
           onChange={(e) => setFilterStep(e.target.value || null)}
           style={{
-            padding: '0 12px',
-            height: 44,
-            lineHeight: '44px',
+            padding: '10px 12px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
-            color: '#111827',
-            fontWeight: 600,
-            minWidth: 240,
             cursor: 'pointer',
           }}
         >
-          <option value="">Todos (Etapa)</option>
+          <option value="">Todos (Step)</option>
           {STEPS.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
@@ -206,16 +201,11 @@ export default function CrmProPage() {
             else setFilterMarketing(e.target.value === 'true')
           }}
           style={{
-            padding: '0 12px',
-            height: 44,
-            lineHeight: '44px',
+            padding: '10px 12px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
-            color: '#111827',
-            fontWeight: 600,
-            minWidth: 240,
             cursor: 'pointer',
           }}
         >
@@ -246,7 +236,7 @@ export default function CrmProPage() {
                 <th style={th}>Nome</th>
                 <th style={th}>Email</th>
                 <th style={th}>Zona</th>
-                <th style={th}>Etapa</th>
+                <th style={th}>Step</th>
                 <th style={th}>Marketing</th>
                 <th style={th}>Data</th>
                 <th style={th}>Ação</th>
@@ -254,7 +244,7 @@ export default function CrmProPage() {
             </thead>
             <tbody>
               {filteredLeads.map(lead => {
-                const colors = etapaColor(lead.step)
+                const colors = stepColor(lead.step)
                 return (
                   <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                     <td style={td}>
@@ -434,23 +424,4 @@ const th = {
 
 const td = {
   padding: '12px 10px',
-}
-      {showEmailModal && selectedLeadForEmail && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
-            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
-            <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Mensagem</label>
-            <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
-              <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
-  )
 }
