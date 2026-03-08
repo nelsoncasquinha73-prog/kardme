@@ -55,7 +55,7 @@ export default function CrmProPage() {
         message,
         marketing_opt_in,
         consent_given,
-        etapa,
+        step,
         notes,
         created_at,
         contacted,
