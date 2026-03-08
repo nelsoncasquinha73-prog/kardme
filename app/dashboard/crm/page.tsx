@@ -148,7 +148,7 @@ export default function CrmProPage() {
       'Fechado': { bg: '#c7d2fe', text: '#312e81' },
       'Perdido': { bg: '#fee2e2', text: '#7f1d1d' },
     }
-    return colors[etapa] || { bg: '#f3f4f6', text: '#374151' }
+    return colors[step] || { bg: '#f3f4f6', text: '#374151' }
   }
 
   if (loading) {
