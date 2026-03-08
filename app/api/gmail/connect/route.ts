@@ -12,17 +12,20 @@ export async function POST(req: NextRequest) {
     const { userId } = await req.json()
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
 
     const state = Buffer.from(userId).toString('base64')
 
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: ['https://www.googleapis.com/auth/gmail.send'],
+      prompt: 'consent',
+      include_granted_scopes: true,
+      scope: [
+        'https://www.googleapis.com/auth/gmail.send',
+        // opcional (mas útil para ir buscar o email do "me" no futuro):
+        'https://www.googleapis.com/auth/gmail.readonly',
+      ],
       state,
     })
 
