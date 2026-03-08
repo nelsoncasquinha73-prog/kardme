@@ -9,9 +9,13 @@ type LeadFormSettings = {
   title?: string
   description?: string
   buttonLabel?: string
-  fields?: { name?: boolean; email?: boolean; phone?: boolean; message?: boolean }
-  labels?: { name?: string; email?: string; phone?: string; message?: string }
-  placeholders?: { name?: string; email?: string; phone?: string; message?: string }
+  fields?: { name?: boolean; email?: boolean; phone?: boolean; message?: boolean; zone?: boolean }
+  labels?: { name?: string; email?: string; phone?: string; message?: string; zone?: string }
+  placeholders?: { name?: string; email?: string; phone?: string; message?: string; zone?: string }
+  consentCheckboxEnabled?: boolean
+  consentCheckboxText?: string
+  marketingCheckboxEnabled?: boolean
+  marketingCheckboxText?: string
 }
 
 type LeadFormStyle = {
@@ -73,6 +77,9 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
   const setLabels = (patch: Partial<LeadFormSettings['labels']>) => setSettings({ labels: { ...labels, ...patch } })
   const setPlaceholders = (patch: Partial<LeadFormSettings['placeholders']>) => setSettings({ placeholders: { ...placeholders, ...patch } })
 
+  const consentCheckboxSettings = s.consentCheckboxEnabled ?? true
+  const marketingCheckboxSettings = s.marketingCheckboxEnabled ?? false
+
   const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (container.borderWidth ?? 0) > 0
 
@@ -98,6 +105,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         <Row label="Email"><Toggle active={fields.email !== false} onClick={() => setFields({ email: !(fields.email !== false) })} /></Row>
         <Row label="Telefone"><Toggle active={fields.phone !== false} onClick={() => setFields({ phone: !(fields.phone !== false) })} /></Row>
         <Row label="Mensagem"><Toggle active={fields.message !== false} onClick={() => setFields({ message: !(fields.message !== false) })} /></Row>
+        <Row label="Zona"><Toggle active={fields.zone === true} onClick={() => setFields({ zone: !(fields.zone === true) })} /></Row>
         
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
         
@@ -105,6 +113,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         <Row label="Label Email"><input type="text" value={labels.email ?? 'Email'} onChange={(e) => setLabels({ email: e.target.value })} style={inputStyle} /></Row>
         <Row label="Label Telefone"><input type="text" value={labels.phone ?? 'Telefone'} onChange={(e) => setLabels({ phone: e.target.value })} style={inputStyle} /></Row>
         <Row label="Label Mensagem"><input type="text" value={labels.message ?? 'Mensagem'} onChange={(e) => setLabels({ message: e.target.value })} style={inputStyle} /></Row>
+        <Row label="Label Zona"><input type="text" value={labels.zone ?? "Zona / Localização"} onChange={(e) => setLabels({ zone: e.target.value })} style={inputStyle} /></Row>
         
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
         
@@ -112,6 +121,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         <Row label="Placeholder Email"><input type="text" value={placeholders.email ?? ''} onChange={(e) => setPlaceholders({ email: e.target.value })} placeholder="Ex: Escreve o teu email" style={inputStyle} /></Row>
         <Row label="Placeholder Tel"><input type="text" value={placeholders.phone ?? ''} onChange={(e) => setPlaceholders({ phone: e.target.value })} placeholder="Ex: Opcional" style={inputStyle} /></Row>
         <Row label="Placeholder Msg"><input type="text" value={placeholders.message ?? ''} onChange={(e) => setPlaceholders({ message: e.target.value })} placeholder="Ex: Como posso ajudar?" style={inputStyle} /></Row>
+        <Row label="Placeholder Zona"><input type="text" value={placeholders.zone ?? ""} onChange={(e) => setPlaceholders({ zone: e.target.value })} placeholder="Ex: Lisboa, Oeiras" style={inputStyle} /></Row>
       </CollapsibleSection>
 
       {/* ========== TÍTULO (ESTILO) ========== */}
@@ -228,6 +238,18 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
       </CollapsibleSection>
 
        
+      {/* ========== CONSENTIMENTO ========== */}
+      <CollapsibleSection title="✔️ Consentimento" subtitle="Ativar, texto" isOpen={activeSection === 'consentimento'} onToggle={() => setActiveSection(activeSection === 'consentimento' ? null : 'consentimento')}>
+        <Row label="Ativar"><Toggle active={consentCheckboxSettings} onClick={() => setSettings({ consentCheckboxEnabled: !consentCheckboxSettings })} /></Row>
+        <Row label="Texto"><input type="text" value={s.consentCheckboxText ?? 'Concordo em ser contactado(a) para responder ao meu pedido.'} onChange={(e) => setSettings({ consentCheckboxText: e.target.value })} style={inputStyle} /></Row>
+      </CollapsibleSection>
+
+      {/* ========== MARKETING / BROADCAST ========== */}
+      <CollapsibleSection title="📧 Marketing / Broadcast" subtitle="Ativar, texto" isOpen={activeSection === 'marketing'} onToggle={() => setActiveSection(activeSection === 'marketing' ? null : 'marketing')}>
+        <Row label="Ativar"><Toggle active={marketingCheckboxSettings} onClick={() => setSettings({ marketingCheckboxEnabled: !marketingCheckboxSettings })} /></Row>
+        <Row label="Texto"><input type="text" value={s.marketingCheckboxText ?? 'Quero receber novidades e oportunidades por email.'} onChange={(e) => setSettings({ marketingCheckboxText: e.target.value })} style={inputStyle} /></Row>
+      </CollapsibleSection>
+
       {/* ========== CHECKBOX CONSENTIMENTO ========== */}
       <CollapsibleSection title="✅ Checkbox Consentimento" subtitle="Cor, fonte, tamanho" isOpen={activeSection === 'consent'} onToggle={() => setActiveSection(activeSection === 'consent' ? null : 'consent')}>
         <Row label="Cor">

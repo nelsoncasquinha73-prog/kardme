@@ -12,21 +12,26 @@ type LeadFormSettings = {
     email?: boolean
     phone?: boolean
     message?: boolean
+    zone?: boolean
   }
   buttonLabel?: string
   consentCheckboxEnabled?: boolean
   consentCheckboxText?: string
+  marketingCheckboxEnabled?: boolean
+  marketingCheckboxText?: string
   labels?: {
     name?: string
     email?: string
     phone?: string
     message?: string
+    zone?: string
   }
   placeholders?: {
     name?: string
     email?: string
     phone?: string
     message?: string
+    zone?: string
   }
 }
 
@@ -102,6 +107,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       email: s.fields?.email !== false,
       phone: s.fields?.phone !== false,
       message: s.fields?.message !== false,
+      zone: s.fields?.zone === true,
     }),
     [s.fields]
   )
@@ -111,6 +117,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     email: s.labels?.email ?? 'Email',
     phone: s.labels?.phone ?? 'Telefone',
     message: s.labels?.message ?? 'Mensagem',
+    zone: s.labels?.zone ?? 'Zona / Localização',
   }
 
   const placeholders = {
@@ -118,10 +125,12 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     email: s.placeholders?.email ?? 'Escreve o teu email',
     phone: s.placeholders?.phone ?? 'Opcional',
     message: s.placeholders?.message ?? 'Como posso ajudar?',
+    zone: s.placeholders?.zone ?? 'Ex.: Lisboa, Oeiras',
   }
 
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '', zone: '' })
   const [consentChecked, setConsentChecked] = useState(false)
+  const [marketingChecked, setMarketingChecked] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -189,7 +198,8 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     `
   }, [st.inputs?.placeholderColor, cardId])
 
-  const consentText = s.consentCheckboxText || t('common.consent_checkbox_text')
+  const consentText = s.consentCheckboxText || 'Concordo em ser contactado(a) para responder ao meu pedido.'
+  const marketingText = s.marketingCheckboxText || 'Quero receber novidades e oportunidades por email.'
 
   async function handleSubmit(e: React.FormEvent) {
     if ((s.consentCheckboxEnabled ?? true) && !consentChecked) {
@@ -204,7 +214,14 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardId, ...formData }),
+        body: JSON.stringify({
+          cardId,
+          ...formData,
+          consentGiven: consentChecked,
+          marketingOptIn: marketingChecked,
+          consentTimestamp: new Date().toISOString(),
+          consentVersion: '1.0',
+        }),
       })
 
       const data = await res.json().catch(() => ({}))
@@ -215,7 +232,9 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
 
       setStatus('success')
       trackEvent(cardId, 'lead', 'lead_form')
-      setFormData({ name: '', email: '', phone: '', message: '' })
+      setFormData({ name: '', email: '', phone: '', message: '', zone: '' })
+      setConsentChecked(false)
+      setMarketingChecked(false)
       window.setTimeout(() => setStatus('idle'), 1800)
     } catch (err: any) {
       setErrorMsg(err?.message || 'Erro no envio')
@@ -285,6 +304,19 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
           </div>
         )}
 
+        {fields.zone && (
+          <div>
+            <div style={labelStyle}>{labels.zone}</div>
+            <input
+              type="text"
+              placeholder={placeholders.zone}
+              value={formData.zone}
+              onChange={(e) => setFormData((p) => ({ ...p, zone: e.target.value }))}
+              style={inputStyle}
+            />
+          </div>
+        )}
+
         {fields.message && (
           <div>
             <div style={labelStyle}>{labels.message}</div>
@@ -308,6 +340,21 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             />
             <label htmlFor={`consent-${cardId}`} style={{ ...consentStyle, cursor: 'pointer', lineHeight: 1.4 }}>
               {consentText}
+            </label>
+          </div>
+        )}
+
+        {(s.marketingCheckboxEnabled ?? false) && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 4 }}>
+            <input
+              type="checkbox"
+              id={`marketing-${cardId}`}
+              checked={marketingChecked}
+              onChange={(e) => setMarketingChecked(e.target.checked)}
+              style={{ marginTop: 4, cursor: 'pointer', accentColor: st.button?.bgColor ?? 'var(--color-primary)' }}
+            />
+            <label htmlFor={`marketing-${cardId}`} style={{ ...consentStyle, cursor: 'pointer', lineHeight: 1.4 }}>
+              {marketingText}
             </label>
           </div>
         )}
