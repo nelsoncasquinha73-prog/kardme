@@ -103,6 +103,12 @@ export default function CrmProPage() {
     loadLeads()
   }, [filterMarketing, filterStep])
 
+  useEffect(() => {
+    if (!userId) return
+    gmail.checkConnection()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
   const updateStep = async (id: string, newStep: string) => {
     await supabase
       .from('leads')
@@ -200,11 +206,16 @@ export default function CrmProPage() {
           value={filterStep || ''}
           onChange={(e) => setFilterStep(e.target.value || null)}
           style={{
-            padding: '10px 12px',
+            padding: '0 12px',
+            height: 44,
+            lineHeight: '44px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 240,
             cursor: 'pointer',
           }}
         >
@@ -221,11 +232,16 @@ export default function CrmProPage() {
             else setFilterMarketing(e.target.value === 'true')
           }}
           style={{
-            padding: '10px 12px',
+            padding: '0 12px',
+            height: 44,
+            lineHeight: '44px',
             borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 240,
             cursor: 'pointer',
           }}
         >
