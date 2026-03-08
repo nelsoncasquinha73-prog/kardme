@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
 import { google } from 'googleapis'
 import nodemailer from 'nodemailer'
 import { createClient } from '@supabase/supabase-js'
@@ -51,16 +50,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Get user email from Auth
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
-    
-    if (userError || !user?.email) {
-      return NextResponse.json(
-        { error: 'User email not found' },
-        { status: 400 }
-      )
-    }
-
     // Refresh token if expired
     if (
       integration.token_expires_at &&
@@ -82,11 +71,15 @@ export async function POST(req: NextRequest) {
         .eq('id', integration.id)
     }
 
+    // Get the user's email from Auth (for sending)
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const senderEmail = user?.email || 'noreply@kardme.com'
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         type: 'OAuth2',
-        user: user.email,
+        user: senderEmail,
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: integration.refresh_token,
@@ -95,7 +88,7 @@ export async function POST(req: NextRequest) {
     })
 
     const info = await transporter.sendMail({
-      from: `${user.email}`,
+      from: senderEmail,
       to: recipientEmail,
       subject,
       html: body,
