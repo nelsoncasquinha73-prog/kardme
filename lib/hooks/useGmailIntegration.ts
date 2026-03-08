@@ -30,14 +30,20 @@ export function useGmailIntegration(userId: string) {
   }
 
   const sendEmail = async (leadId: string, recipientEmail: string, subject: string, body: string, templateId?: string) => {
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, leadId, recipientEmail, subject, body, templateId }),
-    })
-    const json = await response.json()
-    if (!response.ok) throw new Error(json?.error || 'Failed')
-    return json
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, leadId, recipientEmail, subject, body, templateId }),
+      })
+      const json = await response.json()
+      console.log('Send email response:', { status: response.status, json })
+      if (!response.ok) throw new Error(json?.details || json?.error || 'Failed')
+      return json
+    } catch (err: any) {
+      console.error('Send email error:', err)
+      throw err
+    }
   }
 
   return { isConnected, loading, checkConnection, connectGmail, sendEmail }
