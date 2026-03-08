@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { cardId, name, email, phone, message } = body || {}
+    const { cardId, name, email, phone, message, zone, consentGiven, marketingOptIn, consentTimestamp, consentVersion } = body || {}
 
     if (!cardId || !name || !email) {
       return NextResponse.json(
@@ -26,6 +26,11 @@ export async function POST(req: Request) {
         email,
         phone: phone || null,
         message: message || null,
+        zone: zone || null,
+        consent_given: consentGiven ?? true,
+        marketing_opt_in: marketingOptIn ?? false,
+        consent_timestamp: consentTimestamp || new Date().toISOString(),
+        consent_version: consentVersion || '1.0',
       },
     ])
 
