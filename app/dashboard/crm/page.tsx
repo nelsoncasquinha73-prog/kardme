@@ -12,17 +12,24 @@ type Lead = {
   message: string
   marketing_opt_in: boolean
   consent_given: boolean
+  step: string
+  notes: string | null
   created_at: string
   contacted: boolean
   card_id: string
 }
+
+const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
   const { t } = useLanguage()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
+  const [filterStep, setFilterStep] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [noteText, setNoteText] = useState('')
 
   const loadLeads = async () => {
     setLoading(true)
@@ -48,6 +55,8 @@ export default function CrmProPage() {
         message,
         marketing_opt_in,
         consent_given,
+        step,
+        notes,
         created_at,
         contacted,
         card_id,
@@ -59,6 +68,10 @@ export default function CrmProPage() {
 
     if (filterMarketing !== null) {
       query = query.eq('marketing_opt_in', filterMarketing)
+    }
+
+    if (filterStep !== null) {
+      query = query.eq('step', filterStep)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -75,7 +88,37 @@ export default function CrmProPage() {
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing])
+  }, [filterMarketing, filterStep])
+
+  const updateStep = async (id: string, newStep: string) => {
+    await supabase
+      .from('leads')
+      .update({ step: newStep })
+      .eq('id', id)
+
+    setLeads(prev =>
+      prev.map(l =>
+        l.id === id ? { ...l, step: newStep } : l
+      )
+    )
+  }
+
+  const updateNotes = async (id: string, notes: string) => {
+    await supabase
+      .from('leads')
+      .update({ notes: notes || null })
+      .eq('id', id)
+
+    setLeads(prev =>
+      prev.map(l =>
+        l.id === id ? { ...l, notes: notes || null } : l
+      )
+    )
+
+    if (selectedLead?.id === id) {
+      setSelectedLead({ ...selectedLead, notes: notes || null })
+    }
+  }
 
   const toggleContacted = async (id: string, current: boolean) => {
     await supabase
@@ -96,6 +139,17 @@ export default function CrmProPage() {
     l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  const stepColor = (step: string) => {
+    const colors: Record<string, { bg: string; text: string }> = {
+      'Novo': { bg: '#dbeafe', text: '#0c4a6e' },
+      'Contactado': { bg: '#fef3c7', text: '#78350f' },
+      'Qualificado': { bg: '#d1fae5', text: '#065f46' },
+      'Fechado': { bg: '#c7d2fe', text: '#312e81' },
+      'Perdido': { bg: '#fee2e2', text: '#7f1d1d' },
+    }
+    return colors[step] || { bg: '#f3f4f6', text: '#374151' }
+  }
 
   if (loading) {
     return <p style={{ padding: 32 }}>A carregar leads…</p>
@@ -121,6 +175,23 @@ export default function CrmProPage() {
             minWidth: 200,
           }}
         />
+
+        <select
+          value={filterStep || ''}
+          onChange={(e) => setFilterStep(e.target.value || null)}
+          style={{
+            padding: '10px 12px',
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+          }}
+        >
+          <option value="">Todos (Step)</option>
+          {STEPS.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
 
         <select
           value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
@@ -163,41 +234,85 @@ export default function CrmProPage() {
                 <th style={th}>Nome</th>
                 <th style={th}>Email</th>
                 <th style={th}>Zona</th>
+                <th style={th}>Step</th>
                 <th style={th}>Marketing</th>
                 <th style={th}>Data</th>
+                <th style={th}>Ação</th>
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.map(lead => (
-                <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                  <td style={td}>
-                    <input
-                      type="checkbox"
-                      checked={lead.contacted}
-                      onChange={() => toggleContacted(lead.id, lead.contacted)}
-                    />
-                  </td>
-                  <td style={td}>
-                    <strong>{lead.name}</strong>
-                    {lead.phone && <div style={{ fontSize: 11, opacity: 0.6 }}>{lead.phone}</div>}
-                  </td>
-                  <td style={td}>{lead.email}</td>
-                  <td style={td}>{lead.zone || '—'}</td>
-                  <td style={td}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: 6,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
-                      color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
-                    }}>
-                      {lead.marketing_opt_in ? 'Sim' : 'Não'}
-                    </span>
-                  </td>
-                  <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
-                </tr>
-              ))}
+              {filteredLeads.map(lead => {
+                const colors = stepColor(lead.step)
+                return (
+                  <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <td style={td}>
+                      <input
+                        type="checkbox"
+                        checked={lead.contacted}
+                        onChange={() => toggleContacted(lead.id, lead.contacted)}
+                      />
+                    </td>
+                    <td style={td}>
+                      <strong>{lead.name}</strong>
+                      {lead.phone && <div style={{ fontSize: 11, opacity: 0.6 }}>{lead.phone}</div>}
+                    </td>
+                    <td style={td}>{lead.email}</td>
+                    <td style={td}>{lead.zone || '—'}</td>
+                    <td style={td}>
+                      <select
+                        value={lead.step}
+                        onChange={(e) => updateStep(lead.id, e.target.value)}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          border: 'none',
+                          background: colors.bg,
+                          color: colors.text,
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {STEPS.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td style={td}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: 6,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
+                        color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
+                      }}>
+                        {lead.marketing_opt_in ? 'Sim' : 'Não'}
+                      </span>
+                    </td>
+                    <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td style={td}>
+                      <button
+                        onClick={() => {
+                          setSelectedLead(lead)
+                          setNoteText(lead.notes || '')
+                        }}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          border: '1px solid rgba(0,0,0,0.12)',
+                          background: '#fff',
+                          cursor: 'pointer',
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Notas
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -206,6 +321,91 @@ export default function CrmProPage() {
       <div style={{ marginTop: 20, fontSize: 12, opacity: 0.6 }}>
         Total: {filteredLeads.length} lead(s)
       </div>
+
+      {/* Modal de Notas */}
+      {selectedLead && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 16,
+            padding: 24,
+            maxWidth: 500,
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+          }}>
+            <h2 style={{ marginBottom: 16 }}>{selectedLead.name}</h2>
+            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>
+              {selectedLead.email} • {selectedLead.zone || 'Sem zona'}
+            </p>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, fontSize: 13 }}>
+              Notas
+            </label>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Adiciona notas sobre esta lead…"
+              style={{
+                width: '100%',
+                minHeight: 120,
+                padding: 12,
+                borderRadius: 12,
+                border: '1px solid rgba(0,0,0,0.12)',
+                fontSize: 13,
+                fontFamily: 'inherit',
+                marginBottom: 16,
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => {
+                  updateNotes(selectedLead.id, noteText)
+                  setSelectedLead(null)
+                }}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  background: 'var(--color-primary)',
+                  color: '#fff',
+                  border: 'none',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setSelectedLead(null)}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  background: '#f3f4f6',
+                  border: 'none',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
