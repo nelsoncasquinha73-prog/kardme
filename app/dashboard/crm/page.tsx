@@ -160,7 +160,7 @@ export default function CrmProPage() {
       <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
 
       {/* Filtros */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="text"
           placeholder="Pesquisar por nome, email ou zona…"
@@ -185,6 +185,7 @@ export default function CrmProPage() {
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            cursor: 'pointer',
           }}
         >
           <option value="">Todos (Step)</option>
@@ -205,6 +206,7 @@ export default function CrmProPage() {
             border: '1px solid rgba(0,0,0,0.12)',
             fontSize: 13,
             background: '#fff',
+            cursor: 'pointer',
           }}
         >
           <option value="">Todos (Marketing)</option>
@@ -220,101 +222,99 @@ export default function CrmProPage() {
       )}
 
       {filteredLeads.length > 0 && (
-        <div style={{ overflowX: 'auto' }}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: 13,
-            }}
-          >
-            <thead>
-              <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
-                <th style={th}>✓</th>
-                <th style={th}>Nome</th>
-                <th style={th}>Email</th>
-                <th style={th}>Zona</th>
-                <th style={th}>Step</th>
-                <th style={th}>Marketing</th>
-                <th style={th}>Data</th>
-                <th style={th}>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map(lead => {
-                const colors = stepColor(lead.step)
-                return (
-                  <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <td style={td}>
-                      <input
-                        type="checkbox"
-                        checked={lead.contacted}
-                        onChange={() => toggleContacted(lead.id, lead.contacted)}
-                      />
-                    </td>
-                    <td style={td}>
-                      <strong>{lead.name}</strong>
-                      {lead.phone && <div style={{ fontSize: 11, opacity: 0.6 }}>{lead.phone}</div>}
-                    </td>
-                    <td style={td}>{lead.email}</td>
-                    <td style={td}>{lead.zone || '—'}</td>
-                    <td style={td}>
-                      <select
-                        value={lead.step}
-                        onChange={(e) => updateStep(lead.id, e.target.value)}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: 6,
-                          border: 'none',
-                          background: colors.bg,
-                          color: colors.text,
-                          fontWeight: 600,
-                          fontSize: 12,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {STEPS.map(s => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td style={td}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: 6,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
-                        color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
-                      }}>
-                        {lead.marketing_opt_in ? 'Sim' : 'Não'}
-                      </span>
-                    </td>
-                    <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
-                    <td style={td}>
-                      <button
-                        onClick={() => {
-                          setSelectedLead(lead)
-                          setNoteText(lead.notes || '')
-                        }}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: 6,
-                          border: '1px solid rgba(0,0,0,0.12)',
-                          background: '#fff',
-                          cursor: 'pointer',
-                          fontSize: 11,
-                          fontWeight: 600,
-                        }}
-                      >
-                        Notas
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+          {filteredLeads.map(lead => {
+            const colors = stepColor(lead.step)
+            return (
+              <div
+                key={lead.id}
+                style={{
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 14,
+                  padding: 16,
+                  background: '#fff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800 }}>{lead.name}</h3>
+                    {lead.phone && <p style={{ margin: '4px 0 0 0', fontSize: 12, opacity: 0.6 }}>{lead.phone}</p>}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={lead.contacted}
+                    onChange={() => toggleContacted(lead.id, lead.contacted)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </div>
+
+                <p style={{ margin: '0 0 12px 0', fontSize: 12, opacity: 0.7 }}>{lead.email}</p>
+
+                {lead.zone && (
+                  <div style={{ display: 'inline-block', padding: '4px 8px', background: 'rgba(0,0,0,0.04)', borderRadius: 6, fontSize: 11, marginBottom: 12 }}>
+                    📍 {lead.zone}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <select
+                    value={lead.step}
+                    onChange={(e) => updateStep(lead.id, e.target.value)}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: colors.bg,
+                      color: colors.text,
+                      fontWeight: 600,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {STEPS.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+
+                  <span style={{
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
+                    color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
+                  }}>
+                    {lead.marketing_opt_in ? '📧 Sim' : '📧 Não'}
+                  </span>
+                </div>
+
+                <p style={{ margin: '0 0 12px 0', fontSize: 11, opacity: 0.5 }}>
+                  {new Date(lead.created_at).toLocaleDateString()}
+                </p>
+
+                <button
+                  onClick={() => {
+                    setSelectedLead(lead)
+                    setNoteText(lead.notes || '')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'var(--color-primary)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Notas
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
 
@@ -377,13 +377,14 @@ export default function CrmProPage() {
                 }}
                 style={{
                   flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: 12,
+                  padding: '12px 14px',
+                  borderRadius: 10,
                   background: 'var(--color-primary)',
                   color: '#fff',
                   border: 'none',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  fontSize: 13,
                 }}
               >
                 Guardar
@@ -392,12 +393,13 @@ export default function CrmProPage() {
                 onClick={() => setSelectedLead(null)}
                 style={{
                   flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: 12,
+                  padding: '12px 14px',
+                  borderRadius: 10,
                   background: '#f3f4f6',
-                  border: 'none',
+                  border: '1px solid rgba(0,0,0,0.08)',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  fontSize: 13,
                 }}
               >
                 Fechar
@@ -408,15 +410,4 @@ export default function CrmProPage() {
       )}
     </main>
   )
-}
-
-const th = {
-  textAlign: 'left' as const,
-  padding: '12px 10px',
-  fontWeight: 700,
-  fontSize: 12,
-}
-
-const td = {
-  padding: '12px 10px',
 }
