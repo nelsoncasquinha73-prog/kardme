@@ -12,21 +12,21 @@ type Lead = {
   message: string
   marketing_opt_in: boolean
   consent_given: boolean
-  etapa: string
+  step: string
   notes: string | null
   created_at: string
   contacted: boolean
   card_id: string
 }
 
-const ETAPAS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
+const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
   const { t } = useLanguage()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
-  const [filterEtapa, setFilterEtapa] = useState<string | null>(null)
+  const [filterStep, setFilterStep] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [noteText, setNoteText] = useState('')
@@ -70,8 +70,8 @@ export default function CrmProPage() {
       query = query.eq('marketing_opt_in', filterMarketing)
     }
 
-    if (filterEtapa !== null) {
-      query = query.eq('etapa', filterEtapa)
+    if (filterStep !== null) {
+      query = query.eq('step', filterStep)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -88,9 +88,9 @@ export default function CrmProPage() {
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing, filterEtapa])
+  }, [filterMarketing, filterStep])
 
-  const updateEtapa = async (id: string, novaEtapa: string) => {
+  const updateStep = async (id: string, novaEtapa: string) => {
     await supabase
       .from('leads')
       .update({ etapa: novaEtapa })
@@ -140,7 +140,7 @@ export default function CrmProPage() {
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
-  const etapaColor = (etapa: string) => {
+  const etapaColor = (step: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
       'Novo': { bg: '#dbeafe', text: '#0c4a6e' },
       'Contactado': { bg: '#fef3c7', text: '#78350f' },
@@ -177,8 +177,8 @@ export default function CrmProPage() {
         />
 
         <select
-          value={filterEtapa || ''}
-          onChange={(e) => setFilterEtapa(e.target.value || null)}
+          value={filterStep || ''}
+          onChange={(e) => setFilterStep(e.target.value || null)}
           style={{
             padding: '0 12px',
             height: 44,
@@ -194,7 +194,7 @@ export default function CrmProPage() {
           }}
         >
           <option value="">Todos (Etapa)</option>
-          {ETAPAS.map(s => (
+          {STEPS.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
@@ -254,7 +254,7 @@ export default function CrmProPage() {
             </thead>
             <tbody>
               {filteredLeads.map(lead => {
-                const colors = etapaColor(lead.etapa)
+                const colors = etapaColor(lead.step)
                 return (
                   <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                     <td style={td}>
@@ -272,8 +272,8 @@ export default function CrmProPage() {
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
                       <select
-                        value={lead.etapa}
-                        onChange={(e) => updateEtapa(lead.id, e.target.value)}
+                        value={lead.step}
+                        onChange={(e) => updateStep(lead.id, e.target.value)}
                         style={{
                           padding: '6px 10px',
                           borderRadius: 8,
@@ -285,7 +285,7 @@ export default function CrmProPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {ETAPAS.map(s => (
+                        {STEPS.map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
