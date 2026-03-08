@@ -2,6 +2,7 @@
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 
 type Lead = {
   id: string
@@ -23,6 +24,8 @@ const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
   const { t } = useLanguage()
+  const [userId, setUserId] = useState('')
+  const gmail = useGmailIntegration(userId)
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
@@ -30,6 +33,11 @@ export default function CrmProPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [noteText, setNoteText] = useState('')
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null)
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailBody, setEmailBody] = useState('')
+  const [emailLoading, setEmailLoading] = useState(false)
 
   const loadLeads = async () => {
     setLoading(true)
@@ -42,6 +50,11 @@ export default function CrmProPage() {
       setLeads([])
       setLoading(false)
       return
+    }
+
+    if (user.id !== userId) {
+      setUserId(user.id)
+      gmail.checkConnection()
     }
 
     let query = supabase
@@ -158,6 +171,13 @@ export default function CrmProPage() {
   return (
     <main style={{ padding: 32 }}>
       <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
+
+      {!gmail.isConnected && !gmail.loading && (
+        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <div><strong style={{ color: '#78350f' }}>Gmail não ligado</strong><p style={{ fontSize: 13, color: '#92400e', margin: '4px 0 0 0' }}>Liga o teu Gmail para enviar emails direto do CRM.</p></div>
+          <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#78350f', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Ligar Gmail</button>
+        </div>
+      )}
 
       {/* Filtros */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -294,11 +314,32 @@ export default function CrmProPage() {
                     </td>
                     <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
                     <td style={td}>
-                      <button
-                        onClick={() => {
-                          setSelectedLead(lead)
-                          setNoteText(lead.notes || '')
-                        }}
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          onClick={() => {
+                            setSelectedLeadForEmail(lead)
+                            setShowEmailModal(true)
+                          }}
+                          disabled={!gmail.isConnected}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: gmail.isConnected ? '#10b981' : '#d1d5db',
+                            color: '#fff',
+                            fontWeight: 800,
+                            fontSize: 12,
+                            cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
+                          }}
+                          title={gmail.isConnected ? 'Enviar email' : 'Liga Gmail primeiro'}
+                        >
+                          ✉️
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedLead(lead)
+                            setNoteText(lead.notes || '')
+                          }}
                         style={{
                           padding: '6px 10px',
                           borderRadius: 8,
@@ -312,6 +353,7 @@ export default function CrmProPage() {
                       >
                         Notas
                       </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -407,6 +449,23 @@ export default function CrmProPage() {
               >
                 Fechar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEmailModal && selectedLeadForEmail && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+            <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
+            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
+            <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Mensagem</label>
+            <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
+              <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
             </div>
           </div>
         </div>
