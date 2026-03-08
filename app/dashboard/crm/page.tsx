@@ -12,21 +12,21 @@ type Lead = {
   message: string
   marketing_opt_in: boolean
   consent_given: boolean
-  step: string
+  etapa: string
   notes: string | null
   created_at: string
   contacted: boolean
   card_id: string
 }
 
-const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
+const ETAPAS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
   const { t } = useLanguage()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
-  const [filterStep, setFilterStep] = useState<string | null>(null)
+  const [filterEtapa, setFilterEtapa] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [noteText, setNoteText] = useState('')
@@ -55,7 +55,7 @@ export default function CrmProPage() {
         message,
         marketing_opt_in,
         consent_given,
-        step,
+        etapa,
         notes,
         created_at,
         contacted,
@@ -70,8 +70,8 @@ export default function CrmProPage() {
       query = query.eq('marketing_opt_in', filterMarketing)
     }
 
-    if (filterStep !== null) {
-      query = query.eq('step', filterStep)
+    if (filterEtapa !== null) {
+      query = query.eq('etapa', filterEtapa)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -88,17 +88,17 @@ export default function CrmProPage() {
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing, filterStep])
+  }, [filterMarketing, filterEtapa])
 
-  const updateStep = async (id: string, newStep: string) => {
+  const updateEtapa = async (id: string, novaEtapa: string) => {
     await supabase
       .from('leads')
-      .update({ step: newStep })
+      .update({ etapa: novaEtapa })
       .eq('id', id)
 
     setLeads(prev =>
       prev.map(l =>
-        l.id === id ? { ...l, step: newStep } : l
+        l.id === id ? { ...l, etapa: novaEtapa } : l
       )
     )
   }
@@ -140,7 +140,7 @@ export default function CrmProPage() {
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
-  const stepColor = (step: string) => {
+  const etapaColor = (etapa: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
       'Novo': { bg: '#dbeafe', text: '#0c4a6e' },
       'Contactado': { bg: '#fef3c7', text: '#78350f' },
@@ -148,7 +148,7 @@ export default function CrmProPage() {
       'Fechado': { bg: '#c7d2fe', text: '#312e81' },
       'Perdido': { bg: '#fee2e2', text: '#7f1d1d' },
     }
-    return colors[step] || { bg: '#f3f4f6', text: '#374151' }
+    return colors[etapa] || { bg: '#f3f4f6', text: '#374151' }
   }
 
   if (loading) {
@@ -177,8 +177,8 @@ export default function CrmProPage() {
         />
 
         <select
-          value={filterStep || ''}
-          onChange={(e) => setFilterStep(e.target.value || null)}
+          value={filterEtapa || ''}
+          onChange={(e) => setFilterEtapa(e.target.value || null)}
           style={{
             padding: '0 12px',
             height: 44,
@@ -193,8 +193,8 @@ export default function CrmProPage() {
             cursor: 'pointer',
           }}
         >
-          <option value="">Todos (Step)</option>
-          {STEPS.map(s => (
+          <option value="">Todos (Etapa)</option>
+          {ETAPAS.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
@@ -246,7 +246,7 @@ export default function CrmProPage() {
                 <th style={th}>Nome</th>
                 <th style={th}>Email</th>
                 <th style={th}>Zona</th>
-                <th style={th}>Step</th>
+                <th style={th}>Etapa</th>
                 <th style={th}>Marketing</th>
                 <th style={th}>Data</th>
                 <th style={th}>Ação</th>
@@ -254,7 +254,7 @@ export default function CrmProPage() {
             </thead>
             <tbody>
               {filteredLeads.map(lead => {
-                const colors = stepColor(lead.step)
+                const colors = etapaColor(lead.etapa)
                 return (
                   <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                     <td style={td}>
@@ -272,8 +272,8 @@ export default function CrmProPage() {
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
                       <select
-                        value={lead.step}
-                        onChange={(e) => updateStep(lead.id, e.target.value)}
+                        value={lead.etapa}
+                        onChange={(e) => updateEtapa(lead.id, e.target.value)}
                         style={{
                           padding: '6px 10px',
                           borderRadius: 8,
@@ -285,7 +285,7 @@ export default function CrmProPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {STEPS.map(s => (
+                        {ETAPAS.map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
