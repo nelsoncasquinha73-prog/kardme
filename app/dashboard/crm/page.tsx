@@ -3,6 +3,8 @@ import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
+import { logLeadActivity } from '@/lib/crm/logLeadActivity'
+import { createLeadTask, markTaskDone, fetchTasksForDay, type LeadTask } from '@/lib/crm/tasks'
 
 type Lead = {
   id: string
@@ -39,6 +41,15 @@ export default function CrmProPage() {
   const [emailBody, setEmailBody] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [tasksToday, setTasksToday] = useState<LeadTask[]>([])
+  const [loadingTasks, setLoadingTasks] = useState(false)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [selectedLeadForTask, setSelectedLeadForTask] = useState<Lead | null>(null)
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskDesc, setTaskDesc] = useState('')
+  const [taskDueDate, setTaskDueDate] = useState('')
+  const [taskDueTime, setTaskDueTime] = useState('09:00')
+  const [leadActivities, setLeadActivities] = useState<any[]>([])
 
   const loadLeads = async () => {
     setLoading(true)
@@ -110,6 +121,32 @@ export default function CrmProPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
+  useEffect(() => {
+    if (!tasksToday || tasksToday.length === 0) return
+
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {})
+      }
+    }
+
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      const now = Date.now()
+      tasksToday.forEach(t => {
+        const due = new Date(t.due_at).getTime()
+        const diffMin = Math.round((due - now) / 60000)
+        const isOverdue = diffMin < 0
+        const isSoon = diffMin >= 0 && diffMin <= 60
+
+        if (isOverdue || isSoon) {
+          new Notification(isOverdue ? 'Tarefa atrasada' : 'Tarefa a chegar', {
+            body: `${t.title} (${isOverdue ? 'atrasada' : 'em ' + diffMin + ' min'})`,
+          })
+        }
+      })
+    }
+  }, [tasksToday])
+
   const updateStep = async (id: string, newStep: string) => {
     await supabase
       .from('leads')
@@ -153,6 +190,30 @@ export default function CrmProPage() {
     )
   }
 
+  const createTaskForLead = async () => {
+    if (!selectedLeadForTask || !taskTitle || !taskDueDate || !taskDueTime) {
+      alert('Preenche título, data e hora')
+      return
+    }
+    const dueAtISO = new Date(`${taskDueDate}T${taskDueTime}:00`).toISOString()
+    const { error } = await createLeadTask({
+      leadId: selectedLeadForTask.id,
+      userId,
+      title: taskTitle,
+      description: taskDesc || undefined,
+      dueAtISO,
+    })
+    if (!error) {
+      await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
+      setShowTaskModal(false)
+      setTaskTitle('')
+      setTaskDesc('')
+      setTaskDueDate('')
+      setTaskDueTime('09:00')
+      await loadTasksForToday()
+    }
+  }
+
   const deleteLead = async (id: string) => {
     if (!confirm("Tens a certeza que queres apagar esta lead?")) return
     setDeletingId(id)
@@ -187,6 +248,28 @@ export default function CrmProPage() {
   return (
     <main style={{ padding: 32 }}>
       <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
+
+      {tasksToday.length > 0 && (
+        <div style={{ background: '#fef3c7', border: '2px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <strong style={{ color: '#78350f', fontSize: 14 }}>📋 {tasksToday.length} tarefa(s) para hoje</strong>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {tasksToday.map(t => {
+              const isPast = new Date(t.due_at) < new Date()
+              return (
+                <div key={t.id} style={{ background: isPast ? '#fee2e2' : '#fff', padding: 12, borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}` }}>
+                  <div>
+                    <strong style={{ fontSize: 13, color: isPast ? '#991b1b' : '#111827' }}>{t.title}</strong>
+                    <p style={{ fontSize: 12, opacity: 0.6, margin: '4px 0 0 0' }}>{new Date(t.due_at).toLocaleString('pt-PT')}</p>
+                  </div>
+                  <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Feita</button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {!gmail.isConnected && !gmail.loading && (
         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
@@ -387,6 +470,13 @@ export default function CrmProPage() {
                         >
                           🗑️
                         </button>
+                        <button
+                          onClick={() => { setSelectedLeadForTask(lead); setShowTaskModal(true) }}
+                          title="Agendar tarefa"
+                          style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: '#dbeafe', color: '#0c4a6e', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                        >
+                          📅
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -500,6 +590,36 @@ export default function CrmProPage() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showTaskModal && selectedLeadForTask && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1002 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 500, width: '90%' }}>
+            <h2 style={{ marginBottom: 16 }}>Agendar Tarefa</h2>
+            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForTask.name}</strong></p>
+            
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Título da Tarefa</label>
+            <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="Ex: Contactar, Follow-up, Enviar proposta..." style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+            
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Descrição (opcional)</label>
+            <textarea value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="Notas sobre a tarefa..." style={{ width: '100%', minHeight: 80, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+            
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Data</label>
+                <input type="date" value={taskDueDate} onChange={(e) => setTaskDueDate(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Hora</label>
+                <input type="time" value={taskDueTime} onChange={(e) => setTaskDueTime(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }} />
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
+              <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
             </div>
           </div>
         </div>
