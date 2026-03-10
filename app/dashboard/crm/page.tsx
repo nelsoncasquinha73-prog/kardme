@@ -903,7 +903,7 @@ export default function CrmProPage() {
 
       {showEmailModal && selectedLeadForEmail && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
             <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
 
@@ -966,9 +966,9 @@ export default function CrmProPage() {
             </div>
 
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Assunto</label>
-            <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+            <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
-            <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+            <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
