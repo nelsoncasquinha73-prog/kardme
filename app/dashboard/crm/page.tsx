@@ -372,7 +372,7 @@ export default function CrmProPage() {
       const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
 
       try {
-        await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody)
+        await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody, selectedTemplate?.id, selectedAttachments)
         sent++
         await logLeadActivity({ leadId: lead.id, userId, type: 'email_sent', title: `Email em massa enviado: ${personalizedSubject}` })
       } catch (err) {
@@ -1044,6 +1044,75 @@ export default function CrmProPage() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
+
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Template</label>
+                <select
+                  value={selectedTemplate?.id || ''}
+                  onChange={(e) => {
+                    const t = emailTemplates.find(x => x.id === e.target.value) || null
+                    if (t) applyTemplateToBulk(t)
+                  }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                >
+                  <option value="">— Escolher template —</option>
+                  {emailTemplates.map(t => (
+                    <option key={t.id} value={t.id}>
+                      [{t.category}] {t.name}{t.id.startsWith('default-') ? ' (Kardme)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ fontSize: 11, opacity: 0.7, marginTop: 6 }}>Variáveis: {'{nome}'}, {'{email}'}</div>
+                {selectedTemplate && (
+                  <div style={{ fontSize: 12, marginTop: 6, color: '#111827' }}>
+                    <strong>Selecionado:</strong> [{selectedTemplate.category}] {selectedTemplate.name}{selectedTemplate.id.startsWith('default-') ? ' (Kardme)' : ''}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Anexos (máx 5 / 10MB)</label>
+              <input
+                id="bulk-email-attachments"
+                type="file"
+                multiple
+                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx"
+                style={{ position: 'absolute', left: -9999, width: 1, height: 1, opacity: 0 }}
+                onChange={async (e) => {
+                  const atts = await filesToAttachments(e.target.files)
+                  if (atts.length > 0) setSelectedAttachments(atts)
+                }}
+              />
+              <label
+                htmlFor="bulk-email-attachments"
+                style={{
+                  display: 'inline-block',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: '#111827',
+                  color: '#fff',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  fontSize: 13,
+                }}
+              >
+                + Adicionar ficheiros
+              </label>
+              {selectedAttachments.length > 0 && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#111827' }}>
+                  <strong>Anexos:</strong>
+                  <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
+                    {selectedAttachments.map((a, idx) => (
+                      <li key={idx}>{a.filename}</li>
+                    ))}
+                  </ul>
+                  <button onClick={() => setSelectedAttachments([])} style={{ padding: '6px 10px', borderRadius: 8, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, color: '#111827' }}>Remover anexos</button>
+                </div>
+              )}
+            </div>
+
 
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Assunto</label>
             <input type="text" value={bulkSubject} onChange={(e) => setBulkSubject(e.target.value)} placeholder="Ex: Obrigado pela presença! Use {nome} para personalizar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
