@@ -147,6 +147,12 @@ export default function CrmProPage() {
     }
   }, [tasksToday])
 
+  useEffect(() => {
+    if (!userId) return
+    loadTasksForToday()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
   const updateStep = async (id: string, newStep: string) => {
     await supabase
       .from('leads')
@@ -189,6 +195,20 @@ export default function CrmProPage() {
       )
     )
   }
+  const loadTasksForToday = async () => {
+    if (!userId) return
+    setLoadingTasks(true)
+    const today = new Date().toISOString().split('T')[0]
+    const { data, error } = await fetchTasksForDay({ userId, dayISO: today })
+    if (error) {
+      console.error('Erro a carregar tarefas:', error)
+      setTasksToday([])
+    } else {
+      setTasksToday(data || [])
+    }
+    setLoadingTasks(false)
+  }
+
 
   const createTaskForLead = async () => {
     if (!selectedLeadForTask || !taskTitle || !taskDueDate || !taskDueTime) {
