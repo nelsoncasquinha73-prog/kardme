@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
-import nodemailer from 'nodemailer'
 import { createClient } from '@supabase/supabase-js'
-
-const oauth2Client = new google.auth.OAuth2(
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  `${process.env.NEXT_PUBLIC_APP_URL}/api/gmail/callback`
-)
 
 function getAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -17,9 +10,15 @@ function getAdminSupabase() {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
   }
 
-  return createClient(url, serviceKey, {
-    auth: { persistSession: false },
-  })
+  return createClient(url, serviceKey, { auth: { persistSession: false } })
+}
+
+function toBase64Url(str: string) {
+  return Buffer.from(str)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '')
 }
 
 export async function POST(req: NextRequest) {
@@ -28,10 +27,7 @@ export async function POST(req: NextRequest) {
       await req.json()
 
     if (!userId || !leadId || !recipientEmail || !subject || !body) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const supabaseAdmin = getAdminSupabase()
@@ -44,26 +40,39 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (integrationError || !integration) {
+      return NextResponse.json({ error: 'Gmail not connected' }, { status: 401 })
+    }
+
+    if (!integration.refresh_token) {
       return NextResponse.json(
-        { error: 'Gmail not connected' },
-        { status: 401 }
+        { error: 'Missing refresh token. Please reconnect Gmail.' },
+        { status: 400 }
       )
     }
 
-    // Refresh token if expired
-    if (
-      integration.token_expires_at &&
-      new Date(integration.token_expires_at) < new Date()
-    ) {
-      oauth2Client.setCredentials({
-        refresh_token: integration.refresh_token,
-      })
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/gmail/callback`
+    )
 
+    // Ensure we have a valid access token
+    let accessToken = integration.access_token as string | null
+
+    const expired =
+      integration.token_expires_at &&
+      new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000) // 30s buffer
+
+    if (!accessToken || expired) {
+      oauth2Client.setCredentials({ refresh_token: integration.refresh_token })
       const { credentials } = await oauth2Client.refreshAccessToken()
+
+      accessToken = credentials.access_token || null
+
       await supabaseAdmin
         .from('user_integrations')
         .update({
-          access_token: credentials.access_token,
+          access_token: accessToken,
           token_expires_at: credentials.expiry_date
             ? new Date(credentials.expiry_date).toISOString()
             : null,
@@ -71,27 +80,37 @@ export async function POST(req: NextRequest) {
         .eq('id', integration.id)
     }
 
-    // Use the Gmail email address stored during OAuth
-    const senderEmail = integration.sender_email || 'noreply@kardme.com'
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Failed to obtain access token' }, { status: 500 })
+    }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: senderEmail,
-        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: integration.refresh_token,
-        accessToken: integration.access_token,
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+      refresh_token: integration.refresh_token,
+    })
+
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+
+    const fromEmail = integration.sender_email || 'me'
+
+    const raw = [
+      `From: ${fromEmail}`,
+      `To: ${recipientEmail}`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset="UTF-8"',
+      '',
+      body,
+    ].join('\r\n')
+
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: toBase64Url(raw),
       },
     })
 
-    const info = await transporter.sendMail({
-      from: senderEmail,
-      to: recipientEmail,
-      subject,
-      html: body,
-    })
+    const messageId = res.data.id || null
 
     await supabaseAdmin.from('message_history').insert({
       user_id: userId,
@@ -100,11 +119,11 @@ export async function POST(req: NextRequest) {
       recipient_email: recipientEmail,
       subject,
       body,
-      message_id: info.messageId,
+      message_id: messageId,
       sent_at: new Date().toISOString(),
     })
 
-    return NextResponse.json({ success: true, messageId: info.messageId })
+    return NextResponse.json({ success: true, messageId })
   } catch (err: any) {
     console.error('Send email error:', err)
     return NextResponse.json(
