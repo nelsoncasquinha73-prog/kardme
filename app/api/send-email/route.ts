@@ -21,13 +21,99 @@ function toBase64Url(str: string) {
     .replace(/=+$/g, '')
 }
 
+type AttachmentPayload = {
+  filename: string
+  mimeType: string
+  base64: string
+}
+
+function buildRawEmail(params: {
+  fromEmail: string
+  to: string
+  subject: string
+  htmlBody: string
+  attachments?: AttachmentPayload[]
+}) {
+  const attachments = params.attachments || []
+  const hasAttachments = attachments.length > 0
+
+  if (!hasAttachments) {
+    return [
+      `From: ${params.fromEmail}`,
+      `To: ${params.to}`,
+      `Subject: ${params.subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset="UTF-8"',
+      '',
+      params.htmlBody,
+    ].join('\r\n')
+  }
+
+  const boundary = 'kardme_boundary_' + Math.random().toString(16).slice(2)
+
+  const lines: string[] = []
+  lines.push(`From: ${params.fromEmail}`)
+  lines.push(`To: ${params.to}`)
+  lines.push(`Subject: ${params.subject}`)
+  lines.push('MIME-Version: 1.0')
+  lines.push(`Content-Type: multipart/mixed; boundary="${boundary}"`)
+  lines.push('')
+
+  // HTML part
+  lines.push(`--${boundary}`)
+  lines.push('Content-Type: text/html; charset="UTF-8"')
+  lines.push('Content-Transfer-Encoding: 7bit')
+  lines.push('')
+  lines.push(params.htmlBody)
+  lines.push('')
+
+  for (const att of attachments) {
+    const safeName = (att.filename || 'file').replace(/[\r\n"]/g, '')
+    const mime = (att.mimeType || 'application/octet-stream').replace(/[\r\n"]/g, '')
+
+    lines.push(`--${boundary}`)
+    lines.push(`Content-Type: ${mime}; name="${safeName}"`)
+    lines.push('Content-Transfer-Encoding: base64')
+    lines.push(`Content-Disposition: attachment; filename="${safeName}"`)
+    lines.push('')
+
+    const b64 = (att.base64 || '').replace(/\s+/g, '')
+    for (let i = 0; i < b64.length; i += 76) {
+      lines.push(b64.slice(i, i + 76))
+    }
+    lines.push('')
+  }
+
+  lines.push(`--${boundary}--`)
+  lines.push('')
+
+  return lines.join('\r\n')
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { userId, leadId, recipientEmail, subject, body, templateId } =
-      await req.json()
+    const {
+      userId,
+      leadId,
+      recipientEmail,
+      subject,
+      body,
+      templateId,
+      attachments,
+    } = await req.json()
 
     if (!userId || !leadId || !recipientEmail || !subject || !body) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const atts: AttachmentPayload[] = Array.isArray(attachments) ? attachments : []
+    if (atts.length > 5) {
+      return NextResponse.json({ error: 'Too many attachments (max 5)' }, { status: 400 })
+    }
+
+    const totalBase64Size = atts.reduce((sum, a) => sum + (a?.base64?.length || 0), 0)
+    if (totalBase64Size > 14 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Attachments too large (max ~10MB total)' }, { status: 400 })
     }
 
     const supabaseAdmin = getAdminSupabase()
@@ -56,12 +142,11 @@ export async function POST(req: NextRequest) {
       `${process.env.NEXT_PUBLIC_APP_URL}/api/gmail/callback`
     )
 
-    // Ensure we have a valid access token
     let accessToken = integration.access_token as string | null
 
     const expired =
       integration.token_expires_at &&
-      new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000) // 30s buffer
+      new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000)
 
     if (!accessToken || expired) {
       oauth2Client.setCredentials({ refresh_token: integration.refresh_token })
@@ -93,15 +178,13 @@ export async function POST(req: NextRequest) {
 
     const fromEmail = integration.sender_email || 'me'
 
-    const raw = [
-      `From: ${fromEmail}`,
-      `To: ${recipientEmail}`,
-      `Subject: ${subject}`,
-      'MIME-Version: 1.0',
-      'Content-Type: text/html; charset="UTF-8"',
-      '',
-      body,
-    ].join('\r\n')
+    const raw = buildRawEmail({
+      fromEmail,
+      to: recipientEmail,
+      subject,
+      htmlBody: body,
+      attachments: atts,
+    })
 
     const res = await gmail.users.messages.send({
       userId: 'me',

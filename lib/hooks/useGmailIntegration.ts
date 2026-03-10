@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import type { AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 
 export function useGmailIntegration(userId: string) {
   const [isConnected, setIsConnected] = useState(false)
@@ -29,15 +30,29 @@ export function useGmailIntegration(userId: string) {
     window.location.href = json.authUrl
   }
 
-  const sendEmail = async (leadId: string, recipientEmail: string, subject: string, body: string, templateId?: string) => {
+  const sendEmail = async (
+    leadId: string,
+    recipientEmail: string,
+    subject: string,
+    body: string,
+    templateId?: string,
+    attachments?: AttachmentPayload[]
+  ) => {
     try {
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, leadId, recipientEmail, subject, body, templateId }),
+        body: JSON.stringify({
+          userId,
+          leadId,
+          recipientEmail,
+          subject,
+          body,
+          templateId,
+          attachments: attachments || [],
+        }),
       })
       const json = await response.json()
-      console.log('Send email response:', { status: response.status, json })
       if (!response.ok) throw new Error(json?.details || json?.error || 'Failed')
       return json
     } catch (err: any) {
