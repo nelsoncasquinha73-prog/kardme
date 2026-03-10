@@ -585,6 +585,7 @@ export default function CrmProPage() {
               <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
                 <th style={th}>✓</th>
                 <th style={{ ...th, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
                   <input
                     type="checkbox"
                     checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
