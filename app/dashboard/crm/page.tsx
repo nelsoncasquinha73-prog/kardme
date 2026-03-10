@@ -267,6 +267,49 @@ export default function CrmProPage() {
 
   const leadById = new Map(leads.map(l => [l.id, l]))
 
+
+  const normalizePhone = (phone: string | null) => {
+    if (!phone) return null
+    if (phone.startsWith('+')) return phone
+    return null
+  }
+
+  const handleTaskAction = (task: LeadTask, lead: Lead | undefined) => {
+    const actionType = task.action_type || 'follow_up'
+    
+    if (actionType === 'email') {
+      setSelectedLeadForEmail(lead || null)
+      setShowEmailModal(true)
+    } else if (actionType === 'whatsapp') {
+      const phone = normalizePhone(lead?.phone)
+      if (!phone) {
+        alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
+        return
+      }
+      window.open('https://wa.me/' + phone.replace(/\D/g, ''), '_blank')
+    } else if (actionType === 'call') {
+      const phone = normalizePhone(lead?.phone)
+      if (!phone) {
+        alert('Esta lead não tem número de telefone válido (falta +XX)')
+        return
+      }
+      window.location.href = 'tel:' + phone
+    } else if (actionType === 'sms') {
+      const phone = normalizePhone(lead?.phone)
+      if (!phone) {
+        alert('Esta lead não tem número de SMS válido (falta +XX)')
+        return
+      }
+      window.location.href = 'sms:' + phone
+    } else if (actionType === 'message' || actionType === 'follow_up') {
+      setSelectedLead(lead || null)
+      setNoteText(lead?.notes || '')
+    } else if (actionType === 'meeting') {
+      setSelectedLeadForTask(lead || null)
+      setShowTaskModal(true)
+    }
+  }
+
   return (
     <main style={{ padding: 32 }}>
       <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
@@ -283,11 +326,26 @@ export default function CrmProPage() {
               return (
                 <div key={t.id} style={{ background: '#fff', padding: 12, borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}`, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                   <div style={{ cursor: lead ? 'pointer' : 'default', flex: 1 }} onClick={() => { if (lead) { setSelectedLead(lead); setNoteText(lead.notes || '') } }} title={lead ? 'Abrir lead' : 'Lead não encontrada'}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>{t.title}</div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>{t.title}</div>
+                      <span style={{ fontSize: 11, fontWeight: 800, background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                        {t.action_type === 'email' && '📧 Email'}
+                        {t.action_type === 'whatsapp' && '💬 WhatsApp'}
+                        {t.action_type === 'call' && '📞 Ligar'}
+                        {t.action_type === 'sms' && '✉️ SMS'}
+                        {t.action_type === 'message' && '📝 Mensagem'}
+                        {t.action_type === 'meeting' && '📅 Reunião'}
+                        {(!t.action_type || t.action_type === 'follow_up') && '✅ Follow-up'}
+                      </span>
+                    </div>
                     <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4 }}>{lead ? <><strong>{lead.name}</strong> · {lead.email}</> : <>Lead: {t.lead_id}</> }</div>
                     <div style={{ fontSize: 12, color: isPast ? '#991b1b' : '#92400e', marginTop: 4 }}>{new Date(t.due_at).toLocaleString('pt-PT')}</div>
                   </div>
-                  <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
+
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button onClick={() => handleTaskAction(t, lead)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Fazer</button>
+                    <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
+                  </div>
                 </div>
               )
             })}
