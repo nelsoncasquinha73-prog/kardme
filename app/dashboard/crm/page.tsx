@@ -613,7 +613,7 @@ export default function CrmProPage() {
                         onChange={() => toggleContacted(lead.id, lead.contacted)}
                       />
                     </td>
-                    <td style={td} style={{ textAlign: 'center' }}>
+                    <td style={{ ...td, textAlign: 'center' }}>
                       <input
                         type="checkbox"
                         checked={selectedLeadIds.has(lead.id)}
