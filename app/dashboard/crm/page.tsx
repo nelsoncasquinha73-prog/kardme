@@ -874,14 +874,14 @@ export default function CrmProPage() {
 
       {showBulkEmailModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
-            <input type="text" value={bulkSubject} onChange={(e) => setBulkSubject(e.target.value)} placeholder="Ex: Obrigado pela presença! Use {nome} para personalizar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Assunto</label>
+            <input type="text" value={bulkSubject} onChange={(e) => setBulkSubject(e.target.value)} placeholder="Ex: Obrigado pela presença! Use {nome} para personalizar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Mensagem</label>
-            <textarea value={bulkBody} onChange={(e) => setBulkBody(e.target.value)} placeholder="Use {nome} e {email} para personalizar." style={{ width: '100%', minHeight: 150, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Mensagem</label>
+            <textarea value={bulkBody} onChange={(e) => setBulkBody(e.target.value)} placeholder="Use {nome} e {email} para personalizar." style={{ width: '100%', minHeight: 150, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
 
             <div style={{ background: '#f0f9ff', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 12 }}>
               <strong>Preview (primeiras 2):</strong>
