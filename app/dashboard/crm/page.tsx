@@ -926,6 +926,11 @@ export default function CrmProPage() {
                   ))}
                 </select>
                 <div style={{ fontSize: 11, opacity: 0.7, marginTop: 6 }}>Variáveis: {'{nome}'}, {'{email}'}</div>
+                {selectedTemplate && (
+                  <div style={{ fontSize: 12, marginTop: 6, color: '#111827' }}>
+                    <strong>Selecionado:</strong> [{selectedTemplate.category}] {selectedTemplate.name}{selectedTemplate.id.startsWith('default-') ? ' (Kardme)' : ''}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'end' }}>
@@ -947,6 +952,8 @@ export default function CrmProPage() {
               <input
                 type="file"
                 multiple
+                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx"
+                style={{ display: 'block', width: '100%', padding: '10px 0' }}
                 onChange={async (e) => {
                   const atts = await filesToAttachments(e.target.files)
                   if (atts.length > 0) setSelectedAttachments(atts)
