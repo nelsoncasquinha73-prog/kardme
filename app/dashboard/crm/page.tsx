@@ -6,7 +6,6 @@ import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
-import { type AttachmentPayload } from '@/lib/hooks/useGmailIntegration'
 
 type Lead = {
   id: string
@@ -23,6 +22,8 @@ type Lead = {
   contacted: boolean
   card_id: string
 }
+
+type AttachmentPayload = { filename: string; mimeType: string; base64: string }
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
