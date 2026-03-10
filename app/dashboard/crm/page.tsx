@@ -49,6 +49,7 @@ export default function CrmProPage() {
   const [taskDesc, setTaskDesc] = useState('')
   const [taskDueDate, setTaskDueDate] = useState('')
   const [taskDueTime, setTaskDueTime] = useState('09:00')
+  const [taskActionType, setTaskActionType] = useState('follow_up')
   const [leadActivities, setLeadActivities] = useState<any[]>([])
 
   const loadLeads = async () => {
