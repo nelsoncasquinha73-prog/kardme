@@ -71,9 +71,8 @@ export async function POST(req: NextRequest) {
         .eq('id', integration.id)
     }
 
-    // Get the user's email from Auth (for sending)
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
-    const senderEmail = user?.email || 'noreply@kardme.com'
+    // Use the Gmail email address stored during OAuth
+    const senderEmail = integration.sender_email || 'noreply@kardme.com'
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',

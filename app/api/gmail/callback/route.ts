@@ -42,6 +42,13 @@ export async function GET(req: NextRequest) {
       )
     }
 
+    // Get Gmail email address (the "me" profile)
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+    oauth2Client.setCredentials(tokens)
+    
+    const { data: profile } = await gmail.users.getProfile({ userId: 'me' })
+    const gmailEmail = profile.emailAddress || 'noreply@kardme.com'
+
     const supabaseAdmin = getAdminSupabase()
 
     const { error } = await supabaseAdmin
@@ -56,6 +63,7 @@ export async function GET(req: NextRequest) {
             ? new Date(tokens.expiry_date).toISOString()
             : null,
           is_active: true,
+          sender_email: gmailEmail,
         },
         { onConflict: 'user_id,integration_type' }
       )
