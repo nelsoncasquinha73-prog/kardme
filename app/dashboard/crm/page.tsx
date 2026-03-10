@@ -265,6 +265,8 @@ export default function CrmProPage() {
     return <p style={{ padding: 32 }}>A carregar leads…</p>
   }
 
+  const leadById = new Map(leads.map(l => [l.id, l]))
+
   return (
     <main style={{ padding: 32 }}>
       <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
@@ -277,13 +279,15 @@ export default function CrmProPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {tasksToday.map(t => {
               const isPast = new Date(t.due_at) < new Date()
+              const lead = leadById.get(t.lead_id)
               return (
-                <div key={t.id} style={{ background: isPast ? '#fee2e2' : '#fff', padding: 12, borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}` }}>
-                  <div>
-                    <strong style={{ fontSize: 13, color: isPast ? '#991b1b' : '#111827' }}>{t.title}</strong>
-                    <p style={{ fontSize: 12, opacity: 0.6, margin: '4px 0 0 0' }}>{new Date(t.due_at).toLocaleString('pt-PT')}</p>
+                <div key={t.id} style={{ background: '#fff', padding: 12, borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}`, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                  <div style={{ cursor: lead ? 'pointer' : 'default', flex: 1 }} onClick={() => { if (lead) { setSelectedLead(lead); setNoteText(lead.notes || '') } }} title={lead ? 'Abrir lead' : 'Lead não encontrada'}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>{t.title}</div>
+                    <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4 }}>{lead ? <><strong>{lead.name}</strong> · {lead.email}</> : <>Lead: {t.lead_id}</> }</div>
+                    <div style={{ fontSize: 12, color: isPast ? '#991b1b' : '#92400e', marginTop: 4 }}>{new Date(t.due_at).toLocaleString('pt-PT')}</div>
                   </div>
-                  <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Feita</button>
+                  <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
                 </div>
               )
             })}
