@@ -42,8 +42,6 @@ export default function CrmProPage() {
   const [leadTasksLoading, setLeadTasksLoading] = useState(false)
 
 
-  const [leadTasks, setLeadTasks] = useState<LeadTask[]>([])
-  const [leadTasksLoading, setLeadTasksLoading] = useState(false)
 
 
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null)
