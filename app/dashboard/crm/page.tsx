@@ -568,7 +568,7 @@ export default function CrmProPage() {
       {selectedLeadIds.size > 0 && (
         <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
           <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
-          <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Limpar seleção</button>
+          <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Limpar seleção</button>
         </div>
       )}
 
@@ -821,13 +821,13 @@ export default function CrmProPage() {
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
             <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
             <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Assunto</label>
             <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Mensagem</label>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
             <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
-              <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+              <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
         </div>
@@ -866,7 +866,7 @@ export default function CrmProPage() {
             
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
-              <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+              <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
         </div>
@@ -875,7 +875,7 @@ export default function CrmProPage() {
       {showBulkEmailModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2 style={{ marginBottom: 16 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
+            <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
 
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
             <input type="text" value={bulkSubject} onChange={(e) => setBulkSubject(e.target.value)} placeholder="Ex: Obrigado pela presença! Use {nome} para personalizar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
@@ -913,7 +913,7 @@ export default function CrmProPage() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={sendBulkEmails} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A enviar…' : '⚡ Enviar agora'}</button>
               <button onClick={createBulkTasks} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A criar…' : '📅 Agendar'}</button>
-              <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+              <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
         </div>
