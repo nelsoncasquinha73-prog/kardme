@@ -286,6 +286,7 @@ export default function CrmProPage() {
     l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
 
   const toggleLeadSelection = (leadId: string) => {
     const newSet = new Set(selectedLeadIds)
@@ -304,7 +305,6 @@ export default function CrmProPage() {
       setSelectedLeadIds(new Set(filteredLeads.map(l => l.id)))
     }
   }
-  )
 
   const stepColor = (step: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
