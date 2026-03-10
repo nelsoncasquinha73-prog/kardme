@@ -38,6 +38,7 @@ export default function CrmProPage() {
   const [emailSubject, setEmailSubject] = useState('')
   const [emailBody, setEmailBody] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadLeads = async () => {
     setLoading(true)
@@ -150,6 +151,15 @@ export default function CrmProPage() {
         l.id === id ? { ...l, contacted: !current } : l
       )
     )
+  }
+
+  const deleteLead = async (id: string) => {
+    if (!confirm("Tens a certeza que queres apagar esta lead?")) return
+    setDeletingId(id)
+    const { error } = await supabase.from("leads").delete().eq("id", id)
+    if (error) { alert("Erro ao apagar."); setDeletingId(null); return }
+    setLeads(p => p.filter(l => l.id !== id))
+    setDeletingId(null)
   }
 
   const filteredLeads = leads.filter(l =>
@@ -369,6 +379,14 @@ export default function CrmProPage() {
                       >
                         Notas
                       </button>
+                        <button
+                          onClick={() => deleteLead(lead.id)}
+                          disabled={deletingId === lead.id}
+                          title="Apagar lead"
+                          style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: '#fee2e2', color: '#b91c1c', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </td>
                   </tr>
