@@ -9,6 +9,7 @@ export type LeadTask = {
   due_at: string
   status: 'open' | 'done' | 'cancelled'
   done_at: string | null
+  action_type: string | null
   created_at: string
   updated_at: string
 }
@@ -19,6 +20,7 @@ export async function createLeadTask(params: {
   title: string
   description?: string
   dueAtISO: string
+  actionType?: string
 }) {
   return supabase.from('lead_tasks').insert({
     lead_id: params.leadId,
@@ -26,6 +28,7 @@ export async function createLeadTask(params: {
     title: params.title,
     description: params.description || null,
     due_at: params.dueAtISO,
+    action_type: params.actionType || 'follow_up',
   })
 }
 
