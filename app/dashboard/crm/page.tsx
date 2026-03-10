@@ -286,24 +286,6 @@ export default function CrmProPage() {
     l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
-
-  const toggleLeadSelection = (leadId: string) => {
-    const newSet = new Set(selectedLeadIds)
-    if (newSet.has(leadId)) {
-      newSet.delete(leadId)
-    } else {
-      newSet.add(leadId)
-    }
-    setSelectedLeadIds(newSet)
-  }
-
-  const toggleAllLeads = () => {
-    if (selectedLeadIds.size === filteredLeads.length) {
-      setSelectedLeadIds(new Set())
-    } else {
-      setSelectedLeadIds(new Set(filteredLeads.map(l => l.id)))
-    }
-  }
   )
 
   const stepColor = (step: string) => {
@@ -331,6 +313,23 @@ export default function CrmProPage() {
   }
 
 
+  const toggleLeadSelection = (leadId: string) => {
+    const newSet = new Set(selectedLeadIds)
+    if (newSet.has(leadId)) {
+      newSet.delete(leadId)
+    } else {
+      newSet.add(leadId)
+    }
+    setSelectedLeadIds(newSet)
+  }
+
+  const toggleAllLeads = () => {
+    if (selectedLeadIds.size === filteredLeads.length) {
+      setSelectedLeadIds(new Set())
+    } else {
+      setSelectedLeadIds(new Set(filteredLeads.map(l => l.id)))
+    }
+  }
 
   const sendBulkEmails = async () => {
     if (!bulkSubject || !bulkBody) {
