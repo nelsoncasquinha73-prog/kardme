@@ -696,6 +696,15 @@ export default function CrmProPage() {
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Hora</label>
                 <input type="time" value={taskDueTime} onChange={(e) => setTaskDueTime(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }} />
+                <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }}>
+                  <option value="follow_up">✅ Follow-up</option>
+                  <option value="email">📧 Email</option>
+                  <option value="whatsapp">💬 WhatsApp</option>
+                  <option value="call">📞 Ligar</option>
+                  <option value="sms">✉️ SMS</option>
+                  <option value="message">📝 Mensagem</option>
+                  <option value="meeting">📅 Reunião</option>
+                </select>
               </div>
             </div>
             
