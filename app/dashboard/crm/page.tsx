@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
+import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
+import { type AttachmentPayload } from '@/lib/hooks/useGmailIntegration'
 
 type Lead = {
   id: string
@@ -59,6 +61,15 @@ export default function CrmProPage() {
   const [taskDueTime, setTaskDueTime] = useState('09:00')
   const [taskActionType, setTaskActionType] = useState('follow_up')
   const [leadActivities, setLeadActivities] = useState<any[]>([])
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([])
+  const [emailTemplateCategory, setEmailTemplateCategory] = useState('Todos')
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false)
+  const [saveTemplateName, setSaveTemplateName] = useState('')
+  const [saveTemplateCategory, setSaveTemplateCategory] = useState('Geral')
+  const [selectedAttachments, setSelectedAttachments] = useState<AttachmentPayload[]>([])
+  const [bulkAttachments, setBulkAttachments] = useState<AttachmentPayload[]>([])
+
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
   const [bulkSubject, setBulkSubject] = useState('')
@@ -167,6 +178,7 @@ export default function CrmProPage() {
   useEffect(() => {
     if (!userId) return
     loadTasksForToday()
+    loadEmailTemplates()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
@@ -442,6 +454,84 @@ export default function CrmProPage() {
       setShowTaskModal(true)
     }
   }
+
+
+  const loadEmailTemplates = async () => {
+    if (!userId) return
+    const { data, error } = await fetchEmailTemplates({ userId, category: emailTemplateCategory })
+    if (!error) {
+      const mine = (data as any) as EmailTemplate[]
+      // Defaults + meus templates
+      setEmailTemplates([...DEFAULT_EMAIL_TEMPLATES, ...(mine || [])])
+    }
+  }
+
+  const applyTemplateToEmail = (t: EmailTemplate, lead: Lead) => {
+    setSelectedTemplate(t)
+    setEmailSubject(t.subject.replace('{nome}', lead.name).replace('{email}', lead.email))
+    setEmailBody(t.body.replace('{nome}', lead.name).replace('{email}', lead.email))
+  }
+
+  const applyTemplateToBulk = (t: EmailTemplate) => {
+    setSelectedTemplate(t)
+    setBulkSubject(t.subject)
+    setBulkBody(t.body)
+  }
+
+  const filesToAttachments = async (files: FileList | null): Promise<AttachmentPayload[]> => {
+    if (!files || files.length === 0) return []
+    const list = Array.from(files)
+
+    if (list.length > 5) {
+      alert('Máximo 5 anexos')
+      return []
+    }
+
+    const totalBytes = list.reduce((sum, f) => sum + f.size, 0)
+    if (totalBytes > 10 * 1024 * 1024) {
+      alert('Anexos muito grandes (máx 10MB total)')
+      return []
+    }
+
+    const allowed = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]
+
+    for (const f of list) {
+      if (!allowed.includes(f.type)) {
+        alert(`Tipo não permitido: ${f.name} (${f.type || 'unknown'})`)
+        return []
+      }
+    }
+
+    const readAsBase64 = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          const res = String(reader.result || '')
+          // res é data:...;base64,XXXX
+          const base64 = res.includes('base64,') ? res.split('base64,')[1] : res
+          resolve(base64)
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+    const out: AttachmentPayload[] = []
+    for (const f of list) {
+      const base64 = await readAsBase64(f)
+      out.push({ filename: f.name, mimeType: f.type || 'application/octet-stream', base64 })
+    }
+    return out
+  }
+
 
   return (
     <main style={{ padding: 32 }}>
@@ -816,17 +906,107 @@ export default function CrmProPage() {
         </div>
       )}
 
+      {showSaveTemplateModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1005 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 520, width: '90%', color: '#111827' }}>
+            <h2 style={{ marginBottom: 16, fontSize: 18, fontWeight: 900 }}>Guardar Template</h2>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13 }}>Nome</label>
+            <input value={saveTemplateName} onChange={(e) => setSaveTemplateName(e.target.value)} placeholder="Ex: Obrigado Open House" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827', marginBottom: 12 }} />
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13 }}>Categoria</label>
+            <input value={saveTemplateCategory} onChange={(e) => setSaveTemplateCategory(e.target.value)} placeholder="Ex: Imobiliário" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827', marginBottom: 16 }} />
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={async () => {
+                  if (!userId) return alert('Sem userId')
+                  if (!saveTemplateName) return alert('Escolhe um nome')
+                  if (!emailSubject || !emailBody) return alert('Preenche assunto e mensagem')
+                  await createEmailTemplate({ userId, name: saveTemplateName, category: saveTemplateCategory || 'Geral', subject: emailSubject, body: emailBody })
+                  await loadEmailTemplates()
+                  setShowSaveTemplateModal(false)
+                }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                Guardar
+              </button>
+              <button onClick={() => setShowSaveTemplateModal(false)} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showEmailModal && selectedLeadForEmail && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
             <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
             <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
+
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Template</label>
+                <select
+                  value={selectedTemplate?.id || ''}
+                  onChange={(e) => {
+                    const t = emailTemplates.find(x => x.id === e.target.value) || null
+                    if (t) applyTemplateToEmail(t, selectedLeadForEmail)
+                  }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                >
+                  <option value="">— Escolher template —</option>
+                  {emailTemplates.map(t => (
+                    <option key={t.id} value={t.id}>
+                      [{t.category}] {t.name}{t.id.startsWith('default-') ? ' (Kardme)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ fontSize: 11, opacity: 0.7, marginTop: 6 }}>Variáveis: {'{nome}'}, {'{email}'}</div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'end' }}>
+                <button
+                  onClick={() => {
+                    setShowSaveTemplateModal(true)
+                    setSaveTemplateName('')
+                    setSaveTemplateCategory('Geral')
+                  }}
+                  style={{ padding: '10px 12px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
+                >
+                  Guardar como template
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Anexos (máx 5 / 10MB)</label>
+              <input
+                type="file"
+                multiple
+                onChange={async (e) => {
+                  const atts = await filesToAttachments(e.target.files)
+                  if (atts.length > 0) setSelectedAttachments(atts)
+                }}
+              />
+              {selectedAttachments.length > 0 && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#111827' }}>
+                  <strong>Anexos:</strong>
+                  <ul>
+                    {selectedAttachments.map((a, idx) => (
+                      <li key={idx}>{a.filename} ({a.mimeType})</li>
+                    ))}
+                  </ul>
+                  <button onClick={() => setSelectedAttachments([])} style={{ padding: '6px 10px', borderRadius: 8, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, color: '#111827' }}>Remover anexos</button>
+                </div>
+              )}
+            </div>
+
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Assunto</label>
             <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="Ex: Follow-up - Proposta" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
             <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
+              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
