@@ -268,7 +268,7 @@ export default function CrmProPage() {
   const leadById = new Map(leads.map(l => [l.id, l]))
 
 
-  const normalizePhone = (phone: string | null) => {
+  const normalizePhone = (phone: string | null | undefined) => {
     if (!phone) return null
     if (phone.startsWith('+')) return phone
     return null
