@@ -59,6 +59,14 @@ export default function CrmProPage() {
   const [taskDueTime, setTaskDueTime] = useState('09:00')
   const [taskActionType, setTaskActionType] = useState('follow_up')
   const [leadActivities, setLeadActivities] = useState<any[]>([])
+  const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
+  const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
+  const [bulkSubject, setBulkSubject] = useState('')
+  const [bulkBody, setBulkBody] = useState('')
+  const [bulkSending, setBulkSending] = useState(false)
+  const [bulkScheduleDate, setBulkScheduleDate] = useState('')
+  const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
+
 
   const loadLeads = async () => {
     setLoading(true)
@@ -291,6 +299,114 @@ export default function CrmProPage() {
     return null
   }
 
+
+  const toggleLeadSelection = (leadId: string) => {
+    const newSet = new Set(selectedLeadIds)
+    if (newSet.has(leadId)) {
+      newSet.delete(leadId)
+    } else {
+      newSet.add(leadId)
+    }
+    setSelectedLeadIds(newSet)
+  }
+
+  const toggleAllLeads = () => {
+    if (selectedLeadIds.size === filteredLeads.length) {
+      setSelectedLeadIds(new Set())
+    } else {
+      setSelectedLeadIds(new Set(filteredLeads.map(l => l.id)))
+    }
+  }
+
+  const sendBulkEmails = async () => {
+    if (!bulkSubject || !bulkBody) {
+      alert('Preenche assunto e mensagem')
+      return
+    }
+    if (selectedLeadIds.size === 0) {
+      alert('Seleciona pelo menos uma lead')
+      return
+    }
+
+    setBulkSending(true)
+    let sent = 0
+    let failed = 0
+
+    for (const leadId of Array.from(selectedLeadIds)) {
+      const lead = leads.find(l => l.id === leadId)
+      if (!lead) continue
+
+      const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
+      const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
+
+      try {
+        await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody)
+        sent++
+        await logLeadActivity({ leadId: lead.id, userId, type: 'email_sent', title: `Email em massa enviado: ${personalizedSubject}` })
+      } catch (err) {
+        failed++
+        console.error('Erro ao enviar para', lead.email, err)
+      }
+
+      await new Promise(r => setTimeout(r, 500))
+    }
+
+    alert(`Enviados: ${sent}, Falhados: ${failed}`)
+    setShowBulkEmailModal(false)
+    setBulkSubject('')
+    setBulkBody('')
+    setSelectedLeadIds(new Set())
+    setBulkSending(false)
+  }
+
+  const createBulkTasks = async () => {
+    if (!bulkSubject || !bulkBody) {
+      alert('Preenche assunto e mensagem')
+      return
+    }
+    if (selectedLeadIds.size === 0) {
+      alert('Seleciona pelo menos uma lead')
+      return
+    }
+
+    const scheduleDate = bulkScheduleDate || new Date().toISOString().split('T')[0]
+    const dueAtISO = new Date(`${scheduleDate}T${bulkScheduleTime}:00`).toISOString()
+
+    setBulkSending(true)
+    let created = 0
+
+    for (const leadId of Array.from(selectedLeadIds)) {
+      const lead = leads.find(l => l.id === leadId)
+      if (!lead) continue
+
+      const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
+      const personalizedBody = bulkBody.replace('{nome}', lead.name)
+
+      try {
+        await createLeadTask({
+          leadId: lead.id,
+          userId,
+          title: personalizedSubject,
+          description: personalizedBody,
+          dueAtISO,
+          actionType: 'email',
+        })
+        created++
+        await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Tarefa de email agendada: ${personalizedSubject}` })
+      } catch (err) {
+        console.error('Erro ao criar tarefa para', lead.email, err)
+      }
+    }
+
+    alert(`Tarefas criadas: ${created}`)
+    setShowBulkEmailModal(false)
+    setBulkSubject('')
+    setBulkBody('')
+    setSelectedLeadIds(new Set())
+    setBulkSending(false)
+  }
+
+
   const handleTaskAction = (task: LeadTask, lead: Lead | undefined) => {
     const actionType = task.action_type || 'follow_up'
     
@@ -449,6 +565,13 @@ export default function CrmProPage() {
         </p>
       )}
 
+      {selectedLeadIds.size > 0 && (
+        <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
+          <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
+          <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Limpar seleção</button>
+        </div>
+      )}
+
       {filteredLeads.length > 0 && (
         <div style={{ overflowX: 'auto' }}>
           <table
@@ -461,6 +584,14 @@ export default function CrmProPage() {
             <thead>
               <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
                 <th style={th}>✓</th>
+                <th style={th} style={{ textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
+                    onChange={toggleAllLeads}
+                    title="Selecionar todas"
+                  />
+                </th>
                 <th style={th}>Nome</th>
                 <th style={th}>Email</th>
                 <th style={th}>Zona</th>
@@ -480,6 +611,13 @@ export default function CrmProPage() {
                         type="checkbox"
                         checked={lead.contacted}
                         onChange={() => toggleContacted(lead.id, lead.contacted)}
+                      />
+                    </td>
+                    <td style={td} style={{ textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLeadIds.has(lead.id)}
+                        onChange={() => toggleLeadSelection(lead.id)}
                       />
                     </td>
                     <td style={td}>
@@ -728,6 +866,53 @@ export default function CrmProPage() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
               <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkEmailModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+            <h2 style={{ marginBottom: 16 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Assunto</label>
+            <input type="text" value={bulkSubject} onChange={(e) => setBulkSubject(e.target.value)} placeholder="Ex: Obrigado pela presença! Use {nome} para personalizar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Mensagem</label>
+            <textarea value={bulkBody} onChange={(e) => setBulkBody(e.target.value)} placeholder="Use {nome} e {email} para personalizar." style={{ width: '100%', minHeight: 150, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+
+            <div style={{ background: '#f0f9ff', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 12 }}>
+              <strong>Preview (primeiras 2):</strong>
+              <div style={{ marginTop: 8, fontSize: 11, opacity: 0.8 }}>
+                {filteredLeads.slice(0, 2).map(l => (
+                  <div key={l.id} style={{ marginBottom: 8, padding: 8, background: '#fff', borderRadius: 6 }}>
+                    <div><strong>{bulkSubject.replace('{nome}', l.name)}</strong></div>
+                    <div style={{ whiteSpace: 'pre-wrap', marginTop: 4, fontSize: 11 }}>{bulkBody.replace('{nome}', l.name).replace('{email}', l.email).slice(0, 80)}...</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16, padding: 12, background: '#fef3c7', borderRadius: 10 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginBottom: 10 }}>
+                <input type="radio" name="bulkAction" value="now" defaultChecked style={{ cursor: 'pointer' }} />
+                <span><strong>⚡ Enviar agora</strong> (imediatamente para todas)</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
+                <input type="radio" name="bulkAction" value="schedule" style={{ cursor: 'pointer' }} />
+                <span><strong>📅 Agendar</strong> (criar tarefas para)</span>
+              </label>
+              <div style={{ marginTop: 10, marginLeft: 28, display: 'flex', gap: 12 }}>
+                <input type="date" value={bulkScheduleDate} onChange={(e) => setBulkScheduleDate(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)', fontSize: 12 }} />
+                <input type="time" value={bulkScheduleTime} onChange={(e) => setBulkScheduleTime(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)', fontSize: 12 }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={sendBulkEmails} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A enviar…' : '⚡ Enviar agora'}</button>
+              <button onClick={createBulkTasks} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A criar…' : '📅 Agendar'}</button>
+              <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
             </div>
           </div>
         </div>
