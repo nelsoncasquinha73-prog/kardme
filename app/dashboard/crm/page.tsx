@@ -950,15 +950,32 @@ export default function CrmProPage() {
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Anexos (máx 5 / 10MB)</label>
               <input
+                id="email-attachments"
                 type="file"
                 multiple
                 accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx"
-                style={{ display: 'block', width: '100%', padding: '10px 0' }}
+                style={{ position: 'absolute', left: -9999, width: 1, height: 1, opacity: 0 }}
                 onChange={async (e) => {
                   const atts = await filesToAttachments(e.target.files)
                   if (atts.length > 0) setSelectedAttachments(atts)
                 }}
               />
+              <label
+                htmlFor="email-attachments"
+                style={{
+                  display: 'inline-block',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: '#111827',
+                  color: '#fff',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  marginTop: 6,
+                }}
+              >
+                + Adicionar ficheiros
+              </label>
               {selectedAttachments.length > 0 && (
                 <div style={{ marginTop: 8, fontSize: 12, color: '#111827' }}>
                   <strong>Anexos:</strong>
