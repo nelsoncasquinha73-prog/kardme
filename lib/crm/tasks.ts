@@ -53,3 +53,14 @@ export async function fetchTasksForDay(params: { userId: string; dayISO: string 
     .lte('due_at', end.toISOString())
     .order('due_at', { ascending: true })
 }
+
+
+export async function fetchTasksForLead(params: { userId: string; leadId: string }) {
+  return supabase
+    .from('lead_tasks')
+    .select('*')
+    .eq('user_id', params.userId)
+    .eq('lead_id', params.leadId)
+    .eq('status', 'open')
+    .order('due_at', { ascending: true })
+}

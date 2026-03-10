@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
-import { createLeadTask, markTaskDone, fetchTasksForDay, type LeadTask } from '@/lib/crm/tasks'
+import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
 
 type Lead = {
   id: string
@@ -36,6 +36,18 @@ export default function CrmProPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [noteText, setNoteText] = useState('')
   const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showLeadTasksModal, setShowLeadTasksModal] = useState(false)
+  const [selectedLeadForTasks, setSelectedLeadForTasks] = useState<Lead | null>(null)
+  const [leadTasks, setLeadTasks] = useState<LeadTask[]>([])
+  const [leadTasksLoading, setLeadTasksLoading] = useState(false)
+
+
+  const [showLeadTasksModal, setShowLeadTasksModal] = useState(false)
+  const [selectedLeadForTasks, setSelectedLeadForTasks] = useState<Lead | null>(null)
+  const [leadTasks, setLeadTasks] = useState<LeadTask[]>([])
+  const [leadTasksLoading, setLeadTasksLoading] = useState(false)
+
+
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null)
   const [emailSubject, setEmailSubject] = useState('')
   const [emailBody, setEmailBody] = useState('')
@@ -196,6 +208,14 @@ export default function CrmProPage() {
       )
     )
   }
+  const loadTasksForLead = async (leadId: string) => {
+    if (!userId) return
+    setLeadTasksLoading(true)
+    const { data, error } = await fetchTasksForLead({ userId, leadId })
+    if (!error) setLeadTasks((data as any) || [])
+    setLeadTasksLoading(false)
+  }
+
   const loadTasksForToday = async () => {
     if (!userId) return
     setLoadingTasks(true)
@@ -508,16 +528,16 @@ export default function CrmProPage() {
                     <td style={td}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
-                          onClick={() => {
-                            setSelectedLeadForEmail(lead)
-                            setShowEmailModal(true)
+                          onClick={async () => {
+                            setSelectedLeadForTasks(lead)
+                            setShowLeadTasksModal(true)
+                            await loadTasksForLead(lead.id)
                           }}
-                          disabled={!gmail.isConnected}
                           style={{
                             padding: '6px 10px',
                             borderRadius: 8,
                             border: 'none',
-                            background: gmail.isConnected ? '#10b981' : '#d1d5db',
+                            background: '#6366f1',
                             color: '#fff',
                             fontWeight: 800,
                             fontSize: 12,
@@ -716,6 +736,64 @@ export default function CrmProPage() {
           </div>
         </div>
       )}
+
+      {showLeadTasksModal && selectedLeadForTasks && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1003 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h2 style={{ marginBottom: 4 }}>Tarefas de {selectedLeadForTasks.name}</h2>
+                <p style={{ fontSize: 13, opacity: 0.6 }}>{selectedLeadForTasks.email}</p>
+              </div>
+              <button onClick={() => setShowLeadTasksModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>✕</button>
+            </div>
+
+            {leadTasksLoading && <p style={{ opacity: 0.6 }}>A carregar tarefas…</p>}
+
+            {!leadTasksLoading && leadTasks.length === 0 && (
+              <p style={{ opacity: 0.6, marginBottom: 20 }}>Nenhuma tarefa aberta. Cria uma nova!</p>
+            )}
+
+            {!leadTasksLoading && leadTasks.length > 0 && (
+              <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {leadTasks.map(t => {
+                  const isPast = new Date(t.due_at) < new Date()
+                  return (
+                    <div key={t.id} style={{ background: '#f9fafb', padding: 12, borderRadius: 10, borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                            <strong style={{ fontSize: 13 }}>{t.title}</strong>
+                            <span style={{ fontSize: 11, fontWeight: 800, background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: 999 }}>
+                              {t.action_type === 'email' && '📧 Email'}
+                              {t.action_type === 'whatsapp' && '💬 WhatsApp'}
+                              {t.action_type === 'call' && '📞 Ligar'}
+                              {t.action_type === 'sms' && '✉️ SMS'}
+                              {t.action_type === 'message' && '📝 Mensagem'}
+                              {t.action_type === 'meeting' && '📅 Reunião'}
+                              {(!t.action_type || t.action_type === 'follow_up') && '✅ Follow-up'}
+                            </span>
+                          </div>
+                          {t.description && <p style={{ fontSize: 12, opacity: 0.7, margin: 0 }}>{t.description}</p>}
+                          <p style={{ fontSize: 12, color: isPast ? '#991b1b' : '#666', margin: '6px 0 0 0' }}>{new Date(t.due_at).toLocaleString('pt-PT')}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button onClick={() => handleTaskAction(t, selectedLeadForTasks)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Fazer</button>
+                          <button onClick={async () => { await markTaskDone({ taskId: t.id }); await loadTasksForLead(selectedLeadForTasks.id) }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓</button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <button onClick={() => { setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}>+ Nova Tarefa</button>
+            <button onClick={() => setShowLeadTasksModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
+          </div>
+        </div>
+      )}
+
     </main>
   )
 }
