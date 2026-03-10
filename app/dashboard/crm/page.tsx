@@ -695,6 +695,28 @@ export default function CrmProPage() {
                     <td style={td}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
+                          onClick={() => {
+                            setSelectedLeadForEmail(lead)
+                            setShowEmailModal(true)
+                            setSelectedTemplate(null)
+                            setSelectedAttachments([])
+                          }}
+                          disabled={!gmail.isConnected}
+                          title={gmail.isConnected ? 'Enviar email agora' : 'Liga o Gmail para enviar emails'}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: gmail.isConnected ? '#10b981' : '#d1d5db',
+                            color: '#fff',
+                            fontWeight: 800,
+                            fontSize: 12,
+                            cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
+                          }}
+                        >
+                          📧
+                        </button>
+                        <button
                           onClick={async () => {
                             setSelectedLeadForTasks(lead)
                             setShowLeadTasksModal(true)
