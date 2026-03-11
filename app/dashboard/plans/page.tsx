@@ -335,7 +335,7 @@ export default function PlansPage() {
 
       </div>
 
-      {/* BENEFÍCIOS}
+      {/* BENEFÍCIOS */}
       <div style={{ marginTop: 40, textAlign: 'center' }}>
         <h3 style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 20 }}>
           {t('plans.whats_included') || 'O que está incluído'}
