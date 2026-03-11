@@ -211,7 +211,7 @@ Melhores cumprimentos,
       if (!userId) return
       const { data } = await supabase
         .from('cards')
-        .select('id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
+        .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
       setCardsList(data || [])
@@ -1617,7 +1617,7 @@ Melhores cumprimentos,
                     // Recarregar cards para refletir mudanças
                     const { data } = await supabase
                       .from('cards')
-                      .select('id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
+                      .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body')
                       .eq('user_id', userId)
                       .order('created_at', { ascending: false })
                     setCardsList(data || [])
