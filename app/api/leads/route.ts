@@ -8,7 +8,8 @@ const supabaseAdmin = createClient(
 
 async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string }) {
   try {
-    const response = await fetch('/api/send-email', {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
+    const response = await fetch(baseUrl + '/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -29,7 +30,8 @@ async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmai
 
 async function sendOwnerNotification(params: { userId: string; leadId: string; ownerEmail: string; leadName: string; leadEmail: string; cardTitle: string }) {
   try {
-    const response = await fetch('/api/send-email', {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
+    const response = await fetch(baseUrl + '/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
