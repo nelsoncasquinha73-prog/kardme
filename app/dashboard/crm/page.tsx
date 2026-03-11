@@ -73,6 +73,19 @@ export default function CrmProPage() {
   const [showViewLeadModal, setShowViewLeadModal] = useState(false)
   const [selectedLeadForView, setSelectedLeadForView] = useState<Lead | null>(null)
   const [viewLeadActivities, setViewLeadActivities] = useState<any[]>([])
+  const [cardsList, setCardsList] = useState<any[]>([])
+  const [selectedCardId, setSelectedCardId] = useState<string>('all')
+  const [showWelcomeSettingsModal, setShowWelcomeSettingsModal] = useState(false)
+  const [welcomeSubject, setWelcomeSubject] = useState('Bem-vindo à {cardTitle}! 🎉')
+  const [welcomeBody, setWelcomeBody] = useState(`Olá {nome},
+
+Obrigado por se registar e visitar o nosso cartão digital!
+
+Estamos entusiasmados por te ter connosco.
+
+Melhores cumprimentos,
+{cardTitle}`)
+
 
   const [selectedLeadForWhatsApp, setSelectedLeadForWhatsApp] = useState<Lead | null>(null)
   const [whatsAppMessage, setWhatsAppMessage] = useState('Olá {nome}, tudo bem?')
@@ -126,6 +139,10 @@ export default function CrmProPage() {
         )
       `)
       .eq('cards.user_id', user.id)
+
+    if (selectedCardId !== 'all') {
+      query = query.eq('card_id', selectedCardId)
+    }
 
     if (filterMarketing !== null) {
       query = query.eq('marketing_opt_in', filterMarketing)
@@ -187,6 +204,19 @@ export default function CrmProPage() {
     if (!userId) return
     loadTasksForToday()
     loadEmailTemplates()
+
+    // carregar cards do utilizador (para filtro + settings)
+    const loadCards = async () => {
+      if (!userId) return
+      const { data } = await supabase
+        .from('cards')
+        .select('id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      setCardsList(data || [])
+    }
+    loadCards()
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
@@ -526,7 +556,60 @@ export default function CrmProPage() {
 
   return (
     <main style={{ padding: 32 }}>
-      <h1 style={{ marginBottom: 24 }}>CRM Pro</h1>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
+        <h1 style={{ margin: 0, flex: 1 }}>CRM Pro</h1>
+
+        <select
+          value={selectedCardId}
+          onChange={(e) => setSelectedCardId(e.target.value)}
+          style={{
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.18)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          <option value="all">— Todos os cartões —</option>
+          {cardsList.map((card: any) => (
+            <option key={card.id} value={card.id}>
+              {card.title}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={() => {
+            if (selectedCardId === 'all') {
+              alert('Seleciona um cartão para configurar a mensagem de boas-vindas')
+              return
+            }
+            const card = cardsList.find((c: any) => c.id === selectedCardId)
+            if (card) {
+              setWelcomeSubject(card.crm_pro_welcome_subject || 'Bem-vindo à {cardTitle}! 🎉')
+              setWelcomeBody(card.crm_pro_welcome_body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}')
+              setShowWelcomeSettingsModal(true)
+            }
+          }}
+          disabled={selectedCardId === 'all'}
+          title="Configurar mensagem de boas-vindas"
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: selectedCardId === 'all' ? '#d1d5db' : '#8b5cf6',
+            color: '#fff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+          }}
+        >
+          ⚙️ Mensagem
+        </button>
+      </div>
 
       {tasksToday.length > 0 && (
         <div style={{ background: '#fef3c7', border: '2px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 20 }}>
@@ -1397,6 +1480,79 @@ export default function CrmProPage() {
                 style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showWelcomeSettingsModal && selectedCardId !== 'all' && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1008 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 620, width: '90%', maxHeight: '85vh', overflowY: 'auto', color: '#111827' }}>
+            <h2 style={{ marginBottom: 16, fontSize: 18, fontWeight: 900 }}>Configurar Mensagem de Boas-vindas</h2>
+            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>Cartão: <strong>{cardsList.find((c: any) => c.id === selectedCardId)?.title}</strong></p>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Assunto</label>
+            <input
+              type="text"
+              value={welcomeSubject}
+              onChange={(e) => setWelcomeSubject(e.target.value)}
+              placeholder="Ex: Bem-vindo à {cardTitle}! 🎉"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+            />
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Mensagem</label>
+            <textarea
+              value={welcomeBody}
+              onChange={(e) => setWelcomeBody(e.target.value)}
+              placeholder="Escreve a mensagem de boas-vindas..."
+              style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 12, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+            />
+
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 12 }}>
+              <strong style={{ color: '#111827' }}>Variáveis disponíveis:</strong>
+              <ul style={{ margin: '6px 0', paddingLeft: 20, color: '#111827' }}>
+                <li><code>{'{nome}'}</code> — nome da pessoa</li>
+                <li><code>{'{email}'}</code> — email da pessoa</li>
+                <li><code>{'{cardTitle}'}</code> — nome do teu cartão</li>
+              </ul>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={async () => {
+                  if (!selectedCardId || selectedCardId === 'all') return
+                  try {
+                    const { error } = await supabase
+                      .from('cards')
+                      .update({
+                        crm_pro_welcome_subject: welcomeSubject,
+                        crm_pro_welcome_body: welcomeBody,
+                      })
+                      .eq('id', selectedCardId)
+                    if (error) throw error
+                    alert('✓ Mensagem guardada com sucesso!')
+                    setShowWelcomeSettingsModal(false)
+                    // Recarregar cards para refletir mudanças
+                    const { data } = await supabase
+                      .from('cards')
+                      .select('id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
+                      .eq('user_id', userId)
+                      .order('created_at', { ascending: false })
+                    setCardsList(data || [])
+                  } catch (err: any) {
+                    alert('Erro ao guardar: ' + err?.message)
+                  }
+                }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setShowWelcomeSettingsModal(false)}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}
+              >
+                Cancelar
               </button>
             </div>
           </div>
