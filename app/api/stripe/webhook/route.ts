@@ -13,6 +13,30 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+
+async function updateCRMProAddon(userId: string, active: boolean, subscriptionId?: string, billingCycle?: string) {
+  try {
+    const updateData: any = {
+      user_id: userId,
+      crm_pro_active: active,
+      updated_at: new Date().toISOString(),
+    }
+    if (subscriptionId) updateData.stripe_subscription_id = subscriptionId
+    if (billingCycle) updateData.billing_cycle = billingCycle
+    if (active) updateData.activated_at = new Date().toISOString()
+
+    await supabaseAdmin
+      .from('user_addons')
+      .upsert(updateData)
+      .eq('user_id', userId)
+
+    console.log(`CRM Pro addon updated for user ${userId}: active=${active}`)
+  } catch (err: any) {
+    console.error('Error updating CRM Pro addon:', err)
+  }
+}
+
+
 async function getUserByCustomerId(customerId: string) {
   try {
     const { data: subRow } = await supabaseAdmin
@@ -333,7 +357,17 @@ export async function POST(req: Request) {
         .eq('stripe_customer_id', customerId)
         .maybeSingle()
 
+      // Check if this is a CRM Pro subscription
+      const subMetadata = (sub as any).metadata || {}
+      const isCRMPro = subMetadata.product_type === 'crm_pro' || (sub as any).items?.data?.[0]?.price?.product === process.env.STRIPE_CRM_PRO_PRODUCT_ID
+
       if (row?.user_id) {
+        // Update CRM Pro addon status if applicable
+        if (isCRMPro) {
+          const isActive = event.type !== 'customer.subscription.deleted' && sub.status === 'active'
+          await updateCRMProAddon(row.user_id, isActive)
+        }
+
         await supabaseAdmin
           .from('user_subscriptions')
           .update({

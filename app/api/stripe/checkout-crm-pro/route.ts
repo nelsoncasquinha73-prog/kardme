@@ -62,6 +62,12 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
+      subscription_data: {
+        metadata: {
+          product_type: 'crm_pro',
+          billing_cycle: billingCycle,
+        },
+      },
       mode: 'subscription',
       success_url: `${baseUrl}/dashboard/crm?success=true`,
       cancel_url: `${baseUrl}/dashboard/crm?canceled=true`,
