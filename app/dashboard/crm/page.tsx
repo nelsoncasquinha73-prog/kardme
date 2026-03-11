@@ -858,6 +858,7 @@ Melhores cumprimentos,
                 </th>
                 <th style={th}>Nome</th>
                 <th style={th}>Email</th>
+                <th style={th}>Cartão</th>
                 <th style={th}>Zona</th>
                 <th style={th}>Step</th>
                 <th style={th}>Marketing</th>
@@ -889,6 +890,7 @@ Melhores cumprimentos,
                       {lead.phone && <div style={{ fontSize: 11, opacity: 0.6 }}>{lead.phone}</div>}
                     </td>
                     <td style={td}>{lead.email}</td>
+                    <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
                       <select
