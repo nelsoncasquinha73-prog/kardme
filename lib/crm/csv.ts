@@ -1,5 +1,9 @@
 /**
  * CSV utilities for CRM Pro import/export
+ * Supports:
+ * - comma or semicolon separator
+ * - quoted headers/values ("Email")
+ * - Portuguese/English header variants
  */
 
 export interface CSVRow {
@@ -15,53 +19,111 @@ export interface ParsedLead {
   step?: string
 }
 
+function stripQuotes(v: string): string {
+  const t = (v ?? '').trim()
+  if (!t) return ''
+  // remove surrounding quotes if present
+  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+    return t.slice(1, -1).trim()
+  }
+  return t
+}
+
+function detectSeparator(headerLine: string): ',' | ';' {
+  // naive but effective: choose the one that appears more
+  const commas = (headerLine.match(/,/g) || []).length
+  const semis = (headerLine.match(/;/g) || []).length
+  return semis > commas ? ';' : ','
+}
+
+/**
+ * Split a CSV line respecting simple quotes.
+ * (Good enough for typical exports; not a full RFC parser.)
+ */
+function splitLine(line: string, sep: ',' | ';'): string[] {
+  const out: string[] = []
+  let cur = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (ch === '"') {
+      inQuotes = !inQuotes
+      cur += ch
+      continue
+    }
+    if (ch === sep && !inQuotes) {
+      out.push(cur)
+      cur = ''
+      continue
+    }
+    cur += ch
+  }
+  out.push(cur)
+  return out
+}
+
 /**
  * Parse CSV string into rows
  */
 export function parseCSV(csvText: string): CSVRow[] {
-  const lines = csvText.trim().split('\n')
+  const text = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+  const lines = text.split('\n').filter(Boolean)
   if (lines.length < 2) return []
 
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-  const rows: CSVRow[] = []
+  const sep = detectSeparator(lines[0])
+  const rawHeaders = splitLine(lines[0], sep).map(h => stripQuotes(h).toLowerCase())
 
+  const rows: CSVRow[] = []
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim())
+    const rawValues = splitLine(lines[i], sep)
     const row: CSVRow = {}
-    headers.forEach((header, idx) => {
-      row[header] = values[idx] || undefined
+    rawHeaders.forEach((header, idx) => {
+      row[header] = stripQuotes(rawValues[idx] ?? '')
     })
     rows.push(row)
   }
-
   return rows
+}
+
+function findKey(row: CSVRow, keys: string[]): string | null {
+  const rowKeys = Object.keys(row).map(k => k.toLowerCase())
+  for (const k of keys) {
+    const idx = rowKeys.indexOf(k.toLowerCase())
+    if (idx >= 0) return Object.keys(row)[idx]
+  }
+  return null
 }
 
 /**
  * Map CSV row to Lead object (with flexible column names)
  */
 export function mapCSVRowToLead(row: CSVRow): ParsedLead | null {
-  // Try common column name variations
-  const nameCol = Object.keys(row).find(k => ['name', 'nome', 'full_name', 'fullname'].includes(k.toLowerCase()))
-  const emailCol = Object.keys(row).find(k => ['email', 'e-mail'].includes(k.toLowerCase()))
-  const phoneCol = Object.keys(row).find(k => ['phone', 'telefone', 'tel', 'mobile', 'celular'].includes(k.toLowerCase()))
-  const zoneCol = Object.keys(row).find(k => ['zone', 'zona', 'city', 'cidade', 'location'].includes(k.toLowerCase()))
-  const notesCol = Object.keys(row).find(k => ['notes', 'notas', 'comments', 'observações'].includes(k.toLowerCase()))
-  const stepCol = Object.keys(row).find(k => ['step', 'stage', 'status', 'etapa'].includes(k.toLowerCase()))
+  const nameKey = findKey(row, ['name', 'nome', 'full_name', 'fullname'])
+  const emailKey = findKey(row, ['email', 'e-mail'])
+  const phoneKey = findKey(row, ['phone', 'telefone', 'tel', 'telemovel', 'telemóvel', 'mobile', 'celular'])
+  const zoneKey = findKey(row, ['zone', 'zona', 'city', 'cidade', 'localidade', 'location'])
+  const notesKey = findKey(row, ['notes', 'notas', 'comentarios', 'comentários', 'comments', 'observacoes', 'observações'])
+  const stepKey = findKey(row, ['step', 'stage', 'status', 'etapa'])
 
-  const name = row[nameCol || '']?.trim() || ''
-  const email = row[emailCol || '']?.trim() || ''
+  const emailRaw = (emailKey ? row[emailKey] : '') || ''
+  const email = emailRaw.trim().toLowerCase()
 
-  // Email is mandatory
   if (!email) return null
 
+  const nameRaw = (nameKey ? row[nameKey] : '') || ''
+  const name = nameRaw.trim() || email.split('@')[0]
+
+  const stepRaw = (stepKey ? row[stepKey] : '') || ''
+  const step = stepRaw.trim() || 'Novo'
+
   return {
-    name: name || email.split('@')[0], // fallback to email prefix
+    name,
     email,
-    phone: row[phoneCol || '']?.trim(),
-    zone: row[zoneCol || '']?.trim(),
-    notes: row[notesCol || '']?.trim(),
-    step: row[stepCol || '']?.trim() || 'Novo',
+    phone: phoneKey ? row[phoneKey]?.trim() : undefined,
+    zone: zoneKey ? row[zoneKey]?.trim() : undefined,
+    notes: notesKey ? row[notesKey]?.trim() : undefined,
+    step,
   }
 }
 
