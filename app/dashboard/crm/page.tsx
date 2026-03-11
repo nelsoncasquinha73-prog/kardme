@@ -250,21 +250,31 @@ Melhores cumprimentos,
       <div style={{ maxWidth: 980, margin: '0 auto' }}>
         <h1 style={{ fontSize: 40, fontWeight: 950, margin: '10px 0 10px 0' }}>CRM Pro</h1>
         <p style={{ fontSize: 16, opacity: 0.8, marginTop: 0 }}>
-          Um CRM simples e poderoso para gerir leads dos teus cartões: tarefas, email em massa, WhatsApp rápido, e import/export de leads.
+          Um CRM simples e poderoso para gerir leads dos teus cartões. Importa/exporta em CSV, envia emails em massa (200/dia), WhatsApp rápido, e muito mais.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
           {[
-            { title: '📥 Importar/Exportar', desc: 'Traz 1000+ leads em CSV e exporta quando quiseres.' },
-            { title: '📣 Email em massa', desc: 'Envia campanhas para leads selecionadas com templates.' },
-            { title: '✅ Tarefas + alertas', desc: 'Follow-ups organizados para não perder vendas.' },
-            { title: '📊 Histórico (Activity Log)', desc: 'Fica tudo registado por lead para auditoria.' },
+            { title: '📥 Importar/Exportar CSV', desc: 'Importa 1000+ leads em CSV. Exporta quando quiseres com um clique.' },
+            { title: '📣 Email em massa (200/dia)', desc: 'Envia campanhas para leads selecionadas com templates. Limite 200/dia para proteger a reputação do teu Gmail.' },
+            { title: '📧 Emails automáticos', desc: 'Notificação ao receber lead + email de boas-vindas personalizado para o cliente.' },
+            { title: '✅ Tarefas + WhatsApp', desc: 'Follow-ups organizados, envios WhatsApp rápidos, e histórico completo por lead.' },
           ].map((b) => (
             <div key={b.title} style={{ background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
               <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 6, color: '#111827' }}>{b.title}</div>
               <div style={{ fontSize: 13, opacity: 0.75, color: '#111827' }}>{b.desc}</div>
             </div>
           ))}
+        </div>
+
+        <div style={{ marginTop: 24, padding: 18, background: 'rgba(0,0,0,0.02)', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 12, color: '#111827' }}>Como funciona</div>
+          <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#111827', lineHeight: 1.8 }}>
+            <li>Ativa o CRM Pro (mensal ou anual)</li>
+            <li>Liga o teu Gmail (autorização Google OAuth — a Kardme não guarda a tua password)</li>
+            <li>Importa leads em CSV ou recebe automaticamente quando alguém preenche o teu cartão</li>
+            <li>Gere follow-ups com tarefas, emails, WhatsApp e histórico completo</li>
+          </ol>
         </div>
 
         <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
@@ -292,8 +302,8 @@ Melhores cumprimentos,
           </div>
         </div>
 
-        <div style={{ marginTop: 12, fontSize: 12, opacity: 0.65 }}>
-          Nota: o CRM Pro fica disponível imediatamente após confirmação do pagamento.
+        <div style={{ marginTop: 12, fontSize: 12, opacity: 0.65, lineHeight: 1.6 }}>
+          <strong>Segurança:</strong> O envio de emails é feito via a tua conta Gmail (Google OAuth). A Kardme não tem acesso à tua password e podes revogar a autorização quando quiseres. O CRM Pro fica disponível imediatamente após confirmação do pagamento.
         </div>
       </div>
     </main>
