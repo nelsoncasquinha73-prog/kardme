@@ -76,6 +76,7 @@ export default function CrmProPage() {
   const [cardsList, setCardsList] = useState<any[]>([])
   const [selectedCardId, setSelectedCardId] = useState<string>('all')
   const [showWelcomeSettingsModal, setShowWelcomeSettingsModal] = useState(false)
+  const [showCardDropdown, setShowCardDropdown] = useState(false)
   const [welcomeSubject, setWelcomeSubject] = useState('Bem-vindo à {cardTitle}! 🎉')
   const [welcomeBody, setWelcomeBody] = useState(`Olá {nome},
 
@@ -559,33 +560,99 @@ Melhores cumprimentos,
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ margin: 0, flex: 1 }}>CRM Pro</h1>
 
-        <select
-          value={selectedCardId}
-          onChange={(e) => setSelectedCardId(e.target.value)}
-          style={{
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: '1px solid rgba(0,0,0,0.18)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            WebkitTextFillColor: '#111827',
-            appearance: 'auto',
-            WebkitAppearance: 'menulist',
-            fontWeight: 800,
-            cursor: 'pointer',
-            minWidth: 200,
-            maxWidth: 300,
-            height: 40,
-          }}
-        >
-          <option value="all">— Todos os cartões —</option>
-          {cardsList.map((card: any) => (
-            <option key={card.id} value={card.id}>
-              {card.title}
-            </option>
-          ))}
-        </select>
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowCardDropdown(!showCardDropdown)}
+            style={{
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: '1px solid rgba(0,0,0,0.18)',
+              fontSize: 13,
+              background: '#fff',
+              color: '#111827',
+              fontWeight: 800,
+              cursor: 'pointer',
+              minWidth: 200,
+              maxWidth: 320,
+              height: 40,
+              textAlign: 'left',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedCardId === 'all'
+                ? '— Todos os cartões —'
+                : cardsList.find((c: any) => c.id === selectedCardId)?.title || 'Seleciona um cartão'}
+            </span>
+            <span style={{ marginLeft: 10, fontSize: 12, opacity: 0.7 }}>▼</span>
+          </button>
+
+          {showCardDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: 6,
+                background: '#0b1220',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: 12,
+                zIndex: 1000,
+                maxHeight: 320,
+                overflowY: 'auto',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+              }}
+            >
+              <button
+                onClick={() => {
+                  setSelectedCardId('all')
+                  setShowCardDropdown(false)
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px 12px',
+                  background: selectedCardId === 'all' ? 'rgba(255,255,255,0.10)' : 'transparent',
+                  color: '#fff',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: selectedCardId === 'all' ? 900 : 700,
+                }}
+              >
+                — Todos os cartões —
+              </button>
+
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.10)' }} />
+
+              {cardsList.map((card: any) => (
+                <button
+                  key={card.id}
+                  onClick={() => {
+                    setSelectedCardId(card.id)
+                    setShowCardDropdown(false)
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 12px',
+                    background: selectedCardId === card.id ? 'rgba(255,255,255,0.10)' : 'transparent',
+                    color: '#fff',
+                    border: 'none',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: selectedCardId === card.id ? 900 : 700,
+                  }}
+                >
+                  {card.title}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={() => {
