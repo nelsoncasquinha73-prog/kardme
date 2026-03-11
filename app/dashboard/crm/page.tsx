@@ -255,7 +255,7 @@ Melhores cumprimentos,
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
           {[
-            { title: '📥 Importar/Exportar CSV', desc: 'Importa 1000+ leads em CSV. Exporta quando quiseres com um clique.' },
+            { title: '📥 Importar/Exportar CSV', desc: 'Importa leads em CSV (inclui listas grandes). Exporta quando quiseres com um clique.' },
             { title: '📣 Email em massa (200/dia)', desc: 'Envia campanhas para leads selecionadas com templates. Limite 200/dia para proteger a reputação do teu Gmail.' },
             { title: '📧 Emails automáticos', desc: 'Notificação ao receber lead + email de boas-vindas personalizado para o cliente.' },
             { title: '✅ Tarefas + WhatsApp', desc: 'Follow-ups organizados, envios WhatsApp rápidos, e histórico completo por lead.' },
