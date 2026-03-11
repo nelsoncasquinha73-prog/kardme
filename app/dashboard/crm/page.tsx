@@ -230,6 +230,7 @@ Melhores cumprimentos,
       setShowImportModal(false)
       setImportCSVText('')
       setImportPreview([])
+      setImportFileName('')
       await loadLeads()
     } catch (e: any) {
       alert('Erro ao importar: ' + (e?.message || String(e)))
@@ -1869,12 +1870,42 @@ Melhores cumprimentos,
               <strong>Dica:</strong> O CSV deve ter cabeçalho. Colunas reconhecidas automaticamente: <code>nome/name</code>, <code>email</code>, <code>telefone/phone</code>, <code>zona/zone</code>, <code>notas/notes</code>, <code>step</code>.
             </div>
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13 }}>Cola aqui o CSV</label>
-            <textarea
-              value={importCSVText}
-              onChange={(e) => setImportCSVText(e.target.value)}
-              placeholder={"name,email,phone,zone\nJoão,joao@email.com,912345678,Lisboa"}
-              style={{ width: '100%', minHeight: 180, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.18)', fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', boxSizing: 'border-box' }}
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13 }}>Upload do CSV</label>
+
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+              <button
+                onClick={() => importFileInputRef.current?.click()}
+                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                📁 Escolher ficheiro
+              </button>
+
+              <div style={{ fontSize: 12, opacity: 0.75 }}>
+                {importFileName ? <>Selecionado: <strong>{importFileName}</strong></> : 'Nenhum ficheiro selecionado'}
+              </div>
+            </div>
+
+            <input
+              ref={importFileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setImportFileName(file.name)
+
+                const reader = new FileReader()
+                reader.onload = () => {
+                  const text = String(reader.result || '')
+                  setImportCSVText(text)
+                  // gerar preview automaticamente
+                  setTimeout(() => {
+                    try { handleImportPreview() } catch {}
+                  }, 0)
+                }
+                reader.readAsText(file)
+              }}
             />
 
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
@@ -1898,6 +1929,7 @@ Melhores cumprimentos,
                   setShowImportModal(false)
                   setImportCSVText('')
                   setImportPreview([])
+                  setImportFileName('')
                 }}
                 style={{ padding: '10px 14px', borderRadius: 10, background: '#f3f4f6', color: '#111827', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
