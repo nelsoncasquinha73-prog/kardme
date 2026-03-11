@@ -107,6 +107,7 @@ Melhores cumprimentos,
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const [showImportModal, setShowImportModal] = useState(false)
+  const [importFileName, setImportFileName] = useState('')
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
   const [importing, setImporting] = useState(false)
