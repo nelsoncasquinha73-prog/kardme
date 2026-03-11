@@ -572,6 +572,10 @@ Melhores cumprimentos,
             fontWeight: 800,
             cursor: 'pointer',
             lineHeight: '20px',
+            minWidth: 200,
+            maxWidth: 300,
+            height: 40,
+            lineHeight: '40px',
           }}
         >
           <option value="all" style={{ color: '#111827' }}>— Todos os cartões —</option>
