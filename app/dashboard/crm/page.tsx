@@ -249,7 +249,7 @@ Melhores cumprimentos,
 
 
   // Landing interna do CRM Pro (quando não está ativo)
-  if (crmProActive === false) {
+  if (false && crmProActive === false) {
     return (
       <main style={{ padding: 24 }}>
         <div style={{ maxWidth: 980, margin: '0 auto' }}>
