@@ -34,6 +34,10 @@ export default function CrmProPage() {
   const gmail = useGmailIntegration(userId)
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
+  const [crmProActive, setCRMProActive] = useState<boolean | null>(null)
+  const [crmProChecking, setCRMProChecking] = useState(false)
+  const [buyingCRMPro, setBuyingCRMPro] = useState<'monthly' | 'annual' | null>(null)
+
   const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
   const [filterStep, setFilterStep] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
