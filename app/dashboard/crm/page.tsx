@@ -193,28 +193,6 @@ Melhores cumprimentos,
     }
     document.addEventListener('mousedown', handleClickOutsideCardDropdown)
   
-  const handleExportCSV = async () => {
-    try {
-      if (!userId) return alert('Sem userId')
-      if (selectedCardId === 'all') return alert('Seleciona um cartão para exportar.')
-      const url = `/api/crm/leads/export?userId=${encodeURIComponent(userId)}&cardId=${encodeURIComponent(selectedCardId)}&sortBy=${encodeURIComponent(sortBy)}&sortOrder=${encodeURIComponent(sortOrder)}`
-      const res = await fetch(url)
-      if (!res.ok) {
-        const txt = await res.text()
-        return alert('Erro ao exportar: ' + txt)
-      }
-      const blob = await res.blob()
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = `leads_${selectedCardId}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-    } catch (e: any) {
-      alert('Erro ao exportar: ' + (e?.message || String(e)))
-    }
-  }
-
   const handleImportPreview = () => {
     const text = importCSVText.trim()
     if (!text) {
@@ -297,7 +275,76 @@ Melhores cumprimentos,
     }
   }, [tasksToday])
 
-  useEffect(() => {
+
+  const handleExportCSV = async () => {
+    try {
+      if (!userId) return alert('Sem userId')
+      if (selectedCardId === 'all') return alert('Seleciona um cartão para exportar.')
+      const url = `/api/crm/leads/export?userId=${encodeURIComponent(userId)}&cardId=${encodeURIComponent(selectedCardId)}&sortBy=${encodeURIComponent(sortBy)}&sortOrder=${encodeURIComponent(sortOrder)}`
+      const res = await fetch(url)
+      if (!res.ok) {
+        const txt = await res.text()
+        return alert('Erro ao exportar: ' + txt)
+      }
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `leads_${selectedCardId}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    } catch (e: any) {
+      alert('Erro ao exportar: ' + (e?.message || String(e)))
+    }
+  }
+
+  const handleImportPreview = () => {
+    const text = importCSVText.trim()
+    if (!text) {
+      setImportPreview([])
+      return
+    }
+    const lines = text.split('\n').slice(0, 11)
+    const preview = lines.map(l => l.split(',').map(c => c.trim()))
+    setImportPreview(preview)
+  }
+
+  const handleImportCSV = async () => {
+    try {
+      if (!userId) return alert('Sem userId')
+      if (selectedCardId === 'all') return alert('Seleciona um cartão para importar.')
+      if (!importCSVText.trim()) return alert('Cola o CSV primeiro.')
+
+      setImporting(true)
+      const res = await fetch('/api/crm/leads/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          cardId: selectedCardId,
+          csvText: importCSVText,
+        }),
+      })
+
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        return alert('Erro ao importar: ' + (json?.error || 'erro'))
+      }
+
+      alert(json?.message || 'Import concluído')
+      setShowImportModal(false)
+      setImportCSVText('')
+      setImportPreview([])
+      await loadLeads()
+    } catch (e: any) {
+      alert('Erro ao importar: ' + (e?.message || String(e)))
+    } finally {
+      setImporting(false)
+    }
+  }
+
+
+    useEffect(() => {
     if (!userId) return
     loadTasksForToday()
     loadEmailTemplates()
