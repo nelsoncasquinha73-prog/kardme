@@ -67,6 +67,10 @@ export default function CrmProPage() {
   const [saveTemplateName, setSaveTemplateName] = useState('')
   const [saveTemplateCategory, setSaveTemplateCategory] = useState('Geral')
   const [selectedAttachments, setSelectedAttachments] = useState<AttachmentPayload[]>([])
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
+  const [selectedLeadForWhatsApp, setSelectedLeadForWhatsApp] = useState<Lead | null>(null)
+  const [whatsAppMessage, setWhatsAppMessage] = useState('Olá {nome}, tudo bem?')
+
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
@@ -748,7 +752,9 @@ export default function CrmProPage() {
                               alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
                               return
                             }
-                            window.open('https://wa.me/' + phone.replace(/\D/g, ''), '_blank')
+                            setSelectedLeadForWhatsApp(lead)
+                            setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
+                            setShowWhatsAppModal(true)
                           }}
                           title="Enviar WhatsApp"
                           style={{
@@ -924,6 +930,47 @@ export default function CrmProPage() {
                 Guardar
               </button>
               <button onClick={() => setShowSaveTemplateModal(false)} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showWhatsAppModal && selectedLeadForWhatsApp && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1006 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 620, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
+            <h2 style={{ marginBottom: 8, fontSize: 18, fontWeight: 900 }}>Enviar WhatsApp</h2>
+            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>Para: <strong>{selectedLeadForWhatsApp.name}</strong> ({selectedLeadForWhatsApp.phone || 'sem telefone'})</p>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Mensagem</label>
+            <textarea
+              value={whatsAppMessage}
+              onChange={(e) => setWhatsAppMessage(e.target.value)}
+              placeholder="Escreve a mensagem…"
+              style={{ width: '100%', minHeight: 140, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+            />
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => {
+                  const phone = normalizePhone(selectedLeadForWhatsApp.phone)
+                  if (!phone) {
+                    alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
+                    return
+                  }
+                  const encoded = encodeURIComponent(whatsAppMessage || '')
+                  window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`, '_blank')
+                  setShowWhatsAppModal(false)
+                }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#25d366', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                Abrir WhatsApp
+              </button>
+              <button
+                onClick={() => setShowWhatsAppModal(false)}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
