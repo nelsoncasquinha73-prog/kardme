@@ -19,11 +19,11 @@ async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmai
         body: `Olá ${params.leadName},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n${params.cardTitle}`,
       }),
     })
-    if (!response.ok) {
-      console.error('Failed to send welcome email:', await response.text())
-    }
-  } catch (err) {
-    console.error('Error sending welcome email:', err)
+    const txt = await response.text()
+    if (!response.ok) return { ok: false, details: txt }
+    return { ok: true, details: txt }
+  } catch (err: any) {
+    return { ok: false, details: err?.message || String(err) }
   }
 }
 
@@ -40,11 +40,11 @@ async function sendOwnerNotification(params: { userId: string; leadId: string; o
         body: `Olá,\n\nTens uma nova lead no teu cartão "${params.cardTitle}":\n\nNome: ${params.leadName}\nEmail: ${params.leadEmail}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
       }),
     })
-    if (!response.ok) {
-      console.error('Failed to send owner notification:', await response.text())
-    }
-  } catch (err) {
-    console.error('Error sending owner notification:', err)
+    const txt = await response.text()
+    if (!response.ok) return { ok: false, details: txt }
+    return { ok: true, details: txt }
+  } catch (err: any) {
+    return { ok: false, details: err?.message || String(err) }
   }
 }
 
@@ -107,31 +107,51 @@ export async function POST(req: Request) {
 
         if (ownerData?.email) {
           // Enviar email ao owner (sempre)
-          await sendOwnerNotification({ userId: cardData.user_id, leadId, ownerEmail: ownerData.email, leadName: name, leadEmail: email, cardTitle: cardData.title || 'Kardme' })
+          const ownerRes = await sendOwnerNotification({
+            userId: cardData.user_id,
+            leadId,
+            ownerEmail: ownerData.email,
+            leadName: name,
+            leadEmail: email,
+            cardTitle: cardData.title || 'Kardme',
+          })
 
           // Enviar email ao lead (só se opt-in)
+          let welcomeRes: any = null
           if (marketingOptIn && email) {
-            await sendWelcomeEmail({ userId: cardData.user_id, leadId, toEmail: email, leadName: name, cardTitle: cardData.title || 'Kardme' })
+            welcomeRes = await sendWelcomeEmail({
+              userId: cardData.user_id,
+              leadId,
+              toEmail: email,
+              leadName: name,
+              cardTitle: cardData.title || 'Kardme',
+            })
           }
 
-          // Log activities
+          // Log activities (sucesso/falha)
           if (leadId) {
             await supabaseAdmin.from('lead_activities').insert([
               {
                 lead_id: leadId,
                 user_id: cardData.user_id,
-                type: 'owner_notified_email',
-                title: `Email de notificação enviado ao owner`,
+                type: ownerRes?.ok ? 'owner_notified_email' : 'owner_email_failed',
+                title: ownerRes?.ok
+                  ? 'Email de notificação enviado ao owner'
+                  : 'Falha ao enviar email de notificação ao owner',
+                meta: { details: ownerRes?.details || null },
               },
             ])
 
-            if (marketingOptIn) {
+            if (marketingOptIn && email) {
               await supabaseAdmin.from('lead_activities').insert([
                 {
                   lead_id: leadId,
                   user_id: cardData.user_id,
-                  type: 'welcome_email_sent',
-                  title: `Email de boas-vindas enviado ao lead`,
+                  type: welcomeRes?.ok ? 'welcome_email_sent' : 'welcome_email_failed',
+                  title: welcomeRes?.ok
+                    ? 'Email de boas-vindas enviado ao lead'
+                    : 'Falha ao enviar email de boas-vindas ao lead',
+                  meta: { details: welcomeRes?.details || null },
                 },
               ])
             }
