@@ -1,6 +1,8 @@
 'use client'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useState } from 'react'
+import { FaWhatsapp } from 'react-icons/fa'
+
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
@@ -480,7 +482,11 @@ export default function CrmProPage() {
         alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
         return
       }
-      window.open('https://wa.me/' + phone.replace(/\D/g, ''), '_blank')
+      const msg = (typeof (task as any)?.description === 'string' && (task as any).description.trim().length > 0)
+        ? (task as any).description.trim()
+        : `Olá ${lead?.name || ''}, tudo bem?`
+      const encoded = encodeURIComponent(msg)
+      window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`, '_blank')
     } else if (actionType === 'call') {
       const phone = normalizePhone(lead?.phone)
       if (!phone) {
@@ -768,7 +774,7 @@ export default function CrmProPage() {
                             cursor: 'pointer',
                           }}
                         >
-                          💬
+                          <FaWhatsapp size={14} />
                         </button>
                         <button
                           onClick={() => {
