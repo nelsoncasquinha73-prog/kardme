@@ -585,7 +585,7 @@ Melhores cumprimentos,
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {selectedCardId === 'all'
                 ? '— Todos os cartões —'
-                : cardsList.find((c: any) => c.id === selectedCardId)?.title || 'Seleciona um cartão'}
+                : cardsList.find((c: any) => c.id === selectedCardId)?.name || cardsList.find((c: any) => c.id === selectedCardId)?.title || 'Seleciona um cartão'}
             </span>
             <span style={{ marginLeft: 10, fontSize: 12, opacity: 0.7 }}>▼</span>
           </button>
@@ -649,7 +649,7 @@ Melhores cumprimentos,
                     fontWeight: selectedCardId === card.id ? 900 : 700,
                   }}
                 >
-                  {card.title}
+                  {(card as any).name || card.title || (card as any).slug || 'Cartão'}
                 </button>
               ))}
             </div>
