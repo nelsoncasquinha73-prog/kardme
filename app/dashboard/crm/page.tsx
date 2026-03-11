@@ -325,9 +325,34 @@ export default function CrmProPage() {
   const leadById = new Map(leads.map(l => [l.id, l]))
 
 
-  const normalizePhone = (phone: string | null | undefined) => {
+    const normalizePhone = (phone?: string) => {
     if (!phone) return null
+    const cleaned = phone.replace(/\D/g, '')
+    if (cleaned.length < 9) return null
+    
+    // PT: 9 dígitos começando por 2 ou 9 → +351
+    if (cleaned.length === 9 && (cleaned.startsWith('2') || cleaned.startsWith('9'))) {
+      return '+351' + cleaned
+    }
+    // PT: já com 351
+    if (cleaned.startsWith('351') && cleaned.length === 12) {
+      return '+' + cleaned
+    }
+    // BR: 11 dígitos começando por 55
+    if (cleaned.startsWith('55') && cleaned.length === 13) {
+      return '+' + cleaned
+    }
+    // BR: 11 dígitos sem 55
+    if (!cleaned.startsWith('55') && cleaned.length === 11 && cleaned.startsWith('1')) {
+      return '+55' + cleaned
+    }
+    // Genérico: se tiver 10+ dígitos e não tiver +, assume +351
+    if (cleaned.length >= 10 && !cleaned.startsWith('351') && !cleaned.startsWith('55')) {
+      return '+351' + cleaned
+    }
+    // Se já tiver + no início (improvável, mas seguro)
     if (phone.startsWith('+')) return phone
+    
     return null
   }
 
