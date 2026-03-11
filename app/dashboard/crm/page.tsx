@@ -113,6 +113,51 @@ Melhores cumprimentos,
   const [importPreview, setImportPreview] = useState<string[][]>([])
   const [importing, setImporting] = useState(false)
 
+
+  const checkCRMPro = async (uid?: string) => {
+    try {
+      const id = uid || userId
+      if (!id) return
+      setCRMProChecking(true)
+      const { data, error } = await supabase
+        .from('user_addons')
+        .select('crm_pro_active')
+        .eq('user_id', id)
+        .maybeSingle()
+
+      if (error) throw error
+      setCRMProActive((data as any)?.crm_pro_active === true)
+    } catch (e) {
+      setCRMProActive(false)
+    } finally {
+      setCRMProChecking(false)
+    }
+  }
+
+  const startCRMProCheckout = async (cycle: 'monthly' | 'annual') => {
+    try {
+      setBuyingCRMPro(cycle)
+      const { data: authData } = await supabase.auth.getUser()
+      const uid = authData?.user?.id
+      if (!uid) return alert('Sem sessão. Faz login novamente.')
+
+      const res = await fetch('/api/stripe/checkout-crm-pro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: uid, billingCycle: cycle }),
+      })
+      const data = await res.json()
+      if (!res.ok) return alert(data?.error || 'Erro ao iniciar checkout.')
+      if (data?.url) window.location.href = data.url
+      else alert('Checkout sem URL.')
+    } catch (e: any) {
+      alert('Erro ao iniciar checkout: ' + (e?.message || String(e)))
+    } finally {
+      setBuyingCRMPro(null)
+    }
+  }
+
+
   const loadLeads = async () => {
     setLoading(true)
 
@@ -242,13 +287,87 @@ Melhores cumprimentos,
   }
 
 
+
+  // Landing interna do CRM Pro (quando não está ativo)
+  if (crmProActive === false) {
+    return (
+      <main style={{ padding: 24 }}>
+        <div style={{ maxWidth: 980, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 40, fontWeight: 950, margin: '10px 0 10px 0' }}>CRM Pro</h1>
+          <p style={{ fontSize: 16, opacity: 0.8, marginTop: 0 }}>
+            Um CRM simples e poderoso para gerir leads dos teus cartões: tarefas, email em massa, WhatsApp rápido, e import/export de leads.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
+            {[
+              { title: '📥 Importar/Exportar', desc: 'Traz 1000+ leads em CSV e exporta quando quiseres.' },
+              { title: '📣 Email em massa', desc: 'Envia campanhas para leads selecionadas com templates.' },
+              { title: '✅ Tarefas + alertas', desc: 'Follow-ups organizados para não perder vendas.' },
+              { title: '📊 Histórico (Activity Log)', desc: 'Fica tudo registado por lead para auditoria.' },
+            ].map((b) => (
+              <div key={b.title} style={{ background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
+                <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 6, color: '#111827' }}>{b.title}</div>
+                <div style={{ fontSize: 13, opacity: 0.75, color: '#111827' }}>{b.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
+            <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#111827' }}>Ativa o CRM Pro</div>
+            <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 14, color: '#111827' }}>
+              Escolhe mensal ou anual. Podes cancelar quando quiseres.
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => startCRMProCheckout('monthly')}
+                disabled={buyingCRMPro !== null}
+                style={{ padding: '12px 14px', borderRadius: 12, background: '#111827', color: '#fff', border: 'none', fontWeight: 950, cursor: buyingCRMPro ? 'not-allowed' : 'pointer' }}
+              >
+                {buyingCRMPro === 'monthly' ? 'A abrir...' : '💳 Mensal — €5,99'}
+              </button>
+
+              <button
+                onClick={() => startCRMProCheckout('annual')}
+                disabled={buyingCRMPro !== null}
+                style={{ padding: '12px 14px', borderRadius: 12, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 950, cursor: buyingCRMPro ? 'not-allowed' : 'pointer' }}
+              >
+                {buyingCRMPro === 'annual' ? 'A abrir...' : '💳 Anual — €59'}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, fontSize: 12, opacity: 0.65 }}>
+            Nota: o CRM Pro fica disponível imediatamente após confirmação do pagamento.
+          </div>
+        </div>
+      </main>
+    )
+  }
+
   return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
 
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('success') === 'true') {
+      // recheck addon after payment
+      checkCRMPro()
+      // opcional: limpar query param
+      params.delete('success')
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '')
+      window.history.replaceState({}, '', newUrl)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
   useEffect(() => {
     if (!userId) return
     gmail.checkConnection()
+    checkCRMPro()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
