@@ -1,6 +1,6 @@
 'use client'
 import { useLanguage } from '@/components/language/LanguageProvider'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
 
 import { supabase } from '@/lib/supabaseClient'
@@ -77,6 +77,7 @@ export default function CrmProPage() {
   const [selectedCardId, setSelectedCardId] = useState<string>('all')
   const [showWelcomeSettingsModal, setShowWelcomeSettingsModal] = useState(false)
   const [showCardDropdown, setShowCardDropdown] = useState(false)
+  const cardDropdownRef = useRef<HTMLDivElement | null>(null)
   const [welcomeSubject, setWelcomeSubject] = useState('Bem-vindo à {cardTitle}! 🎉')
   const [welcomeBody, setWelcomeBody] = useState(`Olá {nome},
 
@@ -136,7 +137,9 @@ Melhores cumprimentos,
         contacted,
         card_id,
         cards!inner (
-          user_id
+          user_id,
+          name,
+          slug
         )
       `)
       .eq('cards.user_id', user.id)
@@ -168,6 +171,21 @@ Melhores cumprimentos,
   useEffect(() => {
     loadLeads()
   }, [filterMarketing, filterStep, selectedCardId])
+
+
+  useEffect(() => {
+    const handleClickOutsideCardDropdown = (e: MouseEvent) => {
+      if (!showCardDropdown) return
+      const el = cardDropdownRef.current
+      if (!el) return
+      if (!el.contains(e.target as Node)) {
+        setShowCardDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutsideCardDropdown)
+    return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
+  }, [showCardDropdown])
+
 
   useEffect(() => {
     if (!userId) return
@@ -561,7 +579,7 @@ Melhores cumprimentos,
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ margin: 0, flex: 1 }}>CRM Pro</h1>
 
-        <div style={{ position: 'relative' }}>
+        <div ref={cardDropdownRef} style={{ position: 'relative' }}>
           <button
             onClick={() => setShowCardDropdown(!showCardDropdown)}
             style={{
