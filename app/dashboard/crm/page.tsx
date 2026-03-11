@@ -246,13 +246,6 @@ Melhores cumprimentos,
     return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
-  const handleImportCSV = async () => {
-    try {
-      if (!userId) return alert('Sem userId')
-      if (selectedCardId === 'all') return alert('Seleciona um cartão para importar.')
-      if (!importCSVText.trim()) return alert('Cola o CSV primeiro.')
-
-      setImporting(true)
       const res = await fetch('/api/crm/leads/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
