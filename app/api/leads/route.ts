@@ -6,16 +6,17 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function sendWelcomeEmail(toEmail: string, leadName: string, cardTitle: string) {
+async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string }) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+    const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId: 'system',
-        recipientEmail: toEmail,
-        subject: `Bem-vindo à ${cardTitle}! 🎉`,
-        body: `Olá ${leadName},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n${cardTitle}`,
+        userId: params.userId,
+        leadId: params.leadId,
+        recipientEmail: params.toEmail,
+        subject: `Bem-vindo à ${params.cardTitle}! 🎉`,
+        body: `Olá ${params.leadName},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n${params.cardTitle}`,
       }),
     })
     if (!response.ok) {
@@ -26,16 +27,17 @@ async function sendWelcomeEmail(toEmail: string, leadName: string, cardTitle: st
   }
 }
 
-async function sendOwnerNotification(ownerEmail: string, leadName: string, leadEmail: string, cardTitle: string) {
+async function sendOwnerNotification(params: { userId: string; leadId: string; ownerEmail: string; leadName: string; leadEmail: string; cardTitle: string }) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+    const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId: 'system',
-        recipientEmail: ownerEmail,
-        subject: `Nova lead recebida: ${leadName}`,
-        body: `Olá,\n\nTens uma nova lead no teu cartão "${cardTitle}":\n\nNome: ${leadName}\nEmail: ${leadEmail}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
+        userId: params.userId,
+        leadId: params.leadId,
+        recipientEmail: params.ownerEmail,
+        subject: `Nova lead recebida: ${params.leadName}`,
+        body: `Olá,\n\nTens uma nova lead no teu cartão "${params.cardTitle}":\n\nNome: ${params.leadName}\nEmail: ${params.leadEmail}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
       }),
     })
     if (!response.ok) {
@@ -106,11 +108,11 @@ export async function POST(req: Request) {
 
         if (ownerData?.email) {
           // Enviar email ao owner (sempre)
-          await sendOwnerNotification(ownerData.email, name, email, cardData.title || 'Kardme')
+          await sendOwnerNotification({ userId: cardData.user_id, leadId, ownerEmail: ownerData.email, leadName: name, leadEmail: email, cardTitle: cardData.title || 'Kardme' })
 
           // Enviar email ao lead (só se opt-in)
           if (marketingOptIn && email) {
-            await sendWelcomeEmail(email, name, cardData.title || 'Kardme')
+            await sendWelcomeEmail({ userId: cardData.user_id, leadId, toEmail: email, leadName: name, cardTitle: cardData.title || 'Kardme' })
           }
 
           // Log activities
