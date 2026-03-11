@@ -569,6 +569,9 @@ Melhores cumprimentos,
             fontSize: 13,
             background: '#fff',
             color: '#111827',
+            WebkitTextFillColor: '#111827',
+            appearance: 'auto',
+            WebkitAppearance: 'menulist',
             fontWeight: 800,
             cursor: 'pointer',
             minWidth: 200,
@@ -576,9 +579,9 @@ Melhores cumprimentos,
             height: 40,
           }}
         >
-          <option value="all" style={{ color: '#111827' }}>— Todos os cartões —</option>
+          <option value="all">— Todos os cartões —</option>
           {cardsList.map((card: any) => (
-            <option key={card.id} value={card.id} style={{ color: '#111827' }}>
+            <option key={card.id} value={card.id}>
               {card.title}
             </option>
           ))}
