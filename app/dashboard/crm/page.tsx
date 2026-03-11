@@ -246,34 +246,6 @@ Melhores cumprimentos,
     return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
-      const res = await fetch('/api/crm/leads/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          cardId: selectedCardId,
-          csvText: importCSVText,
-        }),
-      })
-
-      const json = await res.json().catch(() => null)
-      if (!res.ok) {
-        return alert('Erro ao importar: ' + (json?.error || 'erro'))
-      }
-
-      alert(json?.message || 'Import concluído')
-      setShowImportModal(false)
-      setImportCSVText('')
-      setImportPreview([])
-      setImportFileName('')
-      await loadLeads()
-    } catch (e: any) {
-      alert('Erro ao importar: ' + (e?.message || String(e)))
-    } finally {
-      setImporting(false)
-    }
-  }
-
 
 
   // Landing interna do CRM Pro (quando não está ativo)
