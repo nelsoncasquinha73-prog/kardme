@@ -569,13 +569,14 @@ Melhores cumprimentos,
             fontSize: 13,
             background: '#fff',
             color: '#111827',
-            fontWeight: 700,
+            fontWeight: 800,
             cursor: 'pointer',
+            lineHeight: '20px',
           }}
         >
-          <option value="all">— Todos os cartões —</option>
+          <option value="all" style={{ color: '#111827' }}>— Todos os cartões —</option>
           {cardsList.map((card: any) => (
-            <option key={card.id} value={card.id}>
+            <option key={card.id} value={card.id} style={{ color: '#111827' }}>
               {card.title}
             </option>
           ))}
@@ -605,6 +606,12 @@ Melhores cumprimentos,
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
             fontSize: 13,
+            minHeight: 40,
+            lineHeight: '20px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            whiteSpace: 'nowrap',
           }}
         >
           ⚙️ Mensagem
