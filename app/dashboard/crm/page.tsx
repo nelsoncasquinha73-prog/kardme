@@ -614,8 +614,8 @@ Melhores cumprimentos,
                 style={{
                   width: '100%',
                   padding: '12px 12px',
-                  background: selectedCardId === 'all' ? 'rgba(255,255,255,0.10)' : 'transparent',
-                  color: '#fff',
+                  background: selectedCardId === 'all' ? 'rgba(255,255,255,0.12)' : '#0b1220',
+                  color: '#ffffff',
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -638,8 +638,8 @@ Melhores cumprimentos,
                   style={{
                     width: '100%',
                     padding: '12px 12px',
-                    background: selectedCardId === card.id ? 'rgba(255,255,255,0.10)' : 'transparent',
-                    color: '#fff',
+                    background: selectedCardId === card.id ? 'rgba(255,255,255,0.12)' : '#0b1220',
+                    color: '#ffffff',
                     border: 'none',
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -673,7 +673,7 @@ Melhores cumprimentos,
             padding: '10px 14px',
             borderRadius: 10,
             background: selectedCardId === 'all' ? '#d1d5db' : '#8b5cf6',
-            color: '#fff',
+            color: '#ffffff',
             border: 'none',
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
@@ -719,8 +719,8 @@ Melhores cumprimentos,
                   </div>
 
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button onClick={() => handleTaskAction(t, lead)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Fazer</button>
-                    <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
+                    <button onClick={() => handleTaskAction(t, lead)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Fazer</button>
+                    <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
                   </div>
                 </div>
               )
@@ -732,7 +732,7 @@ Melhores cumprimentos,
       {!gmail.isConnected && !gmail.loading && (
         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#78350f' }}>Gmail não ligado</strong><p style={{ fontSize: 13, color: '#92400e', margin: '4px 0 0 0' }}>Liga o teu Gmail para enviar emails direto do CRM.</p></div>
-          <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#78350f', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Ligar Gmail</button>
+          <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#78350f', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Ligar Gmail</button>
         </div>
       )}
 
@@ -810,7 +810,7 @@ Melhores cumprimentos,
 
       {selectedLeadIds.size > 0 && (
         <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
-          <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
+          <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
           <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Limpar seleção</button>
         </div>
       )}
@@ -919,7 +919,7 @@ Melhores cumprimentos,
                             borderRadius: 8,
                             border: 'none',
                             background: gmail.isConnected ? '#10b981' : '#d1d5db',
-                            color: '#fff',
+                            color: '#ffffff',
                             fontWeight: 800,
                             fontSize: 12,
                             cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
@@ -944,7 +944,7 @@ Melhores cumprimentos,
                             borderRadius: 8,
                             border: 'none',
                             background: '#25d366',
-                            color: '#fff',
+                            color: '#ffffff',
                             fontWeight: 800,
                             fontSize: 12,
                             cursor: 'pointer',
@@ -982,7 +982,7 @@ Melhores cumprimentos,
                           borderRadius: 8,
                           border: 'none',
                           background: 'var(--color-primary)',
-                          color: '#fff',
+                          color: '#ffffff',
                           fontWeight: 700,
                           fontSize: 12,
                           cursor: 'pointer',
@@ -1077,7 +1077,7 @@ Melhores cumprimentos,
                   padding: '12px 14px',
                   borderRadius: 10,
                   background: 'var(--color-primary)',
-                  color: '#fff',
+                  color: '#ffffff',
                   border: 'none',
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -1127,7 +1127,7 @@ Melhores cumprimentos,
                   await loadEmailTemplates()
                   setShowSaveTemplateModal(false)
                 }}
-                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 Guardar
               </button>
@@ -1163,7 +1163,7 @@ Melhores cumprimentos,
                   window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`, '_blank')
                   setShowWhatsAppModal(false)
                 }}
-                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#25d366', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#25d366', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 Abrir WhatsApp
               </button>
@@ -1217,7 +1217,7 @@ Melhores cumprimentos,
                     setSaveTemplateName('')
                     setSaveTemplateCategory('Geral')
                   }}
-                  style={{ padding: '10px 12px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
+                  style={{ padding: '10px 12px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
                 >
                   Guardar como template
                 </button>
@@ -1244,7 +1244,7 @@ Melhores cumprimentos,
                   padding: '10px 12px',
                   borderRadius: 10,
                   background: '#111827',
-                  color: '#fff',
+                  color: '#ffffff',
                   fontWeight: 900,
                   cursor: 'pointer',
                   fontSize: 13,
@@ -1271,7 +1271,7 @@ Melhores cumprimentos,
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
             <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
+              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
@@ -1310,7 +1310,7 @@ Melhores cumprimentos,
             </div>
             
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
+              <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
               <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
@@ -1369,7 +1369,7 @@ Melhores cumprimentos,
                   padding: '10px 12px',
                   borderRadius: 10,
                   background: '#111827',
-                  color: '#fff',
+                  color: '#ffffff',
                   fontWeight: 900,
                   cursor: 'pointer',
                   fontSize: 13,
@@ -1425,8 +1425,8 @@ Melhores cumprimentos,
             </div>
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={sendBulkEmails} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A enviar…' : '⚡ Enviar agora'}</button>
-              <button onClick={createBulkTasks} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A criar…' : '📅 Agendar'}</button>
+              <button onClick={sendBulkEmails} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A enviar…' : '⚡ Enviar agora'}</button>
+              <button onClick={createBulkTasks} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A criar…' : '📅 Agendar'}</button>
               <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
@@ -1474,8 +1474,8 @@ Melhores cumprimentos,
                           <p style={{ fontSize: 12, color: isPast ? '#991b1b' : '#666', margin: '6px 0 0 0' }}>{new Date(t.due_at).toLocaleString('pt-PT')}</p>
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => handleTaskAction(t, selectedLeadForTasks)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Fazer</button>
-                          <button onClick={async () => { await markTaskDone({ taskId: t.id }); await loadTasksForLead(selectedLeadForTasks.id) }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓</button>
+                          <button onClick={() => handleTaskAction(t, selectedLeadForTasks)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Fazer</button>
+                          <button onClick={async () => { await markTaskDone({ taskId: t.id }); await loadTasksForLead(selectedLeadForTasks.id) }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓</button>
                         </div>
                       </div>
                     </div>
@@ -1484,7 +1484,7 @@ Melhores cumprimentos,
               </div>
             )}
 
-            <button onClick={() => { setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}>+ Nova Tarefa</button>
+            <button onClick={() => { setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}>+ Nova Tarefa</button>
             <button onClick={() => setShowLeadTasksModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
           </div>
         </div>
@@ -1623,7 +1623,7 @@ Melhores cumprimentos,
                     alert('Erro ao guardar: ' + err?.message)
                   }
                 }}
-                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 Guardar
               </button>
