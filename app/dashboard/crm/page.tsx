@@ -70,6 +70,10 @@ export default function CrmProPage() {
   const [saveTemplateCategory, setSaveTemplateCategory] = useState('Geral')
   const [selectedAttachments, setSelectedAttachments] = useState<AttachmentPayload[]>([])
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
+  const [showViewLeadModal, setShowViewLeadModal] = useState(false)
+  const [selectedLeadForView, setSelectedLeadForView] = useState<Lead | null>(null)
+  const [viewLeadActivities, setViewLeadActivities] = useState<any[]>([])
+
   const [selectedLeadForWhatsApp, setSelectedLeadForWhatsApp] = useState<Lead | null>(null)
   const [whatsAppMessage, setWhatsAppMessage] = useState('Olá {nome}, tudo bem?')
 
@@ -290,6 +294,16 @@ export default function CrmProPage() {
     l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+
+  const loadLeadActivities = async (leadId: string) => {
+    const { data, error } = await supabase
+      .from('lead_activities')
+      .select('*')
+      .eq('lead_id', leadId)
+      .order('created_at', { ascending: false })
+    if (!error) setViewLeadActivities(data || [])
+  }
 
   const loadEmailTemplates = async () => {
     if (!userId) return
@@ -775,6 +789,26 @@ export default function CrmProPage() {
                           }}
                         >
                           <FaWhatsapp size={14} />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            setSelectedLeadForView(lead)
+                            setShowViewLeadModal(true)
+                            await loadLeadActivities(lead.id)
+                          }}
+                          title="Ver detalhes"
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: '#f3f4f6',
+                            color: '#111827',
+                            fontWeight: 800,
+                            fontSize: 12,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          👁️
                         </button>
                         <button
                           onClick={() => {
@@ -1290,6 +1324,81 @@ export default function CrmProPage() {
 
             <button onClick={() => { setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}>+ Nova Tarefa</button>
             <button onClick={() => setShowLeadTasksModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
+          </div>
+        </div>
+      )}
+
+      {showViewLeadModal && selectedLeadForView && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1007 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 720, width: '90%', maxHeight: '85vh', overflowY: 'auto', color: '#111827' }}>
+            <h2 style={{ marginBottom: 16, fontSize: 18, fontWeight: 900 }}>Detalhes da Lead</h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>ID</label>
+                <p style={{ margin: 0, fontSize: 13, fontFamily: 'monospace', color: '#666' }}>{selectedLeadForView.id}</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Nome</label>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{selectedLeadForView.name}</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Email</label>
+                <p style={{ margin: 0, fontSize: 13 }}>{selectedLeadForView.email}</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Telefone</label>
+                <p style={{ margin: 0, fontSize: 13 }}>{selectedLeadForView.phone || '—'}</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Zona</label>
+                <p style={{ margin: 0, fontSize: 13 }}>{selectedLeadForView.zone || '—'}</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Data</label>
+                <p style={{ margin: 0, fontSize: 13 }}>{new Date(selectedLeadForView.created_at).toLocaleString('pt-PT')}</p>
+              </div>
+            </div>
+
+            {selectedLeadForView.message && (
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Mensagem</label>
+                <p style={{ margin: 0, fontSize: 13, padding: 12, background: '#f3f4f6', borderRadius: 8 }}>{selectedLeadForView.message}</p>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 900, opacity: 0.7, marginBottom: 4 }}>Notas</label>
+              <p style={{ margin: 0, fontSize: 13, padding: 12, background: '#f3f4f6', borderRadius: 8 }}>{selectedLeadForView.notes || '—'}</p>
+            </div>
+
+            <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)' }} />
+
+            <h3 style={{ fontSize: 14, fontWeight: 900, marginBottom: 12 }}>Histórico de Atividades</h3>
+            {viewLeadActivities.length > 0 ? (
+              <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                {viewLeadActivities.map((act: any, idx: number) => (
+                  <div key={idx} style={{ padding: 12, marginBottom: 8, background: '#f9fafb', borderRadius: 8, borderLeft: '3px solid #8b5cf6' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <strong style={{ fontSize: 12 }}>{act.title}</strong>
+                      <span style={{ fontSize: 11, opacity: 0.7 }}>{new Date(act.created_at).toLocaleString('pt-PT')}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11, opacity: 0.8 }}>Tipo: {act.type}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: 13, opacity: 0.7, textAlign: 'center', padding: 24 }}>Sem atividades registadas</p>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <button
+                onClick={() => setShowViewLeadModal(false)}
+                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
