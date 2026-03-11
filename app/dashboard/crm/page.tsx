@@ -167,7 +167,7 @@ Melhores cumprimentos,
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing, filterStep])
+  }, [filterMarketing, filterStep, selectedCardId])
 
   useEffect(() => {
     if (!userId) return
