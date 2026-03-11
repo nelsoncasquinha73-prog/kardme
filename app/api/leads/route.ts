@@ -6,7 +6,16 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string }) {
+
+  const renderWelcomeMessage = (template: string, vars: { nome: string; email: string; cardTitle: string }) => {
+    return template
+      .replace(/{nome}/g, vars.nome)
+      .replace(/{email}/g, vars.email)
+      .replace(/{cardTitle}/g, vars.cardTitle)
+  }
+
+
+async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string; subject?: string; body?: string }) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
     const response = await fetch(baseUrl + '/api/send-email', {
@@ -16,8 +25,8 @@ async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmai
         userId: params.userId,
         leadId: params.leadId,
         recipientEmail: params.toEmail,
-        subject: `Bem-vindo à ${params.cardTitle}! 🎉`,
-        body: `Olá ${params.leadName},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n${params.cardTitle}`,
+        subject: params.subject || 'Bem-vindo à {cardTitle}! 🎉',
+        body: params.body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}',
       }),
     })
     const txt = await response.text()
@@ -87,7 +96,7 @@ export async function POST(req: Request) {
     // Buscar card owner e verificar CRM Pro
     const { data: cardData } = await supabaseAdmin
       .from('cards')
-      .select('user_id, title')
+      .select('user_id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
       .eq('id', cardId)
       .single()
 
