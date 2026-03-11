@@ -717,24 +717,27 @@ export default function CrmProPage() {
                           📧
                         </button>
                         <button
-                          onClick={async () => {
-                            setSelectedLeadForTasks(lead)
-                            setShowLeadTasksModal(true)
-                            await loadTasksForLead(lead.id)
+                          onClick={() => {
+                            const phone = normalizePhone(lead.phone)
+                            if (!phone) {
+                              alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
+                              return
+                            }
+                            window.open('https://wa.me/' + phone.replace(/\D/g, ''), '_blank')
                           }}
+                          title="Enviar WhatsApp"
                           style={{
                             padding: '6px 10px',
                             borderRadius: 8,
                             border: 'none',
-                            background: '#6366f1',
+                            background: '#25d366',
                             color: '#fff',
                             fontWeight: 800,
                             fontSize: 12,
-                            cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
+                            cursor: 'pointer',
                           }}
-                          title={gmail.isConnected ? 'Enviar email' : 'Liga Gmail primeiro'}
                         >
-                          ✉️
+                          💬
                         </button>
                         <button
                           onClick={() => {
