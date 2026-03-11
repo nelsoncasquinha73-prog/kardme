@@ -1,6 +1,51 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+async function sendWelcomeEmail(toEmail: string, leadName: string, cardTitle: string) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: 'system',
+        recipientEmail: toEmail,
+        subject: `Bem-vindo à ${cardTitle}! 🎉`,
+        body: `Olá ${leadName},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n${cardTitle}`,
+      }),
+    })
+    if (!response.ok) {
+      console.error('Failed to send welcome email:', await response.text())
+    }
+  } catch (err) {
+    console.error('Error sending welcome email:', err)
+  }
+}
+
+async function sendOwnerNotification(ownerEmail: string, leadName: string, leadEmail: string, cardTitle: string) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: 'system',
+        recipientEmail: ownerEmail,
+        subject: `Nova lead recebida: ${leadName}`,
+        body: `Olá,\n\nTens uma nova lead no teu cartão "${cardTitle}":\n\nNome: ${leadName}\nEmail: ${leadEmail}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
+      }),
+    })
+    if (!response.ok) {
+      console.error('Failed to send owner notification:', await response.text())
+    }
+  } catch (err) {
+    console.error('Error sending owner notification:', err)
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -13,13 +58,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // ✅ Usa Service Role no servidor (NUNCA no client)
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    const { error } = await supabase.from('leads').insert([
+    // Inserir lead
+    const { data: leadData, error: leadError } = await supabaseAdmin.from('leads').insert([
       {
         card_id: cardId,
         name,
@@ -32,14 +72,76 @@ export async function POST(req: Request) {
         consent_timestamp: consentTimestamp || new Date().toISOString(),
         consent_version: consentVersion || '1.0',
       },
-    ])
+    ]).select('id')
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (leadError) {
+      return NextResponse.json({ error: leadError.message }, { status: 500 })
+    }
+
+    const leadId = leadData?.[0]?.id
+
+    // Buscar card owner e verificar CRM Pro
+    const { data: cardData } = await supabaseAdmin
+      .from('cards')
+      .select('user_id, title')
+      .eq('id', cardId)
+      .single()
+
+    if (cardData?.user_id) {
+      // Verificar se owner tem CRM Pro
+      const { data: subData } = await supabaseAdmin
+        .from('user_subscriptions')
+        .select('plan_type')
+        .eq('user_id', cardData.user_id)
+        .eq('plan_type', 'crm_pro')
+        .single()
+
+      if (subData) {
+        // Owner tem CRM Pro — enviar notificações
+        const { data: ownerData } = await supabaseAdmin
+          .from('profiles')
+          .select('email')
+          .eq('id', cardData.user_id)
+          .single()
+
+        if (ownerData?.email) {
+          // Enviar email ao owner (sempre)
+          await sendOwnerNotification(ownerData.email, name, email, cardData.title || 'Kardme')
+
+          // Enviar email ao lead (só se opt-in)
+          if (marketingOptIn && email) {
+            await sendWelcomeEmail(email, name, cardData.title || 'Kardme')
+          }
+
+          // Log activities
+          if (leadId) {
+            await supabaseAdmin.from('lead_activities').insert([
+              {
+                lead_id: leadId,
+                user_id: cardData.user_id,
+                type: 'owner_notified_email',
+                title: `Email de notificação enviado ao owner`,
+              },
+            ])
+
+            if (marketingOptIn) {
+              await supabaseAdmin.from('lead_activities').insert([
+                {
+                  lead_id: leadId,
+                  user_id: cardData.user_id,
+                  type: 'welcome_email_sent',
+                  title: `Email de boas-vindas enviado ao lead`,
+                },
+              ])
+            }
+          }
+        }
+      }
     }
 
     return NextResponse.json({ ok: true }, { status: 200 })
   } catch (e: any) {
+    console.error('Error in POST /api/leads:', e)
     return NextResponse.json({ error: e?.message || 'Erro interno' }, { status: 500 })
   }
 }
