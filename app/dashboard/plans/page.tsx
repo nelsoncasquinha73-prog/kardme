@@ -11,10 +11,12 @@ export default function PlansPage() {
   const [error, setError] = useState<string | null>(null)
   const [includeSetupMonthly, setIncludeSetupMonthly] = useState(false)
   const [includeSetupYearly, setIncludeSetupYearly] = useState(false)
+  const [includeCRMProMonthly, setIncludeCRMProMonthly] = useState(false)
+  const [includeCRMProYearly, setIncludeCRMProYearly] = useState(false)
 
   const SETUP_FEE = 5
 
-  const startCheckout = async (billing: 'monthly' | 'yearly', includeSetup: boolean) => {
+  const startCheckout = async (billing: 'monthly' | 'yearly', includeSetup: boolean, upsell_cycle?: string | null) => {
     setLoading(billing)
     setError(null)
 
@@ -29,6 +31,8 @@ export default function PlansPage() {
       const payload: any = {
         user_id: authData.user.id,
         billing,
+        upsell_crm_pro: upsell_cycle ? true : false,
+        upsell_cycle: upsell_cycle || null,
       }
 
       if (includeSetup) {
@@ -143,8 +147,20 @@ export default function PlansPage() {
             </span>
           </label>
 
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={includeCRMProMonthly}
+              onChange={(e) => setIncludeCRMProMonthly(e.target.checked)}
+              style={{ width: 18, height: 18, accentColor: '#3b82f6' }}
+            />
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+              Adicionar CRM Pro (recomendado) (+€5,99/mês)
+            </span>
+          </label>
+
           <button
-            onClick={() => startCheckout('monthly', includeSetupMonthly)}
+            onClick={() => startCheckout('monthly', includeSetupMonthly, includeCRMProMonthly ? 'monthly' : null)}
             disabled={loading === 'monthly'}
             style={{
               width: '100%',
@@ -206,8 +222,20 @@ export default function PlansPage() {
             </span>
           </label>
 
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={includeCRMProYearly}
+              onChange={(e) => setIncludeCRMProYearly(e.target.checked)}
+              style={{ width: 18, height: 18, accentColor: '#3b82f6' }}
+            />
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+              Adicionar CRM Pro (recomendado) (+€59/ano)
+            </span>
+          </label>
+
           <button
-            onClick={() => startCheckout('yearly', includeSetupYearly)}
+            onClick={() => startCheckout('yearly', includeSetupYearly, includeCRMProYearly ? 'yearly' : null)}
             disabled={loading === 'yearly'}
             style={{
               width: '100%',

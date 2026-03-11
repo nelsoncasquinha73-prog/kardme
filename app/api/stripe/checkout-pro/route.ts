@@ -10,11 +10,13 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { user_id, billing, setupFee, setupLabel } = body as {
+    const { user_id, billing, setupFee, setupLabel, upsell_crm_pro, upsell_cycle } = body as {
       user_id: string
       billing: 'monthly' | 'yearly'
       setupFee?: number
       setupLabel?: string
+      upsell_crm_pro?: boolean
+      upsell_cycle?: string
     }
 
     if (!user_id) return NextResponse.json({ error: 'Missing user_id' }, { status: 400 })
@@ -76,7 +78,9 @@ export async function POST(req: Request) {
       customer: customerId,
       line_items: lineItems,
       allow_promotion_codes: true,
-      success_url: `${siteUrl}/dashboard?checkout=success`,
+      success_url: upsell_crm_pro
+        ? `${siteUrl}/dashboard?checkout=success&upsell_crm_pro=1&upsell_cycle=${upsell_cycle}`
+        : `${siteUrl}/dashboard?checkout=success`,
       cancel_url: `${siteUrl}/dashboard?checkout=cancel`,
       metadata: {
         user_id,
