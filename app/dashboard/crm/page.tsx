@@ -591,6 +591,7 @@ Melhores cumprimentos,
 
           {showCardDropdown && (
             <div
+              className="crmpro-card-dropdown"
               style={{
                 position: 'absolute',
                 top: '100%',

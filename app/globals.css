@@ -109,3 +109,19 @@ body {
     margin-right: auto !important;
   }
 }
+
+/* CRM Pro card dropdown */
+.crmpro-card-dropdown {
+  background: #0b1220 !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  color: #ffffff !important;
+}
+
+.crmpro-card-dropdown button {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.crmpro-card-dropdown button:hover {
+  background: rgba(255,255,255,0.10) !important;
+}
