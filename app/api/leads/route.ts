@@ -91,14 +91,13 @@ export async function POST(req: Request) {
 
     if (cardData?.user_id) {
       // Verificar se owner tem CRM Pro
-      const { data: subData } = await supabaseAdmin
-        .from('user_subscriptions')
-        .select('plan_type')
+      const { data: addonData } = await supabaseAdmin
+        .from('user_addons')
+        .select('crm_pro_active')
         .eq('user_id', cardData.user_id)
-        .eq('plan_type', 'crm_pro')
         .single()
 
-      if (subData) {
+      if (addonData?.crm_pro_active) {
         // Owner tem CRM Pro — enviar notificações
         const { data: ownerData } = await supabaseAdmin
           .from('profiles')
