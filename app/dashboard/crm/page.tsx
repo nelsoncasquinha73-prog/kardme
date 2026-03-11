@@ -108,6 +108,7 @@ Melhores cumprimentos,
 
   const [showImportModal, setShowImportModal] = useState(false)
   const [importFileName, setImportFileName] = useState('')
+  const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
   const [importing, setImporting] = useState(false)
