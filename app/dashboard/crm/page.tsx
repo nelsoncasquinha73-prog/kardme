@@ -719,6 +719,25 @@ Melhores cumprimentos,
     let sent = 0
     let failed = 0
 
+    // Limite diário (CRM Pro): 200 emails/dia por utilizador
+    try {
+      const usageRes = await fetch('/api/crm/email/usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, countToSend: selectedLeadIds.size }),
+      })
+      const usageJson = await usageRes.json().catch(() => null)
+      if (!usageRes.ok) {
+        alert(usageJson?.error || 'Limite diário atingido.')
+        setBulkSending(false)
+        return
+      }
+    } catch (e: any) {
+      alert('Erro ao validar limite diário: ' + (e?.message || String(e)))
+      setBulkSending(false)
+      return
+    }
+
     for (const leadId of Array.from(selectedLeadIds)) {
       const lead = leads.find(l => l.id === leadId)
       if (!lead) continue
