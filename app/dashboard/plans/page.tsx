@@ -226,10 +226,116 @@ export default function PlansPage() {
           >
             {loading === 'yearly' ? (t('plans.loading') || 'A abrir...') : (t('plans.subscribe') || 'Subscrever')}
           </button>
+
+        {/* CRM PRO ADD-ON */}
+        <div style={cardStyle(false)}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+              CRM Pro
+            </div>
+            <div style={{ marginTop: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+              Gestão de leads, email em massa, import/export
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              onClick={async () => {
+                setLoading('monthly')
+                try {
+                  const { data: authData } = await supabase.auth.getUser()
+                  if (!authData?.user?.id) {
+                    setError('Sem sessão. Faz login novamente.')
+                    setLoading(null)
+                    return
+                  }
+
+                  const res = await fetch('/api/stripe/checkout-crm-pro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      user_id: authData.user.id,
+                      billingCycle: 'monthly',
+                    }),
+                  })
+
+                  const data = await res.json()
+                  if (data?.url) window.location.href = data.url
+                  else setError(data?.error || 'Erro ao iniciar checkout.')
+                } catch (e) {
+                  setError('Erro ao iniciar checkout.')
+                } finally {
+                  setLoading(null)
+                }
+              }}
+              disabled={loading === 'monthly'}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: loading === 'monthly' ? 'not-allowed' : 'pointer',
+                opacity: loading === 'monthly' ? 0.7 : 1,
+              }}
+            >
+              {loading === 'monthly' ? 'A abrir...' : '💳 Ativar Mensal — €5,99'}
+            </button>
+
+            <button
+              onClick={async () => {
+                setLoading('yearly')
+                try {
+                  const { data: authData } = await supabase.auth.getUser()
+                  if (!authData?.user?.id) {
+                    setError('Sem sessão. Faz login novamente.')
+                    setLoading(null)
+                    return
+                  }
+
+                  const res = await fetch('/api/stripe/checkout-crm-pro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      user_id: authData.user.id,
+                      billingCycle: 'annual',
+                    }),
+                  })
+
+                  const data = await res.json()
+                  if (data?.url) window.location.href = data.url
+                  else setError(data?.error || 'Erro ao iniciar checkout.')
+                } catch (e) {
+                  setError('Erro ao iniciar checkout.')
+                } finally {
+                  setLoading(null)
+                }
+              }}
+              disabled={loading === 'yearly'}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(59,130,246,0.2)',
+                color: '#3b82f6',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: loading === 'yearly' ? 'not-allowed' : 'pointer',
+                opacity: loading === 'yearly' ? 0.7 : 1,
+              }}
+            >
+              {loading === 'yearly' ? 'A abrir...' : '💳 Ativar Anual — €59'}
+            </button>
+          </div>
         </div>
+
       </div>
 
-      {/* BENEFÍCIOS */}
+      {/* BENEFÍCIOS}
       <div style={{ marginTop: 40, textAlign: 'center' }}>
         <h3 style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 20 }}>
           {t('plans.whats_included') || 'O que está incluído'}
