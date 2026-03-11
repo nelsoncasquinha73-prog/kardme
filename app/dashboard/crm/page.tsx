@@ -102,6 +102,15 @@ Melhores cumprimentos,
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
 
 
+
+  const [sortBy, setSortBy] = useState<'created_at' | 'name' | 'zone'>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importCSVText, setImportCSVText] = useState('')
+  const [importPreview, setImportPreview] = useState<string[][]>([])
+  const [importing, setImporting] = useState(false)
+
   const loadLeads = async () => {
     setLoading(true)
 
@@ -156,7 +165,7 @@ Melhores cumprimentos,
       query = query.eq('step', filterStep)
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false })
+    const { data, error } = await query.order(sortBy, { ascending: sortOrder === 'asc' })
 
     if (error) {
       console.error('Erro a carregar leads:', error)
@@ -170,7 +179,7 @@ Melhores cumprimentos,
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing, filterStep, selectedCardId])
+  }, [filterMarketing, filterStep, selectedCardId, sortBy, sortOrder])
 
 
   useEffect(() => {
@@ -183,7 +192,76 @@ Melhores cumprimentos,
       }
     }
     document.addEventListener('mousedown', handleClickOutsideCardDropdown)
-    return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
+  
+  const handleExportCSV = async () => {
+    try {
+      if (!userId) return alert('Sem userId')
+      if (selectedCardId === 'all') return alert('Seleciona um cartão para exportar.')
+      const url = `/api/crm/leads/export?userId=${encodeURIComponent(userId)}&cardId=${encodeURIComponent(selectedCardId)}&sortBy=${encodeURIComponent(sortBy)}&sortOrder=${encodeURIComponent(sortOrder)}`
+      const res = await fetch(url)
+      if (!res.ok) {
+        const txt = await res.text()
+        return alert('Erro ao exportar: ' + txt)
+      }
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `leads_${selectedCardId}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    } catch (e: any) {
+      alert('Erro ao exportar: ' + (e?.message || String(e)))
+    }
+  }
+
+  const handleImportPreview = () => {
+    const text = importCSVText.trim()
+    if (!text) {
+      setImportPreview([])
+      return
+    }
+    const lines = text.split('\n').slice(0, 11) // header + 10 linhas
+    const preview = lines.map(l => l.split(',').map(c => c.trim()))
+    setImportPreview(preview)
+  }
+
+  const handleImportCSV = async () => {
+    try {
+      if (!userId) return alert('Sem userId')
+      if (selectedCardId === 'all') return alert('Seleciona um cartão para importar.')
+      if (!importCSVText.trim()) return alert('Cola o CSV primeiro.')
+
+      setImporting(true)
+      const res = await fetch('/api/crm/leads/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          cardId: selectedCardId,
+          csvText: importCSVText,
+        }),
+      })
+
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        return alert('Erro ao importar: ' + (json?.error || 'erro'))
+      }
+
+      alert(json?.message || 'Import concluído')
+      setShowImportModal(false)
+      setImportCSVText('')
+      setImportPreview([])
+      await loadLeads()
+    } catch (e: any) {
+      alert('Erro ao importar: ' + (e?.message || String(e)))
+    } finally {
+      setImporting(false)
+    }
+  }
+
+
+  return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
 
@@ -828,7 +906,79 @@ Melhores cumprimentos,
         </p>
       )}
 
-      {selectedLeadIds.size > 0 && (
+
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <select
+          value={`${sortBy}:${sortOrder}`}
+          onChange={(e) => {
+            const [field, order] = e.target.value.split(':')
+            setSortBy(field as any)
+            setSortOrder(order as any)
+          }}
+          style={{
+            padding: '0 12px',
+            height: 44,
+            lineHeight: '44px',
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 800,
+            minWidth: 240,
+            cursor: 'pointer',
+          }}
+        >
+          <option value="created_at:desc">Data (mais recentes)</option>
+          <option value="created_at:asc">Data (mais antigas)</option>
+          <option value="name:asc">Nome (A–Z)</option>
+          <option value="name:desc">Nome (Z–A)</option>
+          <option value="zone:asc">Localidade/Zona (A–Z)</option>
+          <option value="zone:desc">Localidade/Zona (Z–A)</option>
+        </select>
+
+        <button
+          onClick={handleExportCSV}
+          disabled={selectedCardId === 'all'}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: selectedCardId === 'all' ? '#e5e7eb' : '#111827',
+            color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+          }}
+          title={selectedCardId === 'all' ? 'Seleciona um cartão para exportar' : 'Exportar CSV'}
+        >
+          ⬇️ Exportar CSV
+        </button>
+
+        <button
+          onClick={() => setShowImportModal(true)}
+          disabled={selectedCardId === 'all'}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: selectedCardId === 'all' ? '#e5e7eb' : '#10b981',
+            color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+          }}
+          title={selectedCardId === 'all' ? 'Seleciona um cartão para importar' : 'Importar CSV'}
+        >
+          ⬆️ Importar CSV
+        </button>
+
+        <div style={{ fontSize: 12, opacity: 0.7 }}>
+          Dedupe: <strong>(cartão + email)</strong>
+        </div>
+      </div>
+
+            {selectedLeadIds.size > 0 && (
         <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
           <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
           <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Limpar seleção</button>
@@ -1659,6 +1809,79 @@ Melhores cumprimentos,
           </div>
         </div>
       )}
+
+      {showImportModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 760, width: '92%', maxHeight: '85vh', overflowY: 'auto', color: '#111827' }}>
+            <h2 style={{ marginBottom: 10, fontSize: 18, fontWeight: 900 }}>⬆️ Importar Leads (CSV)</h2>
+            <p style={{ fontSize: 13, opacity: 0.75, marginBottom: 14 }}>
+              Importação é feita para o cartão selecionado. Dedupe automático por <strong>(cartão + email)</strong>.
+            </p>
+
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 12, marginBottom: 14, fontSize: 12 }}>
+              <strong>Dica:</strong> O CSV deve ter cabeçalho. Colunas reconhecidas automaticamente: <code>nome/name</code>, <code>email</code>, <code>telefone/phone</code>, <code>zona/zone</code>, <code>notas/notes</code>, <code>step</code>.
+            </div>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13 }}>Cola aqui o CSV</label>
+            <textarea
+              value={importCSVText}
+              onChange={(e) => setImportCSVText(e.target.value)}
+              placeholder={"name,email,phone,zone\nJoão,joao@email.com,912345678,Lisboa"}
+              style={{ width: '100%', minHeight: 180, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.18)', fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', boxSizing: 'border-box' }}
+            />
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+              <button
+                onClick={handleImportPreview}
+                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                👀 Preview
+              </button>
+
+              <button
+                onClick={handleImportCSV}
+                disabled={importing}
+                style={{ padding: '10px 14px', borderRadius: 10, background: importing ? '#a7f3d0' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
+              >
+                {importing ? 'A importar...' : 'Importar agora'}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowImportModal(false)
+                  setImportCSVText('')
+                  setImportPreview([])
+                }}
+                style={{ padding: '10px 14px', borderRadius: 10, background: '#f3f4f6', color: '#111827', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+              >
+                Cancelar
+              </button>
+            </div>
+
+            {importPreview.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontWeight: 900, fontSize: 13, marginBottom: 8 }}>Preview (até 10 linhas)</div>
+                <div style={{ overflowX: 'auto', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <tbody>
+                      {importPreview.map((row, idx) => (
+                        <tr key={idx} style={{ background: idx === 0 ? 'rgba(0,0,0,0.04)' : '#fff' }}>
+                          {row.map((cell, j) => (
+                            <td key={j} style={{ padding: '10px 10px', borderBottom: '1px solid rgba(0,0,0,0.06)', whiteSpace: 'nowrap' }}>
+                              {cell || '—'}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
 
     </main>
   )
