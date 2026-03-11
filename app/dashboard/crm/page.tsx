@@ -246,11 +246,6 @@ Melhores cumprimentos,
     return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
-    const lines = text.split('\n').slice(0, 11) // header + 10 linhas
-    const preview = lines.map(l => l.split(',').map(c => c.trim()))
-    setImportPreview(preview)
-  }
-
   const handleImportCSV = async () => {
     try {
       if (!userId) return alert('Sem userId')
