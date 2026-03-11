@@ -351,10 +351,6 @@ Melhores cumprimentos,
     )
   }
 
-  return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
-  }, [showCardDropdown])
-
-
 
   useEffect(() => {
     if (typeof window === 'undefined') return
