@@ -246,7 +246,6 @@ Melhores cumprimentos,
     return () => document.removeEventListener('mousedown', handleClickOutsideCardDropdown)
   }, [showCardDropdown])
 
-  const handleImportPreview = () => {
     const text = importCSVText.trim()
     if (!text) {
       setImportPreview([])
