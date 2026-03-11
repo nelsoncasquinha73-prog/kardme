@@ -215,6 +215,7 @@ Melhores cumprimentos,
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
       setCardsList(data || [])
+      console.log('CRM Pro cardsList:', data)
     }
     loadCards()
 
