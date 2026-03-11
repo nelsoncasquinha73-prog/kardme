@@ -226,6 +226,7 @@ export default function PlansPage() {
           >
             {loading === 'yearly' ? (t('plans.loading') || 'A abrir...') : (t('plans.subscribe') || 'Subscrever')}
           </button>
+        </div>
 
         {/* CRM PRO ADD-ON */}
         <div style={cardStyle(false)}>
