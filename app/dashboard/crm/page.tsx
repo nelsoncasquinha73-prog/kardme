@@ -143,6 +143,7 @@ Melhores cumprimentos,
       setBuyingCRMPro(cycle)
       const { data: authData } = await supabase.auth.getUser()
       const uid = authData?.user?.id
+      console.log('CRM Pro checkout - uid:', uid, 'authData:', authData)
       if (!uid) return alert('Sem sessão. Faz login novamente.')
 
       const res = await fetch('/api/stripe/checkout-crm-pro', {
