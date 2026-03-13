@@ -66,8 +66,111 @@ export default function AdminClienteDetailPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [cards, setCards] = useState<CardRow[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "resumo" | "cartoes" | "analytics"
+    "resumo" | "cartoes" | "dominios" | "analytics"
   >("resumo");
+
+  type DomainRow = {
+    id: string;
+    card_id: string;
+    domain: string;
+    status: string | null;
+    last_check_at: string | null;
+    created_at: string;
+  };
+
+  type DomainCard = {
+    id: string;
+    title: string | null;
+    slug: string;
+  };
+
+  const [domainsLoading, setDomainsLoading] = useState(false);
+  const [domains, setDomains] = useState<DomainRow[]>([]);
+  const [domainCards, setDomainCards] = useState<DomainCard[]>([]);
+  const [newDomain, setNewDomain] = useState("");
+  const [selectedDomainCardId, setSelectedDomainCardId] = useState<string>("");
+
+  async function getAdminToken() {
+    const token = (await supabase.auth.getSession())?.data?.session
+      ?.access_token;
+    return token || null;
+  }
+
+  async function loadDomains() {
+    setDomainsLoading(true);
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error("Sem autenticação");
+
+      const res = await fetch(`/api/admin/domains/by-user?userId=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success)
+        throw new Error(json?.error || "Erro ao carregar domínios");
+
+      setDomains((json?.domains ?? []) as DomainRow[]);
+      setDomainCards((json?.cards ?? []) as DomainCard[]);
+      setSelectedDomainCardId((prev) => prev || (json?.cards?.[0]?.id ?? ""));
+    } catch (e: any) {
+      alert("Erro: " + e?.message);
+    }
+    setDomainsLoading(false);
+  }
+
+  async function createDomain() {
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error("Sem autenticação");
+
+      const domain = newDomain.trim();
+      if (!selectedDomainCardId) throw new Error("Seleciona um cartão");
+      if (!domain) throw new Error("Escreve um domínio");
+
+      const res = await fetch("/api/admin/domains/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ cardId: selectedDomainCardId, domain }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success)
+        throw new Error(json?.error || "Erro ao criar domínio");
+
+      setNewDomain("");
+      await loadDomains();
+      alert("Domínio criado! Agora configura o DNS e clica em Verificar.");
+    } catch (e: any) {
+      alert("Erro: " + e?.message);
+    }
+  }
+
+  async function verifyDomain(domain: string) {
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error("Sem autenticação");
+
+      const res = await fetch("/api/admin/domains/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ domain }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success)
+        throw new Error(json?.error || "Erro ao verificar domínio");
+
+      await loadDomains();
+      alert(`Verificação concluída: ${json?.status || "ok"}`);
+    } catch (e: any) {
+      alert("Erro: " + e?.message);
+    }
+  }
+
   const [plan, setPlan] = useState("free");
   const [billing, setBilling] = useState("monthly");
   const [limit, setLimit] = useState<number>(1);
@@ -124,6 +227,38 @@ export default function AdminClienteDetailPage() {
   }, [userId]);
 
   useEffect(() => {
+    if (activeTab !== "dominios") return;
+    let cancelled = false;
+
+    (async () => {
+      setDomainsLoading(true);
+      try {
+        const token = await getAdminToken();
+        if (!token) throw new Error("Sem autenticação");
+
+        const res = await fetch(`/api/admin/domains/by-user?userId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (!res.ok || !json?.success)
+          throw new Error(json?.error || "Erro ao carregar domínios");
+        if (cancelled) return;
+
+        setDomains((json?.domains ?? []) as DomainRow[]);
+        setDomainCards((json?.cards ?? []) as DomainCard[]);
+        setSelectedDomainCardId((prev) => prev || (json?.cards?.[0]?.id ?? ""));
+      } catch (e: any) {
+        if (!cancelled) alert("Erro: " + e?.message);
+      }
+      if (!cancelled) setDomainsLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, userId]);
+
+  useEffect(() => {
     if (activeTab !== "analytics") return;
     let cancelled = false;
 
@@ -152,8 +287,6 @@ export default function AdminClienteDetailPage() {
           clicks: d.clicks,
           leads: d.leads,
         }));
-
-        setStats(formattedDaily);
 
         const chartMap: Record<string, ChartData> = {};
         for (const row of formattedDaily) {
@@ -417,27 +550,30 @@ export default function AdminClienteDetailPage() {
           paddingBottom: 12,
         }}
       >
-        {(["resumo", "cartoes", "analytics"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "none",
-              background:
-                activeTab === tab ? "rgba(124,58,237,0.3)" : "transparent",
-              color: activeTab === tab ? "#fff" : "rgba(255,255,255,0.6)",
-              fontWeight: activeTab === tab ? 700 : 500,
-              cursor: "pointer",
-              fontSize: 14,
-            }}
-          >
-            {tab === "resumo" && "📋 Resumo"}
-            {tab === "cartoes" && "📇 Cartões"}
-            {tab === "analytics" && "📊 Analytics"}
-          </button>
-        ))}
+        {(["resumo", "cartoes", "dominios", "analytics"] as const).map(
+          (tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "none",
+                background:
+                  activeTab === tab ? "rgba(124,58,237,0.3)" : "transparent",
+                color: activeTab === tab ? "#fff" : "rgba(255,255,255,0.6)",
+                fontWeight: activeTab === tab ? 700 : 500,
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+            >
+              {tab === "resumo" && "📋 Resumo"}
+              {tab === "cartoes" && "📇 Cartões"}
+              {tab === "dominios" && "🌐 Domínios"}
+              {tab === "analytics" && "📊 Analytics"}
+            </button>
+          ),
+        )}
       </div>
 
       {activeTab === "resumo" && (
@@ -837,6 +973,258 @@ export default function AdminClienteDetailPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "dominios" && (
+        <div style={{ marginTop: 20 }}>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>
+              Adicionar domínio
+            </div>
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <select
+                value={selectedDomainCardId}
+                onChange={(e) => setSelectedDomainCardId(e.target.value)}
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(0,0,0,0.25)",
+                  color: "#fff",
+                  minWidth: 240,
+                }}
+              >
+                {domainCards.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {(c.title || "Sem título") + " — " + c.slug}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                value={newDomain}
+                onChange={(e) => setNewDomain(e.target.value)}
+                placeholder="ex: cartao.cliente.pt"
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(0,0,0,0.25)",
+                  color: "#fff",
+                  minWidth: 260,
+                  flex: 1,
+                }}
+              />
+
+              <button
+                onClick={createDomain}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(124,58,237,0.55)",
+                  background: "rgba(124,58,237,0.25)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Criar
+              </button>
+
+              <button
+                onClick={loadDomains}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "#fff",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Recarregar
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                color: "rgba(255,255,255,0.7)",
+                fontSize: 13,
+              }}
+            >
+              Depois de criares, configura o DNS no teu registrador e usa
+              “Verificar”.
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 12,
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 700 }}>
+                Domínios do cliente
+              </div>
+              {domainsLoading && (
+                <div style={{ color: "rgba(255,255,255,0.7)" }}>
+                  A carregar…
+                </div>
+              )}
+            </div>
+
+            {domains.length === 0 ? (
+              <div style={{ color: "rgba(255,255,255,0.7)" }}>
+                Ainda não há domínios associados aos cartões deste cliente.
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr
+                      style={{
+                        textAlign: "left",
+                        color: "rgba(255,255,255,0.7)",
+                        fontSize: 13,
+                      }}
+                    >
+                      <th style={{ padding: "10px 8px" }}>Domínio</th>
+                      <th style={{ padding: "10px 8px" }}>Cartão</th>
+                      <th style={{ padding: "10px 8px" }}>Status</th>
+                      <th style={{ padding: "10px 8px" }}>Último check</th>
+                      <th style={{ padding: "10px 8px" }}>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {domains.map((d) => {
+                      const card = domainCards.find((c) => c.id === d.card_id);
+                      const status = (d.status || "").toLowerCase();
+                      const isActive = status === "active";
+                      const badgeBg = isActive
+                        ? "rgba(34,197,94,0.18)"
+                        : "rgba(234,179,8,0.18)";
+                      const badgeBorder = isActive
+                        ? "rgba(34,197,94,0.35)"
+                        : "rgba(234,179,8,0.35)";
+                      const badgeText = isActive ? "#86efac" : "#fde68a";
+
+                      return (
+                        <tr
+                          key={d.id}
+                          style={{
+                            borderTop: "1px solid rgba(255,255,255,0.08)",
+                          }}
+                        >
+                          <td style={{ padding: "10px 8px", fontWeight: 700 }}>
+                            {d.domain}
+                          </td>
+                          <td
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.85)",
+                            }}
+                          >
+                            {card ? card.title || "Sem título" : d.card_id}
+                          </td>
+                          <td style={{ padding: "10px 8px" }}>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                padding: "4px 10px",
+                                borderRadius: 999,
+                                background: badgeBg,
+                                border: `1px solid ${badgeBorder}`,
+                                color: badgeText,
+                                fontSize: 12,
+                                fontWeight: 800,
+                                letterSpacing: 0.2,
+                              }}
+                            >
+                              {d.status || "—"}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.7)",
+                              fontSize: 13,
+                            }}
+                          >
+                            {d.last_check_at
+                              ? new Date(d.last_check_at).toLocaleString()
+                              : "—"}
+                          </td>
+                          <td style={{ padding: "10px 8px" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <button
+                                onClick={() => verifyDomain(d.domain)}
+                                style={{
+                                  padding: "8px 10px",
+                                  borderRadius: 10,
+                                  border: "1px solid rgba(255,255,255,0.18)",
+                                  background: "rgba(255,255,255,0.06)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Verificar
+                              </button>
+
+                              <a
+                                href={`https://${d.domain}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  padding: "8px 10px",
+                                  borderRadius: 10,
+                                  border: "1px solid rgba(255,255,255,0.18)",
+                                  background: "rgba(255,255,255,0.06)",
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                }}
+                              >
+                                Abrir
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
