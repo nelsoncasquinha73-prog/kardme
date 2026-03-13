@@ -997,7 +997,9 @@ export default function AdminClienteDetailPage() {
                 value={selectedDomainCardId}
                 onChange={(e) => setSelectedDomainCardId(e.target.value)}
                 style={{
-                  padding: 10,
+                  padding: "0 12px",
+                  height: 42,
+                  lineHeight: "42px",
                   borderRadius: 10,
                   border: "1px solid rgba(255,255,255,0.18)",
                   background: "rgba(0,0,0,0.25)",
@@ -1017,7 +1019,8 @@ export default function AdminClienteDetailPage() {
                 onChange={(e) => setNewDomain(e.target.value)}
                 placeholder="ex: cartao.cliente.pt"
                 style={{
-                  padding: 10,
+                  padding: "0 12px",
+                  height: 42,
                   borderRadius: 10,
                   border: "1px solid rgba(255,255,255,0.18)",
                   background: "rgba(0,0,0,0.25)",
