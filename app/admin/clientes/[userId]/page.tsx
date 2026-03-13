@@ -1009,7 +1009,7 @@ export default function AdminClienteDetailPage() {
               >
                 {domainCards.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {(c.title || "Sem título") + " — " + c.slug}
+                    {((c.name || c.title) ? `${c.name || c.title} — ${c.slug}` : (c.slug || "—"))}
                   </option>
                 ))}
               </select>
