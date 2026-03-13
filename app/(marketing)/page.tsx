@@ -8,6 +8,7 @@ import { useLanguage } from '@/components/language/LanguageProvider'
 import LanguageDropdown from '@/components/language/LanguageDropdown'
 
 export default function Home() {
+  
   const [user, setUser] = useState<any>(null)
   const [checked, setChecked] = useState(false)
   const { t } = useLanguage()
