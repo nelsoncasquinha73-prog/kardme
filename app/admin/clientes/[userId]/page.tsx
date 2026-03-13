@@ -80,6 +80,7 @@ export default function AdminClienteDetailPage() {
 
   type DomainCard = {
     id: string;
+    name: string | null;
     title: string | null;
     slug: string;
   };
