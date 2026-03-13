@@ -64,7 +64,14 @@ export async function POST(req: Request) {
     })
     const addJson = await addRes.json()
     if (!addRes.ok) {
-      return NextResponse.json({ success: false, error: 'Falha ao adicionar domínio na Vercel', details: addJson }, { status: 400 })
+      const code = addJson?.error?.code
+      // Idempotência: se o domínio já está associado a um projeto, seguimos e gravamos no Supabase
+      if (code !== 'domain_already_in_use') {
+        return NextResponse.json(
+          { success: false, error: 'Falha ao adicionar domínio na Vercel', details: addJson },
+          { status: 400 }
+        )
+      }
     }
 
     const cfgRes = await fetch(`${VERCEL_API}/v6/domains/${domain}/config?teamId=${teamId}`, {
