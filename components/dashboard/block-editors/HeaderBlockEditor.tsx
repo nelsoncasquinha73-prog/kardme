@@ -433,15 +433,61 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               )}
 
               <Row label={t('header_editor.label_position')}>
-                <select
-                  value={(v1.base as any).position ?? 'center'}
-                  onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), position: e.target.value } })}
-                  style={selectStyle}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, width: 72 }}>
+                  {[
+                    { value: 'top-left', label: '↖' },
+                    { value: 'top', label: '↑' },
+                    { value: 'top-right', label: '↗' },
+                    { value: 'left', label: '←' },
+                    { value: 'center', label: '●' },
+                    { value: 'right', label: '→' },
+                    { value: 'bottom-left', label: '↙' },
+                    { value: 'bottom', label: '↓' },
+                    { value: 'bottom-right', label: '↘' },
+                  ].map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => onChangeCardBg({ ...v1, base: { ...(v1.base as any), position: p.value } })}
+                      style={{
+                        width: 22,
+                        height: 22,
+                        fontSize: 11,
+                        lineHeight: '22px',
+                        textAlign: 'center',
+                        border: (v1.base as any).position === p.value || (!((v1.base as any).position) && p.value === 'center') ? '2px solid #3b82f6' : '1px solid #444',
+                        borderRadius: 4,
+                        background: (v1.base as any).position === p.value || (!((v1.base as any).position) && p.value === 'center') ? '#1e3a5f' : '#1a1a2e',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </Row>
+
+              <Row label="Recentrar">
+                <button
+                  type="button"
+                  onClick={() => onChangeCardBg({
+                    ...v1,
+                    base: { ...(v1.base as any), position: 'center', zoom: 1, offsetX: 0, offsetY: 0 },
+                  })}
+                  style={{
+                    fontSize: 11,
+                    padding: '4px 10px',
+                    borderRadius: 4,
+                    border: '1px solid #444',
+                    background: '#1a1a2e',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <option value="center">Centro</option>
-                  <option value="top">Topo</option>
-                  <option value="bottom">Baixo</option>
-                </select>
+                  ↺ Reset
+                </button>
               </Row>
 
               <Row label={t('header_editor.label_zoom')}>
