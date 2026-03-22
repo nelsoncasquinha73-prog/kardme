@@ -45,3 +45,58 @@
 .card-preview .muted {
   color: rgba(0,0,0,0.6);
 }
+
+/* ═══ Animated Background Presets ═══ */
+
+@keyframes bg-ocean {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes bg-lava {
+  0% { background-position: 0% 0%; }
+  33% { background-position: 100% 50%; }
+  66% { background-position: 50% 100%; }
+  100% { background-position: 0% 0%; }
+}
+@keyframes bg-aurora {
+  0% { background-position: 0% 50%; transform: scale(1); }
+  50% { background-position: 100% 50%; transform: scale(1.05); }
+  100% { background-position: 0% 50%; transform: scale(1); }
+}
+@keyframes bg-pulse {
+  0% { opacity: 0.85; background-position: 0% 50%; }
+  50% { opacity: 1; background-position: 100% 50%; }
+  100% { opacity: 0.85; background-position: 0% 50%; }
+}
+
+.animated-bg-ocean {
+  background: linear-gradient(-45deg, #0077b6, #00b4d8, #0096c7, #023e8a, #0077b6);
+  background-size: 400% 400%;
+  animation: bg-ocean 8s ease infinite;
+}
+.animated-bg-lava {
+  background: linear-gradient(-45deg, #d00000, #e85d04, #faa307, #dc2f02, #d00000);
+  background-size: 400% 400%;
+  animation: bg-lava 10s ease infinite;
+}
+.animated-bg-aurora {
+  background: linear-gradient(-45deg, #06d6a0, #118ab2, #7209b7, #3a0ca3, #06d6a0);
+  background-size: 400% 400%;
+  animation: bg-aurora 12s ease infinite;
+}
+.animated-bg-sunset {
+  background: linear-gradient(-45deg, #f72585, #b5179e, #7209b7, #f4845f, #f72585);
+  background-size: 400% 400%;
+  animation: bg-ocean 9s ease infinite;
+}
+.animated-bg-neon {
+  background: linear-gradient(-45deg, #00f5d4, #00bbf9, #9b5de5, #f15bb5, #00f5d4);
+  background-size: 400% 400%;
+  animation: bg-lava 7s ease infinite;
+}
+.animated-bg-dark-pulse {
+  background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #1b263b, #0d1b2a);
+  background-size: 400% 400%;
+  animation: bg-pulse 6s ease infinite;
+}

@@ -202,9 +202,37 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     )
   }
 
+  // Se for gradiente animado, renderizar AnimatedBgLayer em vez de imagem
+  if (isAnimatedBg(fit)) {
+    return <AnimatedBgLayer preset={fit} borderRadius={borderRadius} />
+  }
+
   return <div aria-hidden style={baseStyle} />
 }
 
+
+// ✅ NOVO: Renderiza fundo animado (gradientes CSS)
+const ANIMATED_BG_PRESETS = ['ocean', 'lava', 'aurora', 'sunset', 'neon', 'dark-pulse'] as const
+type AnimatedPreset = typeof ANIMATED_BG_PRESETS[number]
+
+function isAnimatedBg(fit: string): fit is AnimatedPreset {
+  return ANIMATED_BG_PRESETS.includes(fit as AnimatedPreset)
+}
+
+function AnimatedBgLayer({ preset, borderRadius }: { preset: string; borderRadius?: number | string }) {
+  return (
+    <div
+      aria-hidden
+      className={`animated-bg-${preset}`}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        borderRadius,
+      }}
+    />
+  )
+}
 
 // ✅ NOVO: Renderiza o overlay da imagem (escurecer/clarear)
 function ImageOverlayLayer({

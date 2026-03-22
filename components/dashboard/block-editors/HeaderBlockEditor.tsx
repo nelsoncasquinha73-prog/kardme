@@ -364,6 +364,13 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   <option value="fixed">Parallax suave</option>
                   <option value="tile">Repetir</option>
                   <option value="top-fade">Topo + Fade</option>
+                  <option disabled>── Fundos Animados ──</option>
+                  <option value="ocean">🌊 Oceano</option>
+                  <option value="lava">🔥 Lava</option>
+                  <option value="aurora">🌌 Aurora</option>
+                  <option value="sunset">🌅 Sunset</option>
+                  <option value="neon">⚡ Neon</option>
+                  <option value="dark-pulse">🖤 Dark Pulse</option>
                 </select>
               </Row>
 
