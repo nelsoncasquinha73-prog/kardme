@@ -134,6 +134,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   }
 
   const bgPosition = positionMap[position] ?? 'center center'
+  const [baseX, baseY] = bgPosition.split(' ')
 
   // ✅ Calcular backgroundSize baseado no fit e zoom
   let backgroundSize: string
@@ -159,7 +160,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     position: 'absolute',
     inset: 0,
     backgroundImage: `url(${image.url})`,
-    backgroundPosition: `calc(50% + ${offsetX}px) calc(50% + ${offsetY}px)`,
+    backgroundPosition: `calc(${baseX} + ${offsetX}px) calc(${baseY} + ${offsetY}px)`,
     backgroundRepeat,
     backgroundSize,
     backgroundAttachment,

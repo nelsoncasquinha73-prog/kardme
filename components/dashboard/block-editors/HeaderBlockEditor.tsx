@@ -392,6 +392,42 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 <span style={rightNum}>{Math.round(((v1.base as any).zoom ?? 1) * 100)}%</span>
               </Row>
 
+              <Row label="Ajuste horizontal">
+                <input
+                  type="range"
+                  min={-300}
+                  max={300}
+                  step={5}
+                  value={(v1.base as any).offsetX ?? 0}
+                  onChange={(e) =>
+                    onChangeCardBg({
+                      ...v1,
+                      base: { ...(v1.base as any), offsetX: Number(e.target.value) },
+                    })
+                  }
+                  style={{ flex: 1 }}
+                />
+                <span style={rightNum}>{(v1.base as any).offsetX ?? 0}px</span>
+              </Row>
+
+              <Row label="Ajuste vertical">
+                <input
+                  type="range"
+                  min={-300}
+                  max={300}
+                  step={5}
+                  value={(v1.base as any).offsetY ?? 0}
+                  onChange={(e) =>
+                    onChangeCardBg({
+                      ...v1,
+                      base: { ...(v1.base as any), offsetY: Number(e.target.value) },
+                    })
+                  }
+                  style={{ flex: 1 }}
+                />
+                <span style={rightNum}>{(v1.base as any).offsetY ?? 0}px</span>
+              </Row>
+
               <Row label={t('header_editor.label_blur')}>
                 <input
                   type="range"
