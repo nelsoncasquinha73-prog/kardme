@@ -384,12 +384,12 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   type="range"
                   min={0.5}
                   max={2}
-                  step={0.05}
+                  step={0.01}
                   value={(v1.base as any).zoom ?? 1}
                   onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), zoom: Number(e.target.value) } })}
                   style={{ flex: 1 }}
                 />
-                <span style={rightNum}>{Math.round(((v1.base as any).zoom ?? 1) * 100)}%</span>
+                <span style={rightNum}>{(((v1.base as any).zoom ?? 1) * 100).toFixed(0)}%</span>
               </Row>
 
               <Row label="Ajuste horizontal">

@@ -119,6 +119,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   const offsetX = typeof image.offsetX === 'number' ? image.offsetX : 0
   const offsetY = typeof image.offsetY === 'number' ? image.offsetY : 0
   const blur = typeof image.blur === 'number' ? image.blur : 0
+  const zoomScale = 1 + ((zoom - 1) * 0.6)
 
   // Mapear position para CSS
   const positionMap: Record<string, string> = {
@@ -145,14 +146,14 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
+    backgroundSize = zoomScale === 1 ? "cover" : `${zoomScale * 100}%`
     backgroundAttachment = 'fixed'
   } else if (fit === 'top-fade') {
-    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
+    backgroundSize = zoomScale === 1 ? "cover" : `${zoomScale * 100}%`
   } else {
     // cover - mas agora controlado pelo zoom
     // zoom 1 = 100% da largura, zoom 0.5 = 50%, etc.
-    backgroundSize = zoom === 1 ? "cover" : `${zoom * 100}%`
+    backgroundSize = zoomScale === 1 ? "cover" : `${zoomScale * 100}%`
   }
 
   // Estilos base
