@@ -146,8 +146,9 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     backgroundSize = 'auto'
     backgroundRepeat = 'repeat'
   } else if (fit === 'fixed') {
-    backgroundSize = zoomScale === 1 ? "cover" : `${zoomScale * 100}%`
-    backgroundAttachment = 'fixed'
+    const fixedScale = 1 + ((zoom - 1) * 0.35)
+    backgroundSize = fixedScale === 1 ? "cover" : `${fixedScale * 100}%`
+    backgroundAttachment = 'scroll'
   } else if (fit === 'top-fade') {
     backgroundSize = zoomScale === 1 ? "cover" : `${zoomScale * 100}%`
   } else {

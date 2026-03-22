@@ -361,7 +361,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   style={selectStyle}
                 >
                   <option value="cover">{t('header_editor.option_cover')}</option>
-                  <option value="fixed">Fixo (parallax)</option>
+                  <option value="fixed">Parallax suave</option>
                   <option value="tile">Repetir</option>
                   <option value="top-fade">Topo + Fade</option>
                 </select>
