@@ -202,6 +202,18 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     )
   }
 
+  // Se for vídeo de fundo
+  if (fit === 'video' && image.videoUrl) {
+    return (
+      <VideoBgLayer
+        url={image.videoUrl}
+        fadeColor={image.videoFadeColor}
+        fadeHeight={image.videoFadeHeight}
+        borderRadius={borderRadius}
+      />
+    )
+  }
+
   // Se for gradiente animado, renderizar AnimatedBgLayer em vez de imagem
   if (isAnimatedBg(fit)) {
     return <AnimatedBgLayer preset={fit} borderRadius={borderRadius} />
@@ -210,6 +222,63 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   return <div aria-hidden style={baseStyle} />
 }
 
+
+// ✅ NOVO: Renderiza vídeo de fundo com fade inferior
+function VideoBgLayer({
+  url,
+  fadeColor,
+  fadeHeight,
+  borderRadius,
+}: {
+  url: string
+  fadeColor?: string
+  fadeHeight?: number
+  borderRadius?: number | string
+}) {
+  if (!url) return null
+  const fade = fadeColor ?? 'transparent'
+  const height = fadeHeight ?? 200
+
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        borderRadius,
+      }}
+    >
+      <video
+        src={url}
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+      />
+      {fade !== 'transparent' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `${height}px`,
+            background: `linear-gradient(to bottom, transparent 0%, ${fade} 100%)`,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+    </div>
+  )
+}
 
 // ✅ NOVO: Renderiza fundo animado (gradientes CSS)
 const ANIMATED_BG_PRESETS = ['ocean', 'lava', 'aurora', 'sunset', 'neon', 'dark-pulse'] as const

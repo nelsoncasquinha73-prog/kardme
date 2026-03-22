@@ -364,6 +364,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   <option value="fixed">Parallax suave</option>
                   <option value="tile">Repetir</option>
                   <option value="top-fade">Topo + Fade</option>
+                  <option value="video">🎬 Vídeo</option>
                   <option disabled>── Fundos Animados ──</option>
                   <option value="ocean">🌊 Oceano</option>
                   <option value="lava">🔥 Lava</option>
@@ -373,6 +374,63 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   <option value="dark-pulse">🖤 Dark Pulse</option>
                 </select>
               </Row>
+
+              {(v1.base as any).fit === 'video' && (
+                <>
+                  <Row label="Upload vídeo">
+                    <input
+                      type="file"
+                      accept=".mp4,.webm,.mov,.m4v,.ogg,video/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        try {
+                          const { uploadCardVideo } = await import('@/lib/uploadCardVideo')
+                          const { publicUrl } = await uploadCardVideo({ cardId, file })
+                          onChangeCardBg({ ...v1, base: { ...(v1.base as any), videoUrl: publicUrl } })
+                        } catch (err: any) {
+                          alert(err.message || 'Erro ao enviar vídeo')
+                        }
+                        e.target.value = ''
+                      }}
+                      style={{ fontSize: 11, maxWidth: 180 }}
+                    />
+                  </Row>
+                  <div style={{ fontSize: 10, opacity: 0.5, paddingLeft: 8 }}>Máx: 50MB • mp4, webm, mov</div>
+                  {(v1.base as any).videoUrl && (
+                    <div style={{ fontSize: 11, color: '#22c55e', paddingLeft: 8 }}>✓ Vídeo carregado</div>
+                  )}
+                  <Row label="Ou URL">
+                    <input
+                      value={(v1.base as any).videoUrl ?? ''}
+                      onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), videoUrl: e.target.value } })}
+                      placeholder="https://...video.mp4"
+                      style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #333', background: '#1a1a2e', color: '#fff' }}
+                    />
+                  </Row>
+                  <Row label="Cor fade inferior">
+                    <input
+                      type="color"
+                      value={(v1.base as any).videoFadeColor ?? '#000000'}
+                      onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), videoFadeColor: e.target.value } })}
+                      style={{ width: 28, height: 28, border: 'none', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: 11, opacity: 0.6 }}>{(v1.base as any).videoFadeColor ?? 'Nenhum'}</span>
+                  </Row>
+                  <Row label="Altura fade">
+                    <input
+                      type="range"
+                      min={0}
+                      max={500}
+                      step={10}
+                      value={(v1.base as any).videoFadeHeight ?? 200}
+                      onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), videoFadeHeight: Number(e.target.value) } })}
+                      style={{ flex: 1 }}
+                    />
+                    <span style={{ fontSize: 11, minWidth: 40, textAlign: 'right' }}>{(v1.base as any).videoFadeHeight ?? 200}px</span>
+                  </Row>
+                </>
+              )}
 
               <Row label={t('header_editor.label_position')}>
                 <select

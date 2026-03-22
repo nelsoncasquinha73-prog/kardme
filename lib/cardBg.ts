@@ -31,7 +31,7 @@ export type ImageOverlay = {
 export type ImageBase = {
   kind: 'image'
   url: string
-  fit?: 'cover' | 'fixed' | 'tile' | 'top-fade'
+  fit?: 'cover' | 'fixed' | 'tile' | 'top-fade' | 'video' | 'ocean' | 'lava' | 'aurora' | 'sunset' | 'neon' | 'dark-pulse'
   position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   zoom?: number        // 1 = 100%, 1.5 = 150%, etc.
   offsetX?: number     // px
@@ -39,6 +39,9 @@ export type ImageBase = {
   blur?: number        // px
   fadeToColor?: string // cor para onde faz fade (usado com fit: 'top-fade')
   fadeHeight?: number  // altura do fade em px
+  videoUrl?: string    // URL do vídeo de fundo
+  videoFadeColor?: string // cor do fade inferior do vídeo
+  videoFadeHeight?: number // altura do fade do vídeo em px
 }
 
 export type CardBgV1 = {
