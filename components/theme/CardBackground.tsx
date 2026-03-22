@@ -164,7 +164,11 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     position: 'absolute',
     inset: 0,
     backgroundImage: `url(${image.url})`,
-    backgroundPosition: `calc(${baseX} + ${offsetX}px) calc(${baseY} + ${offsetY}px)`,
+    backgroundPosition: (() => {
+      const unitX = Math.abs(offsetX) > 50 ? 'px' : '%'
+      const unitY = Math.abs(offsetY) > 50 ? 'px' : '%'
+      return `calc(${baseX} + ${offsetX}${unitX}) calc(${baseY} + ${offsetY}${unitY})`
+    })(),
     backgroundRepeat,
     backgroundSize,
     backgroundAttachment,

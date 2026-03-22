@@ -395,9 +395,9 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <Row label="Ajuste horizontal">
                 <input
                   type="range"
-                  min={-300}
-                  max={300}
-                  step={5}
+                  min={-50}
+                  max={50}
+                  step={1}
                   value={(v1.base as any).offsetX ?? 0}
                   onChange={(e) =>
                     onChangeCardBg({
@@ -407,15 +407,15 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   }
                   style={{ flex: 1 }}
                 />
-                <span style={rightNum}>{(v1.base as any).offsetX ?? 0}px</span>
+                <span style={rightNum}>{(v1.base as any).offsetX ?? 0}%</span>
               </Row>
 
               <Row label="Ajuste vertical">
                 <input
                   type="range"
-                  min={-300}
-                  max={300}
-                  step={5}
+                  min={-50}
+                  max={50}
+                  step={1}
                   value={(v1.base as any).offsetY ?? 0}
                   onChange={(e) =>
                     onChangeCardBg({
@@ -425,7 +425,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   }
                   style={{ flex: 1 }}
                 />
-                <span style={rightNum}>{(v1.base as any).offsetY ?? 0}px</span>
+                <span style={rightNum}>{(v1.base as any).offsetY ?? 0}%</span>
               </Row>
 
               <Row label={t('header_editor.label_blur')}>
