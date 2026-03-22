@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabaseServer'
 import ThemePageClient from './ThemePageClient'
+import '@/styles/card-preview.css'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
