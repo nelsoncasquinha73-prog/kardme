@@ -213,7 +213,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     return (
       <>
         {/* Imagem no topo */}
-        <div ref={fit === 'fixed' ? layerRef : null} aria-hidden style={baseStyle} />
+        <div ref={null} aria-hidden style={baseStyle} />
         {/* Gradiente fade para cor */}
         <div
           aria-hidden
