@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { bgToStyle } from '@/lib/bgToCss'
 import { migrateCardBg, type CardBgV1, type ImageBase } from '@/lib/cardBg'
 
@@ -113,6 +113,9 @@ function overlayToCss(ov: Overlay): React.CSSProperties {
 
 // ✅ NOVO: Renderiza o layer de imagem de fundo
 function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borderRadius?: number | string }) {
+  const layerRef = useRef<HTMLDivElement | null>(null)
+  const [parallaxOffset, setParallaxOffset] = useState(0)
+
   const fit = image.fit ?? 'cover'
   const position = image.position ?? 'center'
   const zoom = typeof image.zoom === 'number' ? image.zoom : 1
@@ -137,6 +140,33 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   const bgPosition = positionMap[position] ?? '50% 50%'
   const [baseX, baseY] = bgPosition.split(' ')
 
+  useEffect(() => {
+    if (fit !== 'fixed') {
+      setParallaxOffset(0)
+      return
+    }
+
+    const updateParallax = () => {
+      const el = layerRef.current
+      if (!el) return
+
+      const rect = el.getBoundingClientRect()
+      const viewportH = window.innerHeight || 1
+      const centerDelta = rect.top + rect.height / 2 - viewportH / 2
+      const normalized = Math.max(-1, Math.min(1, centerDelta / viewportH))
+      setParallaxOffset(normalized * -18)
+    }
+
+    updateParallax()
+    window.addEventListener('scroll', updateParallax, { passive: true })
+    window.addEventListener('resize', updateParallax)
+
+    return () => {
+      window.removeEventListener('scroll', updateParallax)
+      window.removeEventListener('resize', updateParallax)
+    }
+  }, [fit])
+
   // ✅ Calcular backgroundSize baseado no fit e zoom
   let backgroundSize: string
   let backgroundRepeat: string = 'no-repeat'
@@ -160,7 +190,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
   // Estilos base
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
-    inset: 0,
+    inset: fit === 'fixed' ? '-24px 0' : 0,
     backgroundImage: `url(${image.url})`,
     backgroundPosition: `calc(${baseX} + ${offsetX}px) calc(${baseY} + ${offsetY}px)`,
     backgroundRepeat,
@@ -170,6 +200,9 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     pointerEvents: 'none',
     borderRadius,
     overflow: 'hidden',
+    transform: fit === 'fixed' ? `translateY(${parallaxOffset}px)` : undefined,
+    transition: fit === 'fixed' ? 'transform 120ms linear' : undefined,
+    willChange: fit === 'fixed' ? 'transform' : undefined,
   }
 
   // Para top-fade, precisamos de um container extra
@@ -180,7 +213,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     return (
       <>
         {/* Imagem no topo */}
-        <div aria-hidden style={baseStyle} />
+        <div ref={fit === 'fixed' ? layerRef : null} aria-hidden style={baseStyle} />
         {/* Gradiente fade para cor */}
         <div
           aria-hidden
@@ -196,7 +229,7 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
     )
   }
 
-  return <div aria-hidden style={baseStyle} />
+  return <div ref={fit === 'fixed' ? layerRef : null} aria-hidden style={baseStyle} />
 }
 
 
