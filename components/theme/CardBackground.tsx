@@ -122,18 +122,18 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
 
   // Mapear position para CSS
   const positionMap: Record<string, string> = {
-    'center': 'center center',
-    'top': 'center top',
-    'bottom': 'center bottom',
-    'left': 'left center',
-    'right': 'right center',
-    'top-left': 'left top',
-    'top-right': 'right top',
-    'bottom-left': 'left bottom',
-    'bottom-right': 'right bottom',
+    'center': '50% 50%',
+    'top': '50% 0%',
+    'bottom': '50% 100%',
+    'left': '0% 50%',
+    'right': '100% 50%',
+    'top-left': '0% 0%',
+    'top-right': '100% 0%',
+    'bottom-left': '0% 100%',
+    'bottom-right': '100% 100%',
   }
 
-  const bgPosition = positionMap[position] ?? 'center center'
+  const bgPosition = positionMap[position] ?? '50% 50%'
   const [baseX, baseY] = bgPosition.split(' ')
 
   // ✅ Calcular backgroundSize baseado no fit e zoom
