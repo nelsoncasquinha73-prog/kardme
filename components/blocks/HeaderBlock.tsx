@@ -18,6 +18,7 @@ export type BadgeSettings = {
 
 export type HeaderSettings = {
   coverImage?: string
+  coverVideo?: string
   badgeImage?: string
   layout?: {
     showCover?: boolean
@@ -186,6 +187,7 @@ export default function HeaderBlock({
   }
 
   const coverSrc = safeSettings.coverImage
+  const coverVideoSrc = safeSettings.coverVideo
 
   // Bleed horizontal para cover
   const horizontalBleed = 16
@@ -203,54 +205,72 @@ export default function HeaderBlock({
         marginRight: 0,
       }}
     >
-      {showCover && coverSrc ? (
-        coverMode === 'full' ? (
-          <div style={{ position: 'absolute', inset: 0 }}>
-            <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'cover' }} />
-          </div>
-        ) : coverMode === 'auto' ? (
-          <div style={{ position: 'absolute', inset: 0 }}>
-            <Image
-              src={coverSrc}
-              alt="Cover blur"
-              fill
-              style={{
-                objectFit: 'cover',
-                filter: 'blur(18px)',
-                transform: 'scale(1.08)',
-                opacity: 0.9,
-              }}
-            />
-            <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 14 }}>
+      {showCover && (coverVideoSrc || coverSrc) ? (
+        coverVideoSrc ? (
+          coverMode === 'full' ? (
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <video src={coverVideoSrc} autoPlay loop muted playsInline preload="auto" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            </div>
+          ) : coverMode === 'auto' ? (
+            <div style={{ position: 'absolute', inset: 0, background: '#000' }}>
+              <video src={coverVideoSrc} autoPlay loop muted playsInline preload="auto" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+            </div>
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, padding: tilePadding }}>
+              <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: tileRadius, overflow: 'hidden' }}>
+                <video src={coverVideoSrc} autoPlay loop muted playsInline preload="auto" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </div>
+            </div>
+          )
+        ) : coverSrc ? (
+          coverMode === 'full' ? (
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'cover' }} />
+            </div>
+          ) : coverMode === 'auto' ? (
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <Image
+                src={coverSrc}
+                alt="Cover blur"
+                fill
+                style={{
+                  objectFit: 'cover',
+                  filter: 'blur(18px)',
+                  transform: 'scale(1.08)',
+                  opacity: 0.9,
+                }}
+              />
+              <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 14 }}>
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: 420,
+                    borderRadius: 18,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'contain' }} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, padding: tilePadding }}>
               <div
                 style={{
                   position: 'relative',
                   width: '100%',
                   height: '100%',
-                  maxWidth: 420,
-                  borderRadius: 18,
+                  borderRadius: tileRadius,
                   overflow: 'hidden',
                 }}
               >
-                <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'contain' }} />
+                <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'cover' }} />
               </div>
             </div>
-          </div>
-        ) : (
-          <div style={{ position: 'absolute', inset: 0, padding: tilePadding }}>
-            <div
-              style={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
-                borderRadius: tileRadius,
-                overflow: 'hidden',
-              }}
-            >
-              <Image src={coverSrc} alt="Cover" fill style={{ objectFit: 'cover' }} />
-            </div>
-          </div>
-        )
+          )
+        ) : null
       ) : null}
 
       {overlayEnabled ? (

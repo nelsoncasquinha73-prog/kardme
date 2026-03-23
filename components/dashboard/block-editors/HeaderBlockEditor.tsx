@@ -859,6 +859,62 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               />
             </Row>
 
+            <Row label="Vídeo cover">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label
+                  style={{
+                    fontSize: 11,
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.06)',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  🎬 Upload
+                  <input
+                    type="file"
+                    accept=".mp4,.webm,.mov,.m4v,.ogg,video/*"
+                    hidden
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      try {
+                        const { uploadCardVideo } = await import('@/lib/uploadCardVideo')
+                        const { publicUrl } = await uploadCardVideo({ cardId, file })
+                        onChange({ ...settings, coverVideo: publicUrl })
+                      } catch (err: any) {
+                        alert(err.message || 'Erro ao enviar vídeo')
+                      }
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+                {settings.coverVideo && (
+                  <>
+                    <span style={{ fontSize: 10, color: '#22c55e' }}>✓</span>
+                    <button
+                      type="button"
+                      onClick={() => onChange({ ...settings, coverVideo: '' })}
+                      style={{
+                        fontSize: 10,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        border: '1px solid #ef4444',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✕ Remover
+                    </button>
+                  </>
+                )}
+              </div>
+            </Row>
+            <div style={{ fontSize: 10, opacity: 0.5, paddingLeft: 8 }}>Substitui a imagem cover • mp4, webm, mov</div>
+
             <Row label={t('header_editor.label_mode')}>
               <div style={{ display: 'flex', gap: 6 }}>
                 <MiniButton active={coverMode === 'full'} onClick={() => setLayout({ ...(layout as any), coverMode: 'full' } as any)}>Full</MiniButton>
