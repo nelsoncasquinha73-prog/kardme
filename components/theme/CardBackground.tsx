@@ -251,7 +251,7 @@ function VideoBgLayer({
   const fade = fadeColor ?? 'transparent'
   const height = fadeHeight ?? 200
   const rawZoom = zoom ?? 1
-  const scale = 1  // video uses object-fit:cover, scale causes excessive zoom
+  const scale = rawZoom
   const ox = offsetX ?? 0
   const oy = offsetY ?? 0
 
@@ -293,8 +293,8 @@ function VideoBgLayer({
           objectFit: 'cover',
           objectPosition: objPosition,
           display: 'block',
-          transform: scale !== 1 || ox !== 0 || oy !== 0 ? `scale(${scale}) translate(${ox}%, ${oy}%)` : undefined,
-          transformOrigin: scale !== 1 || ox !== 0 || oy !== 0 ? objPosition : undefined,
+          transform: `scale(${scale}) translate(${ox}%, ${oy}%)`,
+          transformOrigin: 'center center',
         }}
       />
       {fade !== 'transparent' && (
