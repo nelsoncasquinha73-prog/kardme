@@ -210,6 +210,10 @@ function ImageBackgroundLayer({ image, borderRadius }: { image: ImageBase; borde
         fadeColor={image.videoFadeColor}
         fadeHeight={image.videoFadeHeight}
         borderRadius={borderRadius}
+        zoom={zoom}
+        position={position}
+        offsetX={offsetX}
+        offsetY={offsetY}
       />
     )
   }
@@ -229,15 +233,40 @@ function VideoBgLayer({
   fadeColor,
   fadeHeight,
   borderRadius,
+  zoom,
+  position,
+  offsetX,
+  offsetY,
 }: {
   url: string
   fadeColor?: string
   fadeHeight?: number
   borderRadius?: number | string
+  zoom?: number
+  position?: string
+  offsetX?: number
+  offsetY?: number
 }) {
   if (!url) return null
   const fade = fadeColor ?? 'transparent'
   const height = fadeHeight ?? 200
+  const scale = 1 + (((zoom ?? 1) - 1) * 0.6)
+  const ox = offsetX ?? 0
+  const oy = offsetY ?? 0
+
+  const positionMap: Record<string, string> = {
+    'center': '50% 50%',
+    'top': '50% 0%',
+    'bottom': '50% 100%',
+    'left': '0% 50%',
+    'right': '100% 50%',
+    'top-left': '0% 0%',
+    'top-right': '100% 0%',
+    'bottom-left': '0% 100%',
+    'bottom-right': '100% 100%',
+  }
+
+  const objPosition = positionMap[position ?? 'center'] ?? '50% 50%'
 
   return (
     <div
@@ -260,7 +289,10 @@ function VideoBgLayer({
           width: '100%',
           height: '100%',
           objectFit: 'cover',
+          objectPosition: objPosition,
           display: 'block',
+          transform: `scale(${scale}) translate(${ox}%, ${oy}%)`,
+          transformOrigin: objPosition,
         }}
       />
       {fade !== 'transparent' && (
