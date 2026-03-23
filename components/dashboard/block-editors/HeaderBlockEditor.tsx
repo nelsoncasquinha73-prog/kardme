@@ -357,7 +357,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <Row label={t('header_editor.label_fill')}>
                 <select
                   value={(v1.base as any).fit ?? 'cover'}
-                  onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), fit: e.target.value } })}
+                  onChange={(e) => {
+                    const newFit = e.target.value
+                    const resetZoom = newFit === 'video' ? { zoom: 1, offsetX: 0, offsetY: 0, position: 'center' } : {}
+                    onChangeCardBg({ ...v1, base: { ...(v1.base as any), fit: newFit, ...resetZoom } })
+                  }}
                   style={selectStyle}
                 >
                   <option value="cover">{t('header_editor.option_cover')}</option>

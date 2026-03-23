@@ -250,7 +250,8 @@ function VideoBgLayer({
   if (!url) return null
   const fade = fadeColor ?? 'transparent'
   const height = fadeHeight ?? 200
-  const scale = 1 + (((zoom ?? 1) - 1) * 0.6)
+  const rawZoom = zoom ?? 1
+  const scale = rawZoom === 1 ? 1 : 1 + ((rawZoom - 1) * 0.3)
   const ox = offsetX ?? 0
   const oy = offsetY ?? 0
 
@@ -292,8 +293,8 @@ function VideoBgLayer({
           objectFit: 'cover',
           objectPosition: objPosition,
           display: 'block',
-          transform: `scale(${scale}) translate(${ox}%, ${oy}%)`,
-          transformOrigin: objPosition,
+          transform: scale !== 1 || ox !== 0 || oy !== 0 ? `scale(${scale}) translate(${ox}%, ${oy}%)` : undefined,
+          transformOrigin: scale !== 1 || ox !== 0 || oy !== 0 ? objPosition : undefined,
         }}
       />
       {fade !== 'transparent' && (
