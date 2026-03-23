@@ -250,10 +250,14 @@ function VideoBgLayer({
   if (!url) return null
   const fade = fadeColor ?? 'transparent'
   const height = fadeHeight ?? 200
-  const rawZoom = zoom ?? 1
-  const scale = rawZoom
+  // zoom: 1 = cover normal, <1 = mostra mais do vídeo (zoom out), >1 = crop mais apertado
+  const z = zoom ?? 1
   const ox = offsetX ?? 0
   const oy = offsetY ?? 0
+  // Percentage size: at zoom 0.5 the video is 200% of container (shows more)
+  // at zoom 1 it's 100% (normal cover), at zoom 2 it's 100% (max crop)
+  const sizePercent = z <= 1 ? `${100 / z}%` : '100%'
+  const cropScale = z > 1 ? z : 1
 
   const positionMap: Record<string, string> = {
     'center': '50% 50%',
@@ -288,12 +292,15 @@ function VideoBgLayer({
         playsInline
         preload="auto"
         style={{
-          width: '100%',
-          height: '100%',
+          width: sizePercent,
+          height: sizePercent,
           objectFit: 'cover',
           objectPosition: objPosition,
           display: 'block',
-          transform: `scale(${scale}) translate(${ox}%, ${oy}%)`,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: `translate(-50%, -50%) translate(${ox}%, ${oy}%) scale(${cropScale})`,
           transformOrigin: 'center center',
         }}
       />
