@@ -251,7 +251,7 @@ function VideoBgLayer({
   const fade = fadeColor ?? 'transparent'
   const height = fadeHeight ?? 200
   const rawZoom = zoom ?? 1
-  const scale = rawZoom === 1 ? 1 : 1 + ((rawZoom - 1) * 0.3)
+  const scale = rawZoom === 1 ? 1 : 1 + ((rawZoom - 1) * 0.15)
   const ox = offsetX ?? 0
   const oy = offsetY ?? 0
 
