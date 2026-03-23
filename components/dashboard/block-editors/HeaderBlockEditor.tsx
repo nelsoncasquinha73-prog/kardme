@@ -398,7 +398,24 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   </Row>
                   <div style={{ fontSize: 10, opacity: 0.5, paddingLeft: 8 }}>Máx: 50MB • mp4, webm, mov</div>
                   {(v1.base as any).videoUrl && (
-                    <div style={{ fontSize: 11, color: '#22c55e', paddingLeft: 8 }}>✓ Vídeo carregado</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8 }}>
+                      <span style={{ fontSize: 11, color: '#22c55e' }}>✓ Vídeo carregado</span>
+                      <button
+                        type="button"
+                        onClick={() => onChangeCardBg({ ...v1, base: { ...(v1.base as any), videoUrl: '' } })}
+                        style={{
+                          fontSize: 10,
+                          padding: '2px 8px',
+                          borderRadius: 4,
+                          border: '1px solid #ef4444',
+                          background: 'transparent',
+                          color: '#ef4444',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✕ Remover
+                      </button>
+                    </div>
                   )}
                   <Row label="Ou URL">
                     <input
