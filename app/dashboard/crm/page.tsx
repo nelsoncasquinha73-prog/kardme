@@ -1224,7 +1224,7 @@ Melhores cumprimentos,
           onClick={handleExportCSV}
           disabled={selectedCardId === 'all'}
           style={{
-            padding: '10px 14px',
+            padding: '8px 12px',
             borderRadius: 10,
             background: selectedCardId === 'all' ? '#e5e7eb' : '#111827',
             color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
@@ -1232,11 +1232,11 @@ Melhores cumprimentos,
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
             fontSize: 13,
-            height: 40,
+            height: 38,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 6,
           }}
           title={selectedCardId === 'all' ? 'Seleciona um cartão para exportar' : 'Exportar CSV'}
         >
@@ -1248,7 +1248,7 @@ Melhores cumprimentos,
           onClick={() => setShowImportModal(true)}
           disabled={selectedCardId === 'all'}
           style={{
-            padding: '10px 14px',
+            padding: '8px 12px',
             borderRadius: 10,
             background: selectedCardId === 'all' ? '#e5e7eb' : '#10b981',
             color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
@@ -1256,11 +1256,11 @@ Melhores cumprimentos,
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
             fontSize: 13,
-            height: 40,
+            height: 38,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 6,
           }}
           title={selectedCardId === 'all' ? 'Seleciona um cartão para importar' : 'Importar CSV'}
         >
