@@ -57,6 +57,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
       {/* ========== TEXTO ========== */}
       <CollapsibleSection title="📝 Texto" subtitle="Bio com formatação" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
         <RichTextEditor value={settings.text || ''} onChange={(html) => setSettings({ text: html })} placeholder="Escreve a tua bio..." minHeight={120} />
+        <Row label="Cor texto"><ColorPickerPro value={s.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} /></Row>
         <Row label="Fonte base"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
         <Row label="Tamanho base">
           <input type="range" min={12} max={22} value={s.fontSize ?? 15} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
