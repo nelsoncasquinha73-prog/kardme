@@ -256,10 +256,11 @@ Melhores cumprimentos,
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
           {[
-            { title: '📥 Importar/Exportar CSV', desc: 'Importa leads em CSV (inclui listas grandes). Exporta quando quiseres com um clique.' },
-            { title: '📣 Email em massa (200/dia)', desc: 'Envia campanhas para leads selecionadas com templates. Limite 200/dia para proteger a reputação do teu Gmail.' },
-            { title: '📧 Emails automáticos', desc: 'Notificação ao receber lead + email de boas-vindas personalizado para o cliente.' },
-            { title: '✅ Tarefas + WhatsApp', desc: 'Follow-ups organizados, envios WhatsApp rápidos, e histórico completo por lead.' },
+            { title: '📥 Importar e exportar leads', desc: 'Importa contactos em CSV e exporta os teus leads de forma simples e rápida.' },
+            { title: '📣 Email em massa', desc: 'Envia campanhas e follow-ups para várias leads com poucos cliques.' },
+            { title: '💬 WhatsApp direto do dashboard', desc: 'Fala com os teus contactos por WhatsApp diretamente no dashboard e acelera o seguimento.' },
+            { title: '✅ Tarefas e alertas', desc: 'Organiza os próximos passos e evita perder oportunidades de negócio.' },
+            { title: '📊 Histórico de atividade', desc: 'Consulta o registo de interações e acompanha cada lead com mais contexto.' },
           ].map((b) => (
             <div key={b.title} style={{ background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
               <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 6, color: '#111827' }}>{b.title}</div>
@@ -328,11 +329,12 @@ Melhores cumprimentos,
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
             {[
-              { title: '📥 Importar/Exportar', desc: 'Traz 1000+ leads em CSV e exporta quando quiseres.' },
-              { title: '📣 Email em massa', desc: 'Envia campanhas para leads selecionadas com templates.' },
-              { title: '✅ Tarefas + alertas', desc: 'Follow-ups organizados para não perder vendas.' },
-              { title: '📊 Histórico (Activity Log)', desc: 'Fica tudo registado por lead para auditoria.' },
-            ].map((b) => (
+            { title: '📥 Importar e exportar leads', desc: 'Importa contactos em CSV e exporta os teus leads de forma simples e rápida.' },
+            { title: '📣 Email em massa', desc: 'Envia campanhas e follow-ups para várias leads com poucos cliques.' },
+            { title: '💬 WhatsApp direto do dashboard', desc: 'Fala com os teus contactos por WhatsApp diretamente no dashboard e acelera o seguimento.' },
+            { title: '✅ Tarefas e alertas', desc: 'Organiza os próximos passos e evita perder oportunidades de negócio.' },
+            { title: '📊 Histórico de atividade', desc: 'Consulta o registo de interações e acompanha cada lead com mais contexto.' },
+          ].map((b) => (
               <div key={b.title} style={{ background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
                 <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 6, color: '#111827' }}>{b.title}</div>
                 <div style={{ fontSize: 13, opacity: 0.75, color: '#111827' }}>{b.desc}</div>
@@ -876,10 +878,11 @@ Melhores cumprimentos,
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
           {[
-            { title: '📥 Importar/Exportar', desc: 'Traz 1000+ leads em CSV e exporta quando quiseres.' },
-            { title: '📣 Email em massa', desc: 'Envia campanhas para leads selecionadas com templates.' },
-            { title: '✅ Tarefas + alertas', desc: 'Follow-ups organizados para não perder vendas.' },
-            { title: '📊 Histórico (Activity Log)', desc: 'Fica tudo registado por lead para auditoria.' },
+            { title: '📥 Importar e exportar leads', desc: 'Importa contactos em CSV e exporta os teus leads de forma simples e rápida.' },
+            { title: '📣 Email em massa', desc: 'Envia campanhas e follow-ups para várias leads com poucos cliques.' },
+            { title: '💬 WhatsApp direto do dashboard', desc: 'Fala com os teus contactos por WhatsApp diretamente no dashboard e acelera o seguimento.' },
+            { title: '✅ Tarefas e alertas', desc: 'Organiza os próximos passos e evita perder oportunidades de negócio.' },
+            { title: '📊 Histórico de atividade', desc: 'Consulta o registo de interações e acompanha cada lead com mais contexto.' },
           ].map((b) => (
             <div key={b.title} style={{ background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
               <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 6, color: '#111827' }}>{b.title}</div>
