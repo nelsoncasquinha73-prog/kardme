@@ -272,17 +272,18 @@ Melhores cumprimentos,
         <div style={{ marginTop: 24, padding: 18, background: 'rgba(0,0,0,0.02)', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)' }}>
           <div style={{ fontWeight: 950, fontSize: 14, marginBottom: 12, color: '#111827' }}>Como funciona</div>
           <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#111827', lineHeight: 1.8 }}>
-            <li>Ativa o CRM Pro (mensal ou anual)</li>
-            <li>Liga o teu Gmail (autorização Google OAuth — a Kardme não guarda a tua password)</li>
-            <li>Importa leads em CSV ou recebe automaticamente quando alguém preenche o teu cartão</li>
-            <li>Gere follow-ups com tarefas, emails, WhatsApp e histórico completo</li>
+            <li>Ativa o CRM Pro no plano mensal ou anual</li>
+            <li>Liga a tua conta Gmail de forma segura</li>
+            <li>Recebe leads automaticamente ou importa os teus contactos em CSV</li>
+            <li>Faz follow-up por email, WhatsApp e tarefas num só lugar</li>
+            <li>Acompanha o histórico de cada lead e não percas oportunidades</li>
           </ol>
         </div>
 
         <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
           <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#111827' }}>Ativa o CRM Pro</div>
           <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 14, color: '#111827' }}>
-            Escolhe mensal ou anual. Podes cancelar quando quiseres.
+            Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -324,7 +325,7 @@ Melhores cumprimentos,
         <div style={{ maxWidth: 980, margin: '0 auto' }}>
           <h1 style={{ fontSize: 40, fontWeight: 950, margin: '10px 0 10px 0' }}>CRM Pro</h1>
           <p style={{ fontSize: 16, opacity: 0.8, marginTop: 0 }}>
-            Um CRM simples e poderoso para gerir leads dos teus cartões: tarefas, email em massa, WhatsApp rápido, e import/export de leads.
+            Centraliza leads, follow-ups, emails, WhatsApp e histórico num único dashboard pensado para vender mais.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
@@ -345,7 +346,7 @@ Melhores cumprimentos,
           <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
             <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#111827' }}>Ativa o CRM Pro</div>
             <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 14, color: '#111827' }}>
-              Escolhe mensal ou anual. Podes cancelar quando quiseres.
+              Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
             </div>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -368,7 +369,7 @@ Melhores cumprimentos,
           </div>
 
           <div style={{ marginTop: 12, fontSize: 12, opacity: 0.65 }}>
-            Nota: o CRM Pro fica disponível imediatamente após confirmação do pagamento.
+            O acesso ao CRM Pro é ativado imediatamente após a confirmação do pagamento.
           </div>
         </div>
       </main>
@@ -873,7 +874,7 @@ Melhores cumprimentos,
       <div style={{ maxWidth: 980, margin: '0 auto' }}>
         <h1 style={{ fontSize: 40, fontWeight: 950, margin: '10px 0 10px 0' }}>CRM Pro</h1>
         <p style={{ fontSize: 16, opacity: 0.8, marginTop: 0 }}>
-          Um CRM simples e poderoso para gerir leads dos teus cartões: tarefas, email em massa, WhatsApp rápido, e import/export de leads.
+          Centraliza leads, follow-ups, emails, WhatsApp e histórico num único dashboard pensado para vender mais.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 18 }}>
@@ -894,7 +895,7 @@ Melhores cumprimentos,
         <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
           <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#111827' }}>Ativa o CRM Pro</div>
           <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 14, color: '#111827' }}>
-            Escolhe mensal ou anual. Podes cancelar quando quiseres.
+            Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -917,7 +918,7 @@ Melhores cumprimentos,
         </div>
 
         <div style={{ marginTop: 12, fontSize: 12, opacity: 0.65 }}>
-          Nota: o CRM Pro fica disponível imediatamente após confirmação do pagamento.
+          O acesso ao CRM Pro é ativado imediatamente após a confirmação do pagamento.
         </div>
       </div>
     </main>
