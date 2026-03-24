@@ -10,13 +10,27 @@ import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
 
 type Role = 'admin' | 'user' | string
 
+function DashboardLayoutContent({ children, userEmail, isAdmin, navItems, getPageTitle }: any) {
+  return (
+    <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
+      {children}
+    </AppChrome>
+  )
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [state, setState] = useState<{
+    loaded: boolean
+    userEmail: string | null
+    isAdmin: boolean
+  }>({
+    loaded: false,
+    userEmail: null,
+    isAdmin: false,
+  })
 
   useEffect(() => {
     const boot = async () => {
@@ -27,12 +41,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       const user = sessionData.session.user
-      setUserEmail(user.email ?? null)
+      const userEmail = user.email ?? null
 
       const storedRole = sessionStorage.getItem('role')
       if (storedRole) {
-        setIsAdmin(storedRole === 'admin')
-        setLoading(false)
+        setState({
+          loaded: true,
+          userEmail,
+          isAdmin: storedRole === 'admin',
+        })
         return
       }
 
@@ -42,25 +59,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .eq('id', user.id)
         .single()
 
-      if (error) {
-        console.error('Erro a buscar role:', error)
-        sessionStorage.setItem('role', 'user')
-        setIsAdmin(false)
-      } else {
-        const userRole = profile?.role || 'user'
-        sessionStorage.setItem('role', userRole)
-        setIsAdmin(userRole === 'admin')
-      }
+      const userRole = !error && profile?.role ? profile.role : 'user'
+      sessionStorage.setItem('role', userRole)
 
-      setLoading(false)
+      setState({
+        loaded: true,
+        userEmail,
+        isAdmin: userRole === 'admin',
+      })
     }
 
     boot()
   }, [router])
 
-
-
-  const navItems = isAdmin
+  const navItems = state.isAdmin
     ? [
         { label: 'nav.dashboard', href: '/dashboard', icon: FiHome, emoji: '🏠' },
         { label: 'nav.clients', href: '/admin/clientes', icon: FiUsers },
@@ -111,25 +123,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return match?.title || 'Kardme'
   }
 
-  if (loading) return <p style={{ padding: 40 }}>A verificar sessão…</p>
-
-  if (!isAdmin && pathname.startsWith('/admin')) {
+  if (!state.loaded) {
     return (
-    <LanguageProvider>
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <h2>Sem permissões</h2>
-        <p>Este painel só está disponível para admin.</p>
-      </div>
-    </LanguageProvider>
+      <LanguageProvider>
+        <div style={{ padding: 40, textAlign: 'center', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p>A verificar sessão…</p>
+        </div>
+      </LanguageProvider>
+    )
+  }
+
+  if (!state.isAdmin && pathname.startsWith('/admin')) {
+    return (
+      <LanguageProvider>
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <h2>Sem permissões</h2>
+          <p>Este painel só está disponível para admin.</p>
+        </div>
+      </LanguageProvider>
     )
   }
 
   return (
     <LanguageProvider>
-    <SyncLanguageToProfile />
-    <AppChrome userEmail={userEmail} isAdmin={isAdmin} navItems={navItems} getPageTitle={getPageTitle}>
-      {children}
-    </AppChrome>
+      <SyncLanguageToProfile />
+      <DashboardLayoutContent
+        userEmail={state.userEmail}
+        isAdmin={state.isAdmin}
+        navItems={navItems}
+        getPageTitle={getPageTitle}
+      >
+        {children}
+      </DashboardLayoutContent>
     </LanguageProvider>
   )
 }
