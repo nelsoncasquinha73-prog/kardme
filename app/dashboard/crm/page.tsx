@@ -1289,39 +1289,46 @@ Melhores cumprimentos,
         </div>
       )}
 
-      {filteredLeads.length > 0 && (
-        <div style={{ overflowX: 'auto' }}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: 13,
-            }}
-          >
-            <thead>
-              <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
-                <th style={th}>✓</th>
-                <th style={{ ...th, textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
-                  <input
-                    type="checkbox"
-                    checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
-                    onChange={toggleAllLeads}
-                    title="Selecionar todas"
-                  />
-                </th>
-                <th style={th}>Nome</th>
-                <th style={th}>Email</th>
-                <th style={th}>Cartão</th>
-                <th style={th}>Zona</th>
-                <th style={th}>Step</th>
-                <th style={th}>Marketing</th>
-                <th style={th}>Data</th>
-                <th style={th}>Ação</th>
+      <div style={{ overflowX: 'auto' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: 13,
+          }}
+        >
+          <thead>
+            <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+              <th style={th}>✓</th>
+              <th style={{ ...th, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
+                <input
+                  type="checkbox"
+                  checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
+                  onChange={toggleAllLeads}
+                  title="Selecionar todas"
+                  disabled={filteredLeads.length === 0}
+                />
+              </th>
+              <th style={th}>Nome</th>
+              <th style={th}>Email</th>
+              <th style={th}>Cartão</th>
+              <th style={th}>Zona</th>
+              <th style={th}>Step</th>
+              <th style={th}>Marketing</th>
+              <th style={th}>Data</th>
+              <th style={th}>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLeads.length === 0 ? (
+              <tr>
+                <td colSpan={10} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
+                  Nenhuma lead encontrada.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map(lead => {
+            ) : (
+              filteredLeads.map(lead => {
                 const colors = stepColor(lead.step)
                 return (
                   <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
@@ -1527,11 +1534,11 @@ Melhores cumprimentos,
                     </td>
                   </tr>
                 )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <div style={{ marginTop: 20, fontSize: 12, opacity: 0.6 }}>
         Total: {filteredLeads.length} lead(s)
