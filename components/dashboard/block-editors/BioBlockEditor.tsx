@@ -67,6 +67,13 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           <input type="range" min={1.1} max={2.2} step={0.05} value={s.lineHeight ?? 1.6} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{(s.lineHeight ?? 1.6).toFixed(2)}</span>
         </Row>
+        <Row label="Alinhamento">
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button onClick={() => setStyle({ align: 'left' })}>Esq.</Button>
+            <Button onClick={() => setStyle({ align: 'center' })}>Centro</Button>
+            <Button onClick={() => setStyle({ align: 'right' })}>Dir.</Button>
+          </div>
+        </Row>
       </CollapsibleSection>
 
       {/* ========== CONTAINER ========== */}
