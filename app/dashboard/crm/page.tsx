@@ -2,6 +2,17 @@
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
+import {
+  FiSettings,
+  FiMail,
+  FiEye,
+  FiFileText,
+  FiTrash2,
+  FiCalendar,
+  FiDownload,
+  FiUpload,
+  FiChevronDown,
+} from 'react-icons/fi'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
@@ -858,7 +869,7 @@ Melhores cumprimentos,
         return
       }
       window.location.href = 'sms:' + phone
-    } else if (actionType === 'message' || actionType === 'follow_up') {
+    } else if (actionType === 'follow_up') {
       setSelectedLead(lead || null)
       setNoteText(lead?.notes || '')
     } else if (actionType === 'meeting') {
@@ -956,7 +967,7 @@ Melhores cumprimentos,
                 ? '— Todos os cartões —'
                 : cardsList.find((c: any) => c.id === selectedCardId)?.name || cardsList.find((c: any) => c.id === selectedCardId)?.title || 'Seleciona um cartão'}
             </span>
-            <span style={{ marginLeft: 10, fontSize: 12, opacity: 0.7 }}>▼</span>
+            <span style={{ marginLeft: 10, fontSize: 12, opacity: 0.7, display: 'inline-flex', alignItems: 'center' }}><FiChevronDown size={14} /></span>
           </button>
 
           {showCardDropdown && (
@@ -1080,7 +1091,6 @@ Melhores cumprimentos,
                         {t.action_type === 'whatsapp' && '💬 WhatsApp'}
                         {t.action_type === 'call' && '📞 Ligar'}
                         {t.action_type === 'sms' && '✉️ SMS'}
-                        {t.action_type === 'message' && '📝 Mensagem'}
                         {t.action_type === 'meeting' && '📅 Reunião'}
                         {(!t.action_type || t.action_type === 'follow_up') && '✅ Follow-up'}
                       </span>
@@ -1214,7 +1224,7 @@ Melhores cumprimentos,
           onClick={handleExportCSV}
           disabled={selectedCardId === 'all'}
           style={{
-            padding: '10px 16px',
+            padding: '10px 14px',
             borderRadius: 10,
             background: selectedCardId === 'all' ? '#e5e7eb' : '#111827',
             color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
@@ -1222,17 +1232,23 @@ Melhores cumprimentos,
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
             fontSize: 13,
+            height: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
           title={selectedCardId === 'all' ? 'Seleciona um cartão para exportar' : 'Exportar CSV'}
         >
-          ⬇️ Exportar CSV
+          <FiDownload size={15} />
+          <span>Exportar CSV</span>
         </button>
 
         <button
           onClick={() => setShowImportModal(true)}
           disabled={selectedCardId === 'all'}
           style={{
-            padding: '10px 16px',
+            padding: '10px 14px',
             borderRadius: 10,
             background: selectedCardId === 'all' ? '#e5e7eb' : '#10b981',
             color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
@@ -1240,10 +1256,16 @@ Melhores cumprimentos,
             fontWeight: 900,
             cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
             fontSize: 13,
+            height: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
           title={selectedCardId === 'all' ? 'Seleciona um cartão para importar' : 'Importar CSV'}
         >
-          ⬆️ Importar CSV
+          <FiUpload size={15} />
+          <span>Importar CSV</span>
         </button>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
@@ -1360,17 +1382,21 @@ Melhores cumprimentos,
                           disabled={!gmail.isConnected}
                           title={gmail.isConnected ? 'Enviar email agora' : 'Liga o Gmail para enviar emails'}
                           style={{
-                            padding: '6px 10px',
-                            borderRadius: 8,
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
                             border: 'none',
                             background: gmail.isConnected ? '#10b981' : '#d1d5db',
                             color: '#ffffff',
                             fontWeight: 800,
                             fontSize: 12,
                             cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
-                          📧
+                          <FiMail size={15} />
                         </button>
                         <button
                           onClick={() => {
@@ -1385,14 +1411,18 @@ Melhores cumprimentos,
                           }}
                           title="Enviar WhatsApp"
                           style={{
-                            padding: '6px 10px',
-                            borderRadius: 8,
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
                             border: 'none',
                             background: '#25d366',
                             color: '#ffffff',
                             fontWeight: 800,
                             fontSize: 12,
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
                           <FaWhatsapp size={14} />
@@ -1405,17 +1435,21 @@ Melhores cumprimentos,
                           }}
                           title="Ver detalhes"
                           style={{
-                            padding: '6px 10px',
-                            borderRadius: 8,
-                            border: 'none',
-                            background: '#f3f4f6',
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            border: '1px solid #e5e7eb',
+                            background: '#ffffff',
                             color: '#111827',
                             fontWeight: 800,
                             fontSize: 12,
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
-                          👁️
+                          <FiEye size={15} />
                         </button>
                         <button
                           onClick={() => {
@@ -1423,32 +1457,62 @@ Melhores cumprimentos,
                             setNoteText(lead.notes || '')
                           }}
                         style={{
-                          padding: '6px 10px',
-                          borderRadius: 8,
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
                           border: 'none',
                           background: 'var(--color-primary)',
                           color: '#ffffff',
                           fontWeight: 700,
                           fontSize: 12,
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
-                        Notas
+                        <FiFileText size={14} />
                       </button>
                         <button
                           onClick={() => deleteLead(lead.id)}
                           disabled={deletingId === lead.id}
                           title="Apagar lead"
-                          style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: '#fee2e2', color: '#b91c1c', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            border: 'none',
+                            background: '#fee2e2',
+                            color: '#b91c1c',
+                            fontWeight: 700,
+                            fontSize: 12,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
                         >
-                          🗑️
+                          <FiTrash2 size={14} />
                         </button>
                         <button
                           onClick={() => { setSelectedLeadForTask(lead); setShowTaskModal(true) }}
                           title="Agendar tarefa"
-                          style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: '#dbeafe', color: '#0c4a6e', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            border: 'none',
+                            background: '#dbeafe',
+                            color: '#0c4a6e',
+                            fontWeight: 700,
+                            fontSize: 12,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
                         >
-                          📅
+                          <FiCalendar size={14} />
                         </button>
                       </div>
                     </td>
@@ -1748,7 +1812,6 @@ Melhores cumprimentos,
                   <option value="whatsapp">💬 WhatsApp</option>
                   <option value="call">📞 Ligar</option>
                   <option value="sms">✉️ SMS</option>
-                  <option value="message">📝 Mensagem</option>
                   <option value="meeting">📅 Reunião</option>
                 </select>
               </div>
@@ -1910,8 +1973,7 @@ Melhores cumprimentos,
                               {t.action_type === 'whatsapp' && '💬 WhatsApp'}
                               {t.action_type === 'call' && '📞 Ligar'}
                               {t.action_type === 'sms' && '✉️ SMS'}
-                              {t.action_type === 'message' && '📝 Mensagem'}
-                              {t.action_type === 'meeting' && '📅 Reunião'}
+                                    {t.action_type === 'meeting' && '📅 Reunião'}
                               {(!t.action_type || t.action_type === 'follow_up') && '✅ Follow-up'}
                             </span>
                           </div>
