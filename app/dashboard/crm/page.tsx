@@ -1118,7 +1118,7 @@ Melhores cumprimentos,
       )}
 
       {/* Filtros */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center', flexDirection: 'row' }}>
         <input
           type="text"
           placeholder="Pesquisar por nome, email ou zona…"
