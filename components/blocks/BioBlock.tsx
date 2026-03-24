@@ -81,6 +81,8 @@ export default function BioBlock({ settings, style }: Props) {
   // Check if text contains HTML tags
   const isHTML = /<[a-z][\s\S]*>/i.test(settings.text)
 
+  const bioTextColor = style?.textColor ?? '#111827'
+
   if (isHTML) {
     return (
       <>
@@ -91,8 +93,9 @@ export default function BioBlock({ settings, style }: Props) {
         >
           <style>{`
             [data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }
+            .bio-rich-text, .bio-rich-text p, .bio-rich-text div, .bio-rich-text li, .bio-rich-text span:not([style*="color"]) { color: ${bioTextColor}; }
           `}</style>
-          <div dangerouslySetInnerHTML={{ __html: settings.text }} />
+          <div className="bio-rich-text" dangerouslySetInnerHTML={{ __html: settings.text }} />
         </div>
 
         {mounted && activeModal
