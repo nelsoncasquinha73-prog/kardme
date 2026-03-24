@@ -3,8 +3,17 @@
 
 import React from 'react'
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok, FaYoutube, FaGlobe } from 'react-icons/fa'
+import { SiX, SiPinterest } from 'react-icons/si'
 
-type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
+type SocialChannel =
+  | 'facebook'
+  | 'instagram'
+  | 'linkedin'
+  | 'tiktok'
+  | 'youtube'
+  | 'x'
+  | 'pinterest'
+  | 'website'
 
 type SocialItem = {
   enabled?: boolean
@@ -90,6 +99,8 @@ const ICONS_MAP: Record<SocialChannel, React.ElementType> = {
   linkedin: FaLinkedinIn,
   tiktok: FaTiktok,
   youtube: FaYoutube,
+  x: SiX,
+  pinterest: SiPinterest,
   website: FaGlobe,
 }
 
@@ -99,6 +110,8 @@ const BRAND: Record<SocialChannel, { bg: string; icon: string; text: string }> =
   linkedin: { bg: '#0A66C2', icon: '#ffffff', text: '#ffffff' },
   tiktok: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
   youtube: { bg: '#FF0000', icon: '#ffffff', text: '#ffffff' },
+  x: { bg: '#000000', icon: '#ffffff', text: '#ffffff' },
+  pinterest: { bg: '#E60023', icon: '#ffffff', text: '#ffffff' },
   website: { bg: '#111827', icon: '#ffffff', text: '#ffffff' },
 }
 
@@ -124,6 +137,8 @@ function inferChannelFromUrl(url: string): SocialChannel | null {
   if (u.includes('linkedin.com')) return 'linkedin'
   if (u.includes('tiktok.com')) return 'tiktok'
   if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube'
+  if (u.includes('x.com') || u.includes('twitter.com')) return 'x'
+  if (u.includes('pinterest.com') || u.includes('pin.it')) return 'pinterest'
   return null
 }
 
@@ -213,6 +228,10 @@ function defaultLabel(ch: SocialChannel) {
       return 'TikTok'
     case 'youtube':
       return 'YouTube'
+    case 'x':
+      return 'X'
+    case 'pinterest':
+      return 'Pinterest'
     case 'website':
       return 'Website'
   }
@@ -253,7 +272,7 @@ export default function SocialBlock({ settings, style }: Props) {
 
   // ✅ sempre normalizado
   const items = coerceItems((s as any).items)
-  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'website']
+  const channels: SocialChannel[] = ['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'x', 'pinterest', 'website']
 
   const visible = channels
     .map((ch) => {

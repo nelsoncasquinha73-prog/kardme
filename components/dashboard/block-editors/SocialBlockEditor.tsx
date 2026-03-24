@@ -6,7 +6,16 @@ import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
-type SocialChannel = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'website'
+type SocialChannel =
+  | 'facebook'
+  | 'instagram'
+  | 'linkedin'
+  | 'tiktok'
+  | 'youtube'
+  | 'x'
+  | 'pinterest'
+  | 'website'
+
 type SocialItem = { enabled?: boolean; label?: string; url?: string }
 type ButtonGradient = { from?: string; to?: string; angle?: number }
 
@@ -64,6 +73,8 @@ const CHANNELS: Array<{ key: SocialChannel; title: string; placeholder: string; 
   { key: 'linkedin', title: 'LinkedIn', placeholder: 'https://linkedin.com/in/...', icon: '💼' },
   { key: 'tiktok', title: 'TikTok', placeholder: 'https://tiktok.com/@...', icon: '🎵' },
   { key: 'youtube', title: 'YouTube', placeholder: 'https://youtube.com/@...', icon: '▶️' },
+  { key: 'x', title: 'X', placeholder: 'https://x.com/...', icon: '𝕏' },
+  { key: 'pinterest', title: 'Pinterest', placeholder: 'https://pinterest.com/...', icon: '📌' },
   { key: 'website', title: 'Website', placeholder: 'https://teusite.com', icon: '🌐' },
 ]
 
@@ -79,6 +90,8 @@ function inferChannelFromUrl(url: string): SocialChannel | null {
   if (u.includes('linkedin.com')) return 'linkedin'
   if (u.includes('tiktok.com')) return 'tiktok'
   if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube'
+  if (u.includes('x.com') || u.includes('twitter.com')) return 'x'
+  if (u.includes('pinterest.com') || u.includes('pin.it')) return 'pinterest'
   return null
 }
 

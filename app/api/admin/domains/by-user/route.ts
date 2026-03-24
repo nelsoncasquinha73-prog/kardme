@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     // Buscar cards do user
     const { data: cards, error: cardsErr } = await supabaseAdmin
       .from('cards')
-      .select('id,title,slug')
+      .select('id,name,slug')
       .eq('user_id', userId)
 
     if (cardsErr) return NextResponse.json({ success: false, error: cardsErr.message }, { status: 500 })
