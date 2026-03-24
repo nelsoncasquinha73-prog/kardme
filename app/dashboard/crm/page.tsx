@@ -1148,6 +1148,9 @@ Melhores cumprimentos,
             color: '#111827',
             fontWeight: 700,
             minWidth: 240,
+            width: 240,
+            maxWidth: 240,
+            flex: '0 0 240px',
             cursor: 'pointer',
           }}
         >
@@ -1174,6 +1177,9 @@ Melhores cumprimentos,
             color: '#111827',
             fontWeight: 700,
             minWidth: 240,
+            width: 240,
+            maxWidth: 240,
+            flex: '0 0 240px',
             cursor: 'pointer',
           }}
         >
@@ -1208,7 +1214,10 @@ Melhores cumprimentos,
             background: '#fff',
             color: '#111827',
             fontWeight: 800,
-            minWidth: 240,
+            minWidth: 220,
+            width: 220,
+            maxWidth: 220,
+            flex: '0 0 220px',
             cursor: 'pointer',
           }}
         >
