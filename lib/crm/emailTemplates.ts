@@ -44,6 +44,25 @@ export async function deleteEmailTemplate(params: { templateId: string }) {
   return supabase.from('email_templates').delete().eq('id', params.templateId)
 }
 
+
+export async function updateEmailTemplate(params: {
+  templateId: string
+  name: string
+  category: string
+  subject: string
+  body: string
+}) {
+  return supabase
+    .from('email_templates')
+    .update({
+      name: params.name,
+      category: params.category,
+      subject: params.subject,
+      body: params.body,
+    })
+    .eq('id', params.templateId)
+}
+
 export const DEFAULT_EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     id: 'default-1',
