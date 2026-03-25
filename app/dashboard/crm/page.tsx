@@ -540,27 +540,14 @@ Melhores cumprimentos,
   }
 
   const applyBulkStep = async () => {
-    if (!bulkStep) {
-      alert('Seleciona um step')
-      return
-    }
-
-    if (selectedLeadIds.size === 0) {
-      alert('Seleciona pelo menos uma lead')
-      return
-    }
+    if (!bulkStep || selectedLeadIds.size === 0) return
 
     const ids = Array.from(selectedLeadIds)
 
-    const { error } = await supabase
+    await supabase
       .from('leads')
       .update({ step: bulkStep })
       .in('id', ids)
-
-    if (error) {
-      alert('Erro ao atualizar step em massa')
-      return
-    }
 
     setLeads(prev =>
       prev.map(l =>
@@ -1336,7 +1323,12 @@ Melhores cumprimentos,
 
         <select
           value={bulkStep}
-          onChange={(e) => setBulkStep(e.target.value)}
+          onChange={(e) => {
+            setBulkStep(e.target.value)
+            if (e.target.value) {
+              applyBulkStep()
+            }
+          }}
           disabled={selectedLeadIds.size === 0}
           style={{
             padding: '0 12px',
@@ -1358,24 +1350,6 @@ Melhores cumprimentos,
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-
-        <button
-          onClick={applyBulkStep}
-          disabled={selectedLeadIds.size === 0 || !bulkStep}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 10,
-            background: selectedLeadIds.size === 0 || !bulkStep ? '#d1d5db' : '#0f766e',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 800,
-            cursor: selectedLeadIds.size === 0 || !bulkStep ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            opacity: selectedLeadIds.size === 0 || !bulkStep ? 0.7 : 1,
-          }}
-        >
-          Aplicar step
-        </button>
 
         <button
           onClick={() => setSelectedLeadIds(new Set())}
