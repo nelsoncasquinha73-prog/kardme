@@ -475,13 +475,21 @@ export default function CatalogPage() {
           </select>
         </div>
 
-        {loading ? (
-          <p style={{ color: 'rgba(255,255,255,0.6)' }}>A carregar templates...</p>
-        ) : filtered.length === 0 ? (
-          <p style={{ color: 'rgba(255,255,255,0.6)' }}>Nenhum template encontrado.</p>
-        ) : (
-          <div className='catalog-grid'>
-            {filtered.map((template) => {
+        <div className='catalog-grid'>
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{
+                background: 'rgba(30,30,50,0.7)',
+                borderRadius: 20,
+                height: 700,
+                border: '1px solid rgba(255,255,255,0.08)',
+                animation: 'pulse 2s infinite',
+              }} />
+            ))
+          ) : filtered.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.6)', gridColumn: '1 / -1' }}>Nenhum template encontrado.</p>
+          ) : (
+            filtered.map((template) => {
               const free = isFree(template)
               const owned = ownedTemplates.has(template.id)
               const priceLabel = priceLabelFor(template)
@@ -583,9 +591,9 @@ export default function CatalogPage() {
                   </div>
                 </div>
               )
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
 
       {/* Modal de Checkout */}
