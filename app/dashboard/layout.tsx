@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
 import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiHardDrive, FiSettings, FiBarChart2, FiCreditCard, FiUser } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
+import { ToastProvider } from '@/lib/toast-context'
+import { ToastContainer } from '@/components/Toast'
 import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
 
 type Role = 'admin' | 'user' | string
@@ -134,9 +136,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <LanguageProvider>
-      <SyncLanguageToProfile />
-      <DashboardLayoutContent
+    <ToastProvider>
+      <LanguageProvider>
+        <SyncLanguageToProfile />
+        <ToastContainer />
+        <DashboardLayoutContent
         userEmail={state.userEmail}
         isAdmin={state.isAdmin}
         navItems={navItems}
@@ -144,6 +148,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {children}
       </DashboardLayoutContent>
-    </LanguageProvider>
+      </LanguageProvider>
+    </ToastProvider>
   )
 }

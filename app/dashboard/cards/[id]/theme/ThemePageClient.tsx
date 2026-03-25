@@ -7,7 +7,6 @@ import AddBlockModal from '@/components/editor/AddBlockModal'
 import ThemePageClientLeft from './ThemePageClientLeft'
 import ThemePageClientCenter from './ThemePageClientCenter'
 import ThemePageClientRight from './ThemePageClientRight'
-import Toast from '@/components/Toast'
 import type { BlockItem } from '@/components/editor/BlocksRailSortable'
 import { migrateCardBg, type CardBgV1 } from '@/lib/cardBg'
 import type { DecorationItem } from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
@@ -383,7 +382,6 @@ export default function ThemePageClient({ card, blocks }: Props) {
           }}
         />
 
-        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       </div>
     </ColorPickerProvider>
   )

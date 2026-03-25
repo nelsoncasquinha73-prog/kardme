@@ -1,4 +1,6 @@
 'use client'
+
+import { useToast } from '@/lib/toast-context'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
@@ -40,6 +42,7 @@ type Lead = {
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
+  const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
   const gmail = useGmailIntegration(userId)
@@ -551,7 +554,7 @@ Melhores cumprimentos,
       .in('id', ids)
 
     if (error) {
-      alert('Erro ao atualizar step em massa')
+      addToast('Erro ao atualizar step em massa', 'error')
       return
     }
 
@@ -561,7 +564,7 @@ Melhores cumprimentos,
       )
     )
 
-    alert(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`)
+    addToast(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`, 'success')
     setBulkStep('')
     setSelectedLeadIds(new Set())
   }
