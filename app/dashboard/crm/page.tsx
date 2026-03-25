@@ -539,19 +539,24 @@ Melhores cumprimentos,
     )
   }
 
-  const applyBulkStep = async () => {
-    if (!bulkStep || selectedLeadIds.size === 0) return
+  const applyBulkStep = async (newStep: string) => {
+    if (!newStep || selectedLeadIds.size === 0) return
 
     const ids = Array.from(selectedLeadIds)
 
-    await supabase
+    const { error } = await supabase
       .from('leads')
-      .update({ step: bulkStep })
+      .update({ step: newStep })
       .in('id', ids)
+
+    if (error) {
+      alert('Erro ao atualizar step em massa')
+      return
+    }
 
     setLeads(prev =>
       prev.map(l =>
-        selectedLeadIds.has(l.id) ? { ...l, step: bulkStep } : l
+        selectedLeadIds.has(l.id) ? { ...l, step: newStep } : l
       )
     )
 
@@ -1324,9 +1329,10 @@ Melhores cumprimentos,
         <select
           value={bulkStep}
           onChange={(e) => {
-            setBulkStep(e.target.value)
-            if (e.target.value) {
-              applyBulkStep()
+            const value = e.target.value
+            setBulkStep(value)
+            if (value) {
+              applyBulkStep(value)
             }
           }}
           disabled={selectedLeadIds.size === 0}
