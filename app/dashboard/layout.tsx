@@ -32,6 +32,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     isAdmin: false,
   })
 
+  const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
     const boot = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
@@ -70,6 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     boot()
+    setIsMounted(true)
   }, [router])
 
   const navItems = state.isAdmin
@@ -123,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return match?.title || 'Kardme'
   }
 
-  if (!state.loaded) {
+  if (!state.loaded || !isMounted) {
     return (
       <LanguageProvider>
         <div style={{ padding: 40, textAlign: 'center', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
