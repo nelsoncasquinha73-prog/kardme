@@ -16,16 +16,21 @@
   font-weight: 900;
   letter-spacing: -0.02em;
   margin: 0;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.78);
 }
 
 .dashboard-subtitle{
   margin: 6px 0 0;
   font-size: 13px;
-  color: rgba(255,255,255,0.62);
+  color: rgba(255,255,255,0.55);
   opacity: 1;
 }
 
+.dashboard-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
 .btn-primary{
   height: 42px;
@@ -70,6 +75,7 @@
 @media (max-width: 1100px){
   .cards-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
 @media (max-width: 720px){
   .cards-grid{ grid-template-columns: 1fr; }
 }
@@ -112,6 +118,91 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+.card-tile-premium {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+}
+
+.card-tile-premium .card-name{
+  font-weight: 900;
+  font-size: 14px;
+  margin: 0;
+  color: rgba(255,255,255,0.92);
+}
+
+.card-tile-premium .card-meta{
+  font-size: 12px;
+  margin: 0;
+  color: rgba(255,255,255,0.62);
+}
+
+.card-tile-premium .card-link{
+  font-size: 12px;
+  margin-top: 10px;
+  color: rgba(167,139,250,0.95);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.card-tile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-tile-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.card-btn {
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.card-btn:visited,
+.card-btn:hover,
+.card-btn:active {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+}
+
+.card-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.card-btn-primary {
+  background: linear-gradient(135deg, rgba(124,58,237,0.95), rgba(168,85,247,0.75));
+  border-color: transparent;
+}
+
+.card-btn-ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.card-btn-danger {
+  background: rgba(239,68,68,0.14);
+  border-color: rgba(239,68,68,0.35);
+}
+
 .empty{
   margin-top: 18px;
   border-radius: 18px;
@@ -141,114 +232,7 @@
   color: #b91c1c;
   font-size: 13px;
 }
-.dashboard-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
-.card-tile-premium {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
-}
-
-.card-tile-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.card-tile-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.card-btn {
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 13px;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.card-btn-primary {
-  background: linear-gradient(135deg, rgba(124,58,237,0.95), rgba(168,85,247,0.75));
-  border-color: transparent;
-}
-
-.card-btn-ghost {
-  background: transparent;
-}
-
-.card-btn-danger {
-  background: rgba(239,68,68,0.14);
-  border-color: rgba(239,68,68,0.35);
-}
-
-.card-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.card-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-/* ===== Buttons: texto mais claro ===== */
-.card-btn {
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.card-btn-ghost {
-  color: rgba(255, 255, 255, 0.92);
-}
-
-/* se o tema estiver a meter link azul dentro do botão */
-.card-btn:visited,
-.card-btn:hover,
-.card-btn:active {
-  color: rgba(255, 255, 255, 0.95);
-  text-decoration: none;
-}
-
-/* ===== Título "Dashboard": mais escuro (menos brilho) ===== */
-.dashboard-title {
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.55);
-}
-.card-tile-premium .card-name{
-  font-weight: 900;
-  font-size: 14px;
-  margin: 0;
-  color: rgba(255,255,255,0.92);
-}
-
-.card-tile-premium .card-meta{
-  font-size: 12px;
-  margin: 0;
-  color: rgba(255,255,255,0.62);
-}
-
-.card-tile-premium .card-link{
-  font-size: 12px;
-  margin-top: 10px;
-  color: rgba(167,139,250,0.95); /* roxo claro */
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-
-/* Catalog grid (templates) */
 .catalog-grid{
   display: grid;
   gap: 16px;
