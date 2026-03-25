@@ -1,4 +1,5 @@
 'use client'
+import '@/styles/dashboard.css'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -331,6 +332,7 @@ export default function CatalogPage() {
   }
 
   return (
+    <div style={{ all: 'revert' }}>
     <div className="dashboard-wrap" style={{ position: 'relative' }}>
       <div
         style={{
@@ -766,6 +768,7 @@ export default function CatalogPage() {
           </div>
         </div>
       )}
+    </div>
     </div>
   )
 }
