@@ -20,7 +20,6 @@ import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
-import toast from 'react-hot-toast'
 
 type Lead = {
   id: string
@@ -552,7 +551,7 @@ Melhores cumprimentos,
       .in('id', ids)
 
     if (error) {
-      toast.error('Erro ao atualizar step em massa')
+      alert('Erro ao atualizar step em massa')
       return
     }
 
@@ -562,7 +561,7 @@ Melhores cumprimentos,
       )
     )
 
-    toast.success(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`)
+    alert(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`)
     setBulkStep('')
     setSelectedLeadIds(new Set())
   }
