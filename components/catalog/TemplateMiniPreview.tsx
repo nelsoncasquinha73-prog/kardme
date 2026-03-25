@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
-import PhoneFrame from '@/components/theme/PhoneFrame'
 import CardBackground from '@/components/theme/CardBackground'
+import PhoneFrame from '@/components/theme/PhoneFrame'
 import { migrateCardBg } from '@/lib/cardBg'
 
 import HeaderBlock from '@/components/blocks/HeaderBlock'
@@ -121,20 +121,15 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
   }
 
   const scale = height / 880
-  const phoneWidth = 420
-  const phoneHeight = 880
-  const scaledWidth = phoneWidth * scale
-  const phoneInnerHeight = 880 - 52
 
   return (
     <div
       style={{
-        width: scaledWidth,
         height,
-        margin: '0 auto',
-        position: 'relative',
+        width: '100%',
         overflow: 'hidden',
         borderRadius: 12,
+        position: 'relative',
       }}
     >
       <div
@@ -142,8 +137,8 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
           position: 'absolute',
           top: 0,
           left: '50%',
-          width: phoneWidth,
-          height: phoneHeight,
+          width: 420,
+          height: 880,
           transform: `translateX(-50%) scale(${scale})`,
           transformOrigin: 'top center',
         }}
@@ -151,24 +146,29 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
         <PhoneFrame>
           <div
             style={{
-              height: phoneInnerHeight,
+              width: '100%',
+              height: '100%',
               overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <ThemeProvider theme={fixedThemeJson || {}}>
               <CardBackground
                 bg={cardBg}
                 style={{
-                  minHeight: phoneInnerHeight,
+                  flex: 1,
+                  overflow: 'hidden',
                   padding: 0,
                   width: '100%',
                 }}
               >
                 <div
                   style={{
-                    padding: '0 16px',
-                    maxWidth: 420,
-                    margin: '0 auto',
+                    height: '100%',
+                    overflow: 'hidden',
+                    padding: '16px 16px 24px',
+                    boxSizing: 'border-box',
                   }}
                 >
                   {blocks.map((block, index) => renderBlock(block, index, template.id))}
