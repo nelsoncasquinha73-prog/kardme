@@ -143,9 +143,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={value}>
-      <div dir={dir} lang={lang} style={{ background: 'inherit', minHeight: '100vh' }}>
-        {children}
-      </div>
+      {mounted ? (
+        <div dir={dir} lang={lang} style={{ background: 'inherit', minHeight: '100vh' }}>
+          {children}
+        </div>
+      ) : (
+        <div style={{ background: 'inherit', minHeight: '100vh' }}>
+          {children}
+        </div>
+      )}
     </LanguageContext.Provider>
   )
 }
