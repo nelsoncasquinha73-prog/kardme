@@ -1362,13 +1362,7 @@ Melhores cumprimentos,
                 const colors = stepColor(lead.step)
                 return (
                   <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <td style={td}>
-                      <input
-                        type="checkbox"
-                        checked={lead.contacted}
-                        onChange={() => toggleContacted(lead.id, lead.contacted)}
-                      />
-                    </td>
+
                     <td style={{ ...td, textAlign: 'center' }}>
                         <input
                           type="checkbox"
