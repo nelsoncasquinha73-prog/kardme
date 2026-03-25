@@ -140,8 +140,7 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
         <PhoneFrame>
           <div style={{
             height: phoneInnerHeight,
-            overflow: 'auto',
-            WebkitOverflowScrolling: 'touch',
+            overflow: 'hidden',
           }}>
             <ThemeProvider theme={fixedThemeJson || {}}>
               <CardBackground
