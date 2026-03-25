@@ -120,6 +120,7 @@ Melhores cumprimentos,
 
   const [sortBy, setSortBy] = useState<'created_at' | 'name' | 'zone'>('created_at')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [isMounted, setIsMounted] = useState(false)
 
   const [showImportModal, setShowImportModal] = useState(false)
   const [importFileName, setImportFileName] = useState('')
@@ -128,6 +129,10 @@ Melhores cumprimentos,
   const [importPreview, setImportPreview] = useState<string[][]>([])
   const [importing, setImporting] = useState(false)
 
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const checkCRMPro = async (uid?: string) => {
     try {
@@ -1302,13 +1307,15 @@ Melhores cumprimentos,
               <th style={th}>✓</th>
               <th style={{ ...th, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
-                <input
-                  type="checkbox"
-                  checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
-                  onChange={toggleAllLeads}
-                  title="Selecionar todas"
-                  disabled={filteredLeads.length === 0}
-                />
+                {isMounted && (
+                  <input
+                    type="checkbox"
+                    checked={selectedLeadIds.size === filteredLeads.length && filteredLeads.length > 0}
+                    onChange={toggleAllLeads}
+                    title="Selecionar todas"
+                    disabled={filteredLeads.length === 0}
+                  />
+                )}
               </th>
               <th style={th}>Nome</th>
               <th style={th}>Email</th>
@@ -1340,11 +1347,13 @@ Melhores cumprimentos,
                       />
                     </td>
                     <td style={{ ...td, textAlign: 'center' }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedLeadIds.has(lead.id)}
-                        onChange={() => toggleLeadSelection(lead.id)}
-                      />
+                      {isMounted && (
+                        <input
+                          type="checkbox"
+                          checked={selectedLeadIds.has(lead.id)}
+                          onChange={() => toggleLeadSelection(lead.id)}
+                        />
+                      )}
                     </td>
                     <td style={td}>
                       <strong>{lead.name}</strong>
