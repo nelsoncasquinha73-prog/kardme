@@ -1282,20 +1282,20 @@ Melhores cumprimentos,
         </div>
       </div>
 
-      <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <button
           onClick={() => setShowBulkEmailModal(true)}
           disabled={selectedLeadIds.size === 0}
           style={{
             padding: '10px 16px',
             borderRadius: 10,
-            background: selectedLeadIds.size === 0 ? '#c4b5fd' : '#8b5cf6',
+            background: selectedLeadIds.size === 0 ? '#374151' : '#8b5cf6',
             color: '#ffffff',
             border: 'none',
             fontWeight: 800,
             cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
             fontSize: 13,
-            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
           }}
         >
           📣 Email em massa ({selectedLeadIds.size})
