@@ -1804,7 +1804,7 @@ Melhores cumprimentos,
                     const t = emailTemplates.find(x => x.id === e.target.value) || null
                     if (t) applyTemplateToEmail(t, selectedLeadForEmail)
                   }}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                  style={{ width: '100%', padding: '14px 12px', minHeight: 48, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
                 >
                   <option value="">— Escolher template —</option>
                   {emailTemplates.map(t => (
@@ -1828,7 +1828,7 @@ Melhores cumprimentos,
                     setSaveTemplateName('')
                     setSaveTemplateCategory('Geral')
                   }}
-                  style={{ padding: '10px 12px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
+                  style={{ padding: '14px 12px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
                 >
                   Guardar como template
                 </button>
@@ -1941,7 +1941,7 @@ Melhores cumprimentos,
                     const t = emailTemplates.find(x => x.id === e.target.value) || null
                     if (t) applyTemplateToBulk(t)
                   }}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                  style={{ width: '100%', padding: '14px 12px', minHeight: 48, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
                 >
                   <option value="">— Escolher template —</option>
                   {emailTemplates.map(t => (
