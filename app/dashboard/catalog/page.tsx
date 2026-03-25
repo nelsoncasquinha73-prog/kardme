@@ -102,12 +102,7 @@ export default function CatalogPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (searchParams.get('success') === '1') {
-      setSuccessMessage('Template comprado com sucesso! Já podes usá-lo.')
-      loadData()
-    }
-  }, [searchParams])
+
 
   const loadData = async () => {
     setLoading(true)
@@ -147,6 +142,9 @@ export default function CatalogPage() {
   }
 
   useEffect(() => {
+    if (searchParams.get('success') === '1') {
+      setSuccessMessage('Template comprado com sucesso! Já podes usá-lo.')
+    }
     loadData()
   }, [])
 
