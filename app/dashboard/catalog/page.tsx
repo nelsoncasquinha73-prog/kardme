@@ -377,31 +377,7 @@ export default function CatalogPage() {
               }} />
             </div>
 
-            <div className="catalog-grid">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'rgba(30,30,50,0.7)',
-                    borderRadius: 20,
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 760,
-                  }}
-                >
-                  <div style={{ height: 623, background: '#111' }} />
-                  <div style={{ padding: 16 }}>
-                    <div style={{ height: 20, width: '60%', background: 'rgba(255,255,255,0.08)', borderRadius: 8, marginBottom: 8 }} />
-                    <div style={{ height: 14, width: '35%', background: 'rgba(255,255,255,0.06)', borderRadius: 8, marginBottom: 12 }} />
-                    <div style={{ height: 14, width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: 8, marginBottom: 8 }} />
-                    <div style={{ height: 14, width: '85%', background: 'rgba(255,255,255,0.05)', borderRadius: 8, marginBottom: 18 }} />
-                    <div style={{ height: 44, width: '100%', background: 'rgba(99,102,241,0.35)', borderRadius: 14 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
       </div>
