@@ -115,6 +115,7 @@ Melhores cumprimentos,
   const [bulkSending, setBulkSending] = useState(false)
   const [bulkScheduleDate, setBulkScheduleDate] = useState('')
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
+  const [bulkStep, setBulkStep] = useState('')
 
 
 
@@ -536,6 +537,38 @@ Melhores cumprimentos,
         l.id === id ? { ...l, step: newStep } : l
       )
     )
+  }
+
+  const applyBulkStep = async () => {
+    if (!bulkStep) {
+      alert('Seleciona um step')
+      return
+    }
+
+    if (selectedLeadIds.size === 0) {
+      alert('Seleciona pelo menos uma lead')
+      return
+    }
+
+    const ids = Array.from(selectedLeadIds)
+
+    const { error } = await supabase
+      .from('leads')
+      .update({ step: bulkStep })
+      .in('id', ids)
+
+    if (error) {
+      alert('Erro ao atualizar step em massa')
+      return
+    }
+
+    setLeads(prev =>
+      prev.map(l =>
+        selectedLeadIds.has(l.id) ? { ...l, step: bulkStep } : l
+      )
+    )
+
+    setBulkStep('')
   }
 
   const updateNotes = async (id: string, notes: string) => {
@@ -1282,7 +1315,7 @@ Melhores cumprimentos,
         </div>
       </div>
 
-      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <button
           onClick={() => setShowBulkEmailModal(true)}
           disabled={selectedLeadIds.size === 0}
@@ -1299,6 +1332,49 @@ Melhores cumprimentos,
           }}
         >
           📣 Email em massa ({selectedLeadIds.size})
+        </button>
+
+        <select
+          value={bulkStep}
+          onChange={(e) => setBulkStep(e.target.value)}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '0 12px',
+            height: 42,
+            lineHeight: '42px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 180,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+        >
+          <option value="">Mudar step...</option>
+          {STEPS.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={applyBulkStep}
+          disabled={selectedLeadIds.size === 0 || !bulkStep}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 || !bulkStep ? '#d1d5db' : '#0f766e',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 800,
+            cursor: selectedLeadIds.size === 0 || !bulkStep ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 || !bulkStep ? 0.7 : 1,
+          }}
+        >
+          Aplicar step
         </button>
 
         <button
