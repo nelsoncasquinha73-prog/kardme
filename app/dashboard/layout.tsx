@@ -45,16 +45,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const user = sessionData.session.user
       const userEmail = user.email ?? null
 
-      const storedRole = sessionStorage.getItem('role')
-      if (storedRole) {
-        setState({
-          loaded: true,
-          userEmail,
-          isAdmin: storedRole === 'admin',
-        })
-        return
-      }
-
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
@@ -62,7 +52,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .single()
 
       const userRole = !error && profile?.role ? profile.role : 'user'
-      sessionStorage.setItem('role', userRole)
 
       setState({
         loaded: true,

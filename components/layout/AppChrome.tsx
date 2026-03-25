@@ -38,7 +38,6 @@ export default function AppChrome({
 
   const logout = async () => {
     await supabase.auth.signOut()
-    sessionStorage.removeItem('role')
     router.push('/login')
   }
 
