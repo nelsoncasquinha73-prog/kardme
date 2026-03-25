@@ -1330,7 +1330,6 @@ Melhores cumprimentos,
         >
           <thead>
             <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
-              <th style={th}>✓</th>
               <th style={{ ...th, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
                 <input
@@ -1354,7 +1353,7 @@ Melhores cumprimentos,
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan={10} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
+                <td colSpan={9} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
                   Nenhuma lead encontrada.
                 </td>
               </tr>
