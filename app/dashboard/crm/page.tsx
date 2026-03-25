@@ -1282,12 +1282,43 @@ Melhores cumprimentos,
         </div>
       </div>
 
-            {selectedLeadIds.size > 0 && (
-        <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
-          <button onClick={() => setShowBulkEmailModal(true)} style={{ padding: '10px 16px', borderRadius: 10, background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>📣 Email em massa ({selectedLeadIds.size})</button>
-          <button onClick={() => setSelectedLeadIds(new Set())} style={{ padding: '10px 16px', borderRadius: 10, background: '#e5e7eb', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Limpar seleção</button>
-        </div>
-      )}
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10 }}>
+        <button
+          onClick={() => setShowBulkEmailModal(true)}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 ? '#c4b5fd' : '#8b5cf6',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 800,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+        >
+          📣 Email em massa ({selectedLeadIds.size})
+        </button>
+
+        <button
+          onClick={() => setSelectedLeadIds(new Set())}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: '#e5e7eb',
+            border: 'none',
+            fontWeight: 800,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            color: '#111827',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+        >
+          Limpar seleção
+        </button>
+      </div>
 
       <div style={{ overflowX: 'auto' }}>
         <table
