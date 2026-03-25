@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import '@/styles/dashboard.css'
 
 import TemplateMiniPreview from "@/components/catalog/TemplateMiniPreview"
 
