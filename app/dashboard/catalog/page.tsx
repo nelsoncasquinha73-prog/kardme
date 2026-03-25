@@ -554,7 +554,7 @@ export default function CatalogPage() {
                 >
                   <div style={{ position: 'relative', height: 623, background: '#111' }}>
                     <div style={{ transform: 'translateY(65px)' }}>
-                      <div style={{ width: '100%', height: 504, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }} />
+                      <TemplateMiniPreview template={template} height={504} />
                     </div>
                     <div
                       style={{
