@@ -332,7 +332,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="dashboard-wrap">
+    <div className="dashboard-wrap" style={{ position: 'relative' }}>
       <div
         style={{
               flex: 'none',
