@@ -332,43 +332,7 @@ export default function CatalogPage() {
   return (
     <div style={{ all: 'revert' }}>
     <div className="dashboard-wrap" style={{ position: 'relative' }}>
-      <div
-        style={{
-              flex: 'none',
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-              flex: 'none',
-            position: 'absolute',
-            width: 520,
-            height: 520,
-            left: -120,
-            top: -140,
-            background:
-              'radial-gradient(circle at 30% 30%, rgba(168,85,247,0.35), rgba(168,85,247,0) 60%)',
-            filter: 'blur(8px)',
-          }}
-        />
-        <div
-          style={{
-              flex: 'none',
-            position: 'absolute',
-            width: 620,
-            height: 620,
-            right: -160,
-            bottom: -220,
-            background:
-              'radial-gradient(circle at 30% 30%, rgba(59,130,246,0.28), rgba(59,130,246,0) 60%)',
-            filter: 'blur(10px)',
-          }}
-        />
-      </div>
+
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div className="dashboard-header">
