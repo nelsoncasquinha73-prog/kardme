@@ -143,12 +143,13 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
           transformOrigin: 'top center',
         }}
       >
-        <PhoneFrame>
+        <PhoneFrame style={{ overflow: 'visible' }}>
           <div
             style={{
               width: '100%',
               height: '100%',
-              overflow: 'auto',
+              overflowY: 'auto',
+              overflowX: 'hidden',
               WebkitOverflowScrolling: 'touch',
               display: 'flex',
               flexDirection: 'column',
