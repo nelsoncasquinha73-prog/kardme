@@ -148,7 +148,8 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
             style={{
               width: '100%',
               height: '100%',
-              overflow: 'hidden',
+              overflow: 'auto',
+              WebkitOverflowScrolling: 'touch',
               display: 'flex',
               flexDirection: 'column',
             }}
