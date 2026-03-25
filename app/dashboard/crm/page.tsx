@@ -20,6 +20,7 @@ import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
+import toast from 'react-hot-toast'
 
 type Lead = {
   id: string
@@ -543,6 +544,7 @@ Melhores cumprimentos,
     if (!newStep || selectedLeadIds.size === 0) return
 
     const ids = Array.from(selectedLeadIds)
+    const count = ids.length
 
     const { error } = await supabase
       .from('leads')
@@ -550,7 +552,7 @@ Melhores cumprimentos,
       .in('id', ids)
 
     if (error) {
-      alert('Erro ao atualizar step em massa')
+      toast.error('Erro ao atualizar step em massa')
       return
     }
 
@@ -560,7 +562,9 @@ Melhores cumprimentos,
       )
     )
 
+    toast.success(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`)
     setBulkStep('')
+    setSelectedLeadIds(new Set())
   }
 
   const updateNotes = async (id: string, notes: string) => {
@@ -1351,7 +1355,7 @@ Melhores cumprimentos,
             opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
           }}
         >
-          <option value="">Mudar step...</option>
+          <option value="">{selectedLeadIds.size > 0 ? `Mudar step de ${selectedLeadIds.size} ${selectedLeadIds.size === 1 ? 'lead' : 'leads'}...` : 'Mudar step...'}</option>
           {STEPS.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
