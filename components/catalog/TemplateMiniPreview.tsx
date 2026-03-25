@@ -121,27 +121,40 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
   }
 
   const scale = height / 880
+  const phoneWidth = 420
+  const phoneHeight = 880
+  const scaledWidth = phoneWidth * scale
   const phoneInnerHeight = 880 - 52
 
   return (
-    <div style={{
-      height,
-      display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      overflow: 'hidden',
-      borderRadius: 12,
-      position: 'relative',
-    }}>
-      <div style={{
-        transform: `scale(${scale})`,
-        transformOrigin: 'top center',
-      }}>
+    <div
+      style={{
+        width: scaledWidth,
+        height,
+        margin: '0 auto',
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 12,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          width: phoneWidth,
+          height: phoneHeight,
+          transform: `translateX(-50%) scale(${scale})`,
+          transformOrigin: 'top center',
+        }}
+      >
         <PhoneFrame>
-          <div style={{
-            height: phoneInnerHeight,
-            overflow: 'hidden',
-          }}>
+          <div
+            style={{
+              height: phoneInnerHeight,
+              overflow: 'hidden',
+            }}
+          >
             <ThemeProvider theme={fixedThemeJson || {}}>
               <CardBackground
                 bg={cardBg}
@@ -151,11 +164,13 @@ export default function TemplateMiniPreview({ template, height = 480 }: Props) {
                   width: '100%',
                 }}
               >
-                <div style={{ 
-                  padding: '0 16px',
-                  maxWidth: 420,
-                  margin: '0 auto',
-                }}>
+                <div
+                  style={{
+                    padding: '0 16px',
+                    maxWidth: 420,
+                    margin: '0 auto',
+                  }}
+                >
                   {blocks.map((block, index) => renderBlock(block, index, template.id))}
                 </div>
               </CardBackground>
