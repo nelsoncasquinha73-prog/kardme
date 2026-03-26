@@ -46,6 +46,7 @@ export default function CrmProPage() {
   const router = useRouter()
   const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
   const [showTemplatesInfoModal, setShowTemplatesInfoModal] = useState(false)
+  const [showOptinInfoModal, setShowOptinInfoModal] = useState(false)
   const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
@@ -1237,33 +1238,42 @@ Melhores cumprimentos,
           ))}
         </select>
 
-        <select
-          value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
-          onChange={(e) => {
-            if (e.target.value === '') setFilterMarketing(null)
-            else setFilterMarketing(e.target.value === 'true')
-          }}
-          style={{
-            padding: '0 12px',
-            height: 44,
-            lineHeight: '44px',
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            fontWeight: 700,
-            minWidth: 240,
-            width: 240,
-            maxWidth: 240,
-            flex: '0 0 240px',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="">Todos (Marketing)</option>
-          <option value="true">Opt-in Marketing</option>
-          <option value="false">Sem opt-in</option>
-        </select>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            onClick={() => setShowOptinInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >
+            ?
+          </button>
+
+          <select
+            value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
+            onChange={(e) => {
+              if (e.target.value === '') setFilterMarketing(null)
+              else setFilterMarketing(e.target.value === 'true')
+            }}
+            style={{
+              padding: '0 12px',
+              height: 44,
+              lineHeight: '44px',
+              borderRadius: 12,
+              border: '1px solid rgba(0,0,0,0.12)',
+              fontSize: 13,
+              background: '#fff',
+              color: '#111827',
+              fontWeight: 700,
+              minWidth: 240,
+              width: 240,
+              maxWidth: 240,
+              flex: '0 0 240px',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="">Todos (Marketing)</option>
+            <option value="true">Opt-in Marketing</option>
+            <option value="false">Sem opt-in</option>
+          </select>
+        </div>
       </div>
 
       {filteredLeads.length === 0 && (
@@ -2430,6 +2440,25 @@ Melhores cumprimentos,
               </div>
             </div>
             <button onClick={() => setShowTemplatesInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+          </div>
+        </div>
+      )}
+
+
+      {showOptinInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que é Opt-in Marketing?</h2>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>Opt-in Marketing refere-se ao consentimento do cliente para receber comunicações de marketing (emails, SMS, etc.).</p>
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#111827' }}>Opções:</strong>
+              <div style={{ marginTop: 8, color: '#666' }}>
+                • <strong>Opt-in Marketing</strong> - Cliente consentiu receber comunicações<br/>
+                • <strong>Sem opt-in</strong> - Cliente não consentiu ou retirou consentimento<br/>
+                • <strong>Todos</strong> - Mostra todos os clientes, independentemente do opt-in
+              </div>
+            </div>
+            <button onClick={() => setShowOptinInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
       )}
