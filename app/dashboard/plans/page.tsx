@@ -13,6 +13,7 @@ export default function PlansPage() {
   const [includeSetupYearly, setIncludeSetupYearly] = useState(false)
   const [includeCRMProMonthly, setIncludeCRMProMonthly] = useState(false)
   const [includeCRMProYearly, setIncludeCRMProYearly] = useState(false)
+  const [showCRMProModal, setShowCRMProModal] = useState(false)
 
   const SETUP_FEE = 5
 
