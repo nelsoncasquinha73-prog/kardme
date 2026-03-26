@@ -202,15 +202,17 @@ export default function AdminClienteDetailPage() {
       setPlanExpiresAt(profile.plan_expires_at);
       setPlanAutoRenew(profile.plan_auto_renew ?? false);
       // Carregar addons
-      const { data: addons } = await supabase
+      supabase
         .from('user_addons')
         .select('crm_pro_active, crm_pro_expires_at')
         .eq('user_id', userId)
-        .single();
-      if (addons) {
-        setCrmProActive(addons.crm_pro_active ?? false);
-        setCrmProExpiresAt(addons.crm_pro_expires_at ?? null);
-      }
+        .single()
+        .then(({ data: addons }) => {
+          if (addons) {
+            setCrmProActive(addons.crm_pro_active ?? false);
+            setCrmProExpiresAt(addons.crm_pro_expires_at ?? null);
+          }
+        });
     }
   }, [profile]);
 
