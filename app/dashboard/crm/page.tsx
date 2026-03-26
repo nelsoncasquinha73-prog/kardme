@@ -3,6 +3,7 @@
 import { useToast } from '@/lib/toast-context'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { FaWhatsapp } from 'react-icons/fa'
 import {
   FiSettings,
@@ -42,6 +43,7 @@ type Lead = {
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
+  const router = useRouter()
   const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
@@ -1099,7 +1101,31 @@ Melhores cumprimentos,
             whiteSpace: 'nowrap',
           }}
         >
-          ⚙️ Mensagem
+          ⚙️ Configurar Boas-vindas
+        </button>
+
+        <button
+          onClick={() => router.push("/dashboard/crm/email-templates")}
+          title="Gerir templates de email"
+          style={{
+            padding: "10px 14px",
+            borderRadius: 10,
+            background: "#6366f1",
+            color: "#ffffff",
+            border: "none",
+            fontWeight: 900,
+            cursor: "pointer",
+            fontSize: 13,
+            minHeight: 40,
+            lineHeight: "20px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            whiteSpace: "nowrap",
+            marginLeft: 8,
+          }}
+        >
+          📋 Templates
         </button>
       </div>
 
