@@ -44,6 +44,8 @@ const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
 export default function CrmProPage() {
   const router = useRouter()
+  const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
+  const [showTemplatesInfoModal, setShowTemplatesInfoModal] = useState(false)
   const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
@@ -1070,6 +1072,13 @@ Melhores cumprimentos,
         </div>
 
         <button
+          onClick={() => setShowWelcomeInfoModal(true)}
+          style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.2)', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 14, minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+        >
+          ℹ️
+        </button>
+
+        <button
           onClick={() => {
             if (selectedCardId === 'all') {
               alert('Seleciona um cartão para configurar a mensagem de boas-vindas')
@@ -1102,6 +1111,13 @@ Melhores cumprimentos,
           }}
         >
           ⚙️ Configurar Boas-vindas
+        </button>
+
+        <button
+          onClick={() => setShowTemplatesInfoModal(true)}
+          style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.2)', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 14, minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+        >
+          ℹ️
         </button>
 
         <button
@@ -2376,6 +2392,43 @@ Melhores cumprimentos,
         </div>
       )}
 
+
+
+      {showWelcomeInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que é a Mensagem de Boas-vindas?</h2>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>É uma mensagem automática que o cliente recebe quando preenche o formulário do teu cartão digital.</p>
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#111827' }}>Variáveis disponíveis:</strong>
+              <div style={{ marginTop: 8, fontFamily: 'monospace', color: '#666' }}>
+                • {'{nome}'} - Nome do cliente<br/>
+                • {'{email}'} - Email do cliente<br/>
+                • {'{cardTitle}'} - Nome do teu cartão
+              </div>
+            </div>
+            <button onClick={() => setShowWelcomeInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+          </div>
+        </div>
+      )}
+
+      {showTemplatesInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que são Templates de Email?</h2>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>Templates são modelos de email pré-criados que podes usar para enviar campanhas, follow-ups e automações.</p>
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#111827' }}>Benefícios:</strong>
+              <div style={{ marginTop: 8, color: '#666' }}>
+                • Poupa tempo nas tuas campanhas<br/>
+                • Garante consistência nas mensagens<br/>
+                • Reutilizável em múltiplas ações
+              </div>
+            </div>
+            <button onClick={() => setShowTemplatesInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+          </div>
+        </div>
+      )}
 
     </main>
   )
