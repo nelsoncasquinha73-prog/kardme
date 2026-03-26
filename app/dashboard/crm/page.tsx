@@ -82,6 +82,7 @@ export default function CrmProPage() {
   const [calendarTasks, setCalendarTasks] = useState<LeadTask[]>([])
   const [calendarYearMonth, setCalendarYearMonth] = useState<string>(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` })
   const [selectedCalendarTask, setSelectedCalendarTask] = useState<LeadTask | null>(null)
+  const [pendingCalendarAction, setPendingCalendarAction] = useState<{ task: LeadTask; lead: Lead | undefined } | null>(null)
   const [loadingTasks, setLoadingTasks] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [selectedLeadForTask, setSelectedLeadForTask] = useState<Lead | null>(null)
@@ -616,6 +617,14 @@ Melhores cumprimentos,
     if (!error) setLeadTasks((data as any) || [])
     setLeadTasksLoading(false)
   }
+
+  useEffect(() => {
+    if (pendingCalendarAction && !selectedCalendarTask) {
+      const { task, lead } = pendingCalendarAction
+      setPendingCalendarAction(null)
+      handleTaskAction(task, lead)
+    }
+  }, [selectedCalendarTask, pendingCalendarAction])
 
   useEffect(() => {
     if (!userId) return
@@ -1905,7 +1914,7 @@ Melhores cumprimentos,
               </p>
               <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                 <button
-                  onClick={() => { setSelectedCalendarTask(null); setTimeout(() => handleTaskAction(task, lead), 50) }}
+                  onClick={() => { setPendingCalendarAction({ task, lead }); setSelectedCalendarTask(null) }}
                   style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
                 >
                   {icon} Fazer agora
