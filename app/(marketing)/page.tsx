@@ -137,8 +137,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="row justify-content-center" style={{ marginTop: 30 }}>
-            <div className="col-lg-10">
+          <div className="row justify-content-center" style={{ marginTop: 30, justifyContent: "center", display: "flex" }}>
+            <div className="col-lg-8">
               <KardmeShowcase />
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function Home() {
           </div>
 
           <div className="row" style={{ marginTop: 40 }}>
-            <div className="col-lg-10 col-md-6">
+            <div className="col-lg-8 col-md-6">
               <div className="feature-item">
                 <div className="feature-icon">
                   <i className="fas fa-zap"></i>
@@ -210,7 +210,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-lg-10 col-md-6">
+            <div className="col-lg-8 col-md-6">
               <div className="feature-item">
                 <div className="feature-icon">
                   <i className="fas fa-palette"></i>
@@ -220,7 +220,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-lg-10 col-md-6">
+            <div className="col-lg-8 col-md-6">
               <div className="feature-item">
                 <div className="feature-icon">
                   <i className="fas fa-mobile-alt"></i>
@@ -230,7 +230,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-lg-10 col-md-6">
+            <div className="col-lg-8 col-md-6">
               <div className="feature-item">
                 <div className="feature-icon">
                   <i className="fas fa-chart-line"></i>
