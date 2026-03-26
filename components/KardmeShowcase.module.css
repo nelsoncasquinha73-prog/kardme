@@ -7,7 +7,8 @@
 
 .phoneContainer {
   position: relative;
-  width: 400px;  /* aumentado de 320px */
+  width: 400px;
+  height: 820px;
 }
 
 .cardImage {
@@ -15,13 +16,11 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
-}
-
-.cardImage:first-child {
-  position: relative;
+  mix-blend-mode: lighten;
 }
 
 .cardImage.active {
@@ -61,12 +60,14 @@
 
 @media (max-width: 768px) {
   .phoneContainer {
-    width: 320px;  /* aumentado de 260px */
+    width: 320px;
+    height: 656px;
   }
 }
 
 @media (max-width: 400px) {
   .phoneContainer {
-    width: 280px;  /* aumentado de 220px */
+    width: 280px;
+    height: 574px;
   }
 }
