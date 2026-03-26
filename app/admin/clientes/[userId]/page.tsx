@@ -378,6 +378,8 @@ export default function AdminClienteDetailPage() {
           plan_expires_at: planExpiresAt,
           plan_auto_renew: planAutoRenew,
           disabled,
+          crm_pro_active: crmProActive,
+          crm_pro_expires_at: crmProExpiresAt || null,
         }),
       });
       const json = await res.json();
