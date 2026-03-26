@@ -7,8 +7,8 @@
 
 .phoneContainer {
   position: relative;
-  width: 400px;
-  height: 820px;
+  width: 600px;
+  height: 1230px;
 }
 
 .cardImage {
@@ -20,7 +20,6 @@
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
-  mix-blend-mode: lighten;
 }
 
 .cardImage.active {
@@ -60,14 +59,14 @@
 
 @media (max-width: 768px) {
   .phoneContainer {
-    width: 320px;
-    height: 656px;
+    width: 420px;
+    height: 861px;
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .phoneContainer {
-    width: 280px;
-    height: 574px;
+    width: 320px;
+    height: 656px;
   }
 }

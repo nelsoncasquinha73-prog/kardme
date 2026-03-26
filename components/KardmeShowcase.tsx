@@ -9,9 +9,13 @@ export default function KardmeShowcase() {
   const [activeCard, setActiveCard] = useState<number>(0)
 
   const cards: Card[] = [
-    { id: 1, image: '/assets/kardme/cards/card-1.png', title: 'RE/MAX' },
-    { id: 2, image: '/assets/kardme/cards/card-2.png', title: 'Mecânico' },
-    { id: 3, image: '/assets/kardme/cards/card-3.png', title: 'Barbearia' },
+    { id: 1, image: '/assets/kardme/cards/card-1.png', title: 'Rota Atlântica' },
+    { id: 2, image: '/assets/kardme/cards/card-2.png', title: 'RE/MAX' },
+    { id: 3, image: '/assets/kardme/cards/card-3.png', title: 'Bairro Burger Co.' },
+    { id: 4, image: '/assets/kardme/cards/card-4.png', title: 'Casa Capsula' },
+    { id: 5, image: '/assets/kardme/cards/card-5.png', title: 'Herbalife' },
+    { id: 6, image: '/assets/kardme/cards/card-6.png', title: 'Espaço Paulo Caetano' },
+    { id: 7, image: '/assets/kardme/cards/card-7.png', title: 'Luz & Linha Studio' },
   ]
 
   useEffect(() => {
