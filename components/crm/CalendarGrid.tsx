@@ -35,6 +35,7 @@ type Props = {
   leads: Lead[];
   tasks?: LeadTask[];
   onLeadClick?: (leadId: string) => void;
+  onTaskClick?: (taskId: string) => void;
   onMonthChange?: (year: number, month: number) => void;
 };
 
@@ -68,7 +69,7 @@ function getStepColor(step?: string) {
   return STEP_COLORS[step.toLowerCase()] ?? "bg-gray-500/20 text-gray-300 border-gray-500/30";
 }
 
-export default function CalendarGrid({ leads, tasks = [], onLeadClick, onMonthChange }: Props) {
+export default function CalendarGrid({ leads, tasks = [], onLeadClick, onTaskClick, onMonthChange }: Props) {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -214,7 +215,7 @@ export default function CalendarGrid({ leads, tasks = [], onLeadClick, onMonthCh
                   {dayEvents.slice(0, 2).map((ev) => (
                     <div
                       key={ev.id}
-                      onClick={(e) => { e.stopPropagation(); onLeadClick?.(ev.leadId); }}
+                      onClick={(e) => { e.stopPropagation(); if (ev.type === 'task') { const taskId = ev.id.replace('task-', ''); onTaskClick?.(taskId); } else { onLeadClick?.(ev.leadId); } }}
                       title={`${getEventLabel(ev)} - ${getEventSubtitle(ev)}`}
                       className={["text-[10px] px-1.5 py-0.5 rounded border truncate cursor-pointer hover:opacity-80 transition-opacity", getEventStyle(ev)].join(" ")}
                     >
@@ -244,7 +245,7 @@ export default function CalendarGrid({ leads, tasks = [], onLeadClick, onMonthCh
               {selectedDayEvents.map((ev) => (
                 <div
                   key={ev.id}
-                  onClick={() => onLeadClick?.(ev.leadId)}
+                  onClick={() => { if (ev.type === 'task') { const taskId = ev.id.replace('task-', ''); onTaskClick?.(taskId); } else { onLeadClick?.(ev.leadId); } }}
                   className="flex items-center gap-3 p-2.5 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-colors group"
                 >
                   <div className="text-lg">{getEventIcon(ev)}</div>

@@ -81,6 +81,7 @@ export default function CrmProPage() {
   const [tasksToday, setTasksToday] = useState<LeadTask[]>([])
   const [calendarTasks, setCalendarTasks] = useState<LeadTask[]>([])
   const [calendarYearMonth, setCalendarYearMonth] = useState<string>(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` })
+  const [selectedCalendarTask, setSelectedCalendarTask] = useState<LeadTask | null>(null)
   const [loadingTasks, setLoadingTasks] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [selectedLeadForTask, setSelectedLeadForTask] = useState<Lead | null>(null)
@@ -1285,6 +1286,10 @@ Melhores cumprimentos,
                 setNoteText(lead.notes || '')
               }
             }}
+            onTaskClick={(taskId) => {
+              const task = calendarTasks.find(t => t.id === taskId)
+              if (task) setSelectedCalendarTask(task)
+            }}
             onMonthChange={(year, month) => {
               setCalendarYearMonth(`${year}-${String(month+1).padStart(2,'0')}`)
             }}
@@ -1873,6 +1878,61 @@ Melhores cumprimentos,
           </div>
         </div>
       )}
+
+      {/* Modal Tarefa Calendário */}
+      {selectedCalendarTask && (() => {
+        const task = selectedCalendarTask
+        const lead = leads.find(l => l.id === task.lead_id)
+        const ACTION_ICONS: Record<string, string> = { follow_up: '✅', email: '📧', whatsapp: '💬', call: '📞', sms: '✉️', meeting: '📅' }
+        const ACTION_LABELS: Record<string, string> = { follow_up: 'Follow-up', email: 'Email', whatsapp: 'WhatsApp', call: 'Ligar', sms: 'SMS', meeting: 'Reunião' }
+        const icon = ACTION_ICONS[task.action_type ?? 'follow_up'] ?? '✅'
+        const label = ACTION_LABELS[task.action_type ?? 'follow_up'] ?? 'Follow-up'
+        return (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010 }}>
+            <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 440, width: '90%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <span style={{ fontSize: 28 }}>{icon}</span>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#111827' }}>{task.title}</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>{icon} {label} · {lead?.name ?? 'Lead'}</p>
+                </div>
+              </div>
+              {task.description && (
+                <p style={{ fontSize: 13, color: '#374151', background: '#f9fafb', borderRadius: 10, padding: 12, marginBottom: 16 }}>{task.description}</p>
+              )}
+              <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 20 }}>
+                📅 {new Date(task.due_at).toLocaleString('pt-PT')}
+              </p>
+              <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                <button
+                  onClick={() => { handleTaskAction(task, lead); setSelectedCalendarTask(null) }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                >
+                  {icon} Fazer agora
+                </button>
+                <button
+                  onClick={async () => {
+                    await markTaskDone({ taskId: task.id })
+                    await logLeadActivity({ leadId: task.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${task.title}` })
+                    setCalendarTasks(prev => prev.filter(t => t.id !== task.id))
+                    await loadTasksForToday()
+                    setSelectedCalendarTask(null)
+                  }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                >
+                  ✓ Marcar feita
+                </button>
+              </div>
+              <button
+                onClick={() => setSelectedCalendarTask(null)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: '#f3f4f6', color: '#374151', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )
+      })()}
 
       {showSaveTemplateModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1005 }}>
