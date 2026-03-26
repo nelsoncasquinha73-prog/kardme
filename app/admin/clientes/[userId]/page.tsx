@@ -383,12 +383,6 @@ export default function AdminClienteDetailPage() {
       const json = await res.json();
       if (!res.ok || !json?.success)
         throw new Error(json?.error || "Erro ao atualizar");
-      // Guardar addons
-      await supabase.from('user_addons').upsert({
-        user_id: userId,
-        crm_pro_active: crmProActive,
-        crm_pro_expires_at: crmProExpiresAt || null,
-      }, { onConflict: 'user_id' });
       alert("Guardado!");
       const { data: p2 } = await supabase
         .from("profiles")
