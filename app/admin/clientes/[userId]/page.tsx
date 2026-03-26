@@ -181,6 +181,8 @@ export default function AdminClienteDetailPage() {
   const [planStartedAt, setPlanStartedAt] = useState<string | null>(null);
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
   const [planAutoRenew, setPlanAutoRenew] = useState(false);
+  const [crmProActive, setCrmProActive] = useState(false);
+  const [crmProExpiresAt, setCrmProExpiresAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([]);
@@ -199,6 +201,16 @@ export default function AdminClienteDetailPage() {
       setPlanStartedAt(profile.plan_started_at);
       setPlanExpiresAt(profile.plan_expires_at);
       setPlanAutoRenew(profile.plan_auto_renew ?? false);
+      // Carregar addons
+      const { data: addons } = await supabase
+        .from('user_addons')
+        .select('crm_pro_active, crm_pro_expires_at')
+        .eq('user_id', userId)
+        .single();
+      if (addons) {
+        setCrmProActive(addons.crm_pro_active ?? false);
+        setCrmProExpiresAt(addons.crm_pro_expires_at ?? null);
+      }
     }
   }, [profile]);
 
@@ -369,6 +381,12 @@ export default function AdminClienteDetailPage() {
       const json = await res.json();
       if (!res.ok || !json?.success)
         throw new Error(json?.error || "Erro ao atualizar");
+      // Guardar addons
+      await supabase.from('user_addons').upsert({
+        user_id: userId,
+        crm_pro_active: crmProActive,
+        crm_pro_expires_at: crmProExpiresAt || null,
+      }, { onConflict: 'user_id' });
       alert("Guardado!");
       const { data: p2 } = await supabase
         .from("profiles")
@@ -735,6 +753,52 @@ export default function AdminClienteDetailPage() {
                 />
                 <span>Auto-renovar plano</span>
               </label>
+            </div>
+          </div>
+
+          <div style={cardStyle}>
+            <h2 style={{ marginTop: 0, fontSize: 16, color: "#fff" }}>
+              Add-ons & Acessos
+            </h2>
+            <div style={{ display: "grid", gap: 16 }}>
+              <div style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: crmProActive ? 12 : 0 }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>🧠 CRM Pro</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Acesso manual ao CRM Pro</div>
+                  </div>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <div
+                      onClick={() => setCrmProActive(p => !p)}
+                      style={{
+                        width: 44, height: 24, borderRadius: 12, cursor: "pointer",
+                        background: crmProActive ? "#6366f1" : "rgba(255,255,255,0.15)",
+                        position: "relative", transition: "background 0.2s"
+                      }}
+                    >
+                      <div style={{
+                        position: "absolute", top: 3, left: crmProActive ? 23 : 3,
+                        width: 18, height: 18, borderRadius: "50%", background: "#fff",
+                        transition: "left 0.2s"
+                      }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: crmProActive ? "#a5b4fc" : "rgba(255,255,255,0.4)" }}>
+                      {crmProActive ? "Ativo" : "Inativo"}
+                    </span>
+                  </label>
+                </div>
+                {crmProActive && (
+                  <label style={labelStyle}>
+                    Expira em (opcional)
+                    <input
+                      type="datetime-local"
+                      value={crmProExpiresAt ? new Date(crmProExpiresAt).toISOString().slice(0, 16) : ""}
+                      onChange={(e) => setCrmProExpiresAt(e.target.value ? new Date(e.target.value).toISOString() : null)}
+                      style={inputStyle}
+                    />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
 
