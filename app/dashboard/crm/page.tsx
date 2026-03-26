@@ -1071,14 +1071,15 @@ Melhores cumprimentos,
           )}
         </div>
 
-        <button
-          onClick={() => setShowWelcomeInfoModal(true)}
-          style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.2)', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 14, minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
-        >
-          ℹ️
-        </button>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            onClick={() => setShowWelcomeInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#8b5cf6', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >
+            ?
+          </button>
 
-        <button
+          <button
           onClick={() => {
             if (selectedCardId === 'all') {
               alert('Seleciona um cartão para configurar a mensagem de boas-vindas')
@@ -1112,15 +1113,17 @@ Melhores cumprimentos,
         >
           ⚙️ Configurar Boas-vindas
         </button>
+        </div>
 
-        <button
-          onClick={() => setShowTemplatesInfoModal(true)}
-          style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.2)', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 14, minHeight: 40, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
-        >
-          ℹ️
-        </button>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            onClick={() => setShowTemplatesInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >
+            ?
+          </button>
 
-        <button
+          <button
           onClick={() => router.push("/dashboard/crm/email-templates")}
           title="Gerir templates de email"
           style={{
@@ -1143,6 +1146,7 @@ Melhores cumprimentos,
         >
           📋 Templates
         </button>
+        </div>
       </div>
 
       {tasksToday.length > 0 && (
