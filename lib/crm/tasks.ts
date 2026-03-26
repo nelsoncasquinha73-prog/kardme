@@ -64,3 +64,30 @@ export async function fetchTasksForLead(params: { userId: string; leadId: string
     .eq('status', 'open')
     .order('due_at', { ascending: true })
 }
+
+export async function fetchTasksForMonth(params: { userId: string; yearMonth: string }) {
+  // yearMonth: YYYY-MM
+  const start = new Date(params.yearMonth + '-01T00:00:00')
+  const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999)
+
+  return supabase
+    .from('lead_tasks')
+    .select('*, leads(id, name, email, phone, zone, step, notes, card_id)')
+    .eq('user_id', params.userId)
+    .gte('due_at', start.toISOString())
+    .lte('due_at', end.toISOString())
+    .order('due_at', { ascending: true })
+}
+
+export async function fetchLeadWithActivity(params: { leadId: string; userId: string }) {
+  const [leadRes, activityRes] = await Promise.all([
+    supabase.from('leads').select('*').eq('id', params.leadId).single(),
+    supabase
+      .from('lead_activity')
+      .select('*')
+      .eq('lead_id', params.leadId)
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ])
+  return { lead: leadRes.data, activity: activityRes.data }
+}

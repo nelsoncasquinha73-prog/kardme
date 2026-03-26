@@ -23,6 +23,7 @@ import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
+import CalendarGrid from '@/components/crm/CalendarGrid'
 
 type Lead = {
   id: string
@@ -46,6 +47,7 @@ export default function CrmProPage() {
   const router = useRouter()
   const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
   const [showTemplatesInfoModal, setShowTemplatesInfoModal] = useState(false)
+  const [showGmailInfoModal, setShowGmailInfoModal] = useState(false)
   const [showOptinInfoModal, setShowOptinInfoModal] = useState(false)
   const { addToast } = useToast()
   const { t } = useLanguage()
@@ -135,6 +137,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
+  const [activeView, setActiveView] = useState<'table' | 'calendar'>('table')
   const [importing, setImporting] = useState(false)
 
 
@@ -1191,10 +1194,89 @@ Melhores cumprimentos,
       {!gmail.isConnected && !gmail.loading && (
         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#78350f' }}>Gmail não ligado</strong><p style={{ fontSize: 13, color: '#92400e', margin: '4px 0 0 0' }}>Liga o teu Gmail para enviar emails direto do CRM.</p></div>
-          <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#78350f', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Ligar Gmail</button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <button
+                onClick={() => setShowGmailInfoModal(true)}
+                style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+              >
+                ?
+              </button>
+              <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#78350f', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Ligar Gmail</button>
+            </div>
+          </div>
         </div>
       )}
 
+      {gmail.isConnected && !gmail.loading && (
+        <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <div><strong style={{ color: '#065f46' }}>✓ Gmail ligado</strong><p style={{ fontSize: 13, color: '#047857', margin: '4px 0 0 0' }}>Podes enviar emails direto do CRM ou voltar a configurar a conta.</p></div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <button
+                onClick={() => setShowGmailInfoModal(true)}
+                style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+              >
+                ?
+              </button>
+              <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Alterar Gmail</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <button
+          onClick={() => setActiveView('table')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'table' ? '#3b82f6' : '#e5e7eb',
+            color: activeView === 'table' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          📋 Tabela
+        </button>
+        <button
+          onClick={() => setActiveView('calendar')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'calendar' ? '#3b82f6' : '#e5e7eb',
+            color: activeView === 'calendar' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          📅 Calendário
+        </button>
+      </div>
+
+      {activeView === 'calendar' && (
+        <div style={{ marginBottom: 24 }}>
+          <CalendarGrid
+            leads={filteredLeads}
+            onLeadClick={(leadId) => {
+              const lead = leads.find(l => l.id === leadId)
+              if (lead) {
+                setSelectedLead(lead)
+                setNoteText(lead.notes || '')
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {activeView === 'table' && (<>
       {/* Filtros */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center', flexDirection: 'row' }}>
         <input
@@ -1685,6 +1767,7 @@ Melhores cumprimentos,
       <div style={{ marginTop: 20, fontSize: 12, opacity: 0.6 }}>
         Total: {filteredLeads.length} lead(s)
       </div>
+      </>)}
 
       {/* Modal de Notas */}
       {selectedLead && (
@@ -1730,6 +1813,7 @@ Melhores cumprimentos,
                 fontSize: 13,
                 fontFamily: 'inherit',
                 marginBottom: 16,
+                color: '#1f2937',
               }}
             />
 
@@ -2410,17 +2494,38 @@ Melhores cumprimentos,
 
       {showWelcomeInfoModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 560, width: '90%' }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que é a Mensagem de Boas-vindas?</h2>
-            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>É uma mensagem automática que o cliente recebe quando preenche o formulário do teu cartão digital.</p>
-            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
-              <strong style={{ color: '#111827' }}>Variáveis disponíveis:</strong>
-              <div style={{ marginTop: 8, fontFamily: 'monospace', color: '#666' }}>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
+              É uma mensagem automática enviada ao cliente depois de preencher o formulário do teu cartão digital. Serve para agradecer o contacto, confirmar a receção e criar uma primeira impressão mais profissional.
+            </p>
+
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#111827' }}>Como usar bem:</strong>
+              <div style={{ marginTop: 8, color: '#666', lineHeight: 1.8 }}>
+                • Agradece o contacto<br/>
+                • Diz ao cliente o que acontece a seguir<br/>
+                • Mantém a mensagem curta, clara e pessoal<br/>
+                • Usa variáveis para personalizar automaticamente
+              </div>
+            </div>
+
+            <div style={{ background: '#faf5ff', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#6b21a8' }}>Variáveis disponíveis:</strong>
+              <div style={{ marginTop: 8, fontFamily: 'monospace', color: '#6b7280', lineHeight: 1.8 }}>
                 • {'{nome}'} - Nome do cliente<br/>
                 • {'{email}'} - Email do cliente<br/>
                 • {'{cardTitle}'} - Nome do teu cartão
               </div>
             </div>
+
+            <div style={{ background: '#ecfdf5', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#065f46' }}>Exemplo:</strong>
+              <div style={{ marginTop: 8, color: '#047857', lineHeight: 1.8 }}>
+                Olá {'{nome}'}, obrigado pelo teu contacto. Recebemos o teu pedido através do cartão {'{cardTitle}'} e vamos responder-te o mais breve possível.
+              </div>
+            </div>
+
             <button onClick={() => setShowWelcomeInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
@@ -2428,17 +2533,39 @@ Melhores cumprimentos,
 
       {showTemplatesInfoModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 560, width: '90%' }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que são Templates de Email?</h2>
-            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>Templates são modelos de email pré-criados que podes usar para enviar campanhas, follow-ups e automações.</p>
-            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
-              <strong style={{ color: '#111827' }}>Benefícios:</strong>
-              <div style={{ marginTop: 8, color: '#666' }}>
-                • Poupa tempo nas tuas campanhas<br/>
-                • Garante consistência nas mensagens<br/>
-                • Reutilizável em múltiplas ações
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
+              Templates são modelos de email prontos a usar. Ajudam-te a responder mais rápido, manter consistência na comunicação e evitar escrever sempre a mesma mensagem do zero.
+            </p>
+
+            <div style={{ background: '#eef2ff', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#4338ca' }}>Quando usar:</strong>
+              <div style={{ marginTop: 8, color: '#4f46e5', lineHeight: 1.8 }}>
+                • Follow-up após um contacto<br/>
+                • Resposta a pedidos de informação<br/>
+                • Campanhas comerciais<br/>
+                • Mensagens de acompanhamento e reativação
               </div>
             </div>
+
+            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#111827' }}>Benefícios:</strong>
+              <div style={{ marginTop: 8, color: '#666', lineHeight: 1.8 }}>
+                • Poupa tempo no dia a dia<br/>
+                • Garante consistência nas mensagens<br/>
+                • Facilita o trabalho da equipa<br/>
+                • Reutilizável em múltiplas ações e campanhas
+              </div>
+            </div>
+
+            <div style={{ background: '#ecfeff', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#155e75' }}>Dica:</strong>
+              <div style={{ marginTop: 8, color: '#0f766e', lineHeight: 1.8 }}>
+                Cria templates por objetivo, como "Primeiro contacto", "Follow-up", "Proposta enviada" ou "Reativação". Assim fica mais fácil escolher a mensagem certa no momento certo.
+              </div>
+            </div>
+
             <button onClick={() => setShowTemplatesInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
@@ -2447,18 +2574,99 @@ Melhores cumprimentos,
 
       {showOptinInfoModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%' }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 560, width: '90%' }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>O que é Opt-in Marketing?</h2>
-            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>Opt-in Marketing refere-se ao consentimento do cliente para receber comunicações de marketing (emails, SMS, etc.).</p>
-            <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
-              <strong style={{ color: '#111827' }}>Opções:</strong>
-              <div style={{ marginTop: 8, color: '#666' }}>
-                • <strong>Opt-in Marketing</strong> - Cliente consentiu receber comunicações<br/>
-                • <strong>Sem opt-in</strong> - Cliente não consentiu ou retirou consentimento<br/>
-                • <strong>Todos</strong> - Mostra todos os clientes, independentemente do opt-in
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
+              Opt-in Marketing significa que o cliente deu autorização para receber comunicações comerciais, como emails, campanhas, novidades ou promoções.
+            </p>
+
+            <div style={{ background: '#fff7ed', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#9a3412' }}>Como interpretar este filtro:</strong>
+              <div style={{ marginTop: 8, color: '#c2410c', lineHeight: 1.8 }}>
+                • <strong>Opt-in Marketing</strong> — Cliente autorizou receber comunicações<br/>
+                • <strong>Sem opt-in</strong> — Cliente não autorizou ou retirou consentimento<br/>
+                • <strong>Todos</strong> — Mostra todos os contactos, com ou sem consentimento
               </div>
             </div>
+
+            <div style={{ background: '#fefce8', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+              <strong style={{ color: '#854d0e' }}>Boas práticas:</strong>
+              <div style={{ marginTop: 8, color: '#a16207', lineHeight: 1.8 }}>
+                • Usa campanhas apenas para contactos com opt-in<br/>
+                • Respeita sempre a escolha do cliente<br/>
+                • Mantém o registo de consentimento claro e atualizado
+              </div>
+            </div>
+
+            <div style={{ background: '#ecfdf5', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+              <strong style={{ color: '#065f46' }}>Nota importante:</strong>
+              <div style={{ marginTop: 8, color: '#047857', lineHeight: 1.8 }}>
+                Este filtro ajuda-te a segmentar contactos de forma mais segura e profissional. É especialmente útil para campanhas de email marketing e follow-ups promocionais.
+              </div>
+            </div>
+
             <button onClick={() => setShowOptinInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+          </div>
+        </div>
+      )}
+
+
+      {showGmailInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 550, width: '90%' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111827', margin: '0 0 16px 0' }}>Como funciona a ligação Gmail?</h2>
+            
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
+                A ligação Gmail permite-te enviar emails diretamente do CRM Pro usando uma conta Google. Isso pode ser um Gmail pessoal ou um email profissional ligado ao Google Workspace.
+              </p>
+              
+              <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+                <strong style={{ color: '#111827' }}>Como funciona:</strong>
+                <div style={{ marginTop: 8, color: '#666', lineHeight: 1.8 }}>
+                  1. Clica em "Ligar Gmail" ou "Alterar Gmail"<br/>
+                  2. Autoriza a Kardme a aceder à tua conta Google<br/>
+                  3. Pronto! Podes enviar emails direto do CRM<br/>
+                  4. Se quiseres trocar de conta, basta voltar a configurar
+                </div>
+              </div>
+
+              <div style={{ background: '#ede9fe', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+                <strong style={{ color: '#5b21b6' }}>Que contas são compatíveis?</strong>
+                <div style={{ marginTop: 8, color: '#6d28d9', lineHeight: 1.8 }}>
+                  • <strong>Gmail pessoal</strong> — ex: joao@gmail.com<br/>
+                  • <strong>Email profissional com Google Workspace</strong> — ex: joao@remax.pt<br/>
+                  • <strong>Outras contas sem Google</strong> — ex: Outlook, Yahoo ou emails empresariais fora do Google não são compatíveis com esta ligação
+                </div>
+              </div>
+
+              <div style={{ background: '#f0f9ff', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+                <strong style={{ color: '#0369a1' }}>Links úteis:</strong>
+                <div style={{ marginTop: 8, color: '#0c4a6e', lineHeight: 1.8 }}>
+                  • <a href="https://workspace.google.com" target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'underline', cursor: 'pointer' }}>Saber mais sobre Google Workspace</a><br/>
+                  • <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'underline', cursor: 'pointer' }}>Gerir permissões da Kardme</a><br/>
+                  • <a href="https://admin.google.com" target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'underline', cursor: 'pointer' }}>Google Admin Console (para empresas)</a>
+                </div>
+              </div>
+
+              <div style={{ background: '#ecfdf5', padding: 12, borderRadius: 10, marginBottom: 12, fontSize: 13 }}>
+                <strong style={{ color: '#065f46' }}>Segurança:</strong>
+                <div style={{ marginTop: 8, color: '#047857', lineHeight: 1.8 }}>
+                  • A Kardme não tem acesso à tua password<br/>
+                  • Usamos Google OAuth (protocolo seguro)<br/>
+                  • Podes revogar a autorização quando quiseres
+                </div>
+              </div>
+
+              <div style={{ background: '#fef3c7', padding: 12, borderRadius: 10, fontSize: 13 }}>
+                <strong style={{ color: '#78350f' }}>Nota:</strong>
+                <div style={{ marginTop: 8, color: '#92400e', lineHeight: 1.8 }}>
+                  Os emails são enviados da tua conta Google, não da Kardme. O destinatário verá o teu email como remetente. Se usas um email profissional como `miguelmartins@remax.pt`, ele só funciona se estiver configurado no Google Workspace.
+                </div>
+              </div>
+            </div>
+
+            <button onClick={() => setShowGmailInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
       )}
