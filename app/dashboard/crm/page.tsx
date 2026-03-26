@@ -152,12 +152,15 @@ Melhores cumprimentos,
       setCRMProChecking(true)
       const { data, error } = await supabase
         .from('user_addons')
-        .select('crm_pro_active')
+        .select('crm_pro_active, crm_pro_expires_at')
         .eq('user_id', id)
         .maybeSingle()
 
       if (error) throw error
-      setCRMProActive((data as any)?.crm_pro_active === true)
+      const isActive = (data as any)?.crm_pro_active === true
+      const expiresAt = (data as any)?.crm_pro_expires_at
+      const notExpired = !expiresAt || new Date(expiresAt) > new Date()
+      setCRMProActive(isActive && notExpired)
     } catch (e) {
       setCRMProActive(false)
     } finally {
