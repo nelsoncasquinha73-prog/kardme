@@ -2032,22 +2032,22 @@ Melhores cumprimentos,
       {showTaskModal && selectedLeadForTask && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1002 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 500, width: '90%' }}>
-            <h2 style={{ marginBottom: 16 }}>Agendar Tarefa</h2>
-            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForTask.name}</strong></p>
+            <h2 style={{ marginBottom: 16, color: '#111827' }}>Agendar Tarefa</h2>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 20 }}>Para: <strong>{selectedLeadForTask.name}</strong></p>
             
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Título da Tarefa</label>
-            <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="Ex: Contactar, Follow-up, Enviar proposta..." style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Título da Tarefa</label>
+            <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="Ex: Contactar, Follow-up, Enviar proposta..." style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, marginBottom: 16, boxSizing: 'border-box', color: '#111827' }} />
             
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Descrição (opcional)</label>
-            <textarea value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="Notas sobre a tarefa..." style={{ width: '100%', minHeight: 80, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Descrição (opcional)</label>
+            <textarea value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="Notas sobre a tarefa..." style={{ width: '100%', minHeight: 80, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', color: '#111827' }} />
             
             <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Data</label>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Data</label>
                 <input type="date" value={taskDueDate} onChange={(e) => setTaskDueDate(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Hora</label>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Hora</label>
                 <input type="time" value={taskDueTime} onChange={(e) => setTaskDueTime(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }} />
                 <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box' }}>
                   <option value="follow_up">✅ Follow-up</option>
