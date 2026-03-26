@@ -1905,7 +1905,7 @@ Melhores cumprimentos,
               </p>
               <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                 <button
-                  onClick={() => { handleTaskAction(task, lead); setSelectedCalendarTask(null) }}
+                  onClick={() => { setSelectedCalendarTask(null); setTimeout(() => handleTaskAction(task, lead), 50) }}
                   style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
                 >
                   {icon} Fazer agora
