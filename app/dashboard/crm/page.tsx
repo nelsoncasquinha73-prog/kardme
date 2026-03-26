@@ -20,7 +20,7 @@ import {
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
-import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, type LeadTask } from '@/lib/crm/tasks'
+import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, fetchTasksForMonth, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 import CalendarGrid from '@/components/crm/CalendarGrid'
@@ -79,6 +79,8 @@ export default function CrmProPage() {
   const [emailLoading, setEmailLoading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [tasksToday, setTasksToday] = useState<LeadTask[]>([])
+  const [calendarTasks, setCalendarTasks] = useState<LeadTask[]>([])
+  const [calendarYearMonth, setCalendarYearMonth] = useState<string>(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` })
   const [loadingTasks, setLoadingTasks] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [selectedLeadForTask, setSelectedLeadForTask] = useState<Lead | null>(null)
@@ -613,6 +615,13 @@ Melhores cumprimentos,
     if (!error) setLeadTasks((data as any) || [])
     setLeadTasksLoading(false)
   }
+
+  useEffect(() => {
+    if (!userId) return
+    fetchTasksForMonth({ userId, yearMonth: calendarYearMonth }).then(({ data }) => {
+      setCalendarTasks(data || [])
+    })
+  }, [userId, calendarYearMonth])
 
   const loadTasksForToday = async () => {
     if (!userId) return
@@ -1268,12 +1277,16 @@ Melhores cumprimentos,
         <div style={{ marginBottom: 24 }}>
           <CalendarGrid
             leads={filteredLeads}
+            tasks={calendarTasks}
             onLeadClick={(leadId) => {
               const lead = leads.find(l => l.id === leadId)
               if (lead) {
                 setSelectedLead(lead)
                 setNoteText(lead.notes || '')
               }
+            }}
+            onMonthChange={(year, month) => {
+              setCalendarYearMonth(`${year}-${String(month+1).padStart(2,'0')}`)
             }}
           />
         </div>
