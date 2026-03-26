@@ -201,18 +201,14 @@ export default function AdminClienteDetailPage() {
       setPlanStartedAt(profile.plan_started_at);
       setPlanExpiresAt(profile.plan_expires_at);
       setPlanAutoRenew(profile.plan_auto_renew ?? false);
-      // Carregar addons
-      supabase
-        .from('user_addons')
-        .select('crm_pro_active, crm_pro_expires_at')
-        .eq('user_id', userId)
-        .single()
-        .then(({ data: addons }) => {
-          if (addons) {
-            setCrmProActive(addons.crm_pro_active ?? false);
-            setCrmProExpiresAt(addons.crm_pro_expires_at ?? null);
-          }
-        });
+      // Carregar addons via API (bypassa RLS)
+      fetch(`/api/admin/users/addons?userId=${userId}`)
+        .then(r => r.json())
+        .then(({ crm_pro_active, crm_pro_expires_at }) => {
+          setCrmProActive(crm_pro_active ?? false);
+          setCrmProExpiresAt(crm_pro_expires_at ?? null);
+        })
+        .catch(() => {});
     }
   }, [profile]);
 
