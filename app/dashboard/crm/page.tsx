@@ -641,16 +641,19 @@ Melhores cumprimentos,
       title: taskTitle,
       description: taskDesc || undefined,
       dueAtISO,
+      actionType: taskActionType || 'follow_up',
     })
-    if (!error) {
-      await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
-      setShowTaskModal(false)
-      setTaskTitle('')
-      setTaskDesc('')
-      setTaskDueDate('')
-      setTaskDueTime('09:00')
-      await loadTasksForToday()
+    if (error) {
+      alert('Erro ao guardar tarefa: ' + error.message)
+      return
     }
+    await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
+    setShowTaskModal(false)
+    setTaskTitle('')
+    setTaskDesc('')
+    setTaskDueDate('')
+    setTaskDueTime('09:00')
+    await loadTasksForToday()
   }
 
   const deleteLead = async (id: string) => {
