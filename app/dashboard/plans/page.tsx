@@ -263,11 +263,22 @@ export default function PlansPage() {
               CRM Pro
             </div>
             <div style={{ marginTop: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
-              Gestão de leads, email em massa, import/export
+              Gestão de leads, email em massa, tarefas e muito mais.
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+              {['📋 Leads ilimitadas','📧 Email em massa','📅 Calendário','📊 Pipeline','📥 CSV','🔗 Gmail'].map(f => (
+                <span key={f} style={{ fontSize: 11, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '3px 10px', color: 'rgba(255,255,255,0.8)' }}>{f}</span>
+              ))}
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              onClick={() => setShowCRMProModal(true)}
+              style={{ width: '100%', padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(99,102,241,0.4)', background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+            >
+              ℹ️ Saber mais sobre o CRM Pro
+            </button>
             <button
               onClick={async () => {
                 setLoading('monthly')
@@ -397,6 +408,78 @@ export default function PlansPage() {
       </div>
 
       {/* ERRO */}
+
+      {/* MODAL CRM PRO */}
+      {showCRMProModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: '#1e1e2e', borderRadius: 20, padding: 32, maxWidth: 520, width: '100%', border: '1px solid rgba(99,102,241,0.3)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>🧠 CRM Pro</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>O teu sistema de gestão de clientes completo</div>
+              </div>
+              <button onClick={() => setShowCRMProModal(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 18, cursor: 'pointer', padding: '4px 10px' }}>✕</button>
+            </div>
+            <div style={{ display: 'grid', gap: 12, marginBottom: 24 }}>
+              {[
+                { icon: '📋', title: 'Leads ilimitadas', desc: 'Captura e gere todos os teus contactos num só lugar.' },
+                { icon: '📧', title: 'Email em massa', desc: 'Envia campanhas personalizadas com templates profissionais.' },
+                { icon: '📅', title: 'Calendário de tarefas', desc: 'Agenda follow-ups, reuniões e chamadas com alertas.' },
+                { icon: '📊', title: 'Pipeline visual', desc: 'Acompanha cada lead pelo funil de vendas.' },
+                { icon: '📥', title: 'Import/Export CSV', desc: 'Importa leads de outras ferramentas ou exporta para Excel.' },
+                { icon: '🔗', title: 'Gmail integrado', desc: 'Envia emails diretamente da tua conta Gmail.' },
+                { icon: '📝', title: 'Templates de email', desc: 'Cria e reutiliza templates para poupar tempo.' },
+                { icon: '🤝', title: 'Mensagem de boas-vindas', desc: 'Envia automaticamente quando um lead preenche o formulário.' },
+              ].map(f => (
+                <div key={f.title} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 12 }}>
+                  <span style={{ fontSize: 22 }}>{f.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{f.title}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 12, padding: 16, textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>Escolhe o teu plano</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <button
+                  onClick={async () => {
+                    setShowCRMProModal(false); setLoading('monthly')
+                    try {
+                      const { data: authData } = await supabase.auth.getUser()
+                      if (!authData?.user?.id) { setError('Sem sessão.'); setLoading(null); return }
+                      const res = await fetch('/api/stripe/checkout-crm-pro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: authData.user.id, billingCycle: 'monthly' }) })
+                      const d = await res.json()
+                      if (d?.url) window.location.href = d.url; else setError(d?.error || 'Erro.')
+                    } catch { setError('Erro.') } finally { setLoading(null) }
+                  }}
+                  style={{ padding: '14px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+                >
+                  Mensal<br/><span style={{ fontSize: 18, fontWeight: 900 }}>€5,99</span><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>/mês</span>
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowCRMProModal(false); setLoading('yearly')
+                    try {
+                      const { data: authData } = await supabase.auth.getUser()
+                      if (!authData?.user?.id) { setError('Sem sessão.'); setLoading(null); return }
+                      const res = await fetch('/api/stripe/checkout-crm-pro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: authData.user.id, billingCycle: 'annual' }) })
+                      const d = await res.json()
+                      if (d?.url) window.location.href = d.url; else setError(d?.error || 'Erro.')
+                    } catch { setError('Erro.') } finally { setLoading(null) }
+                  }}
+                  style={{ padding: '14px 16px', borderRadius: 10, border: '1px solid rgba(99,102,241,0.5)', background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+                >
+                  Anual 🎉<br/><span style={{ fontSize: 18, fontWeight: 900 }}>€59</span><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>/ano</span>
+                </button>
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>Poupa 18% com o plano anual</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div
           style={{
