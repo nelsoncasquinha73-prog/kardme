@@ -283,7 +283,7 @@ export default function PlansPage() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      user_id: authData.user.id,
+                      userId: authData.user.id,
                       billingCycle: 'monthly',
                     }),
                   })
@@ -329,7 +329,7 @@ export default function PlansPage() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      user_id: authData.user.id,
+                      userId: authData.user.id,
                       billingCycle: 'annual',
                     }),
                   })
