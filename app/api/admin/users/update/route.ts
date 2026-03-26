@@ -38,15 +38,19 @@ export async function POST(req: Request) {
     }
 
     // Guardar addons via service role (bypassa RLS)
-    const { error: addonsError } = await supabaseAdmin
+    console.log('[addons] upserting:', { userId, crm_pro_active, crm_pro_expires_at })
+    const { error: addonsError, data: addonsData } = await supabaseAdmin
       .from('user_addons')
       .upsert({
         user_id: userId,
         crm_pro_active: crm_pro_active ?? false,
         crm_pro_expires_at: crm_pro_expires_at || null,
       }, { onConflict: 'user_id' })
+      .select()
 
+    console.log('[addons] result:', { addonsData, addonsError })
     if (addonsError) {
+      console.error('[addons] error:', addonsError)
       return NextResponse.json({ success: false, error: 'Erro ao guardar addons: ' + addonsError.message }, { status: 500 })
     }
 
