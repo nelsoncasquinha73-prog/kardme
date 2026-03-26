@@ -673,6 +673,14 @@ Melhores cumprimentos,
     setTaskDueDate('')
     setTaskDueTime('09:00')
     await loadTasksForToday()
+    // Recarregar calendário para o mês da tarefa criada
+    const taskMonth = taskDueDate.slice(0, 7)
+    const start = new Date(taskMonth + '-01T00:00:00')
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999)
+    const { data: freshTasks } = await fetchTasksForMonth({ userId, yearMonth: taskMonth })
+    if (taskMonth === calendarYearMonth) {
+      setCalendarTasks(freshTasks || [])
+    }
   }
 
   const deleteLead = async (id: string) => {
