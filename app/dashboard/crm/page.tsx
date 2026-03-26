@@ -1792,12 +1792,12 @@ Melhores cumprimentos,
             maxHeight: '80vh',
             overflowY: 'auto',
           }}>
-            <h2 style={{ marginBottom: 16 }}>{selectedLead.name}</h2>
-            <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>
+            <h2 style={{ marginBottom: 16, color: '#111827' }}>{selectedLead.name}</h2>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 16 }}>
               {selectedLead.email} • {selectedLead.zone || 'Sem zona'}
             </p>
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, fontSize: 13 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, fontSize: 13, color: '#111827' }}>
               Notas
             </label>
             <textarea
@@ -1844,6 +1844,7 @@ Melhores cumprimentos,
                   padding: '12px 14px',
                   borderRadius: 10,
                   background: '#f3f4f6',
+                  color: '#374151',
                   border: '1px solid rgba(0,0,0,0.08)',
                   fontWeight: 700,
                   cursor: 'pointer',
