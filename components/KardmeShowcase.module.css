@@ -8,17 +8,18 @@
 .phoneContainer {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 700px;
   aspect-ratio: 9 / 16;
   margin: 0 auto;
 }
 
 .cardImage {
   position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
+  top: -5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110%;
+  height: 110%;
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
@@ -61,12 +62,12 @@
 
 @media (max-width: 768px) {
   .phoneContainer {
-    max-width: 400px;
+    max-width: 480px;
   }
 }
 
 @media (max-width: 480px) {
   .phoneContainer {
-    max-width: 320px;
+    max-width: 340px;
   }
 }
