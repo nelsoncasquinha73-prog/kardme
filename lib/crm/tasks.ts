@@ -74,6 +74,7 @@ export async function fetchTasksForMonth(params: { userId: string; yearMonth: st
     .from('lead_tasks')
     .select('*, leads(id, name, email, phone, zone, step, notes, card_id)')
     .eq('user_id', params.userId)
+    .eq('status', 'open')
     .gte('due_at', start.toISOString())
     .lte('due_at', end.toISOString())
     .order('due_at', { ascending: true })
