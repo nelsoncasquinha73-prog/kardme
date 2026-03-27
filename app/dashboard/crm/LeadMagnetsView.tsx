@@ -133,6 +133,15 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
             <div style={{marginBottom:24}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Mensagem de agradecimento</label>
               <input value={form.thank_you_message} onChange={e=>setForm(f=>({...f,thank_you_message:e.target.value}))} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+
+              <div style={{marginTop:16,padding:'14px',borderRadius:10,border:'1px solid rgba(99,102,241,0.3)',background:'rgba(99,102,241,0.05)'}}>
+                <div style={{fontSize:12,color:'#a5b4fc',fontWeight:700,marginBottom:10}}>📧 EMAIL DE BOAS-VINDAS (opcional)</div>
+                <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Assunto do email</label>
+                <input value={(form as any).welcome_email_subject||''} onChange={e=>setForm(f=>({...f,welcome_email_subject:e.target.value}))} placeholder={`📥 O teu recurso: ${form.title||'título'}`} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box',marginBottom:10}}/>
+                <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Mensagem do email</label>
+                <textarea value={(form as any).welcome_email_body||''} onChange={e=>setForm(f=>({...f,welcome_email_body:e.target.value}))} placeholder={'Olá {nome},\n\nObrigado pelo teu interesse!\n\nAqui está o link:\n{link}\n\nMelhores cumprimentos'} rows={5} style={{width:'100%',padding:'12px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box',resize:'vertical'}}/>
+                <p style={{fontSize:11,color:'#64748b',marginTop:6,margin:'6px 0 0'}}>Variáveis: <code style={{color:'#a5b4fc'}}>{'{'+'nome}'}</code> e <code style={{color:'#a5b4fc'}}>{'{'+'link}'}</code></p>
+              </div>
             </div>
 
             <div style={{display:'flex',gap:10}}>
