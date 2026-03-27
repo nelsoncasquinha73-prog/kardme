@@ -256,30 +256,11 @@ Melhores cumprimentos,
     let query = supabase
       .from('leads')
       .select(`
-        id,
-        name,
-        email,
-        phone,
-        zone,
-        message,
-        marketing_opt_in,
-        consent_given,
-        step,
-        notes,
-        created_at,
-        contacted,
-        card_id,
-        user_id,
-        lead_type_id,
-        lead_source,
-        lead_magnet_id,
-        cards (
-          user_id,
-          name,
-          slug
-        )
+        id, name, email, phone, zone, message, marketing_opt_in, consent_given,
+        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id,
+        cards ( user_id, name, slug )
       `)
-      .or(`cards.user_id.eq.${user.id},user_id.eq.${user.id}`)
+      .eq('user_id', user.id)
 
     if (selectedCardId !== 'all') {
       query = query.eq('card_id', selectedCardId)
