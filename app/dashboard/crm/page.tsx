@@ -25,7 +25,7 @@ import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 import CalendarGrid from '@/components/crm/CalendarGrid'
 import LeadTypesModal from '@/components/crm/LeadTypesModal'
-import { fetchLeadTypes, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES, type LeadType } from '@/lib/crm/leadTypes'
+import { fetchLeadTypes, createLeadType, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES, type LeadType } from '@/lib/crm/leadTypes'
 
 type Lead = {
   id: string
@@ -279,8 +279,31 @@ Melhores cumprimentos,
       setLeadTypes([])
       return
     }
-    fetchLeadTypes(selectedCardId).then(setLeadTypes).catch(console.error)
-  }, [selectedCardId])
+    const loadTypes = async () => {
+      try {
+        const types = await fetchLeadTypes(selectedCardId)
+        if (types.length === 0) {
+          // Seed default types
+          const defaults = [
+            { name: 'Cliente', color: '#0984e3' },
+            { name: 'Comprador', color: '#00b894' },
+            { name: 'Vendedor', color: '#e17055' },
+          ]
+          const created = []
+          for (const d of defaults) {
+            const t = await createLeadType(selectedCardId, userId, d.name, d.color)
+            created.push(t)
+          }
+          setLeadTypes(created)
+        } else {
+          setLeadTypes(types)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    loadTypes()
+  }, [selectedCardId, userId])
 
 
   useEffect(() => {
@@ -1711,9 +1734,21 @@ Melhores cumprimentos,
                       <select
                         value={lead.lead_type_id || ''}
                         onChange={async (e) => {
-                          const val = e.target.value || null
-                          await updateLeadTypeOnLead(lead.id, val)
-                          setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: val } : l))
+                          const val = e.target.value
+                          if (val === '__new__') {
+                            const name = prompt('Nome do novo tipo:')
+                            if (!name?.trim()) return
+                            try {
+                              const created = await createLeadType(selectedCardId, userId, name.trim(), '#6c5ce7')
+                              setLeadTypes(prev => [...prev, created])
+                              await updateLeadTypeOnLead(lead.id, created.id)
+                              setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: created.id } : l))
+                            } catch(e) { console.error(e) }
+                            return
+                          }
+                          const finalVal = val || null
+                          await updateLeadTypeOnLead(lead.id, finalVal)
+                          setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: finalVal } : l))
                         }}
                         style={{
                           padding: '6px 10px',
@@ -1731,6 +1766,7 @@ Melhores cumprimentos,
                         {leadTypes.map(t => (
                           <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
+                        <option value="__new__">➕ Novo tipo...</option>
                       </select>
                     </td>
                     <td style={td}>
