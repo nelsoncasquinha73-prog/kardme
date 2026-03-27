@@ -1496,12 +1496,12 @@ Melhores cumprimentos,
           </select>
         </div>
 
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <button
-            onClick={() => setShowTiposInfoModal(true)}
-            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
-          >?</button>
-          {selectedCardId !== 'all' && (
+        {selectedCardId !== 'all' && (
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+              onClick={() => setShowTiposInfoModal(true)}
+              style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+            >?</button>
             <button
               onClick={() => setShowLeadTypesModal(true)}
               style={{
@@ -1519,8 +1519,8 @@ Melhores cumprimentos,
             >
               🏷️ Gerir Tipos
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {filteredLeads.length === 0 && (
