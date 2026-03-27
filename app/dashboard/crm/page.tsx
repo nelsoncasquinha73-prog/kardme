@@ -2064,7 +2064,6 @@ Melhores cumprimentos,
       <div style={{ marginTop: 20, fontSize: 12, opacity: 0.6 }}>
         Total: {filteredLeads.length} lead(s)
       </div>
-      </>)}
 
       {/* Modal de Notas */}
       {selectedLead && (
