@@ -110,6 +110,7 @@ export const LEAD_SOURCES_DEFAULT = [
   { value: 'importado', label: '📥 Importado' },
   { value: 'lead_form', label: '📋 Lead Form' },
   { value: 'manual', label: '✍️ Manual' },
+  { value: 'Lead Magnet', label: '🧲 Lead Magnet' },
 ]
 
 export const TYPE_COLORS = [
