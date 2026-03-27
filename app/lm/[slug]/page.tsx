@@ -41,7 +41,7 @@ export default function LeadMagnetPage() {
   const [submitting, setSubmitting] = useState(false)
   const [fileUrl, setFileUrl] = useState<string | null>(null)
   const [thankYou, setThankYou] = useState('')
-  const [form, setForm] = useState({ name: '', email: '', phone: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', marketing_opt_in: false })
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function LeadMagnetPage() {
       const res = await fetch('/api/lead-magnets/capture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, ...form }),
+        body: JSON.stringify({ slug, name: form.name, email: form.email, phone: form.phone, marketing_opt_in: form.marketing_opt_in }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -230,6 +230,18 @@ export default function LeadMagnetPage() {
                       outline: 'none',
                     }}
                   />
+
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', marginTop: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={form.marketing_opt_in}
+                      onChange={e => setForm(f => ({ ...f, marketing_opt_in: e.target.checked }))}
+                      style={{ marginTop: 3, accentColor: '#6366f1', width: 18, height: 18, cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.4 }}>
+                      Aceito receber comunicações por email com dicas e novidades relevantes.
+                    </span>
+                  </label>
 
                   {error && (
                     <p style={{ color: '#f87171', fontSize: 13, margin: 0 }}>{error}</p>
