@@ -1401,8 +1401,8 @@ Melhores cumprimentos,
 
       {activeView === 'table' && (<>
       {/* Filtros */}
-      {/* Linha 1: Pesquisa + Filtros */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Filtros */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <input
           type="text"
           placeholder="Pesquisar por nome, email ou zona…"
@@ -1447,40 +1447,48 @@ Melhores cumprimentos,
           </select>
         </div>
 
-        <select
-          value={filterLeadType || ''}
-          onChange={(e) => setFilterLeadType(e.target.value || null)}
-          style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 160, cursor: 'pointer' }}
-        >
-          <option value="">Tipo do Contacto</option>
-          {leadTypes.map(t => (
-            <option key={t.id} value={t.id}>{t.name}</option>
-          ))}
-        </select>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
+          <select
+            value={filterLeadType || ''}
+            onChange={(e) => setFilterLeadType(e.target.value || null)}
+            style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 160, cursor: 'pointer' }}
+          >
+            <option value="">Tipo do Contacto</option>
+            {leadTypes.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button onClick={() => setShowTiposInfoModal(true)} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
+            <button onClick={() => setShowLeadTypesModal(true)} style={{ height: 34, padding: '0 12px', borderRadius: 10, border: '1px solid rgba(108,92,231,0.4)', background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', width: '100%' }}>
+              🏷️ Gerir Tipos
+            </button>
+          </div>
+        </div>
 
-        <select
-          value={filterLeadSource || ''}
-          onChange={(e) => setFilterLeadSource(e.target.value || null)}
-          style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 180, cursor: 'pointer' }}
-        >
-          <option value="">Origem do Contacto</option>
-          {LEAD_SOURCES_DEFAULT.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-          {leadSources.map(s => (
-            <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
-          ))}
-        </select>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
+          <select
+            value={filterLeadSource || ''}
+            onChange={(e) => setFilterLeadSource(e.target.value || null)}
+            style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 180, cursor: 'pointer' }}
+          >
+            <option value="">Origem do Contacto</option>
+            {LEAD_SOURCES_DEFAULT.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+            {leadSources.map(s => (
+              <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
+            ))}
+          </select>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
+            <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 34, padding: '0 12px', borderRadius: 10, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.1)', color: '#00b894', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', width: '100%' }}>
+              ⚙️ Gerir Origens
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Linha 2: Ações */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <button onClick={() => setShowTiposInfoModal(true)} style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
-          <button onClick={() => setShowLeadTypesModal(true)} style={{ height: 44, padding: '0 16px', borderRadius: 12, border: '1px solid rgba(108,92,231,0.4)', background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            🏷️ Gerir Tipos
-          </button>
-        </div>
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
