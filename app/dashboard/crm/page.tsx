@@ -1468,55 +1468,62 @@ Melhores cumprimentos,
           ))}
         </select>
 
-        <select
-          value={filterLeadSource || ''}
-          onChange={(e) => setFilterLeadSource(e.target.value || null)}
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", background: "#6366f1", color: "#ffffff", border: "none", fontWeight: 900, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>?</button>
-          style={{
-            padding: '0 12px',
-            height: 44,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            fontWeight: 700,
-            minWidth: 180,
-            cursor: 'pointer',
-          }}
-        >
-          <option value="">Todos (Origem)</option>
-          {LEAD_SOURCES.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <button onClick={() => setShowTiposInfoModal(true)} style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", background: "#6366f1", color: "#ffffff", border: "none", fontWeight: 900, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>?</button>
-        </div>
-        {selectedCardId !== 'all' && (
+        <div style={{ position: 'relative', display: 'inline-block' }}>
           <button
-            onClick={() => setShowLeadTypesModal(true)}
-        </div>
+            onClick={() => setShowOrigemInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >?</button>
+          <select
+            value={filterLeadSource || ''}
+            onChange={(e) => setFilterLeadSource(e.target.value || null)}
             style={{
+              padding: '0 12px',
               height: 44,
-              padding: '0 16px',
               borderRadius: 12,
-              border: '1px solid rgba(108,92,231,0.4)',
-              background: 'rgba(108,92,231,0.1)',
-              color: '#6c5ce7',
-              fontWeight: 700,
+              border: '1px solid rgba(0,0,0,0.12)',
               fontSize: 13,
+              background: '#fff',
+              color: '#111827',
+              fontWeight: 700,
+              minWidth: 180,
               cursor: 'pointer',
-              whiteSpace: 'nowrap',
             }}
           >
-            🏷️ Gerir Tipos
-          </button>
-        )}
+            <option value="">Todos (Origem)</option>
+            {LEAD_SOURCES.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            onClick={() => setShowTiposInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >?</button>
+          {selectedCardId !== 'all' && (
+            <button
+              onClick={() => setShowLeadTypesModal(true)}
+              style={{
+                height: 44,
+                padding: '0 16px',
+                borderRadius: 12,
+                border: '1px solid rgba(108,92,231,0.4)',
+                background: 'rgba(108,92,231,0.1)',
+                color: '#6c5ce7',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              🏷️ Gerir Tipos
+            </button>
+          )}
+        </div>
       </div>
 
+      {filteredLeads.length === 0 && (
       {filteredLeads.length === 0 && (
         <p style={{ opacity: 0.6 }}>
           {leads.length === 0 ? 'Ainda não tens leads.' : 'Nenhuma lead corresponde aos filtros.'}
