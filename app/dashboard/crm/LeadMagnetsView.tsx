@@ -92,17 +92,17 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
 
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Nome da campanha *</label>
-              <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Ex: Guia Comprar Casa 2026" style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+              <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Ex: Guia Comprar Casa 2026" style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
             </div>
 
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Descricao</label>
-              <textarea value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Descreve o que a pessoa vai receber..." rows={3} style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box',resize:'vertical'}}/>
+              <textarea value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Descreve o que a pessoa vai receber..." rows={3} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box',resize:'vertical'}}/>
             </div>
 
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Tipo</label>
-              <select value={form.magnet_type} onChange={e=>setForm(f=>({...f,magnet_type:e.target.value as MagnetType}))} style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}>
+              <select value={form.magnet_type} onChange={e=>setForm(f=>({...f,magnet_type:e.target.value as MagnetType}))} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}>
                 <option value="ebook">📘 E-book</option>
                 <option value="guide">📋 Guia</option>
                 <option value="checklist">✅ Checklist</option>
@@ -114,7 +114,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Imagem de capa</label>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                <input value={form.cover_image_url} onChange={e=>setForm(f=>({...f,cover_image_url:e.target.value}))} placeholder="URL da imagem ou faz upload" style={{flex:1,padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+                <input value={form.cover_image_url} onChange={e=>setForm(f=>({...f,cover_image_url:e.target.value}))} placeholder="URL da imagem ou faz upload" style={{flex:1,padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
                 <button onClick={()=>coverInputRef.current?.click()} style={{padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.07)',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer',whiteSpace:'nowrap'}}>{uploadingCover?'..':'📷 Upload'}</button>
                 <input ref={coverInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleCoverUpload}/>
               </div>
@@ -123,7 +123,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Ficheiro para download *</label>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                <input value={form.file_url} onChange={e=>setForm(f=>({...f,file_url:e.target.value}))} placeholder="URL do ficheiro ou faz upload" style={{flex:1,padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+                <input value={form.file_url} onChange={e=>setForm(f=>({...f,file_url:e.target.value}))} placeholder="URL do ficheiro ou faz upload" style={{flex:1,padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
                 <button onClick={()=>fileInputRef.current?.click()} style={{padding:'10px 14px',borderRadius:10,border:'1px solid rgba(16,185,129,0.4)',background:'rgba(16,185,129,0.1)',color:'#10b981',fontWeight:700,fontSize:12,cursor:'pointer',whiteSpace:'nowrap'}}>{uploadingFile?'..':'📎 Upload'}</button>
                 <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.zip" style={{display:'none'}} onChange={handleFileUpload}/>
               </div>
@@ -132,7 +132,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
 
             <div style={{marginBottom:24}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Mensagem de agradecimento</label>
-              <input value={form.thank_you_message} onChange={e=>setForm(f=>({...f,thank_you_message:e.target.value}))} style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+              <input value={form.thank_you_message} onChange={e=>setForm(f=>({...f,thank_you_message:e.target.value}))} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
             </div>
 
             <div style={{display:'flex',gap:10}}>
