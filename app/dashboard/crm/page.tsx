@@ -26,6 +26,7 @@ import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachment
 import CalendarGrid from '@/components/crm/CalendarGrid'
 import LeadTypesModal from '@/components/crm/LeadTypesModal'
 import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
+import LeadMagnetsView from './LeadMagnetsView'
 
 type Lead = {
   id: string
@@ -182,7 +183,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
-  const [activeView, setActiveView] = useState<'table' | 'calendar'>('table')
+  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets'>('table')
   const [importing, setImporting] = useState(false)
 
 
@@ -1375,6 +1376,22 @@ Melhores cumprimentos,
         >
           🗓️ Calendário de Tarefas
         </button>
+        <button
+          onClick={() => setActiveView('magnets')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'magnets' ? '#10b981' : '#e5e7eb',
+            color: activeView === 'magnets' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          🧲 Lead Magnets
+        </button>
       </div>
 
       {activeView === 'calendar' && (
@@ -1401,7 +1418,8 @@ Melhores cumprimentos,
       )}
 
       {activeView === 'table' && (<>
-      {/* Barra de pesquisa + filtros */}
+      {activeView !== 'magnets' && (<>
+      {/* Barra de pesquisa + filtros */
       <div style={{ marginBottom: 16 }}>
 
         {/* Linha 1: pesquisa + botão filtros + chips ativos */}
@@ -1576,7 +1594,13 @@ Melhores cumprimentos,
         )}
       </div>
 
-      {filteredLeads.length === 0 && (
+      </>)}
+
+      {activeView === 'magnets' && (
+        <LeadMagnetsView userId={userId} />
+      )}
+
+      {filteredLeads.length === 0 && activeView === 'table' && (
         <p style={{ opacity: 0.6 }}>
           {leads.length === 0 ? 'Ainda não tens leads.' : 'Nenhuma lead corresponde aos filtros.'}
         </p>
