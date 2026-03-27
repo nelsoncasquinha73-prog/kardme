@@ -1490,7 +1490,6 @@ Melhores cumprimentos,
       </div>
 
 
-      </div>
 
 
       {filteredLeads.length === 0 && (
