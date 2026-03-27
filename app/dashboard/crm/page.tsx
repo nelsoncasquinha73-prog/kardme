@@ -1465,7 +1465,7 @@ Melhores cumprimentos,
             fontWeight: 700,
             minWidth: 180,
             cursor: 'pointer',
-            display: selectedCardId === 'all' ? 'none' : 'block',
+            display: 'block',
           }}
         >
           <option value="">Todos (Tipo)</option>
