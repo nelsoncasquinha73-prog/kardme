@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabaseClient'
 import {
   LeadMagnet, MagnetType,
   getLeadMagnets, createLeadMagnet, updateLeadMagnet,
@@ -10,7 +10,6 @@ import {
 } from '@/lib/crm/leadMagnets'
 
 export default function LeadMagnetsView({ userId }: { userId: string }) {
-  const supabase = createClientComponentClient()
   const [magnets, setMagnets] = useState<LeadMagnet[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)

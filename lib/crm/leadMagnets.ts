@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabaseClient'
 
 export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar'
 
@@ -28,7 +28,6 @@ export type LeadMagnet = {
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
-  const supabase = createClientComponentClient()
   const { data, error } = await supabase
     .from('lead_magnets')
     .select('*')
@@ -39,7 +38,6 @@ export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
 }
 
 export async function createLeadMagnet(magnet: Partial<LeadMagnet>): Promise<LeadMagnet> {
-  const supabase = createClientComponentClient()
   const { data, error } = await supabase
     .from('lead_magnets')
     .insert([magnet])
@@ -50,7 +48,6 @@ export async function createLeadMagnet(magnet: Partial<LeadMagnet>): Promise<Lea
 }
 
 export async function updateLeadMagnet(id: string, updates: Partial<LeadMagnet>): Promise<void> {
-  const supabase = createClientComponentClient()
   const { error } = await supabase
     .from('lead_magnets')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -59,7 +56,6 @@ export async function updateLeadMagnet(id: string, updates: Partial<LeadMagnet>)
 }
 
 export async function deleteLeadMagnet(id: string): Promise<void> {
-  const supabase = createClientComponentClient()
   const { error } = await supabase
     .from('lead_magnets')
     .delete()
@@ -68,7 +64,6 @@ export async function deleteLeadMagnet(id: string): Promise<void> {
 }
 
 export async function toggleLeadMagnetActive(id: string, isActive: boolean): Promise<void> {
-  const supabase = createClientComponentClient()
   const { error } = await supabase
     .from('lead_magnets')
     .update({ is_active: isActive, updated_at: new Date().toISOString() })
