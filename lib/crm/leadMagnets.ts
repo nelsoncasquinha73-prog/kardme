@@ -1,4 +1,4 @@
-import { supabase  from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar'
 
@@ -7,7 +7,7 @@ export type FormField = {
   label: string
   type: 'text' | 'email' | 'tel'
   required: boolean
-
+}
 
 export type LeadMagnet = {
   id: string
@@ -25,51 +25,51 @@ export type LeadMagnet = {
   leads_count: number
   created_at: string
   updated_at: string
-
+}
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
-  const { data, error  = await supabase
+  const { data, error } = await supabase
     .from('lead_magnets')
     .select('*')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false )
+    .order('created_at', { ascending: false })
   if (error) throw error
   return data || []
-
+}
 
 export async function createLeadMagnet(magnet: Partial<LeadMagnet>): Promise<LeadMagnet> {
-  const { data, error  = await supabase
+  const { data, error } = await supabase
     .from('lead_magnets')
     .insert([magnet])
     .select()
     .single()
   if (error) throw error
   return data
-
+}
 
 export async function updateLeadMagnet(id: string, updates: Partial<LeadMagnet>): Promise<void> {
-  const { error  = await supabase
+  const { error } = await supabase
     .from('lead_magnets')
-    .update({ ...updates, updated_at: new Date().toISOString() )
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) throw error
-
+}
 
 export async function deleteLeadMagnet(id: string): Promise<void> {
-  const { error  = await supabase
+  const { error } = await supabase
     .from('lead_magnets')
     .delete()
     .eq('id', id)
   if (error) throw error
-
+}
 
 export async function toggleLeadMagnetActive(id: string, isActive: boolean): Promise<void> {
-  const { error  = await supabase
+  const { error } = await supabase
     .from('lead_magnets')
-    .update({ is_active: isActive, updated_at: new Date().toISOString() )
+    .update({ is_active: isActive, updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) throw error
-
+}
 
 export function generateSlug(title: string): string {
   return title
@@ -80,7 +80,7 @@ export function generateSlug(title: string): string {
     .trim()
     .replace(/\s+/g, '-')
     .substring(0, 50) + '-' + Math.random().toString(36).substring(2, 7)
-
+}
 
 export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   ebook: '📘 E-book',
@@ -88,10 +88,10 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   guide: '📋 Guia',
   checklist: '✅ Checklist',
   webinar: '🎥 Webinar',
-
+}
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
-  { id: 'name', label: 'Nome', type: 'text', required: true ,
-  { id: 'email', label: 'Email', type: 'email', required: true ,
-  { id: 'phone', label: 'Telefone', type: 'tel', required: false ,
+  { id: 'name', label: 'Nome', type: 'text', required: true },
+  { id: 'email', label: 'Email', type: 'email', required: true },
+  { id: 'phone', label: 'Telefone', type: 'tel', required: false },
 ]
