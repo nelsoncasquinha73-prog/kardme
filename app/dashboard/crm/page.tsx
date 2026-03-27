@@ -1524,7 +1524,6 @@ Melhores cumprimentos,
       </div>
 
       {filteredLeads.length === 0 && (
-      {filteredLeads.length === 0 && (
         <p style={{ opacity: 0.6 }}>
           {leads.length === 0 ? 'Ainda não tens leads.' : 'Nenhuma lead corresponde aos filtros.'}
         </p>
