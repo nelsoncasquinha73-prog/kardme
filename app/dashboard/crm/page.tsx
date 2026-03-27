@@ -2909,8 +2909,6 @@ Melhores cumprimentos,
         </div>
       )}
 
-    </main>
-
       {showLeadTypesModal && selectedCardId !== 'all' && (
         <LeadTypesModal
           cardId={selectedCardId}
@@ -2920,6 +2918,8 @@ Melhores cumprimentos,
           onUpdate={setLeadTypes}
         />
       )}
+
+    </main>
   )
 }
 
