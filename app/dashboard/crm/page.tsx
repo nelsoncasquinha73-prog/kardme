@@ -1471,6 +1471,8 @@ Melhores cumprimentos,
         <select
           value={filterLeadSource || ''}
           onChange={(e) => setFilterLeadSource(e.target.value || null)}
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", background: "#6366f1", color: "#ffffff", border: "none", fontWeight: 900, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>?</button>
           style={{
             padding: '0 12px',
             height: 44,
@@ -1490,9 +1492,13 @@ Melhores cumprimentos,
           ))}
         </select>
 
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <button onClick={() => setShowTiposInfoModal(true)} style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", background: "#6366f1", color: "#ffffff", border: "none", fontWeight: 900, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>?</button>
+        </div>
         {selectedCardId !== 'all' && (
           <button
             onClick={() => setShowLeadTypesModal(true)}
+        </div>
             style={{
               height: 44,
               padding: '0 16px',
