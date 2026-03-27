@@ -25,7 +25,7 @@ import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 import CalendarGrid from '@/components/crm/CalendarGrid'
 import LeadTypesModal from '@/components/crm/LeadTypesModal'
-import { fetchLeadTypes, createLeadType, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES, type LeadType } from '@/lib/crm/leadTypes'
+import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
 
 type Lead = {
   id: string
@@ -137,6 +137,7 @@ Melhores cumprimentos,
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
   const [bulkStep, setBulkStep] = useState('')
   const [leadTypes, setLeadTypes] = useState<LeadType[]>([])
+  const [leadSources, setLeadSources] = useState<LeadSource[]>([])
   const [showLeadTypesModal, setShowLeadTypesModal] = useState(false)
   const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
@@ -275,17 +276,13 @@ Melhores cumprimentos,
     loadLeads()
   }, [filterMarketing, filterStep, selectedCardId, sortBy, sortOrder])
 
-  // Fetch lead types when card changes
+  // Fetch lead types and sources globally by userId
   useEffect(() => {
-    if (selectedCardId === 'all') {
-      setLeadTypes([])
-      return
-    }
+    if (!userId) return
     const loadTypes = async () => {
       try {
-        const types = await fetchLeadTypes(selectedCardId)
+        const types = await fetchLeadTypes(userId)
         if (types.length === 0) {
-          // Seed default types
           const defaults = [
             { name: 'Cliente', color: '#0984e3' },
             { name: 'Comprador', color: '#00b894' },
@@ -293,7 +290,7 @@ Melhores cumprimentos,
           ]
           const created = []
           for (const d of defaults) {
-            const t = await createLeadType(selectedCardId, userId, d.name, d.color)
+            const t = await createLeadType(userId, d.name, d.color)
             created.push(t)
           }
           setLeadTypes(created)
@@ -304,8 +301,17 @@ Melhores cumprimentos,
         console.error(e)
       }
     }
+    const loadSources = async () => {
+      try {
+        const sources = await fetchLeadSources(userId)
+        setLeadSources(sources)
+      } catch (e) {
+        console.error(e)
+      }
+    }
     loadTypes()
-  }, [selectedCardId, userId])
+    loadSources()
+  }, [userId])
 
 
   useEffect(() => {
@@ -1490,8 +1496,11 @@ Melhores cumprimentos,
             }}
           >
             <option value="">Todos (Origem)</option>
-            {LEAD_SOURCES.map(s => (
+            {LEAD_SOURCES_DEFAULT.map(s => (
               <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+            {leadSources.map(s => (
+              <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
             ))}
           </select>
         </div>
@@ -1803,7 +1812,7 @@ Melhores cumprimentos,
                           minWidth: 110,
                         }}
                       >
-                        {LEAD_SOURCES.map(s => (
+                        {LEAD_SOURCES_DEFAULT.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
                         ))}
                       </select>

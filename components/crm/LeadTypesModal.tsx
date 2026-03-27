@@ -24,7 +24,7 @@ export default function LeadTypesModal({ cardId, userId, types, onClose, onUpdat
     if (!newName.trim()) return
     setLoading(true)
     try {
-      const created = await createLeadType(cardId, userId, newName.trim(), newColor)
+      const created = await createLeadType(userId, newName.trim(), newColor)
       onUpdate([...types, created])
       setNewName('')
       setNewColor(TYPE_COLORS[0])
