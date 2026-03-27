@@ -1357,7 +1357,7 @@ Melhores cumprimentos,
             transition: 'all 0.15s',
           }}
         >
-          📋 Tabela
+          📋 Lista de Contactos
         </button>
         <button
           onClick={() => setActiveView('calendar')}
@@ -1373,7 +1373,7 @@ Melhores cumprimentos,
             transition: 'all 0.15s',
           }}
         >
-          📅 Calendário
+          🗓️ Calendário de Tarefas
         </button>
       </div>
 
