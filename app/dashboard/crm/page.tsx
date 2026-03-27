@@ -1417,9 +1417,8 @@ Melhores cumprimentos,
         </div>
       )}
 
-      {activeView === 'table' && (<>
       {activeView !== 'magnets' && (<>
-      {/* Barra de pesquisa + filtros */
+      {/* Barra de pesquisa + filtros */}
       <div style={{ marginBottom: 16 }}>
 
         {/* Linha 1: pesquisa + botão filtros + chips ativos */}
