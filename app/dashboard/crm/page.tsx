@@ -167,6 +167,7 @@ Melhores cumprimentos,
   const [leadTypes, setLeadTypes] = useState<LeadType[]>([])
   const [leadSources, setLeadSources] = useState<LeadSource[]>([])
   const [showLeadTypesModal, setShowLeadTypesModal] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
   const [showLeadSourcesModal, setShowLeadSourcesModal] = useState(false)
   const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
@@ -1400,97 +1401,180 @@ Melhores cumprimentos,
       )}
 
       {activeView === 'table' && (<>
-      {/* Filtros */}
-      {/* Filtros */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <input
-          type="text"
-          placeholder="Pesquisar por nome, email ou zona…"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            flex: 1,
-            minWidth: 200,
-            padding: '0 14px',
-            height: 44,
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-          }}
-        />
-        <select
-          value={filterStep || ''}
-          onChange={(e) => setFilterStep(e.target.value || null)}
-          style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 160, cursor: 'pointer' }}
-        >
-          <option value="">Ação do Contacto</option>
-          {STEPS.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+      {/* Barra de pesquisa + filtros */}
+      <div style={{ marginBottom: 16 }}>
 
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <button onClick={() => setShowOptinInfoModal(true)} style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
-          <select
-            value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
-            onChange={(e) => {
-              if (e.target.value === '') setFilterMarketing(null)
-              else setFilterMarketing(e.target.value === 'true')
+        {/* Linha 1: pesquisa + botão filtros + chips ativos */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
+            <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, opacity: 0.4 }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Pesquisar por nome, email ou zona…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0 14px 0 40px',
+                height: 44,
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.15)',
+                fontSize: 13,
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <button
+            onClick={() => setShowFilters(f => !f)}
+            style={{
+              height: 44,
+              padding: '0 18px',
+              borderRadius: 12,
+              border: `1px solid ${showFilters ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.15)'}`,
+              background: showFilters ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.08)',
+              color: showFilters ? '#a5b4fc' : 'rgba(255,255,255,0.7)',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s',
             }}
-            style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 200, cursor: 'pointer' }}
           >
-            <option value="">Autorização Marketing</option>
-            <option value="true">Com autorização</option>
-            <option value="false">Sem autorização</option>
-          </select>
+            🎛️ Filtros
+            {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource) && (
+              <span style={{ background: '#6366f1', color: '#fff', borderRadius: 20, padding: '1px 8px', fontSize: 11, fontWeight: 900 }}>
+                {[filterStep, filterMarketing !== null ? '1' : null, filterLeadType, filterLeadSource].filter(Boolean).length}
+              </span>
+            )}
+            <span style={{ fontSize: 10, opacity: 0.6 }}>{showFilters ? '▲' : '▼'}</span>
+          </button>
+
+          <button onClick={() => setShowLeadTypesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(108,92,231,0.4)', background: 'rgba(108,92,231,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            🏷️ Tipos
+          </button>
+          <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.12)', color: '#00b894', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            ⚙️ Origens
+          </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
-          <select
-            value={filterLeadType || ''}
-            onChange={(e) => setFilterLeadType(e.target.value || null)}
-            style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 160, cursor: 'pointer' }}
-          >
-            <option value="">Tipo do Contacto</option>
-            {leadTypes.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-          <div style={{ position: 'relative', display: 'inline-block' }}>
-            <button onClick={() => setShowTiposInfoModal(true)} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
-            <button onClick={() => setShowLeadTypesModal(true)} style={{ height: 34, padding: '0 12px', borderRadius: 10, border: '1px solid rgba(108,92,231,0.4)', background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', width: '100%' }}>
-              🏷️ Gerir Tipos
+        {/* Chips de filtros ativos */}
+        {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource) && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+            {filterStep && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                Ação: {filterStep}
+                <button onClick={() => setFilterStep(null)} style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+              </span>
+            )}
+            {filterMarketing !== null && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                {filterMarketing ? 'Com autorização' : 'Sem autorização'}
+                <button onClick={() => setFilterMarketing(null)} style={{ background: 'none', border: 'none', color: '#fbbf24', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+              </span>
+            )}
+            {filterLeadType && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(108,92,231,0.2)', border: '1px solid rgba(108,92,231,0.4)', color: '#c4b5fd', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                Tipo: {leadTypes.find(t => t.id === filterLeadType)?.name || filterLeadType}
+                <button onClick={() => setFilterLeadType(null)} style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+              </span>
+            )}
+            {filterLeadSource && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(0,184,148,0.2)', border: '1px solid rgba(0,184,148,0.4)', color: '#00b894', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                Origem: {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.value, label: `${s.emoji} ${s.label}` }))].find(s => s.value === filterLeadSource)?.label || filterLeadSource}
+                <button onClick={() => setFilterLeadSource(null)} style={{ background: 'none', border: 'none', color: '#00b894', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+              </span>
+            )}
+            <button
+              onClick={() => { setFilterStep(null); setFilterMarketing(null); setFilterLeadType(null); setFilterLeadSource(null); }}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: 20, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+            >
+              Limpar tudo
             </button>
           </div>
-        </div>
+        )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
-          <select
-            value={filterLeadSource || ''}
-            onChange={(e) => setFilterLeadSource(e.target.value || null)}
-            style={{ padding: '0 12px', height: 44, borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, background: '#fff', color: '#111827', fontWeight: 700, minWidth: 180, cursor: 'pointer' }}
-          >
-            <option value="">Origem do Contacto</option>
-            {LEAD_SOURCES_DEFAULT.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-            {leadSources.map(s => (
-              <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
-            ))}
-          </select>
-          <div style={{ position: 'relative', display: 'inline-block' }}>
-            <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
-            <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 34, padding: '0 12px', borderRadius: 10, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.1)', color: '#00b894', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', width: '100%' }}>
-              ⚙️ Gerir Origens
-            </button>
+        {/* Painel de filtros colapsável */}
+        {showFilters && (
+          <div style={{ marginTop: 12, padding: 16, borderRadius: 14, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Ação do Contacto</label>
+              <select
+                value={filterStep || ''}
+                onChange={(e) => setFilterStep(e.target.value || null)}
+                style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 160, cursor: 'pointer' }}
+              >
+                <option value="">Todas</option>
+                {STEPS.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Autorização Marketing
+                <button onClick={() => setShowOptinInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#f59e0b', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+              </label>
+              <select
+                value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
+                onChange={(e) => {
+                  if (e.target.value === '') setFilterMarketing(null)
+                  else setFilterMarketing(e.target.value === 'true')
+                }}
+                style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 190, cursor: 'pointer' }}
+              >
+                <option value="">Todas</option>
+                <option value="true">Com autorização</option>
+                <option value="false">Sem autorização</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Tipo do Contacto
+                <button onClick={() => setShowTiposInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+              </label>
+              <select
+                value={filterLeadType || ''}
+                onChange={(e) => setFilterLeadType(e.target.value || null)}
+                style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 160, cursor: 'pointer' }}
+              >
+                <option value="">Todos</option>
+                {leadTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Origem do Contacto
+                <button onClick={() => setShowOrigemInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+              </label>
+              <select
+                value={filterLeadSource || ''}
+                onChange={(e) => setFilterLeadSource(e.target.value || null)}
+                style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 180, cursor: 'pointer' }}
+              >
+                <option value="">Todas</option>
+                {LEAD_SOURCES_DEFAULT.map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+                {leadSources.map(s => (
+                  <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-
-
-
 
       {filteredLeads.length === 0 && (
         <p style={{ opacity: 0.6 }}>
