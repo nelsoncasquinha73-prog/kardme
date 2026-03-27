@@ -1558,23 +1558,29 @@ Melhores cumprimentos,
           </button>
         </div>
 
-        <button
-          onClick={() => setShowLeadSourcesModal(true)}
-          style={{
-            height: 44,
-            padding: '0 16px',
-            borderRadius: 12,
-            border: '1px solid rgba(0,184,148,0.4)',
-            background: 'rgba(0,184,148,0.1)',
-            color: '#00b894',
-            fontWeight: 700,
-            fontSize: 13,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          ⚙️ Gerir Origens
-        </button>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            onClick={() => setShowOrigemInfoModal(true)}
+            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
+          >?</button>
+          <button
+            onClick={() => setShowLeadSourcesModal(true)}
+            style={{
+              height: 44,
+              padding: '0 16px',
+              borderRadius: 12,
+              border: '1px solid rgba(0,184,148,0.4)',
+              background: 'rgba(0,184,148,0.1)',
+              color: '#00b894',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ⚙️ Gerir Origens
+          </button>
+        </div>
       </div>
 
       {filteredLeads.length === 0 && (
@@ -1803,17 +1809,7 @@ Melhores cumprimentos,
                         value={lead.lead_type_id || ''}
                         onChange={async (e) => {
                           const val = e.target.value
-                          if (val === '__new__') {
-                            const name = prompt('Nome do novo tipo:')
-                            if (!name?.trim()) return
-                            try {
-                              const created = await createLeadType(userId, name.trim(), '#6c5ce7')
-                              setLeadTypes(prev => [...prev, created])
-                              await updateLeadTypeOnLead(lead.id, created.id)
-                              setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: created.id } : l))
-                            } catch(e) { console.error(e) }
-                            return
-                          }
+
                           const finalVal = val || null
                           await updateLeadTypeOnLead(lead.id, finalVal)
                           setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: finalVal } : l))
@@ -1834,7 +1830,7 @@ Melhores cumprimentos,
                         {leadTypes.map(t => (
                           <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
-                        <option value="__new__">➕ Novo tipo...</option>
+
                       </select>
                     </td>
                     <td style={td}>
@@ -3075,7 +3071,7 @@ Melhores cumprimentos,
           <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
             <h3 style={{ margin: '0 0 12px', color: '#fff', fontSize: 17, fontWeight: 700 }}>📍 Origem da Lead</h3>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-              Filtra as leads pela origem: <strong style={{ color: '#fff' }}>Cartão</strong> (via NFC/QR), <strong style={{ color: '#fff' }}>Manual</strong> (adicionada por ti), <strong style={{ color: '#fff' }}>Importado</strong> (CSV) ou <strong style={{ color: '#fff' }}>Lead Form</strong> (formulário de lead).
+              Filtra as leads pela origem. Origens de sistema: <strong style={{ color: '#fff' }}>Cartão</strong> (via NFC/QR), <strong style={{ color: '#fff' }}>Manual</strong> (adicionada por ti), <strong style={{ color: '#fff' }}>Importado</strong> (CSV) ou <strong style={{ color: '#fff' }}>Lead Form</strong> (formulário de lead). Podes criar origens personalizadas em <strong style={{ color: '#fff' }}>Gerir Origens</strong>.
             </p>
             <button onClick={() => setShowOrigemInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
           </div>
