@@ -24,6 +24,8 @@ import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, fetc
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 import CalendarGrid from '@/components/crm/CalendarGrid'
+import LeadTypesModal from '@/components/crm/LeadTypesModal'
+import { fetchLeadTypes, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES, type LeadType } from '@/lib/crm/leadTypes'
 
 type Lead = {
   id: string
@@ -39,6 +41,8 @@ type Lead = {
   created_at: string
   contacted: boolean
   card_id: string
+  lead_type_id: string | null
+  lead_source: string | null
 }
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
@@ -130,6 +134,10 @@ Melhores cumprimentos,
   const [bulkScheduleDate, setBulkScheduleDate] = useState('')
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
   const [bulkStep, setBulkStep] = useState('')
+  const [leadTypes, setLeadTypes] = useState<LeadType[]>([])
+  const [showLeadTypesModal, setShowLeadTypesModal] = useState(false)
+  const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
+  const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
 
 
 
@@ -262,6 +270,15 @@ Melhores cumprimentos,
   useEffect(() => {
     loadLeads()
   }, [filterMarketing, filterStep, selectedCardId, sortBy, sortOrder])
+
+  // Fetch lead types when card changes
+  useEffect(() => {
+    if (selectedCardId === 'all') {
+      setLeadTypes([])
+      return
+    }
+    fetchLeadTypes(selectedCardId).then(setLeadTypes).catch(console.error)
+  }, [selectedCardId])
 
 
   useEffect(() => {
@@ -695,12 +712,15 @@ Melhores cumprimentos,
     setDeletingId(null)
   }
 
-  const filteredLeads = leads.filter(l =>
-    searchTerm === '' ||
-    l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filteredLeads = leads.filter(l => {
+    const matchesSearch = searchTerm === '' ||
+      l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesType = filterLeadType === null || l.lead_type_id === filterLeadType
+    const matchesSource = filterLeadSource === null || (l.lead_source || 'cartão') === filterLeadSource
+    return matchesSearch && matchesType && matchesSource
+  })
 
 
   const loadLeadActivities = async (leadId: string) => {
@@ -1397,6 +1417,71 @@ Melhores cumprimentos,
             <option value="false">Sem opt-in</option>
           </select>
         </div>
+
+        <select
+          value={filterLeadType || ''}
+          onChange={(e) => setFilterLeadType(e.target.value || null)}
+          style={{
+            padding: '0 12px',
+            height: 44,
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 180,
+            cursor: 'pointer',
+            display: selectedCardId === 'all' ? 'none' : 'block',
+          }}
+        >
+          <option value="">Todos (Tipo)</option>
+          {leadTypes.map(t => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={filterLeadSource || ''}
+          onChange={(e) => setFilterLeadSource(e.target.value || null)}
+          style={{
+            padding: '0 12px',
+            height: 44,
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 180,
+            cursor: 'pointer',
+          }}
+        >
+          <option value="">Todos (Origem)</option>
+          {LEAD_SOURCES.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+
+        {selectedCardId !== 'all' && (
+          <button
+            onClick={() => setShowLeadTypesModal(true)}
+            style={{
+              height: 44,
+              padding: '0 16px',
+              borderRadius: 12,
+              border: '1px solid rgba(108,92,231,0.4)',
+              background: 'rgba(108,92,231,0.1)',
+              color: '#6c5ce7',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            🏷️ Gerir Tipos
+          </button>
+        )}
       </div>
 
       {filteredLeads.length === 0 && (
@@ -1585,6 +1670,8 @@ Melhores cumprimentos,
               <th style={th}>Email</th>
               <th style={th}>Cartão</th>
               <th style={th}>Zona</th>
+              <th style={th}>Tipo</th>
+              <th style={th}>Origem</th>
               <th style={th}>Step</th>
               <th style={th}>Marketing</th>
               <th style={th}>Data</th>
@@ -1594,7 +1681,7 @@ Melhores cumprimentos,
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
+                <td colSpan={11} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
                   Nenhuma lead encontrada.
                 </td>
               </tr>
@@ -1618,6 +1705,57 @@ Melhores cumprimentos,
                     <td style={td}>{lead.email}</td>
                     <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
                     <td style={td}>{lead.zone || '—'}</td>
+                    <td style={td}>
+                      <select
+                        value={lead.lead_type_id || ''}
+                        onChange={async (e) => {
+                          const val = e.target.value || null
+                          await updateLeadTypeOnLead(lead.id, val)
+                          setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: val } : l))
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: 'rgba(108,92,231,0.15)',
+                          color: leadTypes.find(t => t.id === lead.lead_type_id)?.color || 'rgba(255,255,255,0.5)',
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          minWidth: 100,
+                        }}
+                      >
+                        <option value="">— Tipo —</option>
+                        {leadTypes.map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td style={td}>
+                      <select
+                        value={lead.lead_source || 'cartão'}
+                        onChange={async (e) => {
+                          const val = e.target.value
+                          await updateLeadSource(lead.id, val)
+                          setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_source: val } : l))
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: 'rgba(0,184,148,0.15)',
+                          color: '#00b894',
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          minWidth: 110,
+                        }}
+                      >
+                        {LEAD_SOURCES.map(s => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    </td>
                     <td style={td}>
                       <select
                         value={lead.step}
@@ -2772,6 +2910,16 @@ Melhores cumprimentos,
       )}
 
     </main>
+
+      {showLeadTypesModal && selectedCardId !== 'all' && (
+        <LeadTypesModal
+          cardId={selectedCardId}
+          userId={userId}
+          types={leadTypes}
+          onClose={() => setShowLeadTypesModal(false)}
+          onUpdate={setLeadTypes}
+        />
+      )}
   )
 }
 
