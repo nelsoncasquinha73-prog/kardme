@@ -1490,12 +1490,6 @@ Melhores cumprimentos,
       </div>
 
 
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <button onClick={() => setShowOrigemInfoModal(true)} style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>?</button>
-          <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 44, padding: '0 16px', borderRadius: 12, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.1)', color: '#00b894', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            ⚙️ Gerir Origens
-          </button>
-        </div>
       </div>
 
 
