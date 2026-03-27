@@ -135,11 +135,11 @@ export default function LeadMagnetPage() {
       }}>
 
         {magnet?.cover_image_url && (
-          <div style={{ width: '100%', height: 220, overflow: 'hidden' }}>
+          <div style={{ width: '100%', overflow: 'hidden', borderRadius: '24px 24px 0 0' }}>
             <img
               src={magnet.cover_image_url}
               alt={magnet.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
             />
           </div>
         )}
