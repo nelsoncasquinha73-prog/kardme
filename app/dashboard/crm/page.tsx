@@ -47,6 +47,34 @@ type Lead = {
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
 
+function NewLeadSourceForm({ userId, onCreated }: { userId: string, onCreated: (s: any) => void }) {
+  const [label, setLabel] = useState('')
+  const [emoji, setEmoji] = useState('📌')
+  const [loading, setLoading] = useState(false)
+
+  const handle = async () => {
+    if (!label.trim()) return
+    setLoading(true)
+    try {
+      const created = await createLeadSource(userId, label.trim(), emoji.trim() || '📌')
+      onCreated(created)
+      setLabel('')
+      setEmoji('📌')
+    } catch(e) { console.error(e) }
+    setLoading(false)
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <input value={emoji} onChange={e => setEmoji(e.target.value)} style={{ width: 48, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px', color: '#fff', fontSize: 18, textAlign: 'center' }} />
+      <input value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && handle()} placeholder="Ex: Parceiro, Evento..." style={{ flex: 1, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: 14 }} />
+      <button onClick={handle} disabled={loading || !label.trim()} style={{ background: '#00b894', border: 'none', borderRadius: 10, padding: '10px 16px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+        + Criar
+      </button>
+    </div>
+  )
+}
+
 export default function CrmProPage() {
   const router = useRouter()
   const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
