@@ -1,0 +1,302 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+
+const supabasePublic = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar'
+
+const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
+  ebook: '📘 E-book',
+  discount: '🎁 Desconto',
+  guide: '📋 Guia',
+  checklist: '✅ Checklist',
+  webinar: '🎥 Webinar',
+}
+
+type LeadMagnet = {
+  id: string
+  title: string
+  description: string | null
+  cover_image_url: string | null
+  magnet_type: MagnetType
+  file_url: string | null
+  thank_you_message: string | null
+  is_active: boolean
+}
+
+export default function LeadMagnetPage() {
+  const params = useParams()
+  const slug = params?.slug as string
+
+  const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [step, setStep] = useState<'form' | 'success'>('form')
+  const [submitting, setSubmitting] = useState(false)
+  const [fileUrl, setFileUrl] = useState<string | null>(null)
+  const [thankYou, setThankYou] = useState('')
+  const [form, setForm] = useState({ name: '', email: '', phone: '' })
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!slug) return
+    loadMagnet()
+    trackView()
+  }, [slug])
+
+  async function loadMagnet() {
+    const { data, error } = await supabasePublic
+      .from('lead_magnets')
+      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active')
+      .eq('slug', slug)
+      .single()
+
+    if (error || !data || !data.is_active) {
+      setNotFound(true)
+    } else {
+      setMagnet(data)
+    }
+    setLoading(false)
+  }
+
+  async function trackView() {
+    await supabasePublic.rpc('increment_magnet_views', { magnet_slug: slug })
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    if (!form.name.trim() || !form.email.trim()) {
+      setError('Por favor preenche o nome e email.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/lead-magnets/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, ...form }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Erro ao submeter. Tenta novamente.')
+        return
+      }
+      setFileUrl(data.file_url)
+      setThankYou(data.thank_you_message)
+      setStep('success')
+    } catch {
+      setError('Erro de ligação. Tenta novamente.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+      <div style={{ color: '#94a3b8', fontSize: 16 }}>A carregar...</div>
+    </div>
+  )
+
+  if (notFound) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+      <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+        <h1 style={{ fontSize: 24, color: '#f1f5f9', marginBottom: 8 }}>Página não encontrada</h1>
+        <p>Este link pode ter expirado ou sido desativado.</p>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px 16px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: 480,
+        background: 'rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 24,
+        overflow: 'hidden',
+      }}>
+
+        {magnet?.cover_image_url && (
+          <div style={{ width: '100%', height: 220, overflow: 'hidden' }}>
+            <img
+              src={magnet.cover_image_url}
+              alt={magnet.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+        )}
+
+        <div style={{ padding: '32px 32px 40px' }}>
+          {step === 'form' ? (
+            <>
+              <div style={{
+                display: 'inline-block',
+                background: 'rgba(99,102,241,0.2)',
+                border: '1px solid rgba(99,102,241,0.4)',
+                borderRadius: 20,
+                padding: '4px 12px',
+                fontSize: 12,
+                color: '#a5b4fc',
+                marginBottom: 16,
+              }}>
+                {MAGNET_TYPE_LABELS[magnet?.magnet_type as MagnetType] || '📄 Recurso'}
+              </div>
+
+              <h1 style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: '#f1f5f9',
+                marginBottom: 12,
+                lineHeight: 1.3,
+              }}>
+                {magnet?.title}
+              </h1>
+
+              {magnet?.description && (
+                <p style={{
+                  fontSize: 15,
+                  color: '#94a3b8',
+                  marginBottom: 28,
+                  lineHeight: 1.6,
+                }}>
+                  {magnet.description}
+                </p>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <input
+                    type="text"
+                    placeholder="O teu nome"
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    required
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.07)',
+                      color: '#f1f5f9',
+                      fontSize: 15,
+                      outline: 'none',
+                    }}
+                  />
+                  <input
+                    type="email"
+                    placeholder="O teu email"
+                    value={form.email}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    required
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.07)',
+                      color: '#f1f5f9',
+                      fontSize: 15,
+                      outline: 'none',
+                    }}
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Telefone (opcional)"
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.07)',
+                      color: '#f1f5f9',
+                      fontSize: 15,
+                      outline: 'none',
+                    }}
+                  />
+
+                  {error && (
+                    <p style={{ color: '#f87171', fontSize: 13, margin: 0 }}>{error}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    style={{
+                      marginTop: 8,
+                      padding: '16px',
+                      borderRadius: 12,
+                      border: 'none',
+                      background: submitting ? '#4f46e5' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      color: '#fff',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      cursor: submitting ? 'not-allowed' : 'pointer',
+                      opacity: submitting ? 0.7 : 1,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {submitting ? 'A enviar...' : '📥 Quero acesso gratuito'}
+                  </button>
+                </div>
+              </form>
+
+              <p style={{ fontSize: 12, color: '#475569', textAlign: 'center', marginTop: 16 }}>
+                🔒 Os teus dados estão seguros. Sem spam.
+              </p>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+              <h2 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>
+                {thankYou || 'Obrigado!'}
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 28 }}>
+                O teu recurso está pronto para download.
+              </p>
+              {fileUrl && (
+                <a
+                  href={fileUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    padding: '16px 32px',
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#fff',
+                    fontSize: 16,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  📥 Fazer Download
+                </a>
+              )}
+              <p style={{ fontSize: 12, color: '#475569', marginTop: 24 }}>
+                Powered by <strong style={{ color: '#6366f1' }}>Kardme</strong>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
