@@ -51,6 +51,8 @@ export default function CrmProPage() {
   const router = useRouter()
   const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
   const [showTemplatesInfoModal, setShowTemplatesInfoModal] = useState(false)
+  const [showTiposInfoModal, setShowTiposInfoModal] = useState(false)
+  const [showOrigemInfoModal, setShowOrigemInfoModal] = useState(false)
   const [showGmailInfoModal, setShowGmailInfoModal] = useState(false)
   const [showOptinInfoModal, setShowOptinInfoModal] = useState(false)
   const { addToast } = useToast()
@@ -2955,6 +2957,30 @@ Melhores cumprimentos,
           onClose={() => setShowLeadTypesModal(false)}
           onUpdate={setLeadTypes}
         />
+      )}
+
+      {showTiposInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowTiposInfoModal(false)}>
+          <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 12px', color: '#fff', fontSize: 17, fontWeight: 700 }}>🏷️ Gerir Tipos</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+              Cria e personaliza tipos de cliente (ex: Comprador, Vendedor, Investidor) com cores diferentes para organizar melhor as tuas leads.
+            </p>
+            <button onClick={() => setShowTiposInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
+          </div>
+        </div>
+      )}
+
+      {showOrigemInfoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowOrigemInfoModal(false)}>
+          <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 12px', color: '#fff', fontSize: 17, fontWeight: 700 }}>📍 Origem da Lead</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+              Filtra as leads pela origem: <strong style={{ color: '#fff' }}>Cartão</strong> (via NFC/QR), <strong style={{ color: '#fff' }}>Manual</strong> (adicionada por ti), <strong style={{ color: '#fff' }}>Importado</strong> (CSV) ou <strong style={{ color: '#fff' }}>Lead Form</strong> (formulário de lead).
+            </p>
+            <button onClick={() => setShowOrigemInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
+          </div>
+        </div>
       )}
 
     </main>
