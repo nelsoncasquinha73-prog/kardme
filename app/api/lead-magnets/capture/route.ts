@@ -100,6 +100,16 @@ export async function POST(req: Request) {
     if (marketing_opt_in && email && leadId) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
+
+        // Usar template personalizado ou default
+        const defaultSubject = `📥 O teu recurso: ${magnet.title}`
+        const defaultBody = `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
+
+        const emailSubject = magnet.welcome_email_subject || defaultSubject
+        const emailBody = (magnet.welcome_email_body || defaultBody)
+          .replace(/{nome}/g, name)
+          .replace(/{link}/g, magnet.file_url || '')
+
         const welcomeRes = await fetch(baseUrl + '/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -107,8 +117,8 @@ export async function POST(req: Request) {
             userId: magnet.user_id,
             leadId,
             recipientEmail: email,
-            subject: `📥 O teu recurso: ${magnet.title}`,
-            body: `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nSe tiveres alguma dúvida, não hesites em contactar-nos!\n\nMelhores cumprimentos`,
+            subject: emailSubject,
+            body: emailBody,
           }),
         })
 

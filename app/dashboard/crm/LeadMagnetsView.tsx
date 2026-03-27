@@ -20,12 +20,12 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
-  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', form_fields: DEFAULT_FORM_FIELDS, is_active: true }
+  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', welcome_email_subject: '', welcome_email_body: '', form_fields: DEFAULT_FORM_FIELDS, is_active: true }
   const [form, setForm] = useState(emptyForm)
   useEffect(() => { load() }, [])
   async function load() { setLoading(true); try { setMagnets(await getLeadMagnets(userId)) } catch(e) { console.error(e) } setLoading(false) }
   function openCreate() { setForm(emptyForm); setEditingMagnet(null); setShowForm(true) }
-  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', form_fields: m.form_fields, is_active: m.is_active }); setEditingMagnet(m); setShowForm(true) }
+  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active }); setEditingMagnet(m); setShowForm(true) }
   async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(!form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
   async function handleDelete(id: string) { if(!confirm('Apagar campanha?')) return; await deleteLeadMagnet(id); await load() }
   async function handleToggle(m: LeadMagnet) { await toggleLeadMagnetActive(m.id, !m.is_active); await load() }
