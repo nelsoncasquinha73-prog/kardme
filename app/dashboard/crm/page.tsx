@@ -235,6 +235,8 @@ Melhores cumprimentos,
         created_at,
         contacted,
         card_id,
+        lead_type_id,
+        lead_source,
         cards!inner (
           user_id,
           name,
