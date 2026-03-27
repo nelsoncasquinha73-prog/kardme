@@ -51,6 +51,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: leadError.message }, { status: 500 })
     }
 
+    const leadId = leadData?.[0]?.id
+
+    // Registar atividade no histórico
+    if (leadId) {
+      await supabaseAdmin.from('lead_activities').insert([{
+        lead_id: leadId,
+        user_id: magnet.user_id,
+        type: 'lead_magnet_download',
+        title: `📥 Recebeu "${magnet.title}"`,
+        meta: {
+          magnet_id: magnet.id,
+          magnet_title: magnet.title,
+          magnet_type: magnet.magnet_type,
+          file_url: magnet.file_url,
+        },
+      }])
+    }
+
     // Incrementar leads_count
     await supabaseAdmin.rpc('increment_magnet_leads', { magnet_id: magnet.id })
 
