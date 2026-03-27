@@ -269,15 +269,17 @@ Melhores cumprimentos,
         created_at,
         contacted,
         card_id,
+        user_id,
         lead_type_id,
         lead_source,
-        cards!inner (
+        lead_magnet_id,
+        cards (
           user_id,
           name,
           slug
         )
       `)
-      .eq('cards.user_id', user.id)
+      .or(`cards.user_id.eq.${user.id},user_id.eq.${user.id}`)
 
     if (selectedCardId !== 'all') {
       query = query.eq('card_id', selectedCardId)
