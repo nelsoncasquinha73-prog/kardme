@@ -139,6 +139,7 @@ Melhores cumprimentos,
   const [leadTypes, setLeadTypes] = useState<LeadType[]>([])
   const [leadSources, setLeadSources] = useState<LeadSource[]>([])
   const [showLeadTypesModal, setShowLeadTypesModal] = useState(false)
+  const [showLeadSourcesModal, setShowLeadSourcesModal] = useState(false)
   const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
 
@@ -2978,6 +2979,39 @@ Melhores cumprimentos,
           onClose={() => setShowLeadTypesModal(false)}
           onUpdate={setLeadTypes}
         />
+      )}
+
+      {showLeadSourcesModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowLeadSourcesModal(false)}>
+          <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 700 }}>⚙️ Gerir Origens</h3>
+              <button onClick={() => setShowLeadSourcesModal(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 20 }}>✕</button>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 16 }}>Origens fixas do sistema + origens personalizadas.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+              {LEAD_SOURCES_DEFAULT.map(s => (
+                <div key={s.value} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px 14px' }}>
+                  <span style={{ flex: 1, color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>{s.label}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: 6 }}>sistema</span>
+                </div>
+              ))}
+              {leadSources.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px' }}>
+                  <span style={{ flex: 1, color: '#fff', fontSize: 14 }}>{s.emoji} {s.label}</span>
+                  <button onClick={async () => { await deleteLeadSource(s.id); setLeadSources(prev => prev.filter(x => x.id !== s.id)) }} style={{ background: 'none', border: 'none', color: '#e17055', cursor: 'pointer', fontSize: 14 }}>🗑️</button>
+                </div>
+              ))}
+              {leadSources.length === 0 && (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', padding: '8px 0' }}>Nenhuma origem personalizada ainda.</p>
+              )}
+            </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Nova origem</p>
+              <NewLeadSourceForm userId={userId} onCreated={(s) => setLeadSources(prev => [...prev, s])} />
+            </div>
+          </div>
+        </div>
       )}
 
       {showTiposInfoModal && (
