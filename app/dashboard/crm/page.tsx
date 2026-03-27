@@ -1762,7 +1762,7 @@ Melhores cumprimentos,
                             const name = prompt('Nome do novo tipo:')
                             if (!name?.trim()) return
                             try {
-                              const created = await createLeadType(selectedCardId, userId, name.trim(), '#6c5ce7')
+                              const created = await createLeadType(userId, name.trim(), '#6c5ce7')
                               setLeadTypes(prev => [...prev, created])
                               await updateLeadTypeOnLead(lead.id, created.id)
                               setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: created.id } : l))
