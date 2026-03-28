@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Ambassador } from '@/lib/ambassadors/ambassadorService'
 import { FiX, FiUpload, FiPlus, FiTrash2 } from 'react-icons/fi'
 
@@ -15,6 +15,11 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
   const [saving, setSaving] = useState(false)
   const avatarRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    console.log('Modal abriu com ambassador:', ambassador);
+    setFormData(ambassador || {})
+  }, [ambassador])
 
   if (!ambassador) return null
 
@@ -74,6 +79,17 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
 
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Foto de Cover</label>
+          {formData.cover_url && (
+            <div style={{
+              width: '100%',
+              height: 120,
+              background: `url(${formData.cover_url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              borderRadius: 8,
+              marginBottom: 12,
+            }} />
+          )}
           <button onClick={() => coverRef.current?.click()} style={{ padding: '8px 16px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
             <FiUpload size={14} /> Upload
           </button>
