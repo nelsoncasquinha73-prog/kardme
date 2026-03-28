@@ -464,7 +464,6 @@ export default function AmbassadorPage() {
         buttonColor={ambassador.background_color || '#8B5CF6'}
       />
     </div>
-        </>
       </ThemeProvider>
     </LanguageProvider>
   )
