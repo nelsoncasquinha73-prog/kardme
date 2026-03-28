@@ -103,6 +103,12 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
           }} />
         </div>
 
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Slug (URL do Cartão)</label>
+          <input type="text" placeholder="ex: nelson-domingos-4aiuyo" value={formData.slug || ''} onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') })} style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }} />
+          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>URL pública: kardme.com/embaixador/{formData.slug || 'seu-slug'}</p>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           {['background_color', 'text_color', 'bio_color'].map((field) => (
             <div key={field}>
