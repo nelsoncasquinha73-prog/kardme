@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato de Embaixador</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #333;
+      padding-bottom: 20px;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .header p {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    .section h2 {
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      color: #000;
+      border-left: 4px solid #3b82f6;
+      padding-left: 10px;
+    }
+    
+    .section p {
+      font-size: 12px;
+      margin-bottom: 10px;
+      text-align: justify;
+      line-height: 1.8;
+    }
+    
+    .section ul {
+      margin-left: 20px;
+      font-size: 12px;
+    }
+    
+    .section ul li {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+    
+    .parties {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    
+    .party {
+      margin-bottom: 15px;
+    }
+    
+    .party label {
+      font-weight: bold;
+      font-size: 12px;
+      display: block;
+      margin-bottom: 3px;
+    }
+    
+    .party input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #333;
+      padding: 5px 0;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    
+    .signatures {
+      margin-top: 50px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    
+    .signature-block {
+      text-align: center;
+    }
+    
+    .signature-line {
+      border-top: 1px solid #333;
+      margin-bottom: 10px;
+      height: 60px;
+    }
+    
+    .signature-label {
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .signature-date {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Contrato de Embaixador</h1>
+      <p>Acordo de Representação e Comissão</p>
+    </div>
+
+    <div class="section">
+      <h2>1. Partes Contratantes</h2>
+      <div class="parties">
+        <div class="party">
+          <label>Empresa / Negócio:</label>
+          <input type="text" placeholder="Nome da empresa">
+        </div>
+        <div class="party">
+          <label>Embaixador:</label>
+          <input type="text" placeholder="Nome completo">
+        </div>
+        <div class="party">
+          <label>Email:</label>
+          <input type="email" placeholder="email@exemplo.com">
+        </div>
+        <div class="party">
+          <label>Telefone:</label>
+          <input type="tel" placeholder="+351 9XX XXX XXX">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>2. Objeto do Contrato</h2>
+      <p>O Embaixador concorda em representar a Empresa e promover os seus produtos e serviços junto da sua rede de contactos, clientes e conhecidos. O Embaixador receberá um cartão personalizado (digital, PVC ou metálico) com o seu nome e contactos para facilitar a promoção.</p>
+    </div>
+
+    <div class="section">
+      <h2>3. Estrutura de Comissões</h2>
+      <p>O Embaixador receberá comissão por cada cliente/lead referenciado que resulte em negócio, de acordo com os seguintes termos:</p>
+      <div class="parties">
+        <div class="party">
+          <label>Tipo de Comissão (Fixa ou Percentagem):</label>
+          <input type="text" placeholder="Ex: Fixa de €X ou Y%">
+        </div>
+        <div class="party">
+          <label>Valor da Comissão:</label>
+          <input type="text" placeholder="Ex: €50 ou 20%">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>4. Obrigações do Embaixador</h2>
+      <ul>
+        <li>Promover ativamente os produtos/serviços junto da sua rede de contactos;</li>
+        <li>Manter comportamento profissional e ético em todas as interações;</li>
+        <li>Reportar leads e vendas através da plataforma Kardme ou conforme indicado;</li>
+        <li>Não difamar ou prejudicar a reputação da Empresa;</li>
+        <li>Cumprir com as políticas e termos de serviço da Kardme;</li>
+        <li>Manter a confidencialidade de informações comerciais sensíveis.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>5. Pagamento de Comissões</h2>
+      <p>As comissões serão calculadas e pagas mensalmente via transferência bancária. O pagamento será processado até ao 5º dia útil do mês seguinte ao período de vendas. O Embaixador deverá fornecer dados bancários válidos para receber os pagamentos.</p>
+    </div>
+
+    <div class="section">
+      <h2>6. Duração e Rescisão</h2>
+      <p>Este contrato é válido por tempo indeterminado. Qualquer uma das partes pode rescindir este contrato com 30 dias de aviso prévio por escrito. Após rescisão, o Embaixador não terá direito a comissões por negócios não finalizados antes da data de término.</p>
+    </div>
+
+    <div class="section">
+      <h2>7. Confidencialidade</h2>
+      <p>O Embaixador concorda em manter confidencial qualquer informação comercial, técnica ou pessoal da Empresa que lhe seja fornecida durante o período de vigência deste contrato.</p>
+    </div>
+
+    <div class="section">
+      <h2>8. Independência</h2>
+      <p>O Embaixador atua como representante independente e não é funcionário da Empresa. O Embaixador é responsável pelo pagamento de todos os impostos e contribuições sociais relacionadas com as comissões recebidas.</p>
+    </div>
+
+    <div class="section">
+      <h2>9. Disposições Gerais</h2>
+      <p>Este contrato é regido pelas leis da República Portuguesa. Qualquer alteração deve ser feita por escrito e assinada por ambas as partes. A invalidade de qualquer cláusula não afeta a validade das restantes.</p>
+    </div>
+
+    <div class="signatures">
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-label">Empresa</div>
+        <div class="signature-date">Data: ___/___/______</div>
+      </div>
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-label">Embaixador</div>
+        <div class="signature-date">Data: ___/___/______</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Este contrato foi gerado por Kardme. Imprima, preencha, assine em duas cópias e guarde uma para seus registos.</p>
+    </div>
+  </div>
+</body>
+</html>
