@@ -135,6 +135,7 @@ export async function getAmbassadorBySlug(slug: string) {
 
 // Atualizar embaixador
 export async function updateAmbassador(id: string, data: Partial<Ambassador>) {
+  console.log('[ambassadorService] Updating ambassador with data:', data);
   const { data: ambassador, error } = await supabase
     .from('ambassadors')
     .update(data)
@@ -143,6 +144,7 @@ export async function updateAmbassador(id: string, data: Partial<Ambassador>) {
     .single()
 
   if (error) throw error
+  console.log('[ambassadorService] Update response:', ambassador);
   return ambassador as Ambassador
 }
 

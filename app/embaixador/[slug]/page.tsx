@@ -339,7 +339,71 @@ export default function AmbassadorPage() {
               }}
             />
 
-            <label style={{
+            {ambassador.custom_fields && ambassador.custom_fields.length > 0 && (
+              <>
+                {ambassador.custom_fields.map((field) => (
+                  field.enabled && (
+                    <div key={field.id}>
+                      <label style={{ display: 'block', color: bioColor, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                        {field.label} {field.required && '*'}
+                      </label>
+                      {field.type === 'textarea' ? (
+                        <textarea
+                          placeholder={field.label}
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px',
+                            borderRadius: 8,
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.05)',
+                            color: textColor,
+                            fontSize: 13,
+                            fontFamily: 'inherit',
+                            minHeight: 80,
+                            resize: 'vertical',
+                          }}
+                        />
+                      ) : field.type === 'select' ? (
+                        <select
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px',
+                            borderRadius: 8,
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.05)',
+                            color: textColor,
+                            fontSize: 13,
+                            fontFamily: 'inherit',
+                          }}
+                        >
+                          <option value="">Seleciona uma opção</option>
+                          {field.options?.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder={field.label}
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px',
+                            borderRadius: 8,
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.05)',
+                            color: textColor,
+                            fontSize: 13,
+                            fontFamily: 'inherit',
+                          }}
+                        />
+                      )}
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+
+                        <label style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
