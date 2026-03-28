@@ -15,7 +15,7 @@ export default function AmbassadorPage() {
     name: '',
     email: '',
     phone: '',
-    interest_type: '', // Comprar, Vender, Alugar
+    interest_type: '',
     location: '',
     budget: '',
     notes: '',
@@ -94,81 +94,136 @@ export default function AmbassadorPage() {
     )
   }
 
+  const bgColor = ambassador.background_color || '#0f172a'
+  const textColor = ambassador.text_color || '#ffffff'
+  const bioColor = ambassador.bio_color || '#94a3b8'
+  const fontFamily = ambassador.font_family || 'system-ui'
+
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      padding: '40px 20px',
+      background: bgColor,
+      padding: '20px',
+      fontFamily: fontFamily,
     }}>
       <div style={{
-        maxWidth: '600px',
+        maxWidth: '500px',
         margin: '0 auto',
       }}>
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 40,
-        }}>
-          <h1 style={{
-            fontSize: 32,
-            fontWeight: 800,
-            color: '#fff',
-            marginBottom: 8,
-          }}>
-            {ambassador.name}
-          </h1>
-          <p style={{
-            fontSize: 14,
-            color: '#94a3b8',
-            marginBottom: 20,
-          }}>
-            {ambassador.bio || 'Embaixador Kardme'}
-          </p>
-          
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            alignItems: 'center',
-            marginBottom: 30,
-          }}>
-            {ambassador.email && (
-              <a href={`mailto:${ambassador.email}`} style={{
-                color: '#60a5fa',
-                textDecoration: 'none',
-                fontSize: 13,
-              }}>
-                📧 {ambassador.email}
-              </a>
-            )}
-            {ambassador.phone && (
-              <a href={`tel:${ambassador.phone}`} style={{
-                color: '#60a5fa',
-                textDecoration: 'none',
-                fontSize: 13,
-              }}>
-                📱 {ambassador.phone}
-              </a>
-            )}
-          </div>
-        </div>
-
+        {/* Cartão Header com Cover e Avatar */}
         <div style={{
           background: 'rgba(255,255,255,0.08)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 16,
-          padding: 32,
+          overflow: 'hidden',
+          marginBottom: 24,
+          backdropFilter: 'blur(10px)',
+        }}>
+          {/* Cover Image */}
+          {ambassador.cover_url && (
+            <div style={{
+              width: '100%',
+              height: 200,
+              background: `url(${ambassador.cover_url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }} />
+          )}
+
+          {/* Avatar + Info */}
+          <div style={{
+            padding: '24px 24px',
+            textAlign: 'center',
+            marginTop: ambassador.cover_url ? -50 : 0,
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            {ambassador.avatar_url && (
+              <img
+                src={ambassador.avatar_url}
+                alt={ambassador.name}
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: '50%',
+                  border: `4px solid ${bgColor}`,
+                  objectFit: 'cover',
+                  marginBottom: 16,
+                }}
+              />
+            )}
+
+            <h1 style={{
+              fontSize: 28,
+              fontWeight: 800,
+              color: textColor,
+              marginBottom: 8,
+              margin: 0,
+            }}>
+              {ambassador.name}
+            </h1>
+
+            {ambassador.bio && (
+              <p style={{
+                fontSize: 14,
+                color: bioColor,
+                marginBottom: 16,
+                marginTop: 8,
+              }}>
+                {ambassador.bio}
+              </p>
+            )}
+
+            {/* Contact Links */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              alignItems: 'center',
+            }}>
+              {ambassador.email && (
+                <a href={`mailto:${ambassador.email}`} style={{
+                  color: '#60a5fa',
+                  textDecoration: 'none',
+                  fontSize: 13,
+                  transition: 'opacity 0.2s',
+                }}>
+                  📧 {ambassador.email}
+                </a>
+              )}
+              {ambassador.phone && (
+                <a href={`tel:${ambassador.phone}`} style={{
+                  color: '#60a5fa',
+                  textDecoration: 'none',
+                  fontSize: 13,
+                  transition: 'opacity 0.2s',
+                }}>
+                  📱 {ambassador.phone}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Formulário */}
+        <div style={{
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 16,
+          padding: 24,
           backdropFilter: 'blur(10px)',
         }}>
           <h2 style={{
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 700,
-            color: '#fff',
-            marginBottom: 24,
+            color: textColor,
+            marginBottom: 20,
+            marginTop: 0,
           }}>
             Deixe seu contacto
           </h2>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input
               type="text"
               placeholder="Nome completo"
@@ -176,11 +231,11 @@ export default function AmbassadorPage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -193,11 +248,11 @@ export default function AmbassadorPage() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -209,11 +264,11 @@ export default function AmbassadorPage() {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -223,11 +278,11 @@ export default function AmbassadorPage() {
               value={formData.interest_type}
               onChange={(e) => setFormData({ ...formData, interest_type: e.target.value })}
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -244,11 +299,11 @@ export default function AmbassadorPage() {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -260,11 +315,11 @@ export default function AmbassadorPage() {
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
               }}
@@ -275,14 +330,14 @@ export default function AmbassadorPage() {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               style={{
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.2)',
                 background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                color: textColor,
                 fontSize: 13,
                 fontFamily: 'inherit',
-                minHeight: 100,
+                minHeight: 80,
                 resize: 'vertical',
               }}
             />
@@ -291,7 +346,7 @@ export default function AmbassadorPage() {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              color: '#cbd5e1',
+              color: bioColor,
               fontSize: 12,
               cursor: 'pointer',
             }}>
@@ -320,6 +375,7 @@ export default function AmbassadorPage() {
                 cursor: submitting ? 'not-allowed' : 'pointer',
                 opacity: submitting ? 0.6 : 1,
                 transition: 'all 0.2s',
+                marginTop: 8,
               }}
             >
               {submitting ? 'Enviando...' : 'Enviar'}
@@ -329,9 +385,9 @@ export default function AmbassadorPage() {
 
         <div style={{
           textAlign: 'center',
-          marginTop: 40,
-          color: '#64748b',
-          fontSize: 12,
+          marginTop: 32,
+          color: bioColor,
+          fontSize: 11,
         }}>
           <p>Powered by Kardme</p>
         </div>
