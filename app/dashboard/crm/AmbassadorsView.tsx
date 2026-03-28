@@ -82,17 +82,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   };
 
   const handleEdit = (amb: Ambassador) => {
-    setFormData({
-      name: amb.name,
-      email: amb.email || '',
-      phone: amb.phone || '',
-      card_type: amb.card_type,
-      commission_type: amb.commission_type,
-      commission_value: amb.commission_value,
-      bio: amb.bio || '',
-    });
-    setEditingId(amb.id);
-    setShowForm(true);
+    setEditingAmbassador(amb);
   };
 
   const handleDelete = async (id: string) => {
