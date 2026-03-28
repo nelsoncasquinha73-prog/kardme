@@ -459,7 +459,7 @@ export default function AmbassadorPage() {
         ambassadorUrl={typeof window !== 'undefined' ? window.location.href : ''}
         ambassadorName={ambassador.name}
         ambassadorId={ambassador.id}
-        buttonColor={ambassador.primary_color || '#8B5CF6'}
+        buttonColor={ambassador.background_color || '#8B5CF6'}
       />
     </div>
   )
