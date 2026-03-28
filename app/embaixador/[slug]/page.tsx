@@ -162,6 +162,59 @@ export default function AmbassadorPage() {
           )}
         </div>
 
+        {(ambassador.email || ambassador.phone) && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: ambassador.email && ambassador.phone ? '1fr 1fr' : '1fr',
+            gap: 12,
+            marginBottom: 24,
+          }}>
+            {ambassador.email && (
+              <a
+                href={`mailto:${ambassador.email}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  padding: '12px 16px',
+                  background: bioColor,
+                  color: bgColor,
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  borderRadius: 10,
+                }}
+              >
+                <FiMail size={18} />
+                Email
+              </a>
+            )}
+
+            {ambassador.phone && (
+              <a
+                href={`tel:${ambassador.phone}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  padding: '12px 16px',
+                  background: bioColor,
+                  color: bgColor,
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  borderRadius: 10,
+                }}
+              >
+                <FiPhone size={18} />
+                Ligar
+              </a>
+            )}
+          </div>
+        )}
+
         <div style={{
           background: 'rgba(255,255,255,0.05)',
           borderRadius: 12,
