@@ -463,7 +463,7 @@ export default function AmbassadorPage() {
         ambassadorId={ambassador.id}
         buttonColor={ambassador.background_color || '#8B5CF6'}
       />
-    </div>
+      </div>
       </ThemeProvider>
     </LanguageProvider>
   )
