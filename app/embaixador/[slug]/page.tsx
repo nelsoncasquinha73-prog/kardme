@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getAmbassadorBySlug, createAmbassadorLead, type Ambassador } from '@/lib/ambassadors/ambassadorService'
+import AmbassadorFloatingActions from '@/components/public/AmbassadorFloatingActions'
 
 export default function AmbassadorPage() {
   const params = useParams()
@@ -453,6 +454,13 @@ export default function AmbassadorPage() {
           <p>Powered by Kardme</p>
         </div>
       </div>
+
+      <AmbassadorFloatingActions
+        ambassadorUrl={typeof window !== 'undefined' ? window.location.href : ''}
+        ambassadorName={ambassador.name}
+        ambassadorId={ambassador.id}
+        buttonColor={ambassador.primary_color || '#8B5CF6'}
+      />
     </div>
   )
 }
