@@ -132,23 +132,20 @@ export default function AmbassadorPage() {
 
           {/* Avatar + Info */}
           <div style={{
-            padding: '24px 24px',
+            padding: '32px 24px 24px 24px',
             textAlign: 'center',
-            marginTop: ambassador.cover_url ? -50 : 0,
-            position: 'relative',
-            zIndex: 1,
           }}>
             {ambassador.avatar_url && (
               <img
                 src={ambassador.avatar_url}
                 alt={ambassador.name}
                 style={{
-                  width: 100,
-                  height: 100,
+                  width: 160,
+                  height: 160,
                   borderRadius: '50%',
-                  border: `4px solid ${bgColor}`,
+                  border: `6px solid ${bgColor}`,
                   objectFit: 'cover',
-                  marginBottom: 16,
+                  marginBottom: 20,
                 }}
               />
             )}
