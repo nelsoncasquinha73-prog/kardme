@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getAmbassadorBySlug, createAmbassadorLead, type Ambassador } from '@/lib/ambassadors/ambassadorService'
 import AmbassadorFloatingActions from '@/components/public/AmbassadorFloatingActions'
+import { LanguageProvider } from '@/components/language/LanguageProvider'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 
 export default function AmbassadorPage() {
   const params = useParams()
@@ -462,5 +464,8 @@ export default function AmbassadorPage() {
         buttonColor={ambassador.background_color || '#8B5CF6'}
       />
     </div>
+        </>
+      </ThemeProvider>
+    </LanguageProvider>
   )
 }

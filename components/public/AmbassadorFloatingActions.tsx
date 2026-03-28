@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FiShare2, FiX, FiUpload } from 'react-icons/fi'
+import { FiShare2, FiX } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import { HiOutlineUserAdd } from 'react-icons/hi'
 import ShareModal from './ShareModal'
@@ -14,25 +14,31 @@ type Props = {
   buttonColor?: string
 }
 
-export default function AmbassadorFloatingActions({ ambassadorUrl, ambassadorName, ambassadorId, buttonColor = '#8B5CF6' }: Props) {
+export default function AmbassadorFloatingActions({
+  ambassadorUrl,
+  ambassadorName,
+  ambassadorId,
+  buttonColor = '#8B5CF6',
+}: Props) {
   const [expanded, setExpanded] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showQR, setShowQR] = useState(false)
 
   const handleSaveContact = () => {
-    // Gerar vCard para o embaixador
     const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${ambassadorName}
 URL:${ambassadorUrl}
 END:VCARD`
-    
-    const blob = new Blob([vcard], { type: 'text/vcard' })
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = `${ambassadorName.replace(/\s+/g, '-')}.vcf`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
@@ -65,7 +71,6 @@ END:VCARD`
 
   return (
     <>
-      {/* FAB Container */}
       <div
         style={{
           position: 'fixed',
@@ -78,7 +83,6 @@ END:VCARD`
           zIndex: 1000,
         }}
       >
-        {/* Main FAB */}
         <button
           onClick={() => setExpanded(!expanded)}
           style={mainButton}
@@ -87,10 +91,8 @@ END:VCARD`
           {expanded ? <FiX size={24} /> : <FiShare2 size={24} />}
         </button>
 
-        {/* Secondary buttons */}
         {expanded && (
           <>
-            {/* Partilhar */}
             <button
               onClick={() => {
                 setShowShare(true)
@@ -103,7 +105,6 @@ END:VCARD`
               <FiShare2 size={22} />
             </button>
 
-            {/* QR Code */}
             <button
               onClick={() => {
                 setShowQR(true)
@@ -116,7 +117,6 @@ END:VCARD`
               <BsQrCode size={22} />
             </button>
 
-            {/* Guardar Contacto */}
             <button
               onClick={() => {
                 handleSaveContact()
@@ -132,7 +132,6 @@ END:VCARD`
         )}
       </div>
 
-      {/* Modals */}
       {showShare && (
         <ShareModal
           url={ambassadorUrl}
