@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { FiShare2, FiX } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import { HiOutlineUserAdd } from 'react-icons/hi'
-import ShareModal from './ShareModal'
 import QRCodeModal from './QRCodeModal'
 
 type Props = {
@@ -21,8 +20,29 @@ export default function AmbassadorFloatingActions({
   buttonColor = '#8B5CF6',
 }: Props) {
   const [expanded, setExpanded] = useState(false)
-  const [showShare, setShowShare] = useState(false)
   const [showQR, setShowQR] = useState(false)
+
+  const handleShare = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: ambassadorName,
+          url: ambassadorUrl,
+        })
+        return
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(ambassadorUrl)
+        alert('Link copiado com sucesso!')
+        return
+      }
+
+      prompt('Copia este link:', ambassadorUrl)
+    } catch (error) {
+      console.error('Erro ao partilhar:', error)
+    }
+  }
 
   const handleSaveContact = () => {
     const vcard = `BEGIN:VCARD
@@ -95,7 +115,7 @@ END:VCARD`
           <>
             <button
               onClick={() => {
-                setShowShare(true)
+                handleShare()
                 setExpanded(false)
               }}
               style={secondaryButton}
@@ -131,14 +151,6 @@ END:VCARD`
           </>
         )}
       </div>
-
-      {showShare && (
-        <ShareModal
-          url={ambassadorUrl}
-          title={ambassadorName}
-          onClose={() => setShowShare(false)}
-        />
-      )}
 
       {showQR && (
         <QRCodeModal
