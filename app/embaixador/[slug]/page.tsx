@@ -396,6 +396,9 @@ export default function AmbassadorPage() {
         ambassadorUrl={typeof window !== 'undefined' ? window.location.href : ''}
         ambassadorName={ambassador.name}
         ambassadorId={ambassador.id}
+        ambassadorEmail={ambassador.email}
+        ambassadorPhone={ambassador.phone}
+        ambassadorBio={ambassador.bio}
         buttonColor={ambassador.background_color || '#8B5CF6'}
       />
     </div>

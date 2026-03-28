@@ -10,6 +10,9 @@ type Props = {
   ambassadorUrl: string
   ambassadorName: string
   ambassadorId: string
+  ambassadorEmail?: string
+  ambassadorPhone?: string
+  ambassadorBio?: string
   buttonColor?: string
 }
 
@@ -17,6 +20,9 @@ export default function AmbassadorFloatingActions({
   ambassadorUrl,
   ambassadorName,
   ambassadorId,
+  ambassadorEmail,
+  ambassadorPhone,
+  ambassadorBio,
   buttonColor = '#8B5CF6',
 }: Props) {
   const [expanded, setExpanded] = useState(false)
@@ -45,9 +51,17 @@ export default function AmbassadorFloatingActions({
   }
 
   const handleSaveContact = () => {
-    const vcard = `BEGIN:VCARD
+    let vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:${ambassadorName}
+FN:${ambassadorName}`
+    
+    if (ambassadorEmail) vcard += `
+EMAIL:${ambassadorEmail}`
+    if (ambassadorPhone) vcard += `
+TEL:${ambassadorPhone}`
+    if (ambassadorBio) vcard += `
+NOTE:${ambassadorBio}`
+    vcard += `
 URL:${ambassadorUrl}
 END:VCARD`
 
@@ -79,6 +93,7 @@ END:VCARD`
     ...buttonBase,
     background: buttonColor,
     color: '#fff',
+    transform: expanded ? 'rotate(45deg) scale(1.1)' : 'scale(1)',
   }
 
   const secondaryButton: React.CSSProperties = {
@@ -87,6 +102,7 @@ END:VCARD`
     height: 48,
     background: '#fff',
     color: buttonColor,
+    transform: 'scale(0.9)',
   }
 
   return (
