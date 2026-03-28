@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { FiPhone, FiMail } from 'react-icons/fi'
 import { getAmbassadorBySlug, createAmbassadorLead, type Ambassador } from '@/lib/ambassadors/ambassadorService'
 import AmbassadorFloatingActions from '@/components/public/AmbassadorFloatingActions'
 
