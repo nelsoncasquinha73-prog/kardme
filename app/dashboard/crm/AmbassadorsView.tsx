@@ -37,6 +37,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAmbassador, setEditingAmbassador] = useState<Ambassador | null>(null);
+  const [openPlanDropdown, setOpenPlanDropdown] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -208,9 +209,35 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
 
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {amb.subscription_status !== 'active' && (
-                  <button title="Ativar Subscrição (3,99€/mês)" style={{ padding: '8px 12px', borderRadius: 8, background: '#fbbf24', color: '#000', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>
-                    💳 Ativar 3,99€
-                  </button>
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      onClick={() => setOpenPlanDropdown(openPlanDropdown === amb.id ? null : amb.id)}
+                      title="Escolher plano de subscrição"
+                      style={{ padding: '8px 12px', borderRadius: 8, background: '#fbbf24', color: '#000', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}
+                    >
+                      💳 Escolher plano ▼
+                    </button>
+                    {openPlanDropdown === amb.id && (
+                      <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#1f2937', border: '1px solid #374151', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 10, minWidth: 180 }}>
+                        <button 
+                          onClick={() => { console.log('Ativar plano mensal:', amb.id); setOpenPlanDropdown(null); }}
+                          style={{ width: '100%', padding: '10px 14px', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderBottom: '1px solid #374151', transition: 'background 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#374151'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          📅 3,99€/mês
+                        </button>
+                        <button 
+                          onClick={() => { console.log('Ativar plano anual:', amb.id); setOpenPlanDropdown(null); }}
+                          style={{ width: '100%', padding: '10px 14px', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600, transition: 'background 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#374151'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          🎁 39€/ano (poupa 3€)
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
                 {amb.subscription_status === 'active' && (
                   <button title="Subscrição Ativa" style={{ padding: '8px 12px', borderRadius: 8, background: '#d1fae5', color: '#065f46', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>
