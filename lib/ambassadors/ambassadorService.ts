@@ -41,6 +41,7 @@ export interface Ambassador {
   subscription_price?: number
   subscription_currency?: string
   subscription_id?: string
+  subscription_current_period_end?: string | null
   checkout_session_id?: string
   activated_at?: string
   deactivated_at?: string

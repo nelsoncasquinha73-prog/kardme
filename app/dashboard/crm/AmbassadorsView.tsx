@@ -37,7 +37,9 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAmbassador, setEditingAmbassador] = useState<Ambassador | null>(null);
-  const [openPlanDropdown, setOpenPlanDropdown] = useState<string | null>(null);
+  const [openPlanDropdown, setOpenPlanDropdown] = useState<string | null>(null)
+  const [cancelConfirm, setCancelConfirm] = useState<{ id: string; periodEnd: string | null } | null>(null)
+  const [cancelLoading, setCancelLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -138,6 +140,26 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   };
 
   
+  const handleCancelSubscription = async () => {
+    if (!cancelConfirm) return
+    setCancelLoading(true)
+    try {
+      const response = await fetch('/api/stripe/cancel-ambassador', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ambassadorId: cancelConfirm.id }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Erro ao cancelar')
+      setCancelConfirm(null)
+      loadAmbassadors()
+    } catch (err: any) {
+      alert('Erro ao cancelar subscrição: ' + err.message)
+    } finally {
+      setCancelLoading(false)
+    }
+  }
+
   const handleCheckout = async (ambassadorId: string, planType: 'monthly' | 'yearly') => {
     try {
       const response = await fetch('/api/stripe/checkout', {
@@ -265,8 +287,12 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                   </div>
                 )}
                 {amb.subscription_status === 'active' && (
-                  <button title="Subscrição Ativa" style={{ padding: '8px 12px', borderRadius: 8, background: '#d1fae5', color: '#065f46', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>
-                    ✅ Ativo
+                  <button 
+                    onClick={() => setCancelConfirm({ id: amb.id, periodEnd: amb.subscription_current_period_end || null })}
+                    title="Cancelar subscrição"
+                    style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}
+                  >
+                    ❌ Cancelar
                   </button>
                 )}
                 <button onClick={() => handleDownloadContract(amb)} title="Ver Contrato" style={{ padding: '8px 12px', borderRadius: 8, background: '#dbeafe', color: '#0284c7', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiDownload size={14} /> Contrato</button>

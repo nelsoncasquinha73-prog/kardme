@@ -22,6 +22,7 @@ async function updateAmbassadorSubscription(params: {
   subscriptionId?: string | null
   status: 'inactive' | 'pending' | 'active' | 'canceled' | 'past_due'
   billingCycle?: string | null
+  currentPeriodEnd?: string | null
 }) {
   try {
     const updateData: any = {
@@ -282,12 +283,22 @@ export async function POST(req: Request) {
         const subscriptionId = session.subscription as string | null
 
         if (ambassadorId && session.payment_status === 'paid') {
+          let currentPeriodEnd: string | null = null
+          if (subscriptionId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subscriptionId)
+              currentPeriodEnd = new Date((sub as any).current_period_end * 1000).toISOString()
+            } catch (e) {
+              console.error('Error retrieving subscription period end:', e)
+            }
+          }
           await updateAmbassadorSubscription({
             ambassadorId,
             userId,
             subscriptionId,
             status: 'active',
             billingCycle: planType === 'yearly' ? 'yearly' : 'monthly',
+            currentPeriodEnd,
           })
         }
       }
