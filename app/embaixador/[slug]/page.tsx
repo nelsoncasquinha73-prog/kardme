@@ -107,6 +107,29 @@ export default function AmbassadorPage() {
     )
   }
 
+  if (!ambassador.is_published) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#000',
+      }}>
+        <div style={{
+          background: '#fff',
+          padding: 24,
+          borderRadius: 12,
+          textAlign: 'center',
+        }}>
+          <h1>Este embaixador não está publicado</h1>
+          <button onClick={() => window.history.back()}>Voltar</button>
+        </div>
+      </div>
+    )
+  }
+
   const bioColor = ambassador.bio_color || '#cbd5e1'
   const textColor = ambassador.text_color || '#fff'
   const bgColor = ambassador.background_color || '#1e293b'
