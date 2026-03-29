@@ -115,16 +115,69 @@ export default function AmbassadorPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#000',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
       }}>
         <div style={{
-          background: '#fff',
-          padding: 24,
-          borderRadius: 12,
           textAlign: 'center',
+          maxWidth: 500,
+          padding: '40px 24px',
         }}>
-          <h1>Este embaixador não está publicado</h1>
-          <button onClick={() => window.history.back()}>Voltar</button>
+          <div style={{
+            fontSize: 64,
+            marginBottom: 24,
+          }}>
+            🔒
+          </div>
+          <h1 style={{
+            color: '#fff',
+            fontSize: 28,
+            fontWeight: 700,
+            margin: '0 0 12px 0',
+          }}>
+            Cartão não publicado
+          </h1>
+          <p style={{
+            color: '#cbd5e1',
+            fontSize: 16,
+            margin: '0 0 32px 0',
+            lineHeight: 1.6,
+          }}>
+            Este embaixador ainda não publicou seu cartão. Volte mais tarde ou contacte o embaixador diretamente.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              padding: '12px 32px',
+              borderRadius: 8,
+              background: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: 14,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#2563eb'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#3b82f6'
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+          >
+            ← Voltar
+          </button>
+          <div style={{
+            marginTop: 48,
+            paddingTop: 24,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            color: '#64748b',
+            fontSize: 12,
+          }}>
+            <p style={{ margin: 0 }}>Powered by Kardme</p>
+          </div>
         </div>
       </div>
     )
