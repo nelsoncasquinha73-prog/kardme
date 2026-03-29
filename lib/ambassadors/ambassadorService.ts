@@ -333,6 +333,7 @@ export async function deactivateAmbassadorSubscription(
 }
 
 export async function toggleAmbassadorPublished(id: string, isPublished: boolean, userId?: string) {
+  console.log('toggleAmbassadorPublished called with:', { id, isPublished, userId })
   const { data, error } = await supabase
     .from('ambassadors')
     .update({ is_published: isPublished, updated_at: new Date().toISOString() })
