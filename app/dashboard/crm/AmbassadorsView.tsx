@@ -292,7 +292,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                     title="Cancelar subscrição"
                     style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}
                   >
-                    ❌ Cancelar
+                    ❌ Cancelar Subscrição
                   </button>
                 )}
                 <button onClick={() => handleDownloadContract(amb)} title="Ver Contrato" style={{ padding: '8px 12px', borderRadius: 8, background: '#dbeafe', color: '#0284c7', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiDownload size={14} /> Contrato</button>
@@ -309,6 +309,48 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
       )}
 
       <AmbassadorEditModal ambassador={editingAmbassador} onClose={() => setEditingAmbassador(null)} onSave={handleSaveAmbassador} onRefresh={loadAmbassadors} />
+
+      {cancelConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 12, padding: 32, maxWidth: 420, width: '90%', textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+            <h3 style={{ color: '#fff', fontSize: 18, fontWeight: 700, margin: '0 0 12px 0' }}>
+              Cancelar subscrição?
+            </h3>
+            <p style={{ color: '#cbd5e1', fontSize: 14, lineHeight: 1.6, margin: '0 0 8px 0' }}>
+              Tens a certeza que queres cancelar a subscrição deste embaixador?
+            </p>
+            {cancelConfirm.periodEnd ? (
+              <p style={{ color: '#fbbf24', fontSize: 13, fontWeight: 600, margin: '0 0 24px 0' }}>
+                O cartão continuará ativo até{' '}
+                <strong>
+                  {new Date(cancelConfirm.periodEnd).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </strong>
+              </p>
+            ) : (
+              <p style={{ color: '#94a3b8', fontSize: 13, margin: '0 0 24px 0' }}>
+                O cancelamento será processado de imediato.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setCancelConfirm(null)}
+                disabled={cancelLoading}
+                style={{ flex: 1, padding: '12px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+              >
+                Manter subscrição
+              </button>
+              <button
+                onClick={handleCancelSubscription}
+                disabled={cancelLoading}
+                style={{ flex: 1, padding: '12px 16px', borderRadius: 8, background: '#ef4444', color: '#fff', border: 'none', fontWeight: 700, fontSize: 13, cursor: cancelLoading ? 'not-allowed' : 'pointer', opacity: cancelLoading ? 0.6 : 1 }}
+              >
+                {cancelLoading ? 'A cancelar...' : 'Confirmar cancelamento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
