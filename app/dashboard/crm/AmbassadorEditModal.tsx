@@ -35,7 +35,6 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
         formData.user_id
       )
       setFormData(updatedAmbassador)
-      if (onRefresh) onRefresh()
     } catch (error) {
       console.error('Erro ao publicar:', error)
       alert('Erro ao atualizar publicação')
