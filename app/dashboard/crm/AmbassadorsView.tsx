@@ -233,7 +233,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                           onMouseEnter={(e) => e.currentTarget.style.background = '#374151'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          🎁 39€/ano (poupa 3€)
+                          🎁 39€/ano + 2 meses de oferta
                         </button>
                       </div>
                     )}
