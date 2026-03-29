@@ -29,8 +29,12 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
     if (!ambassador) return
     setPublishLoading(true)
     try {
-      await toggleAmbassadorPublished(ambassador.id, !formData.is_published, ambassador.user_id)
-      setFormData({ ...formData, is_published: !formData.is_published })
+      const updatedAmbassador = await toggleAmbassadorPublished(
+        ambassador.id,
+        !formData.is_published,
+        ambassador.user_id
+      )
+      setFormData(updatedAmbassador)
       if (onRefresh) onRefresh()
     } catch (error) {
       console.error('Erro ao publicar:', error)
