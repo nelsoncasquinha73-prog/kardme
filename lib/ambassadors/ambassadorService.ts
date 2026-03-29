@@ -45,6 +45,7 @@ export interface Ambassador {
   activated_at?: string
   deactivated_at?: string
   access_token?: string
+  is_published: boolean
   created_at: string
   updated_at: string
 }
@@ -329,4 +330,18 @@ export async function deactivateAmbassadorSubscription(
 
   if (error) throw error
   return data
+}
+
+export async function toggleAmbassadorPublished(id: string, isPublished: boolean, userId?: string) {
+  let query = supabase
+    .from('ambassadors')
+    .update({ is_published: isPublished, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  
+  if (userId) query = query.eq('user_id', userId)
+  
+  const { data, error } = await query.select().single()
+  
+  if (error) throw error
+  return data as Ambassador
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Ambassador } from '@/lib/ambassadors/ambassadorService'
+import { Ambassador, toggleAmbassadorPublished } from '@/lib/ambassadors/ambassadorService'
 import { FiX, FiUpload, FiPlus, FiTrash2 } from 'react-icons/fi'
 
 interface AmbassadorEditModalProps {
@@ -13,6 +13,7 @@ interface AmbassadorEditModalProps {
 export default function AmbassadorEditModal({ ambassador, onClose, onSave }: AmbassadorEditModalProps) {
   const [formData, setFormData] = useState<Partial<Ambassador>>(ambassador || {})
   const [saving, setSaving] = useState(false)
+  const [publishLoading, setPublishLoading] = useState(false)
   const avatarRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
 
@@ -22,6 +23,20 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
   }, [ambassador])
 
   if (!ambassador) return null
+
+  const handlePublish = async () => {
+    if (!ambassador) return
+    setPublishLoading(true)
+    try {
+      await toggleAmbassadorPublished(ambassador.id, !formData.is_published, ambassador.user_id)
+      setFormData({ ...formData, is_published: !formData.is_published })
+    } catch (error) {
+      console.error('Erro ao publicar:', error)
+      alert('Erro ao atualizar publicação')
+    } finally {
+      setPublishLoading(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -107,6 +122,38 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
           <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Slug (URL do Cartão)</label>
           <input type="text" placeholder="ex: nelson-domingos-4aiuyo" value={formData.slug || ''} onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') })} style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }} />
           <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>URL pública: kardme.com/embaixador/{formData.slug || 'seu-slug'}</p>
+        </div>
+
+        <div style={{ marginBottom: 24, padding: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: '#cbd5e1', margin: '0 0 4px 0' }}>Estado do Cartão</p>
+              <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>
+                {formData.is_published ? '🔒 Publicado' : '🔓 Despublicado'}
+              </p>
+            </div>
+            <button 
+              onClick={handlePublish}
+              disabled={publishLoading || ambassador?.subscription_status !== 'active'}
+              title={ambassador?.subscription_status !== 'active' ? 'Ativa a subscrição para publicar' : ''}
+              style={{ 
+                padding: '8px 16px', 
+                borderRadius: 8, 
+                background: formData.is_published ? '#ef4444' : '#10b981',
+                color: '#fff', 
+                border: 'none', 
+                cursor: (publishLoading || ambassador?.subscription_status !== 'active') ? 'not-allowed' : 'pointer', 
+                fontSize: 12, 
+                fontWeight: 600,
+                opacity: (publishLoading || ambassador?.subscription_status !== 'active') ? 0.5 : 1
+              }}
+            >
+              {publishLoading ? '...' : formData.is_published ? 'Despublicar' : 'Publicar'}
+            </button>
+          </div>
+          {ambassador?.subscription_status !== 'active' && (
+            <p style={{ fontSize: 11, color: '#fbbf24', marginTop: 8, margin: '8px 0 0 0' }}>⚠️ Ativa a subscrição para publicar o cartão</p>
+          )}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
