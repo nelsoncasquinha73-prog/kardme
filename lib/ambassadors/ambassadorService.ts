@@ -36,6 +36,15 @@ export interface Ambassador {
     required: boolean
     enabled: boolean
   }>
+  subscription_status?: 'inactive' | 'pending' | 'active' | 'canceled' | 'past_due'
+  subscription_plan?: string
+  subscription_price?: number
+  subscription_currency?: string
+  subscription_id?: string
+  checkout_session_id?: string
+  activated_at?: string
+  deactivated_at?: string
+  access_token?: string
   created_at: string
   updated_at: string
 }
