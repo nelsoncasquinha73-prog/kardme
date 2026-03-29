@@ -19,6 +19,19 @@ interface AmbassadorsViewProps {
   userId: string;
 }
 
+
+// Helper para badge de subscrição
+function getSubscriptionBadge(status?: string) {
+  const badges: Record<string, { bg: string; color: string; label: string }> = {
+    inactive: { bg: '#6b7280', color: '#fff', label: '⚪ Inativo' },
+    pending: { bg: '#f59e0b', color: '#000', label: '🟡 Pendente' },
+    active: { bg: '#10b981', color: '#fff', label: '🟢 Ativo' },
+    canceled: { bg: '#ef4444', color: '#fff', label: '🔴 Cancelado' },
+    past_due: { bg: '#dc2626', color: '#fff', label: '⛔ Vencido' },
+  }
+  return badges[status || 'inactive']
+}
+
 export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const [ambassadors, setAmbassadors] = useState<Ambassador[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -173,13 +186,37 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
           {ambassadors.map((amb) => (
             <div key={amb.id} style={{ padding: 16, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h4 style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>{amb.name}</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                  <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>{amb.name}</h4>
+                  {amb.subscription_status && (
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      background: getSubscriptionBadge(amb.subscription_status).bg,
+                      color: getSubscriptionBadge(amb.subscription_status).color,
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }}>
+                      {getSubscriptionBadge(amb.subscription_status).label}
+                    </span>
+                  )}
+                </div>
                 <p style={{ fontSize: 12, color: '#d1d5db', marginBottom: 4 }}>{amb.email} • {amb.phone}</p>
                 <p style={{ fontSize: 12, color: '#d1d5db' }}>Comissão: {amb.commission_type === 'percentage' ? `${amb.commission_value}%` : `€${amb.commission_value}`}</p>
                 <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>{amb.contract_signed ? '✅ Contrato Assinado' : '⏳ Aguardando Assinatura'}</p>
               </div>
 
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {amb.subscription_status !== 'active' && (
+                  <button title="Ativar Subscrição (3,99€/mês)" style={{ padding: '8px 12px', borderRadius: 8, background: '#fbbf24', color: '#000', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>
+                    💳 Ativar 3,99€
+                  </button>
+                )}
+                {amb.subscription_status === 'active' && (
+                  <button title="Subscrição Ativa" style={{ padding: '8px 12px', borderRadius: 8, background: '#d1fae5', color: '#065f46', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>
+                    ✅ Ativo
+                  </button>
+                )}
                 <button onClick={() => handleDownloadContract(amb)} title="Ver Contrato" style={{ padding: '8px 12px', borderRadius: 8, background: '#dbeafe', color: '#0284c7', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiDownload size={14} /> Contrato</button>
                 {!amb.contract_signed && (
                   <button onClick={() => handleMarkSigned(amb.id)} title="Confirmar Assinatura" style={{ padding: '8px 12px', borderRadius: 8, background: '#dcfce7', color: '#16a34a', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiCheck size={14} /> Confirmar assinatura</button>

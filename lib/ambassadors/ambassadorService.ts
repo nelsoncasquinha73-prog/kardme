@@ -291,3 +291,33 @@ export async function deleteAmbassador(id: string) {
 
   if (error) throw error
 }
+
+export async function activateAmbassadorSubscription(
+  ambassadorId: string,
+  subscriptionId: string,
+  userId: string
+) {
+  const { data, error } = await supabase.rpc('activate_ambassador', {
+    p_ambassador_id: ambassadorId,
+    p_subscription_id: subscriptionId,
+    p_user_id: userId,
+  })
+
+  if (error) throw error
+  return data
+}
+
+export async function deactivateAmbassadorSubscription(
+  ambassadorId: string,
+  userId: string,
+  reason?: string
+) {
+  const { data, error } = await supabase.rpc('deactivate_ambassador', {
+    p_ambassador_id: ambassadorId,
+    p_user_id: userId,
+    p_reason: reason || null,
+  })
+
+  if (error) throw error
+  return data
+}
