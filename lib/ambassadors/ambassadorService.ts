@@ -333,15 +333,18 @@ export async function deactivateAmbassadorSubscription(
 }
 
 export async function toggleAmbassadorPublished(id: string, isPublished: boolean, userId?: string) {
-  let query = supabase
+  const { data, error } = await supabase
     .from('ambassadors')
     .update({ is_published: isPublished, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .select()
+    .single()
   
-  if (userId) query = query.eq('user_id', userId)
+  if (error) {
+    console.error('Error toggling ambassador published:', error)
+    throw error
+  }
   
-  const { data, error } = await query.select().single()
-  
-  if (error) throw error
+  console.log('Ambassador published toggled:', data)
   return data as Ambassador
 }

@@ -8,9 +8,10 @@ interface AmbassadorEditModalProps {
   ambassador: Ambassador | null
   onClose: () => void
   onSave: (data: Partial<Ambassador>) => Promise<void>
+  onRefresh?: () => void
 }
 
-export default function AmbassadorEditModal({ ambassador, onClose, onSave }: AmbassadorEditModalProps) {
+export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRefresh }: AmbassadorEditModalProps) {
   const [formData, setFormData] = useState<Partial<Ambassador>>(ambassador || {})
   const [saving, setSaving] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
@@ -30,6 +31,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave }: Amb
     try {
       await toggleAmbassadorPublished(ambassador.id, !formData.is_published, ambassador.user_id)
       setFormData({ ...formData, is_published: !formData.is_published })
+      if (onRefresh) onRefresh()
     } catch (error) {
       console.error('Erro ao publicar:', error)
       alert('Erro ao atualizar publicação')

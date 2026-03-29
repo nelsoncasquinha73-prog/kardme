@@ -282,7 +282,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
         </div>
       )}
 
-      <AmbassadorEditModal ambassador={editingAmbassador} onClose={() => setEditingAmbassador(null)} onSave={handleSaveAmbassador} />
+      <AmbassadorEditModal ambassador={editingAmbassador} onClose={() => setEditingAmbassador(null)} onSave={handleSaveAmbassador} onRefresh={loadAmbassadors} />
     </div>
   );
 }
