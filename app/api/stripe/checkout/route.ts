@@ -35,9 +35,18 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/crm?checkout=success&ambassador=${ambassadorId}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/crm?checkout=canceled&ambassador=${ambassadorId}`,
       metadata: {
+        purchase_type: 'ambassador_subscription',
         ambassadorId,
         userId,
         planType,
+      },
+      subscription_data: {
+        metadata: {
+          purchase_type: 'ambassador_subscription',
+          ambassadorId,
+          userId,
+          planType,
+        },
       },
     })
 

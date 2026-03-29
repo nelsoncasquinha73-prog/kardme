@@ -14,6 +14,44 @@ const supabaseAdmin = createClient(
 )
 
 
+
+
+async function updateAmbassadorSubscription(params: {
+  ambassadorId: string
+  userId?: string | null
+  subscriptionId?: string | null
+  status: 'inactive' | 'pending' | 'active' | 'canceled' | 'past_due'
+  billingCycle?: string | null
+}) {
+  try {
+    const updateData: any = {
+      subscription_status: params.status,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (params.subscriptionId) updateData.subscription_id = params.subscriptionId
+    if (params.billingCycle) updateData.subscription_plan = params.billingCycle
+
+    if (params.status === 'active') {
+      updateData.activated_at = new Date().toISOString()
+      updateData.is_active = true
+    }
+
+    if (params.status === 'canceled' || params.status === 'inactive' || params.status === 'past_due') {
+      updateData.deactivated_at = new Date().toISOString()
+      updateData.is_active = false
+    }
+
+    let query = supabaseAdmin.from('ambassadors').update(updateData).eq('id', params.ambassadorId)
+    if (params.userId) query = query.eq('user_id', params.userId)
+
+    await query
+    console.log(`Ambassador subscription updated: ${params.ambassadorId} -> ${params.status}`)
+  } catch (err: any) {
+    console.error('Error updating ambassador subscription:', err)
+  }
+}
+
 async function updateCRMProAddon(userId: string, active: boolean, subscriptionId?: string, billingCycle?: string) {
   try {
     const updateData: any = {
@@ -236,6 +274,23 @@ export async function POST(req: Request) {
           }
         }
       }
+
+      if (purchaseType === 'ambassador_subscription') {
+        const ambassadorId = session.metadata?.ambassadorId
+        const userId = session.metadata?.userId
+        const planType = session.metadata?.planType
+        const subscriptionId = session.subscription as string | null
+
+        if (ambassadorId && session.payment_status === 'paid') {
+          await updateAmbassadorSubscription({
+            ambassadorId,
+            userId,
+            subscriptionId,
+            status: 'active',
+            billingCycle: planType === 'yearly' ? 'yearly' : 'monthly',
+          })
+        }
+      }
     }
 
     if (event.type === 'payment_intent.payment_failed') {
@@ -276,6 +331,26 @@ export async function POST(req: Request) {
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string | null
+      const invoiceSub = (invoice as any).subscription as string | null
+
+      // Handle ambassador subscription payment failure
+      if (invoiceSub) {
+        const subscription = await stripe.subscriptions.retrieve(invoiceSub)
+        const subMetadata = (subscription as any).metadata || {}
+        const isAmbassadorSubscription = subMetadata.purchase_type === 'ambassador_subscription'
+        const ambassadorId = subMetadata.ambassadorId as string | undefined
+        const ambassadorUserId = subMetadata.userId as string | undefined
+
+        if (isAmbassadorSubscription && ambassadorId) {
+          await updateAmbassadorSubscription({
+            ambassadorId,
+            userId: ambassadorUserId,
+            subscriptionId: subscription.id,
+            status: 'past_due',
+            billingCycle: subscription.items?.data?.[0]?.price?.recurring?.interval === 'year' ? 'yearly' : 'monthly',
+          })
+        }
+      }
 
       let email: string | null =
         (invoice.customer_email as string | null) ||
