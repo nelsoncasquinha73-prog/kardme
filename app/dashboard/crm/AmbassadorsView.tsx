@@ -137,6 +137,31 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
     }
   };
 
+  
+  const handleCheckout = async (ambassadorId: string, planType: 'monthly' | 'yearly') => {
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ambassadorId,
+          planType,
+          userId,
+        }),
+      })
+
+      const data = await response.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Erro ao iniciar pagamento')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Erro ao processar pagamento')
+    }
+  };
+
   return (
     <div style={{ padding: '20px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -220,7 +245,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                     {openPlanDropdown === amb.id && (
                       <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#1f2937', border: '1px solid #374151', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 10, minWidth: 180 }}>
                         <button 
-                          onClick={() => { console.log('Ativar plano mensal:', amb.id); setOpenPlanDropdown(null); }}
+                          onClick={() => { handleCheckout(amb.id, 'monthly'); setOpenPlanDropdown(null); }}
                           style={{ width: '100%', padding: '10px 14px', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderBottom: '1px solid #374151', transition: 'background 0.2s' }}
                           onMouseEnter={(e) => e.currentTarget.style.background = '#374151'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -228,7 +253,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                           📅 3,99€/mês
                         </button>
                         <button 
-                          onClick={() => { console.log('Ativar plano anual:', amb.id); setOpenPlanDropdown(null); }}
+                          onClick={() => { handleCheckout(amb.id, 'yearly'); setOpenPlanDropdown(null); }}
                           style={{ width: '100%', padding: '10px 14px', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600, transition: 'background 0.2s' }}
                           onMouseEnter={(e) => e.currentTarget.style.background = '#374151'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
