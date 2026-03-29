@@ -240,7 +240,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                       title="Escolher plano de subscrição"
                       style={{ padding: '8px 12px', borderRadius: 8, background: '#fbbf24', color: '#000', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}
                     >
-                      💳 Escolher plano ▼
+                      💳 Ativar ▼
                     </button>
                     {openPlanDropdown === amb.id && (
                       <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#1f2937', border: '1px solid #374151', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 10, minWidth: 180 }}>
