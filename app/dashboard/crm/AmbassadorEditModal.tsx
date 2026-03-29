@@ -23,16 +23,16 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
     setFormData(ambassador || {})
   }, [ambassador])
 
-  if (!ambassador) return null
+  if (!formData?.id) return null
 
   const handlePublish = async () => {
-    if (!ambassador) return
+    if (!formData?.id) return
     setPublishLoading(true)
     try {
       const updatedAmbassador = await toggleAmbassadorPublished(
-        ambassador.id,
+        formData.id!,
         !formData.is_published,
-        ambassador.user_id
+        formData.user_id
       )
       setFormData(updatedAmbassador)
       if (onRefresh) onRefresh()
@@ -140,24 +140,24 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             </div>
             <button 
               onClick={handlePublish}
-              disabled={publishLoading || ambassador?.subscription_status !== 'active'}
-              title={ambassador?.subscription_status !== 'active' ? 'Ativa a subscrição para publicar' : ''}
+              disabled={publishLoading || formData.subscription_status !== 'active'}
+              title={formData.subscription_status !== 'active' ? 'Ativa a subscrição para publicar' : ''}
               style={{ 
                 padding: '8px 16px', 
                 borderRadius: 8, 
                 background: formData.is_published ? '#ef4444' : '#10b981',
                 color: '#fff', 
                 border: 'none', 
-                cursor: (publishLoading || ambassador?.subscription_status !== 'active') ? 'not-allowed' : 'pointer', 
+                cursor: (publishLoading || formData.subscription_status !== 'active') ? 'not-allowed' : 'pointer', 
                 fontSize: 12, 
                 fontWeight: 600,
-                opacity: (publishLoading || ambassador?.subscription_status !== 'active') ? 0.5 : 1
+                opacity: (publishLoading || formData.subscription_status !== 'active') ? 0.5 : 1
               }}
             >
               {publishLoading ? '...' : formData.is_published ? 'Despublicar' : 'Publicar'}
             </button>
           </div>
-          {ambassador?.subscription_status !== 'active' && (
+          {formData.subscription_status !== 'active' && (
             <p style={{ fontSize: 11, color: '#fbbf24', marginTop: 8, margin: '8px 0 0 0' }}>⚠️ Ativa a subscrição para publicar o cartão</p>
           )}
         </div>
