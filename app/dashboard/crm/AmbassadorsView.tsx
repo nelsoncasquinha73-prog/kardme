@@ -56,7 +56,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
 
   const loadAmbassadors = async () => {
     try {
-      const data = await getAmbassadors();
+      const data = await getAmbassadors(userId);
       setAmbassadors(data || []);
     } catch (error) {
       console.error('Erro ao carregar embaixadores:', error);

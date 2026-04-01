@@ -109,11 +109,17 @@ export async function createAmbassador(data: {
 }
 
 // Listar embaixadores do consultor
-export async function getAmbassadors() {
-  const { data, error } = await supabase
+export async function getAmbassadors(userId?: string) {
+  let query = supabase
     .from('ambassadors')
     .select('*')
     .order('created_at', { ascending: false })
+
+  if (userId) {
+    query = query.eq('user_id', userId)
+  }
+
+  const { data, error } = await query
 
   if (error) throw error
   return data as Ambassador[]
