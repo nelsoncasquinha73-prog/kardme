@@ -141,7 +141,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
   const pickFileFor = (buttonId: string) => {
     if (fileInputRef.current) {
       fileInputRef.current.dataset.targetId = buttonId
-      fileInputRef.current.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = ''
       fileInputRef.current.click()
     }
   }

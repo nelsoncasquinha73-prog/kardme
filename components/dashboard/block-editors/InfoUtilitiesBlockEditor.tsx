@@ -119,7 +119,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
   const pickFileFor = (id: string) => {
     if (fileInputRef.current) {
       fileInputRef.current.dataset.targetId = id
-      fileInputRef.current.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = ''
       fileInputRef.current.click()
     }
   }
@@ -180,7 +180,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
           </div>
         </Row>
         <Row label={t('info_utilities_editor.label_add')}>
-          <select onChange={(e) => { if (e.target.value) { addItem(e.target.value as InfoItemType); e.target.value = '' } }} style={selectStyle} defaultValue="">
+          <select onChange={(e) => { if (e.target.value) { addItem(e.target.value as InfoItemType); if (e.target) e.target.value = '' } }} style={selectStyle} defaultValue="">
             <option value="" disabled>{`${t('info_utilities_editor.placeholder_select_type')}`}</option>
             {ITEM_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.icon} {t.label}</option>))}
           </select>

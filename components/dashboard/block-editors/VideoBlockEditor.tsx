@@ -57,7 +57,7 @@ export default function VideoBlockEditor({ cardId, settings, style, onChangeSett
       setUploadError(err.message || 'Erro ao enviar vídeo')
     } finally {
       setUploading(false)
-      e.target.value = ''
+      if (e.target) e.target.value = ''
     }
   }
 

@@ -395,7 +395,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                         } catch (err: any) {
                           alert(err.message || 'Erro ao enviar vídeo')
                         }
-                        e.target.value = ''
+                        if (e.target) e.target.value = ''
                       }}
                       style={{ fontSize: 11, maxWidth: 180 }}
                     />
@@ -887,7 +887,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                       } catch (err: any) {
                         alert(err.message || 'Erro ao enviar vídeo')
                       }
-                      e.target.value = ''
+                      if (e.target) e.target.value = ''
                     }}
                   />
                 </label>

@@ -105,7 +105,7 @@ export default function ThemeDecorationsEditor({
   const pickFileFor = (id: string) => {
     if (!fileInputRef.current) return
     fileInputRef.current.dataset.targetId = id
-    fileInputRef.current.value = ''
+    if (fileInputRef.current) fileInputRef.current.value = ''
     fileInputRef.current.click()
   }
 
