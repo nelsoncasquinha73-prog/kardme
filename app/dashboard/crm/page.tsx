@@ -963,7 +963,7 @@ Melhores cumprimentos,
           email_subject: personalizedSubject,
           email_body: personalizedBody,
           email_recipient: lead.email,
-          email_template_id: selectedTemplate?.id || null,
+          email_template_id: selectedTemplate?.id && /^[0-9a-fA-F-]{36}$/.test(selectedTemplate.id) ? selectedTemplate.id : null,
           lead_id: lead.id,
           due_at: dueAtISO,
         })
