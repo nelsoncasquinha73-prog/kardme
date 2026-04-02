@@ -3240,11 +3240,14 @@ Melhores cumprimentos,
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {countries.map(c => (
                     <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10 }}>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: '#111827', opacity: 1, WebkitTextFillColor: '#111827', textShadow: 'none' }}>🌍 {c.name || '(sem nome)'}</span>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: '#111827', opacity: 1, WebkitTextFillColor: '#111827', textShadow: 'none' }}>🌍 {c.name}</span>
                       <button
                         onClick={async () => {
                           try {
-                            await deleteCountry(c.id)
+                            const { data: authData } = await supabase.auth.getUser()
+                            const userId = authData?.user?.id
+                            if (!userId) throw new Error('Utilizador não autenticado')
+                            await deleteCountry(c.id, userId)
                             setCountries(prev => prev.filter(x => x.id !== c.id))
                             addToast('País eliminado', 'success')
                           } catch (e) {
