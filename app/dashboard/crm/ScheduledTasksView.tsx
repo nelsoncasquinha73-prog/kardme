@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/auth'
+import { useAuth } from '@/lib/useAuth'
 import {
   getScheduledTasks,
   getTasksStats,
