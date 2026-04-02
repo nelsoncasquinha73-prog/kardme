@@ -27,6 +27,7 @@ import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachment
 import CalendarGrid from '@/components/crm/CalendarGrid'
 import LeadTypesModal from '@/components/crm/LeadTypesModal'
 import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
+import { fetchCountries, createCountry, deleteCountry, updateLeadCountry, type Country } from '@/lib/crm/countries'
 import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
@@ -177,7 +178,9 @@ Melhores cumprimentos,
   const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
   const [filterCountry, setFilterCountry] = useState<string | null>(null)
-  const [countries, setCountries] = useState<string[]>([])
+  const [countries, setCountries] = useState<Country[]>([])
+  const [showCountriesModal, setShowCountriesModal] = useState(false)
+  const [newCountryName, setNewCountryName] = useState('')
 
 
 
@@ -191,6 +194,19 @@ Melhores cumprimentos,
   const [importPreview, setImportPreview] = useState<string[][]>([])
   const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled'>('table')
   const [importing, setImporting] = useState(false)
+
+  const handleCreateCountry = async () => {
+    if (!newCountryName.trim()) return
+    try {
+      const created = await createCountry(userId, newCountryName.trim())
+      setCountries(prev => [...prev, created])
+      setNewCountryName('')
+      addToast('País criado com sucesso', 'success')
+    } catch (e) {
+      console.error(e)
+      addToast('Erro ao criar país', 'error')
+    }
+  }
 
 
   const checkCRMPro = async (uid?: string) => {
@@ -290,6 +306,14 @@ Melhores cumprimentos,
     }
 
     setLoading(false)
+
+    // Carregar países do utilizador
+    try {
+      const countryList = await fetchCountries(user.id)
+      setCountries(countryList)
+    } catch (e) {
+      console.error('Erro a carregar países:', e)
+    }
 
     // Carregar países únicos
     if (data && data.length > 0) {
@@ -1514,6 +1538,9 @@ Melhores cumprimentos,
           <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.12)', color: '#00b894', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
             ⚙️ Origens
           </button>
+          <button onClick={() => setShowCountriesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(34,197,94,0.4)', background: 'rgba(34,197,94,0.12)', color: '#86efac', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            🌍 Países
+          </button>
         </div>
 
         {/* Chips de filtros ativos */}
@@ -1640,7 +1667,7 @@ Melhores cumprimentos,
               >
                 <option value="">Todos</option>
                 {countries.map(c => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
             </div>
@@ -1848,6 +1875,7 @@ Melhores cumprimentos,
               <th style={th}>Zona</th>
               <th style={th}>Tipo</th>
               <th style={th}>Origem</th>
+              <th style={th}>País</th>
               <th style={th}>Step</th>
               <th style={th}>Marketing</th>
               <th style={th}>Data</th>
@@ -1857,7 +1885,7 @@ Melhores cumprimentos,
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan={11} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
+                <td colSpan={12} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
                   Nenhuma lead encontrada.
                 </td>
               </tr>
@@ -1933,6 +1961,39 @@ Melhores cumprimentos,
                         {LEAD_SOURCES_DEFAULT.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
                         ))}
+                      </select>
+                    </td>
+                    <td style={td}>
+                      <select
+                        value={lead.country || ''}
+                        onChange={async (e) => {
+                          const val = e.target.value
+                          if (val === '__new__') {
+                            setNewCountryName('')
+                            setShowCountriesModal(true)
+                          } else {
+                            const finalVal = val || null
+                            await updateLeadCountry(lead.id, finalVal)
+                            setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, country: finalVal } : l))
+                          }
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: 'rgba(34,197,94,0.15)',
+                          color: '#86efac',
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          minWidth: 120,
+                        }}
+                      >
+                        <option value="">— País —</option>
+                        {countries.map(c => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                        <option value="__new__">+ Novo país...</option>
                       </select>
                     </td>
                     <td style={td}>
@@ -3098,33 +3159,106 @@ Melhores cumprimentos,
       )}
 
       {showLeadSourcesModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowLeadSourcesModal(false)}>
-          <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 500, width: '90%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 700 }}>⚙️ Gerir Origens</h3>
-              <button onClick={() => setShowLeadSourcesModal(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 20 }}>✕</button>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#111827' }}>⚙️ Gerir Origens</h2>
+              <button onClick={() => setShowLeadSourcesModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 16 }}>Origens fixas do sistema + origens personalizadas.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-              {LEAD_SOURCES_DEFAULT.map(s => (
-                <div key={s.value} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px 14px' }}>
-                  <span style={{ flex: 1, color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>{s.label}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: 6 }}>sistema</span>
+
+            <div style={{ marginBottom: 20 }}>
+              <NewLeadSourceForm userId={userId} onCreated={(s) => setLeadSources(prev => [...prev, s])} />
+            </div>
+
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+              {leadSources.length === 0 ? (
+                <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>Nenhuma origem personalizada criada.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {leadSources.map(s => (
+                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f3f4f6', borderRadius: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{s.emoji} {s.label}</span>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await deleteLeadSource(s.id)
+                            setLeadSources(prev => prev.filter(x => x.id !== s.id))
+                            addToast('Origem eliminada', 'success')
+                          } catch (e) {
+                            console.error(e)
+                            addToast('Erro ao eliminar origem', 'error')
+                          }
+                        }}
+                        style={{ background: '#ef4444', border: 'none', borderRadius: 6, padding: '4px 8px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {leadSources.map(s => (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px' }}>
-                  <span style={{ flex: 1, color: '#fff', fontSize: 14 }}>{s.emoji} {s.label}</span>
-                  <button onClick={async () => { await deleteLeadSource(s.id); setLeadSources(prev => prev.filter(x => x.id !== s.id)) }} style={{ background: 'none', border: 'none', color: '#e17055', cursor: 'pointer', fontSize: 14 }}>🗑️</button>
-                </div>
-              ))}
-              {leadSources.length === 0 && (
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', padding: '8px 0' }}>Nenhuma origem personalizada ainda.</p>
               )}
             </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Nova origem</p>
-              <NewLeadSourceForm userId={userId} onCreated={(s) => setLeadSources(prev => [...prev, s])} />
+          </div>
+        </div>
+      )}
+
+      {showCountriesModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 500, width: '90%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#111827' }}>🌍 Gerir Países</h2>
+              <button onClick={() => setShowCountriesModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+            </div>
+
+            <div style={{ marginBottom: 20, display: 'flex', gap: 8 }}>
+              <input
+                type="text"
+                value={newCountryName}
+                onChange={(e) => setNewCountryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newCountryName.trim()) {
+                    handleCreateCountry()
+                  }
+                }}
+                placeholder="Ex: Brasil, Espanha..."
+                style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, fontFamily: 'inherit' }}
+              />
+              <button
+                onClick={handleCreateCountry}
+                disabled={!newCountryName.trim()}
+                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '10px 16px', color: '#fff', fontWeight: 700, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 14, opacity: newCountryName.trim() ? 1 : 0.5 }}
+              >
+                + Criar
+              </button>
+            </div>
+
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+              {countries.length === 0 ? (
+                <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>Nenhum país criado ainda.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {countries.map(c => (
+                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f3f4f6', borderRadius: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{c.name}</span>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await deleteCountry(c.id)
+                            setCountries(prev => prev.filter(x => x.id !== c.id))
+                            addToast('País eliminado', 'success')
+                          } catch (e) {
+                            console.error(e)
+                            addToast('Erro ao eliminar país', 'error')
+                          }
+                        }}
+                        style={{ background: '#ef4444', border: 'none', borderRadius: 6, padding: '4px 8px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
