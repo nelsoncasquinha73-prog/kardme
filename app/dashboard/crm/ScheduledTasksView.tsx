@@ -25,6 +25,10 @@ export function ScheduledTasksView() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [rescheduleDate, setRescheduleDate] = useState('')
   const [rescheduleTime, setRescheduleTime] = useState('09:00')
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set())
+  const [showBulkRescheduleModal, setShowBulkRescheduleModal] = useState(false)
+  const [bulkRescheduleDate, setBulkRescheduleDate] = useState('')
+  const [bulkRescheduleTime, setBulkRescheduleTime] = useState('09:00')
 
   useEffect(() => {
     if (!user?.id) return
@@ -111,6 +115,100 @@ export function ScheduledTasksView() {
     } catch (err) {
       console.error('Erro ao duplicar:', err)
       alert('Erro ao duplicar tarefa')
+    }
+  }
+
+  function toggleTaskSelection(taskId: string) {
+    const newSelected = new Set(selectedTaskIds)
+    if (newSelected.has(taskId)) {
+      newSelected.delete(taskId)
+    } else {
+      newSelected.add(taskId)
+    }
+    setSelectedTaskIds(newSelected)
+  }
+
+  function toggleSelectAll() {
+    if (selectedTaskIds.size === filteredTasks.length) {
+      setSelectedTaskIds(new Set())
+    } else {
+      setSelectedTaskIds(new Set(filteredTasks.map(t => t.id)))
+    }
+  }
+
+  async function handleBulkCancel() {
+    if (!user?.id || selectedTaskIds.size === 0) return
+    if (!confirm(`Tem a certeza que quer cancelar ${selectedTaskIds.size} tarefa${selectedTaskIds.size > 1 ? 's' : ''}?`)) return
+
+    try {
+      let cancelled = 0
+      for (const taskId of selectedTaskIds) {
+        try {
+          await cancelScheduledTask(taskId, user.id)
+          cancelled++
+        } catch (err) {
+          console.error('Erro ao cancelar tarefa:', err)
+        }
+      }
+      await loadTasks()
+      setSelectedTaskIds(new Set())
+      alert(`✓ ${cancelled} tarefa${cancelled > 1 ? 's' : ''} cancelada${cancelled > 1 ? 's' : ''}`)
+    } catch (err) {
+      console.error('Erro ao cancelar em massa:', err)
+      alert('Erro ao cancelar tarefas')
+    }
+  }
+
+  async function handleBulkReschedule() {
+    if (!user?.id || selectedTaskIds.size === 0) return
+    if (!bulkRescheduleDate) {
+      alert('Seleciona uma data')
+      return
+    }
+
+    try {
+      const newDueAt = new Date(`${bulkRescheduleDate}T${bulkRescheduleTime}:00`).toISOString()
+      let rescheduled = 0
+      for (const taskId of selectedTaskIds) {
+        try {
+          await rescheduleTask(taskId, user.id, newDueAt)
+          rescheduled++
+        } catch (err) {
+          console.error('Erro ao reagendar tarefa:', err)
+        }
+      }
+      await loadTasks()
+      setSelectedTaskIds(new Set())
+      setShowBulkRescheduleModal(false)
+      alert(`✓ ${rescheduled} tarefa${rescheduled > 1 ? 's' : ''} reagendada${rescheduled > 1 ? 's' : ''}`)
+    } catch (err) {
+      console.error('Erro ao reagendar em massa:', err)
+      alert('Erro ao reagendar tarefas')
+    }
+  }
+
+  async function handleBulkDuplicate() {
+    if (!user?.id || selectedTaskIds.size === 0) return
+
+    try {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const newDueAt = tomorrow.toISOString()
+      let duplicated = 0
+      for (const taskId of selectedTaskIds) {
+        try {
+          await duplicateTask(taskId, user.id, newDueAt)
+          duplicated++
+        } catch (err) {
+          console.error('Erro ao duplicar tarefa:', err)
+        }
+      }
+      await loadTasks()
+      setSelectedTaskIds(new Set())
+      alert(`✓ ${duplicated} tarefa${duplicated > 1 ? 's' : ''} duplicada${duplicated > 1 ? 's' : ''} para amanhã`)
+    } catch (err) {
+      console.error('Erro ao duplicar em massa:', err)
+      alert('Erro ao duplicar tarefas')
     }
   }
 
@@ -243,6 +341,76 @@ export function ScheduledTasksView() {
         ))}
       </div>
 
+      {/* Barra de ações em massa */}
+      {selectedTaskIds.size > 0 && (
+        <div style={{ marginBottom: 16, padding: 12, background: '#eff6ff', borderRadius: 10, border: '1px solid #bfdbfe', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#1e40af' }}>
+            {selectedTaskIds.size} tarefa{selectedTaskIds.size > 1 ? 's' : ''} selecionada{selectedTaskIds.size > 1 ? 's' : ''}
+          </span>
+          <button
+            onClick={handleBulkCancel}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid #dc2626',
+              background: '#fee2e2',
+              color: '#991b1b',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ✕ Cancelar
+          </button>
+          <button
+            onClick={() => setShowBulkRescheduleModal(true)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid #f59e0b',
+              background: '#fef3c7',
+              color: '#92400e',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            📅 Reagendar
+          </button>
+          <button
+            onClick={handleBulkDuplicate}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid #10b981',
+              background: '#dcfce7',
+              color: '#166534',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            📋 Duplicar
+          </button>
+          <button
+            onClick={() => setSelectedTaskIds(new Set())}
+            style={{
+              marginLeft: 'auto',
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid #d1d5db',
+              background: '#f3f4f6',
+              color: '#6b7280',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Limpar
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
           Carregando tarefas...
@@ -256,6 +424,14 @@ export function ScheduledTasksView() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                <th style={{ textAlign: 'center', padding: '12px', fontWeight: 700, fontSize: 13, color: '#6b7280', width: 40 }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedTaskIds.size === filteredTasks.length && filteredTasks.length > 0}
+                    onChange={toggleSelectAll}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={{ textAlign: 'left', padding: '12px', fontWeight: 700, fontSize: 13, color: '#6b7280' }}>
                   Assunto
                 </th>
@@ -278,7 +454,15 @@ export function ScheduledTasksView() {
             </thead>
             <tbody>
               {filteredTasks.map((task) => (
-                <tr key={task.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <tr key={task.id} style={{ borderBottom: '1px solid #e5e7eb', background: selectedTaskIds.has(task.id) ? '#f0f9ff' : 'transparent' }}>
+                  <td style={{ textAlign: 'center', padding: '12px', width: 40 }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTaskIds.has(task.id)}
+                      onChange={() => toggleTaskSelection(task.id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
                   <td style={{ padding: '12px', fontSize: 13, color: '#111827' }}>
                     <div style={{ fontWeight: 600 }}>{task.title}</div>
                     <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4 }}>
@@ -590,6 +774,116 @@ export function ScheduledTasksView() {
               </button>
               <button
                 onClick={() => setShowRescheduleModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: 10,
+                  background: '#f3f4f6',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  color: '#111827',
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkRescheduleModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 500,
+              width: '90%',
+            }}
+          >
+            <h2 style={{ marginBottom: 16, fontSize: 18, fontWeight: 900, color: '#111827' }}>
+              📅 Reagendar {selectedTaskIds.size} Tarefa{selectedTaskIds.size > 1 ? 's' : ''}
+            </h2>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>
+                Data
+              </label>
+              <input
+                type="date"
+                value={bulkRescheduleDate}
+                onChange={(e) => setBulkRescheduleDate(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid #d1d5db',
+                  fontSize: 14,
+                  boxSizing: 'border-box',
+                  background: '#ffffff',
+                  color: '#111827',
+                  colorScheme: 'light',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>
+                Hora
+              </label>
+              <input
+                type="time"
+                value={bulkRescheduleTime}
+                onChange={(e) => setBulkRescheduleTime(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid #d1d5db',
+                  fontSize: 14,
+                  boxSizing: 'border-box',
+                  background: '#ffffff',
+                  color: '#111827',
+                  colorScheme: 'light',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={handleBulkReschedule}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: 10,
+                  background: '#3b82f6',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: 13,
+                }}
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setShowBulkRescheduleModal(false)}
                 style={{
                   flex: 1,
                   padding: '12px 16px',
