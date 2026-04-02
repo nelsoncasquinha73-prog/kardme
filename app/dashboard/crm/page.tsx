@@ -3239,7 +3239,7 @@ Melhores cumprimentos,
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {countries.map(c => (
-                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, hover: { background: '#f3f4f6' } }}>
+                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10 }}>
                       <span style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}>🌍 {c.name}</span>
                       <button
                         onClick={async () => {
