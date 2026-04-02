@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
-import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag } from 'react-icons/fi'
+import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag, FiMail } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = isAdmin ? [
     { label: 'nav.clients', href: '/admin/clientes', icon: FiUsers },
+    { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail, emoji: '💼' },
     { label: 'nav.manage_templates', href: '/admin/templates', icon: FiLayout },
     { label: 'nav.template_store', href: '/admin/catalog', icon: FiShoppingCart, emoji: '🛍️' },
     { label: 'nav.analytics', href: '/admin/analytics', icon: FiBarChart2, emoji: '📊' },
@@ -70,6 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
     { prefix: '/admin/clientes', title: 'Clientes' },
+    { prefix: '/dashboard/crm', title: 'CRM Pro' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
     { prefix: '/admin/analytics', title: '📊 Analytics Geral' },
     { prefix: '/admin/catalog', title: '🛍️ Loja de Templates' },
