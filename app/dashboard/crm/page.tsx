@@ -28,6 +28,7 @@ import LeadTypesModal from '@/components/crm/LeadTypesModal'
 import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
 import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
+import { ScheduledTasksView } from './ScheduledTasksView'
 
 type Lead = {
   id: string
@@ -184,7 +185,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
-  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors'>('table')
+  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled'>('table')
   const [importing, setImporting] = useState(false)
 
 
@@ -1404,6 +1405,22 @@ Melhores cumprimentos,
         >
           🤝 Embaixadores
         </button>
+        <button
+          onClick={() => setActiveView('scheduled')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'scheduled' ? '#8b5cf6' : '#e5e7eb',
+            color: activeView === 'scheduled' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          📧 Tarefas Agendadas
+        </button>
       </div>
 
       {activeView === 'calendar' && (
@@ -1606,6 +1623,8 @@ Melhores cumprimentos,
       </div>
 
       </>)}
+
+      {activeView === 'scheduled' && <ScheduledTasksView />}
 
       {activeView === 'ambassadors' && (
         <AmbassadorsView userId={userId} />
