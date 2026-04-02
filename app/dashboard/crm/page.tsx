@@ -957,7 +957,7 @@ Melhores cumprimentos,
 
       try {
         // Criar tarefa agendada em scheduled_tasks
-        const { error } = await createScheduledTask(userId, {
+        await createScheduledTask(userId, {
           title: personalizedSubject,
           email_subject: personalizedSubject,
           email_body: personalizedBody,
@@ -966,8 +966,6 @@ Melhores cumprimentos,
           lead_id: lead.id,
           due_at: dueAtISO,
         })
-
-        if (error) throw error
 
         created++
         await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Email agendado para ${dueAtISO.split('T')[0]} às ${bulkScheduleTime}` })
