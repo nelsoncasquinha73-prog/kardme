@@ -174,3 +174,71 @@ export async function duplicateTask(taskId: string, userId: string, newDueAt: st
     throw err
   }
 }
+
+export async function createScheduledTask(
+  userId: string,
+  params: {
+    title: string
+    email_subject: string
+    email_body: string
+    email_recipient?: string
+    email_template_id?: string | null
+    lead_id?: string | null
+    due_at: string
+  }
+) {
+  try {
+    const { data, error } = await supabase
+      .from('scheduled_tasks')
+      .insert({
+        user_id: userId,
+        title: params.title,
+        email_subject: params.email_subject,
+        email_body: params.email_body,
+        email_recipient: params.email_recipient || null,
+        email_template_id: params.email_template_id || null,
+        lead_id: params.lead_id || null,
+        due_at: params.due_at,
+        send_status: 'pending',
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as ScheduledTask
+  } catch (err) {
+    console.error('[createScheduledTask] Error:', err)
+    throw err
+  }
+}
+
+export async function updateScheduledTask(
+  taskId: string,
+  userId: string,
+  params: {
+    title?: string
+    email_subject?: string
+    email_body?: string
+    email_recipient?: string
+    due_at?: string
+  }
+) {
+  try {
+    const { data, error } = await supabase
+      .from('scheduled_tasks')
+      .update({
+        ...params,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', taskId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as ScheduledTask
+  } catch (err) {
+    console.error('[updateScheduledTask] Error:', err)
+    throw err
+  }
+}

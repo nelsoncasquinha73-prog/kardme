@@ -19,6 +19,7 @@ import {
 
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
+import { createScheduledTask } from '@/lib/crm/scheduledTasks'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, fetchTasksForMonth, type LeadTask } from '@/lib/crm/tasks'
 import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type EmailTemplate } from '@/lib/crm/emailTemplates'
@@ -955,23 +956,16 @@ Melhores cumprimentos,
       const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
 
       try {
-        // Criar task com dados de email preenchidos
-        const { error } = await supabase
-          .from('lead_tasks')
-          .insert({
-            lead_id: lead.id,
-            user_id: userId,
-            title: personalizedSubject,
-            description: personalizedBody,
-            due_at: dueAtISO,
-            action_type: 'email',
-            email_recipient: lead.email,
-            email_subject: personalizedSubject,
-            email_body: personalizedBody,
-            email_template_id: selectedTemplate?.id || null,
-            email_attachments: selectedAttachments && selectedAttachments.length > 0 ? selectedAttachments : null,
-            send_status: 'pending',
-          })
+        // Criar tarefa agendada em scheduled_tasks
+        const { error } = await createScheduledTask(userId, {
+          title: personalizedSubject,
+          email_subject: personalizedSubject,
+          email_body: personalizedBody,
+          email_recipient: lead.email,
+          email_template_id: selectedTemplate?.id || null,
+          lead_id: lead.id,
+          due_at: dueAtISO,
+        })
 
         if (error) throw error
 
