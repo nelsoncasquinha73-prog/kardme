@@ -198,13 +198,17 @@ Melhores cumprimentos,
   const handleCreateCountry = async () => {
     if (!newCountryName.trim()) return
     try {
-      const created = await createCountry(userId, newCountryName.trim())
+      const { data: authData } = await supabase.auth.getUser()
+      const uid = authData?.user?.id
+      if (!uid) throw new Error('Utilizador não autenticado')
+      
+      const created = await createCountry(uid, newCountryName.trim())
       setCountries(prev => [...prev, created])
       setNewCountryName('')
       addToast('País criado com sucesso', 'success')
-    } catch (e) {
-      console.error(e)
-      addToast('Erro ao criar país', 'error')
+    } catch (e: any) {
+      console.error('Erro ao criar país:', e?.message || e)
+      addToast(e?.message || 'Erro ao criar país', 'error')
     }
   }
 
