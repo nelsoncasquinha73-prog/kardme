@@ -21,6 +21,14 @@ function toBase64Url(str: string) {
     .replace(/=+$/g, '')
 }
 
+function encodeSubjectRFC2047(subject: string) {
+  // Se não tem caracteres especiais, retorna como está
+  if (/^[ -~]*$/.test(subject)) return subject
+  // Senão, encoda em Base64 UTF-8
+  const encoded = Buffer.from(subject, 'utf-8').toString('base64')
+  return `=?UTF-8?B?${encoded}?=`
+}
+
 type AttachmentPayload = {
   filename: string
   mimeType: string
@@ -41,7 +49,7 @@ function buildRawEmail(params: {
     return [
       `From: ${params.fromEmail}`,
       `To: ${params.to}`,
-      `Subject: ${params.subject}`,
+      `Subject: ${encodeSubjectRFC2047(params.subject)}`,
       'MIME-Version: 1.0',
       'Content-Type: text/html; charset="UTF-8"',
       '',
@@ -54,7 +62,7 @@ function buildRawEmail(params: {
   const lines: string[] = []
   lines.push(`From: ${params.fromEmail}`)
   lines.push(`To: ${params.to}`)
-  lines.push(`Subject: ${params.subject}`)
+  lines.push(`Subject: ${encodeSubjectRFC2047(params.subject)}`)
   lines.push('MIME-Version: 1.0')
   lines.push(`Content-Type: multipart/mixed; boundary="${boundary}"`)
   lines.push('')
