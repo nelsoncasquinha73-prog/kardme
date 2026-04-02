@@ -29,12 +29,11 @@ export async function createCountry(userId: string, name: string): Promise<Count
   return data
 }
 
-export async function deleteCountry(id: string, userId: string): Promise<void> {
+export async function deleteCountry(id: string): Promise<void> {
   const { error } = await supabase
     .from('crm_countries')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId)
 
   if (error) throw error
 }

@@ -3244,10 +3244,7 @@ Melhores cumprimentos,
                       <button
                         onClick={async () => {
                           try {
-                            const { data: authData } = await supabase.auth.getUser()
-                            const userId = authData?.user?.id
-                            if (!userId) throw new Error('Utilizador não autenticado')
-                            await deleteCountry(c.id, userId)
+                            await deleteCountry(c.id)
                             setCountries(prev => prev.filter(x => x.id !== c.id))
                             addToast('País eliminado', 'success')
                           } catch (e: any) {
