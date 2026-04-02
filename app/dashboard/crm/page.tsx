@@ -3204,13 +3204,13 @@ Melhores cumprimentos,
 
       {showCountriesModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 500, width: '90%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, maxWidth: 520, width: '95%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 25px 70px rgba(0,0,0,0.35)', border: '1px solid rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#111827' }}>🌍 Gerir Países</h2>
               <button onClick={() => setShowCountriesModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
-            <div style={{ marginBottom: 20, display: 'flex', gap: 8 }}>
+            <div style={{ marginBottom: 24, display: 'flex', gap: 10 }}>
               <input
                 type="text"
                 value={newCountryName}
@@ -3220,26 +3220,27 @@ Melhores cumprimentos,
                     handleCreateCountry()
                   }
                 }}
-                placeholder="Ex: Brasil, Espanha..."
-                style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, fontFamily: 'inherit' }}
+                placeholder="Ex: Brasil, Espanha, França..."
+                style={{ flex: 1, padding: '12px 16px', borderRadius: 10, border: '1px solid #d1d5db', fontSize: 15, fontFamily: 'inherit', fontWeight: 500 }}
               />
               <button
                 onClick={handleCreateCountry}
                 disabled={!newCountryName.trim()}
-                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '10px 16px', color: '#fff', fontWeight: 700, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 14, opacity: newCountryName.trim() ? 1 : 0.5 }}
+                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '12px 20px', color: '#fff', fontWeight: 800, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 15, opacity: newCountryName.trim() ? 1 : 0.5, whiteSpace: 'nowrap' }}
               >
-                + Criar
+                ✓ Criar
               </button>
             </div>
 
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 20 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Países criados ({countries.length})</p>
               {countries.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>Nenhum país criado ainda.</p>
+                <p style={{ textAlign: 'center', color: '#d1d5db', fontSize: 15, padding: '20px 0' }}>Nenhum país criado ainda.</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {countries.map(c => (
-                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f3f4f6', borderRadius: 10 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{c.name}</span>
+                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, hover: { background: '#f3f4f6' } }}>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}>🌍 {c.name}</span>
                       <button
                         onClick={async () => {
                           try {
@@ -3251,9 +3252,9 @@ Melhores cumprimentos,
                             addToast('Erro ao eliminar país', 'error')
                           }
                         }}
-                        style={{ background: '#ef4444', border: 'none', borderRadius: 6, padding: '4px 8px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
+                        style={{ background: '#fee2e2', border: 'none', borderRadius: 8, padding: '6px 10px', color: '#dc2626', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}
                       >
-                        🗑️
+                        🗑️ Eliminar
                       </button>
                     </div>
                   ))}
