@@ -971,6 +971,7 @@ Melhores cumprimentos,
         await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Email agendado para ${dueAtISO.split('T')[0]} às ${bulkScheduleTime}` })
       } catch (err) {
         console.error('Erro ao criar tarefa para', lead.email, err)
+        console.error('Stack:', (err as any)?.stack)
       }
     }
 
