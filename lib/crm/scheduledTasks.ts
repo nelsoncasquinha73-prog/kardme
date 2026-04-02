@@ -17,6 +17,23 @@ export type ScheduledTask = {
   updated_at: string
 }
 
+type ScheduledTaskRow = {
+  id: string
+  user_id: string
+  title: string
+  email_subject: string
+  email_body: string
+  email_recipient: string | null
+  email_template_id: string | null
+  lead_id: string | null
+  lead: { name: string }[] | { name: string } | null
+  due_at: string
+  send_status: 'pending' | 'sent' | 'failed'
+  send_error: string | null
+  created_at: string
+  updated_at: string
+}
+
 export async function getScheduledTasks(
   userId: string,
   filters?: { send_status?: 'pending' | 'sent' | 'failed' }
@@ -57,7 +74,12 @@ export async function getScheduledTasks(
       return []
     }
 
-    return data || []
+    const normalized: ScheduledTask[] = ((data || []) as ScheduledTaskRow[]).map((task) => ({
+      ...task,
+      lead: Array.isArray(task.lead) ? task.lead[0] ?? null : task.lead ?? null,
+    }))
+
+    return normalized
   } catch (err) {
     console.error('Erro ao carregar scheduled tasks:', err)
     return []
