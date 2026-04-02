@@ -3220,13 +3220,13 @@ Melhores cumprimentos,
                     handleCreateCountry()
                   }
                 }}
-                placeholder="Ex: Brasil, Espanha, França..."
-                style={{ flex: 1, padding: '12px 16px', borderRadius: 10, border: '1px solid #d1d5db', fontSize: 15, fontFamily: 'inherit', fontWeight: 500 }}
+                placeholder="Ex: Brasil, Espanha..."
+                style={{ flex: 1, padding: '14px 16px', borderRadius: 10, border: '2px solid #d1d5db', fontSize: 16, fontFamily: 'inherit', fontWeight: 600, color: '#000', backgroundColor: '#fff' }}
               />
               <button
                 onClick={handleCreateCountry}
                 disabled={!newCountryName.trim()}
-                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '12px 20px', color: '#fff', fontWeight: 800, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 15, opacity: newCountryName.trim() ? 1 : 0.5, whiteSpace: 'nowrap' }}
+                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '14px 24px', color: '#fff', fontWeight: 900, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 16, opacity: newCountryName.trim() ? 1 : 0.5, whiteSpace: 'nowrap' }}
               >
                 ✓ Criar
               </button>
@@ -3252,7 +3252,7 @@ Melhores cumprimentos,
                             addToast('Erro ao eliminar país', 'error')
                           }
                         }}
-                        style={{ background: '#fee2e2', border: 'none', borderRadius: 8, padding: '6px 10px', color: '#dc2626', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}
+                        style={{ background: '#dc2626', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}
                       >
                         🗑️ Eliminar
                       </button>
