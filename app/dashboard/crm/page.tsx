@@ -175,6 +175,8 @@ Melhores cumprimentos,
   const [showLeadSourcesModal, setShowLeadSourcesModal] = useState(false)
   const [filterLeadType, setFilterLeadType] = useState<string | null>(null)
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
+  const [filterCountry, setFilterCountry] = useState<string | null>(null)
+  const [countries, setCountries] = useState<string[]>([])
 
 
 
@@ -287,11 +289,17 @@ Melhores cumprimentos,
     }
 
     setLoading(false)
+
+    // Carregar países únicos
+    if (data && data.length > 0) {
+      const uniqueCountries = [...new Set(data.map((l: any) => l.country).filter(Boolean))]
+      setCountries(uniqueCountries.sort())
+    }
   }
 
   useEffect(() => {
     loadLeads()
-  }, [filterMarketing, filterStep, selectedCardId, sortBy, sortOrder])
+  }, [filterMarketing, filterStep, selectedCardId, sortBy, sortOrder, filterCountry])
 
   // Fetch lead types and sources globally by userId
   useEffect(() => {
@@ -769,6 +777,7 @@ Melhores cumprimentos,
       (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesType = filterLeadType === null || l.lead_type_id === filterLeadType
     const matchesSource = filterLeadSource === null || (l.lead_source || 'cartão') === filterLeadSource
+    const matchesCountry = filterCountry === null || l.country === filterCountry
     return matchesSearch && matchesType && matchesSource
   })
 
@@ -1490,9 +1499,9 @@ Melhores cumprimentos,
             }}
           >
             🎛️ Filtros
-            {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource) && (
+            {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource || filterCountry) && (
               <span style={{ background: '#6366f1', color: '#fff', borderRadius: 20, padding: '1px 8px', fontSize: 11, fontWeight: 900 }}>
-                {[filterStep, filterMarketing !== null ? '1' : null, filterLeadType, filterLeadSource].filter(Boolean).length}
+                {[filterStep, filterMarketing !== null ? '1' : null, filterLeadType, filterLeadSource, filterCountry].filter(Boolean).length}
               </span>
             )}
             <span style={{ fontSize: 10, opacity: 0.6 }}>{showFilters ? '▲' : '▼'}</span>
@@ -1507,7 +1516,7 @@ Melhores cumprimentos,
         </div>
 
         {/* Chips de filtros ativos */}
-        {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource) && (
+        {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource || filterCountry) && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
             {filterStep && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
@@ -1533,8 +1542,14 @@ Melhores cumprimentos,
                 <button onClick={() => setFilterLeadSource(null)} style={{ background: 'none', border: 'none', color: '#00b894', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
               </span>
             )}
+            {filterCountry && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.2)', border: '1px solid rgba(34,197,94,0.4)', color: '#86efac', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                País: {filterCountry}
+                <button onClick={() => setFilterCountry(null)} style={{ background: 'none', border: 'none', color: '#86efac', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+              </span>
+            )}
             <button
-              onClick={() => { setFilterStep(null); setFilterMarketing(null); setFilterLeadType(null); setFilterLeadSource(null); }}
+              onClick={() => { setFilterStep(null); setFilterMarketing(null); setFilterLeadType(null); setFilterLeadSource(null); setFilterCountry(null); }}
               style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: 20, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
             >
               Limpar tudo
@@ -1611,6 +1626,20 @@ Melhores cumprimentos,
                 ))}
                 {leadSources.map(s => (
                   <option key={s.id} value={s.value}>{s.emoji} {s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>País</label>
+              <select
+                value={filterCountry || ''}
+                onChange={(e) => setFilterCountry(e.target.value || null)}
+                style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 140, cursor: 'pointer' }}
+              >
+                <option value="">Todos</option>
+                {countries.map(c => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
