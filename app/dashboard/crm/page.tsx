@@ -47,6 +47,7 @@ type Lead = {
   card_id: string
   lead_type_id: string | null
   lead_source: string | null
+  country: string | null
 }
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
@@ -262,7 +263,7 @@ Melhores cumprimentos,
       .from('leads')
       .select(`
         id, name, email, phone, zone, message, marketing_opt_in, consent_given,
-        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id,
+        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country,
         cards ( user_id, name, slug )
       `)
       .eq('user_id', user.id)
@@ -778,7 +779,7 @@ Melhores cumprimentos,
     const matchesType = filterLeadType === null || l.lead_type_id === filterLeadType
     const matchesSource = filterLeadSource === null || (l.lead_source || 'cartão') === filterLeadSource
     const matchesCountry = filterCountry === null || l.country === filterCountry
-    return matchesSearch && matchesType && matchesSource
+    return matchesSearch && matchesType && matchesSource && matchesCountry
   })
 
 
