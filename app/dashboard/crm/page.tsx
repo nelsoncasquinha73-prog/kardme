@@ -3240,7 +3240,7 @@ Melhores cumprimentos,
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {countries.map(c => (
                     <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: '#000' }}>🌍 {c.name}</span>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: '#111827', opacity: 1, WebkitTextFillColor: '#111827', textShadow: 'none' }}>🌍 {c.name}</span>
                       <button
                         onClick={async () => {
                           try {
