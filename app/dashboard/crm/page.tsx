@@ -951,19 +951,31 @@ Melhores cumprimentos,
       if (!lead) continue
 
       const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
-      const personalizedBody = bulkBody.replace('{nome}', lead.name)
+      const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
 
       try {
-        await createLeadTask({
-          leadId: lead.id,
-          userId,
-          title: personalizedSubject,
-          description: personalizedBody,
-          dueAtISO,
-          actionType: 'email',
-        })
+        // Criar task com dados de email preenchidos
+        const { error } = await supabase
+          .from('lead_tasks')
+          .insert({
+            lead_id: lead.id,
+            user_id: userId,
+            title: personalizedSubject,
+            description: personalizedBody,
+            due_at: dueAtISO,
+            action_type: 'email',
+            email_recipient: lead.email,
+            email_subject: personalizedSubject,
+            email_body: personalizedBody,
+            email_template_id: selectedTemplate?.id || null,
+            email_attachments: selectedAttachments && selectedAttachments.length > 0 ? selectedAttachments : null,
+            send_status: 'pending',
+          })
+
+        if (error) throw error
+
         created++
-        await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Tarefa de email agendada: ${personalizedSubject}` })
+        await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Email agendado para ${dueAtISO.split('T')[0]} às ${bulkScheduleTime}` })
       } catch (err) {
         console.error('Erro ao criar tarefa para', lead.email, err)
       }
