@@ -57,6 +57,11 @@ export function ScheduledTasksView() {
     }
   }
 
+  async function handleRefresh() {
+    await loadTasks()
+    await loadStats()
+  }
+
   async function handleCancel(taskId: string) {
     if (!user?.id) return
     if (!confirm('Tem a certeza que quer cancelar esta tarefa?')) return
@@ -143,6 +148,33 @@ export function ScheduledTasksView() {
 
   return (
     <div style={{ padding: '24px', background: '#fff', borderRadius: 16 }}>
+      {/* Header com título e refresh */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: '#111827' }}>Tarefas Agendadas</h2>
+          <p style={{ margin: '4px 0 0 0', fontSize: 13, color: '#6b7280' }}>Gerir emails agendados para envio automático</p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={loading}
+          style={{
+            padding: '8px 12px',
+            borderRadius: 8,
+            border: '1px solid #e5e7eb',
+            background: '#fff',
+            color: '#6b7280',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
+            transition: 'all 0.2s',
+          }}
+          title="Atualizar lista"
+        >
+          {loading ? '⏳' : '🔄'} Atualizar
+        </button>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
         <div style={{ padding: 16, background: '#fef3c7', borderRadius: 12 }}>
           <div style={{ fontSize: 12, color: '#92400e', fontWeight: 700 }}>Pendentes</div>
@@ -161,6 +193,28 @@ export function ScheduledTasksView() {
           <div style={{ fontSize: 28, fontWeight: 900, color: '#991b1b', marginTop: 8 }}>
             {stats.failed}
           </div>
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 16, opacity: 0.4 }}>🔍</span>
+          <input
+            type="text"
+            placeholder="Pesquisar por assunto, email ou lead..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 12px 10px 40px',
+              borderRadius: 10,
+              border: '1px solid #e5e7eb',
+              fontSize: 13,
+              boxSizing: 'border-box',
+              background: '#f9fafb',
+            }}
+          />
         </div>
       </div>
 
@@ -187,23 +241,6 @@ export function ScheduledTasksView() {
                 : `Falhados (${stats.failed})`}
           </button>
         ))}
-      </div>
-
-      <div style={{ marginBottom: 24 }}>
-        <input
-          type="text"
-          placeholder="Procurar por assunto, email ou lead..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '12px 16px',
-            borderRadius: 10,
-            border: '1px solid #e5e7eb',
-            fontSize: 14,
-            boxSizing: 'border-box',
-          }}
-        />
       </div>
 
       {loading ? (

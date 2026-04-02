@@ -947,7 +947,6 @@ Melhores cumprimentos,
 
     setBulkSending(true)
     let created = 0
-    const errors: string[] = []
 
     for (const leadId of Array.from(selectedLeadIds)) {
       const lead = leads.find(l => l.id === leadId)
@@ -971,17 +970,14 @@ Melhores cumprimentos,
         created++
         await logLeadActivity({ leadId: lead.id, userId, type: 'task_created', title: `Email agendado para ${dueAtISO.split('T')[0]} às ${bulkScheduleTime}` })
       } catch (err: any) {
-        const message = err?.message || err?.error_description || err?.details || JSON.stringify(err)
-        console.error('Erro ao criar tarefa para', lead.email, err)
-        console.error('Stack:', err?.stack)
-        errors.push(`${lead.email}: ${message}`)
+        console.error('Erro ao agendar email para', lead.email, err)
       }
     }
 
-    if (errors.length > 0) {
-      alert(`Tarefas criadas: ${created}\nErros:\n${errors.slice(0, 5).join('\n')}`)
+    if (created > 0) {
+      alert(`✅ ${created} email${created > 1 ? 's' : ''} agendado${created > 1 ? 's' : ''} com sucesso!`)
     } else {
-      alert(`Tarefas criadas: ${created}`)
+      alert('❌ Nenhum email foi agendado. Tenta novamente.')
     }
     setShowBulkEmailModal(false)
     setBulkSubject('')
