@@ -3250,9 +3250,9 @@ Melhores cumprimentos,
                             await deleteCountry(c.id, userId)
                             setCountries(prev => prev.filter(x => x.id !== c.id))
                             addToast('País eliminado', 'success')
-                          } catch (e) {
-                            console.error(e)
-                            addToast('Erro ao eliminar país', 'error')
+                          } catch (e: any) {
+                            console.error('Erro ao eliminar país:', e?.message || e)
+                            addToast(e?.message || 'Erro ao eliminar país', 'error')
                           }
                         }}
                         style={{ background: '#dc2626', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}
