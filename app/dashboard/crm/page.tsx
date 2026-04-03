@@ -2631,14 +2631,17 @@ Melhores cumprimentos,
             <textarea value={bulkBody} onChange={(e) => setBulkBody(e.target.value)} placeholder="Use {nome} e {email} para personalizar." style={{ width: '100%', minHeight: 150, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
 
             <div style={{ background: '#f0f9ff', padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 12 }}>
-              <strong>Preview (primeiras 2):</strong>
+              <strong>Preview (primeiras 2 selecionadas):</strong>
               <div style={{ marginTop: 8, fontSize: 11, opacity: 0.8 }}>
-                {filteredLeads.slice(0, 2).map(l => (
-                  <div key={l.id} style={{ marginBottom: 8, padding: 8, background: '#fff', borderRadius: 6 }}>
-                    <div><strong>{bulkSubject.replace('{nome}', l.name)}</strong></div>
-                    <div style={{ whiteSpace: 'pre-wrap', marginTop: 4, fontSize: 11 }}>{bulkBody.replace('{nome}', l.name).replace('{email}', l.email).slice(0, 80)}...</div>
-                  </div>
-                ))}
+                {Array.from(selectedLeadIds).slice(0, 2).map(leadId => {
+                  const l = leads.find(x => x.id === leadId)
+                  return l ? (
+                    <div key={l.id} style={{ marginBottom: 8, padding: 8, background: '#fff', borderRadius: 6 }}>
+                      <div><strong>{bulkSubject.replace('{nome}', l.name)}</strong></div>
+                      <div style={{ whiteSpace: 'pre-wrap', marginTop: 4, fontSize: 11 }}>{bulkBody.replace('{nome}', l.name).replace('{email}', l.email).slice(0, 80)}...</div>
+                    </div>
+                  ) : null
+                })}
               </div>
             </div>
 
