@@ -33,6 +33,7 @@ import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
 import PipelineKanban from './PipelineKanban'
+import { processEmailTemplate } from '@/lib/email'
 
 type Lead = {
   id: string
@@ -948,7 +949,7 @@ Melhores cumprimentos,
       if (!lead) continue
 
       const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
-      const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
+      const personalizedBody = processEmailTemplate(bulkBody, { nome: lead.name, email: lead.email })
 
       try {
         await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody, selectedTemplate?.id, selectedAttachments)
@@ -991,7 +992,7 @@ Melhores cumprimentos,
       if (!lead) continue
 
       const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
-      const personalizedBody = bulkBody.replace('{nome}', lead.name).replace('{email}', lead.email)
+      const personalizedBody = processEmailTemplate(bulkBody, { nome: lead.name, email: lead.email })
 
       try {
         // Criar tarefa agendada em scheduled_tasks
@@ -2590,7 +2591,7 @@ Melhores cumprimentos,
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
             <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, emailBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
+              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { const processedBody = processEmailTemplate(emailBody, { nome: selectedLeadForEmail.name, email: selectedLeadForEmail.email }); await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, processedBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
