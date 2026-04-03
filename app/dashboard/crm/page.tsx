@@ -19,6 +19,7 @@ import {
 
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
+import { useChatGPT } from '@/lib/hooks/useChatGPT'
 import { createScheduledTask } from '@/lib/crm/scheduledTasks'
 import { logLeadActivity } from '@/lib/crm/logLeadActivity'
 import { createLeadTask, markTaskDone, fetchTasksForDay, fetchTasksForLead, fetchTasksForMonth, type LeadTask } from '@/lib/crm/tasks'
@@ -31,6 +32,7 @@ import { fetchCountries, createCountry, deleteCountry, updateLeadCountry, type C
 import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
+import PipelineKanban from './PipelineKanban'
 
 type Lead = {
   id: string
@@ -93,6 +95,7 @@ export default function CrmProPage() {
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
   const gmail = useGmailIntegration(userId)
+  const chatgpt = useChatGPT()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [crmProActive, setCRMProActive] = useState<boolean | null>(null)
@@ -192,7 +195,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
-  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled'>('table')
+  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled' | 'kanban'>('table')
   const [importing, setImporting] = useState(false)
 
   const handleCreateCountry = async () => {
@@ -1452,6 +1455,22 @@ Melhores cumprimentos,
         >
           📧 Tarefas Agendadas
         </button>
+        <button
+          onClick={() => setActiveView('kanban')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'kanban' ? '#f59e0b' : '#e5e7eb',
+            color: activeView === 'kanban' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          🎯 Pipeline Kanban
+        </button>
       </div>
 
       {activeView === 'calendar' && (
@@ -1678,6 +1697,34 @@ Melhores cumprimentos,
 
       </>)}
 
+
+      {activeView === 'kanban' && (
+        <PipelineKanban
+          leads={leads}
+          leadTypes={leadTypes}
+          filterLeadType={filterLeadType}
+          setFilterLeadType={setFilterLeadType}
+          updateStep={updateStep}
+          onViewLead={(lead) => {
+            setSelectedLeadForView(lead)
+            setShowViewLeadModal(true)
+          }}
+          onEmailLead={(lead) => {
+            setSelectedLeadForEmail(lead)
+            setShowEmailModal(true)
+          }}
+          onWhatsAppLead={(lead) => {
+            const phone = normalizePhone(lead.phone)
+            if (!phone) {
+              alert('Esta lead não tem número de telefone')
+              return
+            }
+            setSelectedLeadForWhatsApp({...lead, phone})
+            setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
+            setShowWhatsAppModal(true)
+          }}
+        />
+      )}
       {activeView === 'scheduled' && <ScheduledTasksView />}
 
       {activeView === 'ambassadors' && (
@@ -2369,7 +2416,28 @@ Melhores cumprimentos,
             <h2 style={{ marginBottom: 8, fontSize: 18, fontWeight: 900 }}>Enviar WhatsApp</h2>
             <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>Para: <strong>{selectedLeadForWhatsApp.name}</strong> ({selectedLeadForWhatsApp.phone || 'sem telefone'})</p>
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Mensagem</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 12 }}>
+              <label style={{ display: 'block', fontWeight: 900, fontSize: 13, color: '#111827' }}>Mensagem</label>
+              <button
+                onClick={async () => {
+                  const generated = await chatgpt.generateMessage('whatsapp', selectedLeadForWhatsApp, 'Follow-up comercial no CRM')
+                  if (generated) setWhatsAppMessage(generated)
+                }}
+                disabled={chatgpt.loading}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(139,92,246,0.25)',
+                  background: 'rgba(139,92,246,0.08)',
+                  color: '#7c3aed',
+                  fontWeight: 900,
+                  fontSize: 12,
+                  cursor: 'pointer'
+                }}
+              >
+                {chatgpt.loading ? 'A gerar...' : '✨ Gerar com IA'}
+              </button>
+            </div>
             <textarea
               value={whatsAppMessage}
               onChange={(e) => setWhatsAppMessage(e.target.value)}
@@ -2409,6 +2477,31 @@ Melhores cumprimentos,
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 650, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 8 }}>Enviar Email</h2>
             <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 20 }}>Para: <strong>{selectedLeadForEmail.email}</strong></p>
+
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+              <button
+                onClick={async () => {
+                  const generated = await chatgpt.generateMessage('email', selectedLeadForEmail, 'Follow-up comercial no CRM')
+                  if (generated) {
+                    if (!emailSubject) setEmailSubject(`Follow-up ${selectedLeadForEmail.name}`)
+                    setEmailBody(generated)
+                  }
+                }}
+                disabled={chatgpt.loading}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(139,92,246,0.25)',
+                  background: 'rgba(139,92,246,0.08)',
+                  color: '#7c3aed',
+                  fontWeight: 900,
+                  fontSize: 13,
+                  cursor: 'pointer'
+                }}
+              >
+                {chatgpt.loading ? 'A gerar...' : '✨ Gerar com IA'}
+              </button>
+            </div>
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 240 }}>

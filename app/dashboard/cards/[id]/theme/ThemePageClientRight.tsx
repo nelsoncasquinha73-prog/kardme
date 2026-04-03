@@ -57,6 +57,10 @@ type Props = {
   onChangeFloatingActions?: (settings: any) => void
   themeDecorations?: DecorationItem[]
   onChangeThemeDecorations?: (decorations: DecorationItem[]) => void
+  businessCategory: string
+  setBusinessCategory: (cat: string) => void
+  businessCategorySaving: boolean
+  saveBusinessCategory: () => Promise<void>
 }
 
 function isFormEl(el: HTMLElement | null) {
@@ -87,6 +91,10 @@ export default function ThemePageClientRight({
   onChangeFloatingActions,
   themeDecorations,
   onChangeThemeDecorations,
+  businessCategory,
+  setBusinessCategory,
+  businessCategorySaving,
+  saveBusinessCategory,
 }: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const { t } = useLanguage()
@@ -214,6 +222,75 @@ export default function ThemePageClientRight({
       <div style={{ padding: 12, overflow: 'auto', flex: 1 }}>
         {!activeBlock && (
           <>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 900, fontSize: 12, color: '#111827', lineHeight: 1.4 }}>
+                🏢 Área de negócio
+              </label>
+              <p style={{ fontSize: 11, opacity: 0.55, marginBottom: 10, color: '#111827', lineHeight: 1.3 }}>
+                Personaliza templates, CRM e IA para o teu setor.
+              </p>
+              <select
+                value={businessCategory}
+                onChange={(e) => {
+                  setBusinessCategory(e.target.value)
+                  setTimeout(() => saveBusinessCategory(), 100)
+                }}
+                disabled={businessCategorySaving}
+                style={{
+                  width: '100%',
+                  minHeight: 42,
+                  padding: '10px 36px 10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(0,0,0,0.18)',
+                  fontSize: 13,
+                  lineHeight: 1.2,
+                  fontFamily: 'inherit',
+                  background: '#fff',
+                  color: '#111827',
+                  cursor: businessCategorySaving ? 'not-allowed' : 'pointer',
+                  opacity: businessCategorySaving ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                }}
+              >
+                <option value="">Seleciona uma área...</option>
+                <option value="Imobiliário">Imobiliário</option>
+                <option value="Automóvel">Automóvel</option>
+                <option value="Seguros">Seguros</option>
+                <option value="Crédito">Crédito</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Estética">Estética</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Restauração">Restauração</option>
+                <option value="Hotelaria">Hotelaria</option>
+                <option value="Construção">Construção</option>
+                <option value="Advocacia">Advocacia</option>
+                <option value="Finanças">Finanças</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="Educação">Educação</option>
+                <option value="Fotografia">Fotografia</option>
+                <option value="Eventos">Eventos</option>
+                <option value="Política">Política</option>
+                <option value="Pets">Pets</option>
+                <option value="Turismo">Turismo</option>
+                <option value="Retalho">Retalho</option>
+                <option value="Network Marketing">Network Marketing</option>
+                <option value="Consultoria">Consultoria</option>
+                <option value="Serviços">Serviços</option>
+                <option value="Outro">Outro</option>
+              </select>
+              {businessCategorySaving && (
+                <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8, color: '#7c3aed' }}>
+                  ⏳ A guardar...
+                </p>
+              )}
+            </div>
+
             <FloatingActionsEditor
               settings={floatingActions || {}}
               onChange={(s) => onChangeFloatingActions?.(s)}

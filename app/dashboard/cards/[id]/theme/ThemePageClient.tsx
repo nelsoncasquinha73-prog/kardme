@@ -54,6 +54,8 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
   const [toast, setToast] = useState<ToastType>(null)
 
+  const [businessCategory, setBusinessCategory] = useState<string>(card?.business_category || '')
+  const [businessCategorySaving, setBusinessCategorySaving] = useState(false)
 
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const enabledBlocksSorted = useMemo(
@@ -231,6 +233,28 @@ export default function ThemePageClient({ card, blocks }: Props) {
   const [slugSaving, setSlugSaving] = useState(false)
   const [slugError, setSlugError] = useState<string | null>(null)
 
+  async function saveBusinessCategory() {
+    if (!businessCategory || businessCategory === card?.business_category) return
+
+    setBusinessCategorySaving(true)
+
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update({ business_category: businessCategory })
+        .eq('id', card.id)
+
+      if (error) throw error
+
+      setToast({ message: 'Área de negócio atualizada com sucesso', type: 'success' })
+    } catch (e: any) {
+      setToast({ message: e.message || 'Erro ao guardar área de negócio', type: 'error' })
+      setBusinessCategory(card?.business_category || '')
+    } finally {
+      setBusinessCategorySaving(false)
+    }
+  }
+
   async function saveSlug() {
     if (!slugEdit || slugEdit === card.slug) return
 
@@ -347,6 +371,10 @@ export default function ThemePageClient({ card, blocks }: Props) {
             setThemeDecorations(decorations)
             setSaveStatus('dirty')
           }}
+          businessCategory={businessCategory}
+          setBusinessCategory={setBusinessCategory}
+          businessCategorySaving={businessCategorySaving}
+          saveBusinessCategory={saveBusinessCategory}
         />
 
         <AddBlockModal
