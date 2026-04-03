@@ -906,7 +906,9 @@ Melhores cumprimentos,
     if (selectedLeadIds.size === filteredLeads.length) {
       setSelectedLeadIds(new Set())
     } else {
-      setSelectedLeadIds(new Set(filteredLeads.map(l => l.id)))
+      const allVisibleIds = new Set(filteredLeads.map(l => l.id))
+      setSelectedLeadIds(allVisibleIds)
+      console.log('toggleAllLeads - selecionadas:', allVisibleIds.size, 'IDs:', Array.from(allVisibleIds))
     }
   }
 
