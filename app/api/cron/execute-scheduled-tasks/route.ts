@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, processEmailTemplate } from '@/lib/email'
 
 const CRON_SECRET = process.env.CRON_SECRET || 'dev-secret'
 
@@ -68,11 +68,17 @@ export async function POST(req: NextRequest) {
           continue
         }
 
+        // NOVO: Processar template com variáveis
+        const htmlBody = processEmailTemplate(task.email_body, {
+          nome: lead?.name || '',
+          email: lead?.email || '',
+        })
+
         // Enviar email
         const result = await sendEmail({
           to: recipient,
           subject: task.email_subject,
-          html: task.email_body,
+          html: htmlBody,
         })
 
         // 3. Marcar como enviado
