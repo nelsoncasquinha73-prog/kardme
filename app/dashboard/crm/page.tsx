@@ -315,14 +315,9 @@ Melhores cumprimentos,
     try {
       const countryList = await fetchCountries(user.id)
       setCountries(countryList)
+      console.log('Países carregados:', countryList)
     } catch (e) {
       console.error('Erro a carregar países:', e)
-    }
-
-    // Carregar países únicos
-    if (data && data.length > 0) {
-      const uniqueCountries = [...new Set(data.map((l: any) => l.country).filter(Boolean))]
-      setCountries(uniqueCountries.sort())
     }
   }
 
