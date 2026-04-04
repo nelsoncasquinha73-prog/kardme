@@ -365,7 +365,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                         transition: 'all 0.2s',
                       }}
                     >
-                      {renderEmailBlock(block, userId)}
+                      {renderEmailBlock(block)}
                     </div>
                   ))}
                 </div>
@@ -465,7 +465,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                 </label>
               </div>
 
-              {renderBlockInspector(userId, selectedBlock, (updates) => updateBlock(selectedBlock.id, updates))}
+              {renderBlockInspector(selectedBlock, (updates) => updateBlock(selectedBlock.id, updates))}
 
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                 <button
@@ -542,7 +542,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   )
 }
 
-function renderEmailBlock(block: EmailBlock, userId: string) {
+function renderEmailBlock(block: EmailBlock) {
   const { type, content } = block
 
   switch (type) {
@@ -635,7 +635,6 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
 }
 
 function renderBlockInspector(
-  userId: string,
   block: EmailBlock,
   onUpdate: (updates: Record<string, any>) => void
 ) {
@@ -726,7 +725,6 @@ function renderBlockInspector(
           </div>
         </>
       )
-
     case 'image':
       return (
         <>
@@ -737,6 +735,31 @@ function renderBlockInspector(
           />
 
           <div style={{ marginTop: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Alt text
+            </label>
+            <input
+              type="text"
+              value={content.alt || ''}
+              onChange={(e) => onUpdate({ alt: e.target.value })}
+              placeholder="Descrição da imagem"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+              }}
+            />
+          </div>
+                fontSize: 12,
+              }}
+            />
+          </div>
+
+          <div>
             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
               Alt text
             </label>
