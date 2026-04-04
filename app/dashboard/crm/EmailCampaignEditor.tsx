@@ -224,7 +224,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         </div>
 
         {/* COLUNA CENTRAL: CANVAS + HEADER */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           {/* Header */}
           <div
             style={{
