@@ -119,6 +119,7 @@ export default function CrmProPage() {
 
 
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null)
+  const [selectedLeadForEmailMarketing, setSelectedLeadForEmailMarketing] = useState<string | null>(null)
   const [emailSubject, setEmailSubject] = useState('')
   const [emailBody, setEmailBody] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
@@ -2103,10 +2104,8 @@ Melhores cumprimentos,
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
                           onClick={() => {
-                            setSelectedLeadForEmail(lead)
-                            setShowEmailModal(true)
-                            setSelectedTemplate(null)
-                            setSelectedAttachments([])
+                            setSelectedLeadForEmailMarketing(lead.id)
+                            setActiveView('email-marketing')
                           }}
                           disabled={!gmail.isConnected}
                           title={gmail.isConnected ? 'Enviar email agora' : 'Liga o Gmail para enviar emails'}
