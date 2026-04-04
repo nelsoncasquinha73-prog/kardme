@@ -13,6 +13,7 @@ import {
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
 import EmailPreviewModal from './EmailPreviewModal'
+import TextBlockEditor from './TextBlockEditor'
 import { FiX, FiPlus, FiTrash2, FiEye } from 'react-icons/fi'
 
 export type EmailBlock = {
@@ -708,87 +709,10 @@ function renderBlockInspector(
   switch (type) {
     case 'text':
       return (
-        <>
-          <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
-              Texto
-            </label>
-            <textarea
-              value={content.text}
-              onChange={(e) => onUpdate({ text: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 6,
-                border: '1px solid rgba(255,255,255,0.15)',
-                background: 'rgba(255,255,255,0.08)',
-                color: '#fff',
-                fontSize: 12,
-                minHeight: 120,
-                resize: 'vertical',
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
-              Tamanho: {content.fontSize || 16}px
-            </label>
-            <input
-              type="range"
-              min="12"
-              max="32"
-              value={content.fontSize || 16}
-              onChange={(e) => onUpdate({ fontSize: parseInt(e.target.value) })}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
-              Cor
-            </label>
-            <input
-              type="color"
-              value={content.color || '#111827'}
-              onChange={(e) => onUpdate({ color: e.target.value })}
-              style={{
-                width: '100%',
-                height: 40,
-                borderRadius: 6,
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
-              Alinhamento
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
-              {['left', 'center', 'right'].map((align) => (
-                <button
-                  key={align}
-                  onClick={() => onUpdate({ align })}
-                  style={{
-                    padding: '6px',
-                    borderRadius: 4,
-                    border: content.align === align ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.15)',
-                    background: content.align === align ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {align}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
+        <TextBlockEditor
+          content={content}
+          onUpdate={onUpdate}
+        />
       )
 
     case 'image':
