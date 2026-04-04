@@ -197,7 +197,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
-  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled' | 'kanban'>('table')
+  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled' | 'kanban' | 'email-marketing'>('table')
   const [importing, setImporting] = useState(false)
 
   const handleCreateCountry = async () => {
@@ -1737,7 +1737,6 @@ Melhores cumprimentos,
           onWhatsAppLead={(lead) => {
             const phone = normalizePhone(lead.phone)
             if (!phone) {
-      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} />}
               alert('Esta lead não tem número de telefone')
               return
             }
@@ -1749,6 +1748,7 @@ Melhores cumprimentos,
       )}
       {activeView === 'scheduled' && <ScheduledTasksView />}
 
+      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} />}
       {activeView === 'ambassadors' && (
         <AmbassadorsView userId={userId} />
       )}

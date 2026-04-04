@@ -359,13 +359,11 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
                               setSelectedLeads(newSelected)
                             }}
                             style={{ cursor: 'pointer' }}
-                          />
+ />
                         </td>
                         <td style={{ padding: '12px', color: '#fff', fontSize: 14 }}>{lead.name}</td>
                         <td style={{ padding: '12px', color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>{lead.email}</td>
-                        <td style
-cat >> app/dashboard/crm/EmailMarketingView.tsx << 'EOF'
-: {{ padding: '12px', color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>{lead.step}</td>
+                        <td style={{ padding: '12px', color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>{lead.step}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -381,25 +379,19 @@ cat >> app/dashboard/crm/EmailMarketingView.tsx << 'EOF'
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>Campanhas</h3>
             <button
-              onClick={() => {
-                const newBroadcast = {
-                  id: Date.now().toString(),
-                  user_id: userId,
-                  title: 'Nova Campanha',
-                  subject: 'Assunto',
-                  preheader: null,
-                  html_content: {},
-                  template_id: null,
-                  status: 'draft' as const,
-                  scheduled_at: null,
-                  sent_at: null,
-                  total_recipients: 0,
-                  opened: 0,
-                  clicked: 0,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
+              onClick={async () => {
+                try {
+                  const created = await createBroadcast(userId, {
+                    title: 'Nova Campanha',
+                    subject: 'Novo assunto',
+                    html_content: {},
+                  })
+                  setBroadcasts((prev) => [created, ...prev])
+                  addToast('Campanha criada!', 'success')
+                } catch (e) {
+                  console.error(e)
+                  addToast('Erro ao criar campanha', 'error')
                 }
-                setBroadcasts([newBroadcast, ...broadcasts])
               }}
               style={{
                 padding: '8px 16px',
@@ -417,10 +409,20 @@ cat >> app/dashboard/crm/EmailMarketingView.tsx << 'EOF'
           </div>
 
           {broadcasts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.03)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: 16,
+                border: '1px dashed rgba(255,255,255,0.1)',
+              }}
+            >
               <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
               <h3 style={{ color: '#fff', fontWeight: 800, margin: '0 0 8px' }}>Nenhuma campanha ainda</h3>
-              <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: 13 }}>Cria a tua primeira campanha de email</p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: 13 }}>
+                Cria a tua primeira campanha de email
+              </p>
             </div>
           ) : (
             <div style={{ display: 'grid', gap: 12 }}>
@@ -476,6 +478,7 @@ cat >> app/dashboard/crm/EmailMarketingView.tsx << 'EOF'
                       </button>
                     </div>
                   </div>
+
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
                     <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 12 }}>
                       <p style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 4px', fontSize: 12 }}>Destinatários</p>
