@@ -145,6 +145,67 @@ function renderEmailBlock(block: any) {
     case 'spacer':
       return <div style={{ height: content.height || 24 }} />
 
+    case 'video':
+      return (
+        <div
+          style={{
+            width: content.width || '100%',
+            margin: '0 auto',
+            textAlign: content.align || 'center',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: '100%',
+              maxWidth: 500,
+              background: '#000',
+              borderRadius: 8,
+              overflow: 'hidden',
+            }}
+          >
+            {content.thumbnail ? (
+              <img
+                src={content.thumbnail}
+                alt="Video thumbnail"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%',
+                  paddingBottom: '56.25%',
+                  background: '#1a1a1a',
+                }}
+              />
+            )}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 60,
+                height: 60,
+                background: 'rgba(16, 185, 129, 0.9)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 28,
+              }}
+            >
+              ▶️
+            </div>
+          </div>
+        </div>
+      )
+
     default:
       return null
   }
