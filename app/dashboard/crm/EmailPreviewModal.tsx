@@ -34,12 +34,13 @@ export default function EmailPreviewModal({ blocks, title, subject, preheader, o
         style={{
           width: '100%',
           maxWidth: 600,
-          height: '90vh',
+          maxHeight: '90vh',
           background: '#f3f4f6',
           borderRadius: 12,
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
