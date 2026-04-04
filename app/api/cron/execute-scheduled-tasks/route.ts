@@ -75,11 +75,20 @@ export async function POST(req: NextRequest) {
           email: lead?.email || '',
         })
 
-        // Enviar email
+        // Enviar email com anexos
+        const attachments = task.attachments && task.attachments.length > 0
+          ? task.attachments.map((att: any) => ({
+              filename: att.filename,
+              content: Buffer.from(att.base64 || '', 'base64'),
+              contentType: att.mimeType || 'application/octet-stream',
+            }))
+          : null
+
         const result = await sendEmail({
           to: recipient,
           subject: task.email_subject,
           html: htmlBody,
+          attachments,
         })
 
         // 3. Marcar como enviado

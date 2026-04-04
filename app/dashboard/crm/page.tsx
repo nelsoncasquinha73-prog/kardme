@@ -968,6 +968,7 @@ Melhores cumprimentos,
     setBulkSubject('')
     setBulkBody('')
     setSelectedLeadIds(new Set())
+    setSelectedAttachments([])
     setBulkSending(false)
   }
 
@@ -1023,6 +1024,7 @@ Melhores cumprimentos,
     setBulkSubject('')
     setBulkBody('')
     setSelectedLeadIds(new Set())
+    setSelectedAttachments([])
     setBulkSending(false)
   }
 
@@ -2753,7 +2755,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={sendBulkEmails} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A enviar…' : '⚡ Enviar agora'}</button>
               <button onClick={createBulkTasks} disabled={bulkSending} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 800, cursor: bulkSending ? 'not-allowed' : 'pointer', fontSize: 13, opacity: bulkSending ? 0.6 : 1 }}>{bulkSending ? 'A criar…' : '📅 Agendar'}</button>
-              <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
+              <button onClick={() => { setShowBulkEmailModal(false); setBulkSubject(''); setBulkBody(''); setBulkScheduleDate(''); setBulkScheduleTime('09:00'); setSelectedAttachments([]) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>
         </div>
