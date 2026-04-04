@@ -12,7 +12,7 @@ import {
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
 import { FiX, FiPlus, FiTrash2, FiEye } from 'react-icons/fi'
-import EmailPreview from './EmailPreview'
+import EmailPreviewModal from './EmailPreviewModal'
 
 interface EmailCampaignEditorProps {
   userId: string
@@ -39,6 +39,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   const [saving, setSaving] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -175,9 +176,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   return (
     <div
       style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 16,
+        display: 'flex',
+        flexDirection: 'column',
         height: '100vh',
         background: '#0f172a',
       }}
@@ -393,10 +393,16 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         </div>
       </div>
 
-      {/* PREVIEW DIREITA */}
-      <EmailPreview blocks={blocks} title={title} subject={subject} preheader={preheader} />
-
-          </div>
+      {showPreviewModal && (
+        <EmailPreviewModal
+          blocks={blocks}
+          title={title}
+          subject={subject}
+          preheader={preheader}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
+    </div>
   )
 }
 

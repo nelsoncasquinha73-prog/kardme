@@ -506,7 +506,7 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
+            background: '#0f172a',
             display: 'flex',
             zIndex: 1000,
           }}
