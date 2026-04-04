@@ -458,6 +458,23 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
                         {bc.status === 'draft' ? 'Rascunho' : bc.status === 'sent' ? 'Enviado' : 'Agendado'}
                       </span>
                       <button
+                        onClick={() => {
+                          setEditingBroadcastId(bc.id)
+                          setEditorOpen(true)
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#3b82f6',
+                          cursor: 'pointer',
+                          fontSize: 16,
+                          padding: '4px 8px',
+                        }}
+                        title="Editar campanha"
+                      >
+                        ✏️
+                      </button>
+                      <button
                         onClick={() => handleDeleteBroadcast(bc.id)}
                         style={{
                           background: 'transparent',
