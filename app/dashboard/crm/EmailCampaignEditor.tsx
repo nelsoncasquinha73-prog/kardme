@@ -12,6 +12,7 @@ import {
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
 import { FiX, FiPlus, FiTrash2, FiEye } from 'react-icons/fi'
+import EmailPreview from './EmailPreview'
 
 interface EmailCampaignEditorProps {
   userId: string
@@ -20,7 +21,7 @@ interface EmailCampaignEditorProps {
   onSave: () => void
 }
 
-type EmailBlock = {
+export type EmailBlock = {
   id: string
   type: EmailBlockType
   content: Record<string, any>
@@ -175,13 +176,13 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 400px 350px',
+        gridTemplateColumns: '1fr 1fr',
         gap: 16,
         height: '100vh',
         background: '#0f172a',
       }}
     >
-      {/* CANVAS CENTRAL */}
+      {/* EDITOR ESQUERDA */}
       <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -247,50 +248,109 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
           </div>
         </div>
 
-        {/* Canvas */}
-        <div
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            padding: '20px',
-            display: 'flex',
-            justifyContent: 'center',
-            background: 'rgba(255,255,255,0.02)',
-          }}
-        >
-          <div
-            style={{
-              width: 600,
-              background: '#fff',
-              borderRadius: 12,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-              overflow: 'hidden',
-            }}
-          >
-            {blocks.length === 0 ? (
-              <div style={{ padding: '60px 20px', textAlign: 'center', color: '#999' }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
-                <p style={{ margin: 0, fontSize: 14 }}>Adiciona blocos para começar</p>
-              </div>
-            ) : (
-              <div style={{ padding: '20px' }}>
-                {blocks.map((block, idx) => (
-                  <div
-                    key={block.id}
-                    onClick={() => setSelectedBlockId(block.id)}
+        {/* Blocos + Inspector em grid */}
+        <div style={{ flex: 1, overflow: 'auto', display: 'grid', gridTemplateColumns: '200px 1fr', gap: 12, padding: '16px' }}>
+          {/* PAINEL BLOCOS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h3 style={{ color: '#fff', fontWeight: 800, margin: 0, fontSize: 14 }}>Blocos</h3>
+            {DEFAULT_EMAIL_BLOCKS.map((template) => (
+              <button
+                key={template.block_type}
+                onClick={() => addBlock(template.block_type)}
+                style={{
+                  padding: '12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'
+                }}
+              >
+                + {template.name}
+              </button>
+            ))}
+          </div>
+
+          {/* INSPECTOR */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
+            <h3 style={{ color: '#fff', fontWeight: 800, margin: 0, fontSize: 14 }}>Propriedades</h3>
+
+            {selectedBlock ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+                    Tipo: {selectedBlock.type}
+                  </label>
+                </div>
+
+                {renderBlockInspector(selectedBlock, (updates) => updateBlock(selectedBlock.id, updates))}
+
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <button
+                    onClick={() => moveBlock(selectedBlock.id, 'up')}
                     style={{
-                      marginBottom: idx === blocks.length - 1 ? 0 : 16,
-                      padding: '12px',
-                      borderRadius: 8,
-                      border: selectedBlockId === block.id ? '2px solid #10b981' : '1px solid #e5e7eb',
-                      background: selectedBlockId === block.id ? 'rgba(16,185,129,0.05)' : 'transparent',
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: 12,
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
                     }}
                   >
-                    {renderEmailBlock(block)}
-                  </div>
-                ))}
+                    ↑ Subir
+                  </button>
+                  <button
+                    onClick={() => moveBlock(selectedBlock.id, 'down')}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ↓ Baixar
+                  </button>
+                  <button
+                    onClick={() => removeBlock(selectedBlock.id)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: '#ff6b6b',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <FiTrash2 /> Apagar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+                Seleciona um bloco para editar
               </div>
             )}
           </div>
@@ -299,7 +359,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         {/* Footer Actions */}
         <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
-            onClick={() => setShowPreview(!showPreview)}
+            onClick={onClose}
             style={{
               padding: '10px 16px',
               borderRadius: 8,
@@ -309,12 +369,9 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
             }}
           >
-            <FiEye /> Preview
+            Cancelar
           </button>
           <button
             onClick={handleSave}
@@ -336,130 +393,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         </div>
       </div>
 
-      {/* PAINEL BLOCOS (esquerda) */}
-      <div
-        style={{
-          borderRight: '1px solid rgba(255,255,255,0.1)',
-          padding: '16px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        <h3 style={{ color: '#fff', fontWeight: 800, margin: 0, fontSize: 14 }}>Blocos</h3>
-        {DEFAULT_EMAIL_BLOCKS.map((template) => (
-          <button
-            key={template.block_type}
-            onClick={() => addBlock(template.block_type)}
-            style={{
-              padding: '12px',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.05)',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'
-            }}
-          >
-            + {template.name}
-          </button>
-        ))}
-      </div>
+      {/* PREVIEW DIREITA */}
+      <EmailPreview blocks={blocks} title={title} subject={subject} preheader={preheader} />
 
-      {/* INSPECTOR (direita) */}
-      <div
-        style={{
-          borderLeft: '1px solid rgba(255,255,255,0.1)',
-          padding: '16px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-        }}
-      >
-        <h3 style={{ color: '#fff', fontWeight: 800, margin: 0, fontSize: 14 }}>Propriedades</h3>
-
-        {selectedBlock ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
-                Tipo: {selectedBlock.type}
-              </label>
-            </div>
-
-            {renderBlockInspector(selectedBlock, (updates) => updateBlock(selectedBlock.id, updates))}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button
-                onClick={() => moveBlock(selectedBlock.id, 'up')}
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  borderRadius: 6,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  
-cursor: 'pointer',
-                }}
-              >
-                ↑ Subir
-              </button>
-              <button
-                onClick={() => moveBlock(selectedBlock.id, 'down')}
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  borderRadius: 6,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                }}
-              >
-                ↓ Baixar
-              </button>
-              <button
-                onClick={() => removeBlock(selectedBlock.id)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: '#ff6b6b',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                }}
-              >
-                <FiTrash2 /> Apagar
-              </button>
-            </div>
           </div>
-        ) : (
-          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
-            Seleciona um bloco para editar
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
 
