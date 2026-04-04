@@ -1004,6 +1004,7 @@ Melhores cumprimentos,
           email_template_id: (selectedTemplate?.id && !selectedTemplate.id.startsWith('default-')) ? selectedTemplate.id : null,
           lead_id: lead.id,
           due_at: dueAtISO,
+          attachments: selectedAttachments || [],
         })
 
         created++

@@ -13,6 +13,7 @@ export type ScheduledTask = {
   due_at: string
   send_status: 'pending' | 'sent' | 'failed'
   send_error: string | null
+  attachments: any[] | null
   created_at: string
   updated_at: string
 }
@@ -30,6 +31,7 @@ type ScheduledTaskRow = {
   due_at: string
   send_status: 'pending' | 'sent' | 'failed'
   send_error: string | null
+  attachments: any[] | null
   created_at: string
   updated_at: string
 }
@@ -55,6 +57,7 @@ export async function getScheduledTasks(
         due_at,
         send_status,
         send_error,
+        attachments,
         created_at,
         updated_at
       `
@@ -151,7 +154,7 @@ export async function duplicateTask(taskId: string, userId: string, newDueAt: st
 
     if (fetchError) throw fetchError
 
-    const { title, email_subject, email_body, email_recipient, email_template_id, lead_id } =
+    const { title, email_subject, email_body, email_recipient, email_template_id, lead_id, attachments } =
       originalTask
 
     const { error: insertError } = await supabase.from('scheduled_tasks').insert({
@@ -163,6 +166,7 @@ export async function duplicateTask(taskId: string, userId: string, newDueAt: st
       email_template_id,
       lead_id,
       due_at: newDueAt,
+      attachments: attachments || [],
       send_status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -185,6 +189,7 @@ export async function createScheduledTask(
     email_template_id?: string | null
     lead_id?: string | null
     due_at: string
+    attachments?: any[] | null
   }
 ) {
   try {
@@ -199,6 +204,7 @@ export async function createScheduledTask(
         email_template_id: params.email_template_id || null,
         lead_id: params.lead_id || null,
         due_at: params.due_at,
+        attachments: params.attachments || [],
         send_status: 'pending',
       })
       .select()
