@@ -342,7 +342,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                 background: '#fff',
                 borderRadius: 12,
                 boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                overflow: 'hidden',
+                overflow: 'auto',
               }}
             >
               {blocks.length === 0 ? (
