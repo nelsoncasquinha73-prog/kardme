@@ -61,7 +61,7 @@ export default function EmailPreviewModal({ blocks, title, subject, preheader, o
         </div>
 
         {/* Preview Content */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{ flex: 1, overflow: 'auto' }}>
           <EmailPreview blocks={blocks} title={title} subject={subject} preheader={preheader} />
         </div>
       </div>
