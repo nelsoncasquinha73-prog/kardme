@@ -1459,22 +1459,22 @@ Melhores cumprimentos,
           }}
         >
           📧 Tarefas Agendadas
-          <button
-            onClick={() => setActiveView('email-marketing')}
-            style={{
-              padding: '12px 16px',
-              borderRadius: 8,
-              border: activeView === 'email-marketing' ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.2)',
-              background: activeView === 'email-marketing' ? 'rgba(16,185,129,0.1)' : 'transparent',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            📧 Email Marketing
-          </button>
+        </button>
+        <button
+          onClick={() => setActiveView('email-marketing')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 10,
+            border: 'none',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            background: activeView === 'email-marketing' ? '#06b6d4' : '#e5e7eb',
+            color: activeView === 'email-marketing' ? '#ffffff' : '#374151',
+            transition: 'all 0.15s',
+          }}
+        >
+          📧 Email Marketing
         </button>
         <button
           onClick={() => setActiveView('kanban')}
