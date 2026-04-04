@@ -32,6 +32,7 @@ import { fetchCountries, createCountry, deleteCountry, updateLeadCountry, type C
 import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
+import EmailMarketingView from './EmailMarketingView'
 import PipelineKanban from './PipelineKanban'
 import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
@@ -1458,6 +1459,22 @@ Melhores cumprimentos,
           }}
         >
           📧 Tarefas Agendadas
+          <button
+            onClick={() => setActiveView('email-marketing')}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 8,
+              border: activeView === 'email-marketing' ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.2)',
+              background: activeView === 'email-marketing' ? 'rgba(16,185,129,0.1)' : 'transparent',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            📧 Email Marketing
+          </button>
         </button>
         <button
           onClick={() => setActiveView('kanban')}
@@ -1720,6 +1737,7 @@ Melhores cumprimentos,
           onWhatsAppLead={(lead) => {
             const phone = normalizePhone(lead.phone)
             if (!phone) {
+      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} />}
               alert('Esta lead não tem número de telefone')
               return
             }
