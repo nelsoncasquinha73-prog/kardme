@@ -127,6 +127,18 @@ export const DEFAULT_EMAIL_BLOCKS: Array<{
     },
   },
   {
+    name: 'Vídeo',
+    block_type: 'video',
+    content: {
+      videoUrl: '',
+      thumbnail: '',
+      width: '100%',
+      align: 'center',
+      paddingTop: 0,
+      paddingBottom: 0,
+    },
+  },
+  {
     name: 'Divisor',
     block_type: 'divider',
     content: {
