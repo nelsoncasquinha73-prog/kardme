@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendEmail, processEmailTemplate } from '@/lib/email'
+import { sendEmail } from '@/lib/email'
+import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
 const CRON_SECRET = process.env.CRON_SECRET || 'dev-secret'
 

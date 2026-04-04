@@ -33,7 +33,7 @@ import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
 import PipelineKanban from './PipelineKanban'
-import { processEmailTemplate } from '@/lib/email'
+import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
 type Lead = {
   id: string
