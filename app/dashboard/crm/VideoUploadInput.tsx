@@ -2,13 +2,14 @@
 
 import { useState, useRef } from 'react'
 import { uploadEmailVideo } from '@/lib/crm/emailVideoUpload'
+import { uploadEmailImage } from '@/lib/crm/emailImageUpload'
 import { useToast } from '@/lib/toast-context'
 import { FiUpload, FiX } from 'react-icons/fi'
 
 interface VideoUploadInputProps {
   userId: string
   currentUrl?: string
-  onUpload: (url: string) => void
+  onUpload: (data: { videoUrl: string; thumbnail?: string }) => void
 }
 
 export default function VideoUploadInput({ userId, currentUrl, onUpload }: VideoUploadInputProps) {
@@ -17,22 +18,93 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
   const [preview, setPreview] = useState<string | null>(currentUrl || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  async function generateThumbnail(file: File): Promise<File | null> {
+    return new Promise((resolve) => {
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+
+      video.preload = 'metadata'
+      video.muted = true
+      video.playsInline = true
+      video.src = URL.createObjectURL(file)
+
+      video.onloadeddata = () => {
+        try {
+          canvas.width = video.videoWidth || 1280
+          canvas.height = video.videoHeight || 720
+
+          if (!ctx) {
+            resolve(null)
+            return
+          }
+
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                resolve(null)
+                return
+              }
+
+              const thumbnailFile = new File(
+                [blob],
+                `thumbnail-${Date.now()}.jpg`,
+                { type: 'image/jpeg' }
+              )
+
+              resolve(thumbnailFile)
+            },
+            'image/jpeg',
+            0.85
+          )
+        } catch (error) {
+          console.error('Erro ao gerar thumbnail:', error)
+          resolve(null)
+        } finally {
+          URL.revokeObjectURL(video.src)
+        }
+      }
+
+      video.onerror = () => {
+        resolve(null)
+      }
+    })
+  }
+
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
     setUploading(true)
     try {
-      // Upload para Supabase
-      const { url } = await uploadEmailVideo(userId, file)
-      setPreview(url)
-      onUpload(url)
-      addToast('Vídeo enviado com sucesso!', 'success')
+      // 1. Upload do vídeo
+      const { url: videoUrl } = await uploadEmailVideo(userId, file)
+      setPreview(videoUrl)
+
+      // 2. Gerar thumbnail automática
+      let thumbnailUrl: string | undefined = undefined
+      const thumbnailFile = await generateThumbnail(file)
+
+      if (thumbnailFile) {
+        const { url } = await uploadEmailImage(userId, thumbnailFile)
+        thumbnailUrl = url
+      }
+
+      // 3. Devolver ambos
+      onUpload({
+        videoUrl,
+        thumbnail: thumbnailUrl,
+      })
+
+      addToast('Vídeo enviado com thumbnail automática!', 'success')
     } catch (e) {
       console.error(e)
       addToast(e instanceof Error ? e.message : 'Erro ao enviar vídeo', 'error')
       setPreview(null)
     }
+
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -101,7 +173,7 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
           {uploading ? (
             <div style={{ color: 'rgba(255,255,255,0.7)' }}>
               <div style={{ fontSize: 20, marginBottom: 8 }}>⏳</div>
-              <p style={{ margin: 0, fontSize: 12 }}>A enviar vídeo...</p>
+              <p style={{ margin: 0, fontSize: 12 }}>A enviar vídeo e gerar thumbnail...</p>
             </div>
           ) : (
             <div style={{ color: 'rgba(255,255,255,0.7)' }}>
@@ -128,7 +200,7 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
           <button
             onClick={() => {
               setPreview(null)
-              onUpload('')
+              onUpload({ videoUrl: '', thumbnail: '' })
             }}
             style={{
               position: 'absolute',
