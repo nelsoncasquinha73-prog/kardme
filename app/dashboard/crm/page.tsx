@@ -1749,7 +1749,7 @@ Melhores cumprimentos,
       )}
       {activeView === 'scheduled' && <ScheduledTasksView />}
 
-      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} />}
+      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} preSelectedLeadId={selectedLeadForEmailMarketing || undefined} />}
       {activeView === 'ambassadors' && (
         <AmbassadorsView userId={userId} />
       )}
