@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type EmailBlockType = 'text' | 'image' | 'button' | 'divider' | 'spacer'
+export type EmailBlockType = 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'video'
 
 export interface EmailBlockTemplate {
   id: string

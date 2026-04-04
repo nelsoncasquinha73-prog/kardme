@@ -1,5 +1,6 @@
 'use client'
 import ImageUploadInput from './ImageUploadInput'
+import VideoUploadInput from './VideoUploadInput'
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -594,6 +595,69 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
         </div>
       )
 
+    case 'video':
+      return (
+        <div
+          style={{
+            width: content.width || '100%',
+            margin: '0 auto',
+            textAlign: content.align || 'center',
+            padding: '16px 0',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: '100%',
+              maxWidth: 500,
+              background: '#000',
+              borderRadius: 8,
+              overflow: 'hidden',
+            }}
+          >
+            {content.thumbnail ? (
+              <img
+                src={content.thumbnail}
+                alt="Video thumbnail"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%',
+                  paddingBottom: '56.25%',
+                  background: '#1a1a1a',
+                }}
+              />
+            )}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 60,
+                height: 60,
+                background: 'rgba(16, 185, 129, 0.9)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 28,
+                cursor: 'pointer',
+              }}
+            >
+              ▶️
+            </div>
+          </div>
+        </div>
+      )
+
     case 'button':
       return (
         <div style={{ textAlign: content.align || 'center' }}>
@@ -858,6 +922,86 @@ function renderBlockInspector(
                 cursor: 'pointer',
               }}
             />
+          </div>
+        </>
+      )
+
+    case 'video':
+      return (
+        <>
+          <VideoUploadInput
+            userId={userId}
+            currentUrl={content.videoUrl}
+            onUpload={(url) => onUpdate({ videoUrl: url })}
+          />
+
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Thumbnail (URL)
+            </label>
+            <input
+              type="text"
+              value={content.thumbnail || ''}
+              onChange={(e) => onUpdate({ thumbnail: e.target.value })}
+              placeholder="https://... (imagem de capa)"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+              }}
+            />
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Largura
+            </label>
+            <input
+              type="text"
+              value={content.width || '100%'}
+              onChange={(e) => onUpdate({ width: e.target.value })}
+              placeholder="100% ou 500px"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+              }}
+            />
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Alinhamento
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['left', 'center', 'right'] as const).map((align) => (
+                <button
+                  key={align}
+                  onClick={() => onUpdate({ align })}
+                  style={{
+                    flex: 1,
+                    padding: '6px 8px',
+                    borderRadius: 4,
+                    border: 'none',
+                    background: content.align === align ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)',
+                    color: '#fff',
+                    fontSize: 11,
+                    cursor: 'pointer',
+                    fontWeight: content.align === align ? 700 : 400,
+                  }}
+                >
+                  {align === 'left' ? '⬅️' : align === 'center' ? '⬇️' : '➡️'} {align}
+                </button>
+              ))}
+            </div>
           </div>
         </>
       )
