@@ -16,6 +16,7 @@ import {
   type EmailBroadcast,
 } from '@/lib/crm/emailMarketing'
 import { FiTrash2 } from 'react-icons/fi'
+import EmailCampaignEditor from './EmailCampaignEditor'
 
 interface EmailMarketingViewProps {
   userId: string
@@ -39,6 +40,8 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
   const [newSegmentName, setNewSegmentName] = useState('')
   const [newSegmentColor, setNewSegmentColor] = useState(SEGMENT_COLORS[0])
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set())
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editingBroadcastId, setEditingBroadcastId] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -379,19 +382,9 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>Campanhas</h3>
             <button
-              onClick={async () => {
-                try {
-                  const created = await createBroadcast(userId, {
-                    title: 'Nova Campanha',
-                    subject: 'Novo assunto',
-                    html_content: {},
-                  })
-                  setBroadcasts((prev) => [created, ...prev])
-                  addToast('Campanha criada!', 'success')
-                } catch (e) {
-                  console.error(e)
-                  addToast('Erro ao criar campanha', 'error')
-                }
+              onClick={() => {
+                setEditingBroadcastId(null)
+                setEditorOpen(true)
               }}
               style={{
                 padding: '8px 16px',
@@ -503,6 +496,32 @@ export default function EmailMarketingView({ userId }: EmailMarketingViewProps) 
               ))}
             </div>
           )}
+        </div>
+      )}
+      {editorOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            zIndex: 1000,
+          }}
+        >
+          <EmailCampaignEditor
+            userId={userId}
+            broadcastId={editingBroadcastId || undefined}
+            onClose={() => {
+              setEditorOpen(false)
+              setEditingBroadcastId(null)
+            }}
+            onSave={() => {
+              loadData()
+            }}
+          />
         </div>
       )}
     </div>
