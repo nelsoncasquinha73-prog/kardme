@@ -5,14 +5,20 @@ import { createClient } from '@supabase/supabase-js'
 function getAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
   if (!url || !serviceKey) {
     throw new Error('Missing env vars')
   }
+
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
 function toBase64Url(str: string) {
-  return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+  return Buffer.from(str)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '')
 }
 
 function encodeSubjectRFC2047(subject: string) {
@@ -21,7 +27,12 @@ function encodeSubjectRFC2047(subject: string) {
   return `=?UTF-8?B?${encoded}?=`
 }
 
-function buildRawEmail(params: { fromEmail: string; to: string; subject: string; htmlBody: string }) {
+function buildRawEmail(params: {
+  fromEmail: string
+  to: string
+  subject: string
+  htmlBody: string
+}) {
   return [
     `From: ${params.fromEmail}`,
     `To: ${params.to}`,
@@ -69,24 +80,34 @@ export async function POST(req: NextRequest) {
     )
 
     let accessToken = integration.access_token as string | null
-    const expired = integration.token_expires_at && new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000)
+    const expired =
+      integration.token_expires_at &&
+      new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000)
 
     if (!accessToken || expired) {
       oauth2Client.setCredentials({ refresh_token: integration.refresh_token })
       const { credentials } = await oauth2Client.refreshAccessToken()
       accessToken = credentials.access_token || null
 
-      await supabaseAdmin.from('user_integrations').update({
-        access_token: accessToken,
-        token_expires_at: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
-      }).eq('id', integration.id)
+      await supabaseAdmin
+        .from('user_integrations')
+        .update({
+          access_token: accessToken,
+          token_expires_at: credentials.expiry_date
+            ? new Date(credentials.expiry_date).toISOString()
+            : null,
+        })
+        .eq('id', integration.id)
     }
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Failed to obtain access token' }, { status: 500 })
     }
 
-    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: integration.refresh_token })
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+      refresh_token: integration.refresh_token,
+    })
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
     const fromEmail = integration.sender_email || 'me'
@@ -98,22 +119,36 @@ export async function POST(req: NextRequest) {
     for (const recipientEmail of recipients) {
       try {
         console.log(`[SEND] Attempting to send to ${recipientEmail}`)
-        const raw = buildRawEmail({ fromEmail, to: recipientEmail, subject, htmlBody })
+
+        const raw = buildRawEmail({
+          fromEmail,
+          to: recipientEmail,
+          subject,
+          htmlBody,
+        })
 
         const res = await gmail.users.messages.send({
           userId: 'me',
-          requestBody: { raw: toBase64Url(raw) },
+          requestBody: {
+            raw: toBase64Url(raw),
+          },
         })
 
         const messageId = res.data.id || null
         console.log(`[SUCCESS] Email sent to ${recipientEmail}, messageId: ${messageId}`)
 
-        await supabaseAdmin.from('email_broadcast_recipients').insert({
-          broadcast_id: broadcastId,
-          email: recipientEmail,
-          message_id: messageId,
-          status: 'sent',
-        })
+        const { error: insertError } = await supabaseAdmin
+          .from('email_broadcast_recipients')
+          .insert({
+            broadcast_id: broadcastId,
+            email: recipientEmail,
+            status: 'sent',
+          })
+
+        if (insertError) {
+          console.error(`[DB INSERT FAILED] ${recipientEmail}: ${insertError.message}`)
+          errors.push(`${recipientEmail}: DB insert failed - ${insertError.message}`)
+        }
 
         sent++
       } catch (err: any) {
@@ -124,14 +159,45 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await supabaseAdmin.from('email_broadcasts').update({
-      status: 'sent',
-      sent_at: new Date().toISOString(),
-    }).eq('id', broadcastId)
+    const newStatus =
+      sent > 0 && failed === 0
+        ? 'sent'
+        : sent > 0 && failed > 0
+        ? 'sent'
+        : 'draft'
 
-    return NextResponse.json({ sent, failed, errors: errors.length > 0 ? errors : undefined })
+    await supabaseAdmin
+      .from('email_broadcasts')
+      .update({
+        status: newStatus,
+        sent_at: sent > 0 ? new Date().toISOString() : null,
+        total_recipients: sent,
+      })
+      .eq('id', broadcastId)
+
+    if (sent === 0) {
+      return NextResponse.json(
+        {
+          error: 'Nenhum email foi enviado',
+          sent,
+          failed,
+          errors,
+        },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      sent,
+      failed,
+      errors: errors.length > 0 ? errors : undefined,
+    })
   } catch (err: any) {
     console.error('Send broadcast error:', err)
-    return NextResponse.json({ error: 'Failed to send broadcast', details: err?.message }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to send broadcast', details: err?.message || String(err) },
+      { status: 500 }
+    )
   }
 }
