@@ -32,13 +32,26 @@ function buildRawEmail(params: {
   to: string
   subject: string
   htmlBody: string
+  unsubscribeUrl?: string
 }) {
-  return [
+  const headers = [
     `From: ${params.fromEmail}`,
     `To: ${params.to}`,
     `Subject: ${encodeSubjectRFC2047(params.subject)}`,
+    `Reply-To: ${params.fromEmail}`,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset="UTF-8"',
+    'X-Mailer: Kardme Email Marketing',
+    'X-Priority: 3',
+  ]
+
+  if (params.unsubscribeUrl) {
+    headers.push(`List-Unsubscribe: <${params.unsubscribeUrl}>`)
+    headers.push('List-Unsubscribe-Post: List-Unsubscribe=One-Click')
+  }
+
+  return [
+    ...headers,
     '',
     params.htmlBody,
   ].join('\r\n')
@@ -120,11 +133,14 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`[SEND] Attempting to send to ${recipientEmail}`)
 
+        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/unsubscribe?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
+
         const raw = buildRawEmail({
           fromEmail,
           to: recipientEmail,
           subject,
           htmlBody,
+          unsubscribeUrl,
         })
 
         const res = await gmail.users.messages.send({
