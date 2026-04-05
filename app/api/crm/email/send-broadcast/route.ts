@@ -108,9 +108,8 @@ export async function POST(req: NextRequest) {
 
         await supabaseAdmin.from('email_broadcast_recipients').insert({
           broadcast_id: broadcastId,
-          recipient_email: recipientEmail,
+          email: recipientEmail,
           message_id: messageId,
-          sent_at: new Date().toISOString(),
           status: 'sent',
         })
 
