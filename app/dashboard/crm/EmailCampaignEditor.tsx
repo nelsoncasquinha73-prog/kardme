@@ -104,6 +104,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   }
 
   function updateBlock(blockId: string, updates: Record<string, any>) {
+    console.log(`[UPDATE BLOCK] ${blockId}:`, updates)
     setBlocks(
       blocks.map((b) =>
         b.id === blockId
