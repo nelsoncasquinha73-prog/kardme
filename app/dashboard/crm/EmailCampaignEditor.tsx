@@ -44,7 +44,9 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showSendModal, setShowSendModal] = useState(false)
   const [sending, setSending] = useState(false)
-  const [sendingTo, setSendingTo] = useState<'segment' | 'all'>('segment')
+  const [sendingTo, setSendingTo] = useState<'segment' | 'all' | 'individual' | 'manual'>('segment')
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [manualEmail, setManualEmail] = useState<string>('')
   const [leads, setLeads] = useState<any[]>([])
 
   useEffect(() => {
@@ -152,6 +154,13 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         recipients = (data || []).map((m: any) => m.leads?.email).filter(Boolean)
       } else if (sendingTo === 'all') {
         recipients = leads.map((l) => l.email)
+      } else if (sendingTo === 'individual' && selectedLeadId) {
+        const lead = leads.find((l: any) => l.id === selectedLeadId)
+        if (lead?.email) {
+          recipients = [lead.email]
+        }
+      } else if (sendingTo === 'manual' && manualEmail.trim()) {
+        recipients = [manualEmail.trim()]
       }
 
       if (recipients.length === 0) {
@@ -186,6 +195,9 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
       const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients)
       addToast(`✅ ${result.sent} emails enviados!`, 'success')
       setShowSendModal(false)
+      setSelectedLeadId(null)
+      setManualEmail('')
+      setSendingTo('segment')
       onSave()
       onClose()
     } catch (e: any) {
@@ -641,7 +653,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
 
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>Enviar para:</label>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="radio" name="sendTo" value="segment" checked={sendingTo === 'segment'} onChange={(e) => setSendingTo(e.target.value as any)} />
                   <span>Segmentos ({selectedSegments.size})</span>
@@ -649,6 +661,14 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="radio" name="sendTo" value="all" checked={sendingTo === 'all'} onChange={(e) => setSendingTo(e.target.value as any)} />
                   <span>Todos ({leads.length})</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="radio" name="sendTo" value="individual" checked={sendingTo === 'individual'} onChange={(e) => setSendingTo(e.target.value as any)} />
+                  <span>Lead específico</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="radio" name="sendTo" value="manual" checked={sendingTo === 'manual'} onChange={(e) => setSendingTo(e.target.value as any)} />
+                  <span>Email manual</span>
                 </label>
               </div>
             </div>
@@ -659,11 +679,69 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               </div>
             )}
 
+            {sendingTo === 'individual' && (
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>
+                  Selecionar lead
+                </label>
+                <select
+                  value={selectedLeadId || ''}
+                  onChange={(e) => setSelectedLeadId(e.target.value || null)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.08)',
+                    color: '#fff',
+                    fontSize: 14,
+                  }}
+                >
+                  <option value="">Escolhe um lead</option>
+                  {leads.map((lead: any) => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.name || lead.email} {lead.email ? `(${lead.email})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {sendingTo === 'manual' && (
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>
+                  Email manual
+                </label>
+                <input
+                  type="email"
+                  value={manualEmail}
+                  onChange={(e) => setManualEmail(e.target.value)}
+                  placeholder="cliente@exemplo.com"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.08)',
+                    color: '#fff',
+                    fontSize: 14,
+                  }}
+                />
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => setShowSendModal(false)} disabled={sending} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Cancelar
               </button>
-              <button onClick={() => handleSend()} disabled={sending || (sendingTo === 'segment' && selectedSegments.size === 0) || (sendingTo === 'all' && leads.length === 0)} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: sending ? 0.6 : 1 }}>
+              <button 
+                onClick={() => handleSend()} 
+                disabled={sending || 
+                  (sendingTo === 'segment' && selectedSegments.size === 0) || 
+                  (sendingTo === 'individual' && !selectedLeadId) ||
+                  (sendingTo === 'manual' && !manualEmail.trim())
+                } 
+                style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: sending ? 0.6 : 1 }}>
                 {sending ? 'A enviar...' : '✉️ Enviar Agora'}
               </button>
             </div>
