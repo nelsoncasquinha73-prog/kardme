@@ -287,3 +287,35 @@ export async function getLeadsBySegments(userId: string, segmentIds: string[]): 
 }
 
 export const SEGMENT_COLORS = ['#6c5ce7', '#0984e3', '#00b894', '#e17055', '#fdcb6e', '#fd79a8', '#636e72', '#00cec9']
+
+export async function sendBroadcast(
+  userId: string,
+  broadcastId: string,
+  recipientEmails: string[]
+): Promise<{ sent: number; failed: number }> {
+  if (recipientEmails.length === 0) {
+    throw new Error('Sem destinatários')
+  }
+
+  try {
+    const res = await fetch('/api/crm/email/send-broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        broadcastId,
+        recipientEmails,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Erro ao enviar')
+    }
+
+    const result = await res.json()
+    return result
+  } catch (e: any) {
+    throw new Error(e.message || 'Erro ao enviar broadcast')
+  }
+}

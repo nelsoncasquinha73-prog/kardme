@@ -9,6 +9,7 @@ import {
   fetchEmailSegments,
   createBroadcast,
   updateBroadcast,
+  sendBroadcast,
   type EmailSegment,
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
@@ -41,6 +42,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   const [saving, setSaving] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+  const [showSendModal, setShowSendModal] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendingTo, setSendingTo] = useState<'segment' | 'all'>('segment')
+  const [leads, setLeads] = useState<any[]>([])
 
   useEffect(() => {
     loadData()
@@ -50,6 +55,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
     setLoading(true)
     try {
       const segs = await fetchEmailSegments(userId)
+      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email').eq('user_id', userId)
+      setLeads(leadsError ? [] : (leadsData || []))
       setSegments(segs)
 
       if (broadcastId) {
@@ -117,6 +124,75 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
     const swapIndex = direction === 'up' ? index - 1 : index + 1
     ;[newBlocks[index], newBlocks[swapIndex]] = [newBlocks[swapIndex], newBlocks[index]]
     setBlocks(newBlocks)
+  }
+
+  async function handleSend() {
+    if (!title.trim() || !subject.trim()) {
+      addToast('Preenche título e assunto', 'error')
+      return
+    }
+
+    if (blocks.length === 0) {
+      addToast('Adiciona pelo menos um bloco', 'error')
+      return
+    }
+
+    setSending(true)
+    try {
+      let recipients: string[] = []
+
+      if (sendingTo === 'segment' && selectedSegments.size > 0) {
+        const segIds = Array.from(selectedSegments)
+        const { data, error } = await supabase
+          .from('lead_segment_mapping')
+          .select('leads(email)')
+          .in('segment_id', segIds)
+
+        if (error) throw error
+        recipients = (data || []).map((m: any) => m.leads?.email).filter(Boolean)
+      } else if (sendingTo === 'all') {
+        recipients = leads.map((l) => l.email)
+      }
+
+      if (recipients.length === 0) {
+        addToast('Sem destinatários selecionados', 'error')
+        setSending(false)
+        return
+      }
+
+      let bcastId = broadcastId
+      if (!broadcastId) {
+        const htmlContent = { blocks, createdAt: new Date().toISOString() }
+        const { data, error } = await supabase
+          .from('email_broadcasts')
+          .insert({
+            user_id: userId,
+            title,
+            subject,
+            preheader,
+            html_content: htmlContent,
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        bcastId = data.id
+      }
+
+      if (!bcastId) {
+        throw new Error('Broadcast inválido')
+      }
+
+      const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients)
+      addToast(`✅ ${result.sent} emails enviados!`, 'success')
+      setShowSendModal(false)
+      onSave()
+      onClose()
+    } catch (e: any) {
+      console.error(e)
+      addToast(e.message || 'Erro ao enviar', 'error')
+    }
+    setSending(false)
   }
 
   async function handleSave() {
@@ -419,6 +495,23 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               Cancelar
             </button>
             <button
+              onClick={() => setShowSendModal(true)}
+              disabled={saving || sending}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 6,
+                border: 'none',
+                background: '#3b82f6',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: (saving || sending) ? 'not-allowed' : 'pointer',
+                opacity: (saving || sending) ? 0.6 : 1,
+              }}
+            >
+              {sending ? 'A enviar...' : '✉️ Enviar'}
+            </button>
+            <button
               onClick={handleSave}
               disabled={saving}
               style={{
@@ -539,6 +632,43 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
           preheader={preheader}
           onClose={() => setShowPreviewModal(false)}
         />
+      )}
+
+      {showSendModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#0f172a', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%', color: '#fff' }}>
+            <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 16 }}>📧 Enviar Campanha</h3>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>Enviar para:</label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="radio" name="sendTo" value="segment" checked={sendingTo === 'segment'} onChange={(e) => setSendingTo(e.target.value as any)} />
+                  <span>Segmentos ({selectedSegments.size})</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="radio" name="sendTo" value="all" checked={sendingTo === 'all'} onChange={(e) => setSendingTo(e.target.value as any)} />
+                  <span>Todos ({leads.length})</span>
+                </label>
+              </div>
+            </div>
+
+            {sendingTo === 'segment' && selectedSegments.size === 0 && (
+              <div style={{ background: '#fee2e2', color: '#991b1b', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
+                ⚠️ Seleciona segmentos na aba Audience
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setShowSendModal(false)} disabled={sending} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                Cancelar
+              </button>
+              <button onClick={() => handleSend()} disabled={sending || (sendingTo === 'segment' && selectedSegments.size === 0) || (sendingTo === 'all' && leads.length === 0)} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: sending ? 0.6 : 1 }}>
+                {sending ? 'A enviar...' : '✉️ Enviar Agora'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   )
