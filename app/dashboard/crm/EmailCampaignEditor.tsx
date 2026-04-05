@@ -699,11 +699,13 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                     background: 'rgba(255,255,255,0.08)',
                     color: '#fff',
                     fontSize: 14,
+                    maxWidth: '100%',
+                    overflow: 'visible',
                   }}
                 >
                   <option value="">Escolhe um lead</option>
                   {leads.map((lead: any) => (
-                    <option key={lead.id} value={lead.id}>
+                    <option key={lead.id} value={lead.id} style={{ whiteSpace: 'normal' }}>
                       {lead.name || lead.email} {lead.email ? `(${lead.email})` : ''}
                     </option>
                   ))}
