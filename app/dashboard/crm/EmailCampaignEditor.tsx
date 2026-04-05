@@ -192,7 +192,11 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
         throw new Error('Broadcast inválido')
       }
 
-      const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients)
+      // Render blocks to HTML for email
+      const htmlContent = { blocks, createdAt: new Date().toISOString() }
+      const htmlBody = renderEmailBlocksToHtml(blocks) // You'll need to implement this or use blocks directly
+      
+      const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients, subject, htmlBody)
       addToast(`✅ ${result.sent} emails enviados!`, 'success')
       setShowSendModal(false)
       setSelectedLeadId(null)
@@ -750,6 +754,32 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
       )}
     </>
   )
+}
+
+function renderEmailBlocksToHtml(blocks: EmailBlock[]): string {
+  return blocks.map(block => {
+    const { type, content } = block
+
+    switch (type) {
+      case 'text':
+        return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${content.text || ''}</div>`
+
+      case 'image':
+        return content.url ? `<img src="${content.url}" alt="${content.alt || ''}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto;" />` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: ${content.borderRadius || 0}px;"></div>`
+
+      case 'button':
+        return `<a href="${content.url || '#'}" style="display: inline-block; padding: ${content.padding || '12px 24px'}; background: ${content.bgColor || '#3b82f6'}; color: ${content.textColor || '#fff'}; text-decoration: none; border-radius: ${content.borderRadius || 4}px; font-weight: ${content.fontWeight || 600};">${content.text || 'Clique aqui'}</a>`
+
+      case 'divider':
+        return `<hr style="border: none; border-top: ${content.thickness || 1}px solid ${content.color || '#e5e7eb'}; margin: ${content.margin || '20px'} 0;" />`
+
+      case 'spacer':
+        return `<div style="height: ${content.height || 20}px;"></div>`
+
+      default:
+        return ''
+    }
+  }).join('')
 }
 
 function renderEmailBlock(block: EmailBlock, userId: string) {

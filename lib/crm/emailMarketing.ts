@@ -291,10 +291,31 @@ export const SEGMENT_COLORS = ['#6c5ce7', '#0984e3', '#00b894', '#e17055', '#fdc
 export async function sendBroadcast(
   userId: string,
   broadcastId: string,
-  recipientEmails: string[]
+  recipients: string[],
+  subject?: string,
+  htmlBody?: string
 ): Promise<{ sent: number; failed: number }> {
-  if (recipientEmails.length === 0) {
+  if (recipients.length === 0) {
     throw new Error('Sem destinatários')
+  }
+
+  // Fetch broadcast data if subject/htmlBody not provided
+  let finalSubject = subject
+  let finalHtmlBody = htmlBody
+
+  if (!finalSubject || !finalHtmlBody) {
+    const { data: broadcast } = await supabase
+      .from('email_broadcasts')
+      .select('subject, html_body')
+      .eq('id', broadcastId)
+      .single()
+
+    finalSubject = broadcast?.subject || finalSubject || ''
+    finalHtmlBody = broadcast?.html_body || finalHtmlBody || ''
+  }
+
+  if (!finalSubject || !finalHtmlBody) {
+    throw new Error('Subject e htmlBody são obrigatórios')
   }
 
   try {
@@ -304,7 +325,9 @@ export async function sendBroadcast(
       body: JSON.stringify({
         userId,
         broadcastId,
-        recipientEmails,
+        recipients,
+        subject: finalSubject,
+        htmlBody: finalHtmlBody,
       }),
     })
 
