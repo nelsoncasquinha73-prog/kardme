@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
 
     for (const recipientEmail of recipients) {
       try {
+        console.log(`[SEND] Attempting to send to ${recipientEmail}`)
         const raw = buildRawEmail({ fromEmail, to: recipientEmail, subject, htmlBody })
 
         const res = await gmail.users.messages.send({
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
         })
 
         const messageId = res.data.id || null
+        console.log(`[SUCCESS] Email sent to ${recipientEmail}, messageId: ${messageId}`)
 
         await supabaseAdmin.from('email_broadcast_recipients').insert({
           broadcast_id: broadcastId,
@@ -116,7 +118,9 @@ export async function POST(req: NextRequest) {
         sent++
       } catch (err: any) {
         failed++
-        errors.push(`${recipientEmail}: ${err?.message || String(err)}`)
+        const errMsg = err?.message || String(err)
+        console.error(`[FAILED] ${recipientEmail}: ${errMsg}`)
+        errors.push(`${recipientEmail}: ${errMsg}`)
       }
     }
 
