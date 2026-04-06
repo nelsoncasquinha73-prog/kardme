@@ -17,8 +17,6 @@ export default function VideoPreviewPage() {
       try {
         const data = await getEmailVideoPreview(id)
         setPreview(data)
-        
-        // Incrementa view count
         await incrementVideoPreviewView(id)
       } catch (err) {
         console.error('Erro ao carregar preview:', err)
@@ -94,7 +92,6 @@ export default function VideoPreviewPage() {
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
-        {/* Vídeo */}
         <div style={{
           position: 'relative',
           paddingBottom: '56.25%',
@@ -116,7 +113,6 @@ export default function VideoPreviewPage() {
           />
         </div>
 
-        {/* Conteúdo */}
         <div style={{
           padding: '40px',
           color: '#fff',
@@ -143,7 +139,6 @@ export default function VideoPreviewPage() {
             </p>
           )}
 
-          {/* Stats */}
           <div style={{
             display: 'flex',
             gap: 24,
@@ -169,7 +164,6 @@ export default function VideoPreviewPage() {
             </div>
           </div>
 
-          {/* CTA */}
           {preview.cta_url && (
             <button
               onClick={handleCtaClick}
