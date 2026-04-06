@@ -46,10 +46,22 @@ export default function EmailPreview({ blocks, title, subject, preheader }: Emai
           ) : (
             <div style={{ padding: '24px 20px' }}>
               {blocks.map((block, idx) => (
-                <div key={block.id} style={{ marginBottom: idx === blocks.length - 1 ? 0 : 16 }}>
+                <div key={block.id} style={{ marginBottom: idx === blocks.length - 1 ? 24 : 16 }}>
                   {renderEmailBlock(block)}
                 </div>
               ))}
+
+              {/* Footer com Unsubscribe */}
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 20, marginTop: 20, textAlign: 'center' }}>
+                <p style={{ margin: '0 0 10px 0', fontSize: 12, color: '#6b7280' }}>
+                  Kardme © 2026. All rights reserved.
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>
+                  <a href="#" style={{ color: '#3b82f6', textDecoration: 'none', marginRight: 12 }}>Unsubscribe</a>
+                  <span style={{ color: '#d1d5db' }}>|</span>
+                  <a href="#" style={{ color: '#3b82f6', textDecoration: 'none', marginLeft: 12 }}>Manage Preferences</a>
+                </p>
+              </div>
             </div>
           )}
         </div>
