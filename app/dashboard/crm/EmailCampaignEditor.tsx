@@ -859,9 +859,9 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
               display: 'inline-block',
               width: '100%',
               maxWidth: 500,
-              background: '#000',
               borderRadius: 8,
               overflow: 'hidden',
+              background: '#000',
             }}
           >
             {content.thumbnail ? (
@@ -873,16 +873,25 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
                   height: 'auto',
                   display: 'block',
                 }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '100%',
-                  paddingBottom: '56.25%',
-                  background: '#1a1a1a',
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement
+                  target.style.display = 'none'
+                  const fallback = target.nextElementSibling as HTMLElement | null
+                  if (fallback) fallback.style.display = 'block'
                 }}
               />
-            )}
+            ) : null}
+
+            <video
+              src={content.videoUrl}
+              style={{
+                width: '100%',
+                display: content.thumbnail ? 'none' : 'block',
+                background: '#000',
+              }}
+              controls
+            />
+
             <div
               style={{
                 position: 'absolute',
@@ -897,7 +906,7 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 28,
-                cursor: 'pointer',
+                pointerEvents: 'none',
               }}
             >
               ▶️
