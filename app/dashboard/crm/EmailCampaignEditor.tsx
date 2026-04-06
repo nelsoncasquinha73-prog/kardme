@@ -1113,7 +1113,7 @@ function renderBlockInspector(
           <VideoUploadInput
             userId={userId}
             currentUrl={content.videoUrl}
-            onUpload={(data) => onUpdate({ videoUrl: data.videoUrl, thumbnail: data.thumbnail })}
+            onUpload={(data) => onUpdate({ videoUrl: data.videoUrl, thumbnail: data.thumbnail, previewId: data.previewId })}
           />
 
           <div style={{ marginTop: 16 }}>
