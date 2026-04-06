@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { uploadEmailVideo } from '@/lib/crm/emailVideoUpload'
 import { createEmailVideoPreview } from '@/lib/crm/emailVideoPreviews'
+import { generateThumbnailWithPlayButton } from '@/lib/crm/videoThumbnailGenerator'
 import { uploadEmailImage } from '@/lib/crm/emailImageUpload'
 import { useToast } from '@/lib/toast-context'
 import { FiUpload, FiX } from 'react-icons/fi'
@@ -20,90 +21,7 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function generateThumbnail(file: File): Promise<File | null> {
-    return new Promise((resolve) => {
-      const video = document.createElement('video')
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-
-      video.preload = 'metadata'
-      video.muted = true
-      video.playsInline = true
-      const videoUrl = URL.createObjectURL(file)
-      video.src = videoUrl
-
-      video.onloadedmetadata = () => {
-        try {
-          console.log('[THUMB] onloadedmetadata fired, duration:', video.duration)
-          
-          // Desenha um frame do vídeo (no meio ou no início)
-          canvas.width = video.videoWidth || 1280
-          canvas.height = video.videoHeight || 720
-
-          if (!ctx) {
-            console.warn('[THUMB] canvas context is null')
-            URL.revokeObjectURL(videoUrl)
-            resolve(null)
-            return
-          }
-
-          // Busca um frame válido (tenta o meio do vídeo)
-          video.currentTime = Math.min(1, video.duration / 2)
-        } catch (error) {
-          console.error('[THUMB] erro ao buscar frame:', error)
-          URL.revokeObjectURL(videoUrl)
-          resolve(null)
-        }
-      }
-
-      video.onseeked = () => {
-        try {
-          console.log('[THUMB] onseeked fired')
-          ctx!.drawImage(video, 0, 0, canvas.width, canvas.height)
-          
-          // Converte para data URL e depois para blob
-          canvas.toBlob(
-            (blob) => {
-              console.log('[THUMB] toBlob result, size:', blob?.size)
-              if (!blob || blob.size === 0) {
-                console.warn('[THUMB] blob vazio ou null')
-                URL.revokeObjectURL(videoUrl)
-                resolve(null)
-                return
-              }
-
-              const thumbnailFile = new File(
-                [blob],
-                `thumbnail-${Date.now()}.jpg`,
-                { type: 'image/jpeg' }
-              )
-
-              console.log('[THUMB] thumbnailFile created, size:', thumbnailFile.size)
-              URL.revokeObjectURL(videoUrl)
-              resolve(thumbnailFile)
-            },
-            'image/jpeg',
-            0.9
-          )
-        } catch (error) {
-          console.error('[THUMB] erro ao converter canvas:', error)
-          URL.revokeObjectURL(videoUrl)
-          resolve(null)
-        }
-      }
-
-      video.onerror = () => {
-        console.error('[THUMB] video.onerror')
-        URL.revokeObjectURL(videoUrl)
-        resolve(null)
-      }
-
-      // Timeout de segurança: se não conseguir em 5s, desiste
-      setTimeout(() => {
-        console.warn('[THUMB] timeout - desistindo')
-        URL.revokeObjectURL(videoUrl)
-        resolve(null)
-      }, 5000)
-    })
+    return generateThumbnailWithPlayButton(file, '#10b981')
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
