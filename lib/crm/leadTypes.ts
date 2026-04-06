@@ -18,7 +18,7 @@ export type LeadSource = {
   created_at: string
 }
 
-// ── TIPOS (globais por user) ──────────────────────────────────────────────────
+// ── AUDIÊNCIAS (globais por user) ─────────────────────────────────────────────
 
 export async function fetchLeadTypes(userId: string): Promise<LeadType[]> {
   const { data, error } = await supabase
@@ -56,6 +56,31 @@ export async function updateLeadType(id: string, name: string, color: string): P
   if (error) throw error
 }
 
+// ── MULTI-AUDIÊNCIA ───────────────────────────────────────────────────────────
+
+// Atualiza o array de audiências de uma lead (substitui tudo)
+export async function updateLeadAudiences(leadId: string, audienceIds: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('leads')
+    .update({ audience_ids: audienceIds })
+    .eq('id', leadId)
+  if (error) throw error
+}
+
+// Adiciona uma audiência à lead (sem remover as existentes)
+export async function addAudienceToLead(leadId: string, audienceId: string, currentIds: string[]): Promise<void> {
+  if (currentIds.includes(audienceId)) return
+  const newIds = [...currentIds, audienceId]
+  await updateLeadAudiences(leadId, newIds)
+}
+
+// Remove uma audiência da lead
+export async function removeAudienceFromLead(leadId: string, audienceId: string, currentIds: string[]): Promise<void> {
+  const newIds = currentIds.filter(id => id !== audienceId)
+  await updateLeadAudiences(leadId, newIds)
+}
+
+// Compatibilidade retroativa — mantém lead_type_id em sincronia com o primeiro audience_id
 export async function updateLeadTypeOnLead(leadId: string, leadTypeId: string | null): Promise<void> {
   const { error } = await supabase
     .from('leads')
@@ -103,7 +128,7 @@ export async function updateLeadSource(leadId: string, source: string): Promise<
   if (error) throw error
 }
 
-// ── CONSTANTES (origens fixas de sistema) ─────────────────────────────────────
+// ── CONSTANTES ────────────────────────────────────────────────────────────────
 
 export const LEAD_SOURCES_DEFAULT = [
   { value: 'cartão', label: '📇 Cartão' },

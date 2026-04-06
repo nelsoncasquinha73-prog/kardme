@@ -28,7 +28,7 @@ import { fetchEmailTemplates, createEmailTemplate, DEFAULT_EMAIL_TEMPLATES, type
 import { filesToAttachments, type AttachmentPayload } from '@/lib/crm/attachmentHelpers'
 import CalendarGrid from '@/components/crm/CalendarGrid'
 import LeadTypesModal from '@/components/crm/LeadTypesModal'
-import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
+import { fetchLeadTypes, createLeadType, fetchLeadSources, createLeadSource, deleteLeadSource, updateLeadTypeOnLead, updateLeadAudiences, updateLeadSource, LEAD_SOURCES_DEFAULT, type LeadType, type LeadSource } from '@/lib/crm/leadTypes'
 import { fetchCountries, createCountry, deleteCountry, updateLeadCountry, type Country } from '@/lib/crm/countries'
 import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
@@ -1579,7 +1579,7 @@ Melhores cumprimentos,
           </button>
 
           <button onClick={() => setShowLeadTypesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(108,92,231,0.4)', background: 'rgba(108,92,231,0.15)', color: '#a5b4fc', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            🏷️ Tipos
+            🎯 Audiências
           </button>
           <button onClick={() => setShowLeadSourcesModal(true)} style={{ height: 44, padding: '0 14px', borderRadius: 12, border: '1px solid rgba(0,184,148,0.4)', background: 'rgba(0,184,148,0.12)', color: '#00b894', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
             ⚙️ Origens
@@ -1606,7 +1606,7 @@ Melhores cumprimentos,
             )}
             {filterLeadType && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(108,92,231,0.2)', border: '1px solid rgba(108,92,231,0.4)', color: '#c4b5fd', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
-                Tipo: {leadTypes.find(t => t.id === filterLeadType)?.name || filterLeadType}
+                Audiência: {leadTypes.find(t => t.id === filterLeadType)?.name || filterLeadType}
                 <button onClick={() => setFilterLeadType(null)} style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
               </span>
             )}
@@ -1669,7 +1669,7 @@ Melhores cumprimentos,
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
-                Tipo do Contacto
+                Audiência
                 <button onClick={() => setShowTiposInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
               </label>
               <select
@@ -1948,7 +1948,7 @@ Melhores cumprimentos,
               <th style={th}>Email</th>
               <th style={th}>Cartão</th>
               <th style={th}>Zona</th>
-              <th style={th}>Tipo</th>
+              <th style={th}>Audiência</th>
               <th style={th}>Origem</th>
               <th style={th}>País</th>
               <th style={th}>Step</th>
@@ -1985,33 +1985,43 @@ Melhores cumprimentos,
                     <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
-                      <select
-                        value={lead.lead_type_id || ''}
-                        onChange={async (e) => {
-                          const val = e.target.value
-
-                          const finalVal = val || null
-                          await updateLeadTypeOnLead(lead.id, finalVal)
-                          setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, lead_type_id: finalVal } : l))
-                        }}
-                        style={{
-                          padding: '6px 10px',
-                          borderRadius: 8,
-                          border: 'none',
-                          background: 'rgba(108,92,231,0.15)',
-                          color: leadTypes.find(t => t.id === lead.lead_type_id)?.color || 'rgba(255,255,255,0.5)',
-                          fontWeight: 600,
-                          fontSize: 12,
-                          cursor: 'pointer',
-                          minWidth: 100,
-                        }}
-                      >
-                        <option value="">— Tipo —</option>
-                        {leadTypes.map(t => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-
-                      </select>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, minWidth: 120, maxWidth: 200 }}>
+                        {leadTypes.map(t => {
+                          const currentIds: string[] = (lead as any).audience_ids || []
+                          const isActive = currentIds.includes(t.id)
+                          return (
+                            <button
+                              key={t.id}
+                              onClick={async () => {
+                                const currentIds: string[] = (lead as any).audience_ids || []
+                                const newIds = isActive
+                                  ? currentIds.filter((id: string) => id !== t.id)
+                                  : [...currentIds, t.id]
+                                await updateLeadAudiences(lead.id, newIds)
+                                setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, audience_ids: newIds } : l))
+                              }}
+                              style={{
+                                padding: '3px 8px',
+                                borderRadius: 20,
+                                border: `1.5px solid ${t.color}`,
+                                background: isActive ? t.color : 'transparent',
+                                color: isActive ? '#fff' : t.color,
+                                fontWeight: 700,
+                                fontSize: 11,
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                opacity: isActive ? 1 : 0.5,
+                                transition: 'all 0.15s',
+                              }}
+                            >
+                              {t.name}
+                            </button>
+                          )
+                        })}
+                        {leadTypes.length === 0 && (
+                          <span style={{ fontSize: 11, opacity: 0.4, fontStyle: 'italic' }}>—</span>
+                        )}
+                      </div>
                     </td>
                     <td style={td}>
                       <select
@@ -3390,7 +3400,7 @@ Melhores cumprimentos,
       {showTiposInfoModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowTiposInfoModal(false)}>
           <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 12px', color: '#fff', fontSize: 17, fontWeight: 700 }}>🏷️ Gerir Tipos</h3>
+            <h3 style={{ margin: '0 0 12px', color: '#fff', fontSize: 17, fontWeight: 700 }}>🎯 Gerir Audiências</h3>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
               Cria e personaliza tipos de cliente (ex: Comprador, Vendedor, Investidor) com cores diferentes para organizar melhor as tuas leads.
             </p>
