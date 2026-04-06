@@ -132,6 +132,7 @@ export const DEFAULT_EMAIL_BLOCKS: Array<{
     content: {
       videoUrl: '',
       thumbnail: '',
+      previewId: '',
       width: '100%',
       align: 'center',
       paddingTop: 0,

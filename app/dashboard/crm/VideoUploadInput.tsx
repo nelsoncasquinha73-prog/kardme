@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { uploadEmailVideo } from '@/lib/crm/emailVideoUpload'
+import { createEmailVideoPreview } from '@/lib/crm/emailVideoPreviews'
 import { uploadEmailImage } from '@/lib/crm/emailImageUpload'
 import { useToast } from '@/lib/toast-context'
 import { FiUpload, FiX } from 'react-icons/fi'
@@ -138,14 +139,31 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
         console.error('[VIDEO] generateThumbnail error:', thumbError)
       }
 
-      // 3. Devolver ambos
+      // 3. Criar preview público
+      let previewId = ''
+      try {
+        const preview = await createEmailVideoPreview(userId, {
+          video_url: videoUrl,
+          thumbnail_url: thumbnailUrl,
+          title: 'Vídeo da Campanha',
+          cta_text: 'Ver mais',
+        })
+        previewId = preview.id
+        console.log('[VIDEO] preview criado:', previewId)
+      } catch (previewError) {
+        console.error('[VIDEO] erro ao criar preview:', previewError)
+      }
+
+      // 4. Devolver todos os dados
       console.log('[VIDEO] onUpload payload:', {
         videoUrl,
         thumbnail: thumbnailUrl,
+        previewId,
       })
       onUpload({
         videoUrl,
         thumbnail: thumbnailUrl,
+        previewId,
       })
 
       addToast('Vídeo enviado' + (thumbnailUrl ? ' com thumbnail!' : ' (sem thumbnail)'), 'success')
