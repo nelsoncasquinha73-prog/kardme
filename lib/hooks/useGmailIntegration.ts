@@ -61,5 +61,23 @@ export function useGmailIntegration(userId: string) {
     }
   }
 
-  return { isConnected, loading, checkConnection, connectGmail, sendEmail }
+
+  const disconnectGmail = async () => {
+    try {
+      const { error } = await supabase
+        .from('user_integrations')
+        .delete()
+        .eq('user_id', userId)
+        .eq('integration_type', 'gmail')
+
+      if (error) throw error
+      setIsConnected(false)
+      return true
+    } catch (err) {
+      console.error('Disconnect Gmail error:', err)
+      throw err
+    }
+  }
+
+  return { isConnected, loading, checkConnection, connectGmail, disconnectGmail, sendEmail }
 }
