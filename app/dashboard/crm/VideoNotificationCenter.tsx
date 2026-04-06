@@ -24,36 +24,38 @@ export default function VideoNotificationCenter({ userId }: VideoNotificationCen
   useEffect(() => {
     if (!userId) return
 
-    const sub = subscribeToVideoViews(userId, (data) => {
-      const notification: VideoNotification = {
-        id: `${data.previewId}-${Date.now()}`,
-        previewId: data.previewId,
-        timestamp: data.timestamp,
-        viewCount: data.viewCount,
-      }
+    const initSubscription = async () => {
+      const sub = await subscribeToVideoViews(userId, (data) => {
+        const notification: VideoNotification = {
+          id: `${data.previewId}-${Date.now()}`,
+          previewId: data.previewId,
+          timestamp: data.timestamp,
+          viewCount: data.viewCount,
+        }
 
-      setNotifications((prev) => [notification, ...prev.slice(0, 9)])
+        setNotifications((prev) => [notification, ...prev.slice(0, 9)])
 
-      // Auto-remove após 5 segundos se não estiver aberto
-      if (!isOpen) {
-        setTimeout(() => {
-          setNotifications((prev) => prev.filter((n) => n.id !== notification.id))
-        }, 5000)
-      }
-    })
+        if (!isOpen) {
+          setTimeout(() => {
+            setNotifications((prev) => prev.filter((n) => n.id !== notification.id))
+          }, 5000)
+        }
+      })
 
-    setSubscription(sub)
+      setSubscription(sub)
+    }
+
+    initSubscription()
 
     return () => {
-      if (sub) {
-        supabase.removeChannel(sub)
+      if (subscription) {
+        supabase.removeChannel(subscription)
       }
     }
-  }, [userId, isOpen])
+  }, [userId, isOpen, subscription])
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Bell Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -91,7 +93,6 @@ export default function VideoNotificationCenter({ userId }: VideoNotificationCen
         )}
       </button>
 
-      {/* Notification Panel */}
       {isOpen && (
         <div
           style={{
