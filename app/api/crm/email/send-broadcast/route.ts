@@ -152,6 +152,12 @@ export async function POST(req: NextRequest) {
         }
 
         const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/unsubscribe?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
+        const managePreferencesUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/preferences?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
+
+        // Substitui placeholders no footer
+        personalizedHtmlBody = personalizedHtmlBody
+          .replace('{UNSUBSCRIBE_URL}', unsubscribeUrl)
+          .replace('{MANAGE_PREFERENCES_URL}', managePreferencesUrl)
 
         const raw = buildRawEmail({
           fromEmail,

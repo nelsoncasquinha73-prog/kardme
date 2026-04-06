@@ -767,8 +767,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   )
 }
 
-function renderEmailBlocksToHtml(blocks: EmailBlock[]): string {
-  return blocks.map(block => {
+function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): string {
+  const blocksHtml = blocks.map(block => {
     const { type, content } = block
 
     switch (type) {
@@ -795,6 +795,20 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[]): string {
         return ''
     }
   }).join('')
+
+  // Footer com unsubscribe
+  const footer = `
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0 20px 0;" />
+    <div style="text-align: center; font-size: 12px; color: #6b7280; line-height: 1.6;">
+      <p style="margin: 0 0 10px 0;">Kardme © 2026. Todos os direitos reservados.</p>
+      <p style="margin: 0;">
+        <a href="{UNSUBSCRIBE_URL}" style="color: #3b82f6; text-decoration: none;">Unsubscribe</a> | 
+        <a href="{MANAGE_PREFERENCES_URL}" style="color: #3b82f6; text-decoration: none;">Manage Preferences</a>
+      </p>
+    </div>
+  `
+
+  return blocksHtml + footer
 }
 
 function renderEmailBlock(block: EmailBlock, userId: string) {
