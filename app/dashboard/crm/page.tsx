@@ -16,6 +16,7 @@ import {
   FiUpload,
   FiChevronDown,
 } from 'react-icons/fi'
+import VideoNotificationCenter from './VideoNotificationCenter'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
@@ -1228,6 +1229,8 @@ Melhores cumprimentos,
             </div>
           )}
         </div>
+
+        <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <button
