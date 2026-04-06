@@ -1377,7 +1377,7 @@ Melhores cumprimentos,
                 ?
               </button>
               <button onClick={() => gmail.connectGmail()} style={{ padding: '10px 16px', borderRadius: 10, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Alterar Gmail</button>
-              <button onClick={() => { if (confirm('Desligar Gmail?')) gmail.disconnectGmail() }} style={{ padding: '10px 16px', borderRadius: 10, background: '#ef4444', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Desligar</button>
+              <button onClick={() => { if (confirm('Desligar Gmail?')) gmail.disconnectGmail() }} style={{ padding: '10px 16px', borderRadius: 10, background: '#ef4444', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap', marginLeft: 10 }}>Desligar</button>
             </div>
           </div>
         </div>
