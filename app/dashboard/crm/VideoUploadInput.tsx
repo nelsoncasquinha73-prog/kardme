@@ -31,19 +31,26 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
 
       video.onloadeddata = () => {
         try {
+          console.log('[THUMB] onloadeddata fired')
+          console.log('[THUMB] videoWidth:', video.videoWidth, 'videoHeight:', video.videoHeight)
+
           canvas.width = video.videoWidth || 1280
           canvas.height = video.videoHeight || 720
 
           if (!ctx) {
+            console.warn('[THUMB] canvas context is null')
             resolve(null)
             return
           }
 
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          console.log('[THUMB] drawImage ok')
 
           canvas.toBlob(
             (blob) => {
+              console.log('[THUMB] toBlob result:', blob)
               if (!blob) {
+                console.warn('[THUMB] blob is null')
                 resolve(null)
                 return
               }
@@ -54,20 +61,22 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
                 { type: 'image/jpeg' }
               )
 
+              console.log('[THUMB] thumbnailFile created:', thumbnailFile)
               resolve(thumbnailFile)
             },
             'image/jpeg',
             0.85
           )
         } catch (error) {
-          console.error('Erro ao gerar thumbnail:', error)
+          console.error('[THUMB] Erro ao gerar thumbnail:', error)
           resolve(null)
         } finally {
           URL.revokeObjectURL(video.src)
         }
       }
 
-      video.onerror = () => {
+      video.onerror = (e) => {
+        console.error('[THUMB] video.onerror', e)
         resolve(null)
       }
     })
