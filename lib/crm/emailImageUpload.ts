@@ -25,6 +25,7 @@ export async function uploadEmailImage(
   const filePath = `email-images/${fileName}`
 
   // Upload para Supabase Storage
+  console.log('[uploadEmailImage] uploading to:', filePath, 'file type:', file.type, 'file size:', file.size)
   const { data, error } = await supabase.storage
     .from('card-assets')
     .upload(filePath, file, {
@@ -33,14 +34,18 @@ export async function uploadEmailImage(
     })
 
   if (error) {
-    console.error('Erro ao fazer upload:', error)
+    console.error('[uploadEmailImage] ERROR:', error)
     throw new Error(`Erro ao fazer upload: ${error.message}`)
   }
+
+  console.log('[uploadEmailImage] upload success, data:', data)
 
   // Gerar URL pública
   const { data: publicData } = supabase.storage
     .from('card-assets')
     .getPublicUrl(filePath)
+
+  console.log('[uploadEmailImage] public URL:', publicData.publicUrl)
 
   return {
     url: publicData.publicUrl,
