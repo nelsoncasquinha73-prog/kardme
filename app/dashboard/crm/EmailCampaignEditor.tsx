@@ -710,6 +710,9 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                     fontSize: 14,
                     maxWidth: '100%',
                     overflow: 'visible',
+                    height: 42,
+                    lineHeight: '22px',
+                    appearance: 'auto',
                   }}
                 >
                   <option value="">Escolhe um lead</option>
