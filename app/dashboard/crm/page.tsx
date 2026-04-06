@@ -125,6 +125,7 @@ export default function CrmProPage() {
   const [emailBody, setEmailBody] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [openAudienceDropdown, setOpenAudienceDropdown] = useState<string | null>(null)
   const [tasksToday, setTasksToday] = useState<LeadTask[]>([])
   const [calendarTasks, setCalendarTasks] = useState<LeadTask[]>([])
   const [calendarYearMonth, setCalendarYearMonth] = useState<string>(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` })
@@ -1985,41 +1986,100 @@ Melhores cumprimentos,
                     <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, minWidth: 120, maxWidth: 200 }}>
-                        {leadTypes.map(t => {
-                          const currentIds: string[] = (lead as any).audience_ids || []
-                          const isActive = currentIds.includes(t.id)
-                          return (
-                            <button
-                              key={t.id}
-                              onClick={async () => {
-                                const currentIds: string[] = (lead as any).audience_ids || []
-                                const newIds = isActive
-                                  ? currentIds.filter((id: string) => id !== t.id)
-                                  : [...currentIds, t.id]
-                                await updateLeadAudiences(lead.id, newIds)
-                                setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, audience_ids: newIds } : l))
-                              }}
-                              style={{
-                                padding: '3px 8px',
-                                borderRadius: 20,
-                                border: `1.5px solid ${t.color}`,
-                                background: isActive ? t.color : 'transparent',
-                                color: isActive ? '#fff' : t.color,
-                                fontWeight: 700,
-                                fontSize: 11,
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                opacity: isActive ? 1 : 0.5,
-                                transition: 'all 0.15s',
-                              }}
-                            >
-                              {t.name}
-                            </button>
-                          )
-                        })}
-                        {leadTypes.length === 0 && (
-                          <span style={{ fontSize: 11, opacity: 0.4, fontStyle: 'italic' }}>—</span>
+                      <div style={{ position: 'relative' }}>
+                        {/* Bolas coloridas + botão para abrir dropdown */}
+                        <div
+                          style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', minWidth: 60 }}
+                          onClick={() => setOpenAudienceDropdown(openAudienceDropdown === lead.id ? null : lead.id)}
+                        >
+                          {((lead as any).audience_ids || []).length === 0 ? (
+                            <span style={{ fontSize: 11, opacity: 0.3, fontStyle: 'italic' }}>—</span>
+                          ) : (
+                            ((lead as any).audience_ids || []).map((aid: string) => {
+                              const t = leadTypes.find(x => x.id === aid)
+                              if (!t) return null
+                              return (
+                                <span
+                                  key={aid}
+                                  title={t.name}
+                                  style={{
+                                    width: 14,
+                                    height: 14,
+                                    borderRadius: '50%',
+                                    background: t.color,
+                                    display: 'inline-block',
+                                    flexShrink: 0,
+                                    border: '1.5px solid rgba(255,255,255,0.3)',
+                                  }}
+                                />
+                              )
+                            })
+                          )}
+                          <span style={{ fontSize: 10, opacity: 0.4, marginLeft: 2 }}>▾</span>
+                        </div>
+
+                        {/* Dropdown com checkboxes */}
+                        {openAudienceDropdown === lead.id && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 22,
+                            left: 0,
+                            zIndex: 999,
+                            background: '#1e293b',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: 10,
+                            padding: '8px 0',
+                            minWidth: 180,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                          }}>
+                            {leadTypes.map(t => {
+                              const currentIds: string[] = (lead as any).audience_ids || []
+                              const isActive = currentIds.includes(t.id)
+                              return (
+                                <label
+                                  key={t.id}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 10,
+                                    padding: '8px 14px',
+                                    cursor: 'pointer',
+                                    background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
+                                    transition: 'background 0.1s',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isActive}
+                                    onChange={async () => {
+                                      const newIds = isActive
+                                        ? currentIds.filter((id: string) => id !== t.id)
+                                        : [...currentIds, t.id]
+                                      await updateLeadAudiences(lead.id, newIds)
+                                      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, audience_ids: newIds } : l))
+                                    }}
+                                    style={{ accentColor: t.color, width: 14, height: 14 }}
+                                  />
+                                  <span style={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    background: t.color,
+                                    display: 'inline-block',
+                                    flexShrink: 0,
+                                  }} />
+                                  <span style={{ fontSize: 13, color: '#fff', fontWeight: isActive ? 700 : 400 }}>
+                                    {t.name}
+                                  </span>
+                                </label>
+                              )
+                            })}
+                            {leadTypes.length === 0 && (
+                              <p style={{ padding: '8px 14px', fontSize: 12, opacity: 0.5, margin: 0 }}>
+                                Sem audiências definidas
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </td>
