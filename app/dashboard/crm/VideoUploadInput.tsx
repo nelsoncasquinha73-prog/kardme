@@ -105,7 +105,7 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
           console.log('[VIDEO] thumbnail upload ok:', thumbnailUrl)
         } catch (uploadError) {
           console.error('[VIDEO] thumbnail upload failed:', uploadError)
-          addToast('Aviso: thumbnail não foi carregada, mas o vídeo foi enviado', 'warning')
+          addToast('Aviso: thumbnail não foi carregada, mas o vídeo foi enviado', 'error')
         }
       } else {
         console.warn('[VIDEO] thumbnailFile veio null')
