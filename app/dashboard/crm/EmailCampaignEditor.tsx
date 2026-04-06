@@ -577,7 +577,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                 </label>
               </div>
 
-              {renderBlockInspector(userId, selectedBlock, (updates) => updateBlock(selectedBlock.id, updates))}
+              {renderBlockInspector(userId, selectedBlock, (updates) => {
+                console.log('[renderBlockInspector] updates:', updates)
+                updateBlock(selectedBlock.id, updates)
+              })}
 
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                 <button
