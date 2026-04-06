@@ -27,30 +27,45 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       video.preload = 'metadata'
       video.muted = true
       video.playsInline = true
-      video.src = URL.createObjectURL(file)
+      const videoUrl = URL.createObjectURL(file)
+      video.src = videoUrl
 
-      video.onloadeddata = () => {
+      video.onloadedmetadata = () => {
         try {
-          console.log('[THUMB] onloadeddata fired')
-          console.log('[THUMB] videoWidth:', video.videoWidth, 'videoHeight:', video.videoHeight)
-
+          console.log('[THUMB] onloadedmetadata fired, duration:', video.duration)
+          
+          // Desenha um frame do vídeo (no meio ou no início)
           canvas.width = video.videoWidth || 1280
           canvas.height = video.videoHeight || 720
 
           if (!ctx) {
             console.warn('[THUMB] canvas context is null')
+            URL.revokeObjectURL(videoUrl)
             resolve(null)
             return
           }
 
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          console.log('[THUMB] drawImage ok')
+          // Busca um frame válido (tenta o meio do vídeo)
+          video.currentTime = Math.min(1, video.duration / 2)
+        } catch (error) {
+          console.error('[THUMB] erro ao buscar frame:', error)
+          URL.revokeObjectURL(videoUrl)
+          resolve(null)
+        }
+      }
 
+      video.onseeked = () => {
+        try {
+          console.log('[THUMB] onseeked fired')
+          ctx!.drawImage(video, 0, 0, canvas.width, canvas.height)
+          
+          // Converte para data URL e depois para blob
           canvas.toBlob(
             (blob) => {
-              console.log('[THUMB] toBlob result:', blob)
-              if (!blob) {
-                console.warn('[THUMB] blob is null')
+              console.log('[THUMB] toBlob result, size:', blob?.size)
+              if (!blob || blob.size === 0) {
+                console.warn('[THUMB] blob vazio ou null')
+                URL.revokeObjectURL(videoUrl)
                 resolve(null)
                 return
               }
@@ -61,24 +76,32 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
                 { type: 'image/jpeg' }
               )
 
-              console.log('[THUMB] thumbnailFile created:', thumbnailFile)
+              console.log('[THUMB] thumbnailFile created, size:', thumbnailFile.size)
+              URL.revokeObjectURL(videoUrl)
               resolve(thumbnailFile)
             },
             'image/jpeg',
-            0.85
+            0.9
           )
         } catch (error) {
-          console.error('[THUMB] Erro ao gerar thumbnail:', error)
+          console.error('[THUMB] erro ao converter canvas:', error)
+          URL.revokeObjectURL(videoUrl)
           resolve(null)
-        } finally {
-          URL.revokeObjectURL(video.src)
         }
       }
 
-      video.onerror = (e) => {
-        console.error('[THUMB] video.onerror', e)
+      video.onerror = () => {
+        console.error('[THUMB] video.onerror')
+        URL.revokeObjectURL(videoUrl)
         resolve(null)
       }
+
+      // Timeout de segurança: se não conseguir em 5s, desiste
+      setTimeout(() => {
+        console.warn('[THUMB] timeout - desistindo')
+        URL.revokeObjectURL(videoUrl)
+        resolve(null)
+      }, 5000)
     })
   }
 
@@ -93,9 +116,27 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       console.log('[VIDEO] upload ok:', videoUrl)
       setPreview(videoUrl)
 
-      // 2. Thumbnail manual por agora
+      // 2. Gerar thumbnail automática
       let thumbnailUrl: string | undefined = undefined
-      console.log('[VIDEO] Thumbnail automática desativada temporariamente')
+      try {
+        const thumbnailFile = await generateThumbnail(file)
+        console.log('[VIDEO] thumbnailFile gerado:', thumbnailFile?.name, 'size:', thumbnailFile?.size)
+
+        if (thumbnailFile && thumbnailFile.size > 0) {
+          try {
+            const { url } = await uploadEmailImage(userId, thumbnailFile)
+            thumbnailUrl = url
+            console.log('[VIDEO] thumbnail upload ok:', thumbnailUrl)
+          } catch (uploadError) {
+            console.error('[VIDEO] thumbnail upload failed:', uploadError)
+            // Continua sem thumbnail
+          }
+        } else {
+          console.warn('[VIDEO] thumbnailFile vazio ou null')
+        }
+      } catch (thumbError) {
+        console.error('[VIDEO] generateThumbnail error:', thumbError)
+      }
 
       // 3. Devolver ambos
       console.log('[VIDEO] onUpload payload:', {
@@ -107,7 +148,7 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
         thumbnail: thumbnailUrl,
       })
 
-      addToast('Vídeo enviado com thumbnail automática!', 'success')
+      addToast('Vídeo enviado' + (thumbnailUrl ? ' com thumbnail!' : ' (sem thumbnail)'), 'success')
     } catch (e) {
       console.error(e)
       addToast(e instanceof Error ? e.message : 'Erro ao enviar vídeo', 'error')
