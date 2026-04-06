@@ -142,6 +142,11 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       // 3. Criar preview público
       let previewId = ''
       try {
+        console.log('[VIDEO] tentando criar preview com:', {
+          user_id: userId,
+          video_url: videoUrl,
+          thumbnail_url: thumbnailUrl,
+        })
         const preview = await createEmailVideoPreview(userId, {
           video_url: videoUrl,
           thumbnail_url: thumbnailUrl,
@@ -149,9 +154,13 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
           cta_text: 'Ver mais',
         })
         previewId = preview.id
-        console.log('[VIDEO] preview criado:', previewId)
+        console.log('[VIDEO] preview criado com sucesso:', previewId)
       } catch (previewError) {
-        console.error('[VIDEO] erro ao criar preview:', previewError)
+        console.error('[VIDEO] ERRO ao criar preview:', previewError)
+        if (previewError instanceof Error) {
+          console.error('[VIDEO] erro message:', previewError.message)
+          console.error('[VIDEO] erro stack:', previewError.stack)
+        }
       }
 
       // 4. Devolver todos os dados
