@@ -154,31 +154,6 @@ export default function VideoPreviewPage() {
             </p>
           )}
 
-          <div style={{
-            display: 'flex',
-            gap: 24,
-            marginBottom: 24,
-            paddingBottom: 24,
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-          }}>
-            <div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
-                Visualizações
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#10b981' }}>
-                {preview.view_count || 0}
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
-                Cliques
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#3b82f6' }}>
-                {preview.click_count || 0}
-              </div>
-            </div>
-          </div>
-
           {preview.cta_url && (
             <button
               onClick={handleCtaClick}
