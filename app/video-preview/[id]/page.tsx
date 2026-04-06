@@ -2,8 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { getEmailVideoPreview, incrementVideoPreviewView, incrementVideoPreviewClick } from '@/lib/crm/emailVideoPreviews'
-import { EmailVideoPreview } from '@/lib/crm/emailVideoPreviews'
+import { incrementVideoPreviewView, incrementVideoPreviewClick } from '@/lib/crm/emailVideoPreviews'
+
+interface EmailVideoPreview {
+  id: string
+  user_id: string
+  video_url: string
+  thumbnail_url?: string
+  title?: string
+  description?: string
+  cta_text?: string
+  cta_url?: string
+  view_count: number
+  click_count: number
+  created_at: string
+}
 
 export default function VideoPreviewPage() {
   const params = useParams()
@@ -15,7 +28,9 @@ export default function VideoPreviewPage() {
   useEffect(() => {
     async function loadPreview() {
       try {
-        const data = await getEmailVideoPreview(id)
+        const res = await fetch(`/api/video-preview/${id}`)
+        if (!res.ok) throw new Error('Not found')
+        const data = await res.json()
         setPreview(data)
         await incrementVideoPreviewView(id)
       } catch (err) {
