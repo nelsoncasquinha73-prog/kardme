@@ -93,9 +93,9 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       console.log('[VIDEO] upload ok:', videoUrl)
       setPreview(videoUrl)
 
-      // 2. Thumbnail será feita manualmente pelo utilizador
+      // 2. Thumbnail manual por agora
       let thumbnailUrl: string | undefined = undefined
-      console.log('[VIDEO] Thumbnail geração desativada - usar upload manual'
+      console.log('[VIDEO] Thumbnail automática desativada temporariamente')
 
       // 3. Devolver ambos
       console.log('[VIDEO] onUpload payload:', {
