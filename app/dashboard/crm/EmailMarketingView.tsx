@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
-import { getSegments, createSegment, deleteSegment, getBroadcasts, createBroadcast, deleteBroadcast, addLeadsToSegment, type EmailSegment, type EmailBroadcast } from '@/lib/crm/emailMarketing'
+import { getSegments, createSegment, deleteSegment, getBroadcasts, createBroadcast, deleteBroadcast, addLeadsToSegment, SEGMENT_COLORS, type EmailSegment, type EmailBroadcast } from '@/lib/crm/emailMarketing'
 import { FiTrash2 } from 'react-icons/fi'
 import EmailCampaignEditor from './EmailCampaignEditor'
 
@@ -55,7 +55,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
 
   async function handleAddLeadsToSegment(segmentId: string) {
     if (selectedLeads.size === 0) { addToast('Seleciona leads primeiro', 'error'); return }
-    try { await addLeadsToSegment(Array.from(selectedLeads), segmentId); setSelectedLeads(new Set()); await loadData(); addToast(`${selectedLeads.size} leads adicionados!`, 'success') } catch (e) { console.error(e); addToast('Erro ao adicionar leads', 'error') }
+    try { await addLeadsToSegment(segmentId, Array.from(selectedLeads)); setSelectedLeads(new Set()); await loadData(); addToast(`${selectedLeads.size} leads adicionados!`, 'success') } catch (e) { console.error(e); addToast('Erro ao adicionar leads', 'error') }
   }
 
   async function handleDeleteBroadcast(broadcastId: string) {
