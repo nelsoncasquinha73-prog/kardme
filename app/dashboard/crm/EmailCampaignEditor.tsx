@@ -142,26 +142,31 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
 
     setSending(true)
     try {
-      let recipients: string[] = []
+      let recipients: Array<{ email: string; leadId?: string }> = []
 
       if (sendingTo === 'segment' && selectedSegments.size > 0) {
         const segIds = Array.from(selectedSegments)
         const { data, error } = await supabase
           .from('lead_segment_mapping')
-          .select('leads(email)')
+          .select('lead_id, leads(id, email)')
           .in('segment_id', segIds)
 
         if (error) throw error
-        recipients = (data || []).map((m: any) => m.leads?.email).filter(Boolean)
+        recipients = (data || [])
+          .map((m: any) => ({
+            email: m.leads?.email,
+            leadId: m.leads?.id,
+          }))
+          .filter((r) => r.email)
       } else if (sendingTo === 'all') {
-        recipients = leads.map((l) => l.email)
+        recipients = leads.map((l) => ({ email: l.email, leadId: l.id }))
       } else if (sendingTo === 'individual' && selectedLeadId) {
         const lead = leads.find((l: any) => l.id === selectedLeadId)
         if (lead?.email) {
-          recipients = [lead.email]
+          recipients = [{ email: lead.email, leadId: lead.id }]
         }
       } else if (sendingTo === 'manual' && manualEmail.trim()) {
-        recipients = [manualEmail.trim()]
+        recipients = [{ email: manualEmail.trim() }]
       }
 
       if (recipients.length === 0) {

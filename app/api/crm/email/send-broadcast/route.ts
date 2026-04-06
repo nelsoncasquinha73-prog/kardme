@@ -57,9 +57,18 @@ function buildRawEmail(params: {
   ].join('\r\n')
 }
 
+// Função para adicionar lead_id aos links de vídeo
+function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
+  // Substitui links de vídeo com parâmetro lead_id
+  return htmlBody.replace(
+    /https:\/\/www\.kardme\.com\/video-preview\/([a-f0-9-]+)(?=["\s>])/g,
+    `https://www.kardme.com/video-preview/$1?lead=${leadId}`
+  )
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { userId, broadcastId, recipients, subject, htmlBody } = await req.json()
+    const { userId, broadcastId, recipients, subject, htmlBody, recipientLeadIds } = await req.json()
 
     if (!userId || !broadcastId || !recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -129,9 +138,18 @@ export async function POST(req: NextRequest) {
     let failed = 0
     const errors: string[] = []
 
-    for (const recipientEmail of recipients) {
+    for (let i = 0; i < recipients.length; i++) {
+      const recipientEmail = recipients[i]
+      const leadId = recipientLeadIds?.[i] || null
+
       try {
-        console.log(`[SEND] Attempting to send to ${recipientEmail}`)
+        console.log(`[SEND] Attempting to send to ${recipientEmail} (leadId: ${leadId})`)
+
+        // Adiciona lead_id aos links de vídeo se existir
+        let personalizedHtmlBody = htmlBody
+        if (leadId) {
+          personalizedHtmlBody = addLeadIdToVideoLinks(htmlBody, leadId)
+        }
 
         const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/unsubscribe?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
 
@@ -139,7 +157,7 @@ export async function POST(req: NextRequest) {
           fromEmail,
           to: recipientEmail,
           subject,
-          htmlBody,
+          htmlBody: personalizedHtmlBody,
           unsubscribeUrl,
         })
 
@@ -158,6 +176,7 @@ export async function POST(req: NextRequest) {
           .insert({
             broadcast_id: broadcastId,
             email: recipientEmail,
+            lead_id: leadId,
             status: 'sent',
           })
 

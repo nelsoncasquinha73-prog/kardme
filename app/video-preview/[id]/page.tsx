@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { incrementVideoPreviewView, incrementVideoPreviewClick } from '@/lib/crm/emailVideoPreviews'
+import { recordVideoOpen } from '@/lib/crm/videoTracking'
 
 interface EmailVideoPreview {
   id: string
@@ -20,7 +21,9 @@ interface EmailVideoPreview {
 
 export default function VideoPreviewPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const id = params.id as string
+  const leadId = searchParams.get('lead') as string | null
   const [preview, setPreview] = useState<EmailVideoPreview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,6 +36,11 @@ export default function VideoPreviewPage() {
         const data = await res.json()
         setPreview(data)
         await incrementVideoPreviewView(id)
+
+        // Registar abertura com lead_id se existir
+        if (leadId) {
+          await recordVideoOpen(id, leadId)
+        }
       } catch (err) {
         console.error('Erro ao carregar preview:', err)
         setError('Vídeo não encontrado')
@@ -44,7 +52,7 @@ export default function VideoPreviewPage() {
     if (id) {
       loadPreview()
     }
-  }, [id])
+  }, [id, leadId])
 
   if (loading) {
     return (

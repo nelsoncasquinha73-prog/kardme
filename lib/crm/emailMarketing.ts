@@ -1,297 +1,206 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type EmailSegment = {
+export interface EmailSegment {
   id: string
   user_id: string
   name: string
-  color: string
+  color?: string
   created_at: string
 }
 
-export type EmailBroadcast = {
+export interface EmailBroadcast {
   id: string
   user_id: string
   title: string
   subject: string
-  preheader: string | null
+  preheader?: string
   html_content: any
-  template_id: string | null
-  status: 'draft' | 'scheduled' | 'sent' | 'paused'
-  scheduled_at: string | null
-  sent_at: string | null
-  total_recipients: number
-  opened: number
-  clicked: number
-  created_at: string
-  updated_at: string
-}
-
-export type EmailBroadcastRecipient = {
-  id: string
-  broadcast_id: string
-  lead_id: string
-  email: string
-  status: 'pending' | 'sent' | 'opened' | 'clicked' | 'failed'
-  opened_at: string | null
-  clicked_at: string | null
-  click_count: number
-  open_count: number
-  created_at: string
-  updated_at: string
-}
-
-export type EmailCampaignTemplate = {
-  id: string
-  user_id: string
-  name: string
-  category: string | null
-  html_content: any
-  thumbnail_url: string | null
-  is_default: boolean
+  status: 'draft' | 'sent' | 'scheduled'
+  sent_at?: string
+  total_recipients?: number
   created_at: string
 }
 
-export async function fetchEmailSegments(userId: string): Promise<EmailSegment[]> {
-  const { data, error } = await supabase
-    .from('email_segments')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true })
-  if (error) {
-    console.error('Erro ao carregar segmentos:', error)
-    return []
-  }
-  return data || []
-}
-
-export async function createEmailSegment(userId: string, name: string, color: string): Promise<EmailSegment> {
+// SEGMENTS
+export async function createSegment(userId: string, name: string, color?: string) {
   const { data, error } = await supabase
     .from('email_segments')
     .insert({ user_id: userId, name, color })
     .select()
     .single()
+
   if (error) throw error
   return data
 }
 
-export async function deleteEmailSegment(id: string): Promise<void> {
-  const { error } = await supabase.from('email_segments').delete().eq('id', id)
-  if (error) throw error
-}
-
-export async function updateEmailSegment(id: string, name: string, color: string): Promise<void> {
-  const { error } = await supabase.from('email_segments').update({ name, color }).eq('id', id)
-  if (error) throw error
-}
-
-export async function fetchLeadSegments(leadId: string): Promise<EmailSegment[]> {
+export async function getSegments(userId: string) {
   const { data, error } = await supabase
-    .from('lead_segment_mapping')
-    .select('email_segments(*)')
-    .eq('lead_id', leadId)
-  if (error) {
-    console.error('Erro ao carregar segmentos do lead:', error)
-    return []
-  }
-  return (data || []).map((m: any) => m.email_segments).filter(Boolean)
+    .from('email_segments')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
 }
 
-export async function addLeadToSegment(leadId: string, segmentId: string): Promise<void> {
-  const { error } = await supabase.from('lead_segment_mapping').insert({ lead_id: leadId, segment_id: segmentId })
-  if (error && !error.message.includes('duplicate')) throw error
+export async function updateSegment(segmentId: string, updates: any) {
+  const { data, error } = await supabase
+    .from('email_segments')
+    .update(updates)
+    .eq('id', segmentId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
 }
 
-export async function removeLeadFromSegment(leadId: string, segmentId: string): Promise<void> {
+export async function deleteSegment(segmentId: string) {
+  const { error } = await supabase
+    .from('email_segments')
+    .delete()
+    .eq('id', segmentId)
+
+  if (error) throw error
+}
+
+// SEGMENT MAPPING
+export async function addLeadsToSegment(segmentId: string, leadIds: string[]) {
+  const mappings = leadIds.map((leadId) => ({
+    segment_id: segmentId,
+    lead_id: leadId,
+  }))
+
   const { error } = await supabase
     .from('lead_segment_mapping')
-    .delete()
-    .eq('lead_id', leadId)
-    .eq('segment_id', segmentId)
+    .insert(mappings)
+
   if (error) throw error
 }
 
-export async function addLeadsToSegment(leadIds: string[], segmentId: string): Promise<void> {
-  const mappings = leadIds.map((leadId) => ({ lead_id: leadId, segment_id: segmentId }))
-  const { error } = await supabase.from('lead_segment_mapping').insert(mappings)
-  if (error && !error.message.includes('duplicate')) throw error
-}
-
-export async function removeLeadsFromSegment(leadIds: string[], segmentId: string): Promise<void> {
+export async function removeLeadsFromSegment(segmentId: string, leadIds: string[]) {
   const { error } = await supabase
     .from('lead_segment_mapping')
     .delete()
     .in('lead_id', leadIds)
     .eq('segment_id', segmentId)
+
   if (error) throw error
 }
 
-export async function fetchBroadcasts(userId: string, filters?: { status?: string }): Promise<EmailBroadcast[]> {
-  let query = supabase.from('email_broadcasts').select('*').eq('user_id', userId)
-  if (filters?.status) query = query.eq('status', filters.status)
-  query = query.order('created_at', { ascending: false })
-  const { data, error } = await query
-  if (error) {
-    console.error('Erro ao carregar broadcasts:', error)
-    return []
-  }
-  return data || []
+export async function getSegmentLeads(segmentId: string) {
+  const { data, error } = await supabase
+    .from('lead_segment_mapping')
+    .select('leads(id, name, email)')
+    .eq('segment_id', segmentId)
+
+  if (error) throw error
+  return (data || []).map((m: any) => m.leads).filter(Boolean)
 }
 
-export async function createBroadcast(
-  userId: string,
-  params: { title: string; subject: string; preheader?: string; html_content: any; template_id?: string | null; scheduled_at?: string }
-): Promise<EmailBroadcast> {
+// BROADCASTS
+export async function createBroadcast(userId: string, broadcast: any) {
   const { data, error } = await supabase
     .from('email_broadcasts')
-    .insert({
-      user_id: userId,
-      title: params.title,
-      subject: params.subject,
-      preheader: params.preheader || null,
-      html_content: params.html_content,
-      template_id: params.template_id || null,
-      scheduled_at: params.scheduled_at || null,
-      status: params.scheduled_at ? 'scheduled' : 'draft',
-    })
+    .insert({ user_id: userId, ...broadcast })
     .select()
     .single()
+
   if (error) throw error
   return data
 }
 
-export async function updateBroadcast(
-  broadcastId: string,
-  userId: string,
-  params: { title?: string; subject?: string; preheader?: string; html_content?: any; status?: string; scheduled_at?: string }
-): Promise<EmailBroadcast> {
+export async function getBroadcasts(userId: string) {
   const { data, error } = await supabase
     .from('email_broadcasts')
-    .update({ ...params, updated_at: new Date().toISOString() })
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export async function getBroadcast(broadcastId: string) {
+  const { data, error } = await supabase
+    .from('email_broadcasts')
+    .select('*')
+    .eq('id', broadcastId)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updateBroadcast(broadcastId: string, userId: string, updates: any) {
+  const { data, error } = await supabase
+    .from('email_broadcasts')
+    .update(updates)
     .eq('id', broadcastId)
     .eq('user_id', userId)
     .select()
     .single()
+
   if (error) throw error
   return data
 }
 
-export async function deleteBroadcast(broadcastId: string, userId: string): Promise<void> {
-  const { error } = await supabase.from('email_broadcasts').delete().eq('id', broadcastId).eq('user_id', userId)
+export async function deleteBroadcast(broadcastId: string, userId: string) {
+  const { error } = await supabase
+    .from('email_broadcasts')
+    .delete()
+    .eq('id', broadcastId)
+    .eq('user_id', userId)
+
   if (error) throw error
 }
 
-export async function getBroadcastStats(broadcastId: string) {
-  const { data, error } = await supabase.from('email_broadcast_recipients').select('status').eq('broadcast_id', broadcastId)
-  if (error) {
-    console.error('Erro ao carregar stats:', error)
-    return { sent: 0, opened: 0, clicked: 0, failed: 0 }
-  }
-  const recipients = data || []
-  return {
-    sent: recipients.filter((r) => r.status !== 'pending').length,
-    opened: recipients.filter((r) => r.status === 'opened').length,
-    clicked: recipients.filter((r) => r.status === 'clicked').length,
-    failed: recipients.filter((r) => r.status === 'failed').length,
-  }
-}
-
-export async function fetchBroadcastRecipients(broadcastId: string): Promise<EmailBroadcastRecipient[]> {
+// BROADCAST RECIPIENTS
+export async function getBroadcastRecipients(broadcastId: string) {
   const { data, error } = await supabase
     .from('email_broadcast_recipients')
     .select('*')
     .eq('broadcast_id', broadcastId)
     .order('created_at', { ascending: false })
-  if (error) {
-    console.error('Erro ao carregar recipients:', error)
-    return []
-  }
+
+  if (error) throw error
   return data || []
 }
 
-export async function createBroadcastRecipients(broadcastId: string, recipients: Array<{ lead_id: string; email: string }>): Promise<void> {
-  const mappings = recipients.map((r) => ({ broadcast_id: broadcastId, lead_id: r.lead_id, email: r.email, status: 'pending' }))
-  const { error } = await supabase.from('email_broadcast_recipients').insert(mappings)
-  if (error) throw error
-}
-
-export async function markRecipientAsSent(recipientId: string): Promise<void> {
-  const { error } = await supabase
-    .from('email_broadcast_recipients')
-    .update({ status: 'sent', updated_at: new Date().toISOString() })
-    .eq('id', recipientId)
-  if (error) throw error
-}
-
-export async function markRecipientAsOpened(recipientId: string): Promise<void> {
-  const { error } = await supabase
-    .from('email_broadcast_recipients')
-    .update({ status: 'opened', opened_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq('id', recipientId)
-  if (error) throw error
-}
-
-export async function markRecipientAsClicked(recipientId: string): Promise<void> {
-  const { error } = await supabase
-    .from('email_broadcast_recipients')
-    .update({ status: 'clicked', clicked_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq('id', recipientId)
-  if (error) throw error
-}
-
-export async function fetchCampaignTemplates(userId: string): Promise<EmailCampaignTemplate[]> {
+export async function getBroadcastStats(broadcastId: string) {
   const { data, error } = await supabase
-    .from('email_campaign_templates')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-  if (error) {
-    console.error('Erro ao carregar templates:', error)
-    return []
-  }
-  return data || []
-}
+    .from('email_broadcast_recipients')
+    .select('status')
+    .eq('broadcast_id', broadcastId)
 
-export async function createCampaignTemplate(
-  userId: string,
-  params: { name: string; category?: string; html_content: any; thumbnail_url?: string }
-): Promise<EmailCampaignTemplate> {
-  const { data, error } = await supabase
-    .from('email_campaign_templates')
-    .insert({
-      user_id: userId,
-      name: params.name,
-      category: params.category || null,
-      html_content: params.html_content,
-      thumbnail_url: params.thumbnail_url || null,
-      is_default: false,
-    })
-    .select()
-    .single()
   if (error) throw error
-  return data
+
+  const stats = {
+    total: data?.length || 0,
+    sent: data?.filter((d) => d.status === 'sent').length || 0,
+    failed: data?.filter((d) => d.status === 'failed').length || 0,
+    opened: data?.filter((d) => d.status === 'opened').length || 0,
+  }
+
+  return stats
 }
 
-export async function deleteCampaignTemplate(templateId: string, userId: string): Promise<void> {
-  const { error } = await supabase.from('email_campaign_templates').delete().eq('id', templateId).eq('user_id', userId)
+export async function updateRecipientStatus(broadcastId: string, email: string, status: string) {
+  const { error } = await supabase
+    .from('email_broadcast_recipients')
+    .update({ status })
+    .eq('broadcast_id', broadcastId)
+    .eq('email', email)
+
   if (error) throw error
 }
 
-export async function getLeadsBySegments(userId: string, segmentIds: string[]): Promise<any[]> {
-  if (segmentIds.length === 0) return []
-  const { data, error } = await supabase.from('lead_segment_mapping').select('leads(*)').in('segment_id', segmentIds)
-  if (error) {
-    console.error('Erro ao carregar leads por segmentos:', error)
-    return []
-  }
-  return (data || []).map((m: any) => m.leads).filter(Boolean)
-}
-
-export const SEGMENT_COLORS = ['#6c5ce7', '#0984e3', '#00b894', '#e17055', '#fdcb6e', '#fd79a8', '#636e72', '#00cec9']
-
+// SEND BROADCAST
 export async function sendBroadcast(
   userId: string,
   broadcastId: string,
-  recipients: string[],
+  recipients: Array<{ email: string; leadId?: string }>,
   subject: string,
   htmlBody: string
 ): Promise<{ sent: number; failed: number }> {
@@ -304,13 +213,17 @@ export async function sendBroadcast(
   }
 
   try {
+    const recipientEmails = recipients.map((r) => r.email)
+    const recipientLeadIds = recipients.map((r) => r.leadId || null)
+
     const res = await fetch('/api/crm/email/send-broadcast', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId,
         broadcastId,
-        recipients,
+        recipients: recipientEmails,
+        recipientLeadIds,
         subject,
         htmlBody,
       }),
