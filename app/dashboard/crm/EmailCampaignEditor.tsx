@@ -783,7 +783,7 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[]): string {
         return `<div style="height: ${content.height || 20}px;"></div>`
 
       case 'video':
-        const videoLink = content.previewId ? `https://kardme.sintra.site/video-preview/${content.previewId}` : content.videoUrl || '#'
+        const videoLink = content.previewId ? `https://kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
         return content.thumbnail ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0;"><a href="${videoLink}" style="display: inline-block; position: relative; max-width: 100%;"><img src="${content.thumbnail}" alt="Video" style="width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; display: block;" /><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: rgba(16, 185, 129, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><span style="font-size: 24px;">▶</span></div></a></div>` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
 
       default:
