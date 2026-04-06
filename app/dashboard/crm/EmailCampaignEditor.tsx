@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
 import {
-  fetchEmailSegments,
+  getSegments,
   createBroadcast,
   updateBroadcast,
   sendBroadcast,
@@ -56,7 +56,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   async function loadData() {
     setLoading(true)
     try {
-      const segs = await fetchEmailSegments(userId)
+      const segs = await getSegments(userId)
       const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email').eq('user_id', userId)
       setLeads(leadsError ? [] : (leadsData || []))
       setSegments(segs)

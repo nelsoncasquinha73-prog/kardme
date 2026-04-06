@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
-import { fetchEmailSegments, createEmailSegment, deleteEmailSegment, fetchBroadcasts, createBroadcast, deleteBroadcast, addLeadsToSegment, SEGMENT_COLORS, type EmailSegment, type EmailBroadcast } from '@/lib/crm/emailMarketing'
+import { getSegments, createSegment, deleteSegment, getBroadcasts, createBroadcast, deleteBroadcast, addLeadsToSegment, type EmailSegment, type EmailBroadcast } from '@/lib/crm/emailMarketing'
 import { FiTrash2 } from 'react-icons/fi'
 import EmailCampaignEditor from './EmailCampaignEditor'
 
@@ -28,7 +28,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
   async function loadData() {
     setLoading(true)
     try {
-      const [segs, bcasts, leadsData] = await Promise.all([fetchEmailSegments(userId), fetchBroadcasts(userId), fetchLeads()])
+      const [segs, bcasts, leadsData] = await Promise.all([getSegments(userId), getBroadcasts(userId), fetchLeads()])
       setSegments(segs); setBroadcasts(bcasts); setLeads(leadsData)
     } catch (e) { console.error(e); addToast('Erro ao carregar dados', 'error') }
     setLoading(false)
@@ -42,7 +42,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
   async function handleCreateSegment() {
     if (!newSegmentName.trim()) { addToast('Dá um nome ao segmento', 'error'); return }
     try {
-      await createEmailSegment(userId, newSegmentName.trim(), newSegmentColor)
+      await createSegment(userId, newSegmentName.trim(), newSegmentColor)
       setNewSegmentName(''); setNewSegmentColor(SEGMENT_COLORS[0]); setShowNewSegmentForm(false)
       await loadData(); addToast('Segmento criado!', 'success')
     } catch (e) { console.error(e); addToast('Erro ao criar segmento', 'error') }
@@ -50,7 +50,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
 
   async function handleDeleteSegment(segmentId: string) {
     if (!confirm('Apagar segmento?')) return
-    try { await deleteEmailSegment(segmentId); await loadData(); addToast('Segmento apagado', 'success') } catch (e) { console.error(e); addToast('Erro ao apagar segmento', 'error') }
+    try { await deleteSegment(segmentId); await loadData(); addToast('Segmento apagado', 'success') } catch (e) { console.error(e); addToast('Erro ao apagar segmento', 'error') }
   }
 
   async function handleAddLeadsToSegment(segmentId: string) {
