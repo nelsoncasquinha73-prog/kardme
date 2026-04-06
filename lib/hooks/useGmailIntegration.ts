@@ -64,19 +64,24 @@ export function useGmailIntegration(userId: string) {
 
   const disconnectGmail = async () => {
     try {
+      console.log('[DISCONNECT] Iniciando desconexão do Gmail para user:', userId)
       setIsConnected(false)
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_integrations')
         .delete()
         .eq('user_id', userId)
         .eq('integration_type', 'gmail')
+        .select()
+
+      console.log('[DISCONNECT] Resultado:', { data, error })
 
       if (error) throw error
       
+      console.log('[DISCONNECT] Deletado com sucesso, recarregando...')
       // Limpa a URL e faz refresh para garantir que não há cache
       window.history.replaceState({}, '', window.location.pathname)
-      window.location.reload()
+      setTimeout(() => window.location.reload(), 500)
       
       return true
     } catch (err) {
