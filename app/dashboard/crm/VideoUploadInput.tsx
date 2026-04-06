@@ -99,9 +99,14 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       console.log('[VIDEO] thumbnailFile:', thumbnailFile)
 
       if (thumbnailFile) {
-        const { url } = await uploadEmailImage(userId, thumbnailFile)
-        thumbnailUrl = url
-        console.log('[VIDEO] thumbnail upload ok:', thumbnailUrl)
+        try {
+          const { url } = await uploadEmailImage(userId, thumbnailFile)
+          thumbnailUrl = url
+          console.log('[VIDEO] thumbnail upload ok:', thumbnailUrl)
+        } catch (uploadError) {
+          console.error('[VIDEO] thumbnail upload failed:', uploadError)
+          addToast('Aviso: thumbnail não foi carregada, mas o vídeo foi enviado', 'warning')
+        }
       } else {
         console.warn('[VIDEO] thumbnailFile veio null')
       }
