@@ -14,63 +14,72 @@ export async function generateThumbnailWithPlayButton(
 
     video.preload = 'metadata'
     video.muted = true
-    const videoUrl = URL.createObjectURL(videoFile)
-    video.src = videoUrl
+    video.playsInline = true
+
+    const objectUrl = URL.createObjectURL(videoFile)
+    video.src = objectUrl
+
+    const cleanup = () => {
+      URL.revokeObjectURL(objectUrl)
+    }
 
     video.onloadedmetadata = () => {
       try {
-        canvas.width = 1280
-        canvas.height = 720
+        const width = video.videoWidth || 720
+        const height = video.videoHeight || 1280
 
-        // Busca um frame válido
-        video.currentTime = Math.min(1, video.duration / 2)
+        canvas.width = width
+        canvas.height = height
+
+        video.currentTime = Math.min(1, Math.max(0.1, video.duration / 2))
       } catch (error) {
-        console.error('[THUMB] erro ao buscar frame:', error)
-        URL.revokeObjectURL(videoUrl)
+        console.error('[THUMB] metadata error:', error)
+        cleanup()
         resolve(null)
       }
     }
 
     video.onseeked = () => {
       try {
-        // Desenha o frame do vídeo
-        ctx!.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const width = canvas.width
+        const height = canvas.height
 
-        // Desenha overlay escuro semi-transparente
-        ctx!.fillStyle = 'rgba(0, 0, 0, 0.3)'
-        ctx!.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(video, 0, 0, width, height)
 
-        // Desenha o botão play no centro
-        const centerX = canvas.width / 2
-        const centerY = canvas.height / 2
-        const playButtonRadius = 70
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.18)'
+        ctx.fillRect(0, 0, width, height)
 
-        // Círculo do play
-        ctx!.fillStyle = playButtonColor
-        ctx!.beginPath()
-        ctx!.arc(centerX, centerY, playButtonRadius, 0, Math.PI * 2)
-        ctx!.fill()
+        const centerX = width / 2
+        const centerY = height / 2
+        const radius = Math.max(36, Math.min(width, height) * 0.12)
 
-        // Sombra do play
-        ctx!.shadowColor = 'rgba(0, 0, 0, 0.4)'
-        ctx!.shadowBlur = 20
-        ctx!.shadowOffsetX = 0
-        ctx!.shadowOffsetY = 4
+        ctx.save()
+        ctx.shadowColor = 'rgba(0,0,0,0.30)'
+        ctx.shadowBlur = radius * 0.35
+        ctx.shadowOffsetY = 6
 
-        // Triângulo play (▶)
-        ctx!.fillStyle = 'white'
-        ctx!.beginPath()
-        ctx!.moveTo(centerX - 20, centerY - 30)
-        ctx!.lineTo(centerX - 20, centerY + 30)
-        ctx!.lineTo(centerX + 35, centerY)
-        ctx!.closePath()
-        ctx!.fill()
+        ctx.fillStyle = playButtonColor
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.restore()
 
-        // Converte para blob
+        const triangleWidth = radius * 0.72
+        const triangleHeight = radius * 0.82
+        const triangleOffset = radius * 0.12
+
+        ctx.fillStyle = '#ffffff'
+        ctx.beginPath()
+        ctx.moveTo(centerX - triangleWidth / 2 + triangleOffset, centerY - triangleHeight / 2)
+        ctx.lineTo(centerX - triangleWidth / 2 + triangleOffset, centerY + triangleHeight / 2)
+        ctx.lineTo(centerX + triangleWidth / 2 + triangleOffset, centerY)
+        ctx.closePath()
+        ctx.fill()
+
         canvas.toBlob(
           (blob) => {
             if (!blob || blob.size === 0) {
-              URL.revokeObjectURL(videoUrl)
+              cleanup()
               resolve(null)
               return
             }
@@ -81,27 +90,28 @@ export async function generateThumbnailWithPlayButton(
               { type: 'image/jpeg' }
             )
 
-            URL.revokeObjectURL(videoUrl)
+            cleanup()
             resolve(thumbnailFile)
           },
           'image/jpeg',
-          0.95
+          0.92
         )
       } catch (error) {
-        console.error('[THUMB] erro ao desenhar play:', error)
-        URL.revokeObjectURL(videoUrl)
+        console.error('[THUMB] draw error:', error)
+        cleanup()
         resolve(null)
       }
     }
 
     video.onerror = () => {
-      URL.revokeObjectURL(videoUrl)
+      console.error('[THUMB] video load error')
+      cleanup()
       resolve(null)
     }
 
     setTimeout(() => {
-      URL.revokeObjectURL(videoUrl)
+      cleanup()
       resolve(null)
-    }, 5000)
+    }, 8000)
   })
 }
