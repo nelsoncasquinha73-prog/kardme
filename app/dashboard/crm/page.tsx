@@ -2015,7 +2015,7 @@ Melhores cumprimentos,
                               )
                             })
                           )}
-                          <span style={{ fontSize: 10, opacity: 0.4, marginLeft: 2 }}>▾</span>
+                          <span style={{ fontSize: 14, opacity: 0.6, marginLeft: 4 }}>▾</span>
                         </div>
 
                         {/* Dropdown com checkboxes */}
