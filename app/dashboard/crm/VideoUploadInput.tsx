@@ -93,23 +93,9 @@ export default function VideoUploadInput({ userId, currentUrl, onUpload }: Video
       console.log('[VIDEO] upload ok:', videoUrl)
       setPreview(videoUrl)
 
-      // 2. Gerar thumbnail automática
+      // 2. Thumbnail será feita manualmente pelo utilizador
       let thumbnailUrl: string | undefined = undefined
-      const thumbnailFile = await generateThumbnail(file)
-      console.log('[VIDEO] thumbnailFile:', thumbnailFile)
-
-      if (thumbnailFile) {
-        try {
-          const { url } = await uploadEmailImage(userId, thumbnailFile)
-          thumbnailUrl = url
-          console.log('[VIDEO] thumbnail upload ok:', thumbnailUrl)
-        } catch (uploadError) {
-          console.error('[VIDEO] thumbnail upload failed:', uploadError)
-          addToast('Aviso: thumbnail não foi carregada, mas o vídeo foi enviado', 'error')
-        }
-      } else {
-        console.warn('[VIDEO] thumbnailFile veio null')
-      }
+      console.log('[VIDEO] Thumbnail geração desativada - usar upload manual'
 
       // 3. Devolver ambos
       console.log('[VIDEO] onUpload payload:', {
