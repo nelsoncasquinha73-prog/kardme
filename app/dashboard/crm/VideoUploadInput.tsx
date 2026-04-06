@@ -10,7 +10,7 @@ import { FiUpload, FiX } from 'react-icons/fi'
 interface VideoUploadInputProps {
   userId: string
   currentUrl?: string
-  onUpload: (data: { videoUrl: string; thumbnail?: string }) => void
+  onUpload: (data: { videoUrl: string; thumbnail?: string; previewId?: string }) => void
 }
 
 export default function VideoUploadInput({ userId, currentUrl, onUpload }: VideoUploadInputProps) {
