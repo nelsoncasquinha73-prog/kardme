@@ -236,6 +236,7 @@ export async function sendBroadcast(
         broadcastId,
         recipients: recipientEmails,
         recipientLeadIds,
+        recipientNames,
         subject,
         htmlBody,
       }),
