@@ -55,6 +55,7 @@ type Lead = {
   lead_type_id: string | null
   lead_source: string | null
   country: string | null
+  isUnsubscribed?: boolean
 }
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
@@ -317,7 +318,17 @@ Melhores cumprimentos,
       console.error('Erro a carregar leads:', error)
       setLeads([])
     } else {
-      setLeads(data || [])
+      // Carregar unsubscribes
+      const { data: unsubData } = await supabase
+        .from('email_unsubscribes')
+        .select('email')
+        .eq('user_id', user.id)
+      const unsubSet = new Set((unsubData || []).map((u: any) => u.email.toLowerCase()))
+      const leadsWithUnsub = (data || []).map((l: any) => ({
+        ...l,
+        isUnsubscribed: unsubSet.has(l.email?.toLowerCase())
+      }))
+      setLeads(leadsWithUnsub)
     }
 
     setLoading(false)
@@ -2168,16 +2179,30 @@ Melhores cumprimentos,
                       </select>
                     </td>
                     <td style={td}>
-                      <span style={{
-                        padding: '6px 10px',
-                        borderRadius: 8,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
-                        color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
-                      }}>
-                        {lead.marketing_opt_in ? '✓ Sim' : '✗ Não'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
+                          color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
+                        }}>
+                          {lead.marketing_opt_in ? '✓ Sim' : '✗ Não'}
+                        </span>
+                        {(lead as any).isUnsubscribed && (
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: 8,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            background: '#fef3c7',
+                            color: '#92400e',
+                          }}>
+                            🚫 Unsub
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
                     <td style={td}>
