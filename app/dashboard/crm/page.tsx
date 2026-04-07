@@ -2015,7 +2015,7 @@ Melhores cumprimentos,
                               )
                             })
                           )}
-                          <span style={{ fontSize: 26, opacity: 0.9, marginLeft: 6, lineHeight: 1 }}>▾</span>
+                          <FiChevronDown size={16} style={{ opacity: 0.7, marginLeft: 4, flexShrink: 0 }} />
                         </div>
 
                         {/* Dropdown com checkboxes */}
