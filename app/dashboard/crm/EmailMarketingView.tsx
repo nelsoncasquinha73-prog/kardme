@@ -12,7 +12,17 @@ type Lead = { id: string; name: string; email: string; step: string; audience_id
 
 export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailMarketingViewProps) {
   const { addToast } = useToast()
-  const [activeTab, setActiveTab] = useState<'audience' | 'broadcasts'>(preSelectedLeadId ? 'broadcasts' : 'audience')
+  const [activeTab, setActiveTab] = useState<'audience' | 'broadcasts' | 'unsubscribes'>(preSelectedLeadId ? 'broadcasts' : 'audience')
+  const [unsubscribes, setUnsubscribes] = useState<Array<{email: string, unsubscribed_at: string}>>([])
+
+  const loadUnsubscribes = async () => {
+    const { data } = await supabase
+      .from('email_unsubscribes')
+      .select('email, unsubscribed_at')
+      .eq('user_id', userId)
+      .order('unsubscribed_at', { ascending: false })
+    setUnsubscribes(data || [])
+  }
   const [audiences, setAudiences] = useState<LeadType[]>([])
   const [broadcasts, setBroadcasts] = useState<EmailBroadcast[]>([])
   const [leads, setLeads] = useState<Lead[]>([])
@@ -73,6 +83,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
       <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid rgba(0,0,0,0.1)', marginBottom: 24 }}>
         <button onClick={() => setActiveTab('audience')} style={{ padding: '12px 16px', borderRadius: '8px 8px 0 0', border: 'none', background: activeTab === 'audience' ? 'var(--color-primary)' : 'transparent', color: activeTab === 'audience' ? '#fff' : '#666', fontWeight: 600, cursor: 'pointer' }}>🎯 Audiências</button>
         <button onClick={() => setActiveTab('broadcasts')} style={{ padding: '12px 16px', borderRadius: '8px 8px 0 0', border: 'none', background: activeTab === 'broadcasts' ? 'var(--color-primary)' : 'transparent', color: activeTab === 'broadcasts' ? '#fff' : '#666', fontWeight: 600, cursor: 'pointer' }}>📨 Campanhas</button>
+        <button onClick={() => { setActiveTab('unsubscribes'); loadUnsubscribes() }} style={{ padding: '12px 16px', borderRadius: '8px 8px 0 0', border: 'none', background: activeTab === 'unsubscribes' ? '#ef4444' : 'transparent', color: activeTab === 'unsubscribes' ? '#fff' : '#666', fontWeight: 600, cursor: 'pointer' }}>🚫 Unsubscribes</button>
       </div>
 
       {activeTab === 'audience' && (
@@ -121,6 +132,35 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
               <strong>💡 Como funciona:</strong> As audiências são geridas na <strong>Lista de Contactos</strong>. Aqui podes ver quantas leads tens em cada audiência. Para enviar uma campanha a uma audiência específica, vai a <strong>Campanhas</strong> e seleciona a audiência no envio.
             </p>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'unsubscribes' && (
+        <div style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>🚫 Unsubscribes ({unsubscribes.length})</h3>
+          {unsubscribes.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#6b7280' }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
+              <p>Nenhum unsubscribe ainda.</p>
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600, color: '#9ca3af' }}>Email</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600, color: '#9ca3af' }}>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {unsubscribes.map((u, i) => (
+                  <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '10px 12px', color: '#f1f5f9' }}>{u.email}</td>
+                    <td style={{ padding: '10px 12px', color: '#9ca3af' }}>{new Date(u.unsubscribed_at).toLocaleDateString('pt-PT')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
