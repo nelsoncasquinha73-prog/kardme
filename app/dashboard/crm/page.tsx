@@ -34,6 +34,7 @@ import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
 import EmailMarketingView from './EmailMarketingView'
+import EmailCampaignEditor from './EmailCampaignEditor'
 import PipelineKanban from './PipelineKanban'
 import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
@@ -125,6 +126,8 @@ export default function CrmProPage() {
   const [emailBody, setEmailBody] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [showInlineEmailEditor, setShowInlineEmailEditor] = useState(false)
+  const [inlineEmailLeadIds, setInlineEmailLeadIds] = useState<string[]>([])
   const [openAudienceDropdown, setOpenAudienceDropdown] = useState<string | null>(null)
   const [tasksToday, setTasksToday] = useState<LeadTask[]>([])
   const [calendarTasks, setCalendarTasks] = useState<LeadTask[]>([])
@@ -1858,7 +1861,10 @@ Melhores cumprimentos,
 
       <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <button
-          onClick={() => setShowBulkEmailModal(true)}
+          onClick={() => {
+            setInlineEmailLeadIds(Array.from(selectedLeadIds))
+            setShowInlineEmailEditor(true)
+          }}
           disabled={selectedLeadIds.size === 0}
           style={{
             padding: '10px 16px',
@@ -2178,8 +2184,8 @@ Melhores cumprimentos,
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
                           onClick={() => {
-                            setSelectedLeadForEmailMarketing(lead.id)
-                            setActiveView('email-marketing')
+                            setInlineEmailLeadIds([lead.id])
+                            setShowInlineEmailEditor(true)
                           }}
                           disabled={!gmail.isConnected}
                           title={gmail.isConnected ? 'Enviar email agora' : 'Liga o Gmail para enviar emails'}
@@ -2729,6 +2735,26 @@ Melhores cumprimentos,
               <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
               <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Editor de email inline — massa ou individual */}
+      {showInlineEmailEditor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ background: '#0f172a', borderRadius: 16, width: '100%', maxWidth: 1100, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button
+              onClick={() => { setShowInlineEmailEditor(false); setInlineEmailLeadIds([]) }}
+              style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontWeight: 700 }}
+            >
+              ✕ Fechar
+            </button>
+            <EmailCampaignEditor
+              userId={userId}
+              preSelectedLeadIds={inlineEmailLeadIds}
+              onClose={() => { setShowInlineEmailEditor(false); setInlineEmailLeadIds([]) }}
+              onSave={() => { setShowInlineEmailEditor(false); setInlineEmailLeadIds([]) }}
+            />
           </div>
         </div>
       )}

@@ -6,11 +6,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
 import {
-  getSegments,
   createBroadcast,
   updateBroadcast,
   sendBroadcast,
-  type EmailSegment,
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
 import { fetchLeadTypes, type LeadType } from '@/lib/crm/leadTypes'
@@ -27,11 +25,12 @@ export type EmailBlock = {
 interface EmailCampaignEditorProps {
   userId: string
   broadcastId?: string
+  preSelectedLeadIds?: string[]
   onClose: () => void
   onSave: () => void
 }
 
-export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSave }: EmailCampaignEditorProps) {
+export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLeadIds, onClose, onSave }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
@@ -45,8 +44,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showSendModal, setShowSendModal] = useState(false)
   const [sending, setSending] = useState(false)
-  const [sendingTo, setSendingTo] = useState<'audience' | 'all' | 'individual' | 'manual'>('audience')
-  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [sendingTo, setSendingTo] = useState<'audience' | 'all' | 'individual' | 'manual'>(preSelectedLeadIds && preSelectedLeadIds.length === 1 ? 'individual' : preSelectedLeadIds && preSelectedLeadIds.length > 1 ? 'all' : 'audience')
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(preSelectedLeadIds?.length === 1 ? preSelectedLeadIds[0] : null)
   const [manualEmail, setManualEmail] = useState<string>('')
   const [leads, setLeads] = useState<any[]>([])
 
@@ -155,7 +154,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
           .map((l: any) => ({ email: l.email, leadId: l.id }))
           .filter((r) => r.email)
       } else if (sendingTo === 'all') {
-        recipients = leads.map((l) => ({ email: l.email, leadId: l.id }))
+        const pool = preSelectedLeadIds && preSelectedLeadIds.length > 1
+          ? leads.filter((l: any) => preSelectedLeadIds.includes(l.id))
+          : leads
+        recipients = pool.map((l: any) => ({ email: l.email, leadId: l.id }))
       } else if (sendingTo === 'individual' && selectedLeadId) {
         const lead = leads.find((l: any) => l.id === selectedLeadId)
         if (lead?.email) {
@@ -669,7 +671,12 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="radio" name="sendTo" value="all" checked={sendingTo === 'all'} onChange={(e) => setSendingTo(e.target.value as any)} />
-                  <span>Todos ({leads.length})</span>
+                  <span>
+                    {preSelectedLeadIds && preSelectedLeadIds.length > 1
+                      ? `Leads selecionadas (${preSelectedLeadIds.length})`
+                      : `Todos (${leads.length})`
+                    }
+                  </span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="radio" name="sendTo" value="individual" checked={sendingTo === 'individual'} onChange={(e) => setSendingTo(e.target.value as any)} />
