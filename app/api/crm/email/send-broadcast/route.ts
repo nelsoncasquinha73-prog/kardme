@@ -138,11 +138,11 @@ export async function POST(req: NextRequest) {
       try {
         // Skip se unsubscribed
         if (unsubscribedEmails.has(recipientEmail.toLowerCase())) {
-          console.log(\`[SKIP] \${recipientEmail} is unsubscribed\`)
+          console.log("[SKIP] " + recipientEmail + " is unsubscribed")
           continue
         }
 
-        console.log(\`[SEND] Attempting to send to \${recipientEmail} (leadId: \${leadId}, name: \${leadName})\`)
+        console.log("[SEND] Attempting to send to " + recipientEmail + " (leadId: " + leadId + ", name: " + leadName + ")")
 
         let personalizedHtmlBody = htmlBody
 
