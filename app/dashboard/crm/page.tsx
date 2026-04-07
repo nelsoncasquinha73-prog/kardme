@@ -291,7 +291,7 @@ Melhores cumprimentos,
       .from('leads')
       .select(`
         id, name, email, phone, zone, message, marketing_opt_in, consent_given,
-        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country,
+        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country, audience_ids,
         cards ( user_id, name, slug )
       `)
       .eq('user_id', user.id)
