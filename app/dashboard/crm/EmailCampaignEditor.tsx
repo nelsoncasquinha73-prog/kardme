@@ -13,6 +13,7 @@ import {
   type EmailSegment,
 } from '@/lib/crm/emailMarketing'
 import { DEFAULT_EMAIL_BLOCKS, type EmailBlockType } from '@/lib/crm/emailEditor'
+import { fetchLeadTypes, type LeadType } from '@/lib/crm/leadTypes'
 import EmailPreviewModal from './EmailPreviewModal'
 import TextBlockEditor from './TextBlockEditor'
 import { FiX, FiPlus, FiTrash2, FiEye } from 'react-icons/fi'
@@ -36,15 +37,15 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   const [subject, setSubject] = useState('')
   const [preheader, setPreheader] = useState('')
   const [blocks, setBlocks] = useState<EmailBlock[]>([])
-  const [segments, setSegments] = useState<EmailSegment[]>([])
-  const [selectedSegments, setSelectedSegments] = useState<Set<string>>(new Set())
+  const [audiences, setAudiences] = useState<LeadType[]>([])
+  const [selectedAudiences, setSelectedAudiences] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showSendModal, setShowSendModal] = useState(false)
   const [sending, setSending] = useState(false)
-  const [sendingTo, setSendingTo] = useState<'segment' | 'all' | 'individual' | 'manual'>('segment')
+  const [sendingTo, setSendingTo] = useState<'audience' | 'all' | 'individual' | 'manual'>('audience')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [manualEmail, setManualEmail] = useState<string>('')
   const [leads, setLeads] = useState<any[]>([])
@@ -56,10 +57,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
   async function loadData() {
     setLoading(true)
     try {
-      const segs = await getSegments(userId)
-      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email').eq('user_id', userId)
+      const auds = await fetchLeadTypes(userId)
+      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email, audience_ids').eq('user_id', userId)
       setLeads(leadsError ? [] : (leadsData || []))
-      setSegments(segs)
+      setAudiences(auds)
 
       if (broadcastId) {
         const { data, error } = await supabase
@@ -144,19 +145,14 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
     try {
       let recipients: Array<{ email: string; leadId?: string }> = []
 
-      if (sendingTo === 'segment' && selectedSegments.size > 0) {
-        const segIds = Array.from(selectedSegments)
-        const { data, error } = await supabase
-          .from('lead_segment_mapping')
-          .select('lead_id, leads(id, email)')
-          .in('segment_id', segIds)
-
-        if (error) throw error
-        recipients = (data || [])
-          .map((m: any) => ({
-            email: m.leads?.email,
-            leadId: m.leads?.id,
-          }))
+      if (sendingTo === 'audience' && selectedAudiences.size > 0) {
+        const audIds = Array.from(selectedAudiences)
+        recipients = leads
+          .filter((l: any) => {
+            const lAuds: string[] = l.audience_ids || []
+            return audIds.some(aid => lAuds.includes(aid))
+          })
+          .map((l: any) => ({ email: l.email, leadId: l.id }))
           .filter((r) => r.email)
       } else if (sendingTo === 'all') {
         recipients = leads.map((l) => ({ email: l.email, leadId: l.id }))
@@ -207,7 +203,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
       setShowSendModal(false)
       setSelectedLeadId(null)
       setManualEmail('')
-      setSendingTo('segment')
+      setSendingTo('audience')
       onSave()
       onClose()
     } catch (e: any) {
@@ -668,8 +664,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>Enviar para:</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                  <input type="radio" name="sendTo" value="segment" checked={sendingTo === 'segment'} onChange={(e) => setSendingTo(e.target.value as any)} />
-                  <span>Segmentos ({selectedSegments.size})</span>
+                  <input type="radio" name="sendTo" value="audience" checked={sendingTo === 'audience'} onChange={(e) => setSendingTo(e.target.value as any)} />
+                  <span>Audiências ({selectedAudiences.size})</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="radio" name="sendTo" value="all" checked={sendingTo === 'all'} onChange={(e) => setSendingTo(e.target.value as any)} />
@@ -686,9 +682,41 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               </div>
             </div>
 
-            {sendingTo === 'segment' && selectedSegments.size === 0 && (
-              <div style={{ background: '#fee2e2', color: '#991b1b', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
-                ⚠️ Seleciona segmentos na aba Audience
+            {sendingTo === 'audience' && (
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>
+                  Selecionar Audiências
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {audiences.map(a => {
+                    const count = leads.filter((l: any) => (l.audience_ids || []).includes(a.id)).length
+                    const isChecked = selectedAudiences.has(a.id)
+                    return (
+                      <label key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: isChecked ? 'rgba(255,255,255,0.08)' : 'transparent', cursor: 'pointer', border: `1.5px solid ${isChecked ? a.color : 'rgba(255,255,255,0.1)'}`, transition: 'all 0.15s' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            const newSet = new Set(selectedAudiences)
+                            if (isChecked) newSet.delete(a.id)
+                            else newSet.add(a.id)
+                            setSelectedAudiences(newSet)
+                          }}
+                          style={{ accentColor: a.color, width: 15, height: 15 }}
+                        />
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: a.color, display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ fontSize: 13, color: '#fff', fontWeight: isChecked ? 700 : 400, flex: 1 }}>{a.name}</span>
+                        <span style={{ fontSize: 11, opacity: 0.5 }}>{count} leads</span>
+                      </label>
+                    )
+                  })}
+                  {audiences.length === 0 && (
+                    <p style={{ fontSize: 12, opacity: 0.5, fontStyle: 'italic', margin: 0 }}>Sem audiências definidas. Cria-as na Lista de Contactos.</p>
+                  )}
+                </div>
+                {selectedAudiences.size === 0 && audiences.length > 0 && (
+                  <p style={{ fontSize: 11, color: '#f59e0b', marginTop: 8, margin: '8px 0 0' }}>⚠️ Seleciona pelo menos uma audiência</p>
+                )}
               </div>
             )}
 
@@ -755,7 +783,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, onClose, onSa
               <button 
                 onClick={() => handleSend()} 
                 disabled={sending || 
-                  (sendingTo === 'segment' && selectedSegments.size === 0) || 
+                  (sendingTo === 'audience' && selectedAudiences.size === 0) || 
                   (sendingTo === 'individual' && !selectedLeadId) ||
                   (sendingTo === 'manual' && !manualEmail.trim())
                 } 
