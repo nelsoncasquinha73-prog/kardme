@@ -123,13 +123,26 @@ export async function POST(req: NextRequest) {
     let failed = 0
     const errors: string[] = []
 
+    // Buscar emails unsubscribed
+    const { data: unsubscribed } = await supabaseAdmin
+      .from('email_unsubscribes')
+      .select('email')
+      .eq('user_id', userId)
+    const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()))
+
     for (let i = 0; i < recipients.length; i++) {
       const recipientEmail = recipients[i]
       const leadId = recipientLeadIds?.[i] || null
       const leadName = recipientNames?.[i] || null
 
       try {
-        console.log(`[SEND] Attempting to send to ${recipientEmail} (leadId: ${leadId}, name: ${leadName})`)
+        // Skip se unsubscribed
+        if (unsubscribedEmails.has(recipientEmail.toLowerCase())) {
+          console.log(\`[SKIP] \${recipientEmail} is unsubscribed\`)
+          continue
+        }
+
+        console.log(\`[SEND] Attempting to send to \${recipientEmail} (leadId: \${leadId}, name: \${leadName})\`)
 
         let personalizedHtmlBody = htmlBody
 
