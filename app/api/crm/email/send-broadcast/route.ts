@@ -5,20 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 function getAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !serviceKey) {
-    throw new Error('Missing env vars')
-  }
-
+  if (!url || !serviceKey) throw new Error('Missing env vars')
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
 function toBase64Url(str: string) {
-  return Buffer.from(str)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '')
+  return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 function encodeSubjectRFC2047(subject: string) {
@@ -44,36 +36,36 @@ function buildRawEmail(params: {
     'X-Mailer: Kardme Email Marketing',
     'X-Priority: 3',
   ]
-
   if (params.unsubscribeUrl) {
     headers.push(`List-Unsubscribe: <${params.unsubscribeUrl}>`)
     headers.push('List-Unsubscribe-Post: List-Unsubscribe=One-Click')
   }
-
-  return [
-    ...headers,
-    '',
-    params.htmlBody,
-  ].join('\r\n')
+  return [...headers, '', params.htmlBody].join('\r\n')
 }
 
-// Função para adicionar lead_id aos links de vídeo
 function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
-  // Substitui links de vídeo com parâmetro lead_id
   return htmlBody.replace(
     /https:\/\/www\.kardme\.com\/video-preview\/([a-f0-9-]+)(?=["\s>])/g,
     `https://www.kardme.com/video-preview/$1?lead=${leadId}`
   )
 }
 
+// Substitui {{nome}} e outros placeholders pelo dados reais do lead
+function replacePlaceholders(html: string, name: string | null): string {
+  const firstName = name ? name.split(' ')[0] : 'Olá'
+  return html
+    .replace(/\{\{nome\}\}/gi, firstName)
+    .replace(/\{\{name\}\}/gi, firstName)
+    .replace(/\{\{primeiro_nome\}\}/gi, firstName)
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { userId, broadcastId, recipients, subject, htmlBody, recipientLeadIds } = await req.json()
+    const { userId, broadcastId, recipients, recipientNames, subject, htmlBody, recipientLeadIds } = await req.json()
 
     if (!userId || !broadcastId || !recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-
     if (!subject || !htmlBody) {
       return NextResponse.json({ error: 'Subject and htmlBody required' }, { status: 400 })
     }
@@ -90,7 +82,6 @@ export async function POST(req: NextRequest) {
     if (integrationError || !integration) {
       return NextResponse.json({ error: 'Gmail not connected' }, { status: 401 })
     }
-
     if (!integration.refresh_token) {
       return NextResponse.json({ error: 'Missing refresh token' }, { status: 400 })
     }
@@ -110,14 +101,11 @@ export async function POST(req: NextRequest) {
       oauth2Client.setCredentials({ refresh_token: integration.refresh_token })
       const { credentials } = await oauth2Client.refreshAccessToken()
       accessToken = credentials.access_token || null
-
       await supabaseAdmin
         .from('user_integrations')
         .update({
           access_token: accessToken,
-          token_expires_at: credentials.expiry_date
-            ? new Date(credentials.expiry_date).toISOString()
-            : null,
+          token_expires_at: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
         })
         .eq('id', integration.id)
     }
@@ -126,10 +114,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to obtain access token' }, { status: 500 })
     }
 
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      refresh_token: integration.refresh_token,
-    })
+    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: integration.refresh_token })
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
     const fromEmail = integration.sender_email || 'me'
@@ -141,37 +126,34 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < recipients.length; i++) {
       const recipientEmail = recipients[i]
       const leadId = recipientLeadIds?.[i] || null
+      const leadName = recipientNames?.[i] || null
 
       try {
-        console.log(`[SEND] Attempting to send to ${recipientEmail} (leadId: ${leadId})`)
+        console.log(`[SEND] Attempting to send to ${recipientEmail} (leadId: ${leadId}, name: ${leadName})`)
 
-        // Adiciona lead_id aos links de vídeo se existir
         let personalizedHtmlBody = htmlBody
+
+        // 1. Substituir {{nome}} pelo nome real
+        personalizedHtmlBody = replacePlaceholders(personalizedHtmlBody, leadName)
+
+        // 2. Adicionar lead_id aos links de vídeo
         if (leadId) {
-          personalizedHtmlBody = addLeadIdToVideoLinks(htmlBody, leadId)
+          personalizedHtmlBody = addLeadIdToVideoLinks(personalizedHtmlBody, leadId)
         }
 
+        // 3. Substituir URLs de unsubscribe
         const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/unsubscribe?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
         const managePreferencesUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/email/preferences?broadcastId=${broadcastId}&email=${encodeURIComponent(recipientEmail)}`
 
-        // Substitui placeholders no footer
         personalizedHtmlBody = personalizedHtmlBody
           .replace('{UNSUBSCRIBE_URL}', unsubscribeUrl)
           .replace('{MANAGE_PREFERENCES_URL}', managePreferencesUrl)
 
-        const raw = buildRawEmail({
-          fromEmail,
-          to: recipientEmail,
-          subject,
-          htmlBody: personalizedHtmlBody,
-          unsubscribeUrl,
-        })
+        const raw = buildRawEmail({ fromEmail, to: recipientEmail, subject, htmlBody: personalizedHtmlBody, unsubscribeUrl })
 
         const res = await gmail.users.messages.send({
           userId: 'me',
-          requestBody: {
-            raw: toBase64Url(raw),
-          },
+          requestBody: { raw: toBase64Url(raw) },
         })
 
         const messageId = res.data.id || null
@@ -179,12 +161,7 @@ export async function POST(req: NextRequest) {
 
         const { error: insertError } = await supabaseAdmin
           .from('email_broadcast_recipients')
-          .insert({
-            broadcast_id: broadcastId,
-            email: recipientEmail,
-            lead_id: leadId,
-            status: 'sent',
-          })
+          .insert({ broadcast_id: broadcastId, email: recipientEmail, lead_id: leadId, status: 'sent' })
 
         if (insertError) {
           console.error(`[DB INSERT FAILED] ${recipientEmail}: ${insertError.message}`)
@@ -200,45 +177,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const newStatus =
-      sent > 0 && failed === 0
-        ? 'sent'
-        : sent > 0 && failed > 0
-        ? 'sent'
-        : 'draft'
+    const newStatus = sent > 0 ? 'sent' : 'draft'
 
     await supabaseAdmin
       .from('email_broadcasts')
-      .update({
-        status: newStatus,
-        sent_at: sent > 0 ? new Date().toISOString() : null,
-        total_recipients: sent,
-      })
+      .update({ status: newStatus, sent_at: sent > 0 ? new Date().toISOString() : null, total_recipients: sent })
       .eq('id', broadcastId)
 
     if (sent === 0) {
-      return NextResponse.json(
-        {
-          error: 'Nenhum email foi enviado',
-          sent,
-          failed,
-          errors,
-        },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Nenhum email foi enviado', sent, failed, errors }, { status: 500 })
     }
 
-    return NextResponse.json({
-      success: true,
-      sent,
-      failed,
-      errors: errors.length > 0 ? errors : undefined,
-    })
+    return NextResponse.json({ success: true, sent, failed, errors: errors.length > 0 ? errors : undefined })
   } catch (err: any) {
     console.error('Send broadcast error:', err)
-    return NextResponse.json(
-      { error: 'Failed to send broadcast', details: err?.message || String(err) },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to send broadcast', details: err?.message || String(err) }, { status: 500 })
   }
 }

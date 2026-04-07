@@ -151,17 +151,17 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
             const lAuds: string[] = l.audience_ids || []
             return audIds.some(aid => lAuds.includes(aid))
           })
-          .map((l: any) => ({ email: l.email, leadId: l.id }))
+          .map((l: any) => ({ email: l.email, leadId: l.id, name: l.name || null }))
           .filter((r) => r.email)
       } else if (sendingTo === 'all') {
         const pool = preSelectedLeadIds && preSelectedLeadIds.length > 1
           ? leads.filter((l: any) => preSelectedLeadIds.includes(l.id))
           : leads
-        recipients = pool.map((l: any) => ({ email: l.email, leadId: l.id }))
+        recipients = pool.map((l: any) => ({ email: l.email, leadId: l.id, name: l.name || null }))
       } else if (sendingTo === 'individual' && selectedLeadId) {
         const lead = leads.find((l: any) => l.id === selectedLeadId)
         if (lead?.email) {
-          recipients = [{ email: lead.email, leadId: lead.id }]
+          recipients = [{ email: lead.email, leadId: lead.id, name: lead.name || null }]
         }
       } else if (sendingTo === 'manual' && manualEmail.trim()) {
         recipients = [{ email: manualEmail.trim() }]

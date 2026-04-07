@@ -211,7 +211,7 @@ export async function updateRecipientStatus(broadcastId: string, email: string, 
 export async function sendBroadcast(
   userId: string,
   broadcastId: string,
-  recipients: Array<{ email: string; leadId?: string }>,
+  recipients: Array<{ email: string; leadId?: string; name?: string }>,
   subject: string,
   htmlBody: string
 ): Promise<{ sent: number; failed: number }> {
@@ -226,6 +226,7 @@ export async function sendBroadcast(
   try {
     const recipientEmails = recipients.map((r) => r.email)
     const recipientLeadIds = recipients.map((r) => r.leadId || null)
+    const recipientNames = recipients.map((r) => r.name || null)
 
     const res = await fetch('/api/crm/email/send-broadcast', {
       method: 'POST',
