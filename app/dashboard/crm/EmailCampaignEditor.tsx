@@ -846,7 +846,33 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
     </div>
   `
 
-  return blocksHtml + footer
+  const html = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <style>
+    body { margin: 0; padding: 0; background-color: #f9fafb; font-family: Arial, sans-serif; }
+    .email-wrapper { width: 100%; background-color: #f9fafb; padding: 20px 0; }
+    .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; padding: 32px 24px; box-sizing: border-box; }
+    img { max-width: 100%; height: auto; display: block; }
+    @media only screen and (max-width: 600px) {
+      .email-container { padding: 24px 16px !important; border-radius: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-container">
+      ${blocksHtml}
+      ${footer}
+    </div>
+  </div>
+</body>
+</html>`
+
+  return html
 }
 
 function renderEmailBlock(block: EmailBlock, userId: string) {
