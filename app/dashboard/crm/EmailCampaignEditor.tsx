@@ -142,7 +142,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
 
     setSending(true)
     try {
-      let recipients: Array<{ email: string; leadId?: string }> = []
+      let recipients: Array<{ email: string; leadId?: string; name?: string | null }> = []
 
       if (sendingTo === 'audience' && selectedAudiences.size > 0) {
         const audIds = Array.from(selectedAudiences)
