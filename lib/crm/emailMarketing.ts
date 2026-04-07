@@ -211,7 +211,7 @@ export async function updateRecipientStatus(broadcastId: string, email: string, 
 export async function sendBroadcast(
   userId: string,
   broadcastId: string,
-  recipients: Array<{ email: string; leadId?: string; name?: string }>,
+  recipients: Array<{ email: string; leadId?: string; name?: string | null }>,
   subject: string,
   htmlBody: string
 ): Promise<{ sent: number; failed: number }> {
