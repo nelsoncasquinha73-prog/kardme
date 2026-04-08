@@ -181,6 +181,22 @@ export async function POST(req: NextRequest) {
           errors.push(`${recipientEmail}: DB insert failed - ${insertError.message}`)
         }
 
+        // Registar atividade no CRM (scheduled_task como histórico)
+        if (leadId) {
+          await supabaseAdmin.from('scheduled_tasks').insert({
+            user_id: userId,
+            lead_id: leadId,
+            title: `📧 Email enviado: ${subject}`,
+            email_subject: subject,
+            email_recipient: recipientEmail,
+            due_at: new Date().toISOString(),
+            send_status: 'sent',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            attachments: [],
+          })
+        }
+
         sent++
       } catch (err: any) {
         failed++
