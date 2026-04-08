@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { generateEmailHtml } from '@/lib/crm/emailHtmlGenerator'
 import { google } from 'googleapis'
 import { createClient } from '@supabase/supabase-js'
 

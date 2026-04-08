@@ -2,6 +2,7 @@
 import ImageUploadInput from './ImageUploadInput'
 import VideoUploadInput from './VideoUploadInput'
 
+import { generateEmailHtmlBody } from './emailBlockRenderer'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
@@ -197,8 +198,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
       }
 
       // Render blocks to HTML for email
-      const htmlContent = { blocks, createdAt: new Date().toISOString() }
-      const htmlBody = renderEmailBlocksToHtml(blocks) // You'll need to implement this or use blocks directly
+      const htmlBody = generateEmailHtmlBody(blocks, subject, preheader)
       
       const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients, subject, htmlBody)
       addToast(`✅ ${result.sent} emails enviados!`, 'success')
