@@ -218,6 +218,30 @@ function renderEmailBlock(block: any) {
         </div>
       )
 
+    case 'table':
+      return (
+        <div style={{ overflowX: 'auto', paddingTop: content.paddingTop || 0, paddingBottom: content.paddingBottom || 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: content.fontSize || 14 }}>
+            <thead>
+              <tr>
+                {(content.headers || []).map((h: string, i: number) => (
+                  <th key={i} style={{ padding: '10px 14px', background: content.headerBg || '#1e293b', color: content.headerColor || '#fff', textAlign: 'left', fontWeight: 700, border: `1px solid ${content.borderColor || '#e5e7eb'}` }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(content.rows || []).map((row: string[], ri: number) => (
+                <tr key={ri}>
+                  {row.map((cell: string, ci: number) => (
+                    <td key={ci} style={{ padding: '10px 14px', background: ri % 2 === 0 ? (content.rowBg || '#fff') : (content.rowAltBg || '#f9fafb'), border: `1px solid ${content.borderColor || '#e5e7eb'}`, color: '#111827' }}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+
     default:
       return null
   }
