@@ -1,8 +1,9 @@
 .container {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   background: #fff;
+  position: relative;
 }
 
 .toolbar {
@@ -138,12 +139,3 @@
   cursor: pointer;
 }
 
-
-.container {
-  position: relative;
-  overflow: visible;
-}
-
-.toolbar {
-  overflow: visible;
-}
