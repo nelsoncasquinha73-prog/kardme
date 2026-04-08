@@ -4,6 +4,7 @@ import VideoUploadInput from './VideoUploadInput'
 
 import { generateEmailHtmlBody } from './emailBlockRenderer'
 import { parseVideoLink, getVimeoThumbnail } from '@/lib/crm/videoLinkParser'
+import { generateThumbnailFromVideoUrl } from '@/lib/crm/videoThumbnailFromUrl'
 import EmailTextBlockEditor from './EmailTextBlockEditor'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -1245,10 +1246,8 @@ function renderBlockInspector(
                 if (!url) return
                 
                 const info = parseVideoLink(url)
-                if (info.type === 'youtube') {
-                  onUpdate({ videoUrl: url, thumbnail: info.thumbnailUrl })
-                } else if (info.type === 'vimeo') {
-                  const thumb = await getVimeoThumbnail(info.videoId || '')
+                if (info.type === 'youtube' || info.type === 'vimeo') {
+                  const thumb = await generateThumbnailFromVideoUrl(url, userId)
                   onUpdate({ videoUrl: url, thumbnail: thumb || undefined })
                 } else if (info.type === 'upload') {
                   onUpdate({ videoUrl: url })
