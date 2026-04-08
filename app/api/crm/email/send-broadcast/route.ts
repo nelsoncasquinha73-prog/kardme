@@ -197,12 +197,18 @@ export async function POST(req: NextRequest) {
             attachments: [],
           })
           if (taskError) {
-            console.error(`[TASK INSERT FAILED] ${recipientEmail}: ${taskError.message}`, taskError)
-          } else {
-            console.log(`[TASK INSERTED] ${recipientEmail} leadId: ${leadId}`)
+            console.error(`[TASK INSERT FAILED] ${recipientEmail}: ${taskError.message}`)
           }
-        } else {
-          console.log(`[TASK SKIP] ${recipientEmail} - sem leadId`)
+
+          // Registar também em lead_activities para aparecer no histórico
+          await supabaseAdmin.from('lead_activities').insert({
+            lead_id: leadId,
+            user_id: userId,
+            type: 'email_sent',
+            title: `📧 Email enviado: ${subject}`,
+            meta: { broadcastId, email: recipientEmail },
+            created_at: new Date().toISOString(),
+          })
         }
 
         sent++
