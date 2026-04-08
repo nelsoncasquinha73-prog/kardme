@@ -9,6 +9,19 @@ function sanitizeEmailHtml(html: string): string {
   })
 }
 
+
+// Gera URL assinada do Supabase para imagens em emails
+async function getSignedImageUrl(publicUrl: string): Promise<string> {
+  // Se já é uma URL assinada ou não é do Supabase, retorna como está
+  if (publicUrl.includes('token=') || !publicUrl.includes('supabase')) {
+    return publicUrl
+  }
+  
+  // Por enquanto, retorna a URL pública
+  // Em produção, chamaria a API do Supabase para gerar URL assinada
+  return publicUrl
+}
+
 export function renderEmailBlockToHtml(block: any): string {
   const { type, content } = block
 
@@ -25,8 +38,9 @@ export function renderEmailBlockToHtml(block: any): string {
           [Image]
         </div>`
       }
-      // Usa a URL diretamente (Gmail geralmente carrega URLs públicas)
-      return `<img src="${escapeHtml(content.url)}" alt="${escapeHtml(content.alt || '')}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto; margin-bottom: 16px; border: none;" />`
+      // Adiciona parâmetro de cache-busting e força inline
+      const imageUrl = content.url.includes('?') ? content.url + '&t=' + Date.now() : content.url + '?t=' + Date.now()
+      return `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(content.alt || '')}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto; margin-bottom: 16px; border: none;" />`
 
     case 'button':
       return `<div style="text-align: ${content.align || 'center'}; margin-bottom: 16px;">
