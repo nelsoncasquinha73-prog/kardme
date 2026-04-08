@@ -179,15 +179,31 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                 <p style={{ opacity: 0.6 }}>Sem campanhas ainda.</p>
               ) : (
                 <div style={{ display: 'grid', gap: 12 }}>
-                  {broadcasts.map(bc => (
-                    <div key={bc.id} style={{ background: '#f9fafb', padding: 16, borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><strong style={{ color: '#111827' }}>{bc.subject}</strong></div>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => { setEditingBroadcastId(bc.id); setEditorOpen(true) }} style={{ padding: '8px 12px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Editar</button>
-                        <button onClick={() => handleDeleteBroadcast(bc.id)} style={{ padding: '8px 12px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Apagar</button>
+                  {broadcasts.map(bc => {
+                    const isSent = bc.status === 'sent'
+                    const sentDate = bc.sent_at ? new Date(bc.sent_at).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
+                    return (
+                      <div key={bc.id} style={{ background: '#f9fafb', padding: 16, borderRadius: 8, border: `1.5px solid ${isSent ? '#d1fae5' : '#e5e7eb'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                            <strong style={{ color: '#111827', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bc.subject}</strong>
+                            <span style={{ flexShrink: 0, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: isSent ? '#d1fae5' : '#fef9c3', color: isSent ? '#065f46' : '#854d0e' }}>
+                              {isSent ? '✅ Enviado' : '📝 Rascunho'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 12, color: '#6b7280', display: 'flex', gap: 12 }}>
+                            {isSent && sentDate && <span>📅 {sentDate}</span>}
+                            {isSent && bc.total_recipients > 0 && <span>👥 {bc.total_recipients} destinatários</span>}
+                            {bc.title && bc.title !== bc.subject && <span style={{ opacity: 0.7 }}>{bc.title}</span>}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                          <button onClick={() => { setEditingBroadcastId(bc.id); setEditorOpen(true) }} style={{ padding: '8px 12px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Editar</button>
+                          <button onClick={() => handleDeleteBroadcast(bc.id)} style={{ padding: '8px 12px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Apagar</button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </>
