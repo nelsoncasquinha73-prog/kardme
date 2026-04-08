@@ -1,4 +1,14 @@
+import DOMPurify from 'isomorphic-dompurify'
+
 // Renderiza blocos de email para HTML "email-safe"
+function sanitizeEmailHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'span', 'div'],
+    ALLOWED_ATTR: ['href', 'style', 'color'],
+    KEEP_CONTENT: true,
+  })
+}
+
 export function renderEmailBlockToHtml(block: any): string {
   const { type, content } = block
 

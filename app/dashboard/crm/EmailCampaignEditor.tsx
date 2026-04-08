@@ -3,6 +3,7 @@ import ImageUploadInput from './ImageUploadInput'
 import VideoUploadInput from './VideoUploadInput'
 
 import { generateEmailHtmlBody } from './emailBlockRenderer'
+import EmailTextBlockEditor from './EmailTextBlockEditor'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
