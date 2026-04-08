@@ -25,7 +25,8 @@ export function renderEmailBlockToHtml(block: any): string {
           [Image]
         </div>`
       }
-      return `<img src="${escapeHtml(content.url)}" alt="${escapeHtml(content.alt || '')}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto; margin-bottom: 16px;" />`
+      // Usa a URL diretamente (Gmail geralmente carrega URLs públicas)
+      return `<img src="${escapeHtml(content.url)}" alt="${escapeHtml(content.alt || '')}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto; margin-bottom: 16px; border: none;" />`
 
     case 'button':
       return `<div style="text-align: ${content.align || 'center'}; margin-bottom: 16px;">
