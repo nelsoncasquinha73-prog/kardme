@@ -87,7 +87,7 @@ function renderEmailBlock(block: any) {
             wordBreak: 'break-word',
           }}
         >
-          {content.text}
+          {content.html ? <div dangerouslySetInnerHTML={{ __html: content.html }} /> : content.text}
         </div>
       )
 
