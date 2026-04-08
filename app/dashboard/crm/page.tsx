@@ -200,6 +200,9 @@ Melhores cumprimentos,
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false)
+  const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '' })
+  const [savingNewLead, setSavingNewLead] = useState(false)
   const [importFileName, setImportFileName] = useState('')
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
@@ -703,6 +706,44 @@ Melhores cumprimentos,
     addToast(`Step atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`, 'success')
     setBulkStep('')
     setSelectedLeadIds(new Set())
+  }
+
+  const handleAddLead = async () => {
+    if (!newLead.email.trim()) {
+      addToast('Email é obrigatório', 'error')
+      return
+    }
+    if (selectedCardId === 'all') {
+      addToast('Seleciona um cartão primeiro', 'error')
+      return
+    }
+    setSavingNewLead(true)
+    try {
+      const { data, error } = await supabase.from('leads').insert({
+        name: newLead.name.trim() || null,
+        email: newLead.email.trim().toLowerCase(),
+        phone: newLead.phone.trim() || null,
+        zone: newLead.zone.trim() || null,
+        country: newLead.country.trim() || null,
+        notes: newLead.notes.trim() || null,
+        card_id: selectedCardId,
+        user_id: userId,
+        lead_source: 'Manual',
+        step: 'Novo',
+        contacted: false,
+        marketing_opt_in: false,
+        consent_given: false,
+        created_at: new Date().toISOString(),
+      }).select().single()
+      if (error) throw error
+      setLeads(prev => [data, ...prev])
+      setNewLead({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '' })
+      setShowAddLeadModal(false)
+      addToast('Lead adicionada com sucesso!', 'success')
+    } catch (e: any) {
+      addToast(e.message || 'Erro ao adicionar lead', 'error')
+    }
+    setSavingNewLead(false)
   }
 
   const updateNotes = async (id: string, notes: string) => {
@@ -1816,6 +1857,33 @@ Melhores cumprimentos,
           <option value="zone:asc">Localidade/Zona (A–Z)</option>
           <option value="zone:desc">Localidade/Zona (Z–A)</option>
         </select>
+
+        <button
+          onClick={() => {
+            if (selectedCardId === 'all') {
+              addToast('Seleciona um cartão primeiro', 'error')
+              return
+            }
+            setShowAddLeadModal(true)
+          }}
+          style={{
+            padding: '8px 14px',
+            borderRadius: 10,
+            background: '#6366f1',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: 'pointer',
+            fontSize: 13,
+            height: 38,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+          }}
+        >
+          + Adicionar Lead
+        </button>
 
         <button
           onClick={handleExportCSV}
@@ -3101,6 +3169,53 @@ Melhores cumprimentos,
                 style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13, color: '#111827' }}
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddLeadModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010 }} onClick={() => setShowAddLeadModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 480, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', color: '#111827' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>+ Adicionar Lead</h3>
+              <button onClick={() => setShowAddLeadModal(false)} style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Nome</label>
+                  <input type="text" value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Email *</label>
+                  <input type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const }} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Telefone</label>
+                  <input type="text" value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} placeholder="+351 912 345 678" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Zona</label>
+                  <input type="text" value={newLead.zone} onChange={e => setNewLead(p => ({ ...p, zone: e.target.value }))} placeholder="Lisboa, Porto..." style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>País</label>
+                <input type="text" value={newLead.country} onChange={e => setNewLead(p => ({ ...p, country: e.target.value }))} placeholder="Portugal" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Notas</label>
+                <textarea value={newLead.notes} onChange={e => setNewLead(p => ({ ...p, notes: e.target.value }))} placeholder="Notas sobre esta lead..." rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, resize: 'vertical' as const }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowAddLeadModal(false)} style={{ flex: 1, padding: '12px', borderRadius: 10, background: '#f3f4f6', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Cancelar</button>
+              <button onClick={handleAddLead} disabled={savingNewLead} style={{ flex: 2, padding: '12px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: savingNewLead ? 'not-allowed' : 'pointer', fontSize: 14, opacity: savingNewLead ? 0.7 : 1 }}>
+                {savingNewLead ? 'A guardar...' : '+ Adicionar Lead'}
               </button>
             </div>
           </div>
