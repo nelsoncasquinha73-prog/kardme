@@ -829,7 +829,7 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
         const videoLink = content.previewId ? `https://www.kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
         return content.thumbnail ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0;"><a href="${videoLink}" target="_blank" style="display: inline-block; text-decoration: none;"><img src="${content.thumbnail}" alt="Video" style="display: block; width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; margin: 0 auto;" /></a></div>` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
 
-      case 'table':
+      case 'table': {
         const tableHeaders = (content.headers || []).map((h: string) =>
           `<th style="padding: 10px 14px; background: ${content.headerBg || '#1e293b'}; color: ${content.headerColor || '#ffffff'}; text-align: left; font-weight: 700; border: 1px solid ${content.borderColor || '#e5e7eb'};">${h}</th>`
         ).join('')
@@ -839,6 +839,7 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
           ).join('')}</tr>`
         ).join('')
         return `<div style="overflow-x: auto; padding-top: ${content.paddingTop || 0}px; padding-bottom: ${content.paddingBottom || 0}px;"><table style="width: 100%; border-collapse: collapse; font-size: ${content.fontSize || 14}px;"><thead><tr>${tableHeaders}</tr></thead><tbody>${tableRows}</tbody></table></div>`
+      }
 
       default:
         return ''
