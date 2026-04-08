@@ -3,6 +3,7 @@ import ImageUploadInput from './ImageUploadInput'
 import VideoUploadInput from './VideoUploadInput'
 
 import { generateEmailHtmlBody } from './emailBlockRenderer'
+import { parseVideoLink, getVimeoThumbnail } from '@/lib/crm/videoLinkParser'
 import EmailTextBlockEditor from './EmailTextBlockEditor'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -1232,6 +1233,39 @@ function renderBlockInspector(
     case 'video':
       return (
         <>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              URL do Vídeo (YouTube, Vimeo ou Upload)
+            </label>
+            <input
+              type="text"
+              placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
+              onBlur={async (e) => {
+                const url = e.currentTarget.value.trim()
+                if (!url) return
+                
+                const info = parseVideoLink(url)
+                if (info.type === 'youtube') {
+                  onUpdate({ videoUrl: url, thumbnail: info.thumbnailUrl })
+                } else if (info.type === 'vimeo') {
+                  const thumb = await getVimeoThumbnail(info.videoId || '')
+                  onUpdate({ videoUrl: url, thumbnail: thumb || undefined })
+                } else if (info.type === 'upload') {
+                  onUpdate({ videoUrl: url })
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+              }}
+            />
+          </div>
+
           <VideoUploadInput
             userId={userId}
             currentUrl={content.videoUrl}
