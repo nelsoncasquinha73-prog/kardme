@@ -14,8 +14,9 @@ export function renderEmailBlockToHtml(block: any): string {
 
   switch (type) {
     case 'text':
-      return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; margin-bottom: 16px; white-space: pre-wrap; word-break: break-word;">
-        ${escapeHtml(content.text).replace(/\n/g, '<br>')}
+      const textContent = content.html || escapeHtml(content.text || '').replace(/\n/g, '<br>')
+      return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; margin-bottom: 16px; word-break: break-word;">
+        ${textContent}
       </div>`
 
     case 'image':
