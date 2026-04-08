@@ -11,6 +11,26 @@ import { FiBold, FiItalic, FiUnderline, FiLink2, FiAlignLeft, FiAlignCenter, FiA
 import { useState } from 'react'
 import styles from './EmailTextBlockEditor.module.css'
 
+const FontSize = TextStyle.extend({
+  addAttributes() {
+    return {
+      fontSize: {
+        default: null,
+        parseHTML: element => element.style.fontSize?.replace(/['"]/g, ''),
+        renderHTML: attributes => {
+          if (!attributes.fontSize) {
+            return {}
+          }
+
+          return {
+            style: `font-size: ${attributes.fontSize}`,
+          }
+        },
+      },
+    }
+  },
+})
+
 interface EmailTextBlockEditorProps {
   content: string
   onChange: (html: string) => void
@@ -29,7 +49,7 @@ export default function EmailTextBlockEditor({ content, onChange, placeholder }:
         code: false,
         horizontalRule: false,
       }),
-      TextStyle,
+      FontSize,
       Color.configure({ types: ['textStyle'] }),
       Underline,
       Link.configure({ openOnClick: false }),
