@@ -188,6 +188,7 @@ export async function POST(req: NextRequest) {
             lead_id: leadId,
             title: `📧 Email enviado: ${subject}`,
             email_subject: subject,
+            email_body: personalizedHtmlBody,
             email_recipient: recipientEmail,
             due_at: new Date().toISOString(),
             send_status: 'sent',
