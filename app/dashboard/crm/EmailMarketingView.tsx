@@ -193,7 +193,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                           </div>
                           <div style={{ fontSize: 12, color: '#6b7280', display: 'flex', gap: 12 }}>
                             {isSent && sentDate && <span>📅 {sentDate}</span>}
-                            {isSent && bc.total_recipients > 0 && <span>👥 {bc.total_recipients} destinatários</span>}
+                            {isSent && (bc.total_recipients ?? 0) > 0 && <span>👥 {bc.total_recipients} destinatários</span>}
                             {bc.title && bc.title !== bc.subject && <span style={{ opacity: 0.7 }}>{bc.title}</span>}
                           </div>
                         </div>
