@@ -713,10 +713,7 @@ Melhores cumprimentos,
       addToast('Email é obrigatório', 'error')
       return
     }
-    if (selectedCardId === 'all') {
-      addToast('Seleciona um cartão primeiro', 'error')
-      return
-    }
+
     setSavingNewLead(true)
     try {
       const { data, error } = await supabase.from('leads').insert({
@@ -726,7 +723,7 @@ Melhores cumprimentos,
         zone: newLead.zone.trim() || null,
         country: newLead.country.trim() || null,
         notes: newLead.notes.trim() || null,
-        card_id: selectedCardId,
+        card_id: selectedCardId === 'all' ? null : selectedCardId,
         user_id: userId,
         lead_source: 'Manual',
         step: 'Novo',
@@ -1859,13 +1856,7 @@ Melhores cumprimentos,
         </select>
 
         <button
-          onClick={() => {
-            if (selectedCardId === 'all') {
-              addToast('Seleciona um cartão primeiro', 'error')
-              return
-            }
-            setShowAddLeadModal(true)
-          }}
+          onClick={() => setShowAddLeadModal(true)}
           style={{
             padding: '8px 14px',
             borderRadius: 10,
