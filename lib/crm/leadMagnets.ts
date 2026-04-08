@@ -95,3 +95,12 @@ export const DEFAULT_FORM_FIELDS: FormField[] = [
   { id: 'email', label: 'Email', type: 'email', required: true },
   { id: 'phone', label: 'Telefone', type: 'tel', required: false },
 ]
+
+// Novo tipo para suportar formulários
+export type LeadMagnetMode = 'file' | 'form'
+
+// Estender o tipo LeadMagnet com os novos campos
+export type LeadMagnetWithForm = LeadMagnet & {
+  mode?: LeadMagnetMode
+  form_id?: string
+}

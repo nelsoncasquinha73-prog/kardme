@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient'
+import { generateThumbnailWithPlayButton } from '@/lib/crm/videoThumbnailGenerator'
 
 const MAX_VIDEO_SIZE_MB = 50
 const ALLOWED_EXTENSIONS = ['mp4', 'webm', 'mov', 'm4v', 'ogg']
@@ -30,5 +31,32 @@ export async function uploadCardVideo(params: { cardId: string; file: File }) {
   if (uploadError) throw uploadError
 
   const { data } = supabase.storage.from('card-assets').getPublicUrl(path)
-  return { path, publicUrl: data.publicUrl }
+  const publicUrl = data.publicUrl
+
+  // Gerar thumbnail automaticamente
+  let thumbnailUrl: string | null = null
+  try {
+    const thumbnailFile = await generateThumbnailWithPlayButton(file, '#10b981')
+    if (thumbnailFile) {
+      const thumbFileName = `${crypto.randomUUID()}.jpg`
+      const thumbPath = `cards/${cardId}/thumbnails/${thumbFileName}`
+
+      const { error: thumbUploadError } = await supabase.storage
+        .from('card-assets')
+        .upload(thumbPath, thumbnailFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: 'image/jpeg',
+        })
+
+      if (!thumbUploadError) {
+        const { data: thumbData } = supabase.storage.from('card-assets').getPublicUrl(thumbPath)
+        thumbnailUrl = thumbData.publicUrl
+      }
+    }
+  } catch (error) {
+    console.error('[VIDEO] Erro ao gerar thumbnail:', error)
+  }
+
+  return { path, publicUrl, thumbnailUrl }
 }
