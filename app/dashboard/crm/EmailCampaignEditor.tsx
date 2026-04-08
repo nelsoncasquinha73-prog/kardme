@@ -1371,6 +1371,7 @@ function renderBlockInspector(
               type="text"
               value={(content.headers || []).join(', ')}
               onChange={(e) => onUpdate({ headers: e.target.value.split(',').map((h: string) => h.trim()) })}
+              onKeyDown={(e) => e.stopPropagation()}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -1390,6 +1391,7 @@ function renderBlockInspector(
             <textarea
               value={(content.rows || []).map((r: string[]) => r.join(' | ')).join('\n')}
               onChange={(e) => onUpdate({ rows: e.target.value.split('\n').map((r: string) => r.split('|').map((c: string) => c.trim())) })}
+              onKeyDown={(e) => e.stopPropagation()}
               rows={6}
               style={{
                 width: '100%',
