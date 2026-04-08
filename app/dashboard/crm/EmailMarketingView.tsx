@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
-import { getBroadcasts, deleteBroadcast, type EmailBroadcast } from '@/lib/crm/emailMarketing'
+import { getBroadcasts, deleteBroadcast, getBroadcastRecipients, type EmailBroadcast } from '@/lib/crm/emailMarketing'
 import { fetchLeadTypes, type LeadType } from '@/lib/crm/leadTypes'
 import { FiTrash2 } from 'react-icons/fi'
 import EmailCampaignEditor from './EmailCampaignEditor'
@@ -25,6 +25,10 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
   }
   const [audiences, setAudiences] = useState<LeadType[]>([])
   const [broadcasts, setBroadcasts] = useState<EmailBroadcast[]>([])
+  const [showRecipientsModal, setShowRecipientsModal] = useState(false)
+  const [recipientsModalBc, setRecipientsModalBc] = useState<EmailBroadcast | null>(null)
+  const [recipients, setRecipients] = useState<any[]>([])
+  const [loadingRecipients, setLoadingRecipients] = useState(false)
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(preSelectedLeadId ? new Set([preSelectedLeadId]) : new Set())
@@ -164,6 +168,57 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
         </div>
       )}
 
+      {/* Modal Destinatários */}
+      {showRecipientsModal && recipientsModalBc && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }} onClick={() => setShowRecipientsModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, maxWidth: 520, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#111827' }}>👥 Destinatários</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7280' }}>{recipientsModalBc.subject}</p>
+              </div>
+              <button onClick={() => setShowRecipientsModal(false)} style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {loadingRecipients ? (
+                <p style={{ textAlign: 'center', padding: 24, color: '#6b7280' }}>A carregar...</p>
+              ) : recipients.length === 0 ? (
+                <p style={{ textAlign: 'center', padding: 24, color: '#6b7280' }}>Sem destinatários registados.</p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: '#f9fafb' }}>
+                      <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', borderBottom: '1px solid #e5e7eb' }}>Email</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', borderBottom: '1px solid #e5e7eb' }}>Estado</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', borderBottom: '1px solid #e5e7eb' }}>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recipients.map((r, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                        <td style={{ padding: '10px 12px', color: '#111827' }}>{r.email}</td>
+                        <td style={{ padding: '10px 12px' }}>
+                          <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: r.status === 'sent' ? '#d1fae5' : '#fee2e2', color: r.status === 'sent' ? '#065f46' : '#991b1b' }}>
+                            {r.status === 'sent' ? '✅ Enviado' : r.status === 'failed' ? '❌ Falhou' : r.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 12px', color: '#6b7280', fontSize: 12 }}>
+                          {r.created_at ? new Date(r.created_at).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#6b7280' }}>{recipients.length} destinatário(s)</span>
+              <button onClick={() => setShowRecipientsModal(false)} style={{ padding: '8px 20px', background: '#111827', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'broadcasts' && (
         <div>
           {!editorOpen ? (
@@ -198,6 +253,23 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                          <button
+                            onClick={async () => {
+                              setRecipientsModalBc(bc)
+                              setShowRecipientsModal(true)
+                              setLoadingRecipients(true)
+                              try {
+                                const data = await getBroadcastRecipients(bc.id)
+                                setRecipients(data)
+                              } catch (e) {
+                                setRecipients([])
+                              }
+                              setLoadingRecipients(false)
+                            }}
+                            style={{ padding: '8px 12px', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                          >
+                            👥 Destinatários
+                          </button>
                           <button onClick={() => { setEditingBroadcastId(bc.id); setEditorOpen(true) }} style={{ padding: '8px 12px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Editar</button>
                           <button onClick={() => handleDeleteBroadcast(bc.id)} style={{ padding: '8px 12px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Apagar</button>
                         </div>
