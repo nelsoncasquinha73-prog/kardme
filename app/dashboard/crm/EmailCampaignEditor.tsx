@@ -1087,9 +1087,10 @@ function renderBlockInspector(
   switch (type) {
     case 'text':
       return (
-        <TextBlockEditor
-          content={content}
-          onUpdate={onUpdate}
+        <EmailTextBlockEditor
+          content={content.html || ''}
+          onChange={(html) => onUpdate({ html })}
+          placeholder="Escreve o teu texto..."
         />
       )
 
