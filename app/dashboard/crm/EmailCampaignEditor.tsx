@@ -1360,6 +1360,90 @@ function renderBlockInspector(
         </div>
       )
 
+    case 'table':
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Cabeçalhos (separados por vírgula)
+            </label>
+            <input
+              type="text"
+              value={(content.headers || []).join(', ')}
+              onChange={(e) => onUpdate({ headers: e.target.value.split(',').map((h: string) => h.trim()) })}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+                boxSizing: 'border-box' as const,
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Linhas (uma por linha, colunas separadas por |)
+            </label>
+            <textarea
+              value={(content.rows || []).map((r: string[]) => r.join(' | ')).join('\n')}
+              onChange={(e) => onUpdate({ rows: e.target.value.split('\n').map((r: string) => r.split('|').map((c: string) => c.trim())) })}
+              rows={6}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
+                fontSize: 12,
+                boxSizing: 'border-box' as const,
+                resize: 'vertical' as const,
+              }}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+                Cor cabeçalho
+              </label>
+              <input
+                type="color"
+                value={content.headerBg || '#1e293b'}
+                onChange={(e) => onUpdate({ headerBg: e.target.value })}
+                style={{ width: '100%', height: 36, borderRadius: 6, border: 'none', cursor: 'pointer' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+                Texto cabeçalho
+              </label>
+              <input
+                type="color"
+                value={content.headerColor || '#ffffff'}
+                onChange={(e) => onUpdate({ headerColor: e.target.value })}
+                style={{ width: '100%', height: 36, borderRadius: 6, border: 'none', cursor: 'pointer' }}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
+              Tamanho do texto: {content.fontSize || 14}px
+            </label>
+            <input
+              type="range"
+              min="10"
+              max="20"
+              value={content.fontSize || 14}
+              onChange={(e) => onUpdate({ fontSize: parseInt(e.target.value) })}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+      )
+
     default:
       return null
   }
