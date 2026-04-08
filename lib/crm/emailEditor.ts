@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type EmailBlockType = 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'video'
+export type EmailBlockType = 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'video' | 'table'
 
 export interface EmailBlockTemplate {
   id: string
@@ -147,6 +147,25 @@ export const DEFAULT_EMAIL_BLOCKS: Array<{
       thickness: 1,
       marginTop: 12,
       marginBottom: 12,
+    },
+  },
+  {
+    name: 'Tabela',
+    block_type: 'table',
+    content: {
+      headers: ['Coluna 1', 'Coluna 2', 'Coluna 3'],
+      rows: [
+        ['Linha 1', 'Valor', ''],
+        ['Linha 2', 'Valor', ''],
+      ],
+      headerBg: '#1e293b',
+      headerColor: '#ffffff',
+      rowBg: '#ffffff',
+      rowAltBg: '#f9fafb',
+      borderColor: '#e5e7eb',
+      fontSize: 14,
+      paddingTop: 0,
+      paddingBottom: 0,
     },
   },
   {

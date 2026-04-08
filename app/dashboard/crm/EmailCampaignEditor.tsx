@@ -829,6 +829,17 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
         const videoLink = content.previewId ? `https://www.kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
         return content.thumbnail ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0;"><a href="${videoLink}" target="_blank" style="display: inline-block; text-decoration: none;"><img src="${content.thumbnail}" alt="Video" style="display: block; width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; margin: 0 auto;" /></a></div>` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
 
+      case 'table':
+        const tableHeaders = (content.headers || []).map((h: string) =>
+          `<th style="padding: 10px 14px; background: ${content.headerBg || '#1e293b'}; color: ${content.headerColor || '#ffffff'}; text-align: left; font-weight: 700; border: 1px solid ${content.borderColor || '#e5e7eb'};">${h}</th>`
+        ).join('')
+        const tableRows = (content.rows || []).map((row: string[], ri: number) =>
+          `<tr>${row.map((cell: string) =>
+            `<td style="padding: 10px 14px; background: ${ri % 2 === 0 ? (content.rowBg || '#ffffff') : (content.rowAltBg || '#f9fafb')}; border: 1px solid ${content.borderColor || '#e5e7eb'}; color: #111827;">${cell}</td>`
+          ).join('')}</tr>`
+        ).join('')
+        return `<div style="overflow-x: auto; padding-top: ${content.paddingTop || 0}px; padding-bottom: ${content.paddingBottom || 0}px;"><table style="width: 100%; border-collapse: collapse; font-size: ${content.fontSize || 14}px;"><thead><tr>${tableHeaders}</tr></thead><tbody>${tableRows}</tbody></table></div>`
+
       default:
         return ''
     }
@@ -1033,6 +1044,30 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
 
     case 'spacer':
       return <div style={{ height: content.height || 24 }} />
+
+    case 'table':
+      return (
+        <div style={{ overflowX: 'auto', paddingTop: content.paddingTop || 0, paddingBottom: content.paddingBottom || 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: content.fontSize || 14 }}>
+            <thead>
+              <tr>
+                {(content.headers || []).map((h: string, i: number) => (
+                  <th key={i} style={{ padding: '10px 14px', background: content.headerBg || '#1e293b', color: content.headerColor || '#fff', textAlign: 'left', fontWeight: 700, border: `1px solid ${content.borderColor || '#e5e7eb'}` }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(content.rows || []).map((row: string[], ri: number) => (
+                <tr key={ri}>
+                  {row.map((cell: string, ci: number) => (
+                    <td key={ci} style={{ padding: '10px 14px', background: ri % 2 === 0 ? (content.rowBg || '#fff') : (content.rowAltBg || '#f9fafb'), border: `1px solid ${content.borderColor || '#e5e7eb'}`, color: '#111827' }}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
 
     default:
       return <div>Bloco desconhecido</div>
