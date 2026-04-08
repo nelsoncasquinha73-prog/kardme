@@ -102,18 +102,29 @@ export default function EmailTextBlockEditor({ content, onChange, placeholder }:
             🎨
           </button>
           {showColorPicker && (
-            <div className={styles.colorGrid}>
-              {colors.map(color => (
-                <button
-                  key={color}
-                  onClick={() => {
-                    editor.chain().focus().setColor(color).run()
-                    setShowColorPicker(false)
-                  }}
-                  style={{ backgroundColor: color, width: 24, height: 24, borderRadius: 4, border: 'none', cursor: 'pointer' }}
-                  title={color}
-                />
-              ))}
+            <div className={styles.colorPickerContainer}>
+              <div className={styles.colorGrid}>
+                {colors.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => {
+                      editor.chain().focus().setColor(color).run()
+                      setShowColorPicker(false)
+                    }}
+                    style={{ backgroundColor: color, width: 24, height: 24, borderRadius: 4, border: 'none', cursor: 'pointer' }}
+                    title={color}
+                  />
+                ))}
+              </div>
+              <input
+                type="color"
+                onChange={(e) => {
+                  editor.chain().focus().setColor(e.target.value).run()
+                  setShowColorPicker(false)
+                }}
+                style={{ width: '100%', height: 32, border: '1px solid #e5e7eb', borderRadius: 4, cursor: 'pointer', marginTop: 8 }}
+                title="Custom color"
+              />
             </div>
           )}
         </div>

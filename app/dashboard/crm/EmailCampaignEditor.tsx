@@ -812,7 +812,7 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
 
     switch (type) {
       case 'text':
-        return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${content.text || ''}</div>`
+        return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${content.html || content.text || ''}</div>`
 
       case 'image':
         return content.url ? `<img src="${content.url}" alt="${content.alt || ''}" style="width: ${content.width || '100%'}; border-radius: ${content.borderRadius || 0}px; display: block; max-width: 100%; height: auto;" />` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: ${content.borderRadius || 0}px;"></div>`
@@ -906,7 +906,7 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
             wordBreak: 'break-word',
           }}
         >
-          {content.text}
+          {content.html ? <div dangerouslySetInnerHTML={{ __html: content.html }} /> : content.text}
         </div>
       )
 
@@ -1156,7 +1156,7 @@ function renderBlockInspector(
             </label>
             <input
               type="text"
-              value={content.text || ''}
+              disabled value="Usa o editor acima para editar o texto"
               onChange={(e) => onUpdate({ text: e.target.value })}
               style={{
                 width: '100%',
