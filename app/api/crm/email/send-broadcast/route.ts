@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
 
         // Registar atividade no CRM (scheduled_task como histórico)
         if (leadId) {
-          await supabaseAdmin.from('scheduled_tasks').insert({
+          const { error: taskError } = await supabaseAdmin.from('scheduled_tasks').insert({
             user_id: userId,
             lead_id: leadId,
             title: `📧 Email enviado: ${subject}`,
@@ -195,6 +195,13 @@ export async function POST(req: NextRequest) {
             updated_at: new Date().toISOString(),
             attachments: [],
           })
+          if (taskError) {
+            console.error(`[TASK INSERT FAILED] ${recipientEmail}: ${taskError.message}`, taskError)
+          } else {
+            console.log(`[TASK INSERTED] ${recipientEmail} leadId: ${leadId}`)
+          }
+        } else {
+          console.log(`[TASK SKIP] ${recipientEmail} - sem leadId`)
         }
 
         sent++
