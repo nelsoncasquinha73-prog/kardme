@@ -1048,7 +1048,6 @@ function renderEmailBlock(block: EmailBlock, userId: string) {
       return <div style={{ height: content.height || 24 }} />
 
     case 'table':
-      console.log('[renderEmailBlock] table content:', content)
       return (
         <div style={{ overflowX: 'auto', paddingTop: content.paddingTop || 0, paddingBottom: content.paddingBottom || 0 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: content.fontSize || 14 }}>
