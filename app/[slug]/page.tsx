@@ -11,8 +11,8 @@ import { bgToCssString } from '@/lib/bgToCss'
 import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
 import TrackingWrapper from '@/components/TrackingWrapper'
-import dynamic from 'next/dynamic'
-const FloatingActions = dynamic(() => import('@/components/public/FloatingActions'), { ssr: false })
+import nextDynamic from 'next/dynamic'
+const FloatingActions = nextDynamic(() => import('@/components/public/FloatingActions'), { ssr: false })
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
