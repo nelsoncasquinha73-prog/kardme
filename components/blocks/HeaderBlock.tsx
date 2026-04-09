@@ -1,7 +1,7 @@
 'use client'
 
-import React
-import { imgPresets } from '@/lib/imageUrl' from 'react'
+import React from 'react'
+import { imgPresets } from '@/lib/imageUrl'
 import Image from 'next/image'
 import { migrateCardBg, isV1, type CardBg, type CardBgV1 } from '@/lib/cardBg'
 

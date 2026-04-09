@@ -1,7 +1,7 @@
 'use client'
 
-import React
-import { imgPresets } from '@/lib/imageUrl', { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { imgPresets } from '@/lib/imageUrl'
 import { createPortal } from 'react-dom'
 import useEmblaCarousel from 'embla-carousel-react'
 import AutoplayImport from 'embla-carousel-autoplay'
