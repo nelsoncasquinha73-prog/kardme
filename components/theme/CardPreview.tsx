@@ -3,11 +3,13 @@
 import React from 'react'
 import ContactBlock from '@/components/blocks/ContactBlock'
 import DecorationBlock from '@/components/blocks/DecorationBlock'
-import ServicesBlock from '@/components/blocks/ServicesBlock'
-import LeadFormBlock from '@/components/blocks/LeadFormBlock'
-import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
 import SocialBlock from '@/components/blocks/SocialBlock'
+import dynamic from 'next/dynamic'
+
+const ServicesBlock = dynamic(() => import('@/components/blocks/ServicesBlock'), { ssr: false })
+const LeadFormBlock = dynamic(() => import('@/components/blocks/LeadFormBlock'), { ssr: false })
+const BusinessHoursBlock = dynamic(() => import('@/components/blocks/BusinessHoursBlock'), { ssr: false })
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
 import { useLanguage } from '@/components/language/LanguageProvider'
