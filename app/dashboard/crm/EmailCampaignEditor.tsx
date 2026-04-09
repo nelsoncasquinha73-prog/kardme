@@ -425,6 +425,36 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                   fontSize: 12,
                 }}
               />
+              {/* Variáveis disponíveis */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginRight: 4, lineHeight: '22px' }}>Variáveis:</span>
+                {[
+                  { label: '👤 Nome', value: '{nome}' },
+                  { label: '📧 Email', value: '{email}' },
+                  { label: '📱 Telefone', value: '{telefone}' },
+                  { label: '🏢 Empresa', value: '{empresa}' },
+                  { label: '📅 Data', value: '{data}' },
+                ].map((v) => (
+                  <button
+                    key={v.value}
+                    type="button"
+                    onClick={() => setSubject((prev) => prev + v.value)}
+                    title={`Inserir ${v.value} no assunto`}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: 20,
+                      border: '1px solid rgba(139,92,246,0.4)',
+                      background: 'rgba(139,92,246,0.1)',
+                      color: '#a78bfa',
+                      fontSize: 11,
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
