@@ -290,8 +290,6 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                 loadData()
               }}
               onSave={() => {
-                setEditorOpen(false)
-                setEditingBroadcastId(undefined)
                 loadData()
               }}
             />
