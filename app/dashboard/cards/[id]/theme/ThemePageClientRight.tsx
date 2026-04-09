@@ -130,10 +130,6 @@ export default function ThemePageClientRight({
   }
 
   const availableSubcategories = businessCategory ? (subcategoryMap[businessCategory] || []) : []
-  setBusinessCategory,
-  businessCategorySaving,
-  saveBusinessCategory,
-}: Props) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const { t } = useLanguage()
   const [templateSaving, setTemplateSaving] = useState(false)
