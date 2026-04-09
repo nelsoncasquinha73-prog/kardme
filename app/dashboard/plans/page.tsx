@@ -9,15 +9,12 @@ export default function PlansPage() {
   const { t } = useLanguage()
   const [loading, setLoading] = useState<'monthly' | 'yearly' | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [includeSetupMonthly, setIncludeSetupMonthly] = useState(false)
-  const [includeSetupYearly, setIncludeSetupYearly] = useState(false)
   const [includeCRMProMonthly, setIncludeCRMProMonthly] = useState(false)
   const [includeCRMProYearly, setIncludeCRMProYearly] = useState(false)
   const [showCRMProModal, setShowCRMProModal] = useState(false)
 
-  const SETUP_FEE = 5
 
-  const startCheckout = async (billing: 'monthly' | 'yearly', includeSetup: boolean, upsell_cycle?: string | null) => {
+  const startCheckout = async (billing: 'monthly' | 'yearly', upsell_cycle?: string | null) => {
     setLoading(billing)
     setError(null)
 
@@ -34,11 +31,6 @@ export default function PlansPage() {
         billing,
         upsell_crm_pro: upsell_cycle ? true : false,
         upsell_cycle: upsell_cycle || null,
-      }
-
-      if (includeSetup) {
-        payload.setupFee = SETUP_FEE
-        payload.setupLabel = t('plans.setup_label') || 'Serviço de criação do cartão'
       }
 
       const res = await fetch('/api/stripe/checkout-pro', {
@@ -121,32 +113,13 @@ export default function PlansPage() {
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
-                €{includeSetupMonthly ? '11,99' : '6,99'}
+                €6,99
               </span>
-              {!includeSetupMonthly && (
-                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
-                  /{t('plans.month') || 'mês'}
-                </span>
-              )}
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                /{t('plans.month') || 'mês'}
+              </span>
             </div>
-            {includeSetupMonthly && (
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-                {t('plans.then') || 'depois'} €6,99/{t('plans.month') || 'mês'}
-              </div>
-            )}
           </div>
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={includeSetupMonthly}
-              onChange={(e) => setIncludeSetupMonthly(e.target.checked)}
-              style={{ width: 18, height: 18, accentColor: '#3b82f6' }}
-            />
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
-              {t('plans.include_setup') || 'Incluir criação do cartão'} (+€{SETUP_FEE})
-            </span>
-          </label>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
             <input
@@ -161,7 +134,7 @@ export default function PlansPage() {
           </label>
 
           <button
-            onClick={() => startCheckout('monthly', includeSetupMonthly, includeCRMProMonthly ? 'monthly' : null)}
+            onClick={() => startCheckout('monthly', includeCRMProMonthly ? 'monthly' : null)}
             disabled={loading === 'monthly'}
             style={{
               width: '100%',
@@ -193,35 +166,16 @@ export default function PlansPage() {
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
-                €{includeSetupYearly ? '74' : '69'}
+                €69
               </span>
-              {!includeSetupYearly && (
-                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
-                  /{t('plans.year') || 'ano'}
-                </span>
-              )}
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                /{t('plans.year') || 'ano'}
+              </span>
             </div>
             <div style={{ fontSize: 12, color: '#22c55e', fontWeight: 600, marginTop: 4 }}>
               {t('plans.save_2_months') || 'Poupa 2 meses! 🎉'}
             </div>
-            {includeSetupYearly && (
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-                {t('plans.then') || 'depois'} €69/{t('plans.year') || 'ano'}
-              </div>
-            )}
           </div>
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={includeSetupYearly}
-              onChange={(e) => setIncludeSetupYearly(e.target.checked)}
-              style={{ width: 18, height: 18, accentColor: '#3b82f6' }}
-            />
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
-              {t('plans.include_setup') || 'Incluir criação do cartão'} (+€{SETUP_FEE})
-            </span>
-          </label>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
             <input
@@ -236,7 +190,7 @@ export default function PlansPage() {
           </label>
 
           <button
-            onClick={() => startCheckout('yearly', includeSetupYearly, includeCRMProYearly ? 'yearly' : null)}
+            onClick={() => startCheckout('yearly', includeCRMProYearly ? 'yearly' : null)}
             disabled={loading === 'yearly'}
             style={{
               width: '100%',
