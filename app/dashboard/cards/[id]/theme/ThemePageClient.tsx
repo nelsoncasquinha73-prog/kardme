@@ -373,14 +373,14 @@ export default function ThemePageClient({ card, blocks }: Props) {
           slugError={slugError}
           saveSlug={saveSlug}
           floatingActions={localTheme?.floatingActions}
-          onChangeFloatingActions={(settings) => {
+          onChangeFloatingActions={(settings: any) => {
             const nextTheme = structuredClone(localTheme || {})
             nextTheme.floatingActions = settings
             setLocalTheme(nextTheme)
             setSaveStatus("dirty")
           }}
           themeDecorations={themeDecorations}
-          onChangeThemeDecorations={(decorations) => {
+          onChangeThemeDecorations={(decorations: any) => {
             setThemeDecorations(decorations)
             setSaveStatus('dirty')
           }}
