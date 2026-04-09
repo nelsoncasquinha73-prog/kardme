@@ -2,95 +2,118 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { type, lead, context, history, prompt, blocks } = await req.json()
+    const { type, lead, context, history, prompt, blocks, businessContext } = await req.json()
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'API key não configurada' }, { status: 500 })
     }
 
-    let systemPrompt = 'Você é um assistente de vendas e CRM. Gera mensagens profissionais, amigáveis e eficazes. IMPORTANTE: Responde SEMPRE em Português Europeu (Portugal), não Português Brasileiro. Usa vocabulário e expressões de Portugal.'
+    let systemPrompt = ''
     let userPrompt = ''
 
     if (type === 'email_campaign') {
-      systemPrompt = `Você é um assistente de email marketing e CRM especializado. Gera emails profissionais, persuasivos e eficazes.
+      const bizContext = businessContext
+        ? `\nCONTEXTO DO NEGÓCIO DO UTILIZADOR:\n${businessContext}\n`
+        : ''
 
-REGRAS:
-- Responde SEMPRE em Português Europeu (Portugal), não Brasileiro
-- Devolve SEMPRE a resposta em formato JSON válido
-- O JSON deve ter a estrutura: { "subject": "...", "blocks": [...] }
-- Cada bloco pode ser: { "type": "text", "content": { "html": "..." } } ou { "type": "button", "content": { "text": "...", "url": "https://...", "bgColor": "#3b82f6", "textColor": "#ffffff" } }
-- Usa HTML simples no campo html: <p>, <strong>, <em>, <br>, <ul>, <li>
-- Máximo 4-5 blocos
-- O email deve ser conciso, directo e orientado para acção
-- Inclui sempre um CTA (botão) no final
-- NÃO incluas saudações genéricas como "Espero que estejas bem"
-- Sê específico e relevante ao contexto`
+      systemPrompt = `És um copywriter sénior especialista em email marketing de conversão.
+${bizContext}
+REGRAS DE COPYWRITING:
+- Abre com uma dor real, dado surpreendente ou pergunta provocadora (nunca "Espero que estejas bem")
+- Frases curtas e directas — estilo Apple, não estilo corporativo
+- Máximo 1 ideia por parágrafo
+- Benefícios concretos, não features abstractas
+- Urgência real, não artificial
+- CTA único e claro no final
+- Tom: colega que partilha uma dica valiosa, não vendedor a pressionar
+- Usa {nome} para personalizar quando fizer sentido
+- Se o contexto do negócio for fornecido, usa os dados reais (preços, funcionalidades, sector) no email
+- Se NÃO houver contexto do negócio, gera um email genérico mas eficaz com base no pedido
 
-      let contextParts: string[] = []
+IDIOMA: Responde SEMPRE em Português Europeu (Portugal), nunca Brasileiro.
 
-      if (lead?.name) contextParts.push(`Nome do destinatário: ${lead.name}`)
-      if (lead?.email) contextParts.push(`Email: ${lead.email}`)
-      if (lead?.lead_type) contextParts.push(`Tipo de lead: ${lead.lead_type}`)
-      if (lead?.source) contextParts.push(`Origem: ${lead.source}`)
+FORMATO DE RESPOSTA — JSON válido obrigatório:
+{
+  "subject": "assunto curto e magnético (máx 60 chars, sem emojis)",
+  "blocks": [
+    { "type": "text", "content": { "html": "<p>...</p>" } },
+    { "type": "button", "content": { "text": "...", "url": "https://...", "bgColor": "#10b981", "textColor": "#ffffff" } }
+  ]
+}
+
+Usa HTML simples: <p>, <strong>, <em>, <br>, <ul>, <li>
+Máximo 5 blocos. Termina sempre com botão CTA.
+NÃO incluas markdown, NÃO incluas texto fora do JSON.`
+
+      const contextParts: string[] = []
+
+      if (lead?.name) contextParts.push(\`Nome do destinatário: \${lead.name}\`)
+      if (lead?.email) contextParts.push(\`Email: \${lead.email}\`)
+      if (lead?.lead_type) contextParts.push(\`Tipo de lead: \${lead.lead_type}\`)
+      if (lead?.source) contextParts.push(\`Origem: \${lead.source}\`)
 
       if (history && history.length > 0) {
         const historyText = history.slice(0, 10).map((h: any) => {
           const date = new Date(h.created_at).toLocaleDateString('pt-PT')
-          return `- [${date}] ${h.type || 'actividade'}: ${h.description || h.details || 'sem detalhes'}`
+          return \`- [\${date}] \${h.type || 'actividade'}: \${h.description || h.details || 'sem detalhes'}\`
         }).join('\n')
-        contextParts.push(`\nHistórico de interações:\n${historyText}`)
+        contextParts.push(\`\nHistórico de interações:\n\${historyText}\`)
       }
 
       if (blocks && blocks.length > 0) {
         const currentContent = blocks.map((b: any) => {
           if (b.type === 'text') return b.content?.html || ''
-          if (b.type === 'button') return `[Botão: ${b.content?.text}]`
+          if (b.type === 'button') return \`[Botão: \${b.content?.text}]\`
           return ''
         }).filter(Boolean).join('\n')
-        contextParts.push(`\nConteúdo actual do email:\n${currentContent}`)
+        contextParts.push(\`\nConteúdo actual do email:\n\${currentContent}\`)
       }
 
       if (prompt) {
-        userPrompt = `${contextParts.join('\n')}\n\nPedido do utilizador: ${prompt}\n\nGera o email em formato JSON.`
+        userPrompt = \`\${contextParts.length > 0 ? contextParts.join('\n') + '\n\n' : ''}Pedido: \${prompt}\n\nGera o email em JSON.\`
       } else if (lead?.name && history?.length > 0) {
-        userPrompt = `${contextParts.join('\n')}\n\nCom base no histórico de interações, gera um email de follow-up relevante e personalizado em formato JSON.`
+        userPrompt = \`\${contextParts.join('\n')}\n\nCom base no histórico, gera um email de follow-up personalizado e relevante em JSON.\`
       } else if (lead?.name) {
-        userPrompt = `${contextParts.join('\n')}\n\nGera um email de apresentação/primeiro contacto personalizado em formato JSON.`
+        userPrompt = \`\${contextParts.join('\n')}\n\nGera um email de primeiro contacto personalizado para esta lead em JSON.\`
       } else {
-        userPrompt = `${contextParts.join('\n')}\n\nGera um email de marketing genérico e eficaz em formato JSON.`
+        userPrompt = \`Gera um email de prospecção eficaz com base no contexto do negócio. Foco em conversão. JSON.\`
       }
 
     } else if (type === 'email') {
-      userPrompt = `Gera um email profissional e amigável para ${lead?.name || 'o destinatário'}.
-Contexto: ${context || 'Follow-up de lead'}
-Mensagem original do lead: "${lead?.message || 'N/A'}"
-Tipo de lead: ${lead?.lead_type_id || 'Geral'}
+      systemPrompt = \`És um copywriter profissional. Escreves emails directos, humanos e eficazes em Português Europeu (Portugal). Nunca usas linguagem corporativa ou Português Brasileiro.\`
 
-Responde APENAS com o corpo do email, sem assunto, sem saudações formais. Máximo 150 palavras. Em Português Europeu.`
+      userPrompt = \`Gera um email profissional para \${lead?.name || 'o destinatário'}.
+Contexto: \${context || 'Follow-up de lead'}
+Mensagem original: "\${lead?.message || 'N/A'}"
+Tipo de lead: \${lead?.lead_type_id || 'Geral'}
+
+Responde APENAS com o corpo do email. Máximo 150 palavras. Directo e humano.\`
 
     } else if (type === 'whatsapp') {
-      userPrompt = `Gera uma mensagem WhatsApp curta, amigável e direta para ${lead?.name || 'o destinatário'}.
-Contexto: ${context || 'Follow-up'}
-Mensagem original: "${lead?.message || 'N/A'}"
+      systemPrompt = \`És um copywriter profissional. Escreves mensagens WhatsApp curtas, naturais e eficazes em Português Europeu (Portugal).\`
 
-Responde APENAS com a mensagem, sem emojis desnecessários. Máximo 80 palavras. Em Português Europeu.`
+      userPrompt = \`Gera uma mensagem WhatsApp para \${lead?.name || 'o destinatário'}.
+Contexto: \${context || 'Follow-up'}
+Mensagem original: "\${lead?.message || 'N/A'}"
+
+Responde APENAS com a mensagem. Máximo 80 palavras. Natural e directo.\`
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': \`Bearer \${apiKey}\`,
       },
       body: JSON.stringify({
-        model: type === 'email_campaign' ? 'gpt-4o-mini' : 'gpt-3.5-turbo',
+        model: type === 'email_campaign' ? 'gpt-4o' : 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature: 0.7,
-        max_tokens: type === 'email_campaign' ? 800 : 200,
+        temperature: 0.85,
+        max_tokens: type === 'email_campaign' ? 1200 : 300,
       }),
     })
 
@@ -105,11 +128,11 @@ Responde APENAS com a mensagem, sem emojis desnecessários. Máximo 80 palavras.
 
     if (type === 'email_campaign') {
       try {
-        const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        const cleaned = raw.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim()
         const parsed = JSON.parse(cleaned)
         return NextResponse.json(parsed)
       } catch {
-        return NextResponse.json({ 
+        return NextResponse.json({
           subject: 'Email gerado',
           blocks: [{ type: 'text', content: { html: raw } }]
         })

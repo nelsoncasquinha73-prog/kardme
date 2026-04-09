@@ -46,6 +46,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
   const [saving, setSaving] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiPrompt, setAIPrompt] = useState('')
+  const [businessContext, setBusinessContext] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('kardme_business_context') || ''
+    return ''
+  })
   const [aiGenerating, setAIGenerating] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
@@ -722,6 +726,34 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
             {/* Prompt */}
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6, fontWeight: 700 }}>
+                Contexto do teu negócio <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(guardado automaticamente)</span>
+              </label>
+              <textarea
+                value={businessContext}
+                onChange={(e) => {
+                  setBusinessContext(e.target.value)
+                  localStorage.setItem('kardme_business_context', e.target.value)
+                }}
+                placeholder="Ex: Sou consultor imobiliário na Remax. Vendo imóveis de luxo no Algarve. Os meus clientes são investidores estrangeiros. Preço médio: 500k-2M€. Ofereço visitas virtuais e acompanhamento jurídico completo."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(16,185,129,0.3)',
+                  background: 'rgba(16,185,129,0.06)',
+                  color: '#fff',
+                  fontSize: 13,
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  marginBottom: 16,
+                }}
+              />
+            </div>
+
+            {/* Prompt */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6, fontWeight: 700 }}>
                 O que queres comunicar? <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(opcional — deixa em branco para AI decidir com base no histórico)</span>
               </label>
               <textarea
@@ -795,6 +827,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                         history,
                         prompt: aiPrompt.trim() || null,
                         blocks,
+                        businessContext: businessContext.trim() || null,
                       }),
                     })
 
