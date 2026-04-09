@@ -97,7 +97,7 @@ export default function ThemePageClientRight({
 
   // Mapa de subcategorias/marcas por área de negócio
   const subcategoryMap: Record<string, string[]> = {
-    'Imobiliário': ['Remax', 'ERA', 'Century 21', 'KW Keller Williams', 'Coldwell Banker', 'Engel & Völkers', 'Sotheby's', 'IAD', 'Predial Parque', 'Outro'],
+    'Imobiliário': ['Remax', 'ERA', 'Century 21', 'KW Keller Williams', 'Coldwell Banker', 'Engel & Völkers', 'Sothebys International', 'IAD', 'Predial Parque', 'Outro'],
     'Network Marketing': ['Herbalife', 'Amway', 'Forever Living', 'Lifewave', 'Nu Skin', 'Oriflame', 'Avon', 'Tupperware', 'doTERRA', 'Young Living', 'USANA', 'Jeunesse', 'It Works', 'Juice Plus', 'PM International', 'Outro'],
     'Automóvel': ['Stand Multimarca', 'BMW', 'Mercedes-Benz', 'Audi', 'Toyota', 'Volkswagen', 'Peugeot', 'Renault', 'Tesla', 'Oficina', 'Rent-a-Car', 'Outro'],
     'Seguros': ['Allianz', 'Fidelidade', 'Ageas', 'Tranquilidade', 'Zurich', 'Liberty', 'Generali', 'OK! Seguros', 'Mediador Independente', 'Outro'],
