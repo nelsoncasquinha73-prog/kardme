@@ -44,6 +44,10 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
   const [selectedAudiences, setSelectedAudiences] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [aiPrompt, setAIPrompt] = useState('')
+  const [aiGenerating, setAIGenerating] = useState(false)
+  const [aiError, setAIError] = useState<string | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showSendModal, setShowSendModal] = useState(false)
@@ -484,6 +488,24 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
             }}
           >
             <button
+              onClick={() => setShowAIModal(true)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid rgba(139,92,246,0.5)',
+                background: 'rgba(139,92,246,0.15)',
+                color: '#a78bfa',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              ✨ AI
+            </button>
+            <button
               onClick={() => setShowPreviewModal(true)}
               style={{
                 padding: '8px 14px',
@@ -648,6 +670,150 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
           )}
         </div>
       </div>
+
+      {/* MODAL AI */}
+      {showAIModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: '#1e1e2e', borderRadius: 16, padding: 28, maxWidth: 560, width: '100%', border: '1px solid rgba(139,92,246,0.3)' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>✨ Gerar Email com AI</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
+                  {selectedLeadId
+                    ? `Lead seleccionada: ${leads.find((l: any) => l.id === selectedLeadId)?.name || selectedLeadId}`
+                    : sendingTo === 'audience' ? 'Modo: Audiência (email genérico)' : 'Modo: Email genérico'}
+                </div>
+              </div>
+              <button onClick={() => { setShowAIModal(false); setAIError(null); setAIPrompt('') }} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 18, cursor: 'pointer', padding: '4px 10px' }}>✕</button>
+            </div>
+
+            {/* Prompt */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6, fontWeight: 700 }}>
+                O que queres comunicar? <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(opcional — deixa em branco para AI decidir com base no histórico)</span>
+              </label>
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAIPrompt(e.target.value)}
+                placeholder="Ex: faz um follow-up sobre o patch X39, menciona os benefícios de energia e recuperação..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.06)',
+                  color: '#fff',
+                  fontSize: 13,
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {/* Info */}
+            <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+              {selectedLeadId
+                ? '🧠 O AI vai analisar o histórico desta lead e gerar um email personalizado.'
+                : '📧 O AI vai gerar um email com base na tua prompt. Para emails personalizados, selecciona uma lead primeiro.'}
+            </div>
+
+            {aiError && (
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#fca5a5' }}>
+                {aiError}
+              </div>
+            )}
+
+            {/* Botões */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setShowAIModal(false); setAIError(null); setAIPrompt('') }}
+                style={{ padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  setAIGenerating(true)
+                  setAIError(null)
+                  try {
+                    // Buscar histórico se houver lead seleccionada
+                    let leadData: any = null
+                    let history: any[] = []
+
+                    if (selectedLeadId) {
+                      const lead = leads.find((l: any) => l.id === selectedLeadId)
+                      leadData = lead || null
+
+                      const { data: acts } = await supabase
+                        .from('lead_activities')
+                        .select('*')
+                        .eq('lead_id', selectedLeadId)
+                        .order('created_at', { ascending: false })
+                        .limit(10)
+                      history = acts || []
+                    }
+
+                    const res = await fetch('/api/crm/generate-message', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        type: 'email_campaign',
+                        lead: leadData,
+                        history,
+                        prompt: aiPrompt.trim() || null,
+                        blocks,
+                      }),
+                    })
+
+                    const data = await res.json()
+                    if (!res.ok) throw new Error(data.error || 'Erro ao gerar')
+
+                    // Aplicar subject se gerado
+                    if (data.subject) setSubject(data.subject)
+
+                    // Converter blocos AI para formato do editor
+                    if (data.blocks && data.blocks.length > 0) {
+                      const newBlocks = data.blocks.map((b: any, i: number) => ({
+                        id: `ai-block-${Date.now()}-${i}`,
+                        type: b.type as EmailBlockType,
+                        content: b.content || {},
+                      }))
+                      setBlocks(newBlocks)
+                      addToast('✨ Email gerado com sucesso!', 'success')
+                      setShowAIModal(false)
+                      setAIPrompt('')
+                    } else {
+                      throw new Error('AI não devolveu blocos válidos')
+                    }
+                  } catch (e: any) {
+                    setAIError(e.message || 'Erro ao gerar email')
+                  }
+                  setAIGenerating(false)
+                }}
+                disabled={aiGenerating}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: aiGenerating ? 'rgba(139,92,246,0.4)' : 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: aiGenerating ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                {aiGenerating ? '⏳ A gerar...' : '✨ Gerar Email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showPreviewModal && (
         <EmailPreviewModal
