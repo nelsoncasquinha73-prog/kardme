@@ -609,7 +609,8 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
           ×
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
