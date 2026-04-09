@@ -1158,8 +1158,9 @@ function renderBlockInspector(
             </label>
             <input
               type="text"
-              disabled value="Usa o editor acima para editar o texto"
+              value={content.text || ''}
               onChange={(e) => onUpdate({ text: e.target.value })}
+              placeholder="Ex: Clica aqui"
               style={{
                 width: '100%',
                 padding: '8px 12px',
