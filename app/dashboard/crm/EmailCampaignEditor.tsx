@@ -431,9 +431,6 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                 {[
                   { label: '👤 Nome', value: '{nome}' },
                   { label: '📧 Email', value: '{email}' },
-                  { label: '📱 Telefone', value: '{telefone}' },
-                  { label: '🏢 Empresa', value: '{empresa}' },
-                  { label: '📅 Data', value: '{data}' },
                 ].map((v) => (
                   <button
                     key={v.value}
