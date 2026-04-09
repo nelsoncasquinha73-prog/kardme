@@ -389,7 +389,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           businessCategorySaving={businessCategorySaving}
           saveBusinessCategory={saveBusinessCategory}
           businessSubcategory={businessSubcategory}
-          setBusinessSubcategory={(v) => {
+          setBusinessSubcategory={(v: any) => {
             setBusinessSubcategory(v)
             saveBusinessSubcategory(v)
           }}
