@@ -36,6 +36,21 @@ interface EmailCampaignEditorProps {
 
 export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLeadIds, onClose, onSave }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
+
+  // Buscar contexto do cartão principal do utilizador para a IA
+  useEffect(() => {
+    const loadCardContext = async () => {
+      const { data } = await supabase
+        .from('cards')
+        .select('title, business_category, description')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (data) setCardContext(data)
+    }
+    loadCardContext()
+  }, [userId])
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [preheader, setPreheader] = useState('')
@@ -50,6 +65,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
     if (typeof window !== 'undefined') return localStorage.getItem('kardme_business_context') || ''
     return ''
   })
+  const [cardContext, setCardContext] = useState<{ business_category?: string; description?: string; title?: string } | null>(null)
   const [aiGenerating, setAIGenerating] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
@@ -725,8 +741,14 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
 
             {/* Prompt */}
             <div style={{ marginBottom: 16 }}>
+              {cardContext?.business_category && (
+                <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                  ✅ Contexto detectado automaticamente do teu cartão: <strong style={{ color: '#10b981' }}>{cardContext.business_category}</strong>
+                  {cardContext.description ? ` — ${cardContext.description.slice(0, 80)}${cardContext.description.length > 80 ? '…' : ''}` : ''}
+                </div>
+              )}
               <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6, fontWeight: 700 }}>
-                Contexto do teu negócio <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(guardado automaticamente)</span>
+                Contexto adicional <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(opcional — complementa o contexto do cartão)</span>
               </label>
               <textarea
                 value={businessContext}
@@ -827,7 +849,12 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                         history,
                         prompt: aiPrompt.trim() || null,
                         blocks,
-                        businessContext: businessContext.trim() || null,
+                        businessContext: [
+                          cardContext?.title ? `Negócio: ${cardContext.title}` : '',
+                          cardContext?.business_category ? `Sector: ${cardContext.business_category}` : '',
+                          cardContext?.description ? `Descrição: ${cardContext.description}` : '',
+                          businessContext.trim() ? `Contexto adicional: ${businessContext.trim()}` : '',
+                        ].filter(Boolean).join('\n') || null,
                       }),
                     })
 
