@@ -10,13 +10,11 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { user_id, billing, setupFee, setupLabel, upsell_crm_pro, upsell_cycle } = body as {
+    const { user_id, billing, upsell_crm_pro, upsell_cycle } = body as {
       user_id: string
       billing: 'monthly' | 'yearly'
-      setupFee?: number
-      setupLabel?: string
       upsell_crm_pro?: boolean
-      upsell_cycle?: string
+      upsell_cycle?: string | null
     }
 
     if (!user_id) return NextResponse.json({ error: 'Missing user_id' }, { status: 400 })
@@ -27,6 +25,12 @@ export async function POST(req: Request) {
       billing === 'monthly'
         ? process.env.STRIPE_PRICE_PRO_MONTHLY!
         : process.env.STRIPE_PRICE_PRO_YEARLY!
+
+    // CRM Pro price ID (mesmo ciclo de faturação)
+    const crmProPriceId =
+      upsell_cycle === 'yearly'
+        ? process.env.STRIPE_CRM_PRO_PRICE_ANNUAL
+        : process.env.STRIPE_CRM_PRO_PRICE_MONTHLY
 
     // 1) get/create stripe customer
     const { data: subRow } = await supabaseAdmin
@@ -54,39 +58,34 @@ export async function POST(req: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-    // 2) build line items: recorrente + opcional one-time
+    // 2) build line items
     const lineItems: any[] = [{ price: priceId, quantity: 1 }]
 
-    if (setupFee && setupFee > 0) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: setupLabel || 'Serviço de setup',
-            description: 'Taxa única de configuração',
-          },
-          unit_amount: Math.round(setupFee * 100),
-          recurring: undefined,
-        },
-        quantity: 1,
-      })
+    if (upsell_crm_pro && crmProPriceId) {
+      lineItems.push({ price: crmProPriceId, quantity: 1 })
     }
 
-    // 3) create checkout session (subscription)
+    // 3) create checkout session
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
       line_items: lineItems,
       allow_promotion_codes: true,
-      success_url: upsell_crm_pro
-        ? `${siteUrl}/dashboard?checkout=success&upsell_crm_pro=1&upsell_cycle=${upsell_cycle}`
-        : `${siteUrl}/dashboard?checkout=success`,
+      subscription_data: {
+        metadata: {
+          user_id,
+          purchase_type: 'pro_subscription',
+          billing,
+          upsell_crm_pro: upsell_crm_pro ? 'true' : 'false',
+        },
+      },
+      success_url: `${siteUrl}/dashboard?checkout=success`,
       cancel_url: `${siteUrl}/dashboard?checkout=cancel`,
       metadata: {
         user_id,
         purchase_type: 'pro_subscription',
         billing,
-        setupFee: setupFee ? String(setupFee) : '0',
+        upsell_crm_pro: upsell_crm_pro ? 'true' : 'false',
       },
     })
 
