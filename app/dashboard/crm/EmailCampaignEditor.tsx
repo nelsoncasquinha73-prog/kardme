@@ -255,7 +255,6 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
       }
 
       onSave()
-      onClose()
     } catch (e) {
       console.error(e)
       addToast('Erro ao guardar campanha', 'error')
