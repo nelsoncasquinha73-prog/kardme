@@ -58,6 +58,8 @@ type Props = {
   themeDecorations?: DecorationItem[]
   onChangeThemeDecorations?: (decorations: DecorationItem[]) => void
   businessCategory: string
+  businessSubcategory: string
+  setBusinessSubcategory: (v: string) => void
   setBusinessCategory: (cat: string) => void
   businessCategorySaving: boolean
   saveBusinessCategory: () => Promise<void>
@@ -92,6 +94,36 @@ export default function ThemePageClientRight({
   themeDecorations,
   onChangeThemeDecorations,
   businessCategory,
+
+  // Mapa de subcategorias/marcas por área de negócio
+  const subcategoryMap: Record<string, string[]> = {
+    'Imobiliário': ['Remax', 'ERA', 'Century 21', 'KW Keller Williams', 'Coldwell Banker', 'Engel & Völkers', 'Sotheby's', 'IAD', 'Predial Parque', 'Outro'],
+    'Network Marketing': ['Herbalife', 'Amway', 'Forever Living', 'Lifewave', 'Nu Skin', 'Oriflame', 'Avon', 'Tupperware', 'doTERRA', 'Young Living', 'USANA', 'Jeunesse', 'It Works', 'Juice Plus', 'PM International', 'Outro'],
+    'Automóvel': ['Stand Multimarca', 'BMW', 'Mercedes-Benz', 'Audi', 'Toyota', 'Volkswagen', 'Peugeot', 'Renault', 'Tesla', 'Oficina', 'Rent-a-Car', 'Outro'],
+    'Seguros': ['Allianz', 'Fidelidade', 'Ageas', 'Tranquilidade', 'Zurich', 'Liberty', 'Generali', 'OK! Seguros', 'Mediador Independente', 'Outro'],
+    'Crédito': ['Cofidis', 'Cetelem', 'UCI', 'Doutor Finanças', 'Maxfinance', 'Intermediário Crédito', 'Outro'],
+    'Saúde': ['Clínica Geral', 'Dentista', 'Fisioterapia', 'Psicologia', 'Nutrição', 'Medicina Estética', 'Naturopatia', 'Farmácia', 'Outro'],
+    'Estética': ['Cabeleireiro', 'Barbeiro', 'Nail Art', 'Maquilhagem', 'Spa', 'Clínica Estética', 'Sobrancelhas', 'Depilação', 'Outro'],
+    'Fitness': ['Personal Trainer', 'Ginásio', 'CrossFit', 'Yoga', 'Pilates', 'Nutrição Desportiva', 'Outro'],
+    'Restauração': ['Restaurante', 'Café/Bar', 'Pastelaria', 'Fast Food', 'Food Truck', 'Catering', 'Pizzaria', 'Sushi', 'Outro'],
+    'Hotelaria': ['Hotel', 'Hostel', 'Alojamento Local', 'Resort', 'Turismo Rural', 'Outro'],
+    'Construção': ['Empreiteiro', 'Arquitectura', 'Engenharia', 'Remodelações', 'Electricista', 'Canalizador', 'Pintor', 'Outro'],
+    'Advocacia': ['Advogado Geral', 'Direito Imobiliário', 'Direito Fiscal', 'Direito Família', 'Direito Penal', 'Direito Laboral', 'Solicitador', 'Outro'],
+    'Finanças': ['Contabilista', 'Consultor Financeiro', 'Gestor de Patrimónios', 'Banco', 'Fintech', 'Outro'],
+    'Marketing': ['Agência Digital', 'Social Media', 'SEO/SEM', 'Design Gráfico', 'Branding', 'Freelancer', 'Outro'],
+    'Tecnologia': ['Desenvolvimento Web', 'Desenvolvimento App', 'IT Consulting', 'Cibersegurança', 'SaaS', 'Outro'],
+    'Educação': ['Explicações', 'Formação Profissional', 'Coaching', 'Escola de Línguas', 'E-learning', 'Outro'],
+    'Fotografia': ['Casamentos', 'Produto', 'Retrato', 'Imobiliário', 'Eventos', 'Vídeo', 'Outro'],
+    'Eventos': ['Wedding Planner', 'DJ', 'Decoração', 'Som e Luz', 'Animação', 'Outro'],
+    'Política': ['Autarquia', 'Partido', 'Candidato', 'Outro'],
+    'Pets': ['Veterinário', 'Pet Shop', 'Dog Walker', 'Grooming', 'Pet Sitting', 'Outro'],
+    'Turismo': ['Agência de Viagens', 'Guia Turístico', 'Transfer', 'Experiências', 'Outro'],
+    'Retalho': ['Loja Física', 'E-commerce', 'Moda', 'Joalharia', 'Decoração', 'Outro'],
+    'Consultoria': ['Gestão', 'Recursos Humanos', 'Estratégia', 'Qualidade', 'Outro'],
+    'Serviços': ['Limpezas', 'Mudanças', 'Segurança', 'Jardinagem', 'Outro'],
+  }
+
+  const availableSubcategories = businessCategory ? (subcategoryMap[businessCategory] || []) : []
   setBusinessCategory,
   businessCategorySaving,
   saveBusinessCategory,
@@ -288,6 +320,42 @@ export default function ThemePageClientRight({
                 <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8, color: '#7c3aed' }}>
                   ⏳ A guardar...
                 </p>
+              )}
+
+              {availableSubcategories.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 900, fontSize: 12, color: '#111827', lineHeight: 1.4 }}>
+                    🏷️ Marca / Especialidade
+                  </label>
+                  <p style={{ fontSize: 11, opacity: 0.55, marginBottom: 10, color: '#111827', lineHeight: 1.3 }}>
+                    Ajuda a IA a ser mais precisa nos emails e conteúdos.
+                  </p>
+                  <select
+                    value={businessSubcategory}
+                    onChange={(e) => setBusinessSubcategory(e.target.value)}
+                    style={{
+                      width: '100%',
+                      minHeight: 42,
+                      padding: '10px 36px 10px 12px',
+                      borderRadius: 10,
+                      border: '1px solid rgba(0,0,0,0.18)',
+                      fontSize: 13,
+                      lineHeight: 1.2,
+                      fontFamily: 'inherit',
+                      background: '#fff',
+                      color: '#111827',
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      MozAppearance: 'none',
+                    }}
+                  >
+                    <option value="">Seleciona marca/especialidade...</option>
+                    {availableSubcategories.map((sub) => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
 

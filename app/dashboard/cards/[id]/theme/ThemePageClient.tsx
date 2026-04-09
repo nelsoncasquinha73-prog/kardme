@@ -56,6 +56,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
 
   const [businessCategory, setBusinessCategory] = useState<string>(card?.business_category || '')
   const [businessCategorySaving, setBusinessCategorySaving] = useState(false)
+  const [businessSubcategory, setBusinessSubcategory] = useState<string>(card?.business_subcategory || '')
 
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const enabledBlocksSorted = useMemo(
@@ -255,6 +256,18 @@ export default function ThemePageClient({ card, blocks }: Props) {
     }
   }
 
+  async function saveBusinessSubcategory(value: string) {
+    try {
+      await supabase
+        .from('cards')
+        .update({ business_subcategory: value })
+        .eq('id', card.id)
+      setToast({ message: 'Marca/especialidade guardada', type: 'success' })
+    } catch (e: any) {
+      setToast({ message: e.message || 'Erro ao guardar', type: 'error' })
+    }
+  }
+
   async function saveSlug() {
     if (!slugEdit || slugEdit === card.slug) return
 
@@ -375,6 +388,11 @@ export default function ThemePageClient({ card, blocks }: Props) {
           setBusinessCategory={setBusinessCategory}
           businessCategorySaving={businessCategorySaving}
           saveBusinessCategory={saveBusinessCategory}
+          businessSubcategory={businessSubcategory}
+          setBusinessSubcategory={(v) => {
+            setBusinessSubcategory(v)
+            saveBusinessSubcategory(v)
+          }}
         />
 
         <AddBlockModal

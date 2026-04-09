@@ -42,7 +42,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
     const loadCardContext = async () => {
       const { data } = await supabase
         .from('cards')
-        .select('title, business_category, description')
+        .select('title, business_category, business_subcategory, description')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -65,7 +65,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
     if (typeof window !== 'undefined') return localStorage.getItem('kardme_business_context') || ''
     return ''
   })
-  const [cardContext, setCardContext] = useState<{ business_category?: string; description?: string; title?: string } | null>(null)
+  const [cardContext, setCardContext] = useState<{ business_category?: string; business_subcategory?: string; description?: string; title?: string } | null>(null)
   const [aiGenerating, setAIGenerating] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
@@ -743,7 +743,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
             <div style={{ marginBottom: 16 }}>
               {cardContext?.business_category && (
                 <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-                  ✅ Contexto detectado automaticamente do teu cartão: <strong style={{ color: '#10b981' }}>{cardContext.business_category}</strong>
+                  ✅ Contexto detectado do teu cartão: <strong style={{ color: '#10b981' }}>{cardContext.business_category}{cardContext?.business_subcategory ? ` › ${cardContext.business_subcategory}` : ''}</strong>
                   {cardContext.description ? ` — ${cardContext.description.slice(0, 80)}${cardContext.description.length > 80 ? '…' : ''}` : ''}
                 </div>
               )}
@@ -852,6 +852,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                         businessContext: [
                           cardContext?.title ? `Negócio: ${cardContext.title}` : '',
                           cardContext?.business_category ? `Sector: ${cardContext.business_category}` : '',
+                          cardContext?.business_subcategory ? `Marca/Especialidade: ${cardContext.business_subcategory}` : '',
                           cardContext?.description ? `Descrição: ${cardContext.description}` : '',
                           businessContext.trim() ? `Contexto adicional: ${businessContext.trim()}` : '',
                         ].filter(Boolean).join('\n') || null,
