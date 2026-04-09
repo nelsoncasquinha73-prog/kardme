@@ -1,4 +1,5 @@
-import React from 'react'
+import React
+import { imgPresets } from '@/lib/imageUrl' from 'react'
 import type { ProfileSettings, ProfileTextLine } from '@/components/blocks/types/profile'
 import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import HeaderBlock from '@/components/blocks/HeaderBlock'

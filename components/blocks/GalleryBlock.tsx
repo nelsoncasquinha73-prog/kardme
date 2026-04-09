@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React
+import { imgPresets } from '@/lib/imageUrl', { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import useEmblaCarousel from 'embla-carousel-react'
 import AutoplayImport from 'embla-carousel-autoplay'
@@ -267,7 +268,7 @@ export default function GalleryBlock({ settings, style }: Props) {
                 onClick={() => setLightboxIndex(i)}
               >
                 <img
-                  src={item.url}
+                  src={imgPresets.galleryThumb(item.url)}
                   alt={item.caption || `Imagem ${i + 1}`}
                   style={{ width: '100%', height: '100%', objectFit, display: 'block' }}
                   loading="lazy"
@@ -577,7 +578,7 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
       >
         <div style={{ maxWidth: '92vw', maxHeight: '82vh', overflow: 'auto', borderRadius: 12 }}>
           <img
-            src={item.url}
+            src={imgPresets.galleryThumb(item.url)}
             alt={item.caption || `Imagem ${currentIndex + 1}`}
             style={{
               maxWidth: zoom === 1 ? '92vw' : '160vw',
