@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import useEmblaCarousel from 'embla-carousel-react'
 import AutoplayImport from 'embla-carousel-autoplay'
 
