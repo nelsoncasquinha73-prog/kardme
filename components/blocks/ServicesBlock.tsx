@@ -282,7 +282,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
 
       {layout === 'carousel' ? (
         <div style={{ position: 'relative' }}>
-          <div ref={emblaRef} style={{ overflow: 'hidden', WebkitTapHighlightColor: 'transparent' }}>
+          <div ref={emblaRef} style={{ overflow: 'hidden', WebkitTapHighlightColor: 'transparent', overscrollBehaviorX: 'contain' }}>
             <div
               style={{
                 display: 'flex',
@@ -291,6 +291,7 @@ export default function ServicesBlock({ settings, style }: { settings: ServicesS
                 paddingRight: sidePaddingPx,
                 paddingBottom: 2,
                 touchAction: 'pan-y',
+                overscrollBehaviorX: 'contain',
               }}
             >
               {items.map((item) => (
