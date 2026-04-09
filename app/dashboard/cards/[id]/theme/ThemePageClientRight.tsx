@@ -94,6 +94,12 @@ export default function ThemePageClientRight({
   themeDecorations,
   onChangeThemeDecorations,
   businessCategory,
+  setBusinessCategory,
+  businessCategorySaving,
+  saveBusinessCategory,
+  businessSubcategory,
+  setBusinessSubcategory,
+}: any) {
 
   // Mapa de subcategorias/marcas por área de negócio
   const subcategoryMap: Record<string, string[]> = {
