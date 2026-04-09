@@ -53,6 +53,19 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
     setLoading(false)
   }
 
+  async function silentReload() {
+    try {
+      const [auds, bcasts, leadsData] = await Promise.all([
+        fetchLeadTypes(userId),
+        getBroadcasts(userId),
+        fetchLeads()
+      ])
+      setAudiences(auds)
+      setBroadcasts(bcasts)
+      setLeads(leadsData)
+    } catch (e) { console.error(e) }
+  }
+
   async function fetchLeads(): Promise<Lead[]> {
     const { data, error } = await supabase
       .from('leads')
@@ -290,7 +303,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                 loadData()
               }}
               onSave={() => {
-                loadData()
+                silentReload()
               }}
             />
           )}
