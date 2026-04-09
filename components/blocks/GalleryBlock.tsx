@@ -249,6 +249,7 @@ export default function GalleryBlock({ settings, style }: Props) {
             paddingBottom: 2,
             touchAction: 'pan-y',
             WebkitTapHighlightColor: 'transparent',
+            overscrollBehaviorX: 'contain',
           }}
         >
           {visibleItems.map((item, i) => (
