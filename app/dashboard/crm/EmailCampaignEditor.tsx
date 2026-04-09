@@ -435,8 +435,11 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                   <button
                     key={v.value}
                     type="button"
-                    onClick={() => setSubject((prev) => prev + v.value)}
-                    title={`Inserir ${v.value} no assunto`}
+                    onClick={() => {
+                      navigator.clipboard.writeText(v.value)
+                      addToast(`${v.value} copiado!`, 'success')
+                    }}
+                    title={`Copiar ${v.value}`}
                     style={{
                       padding: '2px 8px',
                       borderRadius: 20,
