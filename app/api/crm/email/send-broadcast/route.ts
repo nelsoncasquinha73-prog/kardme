@@ -54,7 +54,7 @@ function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
 // Substitui {{nome}} e outros placeholders pelo dados reais do lead
 function replacePlaceholders(html: string, name: string | null, email?: string): string {
   const firstName = name ? name.split(' ')[0] : 'Olá'
-  const emailVal = name || ''
+  const emailVal = email || ''
   return html
     .replace(/\{\{nome\}\}/gi, firstName)
     .replace(/\{\{name\}\}/gi, firstName)
