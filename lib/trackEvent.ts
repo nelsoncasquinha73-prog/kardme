@@ -1,10 +1,11 @@
-export async function trackEvent(
+export function trackEvent(
   cardId: string,
   type: 'view' | 'click' | 'lead',
   key?: string
 ) {
-  try {
-    await fetch('/api/track', {
+  // Fire and forget — não bloqueia o render nem o scroll
+  setTimeout(() => {
+    fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -14,8 +15,7 @@ export async function trackEvent(
         path: typeof window !== 'undefined' ? window.location.pathname : null,
         referrer: typeof document !== 'undefined' ? document.referrer : null,
       }),
-    })
-  } catch (err) {
-    console.error('[trackEvent] error:', err)
-  }
+      keepalive: true,
+    }).catch(() => {}) // silencia erros
+  }, 2000) // delay de 2s para não competir com o carregamento inicial
 }
