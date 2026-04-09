@@ -52,12 +52,15 @@ function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
 }
 
 // Substitui {{nome}} e outros placeholders pelo dados reais do lead
-function replacePlaceholders(html: string, name: string | null): string {
+function replacePlaceholders(html: string, name: string | null, email?: string): string {
   const firstName = name ? name.split(' ')[0] : 'Olá'
+  const emailVal = name || ''
   return html
     .replace(/\{\{nome\}\}/gi, firstName)
     .replace(/\{\{name\}\}/gi, firstName)
     .replace(/\{\{primeiro_nome\}\}/gi, firstName)
+    .replace(/\{nome\}/gi, firstName)
+    .replace(/\{email\}/gi, emailVal)
 }
 
 export async function POST(req: NextRequest) {
@@ -148,7 +151,7 @@ export async function POST(req: NextRequest) {
         let personalizedHtmlBody = htmlBody
 
         // 1. Substituir {{nome}} pelo nome real
-        personalizedHtmlBody = replacePlaceholders(personalizedHtmlBody, leadName)
+        personalizedHtmlBody = replacePlaceholders(personalizedHtmlBody, leadName, recipientEmail)
 
         // 2. Adicionar lead_id aos links de vídeo
         if (leadId) {
