@@ -354,7 +354,7 @@ export default function ThemePageClient({ card, blocks }: Props) {
           activeDecoId={activeDecoId}
           onSelectDeco={setActiveDecoId}
           cardBg={cardBg}
-          onChangeCardBg={(nextV1) => {
+          onChangeCardBg={(nextV1: any) => {
             setCardBg(nextV1)
 
             const nextTheme = structuredClone(localTheme || {})
