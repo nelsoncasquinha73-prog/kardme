@@ -534,8 +534,9 @@ function Lightbox({ items, currentIndex, onClose, onNavigate }: LightboxProps) {
 
   const startXRef = useRef<number | null>(null)
   if (!item) return null
+  if (typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <div
       onClick={onClose}
       onTouchStart={(e) => (startXRef.current = e.touches[0]?.clientX ?? null)}
