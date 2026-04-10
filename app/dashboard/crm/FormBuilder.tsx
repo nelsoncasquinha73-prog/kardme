@@ -7,6 +7,7 @@ import { FormField } from '@/lib/crm/leadMagnets'
 interface Form {
   id: string
   lead_magnet_id: string
+  title: string
   fields: FormField[]
   created_at: string
   updated_at: string
@@ -16,6 +17,7 @@ interface FormBuilderProps {
   userId: string
   leadMagnetId: string
   formId?: string
+  title: string
   onSave?: (form: Form) => void
 }
 
@@ -23,6 +25,7 @@ export default function FormBuilder({
   userId,
   leadMagnetId,
   formId,
+  title,
   onSave,
 }: FormBuilderProps) {
   const [form, setForm] = useState<Form | null>(null)
@@ -79,6 +82,7 @@ export default function FormBuilder({
         const { error } = await supabase
           .from('lead_magnet_forms')
           .update({
+            title,
             fields: sanitizedFields,
             updated_at: new Date().toISOString(),
           })
@@ -96,6 +100,7 @@ export default function FormBuilder({
 
         const updated = {
           ...form,
+          title,
           fields: sanitizedFields,
           updated_at: new Date().toISOString(),
         }
@@ -109,6 +114,7 @@ export default function FormBuilder({
           .insert([
             {
               lead_magnet_id: leadMagnetId,
+              title,
               fields: sanitizedFields,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),

@@ -161,6 +161,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
       userId={userId}
       leadMagnetId={editingMagnet.id}
       formId={(editingMagnet as any).form_id}
+      title={form.title}
       onSave={(savedForm) => {
         setEditingMagnet((prev) => prev ? ({ ...prev, form_id: savedForm.id } as any) : prev)
       }}
