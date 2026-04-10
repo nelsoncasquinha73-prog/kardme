@@ -115,7 +115,6 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="discount">🎁 Desconto</option>
                 <option value="webinar">🎥 Webinar</option>
                 <option value="form">📝 Formulário / Diagnóstico</option>
-                <option value="form">📝 Formulário / Diagnóstico</option>
               </select>
             </div>
 
