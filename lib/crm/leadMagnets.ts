@@ -74,10 +74,18 @@ export async function updateLeadMagnet(id: string, updates: Partial<LeadMagnet>)
 }
 
 export async function deleteLeadMagnet(id: string): Promise<void> {
+  const { error: formError } = await supabase
+    .from('lead_magnet_forms')
+    .delete()
+    .eq('lead_magnet_id', id)
+
+  if (formError) throw formError
+
   const { error } = await supabase
     .from('lead_magnets')
     .delete()
     .eq('id', id)
+
   if (error) throw error
 }
 
