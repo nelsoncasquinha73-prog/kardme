@@ -1,7 +1,4 @@
-'use client'
-
 import React from 'react'
-import { imgPresets } from '@/lib/imageUrl'
 import type { ProfileSettings, ProfileTextLine } from '@/components/blocks/types/profile'
 import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import HeaderBlock from '@/components/blocks/HeaderBlock'
