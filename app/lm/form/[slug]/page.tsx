@@ -133,7 +133,6 @@ export default function FormPage() {
             name: formData['name'] || '',
             email: formData['email'] || '',
             phone: formData['phone'] || '',
-            status: 'novo',
             notes: `Capturado via: ${magnet.title}`,
             form_data: formData,
           },
