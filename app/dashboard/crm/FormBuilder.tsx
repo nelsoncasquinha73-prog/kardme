@@ -38,6 +38,49 @@ export default function FormBuilder({
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  function normalizeFields(nextFields: FormField[]): FormField[] {
+    return nextFields.map((field, idx) => {
+      if (!field.showIf) return field
+
+      const sourceField = nextFields.find((f) => f.id === field.showIf?.fieldId)
+      const sourceHasOptions = sourceField && isFieldTypeWithOptions(sourceField.type)
+      const sourceOptions = sourceField?.options || []
+
+      if (!sourceHasOptions || sourceOptions.length === 0) {
+        const previousFieldsWithOptions = nextFields
+          .slice(0, idx)
+          .filter((f) => isFieldTypeWithOptions(f.type))
+
+        if (previousFieldsWithOptions.length === 0) {
+          return { ...field, showIf: undefined }
+        }
+
+        const closestField = previousFieldsWithOptions[previousFieldsWithOptions.length - 1]
+        const closestOptions = closestField.options || []
+
+        return {
+          ...field,
+          showIf: {
+            fieldId: closestField.id,
+            value: closestOptions[0] || '',
+          },
+        }
+      }
+
+      if (!sourceOptions.includes(field.showIf.value)) {
+        return {
+          ...field,
+          showIf: {
+            fieldId: field.showIf.fieldId,
+            value: sourceOptions[0] || '',
+          },
+        }
+      }
+
+      return field
+    })
+  }
+
   useEffect(() => {
     if (formId) {
       loadForm()
@@ -81,9 +124,11 @@ export default function FormBuilder({
                 { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
               ]
 
+        const normalized = normalizeFields(nextFields)
+
         setForm(data)
-        setFields(nextFields)
-        syncOptionsText(nextFields)
+        setFields(normalized)
+        syncOptionsText(normalized)
       }
     } catch (e) {
       console.error(e)
