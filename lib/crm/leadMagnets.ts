@@ -42,7 +42,7 @@ export type LeadMagnet = {
   leads_count: number
   created_at: string
   updated_at: string
-  form_id?: string
+  form_id?: string | null
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
@@ -74,6 +74,16 @@ export async function updateLeadMagnet(id: string, updates: Partial<LeadMagnet>)
 }
 
 export async function deleteLeadMagnet(id: string): Promise<void> {
+  const { error: unlinkError } = await supabase
+    .from('lead_magnets')
+    .update({
+      form_id: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+
+  if (unlinkError) throw unlinkError
+
   const { error: formError } = await supabase
     .from('lead_magnet_forms')
     .delete()
