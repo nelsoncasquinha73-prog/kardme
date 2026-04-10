@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar'
+export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form'
 
 export type FormField = {
   id: string
@@ -25,6 +25,7 @@ export type LeadMagnet = {
   leads_count: number
   created_at: string
   updated_at: string
+  form_id?: string
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
@@ -88,6 +89,7 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   guide: '📋 Guia',
   checklist: '✅ Checklist',
   webinar: '🎥 Webinar',
+  form: '📝 Formulário',
 }
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
@@ -95,12 +97,3 @@ export const DEFAULT_FORM_FIELDS: FormField[] = [
   { id: 'email', label: 'Email', type: 'email', required: true },
   { id: 'phone', label: 'Telefone', type: 'tel', required: false },
 ]
-
-// Novo tipo para suportar formulários
-export type LeadMagnetMode = 'file' | 'form'
-
-// Estender o tipo LeadMagnet com os novos campos
-export type LeadMagnetWithForm = LeadMagnet & {
-  mode?: LeadMagnetMode
-  form_id?: string
-}

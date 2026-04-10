@@ -8,6 +8,7 @@ import {
   deleteLeadMagnet, toggleLeadMagnetActive,
   generateSlug, MAGNET_TYPE_LABELS, DEFAULT_FORM_FIELDS
 } from '@/lib/crm/leadMagnets'
+import FormBuilder from './FormBuilder'
 
 export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [magnets, setMagnets] = useState<LeadMagnet[]>([])
@@ -26,12 +27,17 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   async function load() { setLoading(true); try { setMagnets(await getLeadMagnets(userId)) } catch(e) { console.error(e) } setLoading(false) }
   function openCreate() { setForm(emptyForm); setEditingMagnet(null); setShowForm(true) }
   function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active }); setEditingMagnet(m); setShowForm(true) }
-  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(!form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
+  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(form.magnet_type !== 'form' && !form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
   async function handleDelete(id: string) { if(!confirm('Apagar campanha?')) return; await deleteLeadMagnet(id); await load() }
   async function handleToggle(m: LeadMagnet) { await toggleLeadMagnetActive(m.id, !m.is_active); await load() }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingFile(true); try { const path=`lead-magnets/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, file_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingFile(false) }
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingCover(true); try { const path=`lead-magnets-covers/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, cover_image_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingCover(false) }
-  function copyLink(slug: string, id: string) { navigator.clipboard.writeText(window.location.origin+'/lm/'+slug); setCopiedId(id); setTimeout(()=>setCopiedId(null),2000) }
+  function copyLink(m: LeadMagnet) { 
+    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : `/lm/${m.slug}`
+    navigator.clipboard.writeText(window.location.origin + path)
+    setCopiedId(m.id)
+    setTimeout(() => setCopiedId(null), 2000) 
+  }
   if (loading) return <div style={{color:'rgba(255,255,255,0.5)',padding:40,textAlign:'center'}}>A carregar...</div>
 
   return (
@@ -72,7 +78,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 </div>
                 <div style={{background:'rgba(255,255,255,0.05)',borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
                   <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>/lm/{m.slug}</span>
-                  <button onClick={()=>copyLink(m.slug,m.id)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
+                  <button onClick={()=>copyLink(m)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
                   <button onClick={()=>openEdit(m)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer'}}>✏️ Editar</button>
@@ -108,6 +114,8 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="checklist">✅ Checklist</option>
                 <option value="discount">🎁 Desconto</option>
                 <option value="webinar">🎥 Webinar</option>
+                <option value="form">📝 Formulário / Diagnóstico</option>
+                <option value="form">📝 Formulário / Diagnóstico</option>
               </select>
             </div>
 
@@ -144,7 +152,29 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
               </div>
             </div>
 
-            <div style={{display:'flex',gap:10}}>
+            {form.magnet_type === 'form' && editingMagnet && (
+  <div style={{marginBottom:24,padding:'16px',borderRadius:12,border:'1px solid rgba(59,130,246,0.25)',background:'rgba(59,130,246,0.06)'}}>
+    <div style={{fontSize:12,color:'#93c5fd',fontWeight:700,marginBottom:12}}>
+      📝 Configuração do formulário
+    </div>
+    <FormBuilder
+      userId={userId}
+      leadMagnetId={editingMagnet.id}
+      formId={(editingMagnet as any).form_id}
+      onSave={(savedForm) => {
+        setEditingMagnet((prev) => prev ? ({ ...prev, form_id: savedForm.id } as any) : prev)
+      }}
+    />
+  </div>
+)}
+
+{form.magnet_type === 'form' && !editingMagnet && (
+  <div style={{marginBottom:20,padding:'12px 14px',borderRadius:10,border:'1px solid rgba(250,204,21,0.25)',background:'rgba(250,204,21,0.08)',color:'#fde68a',fontSize:12,lineHeight:1.5}}>
+    Cria primeiro a campanha e depois poderás editar e adicionar as perguntas do formulário.
+  </div>
+)}
+
+<div style={{display:'flex',gap:10}}>
               <button onClick={()=>setShowForm(false)} style={{flex:1,padding:'12px 0',borderRadius:12,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'rgba(255,255,255,0.6)',fontWeight:700,fontSize:14,cursor:'pointer'}}>Cancelar</button>
               <button onClick={handleSave} disabled={saving} style={{flex:2,padding:'12px 0',borderRadius:12,border:'none',background:'linear-gradient(135deg,#10b981,#059669)',color:'#fff',fontWeight:800,fontSize:14,cursor:'pointer',opacity:saving?0.6:1}}>{saving?'A guardar...':editingMagnet?'Guardar alteracoes':'Criar campanha'}</button>
             </div>

@@ -1,214 +1,261 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import type { LeadMagnetForm } from '@/lib/crm/formBuilder'
+import { supabase } from '@/lib/supabaseClient'
+import { FormField } from '@/lib/crm/leadMagnets'
 
-interface LeadMagnetData {
+interface LeadMagnet {
   id: string
+  user_id: string
   title: string
-  description: string
-  cover_image_url: string
-  thank_you_message: string
-  form_fields: LeadMagnetForm
-  magnet_type: string
+  description: string | null
+  cover_image_url: string | null
+  thank_you_message: string | null
+  form_id?: string
+  views_count?: number
+  leads_count?: number
 }
 
-export default function FormLandingPage() {
+interface Form {
+  id: string
+  fields: FormField[]
+}
+
+export default function FormPage() {
   const params = useParams()
   const slug = params.slug as string
 
-  const [magnet, setMagnet] = useState<LeadMagnetData | null>(null)
+  const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
+  const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
-  const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [formData, setFormData] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     loadMagnet()
   }, [slug])
 
   async function loadMagnet() {
+    setLoading(true)
     try {
-      const res = await fetch(`/api/lead-magnets/get/${slug}`)
-      if (!res.ok) throw new Error('Lead magnet not found')
-      const data = await res.json()
+      const { data, error } = await supabase
+        .from('lead_magnets')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .single()
+
+      if (error) throw error
+      if (!data) throw new Error('Campanha não encontrada')
+
       setMagnet(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar formulário')
-    } finally {
-      setLoading(false)
+
+      // Incrementar views
+      await supabase
+        .from('lead_magnets')
+        .update({ views_count: (data.views_count || 0) + 1 })
+        .eq('id', data.id)
+
+      // Carregar formulário
+      if (data.form_id) {
+        const { data: formData, error: formError } = await supabase
+          .from('lead_magnet_forms')
+          .select('*')
+          .eq('id', data.form_id)
+          .single()
+
+        if (!formError && formData) {
+          setForm(formData)
+          // Inicializar formData com campos vazios
+          const initial: Record<string, string> = {}
+          formData.fields.forEach((field: FormField) => {
+            initial[field.id] = ''
+          })
+          setFormData(initial)
+        }
+      }
+    } catch (e: any) {
+      console.error(e)
     }
+    setLoading(false)
+  }
+
+  function validateForm(): boolean {
+    const newErrors: Record<string, string> = {}
+
+    if (form) {
+      form.fields.forEach((field) => {
+        const value = formData[field.id]?.trim()
+
+        if (field.required && !value) {
+          newErrors[field.id] = `${field.label} é obrigatório`
+        }
+
+        if (value && field.type === 'email') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          if (!emailRegex.test(value)) {
+            newErrors[field.id] = 'Email inválido'
+          }
+        }
+
+        if (value && field.type === 'tel') {
+          const telRegex = /^[\d\s\-\+$$]+$/
+          if (!telRegex.test(value)) {
+            newErrors[field.id] = 'Telefone inválido'
+          }
+        }
+      })
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (!validateForm()) return
+
     setSubmitting(true)
-
     try {
-      const res = await fetch('/api/lead-magnets/submit-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lead_magnet_id: magnet?.id,
-          responses: answers,
-        }),
-      })
+      if (!magnet) throw new Error('Campanha não encontrada')
 
-      if (!res.ok) throw new Error('Erro ao submeter formulário')
+      // Criar lead
+      const { data: lead, error: leadError } = await supabase
+        .from('leads')
+        .insert([
+          {
+            user_id: magnet.user_id || '',
+            card_id: null,
+            name: formData['name'] || '',
+            email: formData['email'] || '',
+            phone: formData['phone'] || '',
+            source: 'Lead Magnet',
+            lead_type: null,
+            status: 'novo',
+            notes: `Capturado via: ${magnet.title}`,
+            form_data: formData,
+          },
+        ])
+        .select()
+        .single()
+
+      if (leadError) throw leadError
+
+      // Incrementar leads_count
+      await supabase
+        .from('lead_magnets')
+        .update({ leads_count: (magnet.leads_count || 0) + 1 })
+        .eq('id', magnet.id)
+
+      // Criar activity log
+      await supabase.from('lead_activities').insert([
+        {
+          lead_id: lead.id,
+          activity_type: 'form_submission',
+          description: `Preencheu formulário: ${magnet.title}`,
+          created_at: new Date().toISOString(),
+        },
+      ])
 
       setSubmitted(true)
-      setAnswers({})
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao submeter')
-    } finally {
-      setSubmitting(false)
+    } catch (e: any) {
+      alert('Erro ao submeter: ' + e.message)
     }
+    setSubmitting(false)
   }
 
-  if (loading) return <div style={{ minHeight: '100vh', background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A carregar...</div>
-  if (error || !magnet) return <div style={{ minHeight: '100vh', background: '#0f172a', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Erro: {error || 'Formulário não encontrado'}</div>
-  if (submitted) return <div style={{ minHeight: '100vh', background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}><div style={{ textAlign: 'center' }}><div style={{ fontSize: 48, marginBottom: 20 }}>✅</div><h1>Obrigado!</h1><p style={{ color: 'rgba(255,255,255,0.7)' }}>{magnet.thank_you_message}</p></div></div>
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+        <div style={{ color: 'rgba(255,255,255,0.5)' }}>A carregar...</div>
+      </div>
+    )
+  }
 
-  const form = magnet.form_fields as LeadMagnetForm
-  const questions = form.questions || []
+  if (!magnet) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+        <div style={{ color: '#ef4444', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
+          <h1 style={{ color: '#fff', margin: '0 0 8px' }}>Campanha não encontrada</h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)' }}>Esta campanha pode ter sido removida ou o link está incorreto.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (submitted) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', padding: 20 }}>
+        <div style={{ textAlign: 'center', maxWidth: 400 }}>
+          <div style={{ fontSize: 64, marginBottom: 24 }}>✅</div>
+          <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 900, margin: '0 0 12px' }}>Obrigado!</h1>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+            {magnet.thank_you_message || 'O teu pedido foi recebido com sucesso.'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', padding: '40px 20px' }}>
-      <div style={{ maxWidth: 700, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: '#0f172a', padding: 20 }}>
+      <div style={{ maxWidth: 500, margin: '0 auto', paddingTop: 40, paddingBottom: 40 }}>
         {magnet.cover_image_url && (
           <img
             src={magnet.cover_image_url}
             alt={magnet.title}
-            style={{ width: '100%', height: 300, objectFit: 'cover', borderRadius: 12, marginBottom: 32 }}
+            style={{ width: '100%', borderRadius: 12, marginBottom: 24, maxHeight: 200, objectFit: 'cover' }}
           />
         )}
 
-        <h1 style={{ color: '#fff', fontSize: 32, marginBottom: 12 }}>{magnet.title}</h1>
-
+        <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 900, margin: '0 0 8px' }}>{magnet.title}</h1>
         {magnet.description && (
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, marginBottom: 32 }}>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
             {magnet.description}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {questions.map((q) => (
-            <div key={q.id}>
-              <label style={{ display: 'block', color: '#fff', marginBottom: 8, fontWeight: 600 }}>
-                {q.question}
-                {q.is_required && <span style={{ color: '#f87171' }}> *</span>}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {form?.fields.map((field) => (
+            <div key={field.id}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 6 }}>
+                {field.label}
+                {field.required && <span style={{ color: '#ef4444' }}> *</span>}
               </label>
-
-              {q.description && (
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginBottom: 8 }}>
-                  {q.description}
-                </p>
-              )}
-
-              {q.type === 'text' && (
-                <input
-                  type="text"
-                  placeholder={q.placeholder || ''}
-                  value={(answers[q.id || ''] as string) || ''}
-                  onChange={(e) => setAnswers(prev => ({ ...prev, [q.id || '']: e.target.value }))}
-                  required={q.is_required}
-                  style={inputStyle}
-                />
-              )}
-
-              {q.type === 'email' && (
-                <input
-                  type="email"
-                  placeholder={q.placeholder || 'seu@email.com'}
-                  value={(answers[q.id || ''] as string) || ''}
-                  onChange={(e) => setAnswers(prev => ({ ...prev, [q.id || '']: e.target.value }))}
-                  required={q.is_required}
-                  style={inputStyle}
-                />
-              )}
-
-              {q.type === 'textarea' && (
-                <textarea
-                  placeholder={q.placeholder || ''}
-                  value={(answers[q.id || ''] as string) || ''}
-                  onChange={(e) => setAnswers(prev => ({ ...prev, [q.id || '']: e.target.value }))}
-                  required={q.is_required}
-                  style={{ ...inputStyle, minHeight: 120 }}
-                />
-              )}
-
-              {q.type === 'date' && (
-                <input
-                  type="date"
-                  value={(answers[q.id || ''] as string) || ''}
-                  onChange={(e) => setAnswers(prev => ({ ...prev, [q.id || '']: e.target.value }))}
-                  required={q.is_required}
-                  style={inputStyle}
-                />
-              )}
-
-              {q.type === 'single_choice' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {(q.options || []).map((opt) => (
-                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff' }}>
-                      <input
-                        type="radio"
-                        name={q.id}
-                        value={opt.value}
-                        checked={(answers[q.id || ''] as string) === opt.value}
-                        onChange={(e) => setAnswers(prev => ({ ...prev, [q.id || '']: e.target.value }))}
-                        required={q.is_required}
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-              )}
-
-              {q.type === 'multiple_choice' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {(q.options || []).map((opt) => (
-                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff' }}>
-                      <input
-                        type="checkbox"
-                        value={opt.value}
-                        checked={((answers[q.id || ''] as string[]) || []).includes(opt.value)}
-                        onChange={(e) => {
-                          const current = ((answers[q.id || ''] as string[]) || [])
-                          const next = e.target.checked ? [...current, opt.value] : current.filter((v) => v !== opt.value)
-                          setAnswers(prev => ({ ...prev, [q.id || '']: next }))
-                        }}
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-              )}
-
-              {q.type === 'rating' && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setAnswers(prev => ({ ...prev, [q.id || '']: String(n) }))}
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 6,
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        background: (answers[q.id || ''] as string) === String(n) ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255,255,255,0.08)',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
+              <input
+                type={field.type === 'tel' ? 'tel' : field.type === 'email' ? 'email' : 'text'}
+                value={formData[field.id] || ''}
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
+                  if (errors[field.id]) {
+                    setErrors((prev) => {
+                      const newErrors = { ...prev }
+                      delete newErrors[field.id]
+                      return newErrors
+                    })
+                  }
+                }}
+                placeholder={field.label}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  height: 44,
+                  borderRadius: 10,
+                  border: errors[field.id] ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)',
+                  fontSize: 13,
+                  background: 'rgba(255,255,255,0.07)',
+                  color: '#fff',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+              {errors[field.id] && (
+                <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors[field.id]}</p>
               )}
             </div>
           ))}
@@ -217,32 +264,26 @@ export default function FormLandingPage() {
             type="submit"
             disabled={submitting}
             style={{
-              padding: '12px 24px',
-              borderRadius: 8,
-              border: '1px solid rgba(34, 197, 94, 0.4)',
-              background: 'rgba(34, 197, 94, 0.2)',
-              color: '#86efac',
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              fontSize: 16,
-              fontWeight: 600,
-              marginTop: 24,
+              padding: '14px 0',
+              borderRadius: 10,
+              border: 'none',
+              background: 'linear-gradient(135deg,#10b981,#059669)',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: 14,
+              cursor: 'pointer',
+              marginTop: 8,
+              opacity: submitting ? 0.6 : 1,
             }}
           >
-            {submitting ? 'A enviar...' : 'Enviar'}
+            {submitting ? '⏳ A enviar...' : '✓ Enviar'}
           </button>
         </form>
+
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '24px 0 0' }}>
+          Protegido por Kardme
+        </p>
       </div>
     </div>
   )
 }
-
-const inputStyle = {
-  width: '100%',
-  padding: '10px 14px',
-  borderRadius: 8,
-  border: '1px solid rgba(255,255,255,0.15)',
-  background: 'rgba(255,255,255,0.08)',
-  color: '#fff',
-  fontSize: 14,
-  fontFamily: 'inherit',
-} as const
