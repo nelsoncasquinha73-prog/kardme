@@ -414,14 +414,14 @@ export default function FormBuilder({
                   onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                   style={{
                     width: '100%',
-                
-padding: '8px 10px',
+                    padding: '8px 10px',
                     height: 32,
                     borderRadius: 6,
                     border: '1px solid rgba(255,255,255,0.1)',
                     fontSize: 12,
                     background: 'rgba(255,255,255,0.05)',
-                    color: '#fff',
+                    
+ color: '#fff',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
@@ -499,10 +499,14 @@ padding: '8px 10px',
                         borderRadius: 6,
                         border: '1px solid rgba(255,255,255,0.1)',
                         background: 'rgba(255,255,255,0.05)',
-                        color: 'rgba(255,255,255,0.7)',
+                        color: 'rgba(255,255,255,0.75)',
                         fontSize: 12,
                         display: 'flex',
                         alignItems: 'center',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        pointerEvents: 'none',
                       }}
                     >
                       {getFieldById(field.showIf.fieldId)?.label || 'Campo não encontrado'}
