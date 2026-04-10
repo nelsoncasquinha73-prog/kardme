@@ -307,6 +307,14 @@ export default function FormBuilder({
     return fields.findIndex((f) => f.id === fieldId)
   }
 
+  function getClosestPreviousFieldWithOptions(currentFieldId: string): FormField | undefined {
+    const currentIndex = getFieldIndex(currentFieldId)
+    const previousFields = fields
+      .slice(0, currentIndex)
+      .filter((f) => isFieldTypeWithOptions(f.type) && (f.options || []).length > 0)
+    return previousFields[previousFields.length - 1]
+  }
+
   function getPreviousFieldsWithOptions(currentFieldId: string): FormField[] {
     const currentIndex = getFieldIndex(currentFieldId)
     const previousFields = fields.slice(0, currentIndex).filter((f) => isFieldTypeWithOptions(f.type))
@@ -482,10 +490,13 @@ export default function FormBuilder({
                 {!field.showIf ? (
                   <button
                     onClick={() => {
-                      const prevFields = getPreviousFieldsWithOptions(field.id)
-                      if (prevFields.length > 0) {
+                      const closestField = getClosestPreviousFieldWithOptions(field.id)
+                      if (closestField) {
                         updateField(field.id, {
-                          showIf: { fieldId: prevFields[0].id, value: '' },
+                          showIf: {
+                            fieldId: closestField.id,
+                            value: closestField.options?.[0] || '',
+                          },
                         })
                       }
                     }}
@@ -507,15 +518,8 @@ export default function FormBuilder({
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
                     <select
                       value={field.showIf.fieldId}
-                      onChange={(e) => {
-                        const selectedField = getFieldById(e.target.value)
-                        updateField(field.id, {
-                          showIf: {
-                            fieldId: e.target.value,
-                            value: selectedField?.options?.[0] || '',
-                          },
-                        })
-                      }}
+                      onChange={() => {}}
+                      disabled
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -585,7 +589,7 @@ export default function FormBuilder({
                   </div>
                 )}
 
-                {getPreviousFieldsWithOptions(field.id).length === 0 && (
+                {!getClosestPreviousFieldWithOptions(field.id) && (
                   <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
                     Para usar lógica condicional, cria antes uma pergunta do tipo dropdown, radio ou checkbox.
                   </div>
