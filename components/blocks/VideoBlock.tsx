@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 
 type VideoSettings = {
   url: string
@@ -67,7 +68,7 @@ function parseVideoUrl(url: string): VideoInfo {
       type: 'vimeo',
       videoId,
       embedUrl: `https://player.vimeo.com/video/${videoId}?autoplay=1`,
-      thumbnailUrl: undefined, // Vimeo needs API call for thumbnail
+      thumbnailUrl: undefined,
     }
   }
 
@@ -235,13 +236,14 @@ export default function VideoBlock({ settings, style }: Props) {
         </div>
       </div>
 
-      {/* Video Modal */}
-      {isModalOpen && (
+      {/* Video Modal via Portal */}
+      {isModalOpen && typeof document !== 'undefined' && createPortal(
         <VideoModal
           videoInfo={videoInfo}
           title={settings.title}
           onClose={() => setIsModalOpen(false)}
-        />
+        />,
+        document.body
       )}
     </>
   )
@@ -262,7 +264,6 @@ function VideoModal({ videoInfo, title, onClose }: VideoModalProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Prevent body scroll when modal is open
   React.useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
