@@ -215,7 +215,9 @@ export default function FormBuilder({
 
   function getPreviousFieldsWithOptions(currentFieldId: string): FormField[] {
     const currentIndex = getFieldIndex(currentFieldId)
-    return fields.slice(0, currentIndex).filter((f) => isFieldTypeWithOptions(f.type))
+    const previousFields = fields.slice(0, currentIndex).filter((f) => isFieldTypeWithOptions(f.type))
+    if (previousFields.length === 0) return []
+    return [previousFields[previousFields.length - 1]]
   }
 
   function getFieldById(fieldId: string): FormField | undefined {
