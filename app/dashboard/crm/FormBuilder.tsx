@@ -184,7 +184,56 @@ export default function FormBuilder({
   }
 
   function updateField(id: string, updates: Partial<FormField>) {
-    setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)))
+    setFields((prev) => {
+      const next = prev.map((f) => {
+        if (f.id !== id) return f
+
+        const merged = { ...f, ...updates }
+
+        if (updates.type && !isFieldTypeWithOptions(updates.type)) {
+          delete merged.options
+        }
+
+        if (updates.type && ['select', 'radio', 'checkbox'].includes(updates.type) && !merged.options) {
+          merged.options = []
+        }
+
+        if (merged.showIf) {
+          const sourceField = prev.find((field) => field.id === merged.showIf?.fieldId)
+          const sourceOptions = sourceField?.options || []
+          if (!sourceOptions.includes(merged.showIf.value)) {
+            merged.showIf = {
+              fieldId: merged.showIf.fieldId,
+              value: sourceOptions[0] || '',
+            }
+          }
+        }
+
+        return merged
+      })
+
+      return next.map((field) => {
+        if (!field.showIf) return field
+
+        const sourceField = next.find((f) => f.id === field.showIf?.fieldId)
+        if (!sourceField || !isFieldTypeWithOptions(sourceField.type)) {
+          return { ...field, showIf: undefined }
+        }
+
+        const sourceOptions = sourceField.options || []
+        if (!sourceOptions.includes(field.showIf.value)) {
+          return {
+            ...field,
+            showIf: {
+              fieldId: field.showIf.fieldId,
+              value: sourceOptions[0] || '',
+            },
+          }
+        }
+
+        return field
+      })
+    })
   }
 
   function updateOptionsText(id: string, text: string) {
