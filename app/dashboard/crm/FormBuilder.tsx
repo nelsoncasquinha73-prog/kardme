@@ -107,7 +107,7 @@ export default function FormBuilder({
 
         setForm(updated)
         if (onSave) onSave(updated)
-        alert('Formulário guardado com sucesso!')
+        alert('Perguntas guardadas com sucesso!')
       } else {
         const { data, error } = await supabase
           .from('lead_magnet_forms')
@@ -138,7 +138,7 @@ export default function FormBuilder({
 
         setForm(data)
         if (onSave) onSave(data)
-        alert('Formulário criado com sucesso!')
+        alert('Perguntas guardadas com sucesso!')
       }
     } catch (e: any) {
       alert('Erro ao guardar: ' + e.message)
@@ -300,7 +300,7 @@ export default function FormBuilder({
           opacity: saving ? 0.6 : 1,
         }}
       >
-        {saving ? '💾 A guardar...' : '✓ Guardar formulário'}
+        {saving ? '💾 A guardar...' : '✓ Guardar perguntas'}
       </button>
     </div>
   )
