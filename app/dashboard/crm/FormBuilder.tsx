@@ -34,14 +34,31 @@ export default function FormBuilder({
     { id: 'email', label: 'Email', type: 'email', required: true, placeholder: 'O teu email' },
     { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
   ])
+  const [optionsTextMap, setOptionsTextMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (formId) {
       loadForm()
+    } else {
+      const defaults = [
+        { id: 'name', label: 'Nome', type: 'text', required: true, placeholder: 'O teu nome' },
+        { id: 'email', label: 'Email', type: 'email', required: true, placeholder: 'O teu email' },
+        { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
+      ] as FormField[]
+      setFields(defaults)
+      syncOptionsText(defaults)
     }
   }, [formId])
+
+  function syncOptionsText(nextFields: FormField[]) {
+    const nextMap: Record<string, string> = {}
+    nextFields.forEach((field) => {
+      nextMap[field.id] = (field.options || []).join('\n')
+    })
+    setOptionsTextMap(nextMap)
+  }
 
   async function loadForm() {
     setLoading(true)
@@ -55,12 +72,18 @@ export default function FormBuilder({
       if (error && error.code !== 'PGRST116') throw error
 
       if (data) {
+        const nextFields =
+          Array.isArray(data.fields) && data.fields.length > 0
+            ? data.fields
+            : [
+                { id: 'name', label: 'Nome', type: 'text', required: true, placeholder: 'O teu nome' },
+                { id: 'email', label: 'Email', type: 'email', required: true, placeholder: 'O teu email' },
+                { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
+              ]
+
         setForm(data)
-        setFields(Array.isArray(data.fields) && data.fields.length > 0 ? data.fields : [
-          { id: 'name', label: 'Nome', type: 'text', required: true, placeholder: 'O teu nome' },
-          { id: 'email', label: 'Email', type: 'email', required: true, placeholder: 'O teu email' },
-          { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
-        ])
+        setFields(nextFields)
+        syncOptionsText(nextFields)
       }
     } catch (e) {
       console.error(e)
@@ -156,14 +179,29 @@ export default function FormBuilder({
       required: false,
     }
     setFields((prev) => [...prev, newField])
+    setOptionsTextMap((prev) => ({ ...prev, [newField.id]: '' }))
   }
 
   function updateField(id: string, updates: Partial<FormField>) {
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)))
   }
 
+  function updateOptionsText(id: string, text: string) {
+    setOptionsTextMap((prev) => ({ ...prev, [id]: text }))
+    const options = text
+      .split('\n')
+      .map((v) => v.trim())
+      .filter(Boolean)
+    updateField(id, { options })
+  }
+
   function removeField(id: string) {
     setFields((prev) => prev.filter((f) => f.id !== id))
+    setOptionsTextMap((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
   }
 
   function isFieldTypeWithOptions(type: FormField['type']): boolean {
@@ -188,7 +226,6 @@ export default function FormBuilder({
               background: 'rgba(255,255,255,0.02)',
             }}
           >
-            {/* Row 1: Pergunta + Tipo + Obrigatório + Delete */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 4 }}>
@@ -274,7 +311,6 @@ export default function FormBuilder({
               </button>
             </div>
 
-            {/* Row 2: Placeholder (se for text/email/tel/textarea) */}
             {['text', 'email', 'tel', 'textarea'].includes(field.type) && (
               <div style={{ marginBottom: 8 }}>
                 <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 4 }}>
@@ -299,21 +335,15 @@ export default function FormBuilder({
               </div>
             )}
 
-            {/* Row 3: Opções (se for select/radio/checkbox) */}
             {isFieldTypeWithOptions(field.type) && (
               <div>
                 <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 4 }}>
                   Opções (uma por linha)
                 </label>
                 <textarea
-                  value={(field.options || []).join('\n')}
-                  onChange={(e) => {
-                    const opts = e.target.value
-                      .split('\n')
-                      .map((v) => v.trim())
-                      .filter(Boolean)
-                    updateField(field.id, { options: opts })
-                  }}
+                  value={optionsTextMap[field.id] ?? (field.options || []).join('\n')}
+                  onChange={(e) => updateOptionsText(field.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
                   style={{
                     width: '100%',
                     padding: '8px 10px',
@@ -328,8 +358,8 @@ export default function FormBuilder({
                     fontFamily: 'monospace',
                     resize: 'vertical',
                     whiteSpace: 'pre-wrap',
-                    wordWrap: 'break-word',
                   }}
+                  placeholder={'Opção 1\nOpção 2\nOpção 3'}
                 />
               </div>
             )}
