@@ -327,8 +327,9 @@ export default function FormBuilder({
                     boxSizing: 'border-box',
                     fontFamily: 'monospace',
                     resize: 'vertical',
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word',
                   }}
-                  placeholder="Opção 1&#10;Opção 2&#10;Opção 3"
                 />
               </div>
             )}
