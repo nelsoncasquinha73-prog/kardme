@@ -31,7 +31,7 @@ export default function FormPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [formData, setFormData] = useState<Record<string, string>>({})
+  const [formData, setFormData] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -53,13 +53,11 @@ export default function FormPage() {
 
       setMagnet(data)
 
-      // Incrementar views
       await supabase
         .from('lead_magnets')
         .update({ views_count: (data.views_count || 0) + 1 })
         .eq('id', data.id)
 
-      // Carregar formulário
       if (data.form_id) {
         const { data: formData, error: formError } = await supabase
           .from('lead_magnet_forms')
@@ -69,10 +67,9 @@ export default function FormPage() {
 
         if (!formError && formData) {
           setForm(formData)
-          // Inicializar formData com campos vazios
-          const initial: Record<string, string> = {}
+          const initial: Record<string, any> = {}
           formData.fields.forEach((field: FormField) => {
-            initial[field.id] = ''
+            initial[field.id] = field.type === 'checkbox' ? [] : ''
           })
           setFormData(initial)
         }
@@ -88,22 +85,31 @@ export default function FormPage() {
 
     if (form) {
       form.fields.forEach((field) => {
-        const value = formData[field.id]?.trim()
+        const value = formData[field.id]
 
-        if (field.required && !value) {
-          newErrors[field.id] = `${field.label} é obrigatório`
+        if (field.required) {
+          if (field.type === 'checkbox') {
+            if (!Array.isArray(value) || value.length === 0) {
+              newErrors[field.id] = `\${field.label} é obrigatório`
+            }
+          } else {
+            const stringValue = String(value || '').trim()
+            if (!stringValue) {
+              newErrors[field.id] = `\${field.label} é obrigatório`
+            }
+          }
         }
 
         if (value && field.type === 'email') {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-          if (!emailRegex.test(value)) {
+          if (!emailRegex.test(String(value))) {
             newErrors[field.id] = 'Email inválido'
           }
         }
 
         if (value && field.type === 'tel') {
-          const telRegex = /^[\d\s\-\+$$]+$/
-          if (!telRegex.test(value)) {
+          const telRegex = /^[\d\s\-\+()]+$/
+          if (!telRegex.test(String(value))) {
             newErrors[field.id] = 'Telefone inválido'
           }
         }
@@ -123,12 +129,17 @@ export default function FormPage() {
     try {
       if (!magnet) throw new Error('Campanha não encontrada')
 
-      // Criar lead
       const formattedResponses = form?.fields
-        .map((field) => `${field.label}: ${formData[field.id] || '—'}`)
+        .map((field) => {
+          let value = formData[field.id]
+          if (Array.isArray(value)) {
+            value = value.join(', ')
+          }
+          return `\${field.label}: \${value || '—'}`
+        })
         .join('\n') || ''
-      
-      const notesText = `Capturado via: ${magnet.title}\n\nRespostas do formulário:\n${formattedResponses}`
+
+      const notesText = `Capturado via: \${magnet.title}\n\nRespostas do formulário:\n\${formattedResponses}`
 
       const { data: lead, error: leadError } = await supabase
         .from('leads')
@@ -148,18 +159,16 @@ export default function FormPage() {
 
       if (leadError) throw leadError
 
-      // Incrementar leads_count
       await supabase
         .from('lead_magnets')
         .update({ leads_count: (magnet.leads_count || 0) + 1 })
         .eq('id', magnet.id)
 
-      // Criar activity log
       await supabase.from('lead_activities').insert([
         {
           lead_id: lead.id,
           activity_type: 'form_submission',
-          description: `Preencheu formulário: ${magnet.title}`,
+          description: `Preencheu formulário: \${magnet.title}`,
           created_at: new Date().toISOString(),
         },
       ])
@@ -230,33 +239,163 @@ export default function FormPage() {
                 {field.label}
                 {field.required && <span style={{ color: '#ef4444' }}> *</span>}
               </label>
-              <input
-                type={field.type === 'tel' ? 'tel' : field.type === 'email' ? 'email' : 'text'}
-                value={formData[field.id] || ''}
-                onChange={(e) => {
-                  setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
-                  if (errors[field.id]) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev }
-                      delete newErrors[field.id]
-                      return newErrors
-                    })
-                  }
-                }}
-                placeholder={field.label}
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  height: 44,
-                  borderRadius: 10,
-                  border: errors[field.id] ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)',
-                  fontSize: 13,
-                  background: 'rgba(255,255,255,0.07)',
-                  color: '#fff',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
+
+              {['text', 'email', 'tel', 'textarea'].includes(field.type) && (
+                <>
+                  {field.type === 'textarea' ? (
+                    <textarea
+                      value={formData[field.id] || ''}
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
+                        if (errors[field.id]) {
+                          setErrors((prev) => {
+                            const newErrors = { ...prev }
+                            delete newErrors[field.id]
+                            return newErrors
+                          })
+                        }
+                      }}
+                      placeholder={field.placeholder || field.label}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        minHeight: 100,
+                        borderRadius: 10,
+                        border: errors[field.id] ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)',
+                        fontSize: 13,
+                        background: 'rgba(255,255,255,0.07)',
+                        color: '#fff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        fontFamily: 'inherit',
+                        resize: 'vertical',
+                      }}
+                    />
+                  ) : (
+                    <input
+                      type={field.type === 'tel' ? 'tel' : field.type === 'email' ? 'email' : 'text'}
+                      value={formData[field.id] || ''}
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
+                        if (errors[field.id]) {
+                          setErrors((prev) => {
+                            const newErrors = { ...prev }
+                            delete newErrors[field.id]
+                            return newErrors
+                          })
+                        }
+                      }}
+                      placeholder={field.placeholder || field.label}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        height: 44,
+                        borderRadius: 10,
+                        border: errors[field.id] ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)',
+                        fontSize: 13,
+                        background: 'rgba(255,255,255,0.07)',
+                        color: '#fff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  )}
+                </>
+              )}
+
+              {field.type === 'select' && (
+                <select
+                  value={formData[field.id] || ''}
+                  onChange={(e) => {
+                    setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
+                    if (errors[field.id]) {
+                      setErrors((prev) => {
+                        const newErrors = { ...prev }
+                        delete newErrors[field.id]
+                        return newErrors
+                      })
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    height: 44,
+                    borderRadius: 10,
+                    border: errors[field.id] ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)',
+                    fontSize: 13,
+                    background: 'rgba(255,255,255,0.07)',
+                    color: '#fff',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <option value="">— Seleciona uma opção —</option>
+                  {field.options?.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {field.type === 'radio' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {field.options?.map((opt) => (
+                    <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                      <input
+                        type="radio"
+                        name={field.id}
+                        value={opt}
+                        checked={formData[field.id] === opt}
+                        onChange={(e) => {
+                          setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))
+                          if (errors[field.id]) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev }
+                              delete newErrors[field.id]
+                              return newErrors
+                            })
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {field.type === 'checkbox' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {field.options?.map((opt) => (
+                    <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                      <input
+                        type="checkbox"
+                        value={opt}
+                        checked={Array.isArray(formData[field.id]) && formData[field.id].includes(opt)}
+                        onChange={(e) => {
+                          const currentValues: string[] = Array.isArray(formData[field.id]) ? formData[field.id] as string[] : []
+                          const newValues = e.target.checked
+                            ? [...currentValues, opt]
+                            : currentValues.filter((v: string) => v !== opt)
+                          setFormData((prev) => ({ ...prev, [field.
+id]: newValues }))
+                          if (errors[field.id]) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev }
+                              delete newErrors[field.id]
+                              return newErrors
+                            })
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              )}
+
               {errors[field.id] && (
                 <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors[field.id]}</p>
               )}

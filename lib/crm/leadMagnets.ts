@@ -2,11 +2,22 @@ import { supabase } from '@/lib/supabaseClient'
 
 export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form'
 
+export type FormFieldType =
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'textarea'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+
 export type FormField = {
   id: string
   label: string
-  type: 'text' | 'email' | 'tel'
+  type: FormFieldType
   required: boolean
+  placeholder?: string
+  options?: string[]
 }
 
 export type LeadMagnet = {
@@ -93,7 +104,7 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
 }
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
-  { id: 'name', label: 'Nome', type: 'text', required: true },
-  { id: 'email', label: 'Email', type: 'email', required: true },
-  { id: 'phone', label: 'Telefone', type: 'tel', required: false },
+  { id: 'name', label: 'Nome', type: 'text', required: true, placeholder: 'O teu nome' },
+  { id: 'email', label: 'Email', type: 'email', required: true, placeholder: 'O teu email' },
+  { id: 'phone', label: 'Telefone', type: 'tel', required: false, placeholder: 'O teu telefone' },
 ]
