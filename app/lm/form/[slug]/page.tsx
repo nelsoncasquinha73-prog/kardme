@@ -134,7 +134,6 @@ export default function FormPage() {
             email: formData['email'] || '',
             phone: formData['phone'] || '',
             source: 'Lead Magnet',
-            lead_type: null,
             status: 'novo',
             notes: `Capturado via: ${magnet.title}`,
             form_data: formData,
