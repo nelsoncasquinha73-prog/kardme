@@ -124,6 +124,12 @@ export default function FormPage() {
       if (!magnet) throw new Error('Campanha não encontrada')
 
       // Criar lead
+      const formattedResponses = form?.fields
+        .map((field) => `${field.label}: ${formData[field.id] || '—'}`)
+        .join('\n') || ''
+      
+      const notesText = `Capturado via: ${magnet.title}\n\nRespostas do formulário:\n${formattedResponses}`
+
       const { data: lead, error: leadError } = await supabase
         .from('leads')
         .insert([
@@ -133,7 +139,7 @@ export default function FormPage() {
             name: formData['name'] || '',
             email: formData['email'] || '',
             phone: formData['phone'] || '',
-            notes: `Capturado via: ${magnet.title}`,
+            notes: notesText,
             form_data: formData,
           },
         ])
