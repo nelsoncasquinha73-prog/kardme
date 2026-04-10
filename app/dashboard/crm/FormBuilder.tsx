@@ -38,49 +38,6 @@ export default function FormBuilder({
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  function normalizeFields(nextFields: FormField[]): FormField[] {
-    return nextFields.map((field, idx) => {
-      if (!field.showIf) return field
-
-      const sourceField = nextFields.find((f) => f.id === field.showIf?.fieldId)
-      const sourceHasOptions = sourceField && isFieldTypeWithOptions(sourceField.type)
-      const sourceOptions = sourceField?.options || []
-
-      if (!sourceHasOptions || sourceOptions.length === 0) {
-        const previousFieldsWithOptions = nextFields
-          .slice(0, idx)
-          .filter((f) => isFieldTypeWithOptions(f.type))
-
-        if (previousFieldsWithOptions.length === 0) {
-          return { ...field, showIf: undefined }
-        }
-
-        const closestField = previousFieldsWithOptions[previousFieldsWithOptions.length - 1]
-        const closestOptions = closestField.options || []
-
-        return {
-          ...field,
-          showIf: {
-            fieldId: closestField.id,
-            value: closestOptions[0] || '',
-          },
-        }
-      }
-
-      if (!sourceOptions.includes(field.showIf.value)) {
-        return {
-          ...field,
-          showIf: {
-            fieldId: field.showIf.fieldId,
-            value: sourceOptions[0] || '',
-          },
-        }
-      }
-
-      return field
-    })
-  }
-
   useEffect(() => {
     if (formId) {
       loadForm()
@@ -134,6 +91,31 @@ export default function FormBuilder({
       console.error(e)
     }
     setLoading(false)
+  }
+
+  function normalizeFields(nextFields: FormField[]): FormField[] {
+    return nextFields.map((field, idx) => {
+      if (!field.showIf) return field
+
+      const previousFieldsWithOptions = nextFields
+        .slice(0, idx)
+        .filter((f) => isFieldTypeWithOptions(f.type) && (f.options || []).length > 0)
+
+      if (previousFieldsWithOptions.length === 0) {
+        return { ...field, showIf: undefined }
+      }
+
+      const closestField = previousFieldsWithOptions[previousFieldsWithOptions.length - 1]
+      const closestOptions = closestField.options || []
+
+      return {
+        ...field,
+        showIf: {
+          fieldId: closestField.id,
+          value: closestOptions.includes(field.showIf.value) ? field.showIf.value : (closestOptions[0] || ''),
+        },
+      }
+    })
   }
 
   async function handleSave() {
@@ -315,13 +297,6 @@ export default function FormBuilder({
     return previousFields[previousFields.length - 1]
   }
 
-  function getPreviousFieldsWithOptions(currentFieldId: string): FormField[] {
-    const currentIndex = getFieldIndex(currentFieldId)
-    const previousFields = fields.slice(0, currentIndex).filter((f) => isFieldTypeWithOptions(f.type))
-    if (previousFields.length === 0) return []
-    return [previousFields[previousFields.length - 1]]
-  }
-
   function getFieldById(fieldId: string): FormField | undefined {
     return fields.find((f) => f.id === fieldId)
   }
@@ -439,7 +414,8 @@ export default function FormBuilder({
                   onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '8px 10px',
+                
+padding: '8px 10px',
                     height: 32,
                     borderRadius: 6,
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -516,29 +492,21 @@ export default function FormBuilder({
                   </button>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
-                    <select
-                      value={field.showIf.fieldId}
-                      onChange={() => {}}
-                      disabled
+                    <div
                       style={{
-                        width: '100%',
                         padding: '8px 10px',
                         height: 32,
                         borderRadius: 6,
                         border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: 12,
                         background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        outline: 'none',
-                        boxSizing: 'border-box',
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: 12,
+                        display: 'flex',
+                        alignItems: 'center',
                       }}
                     >
-                      {getPreviousFieldsWithOptions(field.id).map((prevField) => (
-                        <option key={prevField.id} value={prevField.id}>
-                          {prevField.label}
-                        </option>
-                      ))}
-                    </select>
+                      {getFieldById(field.showIf.fieldId)?.label || 'Campo não encontrado'}
+                    </div>
 
                     <select
                       value={field.showIf.value}
