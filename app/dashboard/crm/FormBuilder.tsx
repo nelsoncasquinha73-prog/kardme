@@ -101,6 +101,7 @@ export default function FormBuilder({
         required: !!field.required,
         placeholder: field.placeholder || undefined,
         options: field.options && field.options.length > 0 ? field.options : undefined,
+        showIf: field.showIf || undefined,
       }))
 
       if (form) {
@@ -208,6 +209,19 @@ export default function FormBuilder({
     return ['select', 'radio', 'checkbox'].includes(type)
   }
 
+  function getFieldIndex(fieldId: string): number {
+    return fields.findIndex((f) => f.id === fieldId)
+  }
+
+  function getPreviousFieldsWithOptions(currentFieldId: string): FormField[] {
+    const currentIndex = getFieldIndex(currentFieldId)
+    return fields.slice(0, currentIndex).filter((f) => isFieldTypeWithOptions(f.type))
+  }
+
+  function getFieldById(fieldId: string): FormField | undefined {
+    return fields.find((f) => f.id === fieldId)
+  }
+
   if (loading) {
     return <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>A carregar...</div>
   }
@@ -215,7 +229,7 @@ export default function FormBuilder({
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        {fields.map((field) => (
+        {fields.map((field, idx) => (
           <div
             key={field.id}
             style={{
@@ -336,7 +350,7 @@ export default function FormBuilder({
             )}
 
             {isFieldTypeWithOptions(field.type) && (
-              <div>
+              <div style={{ marginBottom: 8 }}>
                 <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 4 }}>
                   Opções (uma por linha)
                 </label>
@@ -363,46 +377,163 @@ export default function FormBuilder({
                 />
               </div>
             )}
+
+            {idx > 0 && (
+              <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6 }}>
+                  Mostrar se... (opcional)
+                </label>
+                {!field.showIf ? (
+                  <button
+                    onClick={() => {
+                      const prevFields = getPreviousFieldsWithOptions(field.id)
+                      if (prevFields.length > 0) {
+                        updateField(field.id, {
+                          showIf: { fieldId: prevFields[0].id, value: '' },
+                        })
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      background: 'transparent',
+                      color: 'rgba(255,255,255,0.6)',
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    + Adicionar condição
+                  </button>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
+                    <select
+                      value={field.showIf.fieldId}
+                      onChange={(e) => {
+                        const selectedField = getFieldById(e.target.value)
+                        updateField(field.id, {
+                          showIf: {
+                            fieldId: e.target.value,
+                            value: selectedField?.options?.[0] || '',
+                          },
+                        })
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        height: 32,
+                        borderRadius: 6,
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: 12,
+                        background: 'rgba(255,255,255,0.05)',
+                        color: '#fff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {getPreviousFieldsWithOptions(field.id).map((prevField) => (
+                        <option key={prevField.id} value={prevField.id}>
+                          {prevField.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={field.showIf.value}
+                      onChange={(e) =>
+                        updateField(field.id, {
+                          showIf: {
+                            fieldId: field.showIf!.fieldId,
+                            value: e.target.value,
+                          },
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        height: 32,
+                        borderRadius: 6,
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: 12,
+                        background: 'rgba(255,255,255,0.05)',
+                        color: '#fff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {(getFieldById(field.showIf.fieldId)?.options || []).map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      onClick={() => updateField(field.id, { showIf: undefined })}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: 6,
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: 'pointer',
+                        height: 32,
+                      }}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                )}
+
+                {getPreviousFieldsWithOptions(field.id).length === 0 && (
+                  <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                    Para usar lógica condicional, cria antes uma pergunta do tipo dropdown, radio ou checkbox.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      <button
-        onClick={addField}
-        style={{
-          width: '100%',
-          padding: '10px 0',
-          borderRadius: 8,
-          border: '1px dashed rgba(59,130,246,0.4)',
-          background: 'rgba(59,130,246,0.08)',
-          color: '#93c5fd',
-          fontWeight: 700,
-          fontSize: 12,
-          cursor: 'pointer',
-          marginBottom: 12,
-        }}
-      >
-        + Adicionar pergunta
-      </button>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={addField}
+          style={{
+            padding: '8px 12px',
+            borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.15)',
+            background: 'rgba(255,255,255,0.05)',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          + Adicionar pergunta
+        </button>
 
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        style={{
-          width: '100%',
-          padding: '10px 0',
-          borderRadius: 8,
-          border: 'none',
-          background: 'rgba(16,185,129,0.2)',
-          color: '#10b981',
-          fontWeight: 700,
-          fontSize: 12,
-          cursor: 'pointer',
-          opacity: saving ? 0.6 : 1,
-        }}
-      >
-        {saving ? '💾 A guardar...' : '✓ Guardar perguntas'}
-      </button>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            padding: '8px 12px',
+            borderRadius: 8,
+            border: 'none',
+            background: saving ? 'rgba(59,130,246,0.5)' : '#3b82f6',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 12,
+            cursor: saving ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {saving ? 'A guardar...' : 'Guardar perguntas'}
+        </button>
+      </div>
     </div>
   )
 }

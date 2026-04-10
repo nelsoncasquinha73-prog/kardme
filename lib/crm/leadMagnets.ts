@@ -11,6 +11,11 @@ export type FormFieldType =
   | 'radio'
   | 'checkbox'
 
+export type FormFieldCondition = {
+  fieldId: string
+  value: string
+}
+
 export type FormField = {
   id: string
   label: string
@@ -18,6 +23,7 @@ export type FormField = {
   required: boolean
   placeholder?: string
   options?: string[]
+  showIf?: FormFieldCondition
 }
 
 export type LeadMagnet = {
