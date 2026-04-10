@@ -460,9 +460,6 @@ export default function FormBuilder({
 
             {idx > 0 && (
               <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6 }}>
-                  Mostrar se... (opcional)
-                </label>
                 {!field.showIf ? (
                   <button
                     onClick={() => {
