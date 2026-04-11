@@ -118,8 +118,8 @@ export async function POST(req: Request) {
             userId: magnet.user_id,
             leadId: leadId,
             recipientEmail: ownerData.email,
-            subject: `Nova lead via Lead Magnet: ${name}`,
-            body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
+            subject: `Nova lead via ${magnet.magnet_type === "raffle" ? "Lead Magnet - Sorteio" : magnet.magnet_type === "form" ? "Lead Magnet - Formulário" : "Lead Magnet"}: ${name}`,
+            body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}${number_chosen ? `\nNúmero escolhido: 🎰 ${number_chosen}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
           }),
         })
       }
@@ -131,8 +131,8 @@ export async function POST(req: Request) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
 
         // Usar template personalizado ou default
-        const defaultSubject = `📥 O teu recurso: ${magnet.title}`
         const isRaffle = magnet.magnet_type === 'raffle'
+        const defaultSubject = isRaffle ? `🎰 A tua participação no sorteio: ${magnet.title}` : `📥 O teu recurso: ${magnet.title}`
         const defaultBody = isRaffle
           ? `Olá ${name},\n\nObrigado por participares no sorteio "${magnet.title}"!\n\nO teu número da sorte é: 🎰 ${number_chosen}\n\nGuarda este email — se fores o vencedor entraremos em contacto contigo.\n\nBoa sorte!\n\nMelhores cumprimentos`
           : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
