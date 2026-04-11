@@ -123,7 +123,6 @@ export default function RafflePage() {
           phone: modal.phone.trim() || null,
           consent_given: true,
           marketing_opt_in: true,
-            number_chosen: modal.number,
         }])
 
       if (entryError) {
