@@ -30,28 +30,57 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Lead magnet não encontrado.' }, { status: 404 })
     }
 
-    // Inserir lead na tabela leads
-    const { data: leadData, error: leadError } = await supabaseAdmin
+    // Verificar se lead já existe (mesmo email + user_id)
+    const { data: existingLead } = await supabaseAdmin
       .from('leads')
-      .insert([{
-        user_id: magnet.user_id,
-        name,
-        email,
-        phone: phone || null,
-        lead_source: magnet.magnet_type === 'raffle' ? 'Lead Magnet - Sorteio' : magnet.magnet_type === 'form' ? 'Lead Magnet - Formulário' : 'Lead Magnet',
-        lead_magnet_id: magnet.id,
-        consent_given: true,
-        marketing_opt_in: marketing_opt_in || false,
-        consent_timestamp: new Date().toISOString(),
-        consent_version: '1.0',
-      }])
       .select('id')
+      .eq('user_id', magnet.user_id)
+      .eq('email', email.toLowerCase().trim())
+      .maybeSingle()
 
-    if (leadError) {
-      return NextResponse.json({ error: leadError.message }, { status: 500 })
+    let leadId: string | null = null
+    const leadSource = magnet.magnet_type === 'raffle' ? 'Lead Magnet - Sorteio' : magnet.magnet_type === 'form' ? 'Lead Magnet - Formulário' : 'Lead Magnet'
+
+    if (existingLead) {
+      // Atualizar lead existente
+      const { error: updateError } = await supabaseAdmin
+        .from('leads')
+        .update({
+          lead_source: leadSource,
+          lead_magnet_id: magnet.id,
+          marketing_opt_in: marketing_opt_in || false,
+          consent_given: true,
+          consent_timestamp: new Date().toISOString(),
+        })
+        .eq('id', existingLead.id)
+
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
+      leadId = existingLead.id
+    } else {
+      // Inserir nova lead
+      const { data: leadData, error: leadError } = await supabaseAdmin
+        .from('leads')
+        .insert([{
+          user_id: magnet.user_id,
+          name,
+          email: email.toLowerCase().trim(),
+          phone: phone || null,
+          lead_source: leadSource,
+          lead_magnet_id: magnet.id,
+          consent_given: true,
+          marketing_opt_in: marketing_opt_in || false,
+          consent_timestamp: new Date().toISOString(),
+          consent_version: '1.0',
+        }])
+        .select('id')
+
+      if (leadError) {
+        return NextResponse.json({ error: leadError.message }, { status: 500 })
+      }
+      leadId = leadData?.[0]?.id
     }
-
-    const leadId = leadData?.[0]?.id
 
     // Registar atividade no histórico
     if (leadId) {
