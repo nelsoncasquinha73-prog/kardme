@@ -18,10 +18,13 @@ interface LeadMagnet {
   description?: string
   cover_image_url?: string
   thank_you_message?: string
+  welcome_email_subject?: string
+  welcome_email_body?: string
   raffle_config: RaffleConfig
   user_id: string
   leads_count: number
   views_count: number
+  slug: string
 }
 
 interface RaffleEntry {
@@ -94,6 +97,7 @@ export default function RafflePage() {
 
     setSubmitting(true)
     try {
+      // Verificar se já participou
       const { data: existing } = await supabase
         .from('raffle_entries')
         .select('id')
@@ -108,6 +112,7 @@ export default function RafflePage() {
         return
       }
 
+      // Inserir entrada no sorteio
       const { error: entryError } = await supabase
         .from('raffle_entries')
         .insert([{
@@ -131,19 +136,24 @@ export default function RafflePage() {
         throw entryError
       }
 
-      await supabase.from('leads').insert([{
-        user_id: magnet.user_id,
-        name: modal.name.trim(),
-        email: modal.email.toLowerCase().trim(),
-        phone: modal.phone.trim() || null,
-        notes: `Participou no sorteio "${magnet.title}" — escolheu o número ${modal.number}`,
-        lead_magnet_id: magnet.id,
-        consent_given: true,
-        marketing_opt_in: true,
-        created_at: new Date().toISOString(),
-      }])
+      // Chamar API capture para: criar lead no CRM + enviar emails (owner + boas-vindas)
+      try {
+        await fetch('/api/lead-magnets/capture', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: magnet.slug,
+            name: modal.name.trim(),
+            email: modal.email.toLowerCase().trim(),
+            phone: modal.phone.trim() || null,
+            marketing_opt_in: true,
+          }),
+        })
+      } catch (apiErr) {
+        console.error('Erro ao chamar capture API:', apiErr)
+        // Não bloqueia o fluxo — lead já foi registado no raffle_entries
+      }
 
-      await supabase.rpc('increment_lead_magnet_leads', { magnet_id: magnet.id })
       setEntries(prev => [...prev, { number_chosen: modal.number, is_winner: false }])
       setSelectedNumber(null)
       setSubmitted(true)
