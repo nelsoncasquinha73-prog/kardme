@@ -177,7 +177,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
-      ok: true,
+      ok: true, lead_id: leadId,
       file_url: magnet.file_url,
       thank_you_message: magnet.thank_you_message || 'Obrigado! O teu download está pronto.',
     }, { status: 200 })
