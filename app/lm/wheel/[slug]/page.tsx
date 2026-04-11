@@ -136,7 +136,7 @@ export default function WheelPage() {
       else {
         rotationRef.current = finalRot; drawWheel(finalRot)
         setResult(winner); setSpinning(false)
-        spawnConfetti(winner.is_prize)
+        spawnConfetti(winner.is_prize); if (winner.is_prize && leadId) notifyWinner(winner.label)
         const currentLeadId = leadId
         if (currentLeadId) incrementSpinCount(currentLeadId)
         const newCount = spinCount + 1
@@ -186,6 +186,13 @@ export default function WheelPage() {
     const id = await captureLeadAPI()
     if (id) setLeadId(id)
     setStep('spin')
+  }
+
+  async function notifyWinner(prizeLabel: string) {
+    if (!magnet || !leadId) return
+    try {
+      await fetch("/api/lead-magnets/wheel-winner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_id: leadId, slug: magnet.slug, prize_label: prizeLabel }) })
+    } catch (e) { console.error(e) }
   }
 
   function handleTryAgain() {
