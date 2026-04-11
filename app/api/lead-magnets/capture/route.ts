@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         name,
         email,
         phone: phone || null,
-        lead_source: 'Lead Magnet',
+        lead_source: magnet.magnet_type === 'raffle' ? 'Lead Magnet - Sorteio' : magnet.magnet_type === 'form' ? 'Lead Magnet - Formulário' : 'Lead Magnet',
         lead_magnet_id: magnet.id,
         consent_given: true,
         marketing_opt_in: marketing_opt_in || false,
