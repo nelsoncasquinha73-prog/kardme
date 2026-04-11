@@ -172,14 +172,16 @@ export default function FormBuilder({
 
         const { data: { user } } = await supabase.auth.getUser()
         console.log('leadMagnetId:', leadMagnetId, 'campos:', sanitizedFields.length, 'auth.uid:', user?.id, 'prop userId:', userId)
-        const { error: magnetError } = await supabase
+        const { data: magnetData, error: magnetError, status: magnetStatus } = await supabase
           .from('lead_magnets')
           .update({
             form_fields: sanitizedFields,
             updated_at: new Date().toISOString(),
           })
           .eq('id', leadMagnetId)
+          .select()
 
+        console.log('update result:', { magnetData, magnetError, magnetStatus })
         if (magnetError) throw magnetError
 
         const updated = {
