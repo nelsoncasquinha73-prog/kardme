@@ -134,6 +134,7 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   checklist: '✅ Checklist',
   webinar: '🎥 Webinar',
   form: '📝 Formulário',
+  raffle: '🎰 Sorteio',
 }
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
