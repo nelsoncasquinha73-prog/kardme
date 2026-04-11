@@ -170,13 +170,15 @@ export default function FormBuilder({
 
         if (error) throw error
 
-        await supabase
+        const { error: magnetError } = await supabase
           .from('lead_magnets')
           .update({
             form_fields: sanitizedFields,
             updated_at: new Date().toISOString(),
           })
           .eq('id', leadMagnetId)
+
+        if (magnetError) throw magnetError
 
         const updated = {
           ...form,
