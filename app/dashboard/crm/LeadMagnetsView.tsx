@@ -93,7 +93,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
     setUploadingCover(false)
   }
   function copyLink(m: LeadMagnet) {
-    const path = m.magnet_type === 'form' ? `/lm/form/\${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/\${m.slug}` : m.magnet_type === 'wheel' ? `/lm/wheel/\${m.slug}` : `/lm/\${m.slug}`
+    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : m.magnet_type === 'wheel' ? `/lm/wheel/${m.slug}` : `/lm/${m.slug}`
     navigator.clipboard.writeText(window.location.origin + path)
     setCopiedId(m.id); setTimeout(() => setCopiedId(null), 2000)
   }
@@ -140,7 +140,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#f59e0b'}}>{m.views_count>0?Math.round((m.leads_count/m.views_count)*100):0}%</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>CONVERSAO</div></div>
                 </div>
                 <div style={{background:'rgba(255,255,255,0.05)',borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type==='form'?`/lm/form/\${m.slug}`:m.magnet_type==='raffle'?`/lm/raffle/\${m.slug}`:m.magnet_type==='wheel'?`/lm/wheel/\${m.slug}`:`/lm/\${m.slug}`}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type==='form'?`/lm/form/${m.slug}`:m.magnet_type==='raffle'?`/lm/raffle/${m.slug}`:m.magnet_type==='wheel'?`/lm/wheel/${m.slug}`:`/lm/${m.slug}`}</span>
                   <button onClick={()=>copyLink(m)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
