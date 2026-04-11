@@ -116,7 +116,7 @@ export async function POST(req: Request) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: magnet.user_id,
-            leadId: leadData?.[0]?.id,
+            leadId: leadId,
             recipientEmail: ownerData.email,
             subject: `Nova lead via Lead Magnet: ${name}`,
             body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
