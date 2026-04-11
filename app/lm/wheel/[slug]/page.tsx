@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import styles from './wheel.module.css'
@@ -33,157 +33,191 @@ interface LeadMagnet {
 
 const DEFAULT_SLICES: WheelSlice[] = [
   { id: '1', label: '🏆 Prémio Principal', color: '#f59e0b', is_prize: true },
-  { id: '2', label: 'Tenta outra vez', color: '#6b7280', is_prize: false },
+  { id: '2', label: 'Tenta outra vez', color: '#4b5563', is_prize: false },
   { id: '3', label: '🎁 Brinde Surpresa', color: '#8b5cf6', is_prize: true },
-  { id: '4', label: 'Quase!', color: '#6b7280', is_prize: false },
+  { id: '4', label: 'Quase!', color: '#374151', is_prize: false },
   { id: '5', label: '🥈 2º Prémio', color: '#10b981', is_prize: true },
-  { id: '6', label: 'Tenta outra vez', color: '#6b7280', is_prize: false },
+  { id: '6', label: 'Tenta outra vez', color: '#4b5563', is_prize: false },
 ]
 
 export default function WheelPage() {
   const params = useParams()
   const slug = params.slug as string
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rotationRef = useRef(0)
+  const animFrameRef = useRef<number>(0)
 
   const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
   const [loading, setLoading] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [result, setResult] = useState<WheelSlice | null>(null)
-  const [rotation, setRotation] = useState(0)
   const [form, setForm] = useState({ name: '', email: '', phone: '', consent: false })
   const [step, setStep] = useState<'form' | 'spin' | 'result'>('form')
   const [leadCaptured, setLeadCaptured] = useState(false)
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
-  const [currentRotation, setCurrentRotation] = useState(0)
+  const [confetti, setConfetti] = useState<{x:number,y:number,color:string,size:number,speed:number,angle:number}[]>([])
 
-  useEffect(() => {
-    if (slug) loadData()
-  }, [slug])
+  useEffect(() => { if (slug) loadData() }, [slug])
 
   async function loadData() {
     setLoading(true)
     try {
-      const { data } = await supabase
-        .from('lead_magnets')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_active', true)
-        .single()
-
+      const { data } = await supabase.from('lead_magnets').select('*').eq('slug', slug).eq('is_active', true).single()
       if (data) {
         setMagnet(data)
         await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
-        // Se capture_before_spin é false, mostra a roleta primeiro
         const config = data.wheel_config || {}
-        if (!config.capture_before_spin) setStep('spin')
+        if (config.capture_before_spin === false) setStep('spin')
       }
-    } catch (e) {
-      console.error(e)
-    }
+    } catch (e) { console.error(e) }
     setLoading(false)
   }
 
-  useEffect(() => {
-    if (magnet) drawWheel(currentRotation)
-  }, [magnet, currentRotation])
-
-  function getSlices(): WheelSlice[] {
+  const getSlices = useCallback(() => {
     return magnet?.wheel_config?.slices?.length ? magnet.wheel_config.slices : DEFAULT_SLICES
-  }
+  }, [magnet])
 
-  function drawWheel(rot: number) {
+  const drawWheel = useCallback((rot: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
-    const slices = getSlices()
-    const numSlices = slices.length
-    const arc = (2 * Math.PI) / numSlices
+    const slices = magnet?.wheel_config?.slices?.length ? magnet.wheel_config.slices : DEFAULT_SLICES
+    const n = slices.length
+    const arc = (2 * Math.PI) / n
     const cx = canvas.width / 2
     const cy = canvas.height / 2
-    const radius = cx - 10
+    const R = cx - 8
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Sombra exterior
-    ctx.save()
-    ctx.shadowColor = 'rgba(0,0,0,0.5)'
-    ctx.shadowBlur = 20
+    // Outer glow ring
+    const glowGrad = ctx.createRadialGradient(cx, cy, R - 10, cx, cy, R + 8)
+    glowGrad.addColorStop(0, 'rgba(245,158,11,0.6)')
+    glowGrad.addColorStop(1, 'rgba(245,158,11,0)')
     ctx.beginPath()
-    ctx.arc(cx, cy, radius, 0, 2 * Math.PI)
-    ctx.fillStyle = '#1a1a2e'
+    ctx.arc(cx, cy, R + 6, 0, 2 * Math.PI)
+    ctx.fillStyle = glowGrad
     ctx.fill()
-    ctx.restore()
 
-    slices.forEach((slice, i) => {
-      const startAngle = rot + i * arc
-      const endAngle = startAngle + arc
-
-      // Fatia
-      ctx.beginPath()
-      ctx.moveTo(cx, cy)
-      ctx.arc(cx, cy, radius, startAngle, endAngle)
-      ctx.closePath()
-      ctx.fillStyle = slice.color
-      ctx.fill()
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)'
-      ctx.lineWidth = 2
-      ctx.stroke()
-
-      // Texto
-      ctx.save()
-      ctx.translate(cx, cy)
-      ctx.rotate(startAngle + arc / 2)
-      ctx.textAlign = 'right'
-      ctx.fillStyle = '#fff'
-      ctx.font = 'bold 13px Inter, sans-serif'
-      ctx.shadowColor = 'rgba(0,0,0,0.8)'
-      ctx.shadowBlur = 4
-      const maxLen = 14
-      const label = slice.label.length > maxLen ? slice.label.substring(0, maxLen) + '…' : slice.label
-      ctx.fillText(label, radius - 12, 5)
-      ctx.restore()
-    })
-
-    // Centro
+    // Outer border ring
     ctx.beginPath()
-    ctx.arc(cx, cy, 28, 0, 2 * Math.PI)
-    ctx.fillStyle = '#0f0f1a'
-    ctx.fill()
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)'
+    ctx.arc(cx, cy, R + 2, 0, 2 * Math.PI)
+    ctx.strokeStyle = 'rgba(245,158,11,0.8)'
     ctx.lineWidth = 3
     ctx.stroke()
 
-    // Ícone centro
-    ctx.fillStyle = '#fff'
-    ctx.font = 'bold 18px sans-serif'
+    slices.forEach((slice, i) => {
+      const start = rot + i * arc
+      const end = start + arc
+      const mid = start + arc / 2
+
+      // Slice fill with gradient
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R)
+      grad.addColorStop(0, lightenColor(slice.color, 40))
+      grad.addColorStop(1, slice.color)
+
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.arc(cx, cy, R, start, end)
+      ctx.closePath()
+      ctx.fillStyle = grad
+      ctx.fill()
+
+      // Slice border
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.arc(cx, cy, R, start, end)
+      ctx.closePath()
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+
+      // Gold separator lines
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.lineTo(cx + R * Math.cos(start), cy + R * Math.sin(start))
+      ctx.strokeStyle = 'rgba(245,158,11,0.5)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+
+      // Text
+      ctx.save()
+      ctx.translate(cx, cy)
+      ctx.rotate(mid)
+      ctx.textAlign = 'right'
+      ctx.fillStyle = '#fff'
+      ctx.font = `bold \${n > 8 ? 11 : 13}px Inter, sans-serif`
+      ctx.shadowColor = 'rgba(0,0,0,0.9)'
+      ctx.shadowBlur = 6
+      const maxLen = n > 8 ? 12 : 16
+      const label = slice.label.length > maxLen ? slice.label.substring(0, maxLen) + '…' : slice.label
+      ctx.fillText(label, R - 14, 5)
+      ctx.restore()
+    })
+
+    // Inner shadow circle
+    const innerGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, 40)
+    innerGrad.addColorStop(0, '#1a1a2e')
+    innerGrad.addColorStop(1, '#0f0f1a')
+    ctx.beginPath()
+    ctx.arc(cx, cy, 38, 0, 2 * Math.PI)
+    ctx.fillStyle = innerGrad
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(245,158,11,0.6)'
+    ctx.lineWidth = 2
+    ctx.stroke()
+
+    // Center icon
+    ctx.font = '22px sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText('🎡', cx, cy)
+  }, [magnet])
+
+  useEffect(() => {
+    if (magnet && (step === 'spin' || step === 'form')) {
+      drawWheel(rotationRef.current)
+    }
+  }, [magnet, step, drawWheel])
+
+  function lightenColor(hex: string, amount: number): string {
+    try {
+      const num = parseInt(hex.replace('#', ''), 16)
+      const r = Math.min(255, (num >> 16) + amount)
+      const g = Math.min(255, ((num >> 8) & 0xff) + amount)
+      const b = Math.min(255, (num & 0xff) + amount)
+      return `rgb(\${r},\${g},\${b})`
+    } catch { return hex }
+  }
+
+  function spawnConfetti(isPrize: boolean) {
+    if (!isPrize) return
+    const colors = ['#f59e0b', '#8b5cf6', '#10b981', '#ef4444', '#3b82f6', '#ec4899']
+    const items = Array.from({ length: 60 }, () => ({
+      x: Math.random() * 100,
+      y: -10,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: 4 + Math.random() * 8,
+      speed: 1 + Math.random() * 3,
+      angle: Math.random() * 360,
+    }))
+    setConfetti(items)
+    setTimeout(() => setConfetti([]), 4000)
   }
 
   async function handleSpin() {
     if (spinning || !magnet) return
-
-    const config = magnet.wheel_config || {}
-    const captureFirst = config.capture_before_spin !== false
-
-    // Se precisa capturar primeiro e ainda não capturou
-    if (captureFirst && !leadCaptured) {
-      setStep('form')
-      return
-    }
-
     setSpinning(true)
-    const slices = getSlices()
-    const numSlices = slices.length
-    const arc = (2 * Math.PI) / numSlices
 
-    // Escolher fatia vencedora (weighted por is_prize)
+    const slices = getSlices()
+    const n = slices.length
+    const arc = (2 * Math.PI) / n
+
+    // Escolher vencedor respeitando is_prize
     const prizes = slices.filter(s => s.is_prize)
     const nonPrizes = slices.filter(s => !s.is_prize)
-    const winPrize = Math.random() < 0.4 && prizes.length > 0
+    const winPrize = Math.random() < 0.35 && prizes.length > 0
     const winner = winPrize
       ? prizes[Math.floor(Math.random() * prizes.length)]
       : nonPrizes.length > 0
@@ -192,41 +226,39 @@ export default function WheelPage() {
 
     const winnerIndex = slices.findIndex(s => s.id === winner.id)
 
-    // Calcular rotação final
-    const targetAngle = -(winnerIndex * arc + arc / 2)
-    const spins = 5 + Math.random() * 3
-    const finalRotation = currentRotation + spins * 2 * Math.PI + targetAngle - (currentRotation % (2 * Math.PI))
+    // A roleta para com o vencedor no topo (ponteiro em cima = -π/2)
+    const targetSliceAngle = winnerIndex * arc + arc / 2
+    const targetRot = -Math.PI / 2 - targetSliceAngle
+    const spins = 6 + Math.random() * 4
+    const finalRot = rotationRef.current + spins * 2 * Math.PI + (targetRot - ((rotationRef.current + spins * 2 * Math.PI) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI)
 
-    // Animar
-    const duration = 4000
-    const start = performance.now()
-    const startRot = currentRotation
+    const duration = 5000
+    const startTime = performance.now()
+    const startRot = rotationRef.current
+
+    function easeOutQuart(t: number) { return 1 - Math.pow(1 - t, 4) }
 
     function animate(now: number) {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      // Easing out cubic
-      const eased = 1 - Math.pow(1 - progress, 3)
-      const rot = startRot + (finalRotation - startRot) * eased
-      setCurrentRotation(rot)
+      const elapsed = now - startTime
+      const t = Math.min(elapsed / duration, 1)
+      const eased = easeOutQuart(t)
+      const rot = startRot + (finalRot - startRot) * eased
+      rotationRef.current = rot
       drawWheel(rot)
 
-      if (progress < 1) {
-        requestAnimationFrame(animate)
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(animate)
       } else {
-        setCurrentRotation(finalRotation)
+        rotationRef.current = finalRot
+        drawWheel(finalRot)
         setResult(winner)
         setStep('result')
         setSpinning(false)
-
-        // Capturar lead se ainda não foi capturada
-        if (!leadCaptured && form.email) {
-          captureLeadAPI(winner.label)
-        }
+        spawnConfetti(winner.is_prize)
+        if (!leadCaptured && form.email) captureLeadAPI(winner.label)
       }
     }
-
-    requestAnimationFrame(animate)
+    animFrameRef.current = requestAnimationFrame(animate)
   }
 
   async function captureLeadAPI(prizeWon?: string) {
@@ -235,69 +267,32 @@ export default function WheelPage() {
       await fetch('/api/lead-magnets/capture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: magnet.slug,
-          name: form.name,
-          email: form.email,
-          phone: form.phone || null,
-          marketing_opt_in: form.consent,
-          wheel_prize: prizeWon || '',
-        }),
+        body: JSON.stringify({ slug: magnet.slug, name: form.name, email: form.email, phone: form.phone || null, marketing_opt_in: form.consent, wheel_prize: prizeWon || '' }),
       })
       setLeadCaptured(true)
-    } catch (e) {
-      console.error(e)
-    }
+    } catch (e) { console.error(e) }
   }
 
   async function handleFormSubmit() {
     if (!form.name.trim() || !form.email.trim() || !form.consent) return
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(form.email)) return alert('Email inválido')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return alert('Email inválido')
     if (!magnet) return
-
-    // Verificar se já jogou
-    const { data: existing } = await supabase
-      .from('leads')
-      .select('id')
-      .eq('email', form.email.toLowerCase())
-      .eq('lead_magnet_id', magnet.id)
-      .maybeSingle()
-
-    if (existing) {
-      setAlreadyPlayed(true)
-      return
-    }
-
+    const { data: existing } = await supabase.from('leads').select('id').eq('email', form.email.toLowerCase()).eq('lead_magnet_id', magnet.id).maybeSingle()
+    if (existing) { setAlreadyPlayed(true); return }
     const config = magnet.wheel_config || {}
-    if (config.capture_before_spin !== false) {
-      await captureLeadAPI()
-    }
+    if (config.capture_before_spin !== false) await captureLeadAPI()
     setStep('spin')
   }
 
-  if (loading) return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>A carregar...</p>
-      </div>
-    </div>
-  )
-
-  if (!magnet) return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 style={{ color: '#fff', textAlign: 'center' }}>Roleta não encontrada</h1>
-      </div>
-    </div>
-  )
-
+  if (loading) return <div className={styles.container}><div className={styles.card}><p style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:40}}>A carregar...</p></div></div>
+  if (!magnet) return <div className={styles.container}><div className={styles.card}><h1 style={{color:'#fff',textAlign:'center',padding:40}}>Roleta não encontrada</h1></div></div>
   if (alreadyPlayed) return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <div className={styles.alreadyCard}>
-          <h1>⚠️ Já participaste!</h1>
-          <p>Só é permitida uma participação por email. Obrigado!</p>
+        <div className={styles.centerSection}>
+          <div style={{fontSize:64}}>⚠️</div>
+          <h1 style={{color:'#fff',fontSize:'1.5rem',margin:'16px 0 8px'}}>Já participaste!</h1>
+          <p style={{color:'rgba(255,255,255,0.6)'}}>Só é permitida uma participação por email.</p>
         </div>
       </div>
     </div>
@@ -305,16 +300,31 @@ export default function WheelPage() {
 
   return (
     <div className={styles.container}>
+      {/* Particles */}
       <div className={styles.particles}>
-        {[...Array(20)].map((_, i) => (
+        {[...Array(25)].map((_, i) => (
           <div key={i} className={styles.particle} style={{
             left: `\${Math.random() * 100}%`,
             top: `\${Math.random() * 100}%`,
-            animationDelay: `\${Math.random() * 6}s`,
-            animationDuration: `\${4 + Math.random() * 4}s`,
+            animationDelay: `\${Math.
+random() * 6}s`,
+            animationDuration: `${4 + Math.random() * 4}s`,
           }} />
         ))}
       </div>
+
+      {/* Confetti */}
+      {confetti.map((c, i) => (
+        <div key={i} className={styles.confettiPiece} style={{
+          left: `${c.x}%`,
+          background: c.color,
+          width: c.size,
+          height: c.size * 0.6,
+          animationDuration: `${c.speed}s`,
+          animationDelay: `${Math.random() * 0.5}s`,
+          transform: `rotate(${c.angle}deg)`,
+        }} />
+      ))}
 
       <div className={styles.card}>
         {magnet.cover_image_url && step !== 'result' && (
@@ -328,7 +338,7 @@ export default function WheelPage() {
 
         {step === 'form' && (
           <div className={styles.formSection}>
-            <p className={styles.formTitle}>Preenche os teus dados para girar a roleta!</p>
+            <p className={styles.formTitle}>🎡 Preenche os teus dados para girar!</p>
             <div className={styles.formGroup}>
               <label>Nome *</label>
               <input className={styles.input} type="text" placeholder="O teu nome" value={form.name}
@@ -349,10 +359,9 @@ export default function WheelPage() {
                 onChange={e => setForm(p => ({ ...p, consent: e.target.checked }))} />
               Aceito receber comunicações e promoções.
             </label>
-            <button className={styles.btnSpin}
-              disabled={!form.name || !form.email || !form.consent}
+            <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.consent}
               onClick={handleFormSubmit}>
-              🎡 Quero girar!
+              🎡 Quero girar a roleta!
             </button>
           </div>
         )}
@@ -360,25 +369,52 @@ export default function WheelPage() {
         {step === 'spin' && (
           <div className={styles.wheelSection}>
             <div className={styles.wheelWrapper}>
-              <div className={styles.pointer}>▼</div>
-              <canvas ref={canvasRef} width={320} height={320} className={styles.canvas} />
+              <div className={styles.pointer}>
+                <svg width="32" height="40" viewBox="0 0 32 40">
+                  <defs>
+                    <linearGradient id="ptrGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#fbbf24"/>
+                      <stop offset="100%" stopColor="#d97706"/>
+                    </linearGradient>
+                    <filter id="ptrShadow"><feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.5"/></filter>
+                  </defs>
+                  <polygon points="16,36 4,8 28,8" fill="url(#ptrGrad)" filter="url(#ptrShadow)" stroke="#92400e" strokeWidth="1"/>
+                  <circle cx="16" cy="12" r="4" fill="#fef3c7" stroke="#92400e" strokeWidth="1"/>
+                </svg>
+              </div>
+              <canvas ref={canvasRef} width={340} height={340} className={styles.canvas} />
             </div>
             <button className={styles.btnSpin} onClick={handleSpin} disabled={spinning}>
-              {spinning ? '🎡 A girar...' : '🎡 Girar!'}
+              {spinning ? (
+                <span className={styles.spinningText}>
+                  <span className={styles.spinDot}>●</span>
+                  <span className={styles.spinDot}>●</span>
+                  <span className={styles.spinDot}>●</span>
+                </span>
+              ) : '🎡 Girar a Roleta!'}
             </button>
           </div>
         )}
 
         {step === 'result' && result && (
           <div className={styles.resultSection}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>
-              {result.is_prize ? '🎉' : '😢'}
+            <div className={styles.resultIcon}>
+              {result.is_prize ? '🎉' : '😔'}
             </div>
-            <h2>{result.is_prize ? 'Parabéns!' : 'Quase!'}</h2>
-            <div className={styles.resultBadge} style={{ background: result.color }}>
+            <h2 className={styles.resultTitle}>
+              {result.is_prize ? 'Parabéns!' : 'Não foi desta vez...'}
+            </h2>
+            <div className={styles.resultBadge} style={{
+              background: `linear-gradient(135deg, ${result.color}, ${result.color}dd)`,
+              boxShadow: `0 4px 24px ${result.color}66`,
+            }}>
               {result.label}
-</div>
-            <p>{magnet.thank_you_message || (result.is_prize ? 'O teu prémio foi registado! Entraremos em contacto em breve.' : 'Não foi desta vez. Obrigado por participares!')}</p>
+            </div>
+            <p className={styles.resultMessage}>
+              {magnet.thank_you_message || (result.is_prize
+                ? 'O teu prémio foi registado! Entraremos em contacto em breve.'
+                : 'Obrigado por participares! Fica atento às próximas oportunidades.')}
+            </p>
           </div>
         )}
       </div>
