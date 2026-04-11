@@ -138,10 +138,15 @@ export async function POST(req: Request) {
           : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
 
         const emailSubject = magnet.welcome_email_subject || defaultSubject
-        const emailBody = (magnet.welcome_email_body || defaultBody)
+        let emailBody = (magnet.welcome_email_body || defaultBody)
           .replace(/{nome}/g, name)
           .replace(/{link}/g, magnet.file_url || '')
           .replace(/{numero}/g, number_chosen ? String(number_chosen) : '')
+
+        // Se for sorteio e o número não estiver no body, adiciona no final
+        if (isRaffle && number_chosen && !emailBody.includes(String(number_chosen))) {
+          emailBody += `\n\nO teu número da sorte é: 🎰 ${number_chosen}`
+        }
 
         const welcomeRes = await fetch(baseUrl + '/api/send-email', {
           method: 'POST',
