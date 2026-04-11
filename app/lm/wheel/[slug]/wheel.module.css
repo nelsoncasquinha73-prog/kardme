@@ -258,3 +258,24 @@
   .header h1 { font-size: 1.4rem; }
   .canvas { width: 280px !important; height: 280px !important; }
 }
+
+.spinsCounter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.spinDotIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+.spinDotUsed {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.spinDotAvailable {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245,158,11,0.6);
+}
