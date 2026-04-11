@@ -31,7 +31,11 @@ export default function FormPage() {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      if (data) setMagnet(data)
+      if (data) {
+        setMagnet(data)
+        // Incrementar views_count via RPC
+        await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
+      }
     } catch (e) {
       console.error(e)
     }
@@ -117,12 +121,7 @@ export default function FormPage() {
 
       if (error) throw error
 
-      await supabase
-        .from('lead_magnets')
-        .update({
-          leads_count: (magnet!.leads_count || 0) + 1,
-        })
-        .eq('id', magnet!.id)
+      await supabase.rpc('increment_lead_magnet_leads', { magnet_id: magnet!.id })
 
       setSubmitted(true)
     } catch (e: any) {
