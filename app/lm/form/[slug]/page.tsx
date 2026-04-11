@@ -1,17 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { LeadMagnet, FormField } from '@/lib/crm/leadMagnets'
 import styles from './form.module.css'
 
-interface PageProps {
-  params: {
-    slug: string
-  }
-}
-
-export default function FormPage({ params }: PageProps) {
+export default function FormPage() {
+  const params = useParams()
   const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
