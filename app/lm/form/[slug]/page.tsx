@@ -25,6 +25,7 @@ export default function FormPage({ params }: PageProps) {
 
   async function loadMagnet() {
     setLoading(true)
+    console.log("slug:", params.slug)
     try {
       const { data, error } = await supabase
         .from('lead_magnets')
