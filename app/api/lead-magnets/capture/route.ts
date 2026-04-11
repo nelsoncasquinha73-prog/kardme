@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { slug, name, email, phone, marketing_opt_in } = body || {}
+    const { slug, name, email, phone, marketing_opt_in, number_chosen } = body || {}
 
     if (!slug || !name || !email) {
       return NextResponse.json(
@@ -103,12 +103,16 @@ export async function POST(req: Request) {
 
         // Usar template personalizado ou default
         const defaultSubject = `📥 O teu recurso: ${magnet.title}`
-        const defaultBody = `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
+        const isRaffle = magnet.magnet_type === 'raffle'
+        const defaultBody = isRaffle
+          ? `Olá ${name},\n\nObrigado por participares no sorteio "${magnet.title}"!\n\nO teu número da sorte é: 🎰 ${number_chosen}\n\nGuarda este email — se fores o vencedor entraremos em contacto contigo.\n\nBoa sorte!\n\nMelhores cumprimentos`
+          : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
 
         const emailSubject = magnet.welcome_email_subject || defaultSubject
         const emailBody = (magnet.welcome_email_body || defaultBody)
           .replace(/{nome}/g, name)
           .replace(/{link}/g, magnet.file_url || '')
+          .replace(/{numero}/g, number_chosen ? String(number_chosen) : '')
 
         const welcomeRes = await fetch(baseUrl + '/api/send-email', {
           method: 'POST',

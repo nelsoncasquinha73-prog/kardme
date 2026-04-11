@@ -123,6 +123,7 @@ export default function RafflePage() {
           phone: modal.phone.trim() || null,
           consent_given: true,
           marketing_opt_in: true,
+            number_chosen: modal.number,
         }])
 
       if (entryError) {
@@ -147,6 +148,7 @@ export default function RafflePage() {
             email: modal.email.toLowerCase().trim(),
             phone: modal.phone.trim() || null,
             marketing_opt_in: true,
+            number_chosen: modal.number,
           }),
         })
       } catch (apiErr) {
