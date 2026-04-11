@@ -113,6 +113,8 @@ export default function FormPage() {
             email: formData.email || null,
             phone: formData.phone || null,
             notes: `Resposta do Lead Magnet "${magnet!.title}":\n\n${formDataSummary}`,
+            lead_source: 'Lead Magnet',
+            lead_magnet_id: magnet!.id,
             form_data: formData,
             created_at: new Date().toISOString(),
           },
