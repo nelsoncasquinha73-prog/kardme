@@ -184,8 +184,14 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                             onChange={e=>{const slices=[...((form as any).wheel_config?.slices||[{id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true},{id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false},{id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true},{id:'4',label:'Quase!',color:'#6b7280',is_prize:false},{id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true},{id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false}])];slices[i]={...slices[i],is_prize:e.target.checked};setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}} />
                           Prémio
                         </label>
+                        <button onClick={()=>{const slices=((form as any).wheel_config?.slices||[]).filter((_:any,idx:number)=>idx!==i);setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}}
+                          style={{background:'rgba(239,68,68,0.2)',border:'1px solid rgba(239,68,68,0.3)',borderRadius:6,color:'#ef4444',width:28,height:28,cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>✕</button>
                       </div>
                     ))}
+                    <button onClick={()=>{const slices=[...((form as any).wheel_config?.slices||[]),{id:Date.now().toString(),label:'Nova fatia',color:'#6b7280',is_prize:false}];setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}}
+                      style={{background:'rgba(139,92,246,0.15)',border:'1px dashed rgba(139,92,246,0.4)',borderRadius:8,color:'rgba(139,92,246,0.9)',padding:'8px 12px',cursor:'pointer',fontSize:13,width:'100%',marginTop:4}}>
+                      + Adicionar fatia
+                    </button>
                   </div>
                 </div>
               </div>
