@@ -21,6 +21,32 @@ interface FormBuilderProps {
   onSave?: (form: Form) => void
 }
 
+type FieldType = 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox'
+
+const FIELD_CATEGORIES = {
+  Texto: [
+    { type: 'text' as FieldType, label: 'Texto breve', icon: '📝' },
+    { type: 'textarea' as FieldType, label: 'Texto longo', icon: '📄' },
+    { type: 'tel' as FieldType, label: 'Entrada numérica', icon: '#️⃣' },
+    { type: 'email' as FieldType, label: 'Data', icon: '📅' },
+  ],
+  Escolhas: [
+    { type: 'select' as FieldType, label: 'Escolha única', icon: '✅' },
+    { type: 'radio' as FieldType, label: 'Escolha múltipla', icon: '⭕' },
+    { type: 'checkbox' as FieldType, label: 'Sim/Não', icon: '☑️' },
+    { type: 'checkbox' as FieldType, label: 'Escolha da imagem', icon: '🖼️' },
+  ],
+  'Informações de contacto': [
+    { type: 'text' as FieldType, label: 'País', icon: '🌍' },
+    { type: 'tel' as FieldType, label: 'Número de telefone', icon: '📱' },
+    { type: 'text' as FieldType, label: 'Perfil do Instagram', icon: '📸' },
+    { type: 'text' as FieldType, label: 'Perfil do Facebook', icon: '👤' },
+    { type: 'text' as FieldType, label: 'Perfil no LinkedIn', icon: '💼' },
+    { type: 'text' as FieldType, label: 'Perfil do Telegram', icon: '✈️' },
+    { type: 'text' as FieldType, label: 'Aniversário', icon: '🎂' },
+  ],
+}
+
 export default function FormBuilder({
   userId,
   leadMagnetId,
@@ -37,6 +63,7 @@ export default function FormBuilder({
   const [optionsTextMap, setOptionsTextMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [showTypeModal, setShowTypeModal] = useState(false)
 
   useEffect(() => {
     if (formId) {
@@ -199,15 +226,21 @@ export default function FormBuilder({
     setSaving(false)
   }
 
-  function addField() {
+  function addFieldOfType(type: FieldType) {
     const newField: FormField = {
       id: 'field-' + Date.now(),
       label: 'Nova pergunta',
-      type: 'text',
+      type,
       required: false,
     }
+
+    if (isFieldTypeWithOptions(type)) {
+      newField.options = []
+    }
+
     setFields((prev) => [...prev, newField])
     setOptionsTextMap((prev) => ({ ...prev, [newField.id]: '' }))
+    setShowTypeModal(false)
   }
 
   function updateField(id: string, updates: Partial<FormField>) {
@@ -426,8 +459,7 @@ export default function FormBuilder({
                     border: '1px solid rgba(255,255,255,0.1)',
                     fontSize: 12,
                     background: 'rgba(255,255,255,0.05)',
-                    
- color: '#fff',
+                    color: '#fff',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
@@ -466,122 +498,131 @@ export default function FormBuilder({
 
             {idx > 0 && (
               <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                {!field.showIf ? (
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      const closestField = getClosestPreviousFieldWithOptions(field.id)
-                      if (closestField) {
-                        updateField(field.id, {
-                          showIf: {
-                            fieldId: closestField.id,
-                            value: closestField.options?.[0] || '',
-                          },
-                        })
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 6,
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      background: 'transparent',
-                      color: 'rgba(255,255,255,0.6)',
-                      fontSize: 12,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      zIndex: 10,
-                      position: 'relative',
-                    }}
-                  >
-                    + Adicionar condição
-                  </button>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
-                    <div
-                      style={{
-                        padding: '8px 10px',
-                        height: 32,
-                        borderRadius: 6,
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: 'rgba(255,255,255,0.75)',
-                        fontSize: 12,
-                        display: 'flex',
-                        alignItems: 'center',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      {getFieldById(field.showIf.fieldId)?.label || 'Campo não encontrado'}
+                {(() => {
+                  const previousConditionalField = getClosestPreviousFieldWithOptions(field.id)
+
+                  if (!field.showIf) {
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!previousConditionalField) return
+
+                            updateField(field.id, {
+                              showIf: {
+                                fieldId: previousConditionalField.id,
+                                value: previousConditionalField.options?.[0] || '',
+                              },
+                            })
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px 10px',
+                            borderRadius: 6,
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'transparent',
+                            color: previousConditionalField ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.35)',
+                            fontSize: 12,
+                            cursor: previousConditionalField ? 'pointer' : 'not-allowed',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          + Adicionar condição
+                        </button>
+
+                        {!previousConditionalField && (
+                          <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                            Para usar lógica condicional, cria antes uma pergunta do tipo dropdown, radio ou checkbox.
+                          </div>
+                        )}
+                      </>
+                    )
+                  }
+
+                  const sourceField = getFieldById(field.showIf.fieldId)
+                  const sourceOptions = sourceField?.options || []
+
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
+                      <div
+                        style={{
+                          padding: '8px 10px',
+                          height: 32,
+                          borderRadius: 6,
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          background: 'rgba(255,255,255,0.05)',
+                          color: 'rgba(255,255,255,0.75)',
+                          fontSize: 12,
+                          display: 'flex',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {sourceField?.label || 'Campo não encontrado'}
+                      </div>
+
+                      <select
+                        value={field.showIf.value}
+                        onChange={(e) =>
+                          updateField(field.id, {
+                            showIf: {
+                              fieldId: field.showIf!.fieldId,
+                              value: e.target.value,
+                            },
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          height: 32,
+                          borderRadius: 6,
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          fontSize: 12,
+                          background: 'rgba(255,255,255,0.05)',
+                          color: '#fff',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        {sourceOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => updateField(field.id, { showIf: undefined })}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 6,
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          background: 'transparent',
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          height: 32,
+                        }}
+                      >
+                        Remover
+                      </button>
                     </div>
-
-                    <select
-                      value={field.showIf.value}
-                      onChange={(e) =>
-                        updateField(field.id, {
-                          showIf: {
-                            fieldId: field.showIf!.fieldId,
-                            value: e.target.value,
-                          },
-                        })
-                      }
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        height: 32,
-                        borderRadius: 6,
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: 12,
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                    >
-                      {(getFieldById(field.showIf.fieldId)?.options || []).map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      onClick={() => updateField(field.id, { showIf: undefined })}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: 6,
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        background: 'transparent',
-                        color: '#ef4444',
-                        fontWeight: 700,
-                        fontSize: 12,
-                        cursor: 'pointer',
-                        height: 32,
-                      }}
-                    >
-                      Remover
-                    </button>
-                  </div>
-                )}
-
-                {!getClosestPreviousFieldWithOptions(field.id) && (
-                  <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                    Para usar lógica condicional, cria antes uma pergunta do tipo dropdown, radio ou checkbox.
-                  </div>
-                )}
+                  )
+                })()}
               </div>
             )}
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button
-          onClick={addField}
+          onClick={() => setShowTypeModal(true)}
           style={{
             padding: '8px 12px',
             borderRadius: 8,
@@ -613,6 +654,99 @@ export default function FormBuilder({
           {saving ? 'A guardar...' : 'Guardar perguntas'}
         </button>
       </div>
+
+      {showTypeModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowTypeModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: 32,
+              maxWidth: 600,
+              maxHeight: '80vh',
+              overflow: 'auto',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ margin: '0 0 24px 0', fontSize: 20, fontWeight: 700, color: '#000' }}>
+              Adicionar nova pergunta
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              {Object.entries(FIELD_CATEGORIES).map(([category, items]) => (
+                <div key={category}>
+                  <h3 style={{ fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 12, textTransform: 'uppercase' }}>
+                    {category}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {items.map((item) => (
+                      <button
+                        key={`${category}-${item.type}`}
+                        onClick={() => addFieldOfType(item.type)}
+                        style={{
+                          padding: '12px 16px',
+                          borderRadius: 8,
+                          border: '1px solid #e5e7eb',
+                          background: '#fff',
+                          color: '#000',
+                          fontSize: 12,
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#f3f4f6'
+                          e.currentTarget.style.borderColor = '#d1d5db'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#fff'
+                          e.currentTarget.style.borderColor = '#e5e7eb'
+                        }}
+                      >
+                        <span style={{ fontSize: 16 }}>{item.icon}</span>
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowTypeModal(false)}
+              style={{
+                marginTop: 24,
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: 'none',
+                background: '#e5e7eb',
+                color: '#000',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
