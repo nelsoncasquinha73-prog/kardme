@@ -54,7 +54,7 @@ export default function WheelPage() {
   function lightenColor(hex: string, amount: number): string {
     try {
       const num = parseInt(hex.replace('#', ''), 16)
-      return `rgb(\${Math.min(255,(num>>16)+amount)},\${Math.min(255,((num>>8)&0xff)+amount)},\${Math.min(255,(num&0xff)+amount)})`
+      return `rgb(${Math.min(255,(num>>16)+amount)},${Math.min(255,((num>>8)&0xff)+amount)},${Math.min(255,(num&0xff)+amount)})`
     } catch { return hex }
   }
 
@@ -83,7 +83,7 @@ export default function WheelPage() {
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, start, end); ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke()
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R*Math.cos(start), cy + R*Math.sin(start)); ctx.strokeStyle = 'rgba(245,158,11,0.5)'; ctx.lineWidth = 1; ctx.stroke()
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(mid); ctx.textAlign = 'right'; ctx.fillStyle = '#fff'
-      ctx.font = `bold \${n > 8 ? 11 : 13}px Inter, sans-serif`; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6
+      ctx.font = `bold ${n > 8 ? 11 : 13}px Inter, sans-serif`; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6
       const maxLen = n > 8 ? 12 : 16
       ctx.fillText(slice.label.length > maxLen ? slice.label.substring(0, maxLen)+'…' : slice.label, R-14, 5); ctx.restore()
     })
@@ -152,9 +152,9 @@ export default function WheelPage() {
   return (
     <div className={styles.container}>
       <div className={styles.particles}>
-        {[...Array(12)].map((_,i) => <div key={i} className={styles.particle} style={{left:`\${(i*8)+2}%`,top:`\${(i*7+10)%100}%`,animationDelay:`\${i*0.5}s`,animationDuration:`\${5+i%4}s`}} />)}
+        {[...Array(12)].map((_,i) => <div key={i} className={styles.particle} style={{left:`${(i*8)+2}%`,top:`${(i*7+10)%100}%`,animationDelay:`${i*0.5}s`,animationDuration:`${5+i%4}s`}} />)}
       </div>
-      {confetti.map((c,i) => <div key={i} className={styles.confettiPiece} style={{left:`\${c.x}%`,background:c.color,width:c.size,height:c.size*0.6,animationDuration:`\${c.speed}s`,animationDelay:`\${(i%5)*0.1}s`,transform:`rotate(\${c.angle}deg)`}} />)}
+      {confetti.map((c,i) => <div key={i} className={styles.confettiPiece} style={{left:`${c.x}%`,background:c.color,width:c.size,height:c.size*0.6,animationDuration:`${c.speed}s`,animationDelay:`${(i%5)*0.1}s`,transform:`rotate(${c.angle}deg)`}} />)}
       <div className={styles.card}>
         {magnet.cover_image_url && step !== 'result' && <img src={magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
         <div className={styles.header}>
