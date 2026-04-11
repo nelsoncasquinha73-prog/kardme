@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form'
+export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form' | 'raffle'
 
 export type FormFieldType =
   | 'text'
@@ -26,6 +26,14 @@ export type FormField = {
   showIf?: FormFieldCondition
 }
 
+export type RaffleConfig = {
+  grid_size: number
+  prize_description: string
+  prize_image_url?: string
+  winning_numbers?: number[]
+  winners_notified?: boolean
+}
+
 export type LeadMagnet = {
   id: string
   user_id: string
@@ -43,6 +51,7 @@ export type LeadMagnet = {
   created_at: string
   updated_at: string
   form_id?: string | null
+  raffle_config?: RaffleConfig
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {

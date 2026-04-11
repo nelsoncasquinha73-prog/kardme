@@ -21,19 +21,19 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
-  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', welcome_email_subject: '', welcome_email_body: '', form_fields: DEFAULT_FORM_FIELDS, is_active: true }
+  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', welcome_email_subject: '', welcome_email_body: '', form_fields: DEFAULT_FORM_FIELDS, is_active: true, raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] } }
   const [form, setForm] = useState(emptyForm)
   useEffect(() => { load() }, [])
   async function load() { setLoading(true); try { setMagnets(await getLeadMagnets(userId)) } catch(e) { console.error(e) } setLoading(false) }
   function openCreate() { setForm(emptyForm); setEditingMagnet(null); setShowForm(true) }
-  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active }); setEditingMagnet(m); setShowForm(true) }
-  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(form.magnet_type !== 'form' && !form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
+  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active, raffle_config: m.raffle_config || { grid_size: 49, prize_description: '', winning_numbers: [] } }); setEditingMagnet(m); setShowForm(true) }
+  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(form.magnet_type !== 'form' && form.magnet_type !== 'raffle' && !form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
   async function handleDelete(id: string) { if(!confirm('Apagar campanha?')) return; await deleteLeadMagnet(id); await load() }
   async function handleToggle(m: LeadMagnet) { await toggleLeadMagnetActive(m.id, !m.is_active); await load() }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingFile(true); try { const path=`lead-magnets/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, file_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingFile(false) }
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingCover(true); try { const path=`lead-magnets-covers/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, cover_image_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingCover(false) }
   function copyLink(m: LeadMagnet) { 
-    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : `/lm/${m.slug}`
+    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : `/lm/${m.slug}`
     navigator.clipboard.writeText(window.location.origin + path)
     setCopiedId(m.id)
     setTimeout(() => setCopiedId(null), 2000) 
@@ -77,7 +77,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#f59e0b'}}>{m.views_count>0?Math.round((m.leads_count/m.views_count)*100):0}%</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>CONVERSAO</div></div>
                 </div>
                 <div style={{background:'rgba(255,255,255,0.05)',borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type === 'form' ? `/lm/form/${m.slug}` : `/lm/${m.slug}`}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : `/lm/${m.slug}`}</span>
                   <button onClick={()=>copyLink(m)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
@@ -115,6 +115,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="discount">🎁 Desconto</option>
                 <option value="webinar">🎥 Webinar</option>
                 <option value="form">📝 Formulário / Diagnóstico</option>
+                <option value="raffle">🎰 Sorteio / Grelha</option>
               </select>
             </div>
 
@@ -150,6 +151,39 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <p style={{fontSize:11,color:'#64748b',marginTop:6,margin:'6px 0 0'}}>Variáveis: <code style={{color:'#a5b4fc'}}>{'{'+'nome}'}</code> e <code style={{color:'#a5b4fc'}}>{'{'+'link}'}</code></p>
               </div>
             </div>
+
+
+            {form.magnet_type === 'raffle' && (
+  <div style={{marginBottom:24,padding:'16px',borderRadius:12,border:'1px solid rgba(245,158,11,0.25)',background:'rgba(245,158,11,0.05)'}}>
+    <div style={{fontSize:12,color:'#fcd34d',fontWeight:700,marginBottom:12}}>🎰 CONFIGURAÇÃO DO SORTEIO</div>
+    <div style={{marginBottom:12}}>
+      <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Quantidade de números na grelha</label>
+      <input type="number" min={5} max={200} value={(form as any).raffle_config?.grid_size||49}
+        onChange={e=>setForm(f=>({...f,raffle_config:{...(f as any).raffle_config,grid_size:parseInt(e.target.value)||49}}))}
+        style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+    </div>
+    <div style={{marginBottom:12}}>
+      <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Descrição do prémio</label>
+      <input value={(form as any).raffle_config?.prize_description||''}
+        onChange={e=>setForm(f=>({...f,raffle_config:{...(f as any).raffle_config,prize_description:e.target.value}}))}
+        placeholder="Ex: Consulta gratuita, Voucher 50€..."
+        style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+    </div>
+    {editingMagnet && (
+      <div>
+        <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Números vencedores (separados por vírgula)</label>
+        <input value={((form as any).raffle_config?.winning_numbers||[]).join(',')}
+          onChange={e=>{
+            const nums = e.target.value.split(',').map((n:string)=>parseInt(n.trim())).filter((n:number)=>!isNaN(n))
+            setForm(f=>({...f,raffle_config:{...(f as any).raffle_config,winning_numbers:nums}}))
+          }}
+          placeholder="Ex: 7, 23, 42"
+          style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+        <p style={{fontSize:11,color:'rgba(255,255,255,0.3)',margin:'6px 0 0'}}>Define após o sorteio. Os números vencedores ficam destacados na grelha.</p>
+      </div>
+    )}
+  </div>
+)}
 
             {form.magnet_type === 'form' && editingMagnet && (
   <div style={{marginBottom:24,padding:'16px',borderRadius:12,border:'1px solid rgba(59,130,246,0.25)',background:'rgba(59,130,246,0.06)'}}>
