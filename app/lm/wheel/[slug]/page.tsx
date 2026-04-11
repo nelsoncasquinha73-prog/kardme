@@ -167,8 +167,9 @@ export default function WheelPage() {
             <div className={styles.formGroup}><label>Nome *</label><input className={styles.input} type="text" placeholder="O teu nome" value={form.name} onChange={e => setForm(p => ({...p, name: e.target.value}))} /></div>
             <div className={styles.formGroup}><label>Email *</label><input className={styles.input} type="email" placeholder="O teu email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} /></div>
             <div className={styles.formGroup}><label>Telefone (opcional)</label><input className={styles.input} type="tel" placeholder="O teu telefone" value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} /></div>
-            <label className={styles.checkboxLabel}><input type="checkbox" checked={form.consent
-} onChange={e => setForm(p => ({...p, consent: e.target.checked}))} /> Aceito receber comunicações e promoções.</label>
+            <label className={styles.checkboxLabel}><input type="checkbox" checked={form.consent} onChange={e => setForm(p => ({...p, consent: e.target.checked}))} /> Aceito receber comunicações e promoções.</label>
+
+
             <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.consent} onClick={handleFormSubmit}>🎡 Quero girar a roleta!</button>
           </div>
         )}
