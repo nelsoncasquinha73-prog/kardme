@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { slug, name, email, phone, marketing_opt_in, number_chosen } = body || {}
+    const { slug, name, email, phone, marketing_opt_in, number_chosen, wheel_prize } = body || {}
 
     if (!slug || !name || !email) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       .maybeSingle()
 
     let leadId: string | null = null
-    const leadSource = magnet.magnet_type === 'raffle' ? 'Lead Magnet - Sorteio' : magnet.magnet_type === 'form' ? 'Lead Magnet - Formulário' : 'Lead Magnet'
+    const leadSource = magnet.magnet_type === 'raffle' ? 'Lead Magnet - Sorteio' : magnet.magnet_type === 'form' ? 'Lead Magnet - Formulário' : magnet.magnet_type === 'wheel' ? 'Lead Magnet - Roleta' : 'Lead Magnet'
 
     if (existingLead) {
       // Atualizar lead existente
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
             leadId: leadId,
             recipientEmail: ownerData.email,
             subject: `Nova lead via ${magnet.magnet_type === "raffle" ? "Lead Magnet - Sorteio" : magnet.magnet_type === "form" ? "Lead Magnet - Formulário" : "Lead Magnet"}: ${name}`,
-            body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}${number_chosen ? `\nNúmero escolhido: 🎰 ${number_chosen}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
+            body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}${number_chosen ? `\nNúmero escolhido: 🎰 ${number_chosen}` : ''}${wheel_prize ? `\nPrémio ganho: 🎡 ${wheel_prize}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
           }),
         })
       }
@@ -132,8 +132,11 @@ export async function POST(req: Request) {
 
         // Usar template personalizado ou default
         const isRaffle = magnet.magnet_type === 'raffle'
-        const defaultSubject = isRaffle ? `🎰 A tua participação no sorteio: ${magnet.title}` : `📥 O teu recurso: ${magnet.title}`
-        const defaultBody = isRaffle
+        const isWheel = magnet.magnet_type === 'wheel'
+        const defaultSubject = isRaffle ? `🎰 A tua participação no sorteio: ${magnet.title}` : isWheel ? `🎡 O teu resultado na roleta: ${magnet.title}` : `📥 O teu recurso: ${magnet.title}`
+        const defaultBody = isWheel
+          ? `Olá ${name},\n\nObrigado por participares na roleta "${magnet.title}"!\n\n${wheel_prize ? `O teu resultado foi: 🎡 ${wheel_prize}` : ''}\n\nMelhores cumprimentos`
+          : isRaffle
           ? `Olá ${name},\n\nObrigado por participares no sorteio "${magnet.title}"!\n\nO teu número da sorte é: 🎰 ${number_chosen}\n\nGuarda este email — se fores o vencedor entraremos em contacto contigo.\n\nBoa sorte!\n\nMelhores cumprimentos`
           : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
 
@@ -142,6 +145,7 @@ export async function POST(req: Request) {
           .replace(/{nome}/g, name)
           .replace(/{link}/g, magnet.file_url || '')
           .replace(/{numero}/g, number_chosen ? String(number_chosen) : '')
+          .replace(/{premio}/g, wheel_prize ? String(wheel_prize) : '')
 
         // Se for sorteio e o número não estiver no body, adiciona no final
         if (isRaffle && number_chosen && !emailBody.includes(String(number_chosen))) {

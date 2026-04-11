@@ -34,13 +34,6 @@ export type RaffleConfig = {
   winners_notified?: boolean
 }
 
-export type LeadMagnet = {
-  id: string
-  user_id: string
-  title: string
-  description: string | null
-  cover_image_url: string | null
-
 export type WheelSlice = {
   id: string
   label: string
@@ -55,6 +48,12 @@ export type WheelConfig = {
   max_spins_per_email: number
 }
 
+export type LeadMagnet = {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  cover_image_url: string | null
   magnet_type: MagnetType
   file_url: string | null
   form_fields: FormField[]
