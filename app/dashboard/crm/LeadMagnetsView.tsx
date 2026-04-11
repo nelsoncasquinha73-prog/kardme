@@ -21,19 +21,19 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
-  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', welcome_email_subject: '', welcome_email_body: '', form_fields: DEFAULT_FORM_FIELDS, is_active: true, raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] } }
+  const emptyForm = { title: '', description: '', magnet_type: 'ebook' as MagnetType, cover_image_url: '', file_url: '', thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.', welcome_email_subject: '', welcome_email_body: '', form_fields: DEFAULT_FORM_FIELDS, is_active: true, raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] }, wheel_config: { slices: [], capture_before_spin: true, max_spins_per_email: 1 } }
   const [form, setForm] = useState(emptyForm)
   useEffect(() => { load() }, [])
   async function load() { setLoading(true); try { setMagnets(await getLeadMagnets(userId)) } catch(e) { console.error(e) } setLoading(false) }
   function openCreate() { setForm(emptyForm); setEditingMagnet(null); setShowForm(true) }
-  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active, raffle_config: { grid_size: m.raffle_config?.grid_size || 49, prize_description: m.raffle_config?.prize_description || '', winning_numbers: m.raffle_config?.winning_numbers || [] } as any }); setEditingMagnet(m); setShowForm(true) }
-  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(form.magnet_type !== 'form' && form.magnet_type !== 'raffle' && !form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
+  function openEdit(m: LeadMagnet) { setForm({ title: m.title, description: m.description||'', magnet_type: m.magnet_type, cover_image_url: m.cover_image_url||'', file_url: m.file_url||'', thank_you_message: m.thank_you_message||'', welcome_email_subject: (m as any).welcome_email_subject||'', welcome_email_body: (m as any).welcome_email_body||'', form_fields: m.form_fields, is_active: m.is_active, raffle_config: { grid_size: m.raffle_config?.grid_size || 49, prize_description: m.raffle_config?.prize_description || '', winning_numbers: m.raffle_config?.winning_numbers || [] } as any, wheel_config: (m as any).wheel_config || { slices: [], capture_before_spin: true, max_spins_per_email: 1 } }); setEditingMagnet(m); setShowForm(true) }
+  async function handleSave() { if(!form.title.trim()) return alert('Da um nome!'); if(form.magnet_type !== 'form' && form.magnet_type !== 'raffle' && form.magnet_type !== 'wheel' && !form.file_url.trim()) return alert('Upload ficheiro!'); setSaving(true); try { if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) } else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) } await load(); setShowForm(false) } catch(e:any){alert(e.message)} setSaving(false) }
   async function handleDelete(id: string) { if(!confirm('Apagar campanha?')) return; await deleteLeadMagnet(id); await load() }
   async function handleToggle(m: LeadMagnet) { await toggleLeadMagnetActive(m.id, !m.is_active); await load() }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingFile(true); try { const path=`lead-magnets/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, file_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingFile(false) }
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) { const file=e.target.files?.[0]; if(!file) return; setUploadingCover(true); try { const path=`lead-magnets-covers/${userId}/${Date.now()}.${file.name.split('.').pop()}`; const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true}); if(error) throw error; const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path); setForm(f=>({...f, cover_image_url: data.publicUrl})) } catch(e:any){alert(e.message)} setUploadingCover(false) }
   function copyLink(m: LeadMagnet) { 
-    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : `/lm/${m.slug}`
+    const path = m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : m.magnet_type === 'wheel' ? `/lm/wheel/${m.slug}` : `/lm/${m.slug}`
     navigator.clipboard.writeText(window.location.origin + path)
     setCopiedId(m.id)
     setTimeout(() => setCopiedId(null), 2000) 
@@ -77,7 +77,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#f59e0b'}}>{m.views_count>0?Math.round((m.leads_count/m.views_count)*100):0}%</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>CONVERSAO</div></div>
                 </div>
                 <div style={{background:'rgba(255,255,255,0.05)',borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : `/lm/${m.slug}`}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type === 'form' ? `/lm/form/${m.slug}` : m.magnet_type === 'raffle' ? `/lm/raffle/${m.slug}` : m.magnet_type === 'wheel' ? `/lm/wheel/${m.slug}` : `/lm/${m.slug}`}</span>
                   <button onClick={()=>copyLink(m)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
@@ -116,6 +116,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="webinar">🎥 Webinar</option>
                 <option value="form">📝 Formulário / Diagnóstico</option>
                 <option value="raffle">🎰 Sorteio / Grelha</option>
+                <option value="wheel">🎡 Roleta da Sorte</option>
               </select>
             </div>
 
@@ -153,6 +154,42 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
             </div>
 
 
+            
+            {form.magnet_type === 'wheel' && (
+              <div style={{background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:12,padding:16,marginTop:8}}>
+                <div style={{color:'#f59e0b',fontWeight:700,fontSize:13,marginBottom:12}}>🎡 CONFIGURAÇÃO DA ROLETA</div>
+                <div style={{marginBottom:12}}>
+                  <label style={{color:'rgba(255,255,255,0.6)',fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Capturar email antes de girar?</label>
+                  <select value={(form as any).wheel_config?.capture_before_spin ? 'true' : 'false'}
+                    onChange={e=>setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,capture_before_spin:e.target.value==='true'}}))}
+                    style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none'}}>
+                    <option value="true">✅ Sim — email antes de girar</option>
+                    <option value="false">🎡 Não — girar primeiro, email depois</option>
+                  </select>
+                </div>
+                <div style={{marginBottom:12}}>
+                  <label style={{color:'rgba(255,255,255,0.6)',fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Fatias da Roleta</label>
+                  <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                    {((form as any).wheel_config?.slices?.length ? (form as any).wheel_config.slices : [{id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true},{id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false},{id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true},{id:'4',label:'Quase!',color:'#6b7280',is_prize:false},{id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true},{id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false}]).map((slice: any, i: number) => (
+                      <div key={slice.id} style={{display:'flex',gap:8,alignItems:'center'}}>
+                        <input type="color" value={slice.color}
+                          onChange={e=>{const slices=[...((form as any).wheel_config?.slices||[{id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true},{id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false},{id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true},{id:'4',label:'Quase!',color:'#6b7280',is_prize:false},{id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true},{id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false}])];slices[i]={...slices[i],color:e.target.value};setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}}
+                          style={{width:36,height:36,borderRadius:8,border:'none',cursor:'pointer',padding:2}} />
+                        <input value={slice.label}
+                          onChange={e=>{const slices=[...((form as any).wheel_config?.slices||[{id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true},{id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false},{id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true},{id:'4',label:'Quase!',color:'#6b7280',is_prize:false},{id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true},{id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false}])];slices[i]={...slices[i],label:e.target.value};setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}}
+                          placeholder="Texto da fatia"
+                          style={{flex:1,padding:'8px 12px',borderRadius:8,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.07)',color:'#fff',fontSize:13,outline:'none'}} />
+                        <label style={{display:'flex',alignItems:'center',gap:4,color:'rgba(255,255,255,0.5)',fontSize:11,whiteSpace:'nowrap'}}>
+                          <input type="checkbox" checked={slice.is_prize}
+                            onChange={e=>{const slices=[...((form as any).wheel_config?.slices||[{id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true},{id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false},{id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true},{id:'4',label:'Quase!',color:'#6b7280',is_prize:false},{id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true},{id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false}])];slices[i]={...slices[i],is_prize:e.target.checked};setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,slices}}))}} />
+                          Prémio
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             {form.magnet_type === 'raffle' && (
   <div style={{marginBottom:24,padding:'16px',borderRadius:12,border:'1px solid rgba(245,158,11,0.25)',background:'rgba(245,158,11,0.05)'}}>
     <div style={{fontSize:12,color:'#fcd34d',fontWeight:700,marginBottom:12}}>🎰 CONFIGURAÇÃO DO SORTEIO</div>

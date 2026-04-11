@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form' | 'raffle'
+export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form' | 'raffle' | 'wheel'
 
 export type FormFieldType =
   | 'text'
@@ -40,6 +40,21 @@ export type LeadMagnet = {
   title: string
   description: string | null
   cover_image_url: string | null
+
+export type WheelSlice = {
+  id: string
+  label: string
+  color: string
+  is_prize: boolean
+  probability?: number
+}
+
+export type WheelConfig = {
+  slices: WheelSlice[]
+  capture_before_spin: boolean
+  max_spins_per_email: number
+}
+
   magnet_type: MagnetType
   file_url: string | null
   form_fields: FormField[]
@@ -52,6 +67,7 @@ export type LeadMagnet = {
   updated_at: string
   form_id?: string | null
   raffle_config?: RaffleConfig
+  wheel_config?: WheelConfig
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
@@ -135,6 +151,7 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   webinar: '🎥 Webinar',
   form: '📝 Formulário',
   raffle: '🎰 Sorteio',
+  wheel: '🎡 Roleta da Sorte',
 }
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
