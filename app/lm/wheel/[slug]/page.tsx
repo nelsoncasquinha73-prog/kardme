@@ -109,7 +109,8 @@ export default function WheelPage() {
   }
 
   async function incrementSpinCount(currentLeadId: string) {
-    const newCount = spinCount + 1
+        const newCount = spinCount + 1
+        setSpinCount(newCount)
     setSpinCount(newCount)
     await supabase.from('leads').update({ spin_count: newCount }).eq('id', currentLeadId)
   }
@@ -140,11 +141,12 @@ export default function WheelPage() {
         const currentLeadId = leadId
         if (currentLeadId) incrementSpinCount(currentLeadId)
         const newCount = spinCount + 1
+        setSpinCount(newCount)
         if (winner.is_prize || newCount >= maxSpins) {
           setExhausted(true)
           setStep('result')
         } else {
-          setStep('result')
+          setTimeout(() => { setResult(null); setStep('spin'); setTimeout(() => drawWheel(rotationRef.current), 50) }, 2500)
         }
       }
     }
