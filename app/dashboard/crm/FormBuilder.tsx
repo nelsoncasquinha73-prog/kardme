@@ -291,10 +291,16 @@ export default function FormBuilder({
 
   function getClosestPreviousFieldWithOptions(currentFieldId: string): FormField | undefined {
     const currentIndex = getFieldIndex(currentFieldId)
-    const previousFields = fields
-      .slice(0, currentIndex)
-      .filter((f) => isFieldTypeWithOptions(f.type) && (f.options || []).length > 0)
-    return previousFields[previousFields.length - 1]
+    if (currentIndex <= 0) return undefined
+
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const field = fields[i]
+      if (isFieldTypeWithOptions(field.type) && (field.options || []).length > 0) {
+        return field
+      }
+    }
+
+    return undefined
   }
 
   function getFieldById(fieldId: string): FormField | undefined {
