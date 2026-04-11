@@ -31,7 +31,10 @@ export default function WheelPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', consent: false })
   const [step, setStep] = useState<'form' | 'spin' | 'result'>('form')
   const [leadCaptured, setLeadCaptured] = useState(false)
-  const [alreadyPlayed, setAlreadyPlayed] = useState(false)
+  const [leadId, setLeadId] = useState<string | null>(null)
+  const [spinCount, setSpinCount] = useState(0)
+  const [maxSpins, setMaxSpins] = useState(1)
+  const [exhausted, setExhausted] = useState(false)
   const [confetti, setConfetti] = useState<{x:number;y:number;color:string;size:number;speed:number;angle:number}[]>([])
 
   useEffect(() => { if (slug) loadData() }, [slug])
@@ -43,6 +46,8 @@ export default function WheelPage() {
       if (data) {
         setMagnet(data)
         await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
+        const max = data.wheel_config?.max_spins_per_email || 1
+        setMaxSpins(max)
         if ((data.wheel_config || {}).capture_before_spin === false) setStep('spin')
       }
     } catch (e) { console.error(e) }
@@ -94,13 +99,19 @@ export default function WheelPage() {
     ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🎡', cx, cy)
   }, [magnet])
 
-  useEffect(() => { if (magnet && (step === 'spin' || step === 'form')) drawWheel(rotationRef.current) }, [magnet, step, drawWheel])
+  useEffect(() => { if (magnet && (step === 'spin')) drawWheel(rotationRef.current) }, [magnet, step, drawWheel])
 
   function spawnConfetti(isPrize: boolean) {
     if (!isPrize) return
     const colors = ['#f59e0b','#8b5cf6','#10b981','#ef4444','#3b82f6','#ec4899']
     setConfetti(Array.from({ length: 60 }, () => ({ x: Math.random()*100, y: -10, color: colors[Math.floor(Math.random()*colors.length)], size: 4+Math.random()*8, speed: 1+Math.random()*3, angle: Math.random()*360 })))
     setTimeout(() => setConfetti([]), 4000)
+  }
+
+  async function incrementSpinCount(currentLeadId: string) {
+    const newCount = spinCount + 1
+    setSpinCount(newCount)
+    await supabase.from('leads').update({ spin_count: newCount }).eq('id', currentLeadId)
   }
 
   async function handleSpin() {
@@ -122,32 +133,71 @@ export default function WheelPage() {
       const rot = startRot + (finalRot - startRot) * easeOutQuart(t)
       rotationRef.current = rot; drawWheel(rot)
       if (t < 1) { animFrameRef.current = requestAnimationFrame(animate) }
-      else { rotationRef.current = finalRot; drawWheel(finalRot); setResult(winner); setStep('result'); setSpinning(false); spawnConfetti(winner.is_prize); if (!leadCaptured && form.email) captureLeadAPI(winner.label) }
+      else {
+        rotationRef.current = finalRot; drawWheel(finalRot)
+        setResult(winner); setSpinning(false)
+        spawnConfetti(winner.is_prize)
+        const currentLeadId = leadId
+        if (currentLeadId) incrementSpinCount(currentLeadId)
+        const newCount = spinCount + 1
+        if (winner.is_prize || newCount >= maxSpins) {
+          setExhausted(true)
+          setStep('result')
+        } else {
+          setStep('result')
+        }
+      }
     }
     animFrameRef.current = requestAnimationFrame(animate)
   }
 
-  async function captureLeadAPI(prizeWon?: string) {
-    if (!magnet || !form.email) return
+  async function captureLeadAPI(prizeWon?: string): Promise<string | null> {
+    if (!magnet || !form.email) return null
     try {
-      await fetch('/api/lead-magnets/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: magnet.slug, name: form.name, email: form.email, phone: form.phone || null, marketing_opt_in: form.consent, wheel_prize: prizeWon || '' }) })
+      const res = await fetch('/api/lead-magnets/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: magnet.slug, name: form.name, email: form.email, phone: form.phone || null, marketing_opt_in: form.consent, wheel_prize: prizeWon || '' }),
+      })
+      const json = await res.json()
       setLeadCaptured(true)
-    } catch (e) { console.error(e) }
+      return json?.lead_id || null
+    } catch (e) { console.error(e); return null }
   }
 
   async function handleFormSubmit() {
     if (!form.name.trim() || !form.email.trim() || !form.consent) return
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { alert('Email inválido'); return }
     if (!magnet) return
-    const { data: existing } = await supabase.from('leads').select('id').eq('email', form.email.toLowerCase()).eq('lead_magnet_id', magnet.id).maybeSingle()
-    if (existing) { setAlreadyPlayed(true); return }
-    if ((magnet.wheel_config || {}).capture_before_spin !== false) await captureLeadAPI()
+    const { data: existing } = await supabase.from('leads').select('id, spin_count').eq('email', form.email.toLowerCase()).eq('lead_magnet_id', magnet.id).maybeSingle()
+    if (existing) {
+      const usedSpins = existing.spin_count || 1
+      if (usedSpins >= maxSpins) {
+        setExhausted(true)
+        setStep('result')
+        return
+      }
+      setLeadId(existing.id)
+      setSpinCount(usedSpins)
+      setLeadCaptured(true)
+      setStep('spin')
+      return
+    }
+    const id = await captureLeadAPI()
+    if (id) setLeadId(id)
     setStep('spin')
   }
 
+  function handleTryAgain() {
+    setResult(null)
+    setStep('spin')
+    setTimeout(() => drawWheel(rotationRef.current), 50)
+  }
+
+  const spinsLeft = maxSpins - spinCount
+
   if (loading) return <div className={styles.container}><div className={styles.card}><p style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:40}}>A carregar...</p></div></div>
   if (!magnet) return <div className={styles.container}><div className={styles.card}><h1 style={{color:'#fff',textAlign:'center',padding:40}}>Roleta não encontrada</h1></div></div>
-  if (alreadyPlayed) return <div className={styles.container}><div className={styles.card}><div className={styles.centerSection}><div style={{fontSize:64}}>⚠️</div><h1 style={{color:'#fff',fontSize:'1.5rem',margin:'16px 0 8px'}}>Já participaste!</h1><p style={{color:'rgba(255,255,255,0.6)'}}>Só é permitida uma participação por email.</p></div></div></div>
 
   return (
     <div className={styles.container}>
@@ -156,7 +206,8 @@ export default function WheelPage() {
       </div>
       {confetti.map((c,i) => <div key={i} className={styles.confettiPiece} style={{left:`${c.x}%`,background:c.color,width:c.size,height:c.size*0.6,animationDuration:`${c.speed}s`,animationDelay:`${(i%5)*0.1}s`,transform:`rotate(${c.angle}deg)`}} />)}
       <div className={styles.card}>
-        {magnet.cover_image_url && step !== 'result' && <img src={magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
+        {magnet.cover_image_url && step !== 'result' && <img src={
+magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
         <div className={styles.header}>
           <h1>{magnet.title}</h1>
           {magnet.description && <p className={styles.description}>{magnet.description}</p>}
@@ -168,13 +219,19 @@ export default function WheelPage() {
             <div className={styles.formGroup}><label>Email *</label><input className={styles.input} type="email" placeholder="O teu email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} /></div>
             <div className={styles.formGroup}><label>Telefone (opcional)</label><input className={styles.input} type="tel" placeholder="O teu telefone" value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} /></div>
             <label className={styles.checkboxLabel}><input type="checkbox" checked={form.consent} onChange={e => setForm(p => ({...p, consent: e.target.checked}))} /> Aceito receber comunicações e promoções.</label>
-
-
             <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.consent} onClick={handleFormSubmit}>🎡 Quero girar a roleta!</button>
           </div>
         )}
         {step === 'spin' && (
           <div className={styles.wheelSection}>
+            {maxSpins > 1 && (
+              <div className={styles.spinsCounter}>
+                {Array.from({length: maxSpins}).map((_,i) => (
+                  <div key={i} className={`${styles.spinDotIndicator} ${i < spinCount ? styles.spinDotUsed : styles.spinDotAvailable}`} />
+                ))}
+                <span style={{color:'rgba(255,255,255,0.5)',fontSize:'0.8rem',marginLeft:8}}>{spinsLeft} tentativa{spinsLeft !== 1 ? 's' : ''} restante{spinsLeft !== 1 ? 's' : ''}</span>
+              </div>
+            )}
             <div className={styles.wheelWrapper}>
               <div className={styles.pointer}>
                 <svg width="32" height="40" viewBox="0 0 32 40">
@@ -196,12 +253,28 @@ export default function WheelPage() {
             </button>
           </div>
         )}
-        {step === 'result' && result && (
+        {step === 'result' && result && !exhausted && spinsLeft > 0 && (
+          <div className={styles.resultSection}>
+            <div className={styles.resultIcon}>😔</div>
+            <h2 className={styles.resultTitle}>Não foi desta vez...</h2>
+            <div className={styles.resultBadge} style={{background:`linear-gradient(135deg, ${result.color}, ${result.color}dd)`,boxShadow:`0 4px 24px ${result.color}66`}}>{result.label}</div>
+            <p className={styles.resultMessage}>Ainda tens <strong style={{color:'#f59e0b'}}>{spinsLeft} tentativa{spinsLeft !== 1 ? 's' : ''}</strong> restante{spinsLeft !== 1 ? 's' : ''}!</p>
+            <button className={styles.btnSpin} onClick={handleTryAgain}>🎡 Tentar outra vez!</button>
+          </div>
+        )}
+        {step === 'result' && result && (exhausted || spinsLeft <= 0) && (
           <div className={styles.resultSection}>
             <div className={styles.resultIcon}>{result.is_prize ? '🎉' : '😔'}</div>
             <h2 className={styles.resultTitle}>{result.is_prize ? 'Parabéns!' : 'Não foi desta vez...'}</h2>
             <div className={styles.resultBadge} style={{background:`linear-gradient(135deg, ${result.color}, ${result.color}dd)`,boxShadow:`0 4px 24px ${result.color}66`}}>{result.label}</div>
             <p className={styles.resultMessage}>{magnet.thank_you_message || (result.is_prize ? 'O teu prémio foi registado! Entraremos em contacto em breve.' : 'Obrigado por participares! Fica atento às próximas oportunidades.')}</p>
+          </div>
+        )}
+        {step === 'result' && !result && exhausted && (
+          <div className={styles.resultSection}>
+            <div className={styles.resultIcon}>⚠️</div>
+            <h2 className={styles.resultTitle}>Já esgotaste as tuas tentativas!</h2>
+            <p className={styles.resultMessage}>Obrigado por participares!</p>
           </div>
         )}
       </div>
