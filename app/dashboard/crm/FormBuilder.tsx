@@ -462,7 +462,9 @@ export default function FormBuilder({
               <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 {!field.showIf ? (
                   <button
-                    onClick={() => {
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
                       const closestField = getClosestPreviousFieldWithOptions(field.id)
                       if (closestField) {
                         updateField(field.id, {
@@ -483,6 +485,8 @@ export default function FormBuilder({
                       fontSize: 12,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
+                      zIndex: 10,
+                      position: 'relative',
                     }}
                   >
                     + Adicionar condição
