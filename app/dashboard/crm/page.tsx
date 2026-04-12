@@ -207,7 +207,7 @@ Melhores cumprimentos,
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
   const [importCSVText, setImportCSVText] = useState('')
   const [importPreview, setImportPreview] = useState<string[][]>([])
-  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'magnets' | 'ambassadors' | 'scheduled' | 'kanban' | 'email-marketing'>('table')
+  const [activeView, setActiveView] = useState<'table' | 'calendar' | 'scheduled' | 'kanban'>('table')
   const [importing, setImporting] = useState(false)
 
   const handleCreateCountry = async () => {
@@ -1470,38 +1470,8 @@ Melhores cumprimentos,
         >
           🗓️ Calendário de Tarefas
         </button>
-        <button
-          onClick={() => setActiveView('magnets')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 10,
-            border: 'none',
-            fontWeight: 800,
-            fontSize: 13,
-            cursor: 'pointer',
-            background: activeView === 'magnets' ? '#10b981' : '#e5e7eb',
-            color: activeView === 'magnets' ? '#ffffff' : '#374151',
-            transition: 'all 0.15s',
-          }}
-        >
-          🧲 Lead Magnets
-        </button>
-        <button
-          onClick={() => setActiveView('ambassadors')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 10,
-            border: 'none',
-            fontWeight: 800,
-            fontSize: 13,
-            cursor: 'pointer',
-            background: activeView === 'ambassadors' ? '#3b82f6' : '#e5e7eb',
-            color: activeView === 'ambassadors' ? '#ffffff' : '#374151',
-            transition: 'all 0.15s',
-          }}
-        >
-          🤝 Embaixadores
-        </button>
+
+
         <button
           onClick={() => setActiveView('scheduled')}
           style={{
@@ -1518,22 +1488,7 @@ Melhores cumprimentos,
         >
           📧 Tarefas Agendadas
         </button>
-        <button
-          onClick={() => setActiveView('email-marketing')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 10,
-            border: 'none',
-            fontWeight: 800,
-            fontSize: 13,
-            cursor: 'pointer',
-            background: activeView === 'email-marketing' ? '#06b6d4' : '#e5e7eb',
-            color: activeView === 'email-marketing' ? '#ffffff' : '#374151',
-            transition: 'all 0.15s',
-          }}
-        >
-          📧 Email Marketing
-        </button>
+
         <button
           onClick={() => setActiveView('kanban')}
           style={{
@@ -1575,7 +1530,7 @@ Melhores cumprimentos,
         </div>
       )}
 
-      {activeView !== 'magnets' && (<>
+      {(<>
       {/* Barra de pesquisa + filtros */}
       <div style={{ marginBottom: 16 }}>
 
@@ -1806,14 +1761,6 @@ Melhores cumprimentos,
       )}
       {activeView === 'scheduled' && <ScheduledTasksView />}
 
-      {activeView === 'email-marketing' && <EmailMarketingView userId={userId} preSelectedLeadId={selectedLeadForEmailMarketing || undefined} />}
-      {activeView === 'ambassadors' && (
-        <AmbassadorsView userId={userId} />
-      )}
-
-      {activeView === 'magnets' && (
-        <LeadMagnetsView userId={userId} />
-      )}
 
       {filteredLeads.length === 0 && activeView === 'table' && (
         <p style={{ opacity: 0.6 }}>
