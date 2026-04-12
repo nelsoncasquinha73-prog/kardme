@@ -142,7 +142,7 @@ export default function WheelPage() {
         if (currentLeadId) incrementSpinCount(currentLeadId)
         const newCount = spinCount + 1
         setSpinCount(newCount)
-        if (winner.is_prize || newCount >= maxSpins) {
+        if (newCount >= maxSpins) {
           setExhausted(true)
           setStep('result')
         } else {
