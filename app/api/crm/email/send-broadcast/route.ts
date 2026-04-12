@@ -53,7 +53,7 @@ function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
 
 // Substitui {{nome}} e outros placeholders pelo dados reais do lead
 function replacePlaceholders(html: string, name: string | null, email?: string): string {
-  const firstName = name ? name.split(' ')[0] : 'Olá'
+  const firstName = name ? name.split(' ')[0] : ''
   const emailVal = email || ''
   return html
     .replace(/\{\{nome\}\}/gi, firstName)
@@ -176,13 +176,18 @@ export async function POST(req: NextRequest) {
         const messageId = res.data.id || null
         console.log(`[SUCCESS] Email sent to ${recipientEmail}, messageId: ${messageId}`)
 
+        const insertPayload: Record<string, any> = { broadcast_id: broadcastId, email: recipientEmail, status: 'sent' }
+        if (leadId) insertPayload.lead_id = leadId
+
         const { error: insertError } = await supabaseAdmin
           .from('email_broadcast_recipients')
-          .insert({ broadcast_id: broadcastId, email: recipientEmail, lead_id: leadId, status: 'sent' })
+          .insert(insertPayload)
 
         if (insertError) {
           console.error(`[DB INSERT FAILED] ${recipientEmail}: ${insertError.message}`)
           errors.push(`${recipientEmail}: DB insert failed - ${insertError.message}`)
+        } else {
+          console.log(`[DB INSERT OK] ${recipientEmail}`)
         }
 
         // Registar atividade no CRM (scheduled_task como histórico)
