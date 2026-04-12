@@ -58,10 +58,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (!isAdmin) {
         const { data: sub } = await supabase
           .from('user_subscriptions')
-          .select('status, crm_pro_active')
+          .select('status, plan')
           .eq('user_id', user.id)
           .maybeSingle()
-        isPro = sub?.crm_pro_active === true && sub?.status === 'active'
+        isPro = (sub?.plan === 'pro_monthly' || sub?.plan === 'pro_yearly') && sub?.status === 'active'
       }
 
       setState({
