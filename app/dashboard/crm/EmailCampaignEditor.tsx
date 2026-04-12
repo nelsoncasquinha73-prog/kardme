@@ -463,10 +463,15 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                     key={v.value}
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(v.value)
-                      addToast(`${v.value} copiado!`, 'success')
+                      const insertFn = (window as any).__kardmeInsertVar
+                      if (insertFn) {
+                        insertFn(v.value)
+                      } else {
+                        navigator.clipboard.writeText(v.value)
+                        addToast(`${v.value} copiado! Cola no bloco de texto.`, 'success')
+                      }
                     }}
-                    title={`Copiar ${v.value}`}
+                    title={`Inserir ${v.value} no cursor`}
                     style={{
                       padding: '2px 8px',
                       borderRadius: 20,
@@ -1353,9 +1358,11 @@ function renderBlockInspector(
     case 'text':
       return (
         <EmailTextBlockEditor
+          key={block.id}
           content={content.html || ''}
           onChange={(html) => onUpdate({ html })}
           placeholder="Escreve o teu texto..."
+          onInsertVariable={(fn) => { (window as any).__kardmeInsertVar = fn }}
         />
       )
 

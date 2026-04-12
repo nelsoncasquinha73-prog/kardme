@@ -35,11 +35,23 @@ interface EmailTextBlockEditorProps {
   content: string
   onChange: (html: string) => void
   placeholder?: string
+  onInsertVariable?: (insertFn: (text: string) => void) => void
 }
 
-export default function EmailTextBlockEditor({ content, onChange, placeholder }: EmailTextBlockEditorProps) {
+export default function EmailTextBlockEditor({ content, onChange, placeholder, onInsertVariable }: EmailTextBlockEditorProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showSizePicker, setShowSizePicker] = useState(false)
+
+  const insertText = (text: string) => {
+    if (editor) {
+      editor.chain().focus().insertContent(text).run()
+    }
+  }
+
+  // Expor função de inserção ao pai
+  if (onInsertVariable) {
+    onInsertVariable(insertText)
+  }
 
   const editor = useEditor({
     extensions: [

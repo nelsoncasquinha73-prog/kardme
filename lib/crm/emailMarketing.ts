@@ -169,12 +169,14 @@ export async function deleteBroadcast(broadcastId: string, userId: string) {
 
 // BROADCAST RECIPIENTS
 export async function getBroadcastRecipients(broadcastId: string) {
+  console.log('[getBroadcastRecipients] broadcastId:', broadcastId)
   const { data, error } = await supabase
     .from('email_broadcast_recipients')
     .select('*')
     .eq('broadcast_id', broadcastId)
     .order('created_at', { ascending: false })
 
+  console.log('[getBroadcastRecipients] data:', data, 'error:', error)
   if (error) throw error
   return data || []
 }
