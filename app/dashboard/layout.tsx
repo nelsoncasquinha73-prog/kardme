@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
-import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiSettings, FiBarChart2, FiCreditCard, FiUser, FiBook, FiStar, FiClipboard } from 'react-icons/fi'
+import { FiHome, FiLayout, FiMail, FiCalendar, FiShoppingCart, FiUsers, FiZap, FiSettings, FiBarChart2, FiCreditCard, FiUser, FiBook, FiStar, FiClipboard, FiGift, FiTrendingUp, FiTag } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 import { ToastProvider } from '@/lib/toast-context'
 import { ToastContainer } from '@/components/Toast'
@@ -56,7 +56,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       let isPro = false
       if (!isAdmin) {
-        // Verificar subscrição paga via Stripe
         const { data: sub } = await supabase
           .from('user_subscriptions')
           .select('status, plan')
@@ -64,7 +63,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           .maybeSingle()
         const hasActivePlan = (sub?.plan === 'pro_monthly' || sub?.plan === 'pro_yearly') && sub?.status === 'active'
 
-        // Verificar acesso manual dado pelo admin
         const { data: addon } = await supabase
           .from('user_addons')
           .select('crm_pro_active, crm_pro_expires_at')
@@ -87,48 +85,62 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     boot()
   }, [router])
 
-  const navItems = state.isAdmin
-    ? [
-        { label: 'nav.dashboard', href: '/dashboard', icon: FiHome },
-        { label: 'nav.clients', href: '/admin/clientes', icon: FiUsers },
-        { label: 'nav.manage_templates', href: '/admin/templates', icon: FiLayout },
-        { label: 'nav.analytics', href: '/admin/analytics', icon: FiBarChart2 },
-        { label: 'nav.template_store', href: '/dashboard/catalog', icon: FiShoppingCart },
-        { label: 'nav.settings', href: '/admin/settings', icon: FiSettings },
-      ]
-    : [
-        { label: 'nav.dashboard', href: '/dashboard', icon: FiHome },
-        { label: 'nav.analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-        { label: 'CRM Mini', href: '/dashboard/leads', icon: FiClipboard },
-        { label: 'CRM Pro', href: '/dashboard/crm', icon: FiStar, locked: !state.isPro },
-        { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiZap, locked: !state.isPro },
-        { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiMail, locked: !state.isPro },
-        { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiUsers, locked: !state.isPro },
-        { label: 'Biblioteca', href: '/dashboard/biblioteca', icon: FiBook },
-        { label: 'nav.template_store', href: '/dashboard/catalog', icon: FiShoppingCart },
-        { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
-        { label: 'nav.plans', href: '/dashboard/plans', icon: FiCreditCard },
-        { label: 'nav.billing', href: '/dashboard/settings/billing', icon: FiCreditCard },
-        { label: 'nav.profile', href: '/dashboard/perfil', icon: FiUser },
-      ]
+  // MENU DO ADMIN (fixo, sem mudanças)
+  const adminNavItems = useMemo(() => [
+    { label: 'Dashboard', href: '/dashboard', icon: FiHome },
+    { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
+    { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
+    { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
+    { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiTrendingUp },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+    { label: 'Analytics Global', href: '/admin/analytics', icon: FiBarChart2 },
+    { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
+    { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
+    { label: 'Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
+    { label: 'Cupões', href: '/admin/coupons', icon: FiTag },
+    { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+  ], [])
+
+  // MENU DO CLIENTE (original)
+  const clientNavItems = useMemo(() => [
+    { label: 'nav.dashboard', href: '/dashboard', icon: FiHome },
+    { label: 'nav.analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+    { label: 'CRM Mini', href: '/dashboard/leads', icon: FiClipboard },
+    { label: 'CRM Pro', href: '/dashboard/crm', icon: FiStar, locked: !state.isPro },
+    { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift, locked: !state.isPro },
+    { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap, locked: !state.isPro },
+    { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiUsers, locked: !state.isPro },
+    { label: 'Biblioteca', href: '/dashboard/biblioteca', icon: FiBook },
+    { label: 'nav.template_store', href: '/dashboard/catalog', icon: FiShoppingCart },
+    { label: 'NFC', href: '/dashboard/nfc', icon: FiZap },
+    { label: 'nav.plans', href: '/dashboard/plans', icon: FiCreditCard },
+    { label: 'nav.billing', href: '/dashboard/settings/billing', icon: FiCreditCard },
+    { label: 'nav.profile', href: '/dashboard/perfil', icon: FiUser },
+  ], [state.isPro])
+
+  // ESCOLHER MENU
+  const navItems = useMemo(() => state.isAdmin ? adminNavItems : clientNavItems, [state.isAdmin, adminNavItems, clientNavItems])
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
-    { prefix: '/admin/clientes', title: 'Clientes' },
-    { prefix: '/admin/templates', title: 'Gerir Templates' },
-    { prefix: '/admin/analytics', title: 'Analytics Geral' },
-    { prefix: '/admin/settings', title: 'Configurações' },
-    { prefix: '/dashboard/leads', title: 'CRM Mini' },
+    { prefix: '/dashboard', title: 'Dashboard' },
     { prefix: '/dashboard/crm', title: 'CRM Pro' },
     { prefix: '/dashboard/lead-magnets', title: 'Lead Magnets' },
     { prefix: '/dashboard/email-marketing', title: 'Email Marketing' },
     { prefix: '/dashboard/embaixadores', title: 'Embaixadores' },
+    { prefix: '/dashboard/analytics', title: 'Analytics' },
+    { prefix: '/dashboard/leads', title: 'CRM Mini' },
     { prefix: '/dashboard/biblioteca', title: 'Biblioteca' },
+    { prefix: '/dashboard/catalog', title: 'Loja de Templates' },
     { prefix: '/dashboard/nfc', title: 'NFC' },
     { prefix: '/dashboard/settings', title: 'Definições' },
     { prefix: '/dashboard/plans', title: 'Planos' },
-    { prefix: '/dashboard/catalog', title: 'Loja de Templates' },
-    { prefix: '/dashboard/analytics', title: 'Analytics' },
-    { prefix: '/dashboard', title: 'Dashboard' },
+    { prefix: '/dashboard/perfil', title: 'Perfil' },
+    { prefix: '/admin/clientes', title: 'Clientes' },
+    { prefix: '/admin/templates', title: 'Gerir Templates' },
+    { prefix: '/admin/analytics', title: 'Analytics Global' },
+    { prefix: '/admin/catalog', title: 'Loja de Templates' },
+    { prefix: '/admin/coupons', title: 'Cupões' },
+    { prefix: '/admin/settings', title: 'Configurações' },
   ]
 
   const getPageTitle = () => {
