@@ -2005,7 +2005,11 @@ Melhores cumprimentos,
                       <strong>{lead.name}</strong>
                       {lead.phone && <div style={{ fontSize: 11, opacity: 0.6 }}>{lead.phone}</div>}
                     </td>
-                    <td style={td}>{lead.email}</td>
+                    <td style={td}>
+                      <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', fontSize: 12 }} title={lead.email}>
+                        {lead.email}
+                      </span>
+                    </td>
                     <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
@@ -2146,15 +2150,15 @@ Melhores cumprimentos,
                           }
                         }}
                         style={{
-                          padding: '6px 10px',
+                          padding: '4px 6px',
                           borderRadius: 8,
                           border: 'none',
                           background: 'rgba(34,197,94,0.15)',
                           color: '#86efac',
                           fontWeight: 600,
-                          fontSize: 12,
+                          fontSize: 11,
                           cursor: 'pointer',
-                          minWidth: 120,
+                          maxWidth: 90,
                         }}
                       >
                         <option value="">— País —</option>
@@ -2191,10 +2195,17 @@ Melhores cumprimentos,
                           borderRadius: 8,
                           fontSize: 11,
                           fontWeight: 600,
-                          background: lead.marketing_opt_in ? '#d1fae5' : '#fee2e2',
-                          color: lead.marketing_opt_in ? '#065f46' : '#7f1d1d',
+                          background: 'transparent',
+                          color: 'transparent',
+                          padding: 0,
                         }}>
-                          {lead.marketing_opt_in ? '✓ Sim' : '✗ Não'}
+                          <span style={{
+                            display: 'inline-block',
+                            width: 12, height: 12, borderRadius: '50%',
+                            background: lead.marketing_opt_in ? '#10b981' : '#ef4444',
+                            boxShadow: lead.marketing_opt_in ? '0 0 6px #10b981' : '0 0 6px #ef4444',
+                          }} />
+                          {lead.marketing_opt_in ? '' : ''}
                         </span>
                         {(lead as any).isUnsubscribed && (
                           <span style={{
