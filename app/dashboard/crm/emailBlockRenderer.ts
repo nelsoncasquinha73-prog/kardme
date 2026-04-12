@@ -27,7 +27,11 @@ export function renderEmailBlockToHtml(block: any): string {
 
   switch (type) {
     case 'text':
-      const textContent = content.html || escapeHtml(content.text || '').replace(/\n/g, '<br>')
+      const rawHtml = content.html || escapeHtml(content.text || '').replace(/\n/g, '<br>')
+      // Garantir que placeholders {nome} não ficam escapados pelo TipTap
+      const textContent = rawHtml
+        .replace(/&#123;/g, '{').replace(/&#125;/g, '}')
+        .replace(/&lbrace;/g, '{').replace(/&rbrace;/g, '}')
       return `<div style="font-size: ${content.fontSize || 16}px; color: ${content.color || '#111827'}; text-align: ${content.align || 'left'}; font-weight: ${content.fontWeight || 400}; line-height: 1.6; margin-bottom: 16px; word-break: break-word;">
         ${textContent}
       </div>`
