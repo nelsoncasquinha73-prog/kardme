@@ -1,18 +1,24 @@
 .dashboard-scope .dashboard-sidebar, .dashboard-sidebar {
   width: 220px;
+  min-width: 220px;
+  max-width: 220px;
   background: linear-gradient(180deg, #0b0b12 0%, #0f0f1a 100%);
   color: rgba(255, 255, 255, 0.92);
   padding: 14px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  overflow-y: auto;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
 }
 
 .sidebar-header {
   margin-bottom: 22px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .sidebar-logo {
@@ -32,6 +38,9 @@
 
 .sidebar-nav {
   flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
 }
 
 .sidebar-menu {
@@ -57,6 +66,9 @@
   transition: transform 0.18s ease, border-left-color 0.18s ease;
   border-left: 2px solid transparent;
   outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-link:focus-visible {
@@ -90,6 +102,7 @@
 .sidebar-footer {
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .sidebar-logout {
@@ -123,6 +136,7 @@
   color: rgba(255, 255, 255, 0.92);
   font-weight: 700;
   font-size: 15px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -150,9 +164,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.8; }
 }
