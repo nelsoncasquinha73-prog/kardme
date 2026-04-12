@@ -2190,22 +2190,13 @@ Melhores cumprimentos,
                     </td>
                     <td style={td}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: 8,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          background: 'transparent',
-                          color: 'transparent',
-                          padding: 0,
-                        }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span style={{
                             display: 'inline-block',
                             width: 12, height: 12, borderRadius: '50%',
                             background: lead.marketing_opt_in ? '#10b981' : '#ef4444',
                             boxShadow: lead.marketing_opt_in ? '0 0 6px #10b981' : '0 0 6px #ef4444',
                           }} />
-                          {lead.marketing_opt_in ? '' : ''}
                         </span>
                         {(lead as any).isUnsubscribed && (
                           <span style={{
