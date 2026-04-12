@@ -261,7 +261,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                           </div>
                           <div style={{ fontSize: 12, color: '#6b7280', display: 'flex', gap: 12 }}>
                             {isSent && sentDate && <span>📅 {sentDate}</span>}
-                            {isSent && (bc.total_recipients ?? 0) > 0 && <span>👥 {bc.total_recipients} destinatários</span>}
+
                             {bc.title && bc.title !== bc.subject && <span style={{ opacity: 0.7 }}>{bc.title}</span>}
                           </div>
                         </div>
@@ -281,7 +281,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                             }}
                             style={{ padding: '8px 12px', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                           >
-                            👥 Destinatários
+                            📬 Enviados {(bc.total_recipients ?? 0) > 0 ? `(${bc.total_recipients})` : ''}
                           </button>
                           <button onClick={() => { setEditingBroadcastId(bc.id); setEditorOpen(true) }} style={{ padding: '8px 12px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Editar</button>
                           <button onClick={() => handleDeleteBroadcast(bc.id)} style={{ padding: '8px 12px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Apagar</button>
