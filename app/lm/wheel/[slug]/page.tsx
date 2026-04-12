@@ -35,6 +35,7 @@ export default function WheelPage() {
   const [spinCount, setSpinCount] = useState(0)
   const [maxSpins, setMaxSpins] = useState(1)
   const [exhausted, setExhausted] = useState(false)
+  const [prizes, setPrizes] = useState<WheelSlice[]>([])
   const [confetti, setConfetti] = useState<{x:number;y:number;color:string;size:number;speed:number;angle:number}[]>([])
 
   useEffect(() => { if (slug) loadData() }, [slug])
@@ -108,11 +109,8 @@ export default function WheelPage() {
     setTimeout(() => setConfetti([]), 4000)
   }
 
-  async function incrementSpinCount(currentLeadId: string) {
-        const newCount = spinCount + 1
-        setSpinCount(newCount)
-    setSpinCount(newCount)
-    await supabase.from('leads').update({ spin_count: newCount }).eq('id', currentLeadId)
+  async function incrementSpinCount(currentLeadId: string, count: number) {
+    await supabase.from('leads').update({ spin_count: count }).eq('id', currentLeadId)
   }
 
   async function handleSpin() {
@@ -137,11 +135,14 @@ export default function WheelPage() {
       else {
         rotationRef.current = finalRot; drawWheel(finalRot)
         setResult(winner); setSpinning(false)
-        spawnConfetti(winner.is_prize); if (winner.is_prize && leadId) notifyWinner(winner.label)
-        const currentLeadId = leadId
-        if (currentLeadId) incrementSpinCount(currentLeadId)
+        spawnConfetti(winner.is_prize)
+        if (winner.is_prize) {
+          setPrizes(prev => [...prev, winner])
+          if (leadId) notifyWinner(winner.label)
+        }
         const newCount = spinCount + 1
         setSpinCount(newCount)
+        if (leadId) incrementSpinCount(leadId, newCount)
         if (newCount >= maxSpins) {
           setExhausted(true)
           setStep('result')
@@ -271,12 +272,27 @@ magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
             <button className={styles.btnSpin} onClick={handleTryAgain}>🎡 Tentar outra vez!</button>
           </div>
         )}
-        {step === 'result' && result && (exhausted || spinsLeft <= 0) && (
+        {step === 'result' && (exhausted || spinsLeft <= 0) && (
           <div className={styles.resultSection}>
-            <div className={styles.resultIcon}>{result.is_prize ? '🎉' : '😔'}</div>
-            <h2 className={styles.resultTitle}>{result.is_prize ? 'Parabéns!' : 'Não foi desta vez...'}</h2>
-            <div className={styles.resultBadge} style={{background:`linear-gradient(135deg, ${result.color}, ${result.color}dd)`,boxShadow:`0 4px 24px ${result.color}66`}}>{result.label}</div>
-            <p className={styles.resultMessage}>{magnet.thank_you_message || (result.is_prize ? 'O teu prémio foi registado! Entraremos em contacto em breve.' : 'Obrigado por participares! Fica atento às próximas oportunidades.')}</p>
+            {prizes.length > 0 ? (
+              <>
+                <div className={styles.resultIcon}>🎉</div>
+                <h2 className={styles.resultTitle}>Parabéns!</h2>
+                <p style={{color:'rgba(255,255,255,0.7)',marginBottom:12}}>Ganhaste {prizes.length} prémio{prizes.length > 1 ? 's' : ''}:</p>
+                <div style={{display:'flex',flexDirection:'column',gap:8,width:'100%',alignItems:'center'}}>
+                  {prizes.map((p,i) => (
+                    <div key={i} className={styles.resultBadge} style={{background:`linear-gradient(135deg, ${p.color}, ${p.color}dd)`,boxShadow:`0 4px 24px ${p.color}66`}}>{p.label}</div>
+                  ))}
+                </div>
+                <p className={styles.resultMessage}>{magnet.thank_you_message || 'Os teus prémios foram registados! Entraremos em contacto em breve.'}</p>
+              </>
+            ) : (
+              <>
+                <div className={styles.resultIcon}>😔</div>
+                <h2 className={styles.resultTitle}>Não foi desta vez...</h2>
+                <p className={styles.resultMessage}>{magnet.thank_you_message || 'Obrigado por participares! Fica atento às próximas oportunidades.'}</p>
+              </>
+            )}
           </div>
         )}
         {step === 'result' && !result && exhausted && (
