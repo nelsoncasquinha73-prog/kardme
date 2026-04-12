@@ -34,7 +34,7 @@ interface EmailCampaignEditorProps {
   onSave: () => void
 }
 
-export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLeadIds, onClose, onSave }: EmailCampaignEditorProps) {
+export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, preSelectedLeadIds, onClose, onSave }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
 
   // Buscar contexto do cartão principal do utilizador para a IA
@@ -54,6 +54,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [preheader, setPreheader] = useState('')
+  const [currentBroadcastId, setCurrentBroadcastId] = useState<string | undefined>(initialBroadcastId)
   const [blocks, setBlocks] = useState<EmailBlock[]>([])
   const [audiences, setAudiences] = useState<LeadType[]>([])
   const [selectedAudiences, setSelectedAudiences] = useState<Set<string>>(new Set())
@@ -79,7 +80,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
 
   useEffect(() => {
     loadData()
-  }, [userId, broadcastId])
+  }, [userId, initialBroadcastId])
 
   async function loadData() {
     setLoading(true)
@@ -89,11 +90,11 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
       setLeads(leadsError ? [] : (leadsData || []))
       setAudiences(auds)
 
-      if (broadcastId) {
+      if (currentBroadcastId) {
         const { data, error } = await supabase
           .from('email_broadcasts')
           .select('*')
-          .eq('id', broadcastId)
+          .eq('id', currentBroadcastId)
           .eq('user_id', userId)
           .single()
 
@@ -201,8 +202,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
         return
       }
 
-      let bcastId = broadcastId
-      if (!broadcastId) {
+      let bcastId = currentBroadcastId
+      if (!currentBroadcastId) {
         const htmlContent = { blocks, createdAt: new Date().toISOString() }
         const { data, error } = await supabase
           .from('email_broadcasts')
@@ -260,8 +261,8 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
         createdAt: new Date().toISOString(),
       }
 
-      if (broadcastId) {
-        await updateBroadcast(broadcastId, userId, {
+      if (currentBroadcastId) {
+        await updateBroadcast(currentBroadcastId!, userId, {
           title,
           subject,
           preheader,
@@ -269,12 +270,13 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
         })
         addToast('Campanha atualizada!', 'success')
       } else {
-        await createBroadcast(userId, {
+        const newBroadcast = await createBroadcast(userId, {
           title,
           subject,
           preheader,
           html_content: htmlContent,
         })
+        if (newBroadcast?.id) setCurrentBroadcastId(newBroadcast.id)
         addToast('Campanha criada!', 'success')
       }
 
