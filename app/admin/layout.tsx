@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
@@ -58,28 +58,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router, pathname])
 
   // NÚCLEO OPERACIONAL (igual para admin e cliente)
-  const coreNavItems = [
+  const coreNavItems = useMemo(() => [
     { label: 'Dashboard', href: '/dashboard', icon: FiHome },
     { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
     { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
     { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
     { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiTrendingUp },
     { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-  ]
+  ], [])
 
   // EXTRAS DO ADMIN (só aparecem para admin)
-  const adminOnlyItems = isAdmin ? [
+  const adminOnlyItems = useMemo(() => isAdmin ? [
     { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
     { label: 'Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
     { label: 'Cupões', href: '/admin/coupons', icon: FiTag },
     { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
-  ] : []
+  ] : [], [isAdmin])
 
-  // COMBINAR: núcleo + admin extras
-  const navItems = isAdmin ? [...coreNavItems, ...adminOnlyItems] : [
+  // COMBINAR: núcleo + admin extras (MEMOIZADO para não recalcular a cada render)
+  const navItems = useMemo(() => isAdmin ? [...coreNavItems, ...adminOnlyItems] : [
     { label: 'Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
-  ]
+  ], [isAdmin, coreNavItems, adminOnlyItems])
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
     { prefix: '/dashboard', title: 'Dashboard' },
