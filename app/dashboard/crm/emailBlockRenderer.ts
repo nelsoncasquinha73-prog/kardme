@@ -59,13 +59,16 @@ export function renderEmailBlockToHtml(block: any): string {
     case 'spacer':
       return `<div style="height: ${content.height || 24}px; margin-bottom: 16px;"></div>`
 
-    case 'video':
-      return `<div style="width: ${content.width || '100%'}; margin: 0 auto 16px; text-align: ${content.align || 'center'};">
-        <div style="position: relative; display: inline-block; width: 100%; max-width: 500px; background-color: #000; border-radius: 8px; overflow: hidden;">
-          ${content.thumbnail ? `<img src="${escapeHtml(content.thumbnail)}" alt="Video thumbnail" style="width: 100%; height: auto; display: block;" />` : `<div style="width: 100%; padding-bottom: 56.25%; background-color: #1a1a1a;"></div>`}
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(16, 185, 129, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px;">▶️</div>
-        </div>
-      </div>`
+    case 'video': {
+      const videoLink = content.previewId ? `https://www.kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
+      return content.thumbnail
+        ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0; margin-bottom: 16px;">
+            <a href="${escapeHtml(videoLink)}" target="_blank" style="display: inline-block; text-decoration: none; position: relative;">
+              <img src="${escapeHtml(content.thumbnail)}" alt="Video" style="display: block; width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; margin: 0 auto;" />
+            </a>
+          </div>`
+        : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; text-align: center; line-height: 200px; color: #999; margin-bottom: 16px;">Vídeo</div>`
+    }
 
     case 'table':
       const headerHtml = (content.headers || []).map((h: string) => 
