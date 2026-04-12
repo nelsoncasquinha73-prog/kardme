@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
-import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag, FiMail, FiZap, FiGift, FiTrendingUp } from 'react-icons/fi'
+import { FiLayout, FiShoppingCart, FiUsers, FiSettings, FiBarChart2, FiTag, FiMail, FiZap, FiGift, FiTrendingUp, FiHome } from 'react-icons/fi'
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -59,10 +59,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // NÚCLEO OPERACIONAL (igual para admin e cliente)
   const coreNavItems = [
+    { label: 'Dashboard', href: '/dashboard', icon: FiHome },
     { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
     { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
     { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
-    { label: 'Embaixadores', href: '/dashboard/ambassadors', icon: FiTrendingUp },
+    { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiTrendingUp },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
   ]
 
   // EXTRAS DO ADMIN (só aparecem para admin)
@@ -70,7 +72,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
     { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
     { label: 'Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
-    { label: 'Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { label: 'Cupões', href: '/admin/coupons', icon: FiTag },
     { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
   ] : []
@@ -81,13 +82,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ]
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
+    { prefix: '/dashboard', title: 'Dashboard' },
     { prefix: '/dashboard/crm', title: 'CRM Pro' },
     { prefix: '/dashboard/lead-magnets', title: 'Lead Magnets' },
     { prefix: '/dashboard/email-marketing', title: 'Email Marketing' },
-    { prefix: '/dashboard/ambassadors', title: 'Embaixadores' },
+    { prefix: '/dashboard/embaixadores', title: 'Embaixadores' },
+    { prefix: '/dashboard/analytics', title: 'Analytics' },
     { prefix: '/admin/clientes', title: 'Clientes' },
     { prefix: '/admin/templates', title: 'Gerir Templates' },
-    { prefix: '/admin/analytics', title: 'Analytics' },
     { prefix: '/admin/catalog', title: 'Loja de Templates' },
     { prefix: '/admin/coupons', title: 'Cupões' },
     { prefix: '/admin/settings', title: 'Configurações' },
