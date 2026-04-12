@@ -480,17 +480,23 @@ Melhores cumprimentos,
     if (!editingLead) return
     setEditLoading(true)
     try {
-      const res = await fetch(`/api/crm/leads/${editingLead.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Erro ao guardar')
-      }
-      const updated = await res.json()
-      setLeads(prev => prev.map(l => l.id === editingLead.id ? { ...l, ...updated } : l))
+      const { error } = await supabase
+        .from('leads')
+        .update({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          zone: data.zone,
+          marketing_opt_in: data.marketing_opt_in,
+          lead_type_id: data.lead_type_id,
+          lead_source: data.lead_source,
+          country: data.country,
+        })
+        .eq('id', editingLead.id)
+
+      if (error) throw new Error(error.message)
+
+      setLeads(prev => prev.map(l => l.id === editingLead.id ? { ...l, ...data } : l))
       addToast('Lead atualizada com sucesso!', 'success')
       setEditingLead(null)
     } catch (err: any) {
