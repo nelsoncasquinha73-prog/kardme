@@ -184,13 +184,13 @@ export default function AppChrome({
           </div>
         </aside>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong>{getPageTitle()}</strong>
             <LanguageDropdown />
           </header>
 
-          <main style={{ padding: 24 }}>{children}</main>
+          <main style={{ padding: 24, flex: 1, overflow: 'auto' }}>{children}</main>
         </div>
       </div>
     </ColorPickerProvider>
