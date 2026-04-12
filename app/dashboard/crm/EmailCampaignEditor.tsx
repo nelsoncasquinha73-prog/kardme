@@ -366,18 +366,7 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                 {title || 'Sem título'}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                cursor: 'pointer',
-                fontSize: 20,
-              }}
-            >
-              <FiX />
-            </button>
+
           </div>
 
           {/* Metadata */}
