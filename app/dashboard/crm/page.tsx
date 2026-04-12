@@ -15,7 +15,9 @@ import {
   FiDownload,
   FiUpload,
   FiChevronDown,
+  FiEdit2,
 } from 'react-icons/fi'
+import EditLeadModal from '@/components/crm/EditLeadModal'
 import VideoNotificationCenter from './VideoNotificationCenter'
 
 import { supabase } from '@/lib/supabaseClient'
@@ -96,6 +98,8 @@ export default function CrmProPage() {
   const [showOrigemInfoModal, setShowOrigemInfoModal] = useState(false)
   const [showGmailInfoModal, setShowGmailInfoModal] = useState(false)
   const [showOptinInfoModal, setShowOptinInfoModal] = useState(false)
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [editLoading, setEditLoading] = useState(false)
   const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
@@ -471,6 +475,30 @@ Melhores cumprimentos,
   }, [showCardDropdown])
 
 
+
+  const handleSaveLead = async (data: Partial<Lead>) => {
+    if (!editingLead) return
+    setEditLoading(true)
+    try {
+      const res = await fetch(`/api/crm/leads/${editingLead.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Erro ao guardar')
+      }
+      const updated = await res.json()
+      setLeads(prev => prev.map(l => l.id === editingLead.id ? { ...l, ...updated } : l))
+      addToast('Lead atualizada com sucesso!', 'success')
+      setEditingLead(null)
+    } catch (err: any) {
+      addToast(err.message || 'Erro ao guardar lead', 'error')
+    } finally {
+      setEditLoading(false)
+    }
+  }
 
   // Landing interna do CRM Pro (quando não está ativo)
   if (false && crmProActive === false) {
@@ -1968,6 +1996,7 @@ Melhores cumprimentos,
                     disabled={filteredLeads.length === 0}
                 />
               </th>
+              <th style={{ ...th, textAlign: 'center', width: 60 }}>Ações</th>
               <th style={th}>Nome</th>
               <th style={th}>Email</th>
               <th style={th}>Cartão</th>
@@ -2000,6 +2029,25 @@ Melhores cumprimentos,
                           checked={selectedLeadIds.has(lead.id)}
                           onChange={() => toggleLeadSelection(lead.id)}
                         />
+                    </td>
+                    <td style={{ ...td, textAlign: 'center' }}>
+                      <button
+                        onClick={() => setEditingLead(lead)}
+                        title="Editar lead"
+                        style={{
+                          background: 'rgba(59,130,246,0.15)',
+                          border: '1px solid rgba(59,130,246,0.3)',
+                          borderRadius: 8,
+                          padding: '6px 8px',
+                          cursor: 'pointer',
+                          color: '#3b82f6',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <FiEdit2 size={14} />
+                      </button>
                     </td>
                     <td style={td}>
                       <strong>{lead.name}</strong>
@@ -3585,6 +3633,18 @@ Melhores cumprimentos,
             <button onClick={() => setShowOrigemInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
           </div>
         </div>
+      )}
+
+    {editingLead && (
+        <EditLeadModal
+          lead={editingLead}
+          onClose={() => setEditingLead(null)}
+          onSave={handleSaveLead}
+          leadTypes={leadTypes}
+          leadSources={leadSources}
+          countries={countries}
+          loading={editLoading}
+        />
       )}
 
     </main>
