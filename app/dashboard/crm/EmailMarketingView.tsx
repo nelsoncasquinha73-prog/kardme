@@ -74,6 +74,25 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
     return error ? [] : (data || []).map(l => ({ ...l, audience_ids: l.audience_ids || [] }))
   }
 
+  async function handleDuplicateBroadcast(bc: any) {
+    try {
+      const { error } = await supabase
+        .from('email_broadcasts')
+        .insert({
+          user_id: userId,
+          title: bc.title + ' (cópia)',
+          subject: bc.subject,
+          preheader: bc.preheader,
+          html_content: bc.html_content,
+          status: 'draft',
+        })
+      if (error) throw error
+      await silentReload()
+    } catch (e) {
+      console.error('Erro ao duplicar campanha:', e)
+    }
+  }
+
   async function handleDeleteBroadcast(broadcastId: string) {
     if (!confirm('Apagar campanha?')) return
     try {
@@ -284,6 +303,7 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
                             📬 Enviados {(bc.total_recipients ?? 0) > 0 ? `(${bc.total_recipients})` : ''}
                           </button>
                           <button onClick={() => { setEditingBroadcastId(bc.id); setEditorOpen(true) }} style={{ padding: '8px 12px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Editar</button>
+                          <button onClick={() => handleDuplicateBroadcast(bc)} style={{ padding: '8px 12px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Duplicar</button>
                           <button onClick={() => handleDeleteBroadcast(bc.id)} style={{ padding: '8px 12px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Apagar</button>
                         </div>
                       </div>
