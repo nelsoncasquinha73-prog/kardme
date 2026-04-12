@@ -366,6 +366,24 @@ export default function EmailCampaignEditor({ userId, broadcastId, preSelectedLe
                 {title || 'Sem título'}
               </p>
             </div>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 8,
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 700,
+                padding: '6px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <FiX size={14} /> Fechar
+            </button>
 
           </div>
 
