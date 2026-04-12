@@ -84,7 +84,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file=e.target.files?.[0]; if(!file) return; setUploadingCover(true)
     try {
-      const path=`lead-magnets-covers/\${userId}/\${Date.now()}.\${file.name.split('.').pop()}`
+      const path=`lead-magnets-covers/${userId}/${Date.now()}.${file.name.split('.').pop()}`
       const {error}=await supabase.storage.from('lead-magnets').upload(path,file,{upsert:true})
       if(error) throw error
       const {data}=supabase.storage.from('lead-magnets').getPublicUrl(path)
