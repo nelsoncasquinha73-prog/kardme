@@ -277,7 +277,12 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {loading ? (
-        <p style={{ color: '#60a5fa', textAlign: 'center', padding: 40 }}>A carregar analytics…</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, opacity: 0.4, pointerEvents: 'none' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 16, height: 80 }} />
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 16, height: 80 }} />
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 16, height: 80 }} />
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 16, height: 80 }} />
+        </div>
       ) : (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>

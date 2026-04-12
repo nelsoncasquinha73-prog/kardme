@@ -3,3 +3,19 @@
 html {
   scrollbar-gutter: stable;
 }
+
+/* Prevent white flash during route transitions */
+html, body {
+  background: #0f0f1e;
+  color: #fff;
+}
+
+/* Smooth transitions between routes */
+main {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.98; }
+  to { opacity: 1; }
+}
