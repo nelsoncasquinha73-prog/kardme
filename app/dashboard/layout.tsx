@@ -56,12 +56,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       let isPro = false
       if (!isAdmin) {
+        // Verificar subscrição paga via Stripe
         const { data: sub } = await supabase
           .from('user_subscriptions')
           .select('status, plan')
           .eq('user_id', user.id)
           .maybeSingle()
-        isPro = (sub?.plan === 'pro_monthly' || sub?.plan === 'pro_yearly') && sub?.status === 'active'
+        const hasActivePlan = (sub?.plan === 'pro_monthly' || sub?.plan === 'pro_yearly') && sub?.status === 'active'
+
+        // Verificar acesso manual dado pelo admin
+        const { data: addon } = await supabase
+          .from('user_addons')
+          .select('crm_pro_active, crm_pro_expires_at')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        const hasManualAccess = addon?.crm_pro_active === true &&
+          (!addon?.crm_pro_expires_at || new Date(addon.crm_pro_expires_at) > new Date())
+
+        isPro = hasActivePlan || hasManualAccess
       }
 
       setState({
