@@ -2002,7 +2002,7 @@ Melhores cumprimentos,
                     disabled={filteredLeads.length === 0}
                 />
               </th>
-              <th style={{ ...th, textAlign: 'center', width: 60 }}>Ações</th>
+              <th style={{ ...th, textAlign: 'center', width: 40 }}>✏️</th>
               <th style={th}>Nome</th>
               <th style={th}>Email</th>
               <th style={th}>Cartão</th>
@@ -3659,11 +3659,13 @@ Melhores cumprimentos,
 
 const th = {
   textAlign: 'left' as const,
-  padding: '12px 10px',
+  padding: '8px 6px',
   fontWeight: 700,
-  fontSize: 12,
+  fontSize: 11,
+  whiteSpace: 'nowrap' as const,
 }
 
 const td = {
-  padding: '12px 10px',
+  padding: '8px 6px',
+  fontSize: 12,
 }
