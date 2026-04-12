@@ -9,6 +9,7 @@ import { LanguageProvider } from '@/components/language/LanguageProvider'
 import { ToastProvider } from '@/lib/toast-context'
 import { ToastContainer } from '@/components/Toast'
 import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
+import SessionWatcher from '@/components/SessionWatcher'
 
 function DashboardLayoutContent({ children, userEmail, isAdmin, navItems, getPageTitle }: any) {
   return (
@@ -33,6 +34,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     isAdmin: false,
     isPro: false,
   })
+
+  useEffect(() => {
+    // Listener de sessão expirada
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        if (event === 'SIGNED_OUT') {
+          router.push('/login')
+        }
+      }
+      if (event === 'USER_UPDATED') return
+      // Sessão expirada — mostrar aviso
+      if (event === 'SIGNED_OUT') {
+        alert('A tua sessão expirou. Por favor faz login novamente.')
+      }
+    })
+    return () => authListener.subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     const boot = async () => {
@@ -175,6 +193,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <LanguageProvider>
         <SyncLanguageToProfile />
         <ToastContainer />
+        <SessionWatcher />
         <DashboardLayoutContent
           userEmail={state.userEmail}
           isAdmin={state.isAdmin}
