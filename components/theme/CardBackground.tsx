@@ -393,6 +393,61 @@ export default function CardBackground({ bg, borderRadius, className, children, 
   const v1 = migrateCardBg(bg)
   const result = bgToStyle(v1)
 
+  // ✅ NOVO: Se for animated-gradient, renderiza com animação
+  if (v1.base.kind === 'animated-gradient') {
+    const animBase = v1.base as any
+    const { keyframes, animationName, duration } = generateAnimatedGradientCSS(
+      'card',
+      animBase.colors || ['#ffffff', '#f3f4f6'],
+      animBase.style || 'shift',
+      animBase.angle || 45,
+      animBase.speed || 'normal'
+    )
+
+    const overlays = (v1.overlays ?? []) as Overlay[]
+    const patternOverlay = overlays?.[0] ?? null
+    const patternStyle = patternOverlay ? overlayToCss(patternOverlay) : null
+
+    return (
+      <div
+        className={className}
+        style={{
+          position: 'relative',
+          ...style,
+        } as React.CSSProperties}
+      >
+        {/* Injetar keyframes */}
+        <style dangerouslySetInnerHTML={{ __html: keyframes }} />
+
+        {/* Layer 1: Animated gradient background */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius,
+            animation: `${animationName} ${duration}s infinite linear`,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Layer 2: Patterns (se existirem) */}
+        {patternStyle ? (
+          <div
+            aria-hidden
+            style={{
+              ...patternStyle,
+              borderRadius,
+            }}
+          />
+        ) : null}
+
+        {/* Layer 3: Conteúdo */}
+        <div style={{ position: 'relative', borderRadius }}>{children}</div>
+      </div>
+    )
+  }
+
   // ✅ NOVO: Se for imagem, renderiza layers de imagem
   if (result.isImage && result.image) {
     const overlays = (v1.overlays ?? []) as Overlay[]
