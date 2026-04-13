@@ -234,9 +234,7 @@ export default function WheelPage() {
       setStep('spin')
       return
     }
-    const id = await captureLead
-API()
-    if (id) setLeadId(id)
+    const id = await captureLeadAPI()
     setStep('spin')
   }
 
