@@ -1,0 +1,1 @@
+ALTER TABLE lead_magnets ADD COLUMN IF NOT EXISTS total_spins INTEGER DEFAULT 0;

@@ -117,9 +117,33 @@ export default function WheelPage() {
     if (spinning || !magnet) return
     setSpinning(true)
     const slices = getSlices(); const n = slices.length; const arc = (2*Math.PI)/n
-    const prizes = slices.filter(s => s.is_prize); const nonPrizes = slices.filter(s => !s.is_prize)
-    const winPrize = Math.random() < 0.35 && prizes.length > 0
-    const winner = winPrize ? prizes[Math.floor(Math.random()*prizes.length)] : nonPrizes.length > 0 ? nonPrizes[Math.floor(Math.random()*nonPrizes.length)] : slices[Math.floor(Math.random()*slices.length)]
+    
+    // Incrementa contador global (atómico) e obtém o total
+    const { data: newTotal, error: spinErr } = await supabase.rpc('increment_lead_magnet_total_spins', { magnet_id: magnet.id })
+    if (spinErr) console.error('Erro ao incrementar spins:', spinErr)
+
+    // Construir bucket de 100 posições baseado nas percentagens
+    const bucket: WheelSlice[] = []
+    const safeSlices = slices.map(s => ({ ...s, percentage: (s as any).percentage ?? 0 }))
+
+    // Garantir soma 100 (se não for, normaliza)
+    const sum = safeSlices.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0)
+    const normalized = sum > 0
+      ? safeSlices.map(s => ({ ...s, percentage: (Number(s.percentage) || 0) * (100 / sum) }))
+      : safeSlices.map(s => ({ ...s, percentage: 100 / safeSlices.length }))
+
+    for (const sl of normalized) {
+      const count = Math.round(sl.percentage)
+      for (let i = 0; i < count && bucket.length < 100; i++) bucket.push(sl)
+    }
+
+    // Ajuste final para ficar exatamente 100
+    while (bucket.length < 100) bucket.push(normalized[normalized.length - 1])
+    if (bucket.length > 100) bucket.length = 100
+
+    // Escolher vencedor determinístico dentro do ciclo de 100
+    const pos = (typeof newTotal === 'number' ? (newTotal - 1) : Math.floor(Math.random() * 100)) % 100
+    const winner = bucket[pos] ?? slices[Math.floor(Math.random() * slices.length)]
     const winnerIndex = slices.findIndex(s => s.id === winner.id)
     const targetSliceAngle = winnerIndex * arc + arc / 2
     const targetRot = -Math.PI/2 - targetSliceAngle
