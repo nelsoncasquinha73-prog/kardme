@@ -3,6 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { migrateCardBg, isV1, type CardBg, type CardBgV1 } from '@/lib/cardBg'
+import { generateAnimatedGradientCSS } from '@/lib/animatedGradient'
 
 export type BadgeSettings = {
   enabled?: boolean
@@ -192,19 +193,36 @@ export default function HeaderBlock({
   // Bleed horizontal para cover
   const horizontalBleed = 16
 
+  // Gerar keyframes para animated-gradient se existir
+  const animatedGradientOverlay = v1.overlays?.find((o: any) => o.kind === 'animated-gradient') as any
+  let animatedGradientStyles = ''
+  if (animatedGradientOverlay) {
+    const { keyframes, animationName, duration } = generateAnimatedGradientCSS(
+      'header',
+      animatedGradientOverlay.colors || ['#ffffff', '#f3f4f6'],
+      animatedGradientOverlay.style || 'shift',
+      animatedGradientOverlay.angle || 45,
+      animatedGradientOverlay.speed || 'normal'
+    )
+    animatedGradientStyles = keyframes
+  }
+
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: `calc(100% + ${horizontalBleed * 2}px)`,
-        left: `-${horizontalBleed}px`,
-        height,
-        background: headerBgEnabled ? headerBgColor : 'transparent',
-        overflow: 'hidden',
-        marginLeft: 0,
-        marginRight: 0,
-      }}
-    >
+    <>
+      {animatedGradientStyles && <style dangerouslySetInnerHTML={{ __html: animatedGradientStyles }} />}
+      <div
+        style={{
+          position: 'relative',
+          width: `calc(100% + ${horizontalBleed * 2}px)`,
+          left: `-${horizontalBleed}px`,
+          height,
+          background: headerBgEnabled ? headerBgColor : 'transparent',
+          overflow: 'hidden',
+          marginLeft: 0,
+          marginRight: 0,
+          animation: animatedGradientOverlay ? `${animatedGradientOverlay.style ? 'ag_header_' + animatedGradientOverlay.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientOverlay?.colors || ['#fff', '#f3f4f6'], animatedGradientOverlay?.style || 'shift', animatedGradientOverlay?.angle || 45, animatedGradientOverlay?.speed || 'normal').duration}s infinite linear` : 'none',
+        }}
+      >
       {showCover && (coverVideoSrc || coverSrc) ? (
         coverVideoSrc ? (
           coverMode === 'full' ? (
@@ -315,6 +333,7 @@ export default function HeaderBlock({
           />
         </div>
       ) : null}
-    </div>
+      </div>
+    </>
   )
 }
