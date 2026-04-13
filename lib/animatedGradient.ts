@@ -1,5 +1,5 @@
 /**
- * Sistema de gradientes animados para HeaderBlock
+ * Sistema de gradientes animados
  */
 
 export type AnimatedGradientSpeed = 'slow' | 'normal' | 'fast'
@@ -7,7 +7,7 @@ export type AnimatedGradientStyle = 'shift' | 'pulse' | 'wave'
 
 export interface AnimatedGradientOverlay {
   kind: 'animated-gradient'
-  colors: string[] // 2-4 cores
+  colors: string[]
   speed: AnimatedGradientSpeed
   style: AnimatedGradientStyle
   angle: number
@@ -34,36 +34,29 @@ export function generateAnimatedGradientCSS(
   let keyframes = ''
 
   if (style === 'shift') {
-    // Gradiente que roda suavemente
     keyframes = `
       @keyframes ${animationName} {
-        0% { background: linear-gradient(${angle}deg, ${colors.join(', ')}); }
-        50% { background: linear-gradient(${angle + 180}deg, ${colors.join(', ')}); }
-        100% { background: linear-gradient(${angle}deg, ${colors.join(', ')}); }
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
       }
     `
   } else if (style === 'pulse') {
-    // Cores pulsam suavemente
-    const frames = colors.map((_, i) => {
-      const percent = (i / colors.length) * 100
-      const nextColor = colors[(i + 1) % colors.length]
-      return `${percent}% { background: linear-gradient(${angle}deg, ${colors[i]}, ${nextColor}); }`
-    }).join('\n')
     keyframes = `
       @keyframes ${animationName} {
-        ${frames}
-        100% { background: linear-gradient(${angle}deg, ${colors[0]}, ${colors[1]}); }
+        0% { background-position: 50% 50%; transform: scale(1); }
+        50% { background-position: 60% 40%; transform: scale(1.03); }
+        100% { background-position: 50% 50%; transform: scale(1); }
       }
     `
   } else if (style === 'wave') {
-    // Onda suave
     keyframes = `
       @keyframes ${animationName} {
-        0% { background: linear-gradient(${angle}deg, ${colors[0]} 0%, ${colors[colors.length - 1]} 100%); }
-        25% { background: linear-gradient(${angle + 45}deg, ${colors[0]} 0%, ${colors[colors.length - 1]} 100%); }
-        50% { background: linear-gradient(${angle + 90}deg, ${colors[0]} 0%, ${colors[colors.length - 1]} 100%); }
-        75% { background: linear-gradient(${angle + 45}deg, ${colors[0]} 0%, ${colors[colors.length - 1]} 100%); }
-        100% { background: linear-gradient(${angle}deg, ${colors[0]} 0%, ${colors[colors.length - 1]} 100%); }
+        0% { background-position: 0% 50%; }
+        25% { background-position: 50% 100%; }
+        50% { background-position: 100% 50%; }
+        75% { background-position: 50% 0%; }
+        100% { background-position: 0% 50%; }
       }
     `
   }

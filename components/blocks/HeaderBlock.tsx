@@ -210,7 +210,6 @@ export default function HeaderBlock({
 
   return (
     <>
-      {animatedGradientStyles && <style dangerouslySetInnerHTML={{ __html: animatedGradientStyles }} />}
       <div
         style={{
           position: 'relative',
@@ -221,7 +220,6 @@ export default function HeaderBlock({
           overflow: 'hidden',
           marginLeft: 0,
           marginRight: 0,
-          animation: animatedGradientBase && (showCover || headerBgEnabled) ? `${animatedGradientBase.style ? 'ag_header_' + animatedGradientBase.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientBase?.colors || ['#fff', '#f3f4f6'], animatedGradientBase?.style || 'shift', animatedGradientBase?.angle || 45, animatedGradientBase?.speed || 'normal').duration}s infinite linear` : 'none',
         }}
       >
       {showCover && (coverVideoSrc || coverSrc) ? (
