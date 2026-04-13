@@ -215,12 +215,12 @@ export default function HeaderBlock({
           position: 'relative',
           width: `calc(100% + ${horizontalBleed * 2}px)`,
           left: `-${horizontalBleed}px`,
-          height,
+          height: showCover || headerBgEnabled ? height : 0,
           background: headerBgEnabled ? headerBgColor : 'transparent',
           overflow: 'hidden',
           marginLeft: 0,
           marginRight: 0,
-          animation: animatedGradientOverlay ? `${animatedGradientOverlay.style ? 'ag_header_' + animatedGradientOverlay.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientOverlay?.colors || ['#fff', '#f3f4f6'], animatedGradientOverlay?.style || 'shift', animatedGradientOverlay?.angle || 45, animatedGradientOverlay?.speed || 'normal').duration}s infinite linear` : 'none',
+          animation: animatedGradientOverlay && (showCover || headerBgEnabled) ? `${animatedGradientOverlay.style ? 'ag_header_' + animatedGradientOverlay.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientOverlay?.colors || ['#fff', '#f3f4f6'], animatedGradientOverlay?.style || 'shift', animatedGradientOverlay?.angle || 45, animatedGradientOverlay?.speed || 'normal').duration}s infinite linear` : 'none',
         }}
       >
       {showCover && (coverVideoSrc || coverSrc) ? (
