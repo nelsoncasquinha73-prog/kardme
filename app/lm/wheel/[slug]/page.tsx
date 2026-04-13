@@ -18,6 +18,46 @@ const DEFAULT_SLICES: WheelSlice[] = [
   { id: '6', label: 'Tenta outra vez', color: '#4b5563', is_prize: false },
 ]
 
+// ✅ HAMILTON METHOD - Distribuição exata de 100 slots sem distorção
+function hamiltonMethod(slices: WheelSlice[]): WheelSlice[] {
+  const bucket: WheelSlice[] = []
+  const slots = slices.map((s, i) => ({
+    slice: s,
+    index: i,
+    percentage: Number((s as any).percentage) || 0,
+    whole: 0,
+    remainder: 0,
+  }))
+
+  // 1) Calcular inteiros e restos
+  let totalWhole = 0
+  for (const slot of slots) {
+    slot.whole = Math.floor(slot.percentage)
+    slot.remainder = slot.percentage - slot.whole
+    totalWhole += slot.whole
+  }
+
+  // 2) Distribuir inteiros
+  for (const slot of slots) {
+    for (let i = 0; i < slot.whole; i++) {
+      bucket.push(slot.slice)
+    }
+  }
+
+  // 3) Distribuir os slots restantes (até 100) pelos maiores restos
+  const remaining = 100 - totalWhole
+  if (remaining > 0) {
+    const sorted = slots
+      .map((s, i) => ({ ...s, origIndex: i }))
+      .sort((a, b) => b.remainder - a.remainder)
+    for (let i = 0; i < remaining && i < sorted.length; i++) {
+      bucket.push(sorted[i].slice)
+    }
+  }
+
+  return bucket.slice(0, 100)
+}
+
 export default function WheelPage() {
   const params = useParams()
   const slug = params.slug as string
@@ -60,7 +100,7 @@ export default function WheelPage() {
   function lightenColor(hex: string, amount: number): string {
     try {
       const num = parseInt(hex.replace('#', ''), 16)
-      return `rgb(${Math.min(255,(num>>16)+amount)},${Math.min(255,((num>>8)&0xff)+amount)},${Math.min(255,(num&0xff)+amount)})`
+      return `rgb(\${Math.min(255,(num>>16)+amount)},\${Math.min(255,((num>>8)&0xff)+amount)},\${Math.min(255,(num&0xff)+amount)})`
     } catch { return hex }
   }
 
@@ -89,7 +129,7 @@ export default function WheelPage() {
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, start, end); ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke()
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R*Math.cos(start), cy + R*Math.sin(start)); ctx.strokeStyle = 'rgba(245,158,11,0.5)'; ctx.lineWidth = 1; ctx.stroke()
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(mid); ctx.textAlign = 'right'; ctx.fillStyle = '#fff'
-      ctx.font = `bold ${n > 8 ? 11 : 13}px Inter, sans-serif`; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6
+      ctx.font = `bold \${n > 8 ? 11 : 13}px Inter, sans-serif`; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6
       const maxLen = n > 8 ? 12 : 16
       ctx.fillText(slice.label.length > maxLen ? slice.label.substring(0, maxLen)+'…' : slice.label, R-14, 5); ctx.restore()
     })
@@ -122,24 +162,8 @@ export default function WheelPage() {
     const { data: newTotal, error: spinErr } = await supabase.rpc('increment_lead_magnet_total_spins', { magnet_id: magnet.id })
     if (spinErr) console.error('Erro ao incrementar spins:', spinErr)
 
-    // Construir bucket de 100 posições baseado nas percentagens
-    const bucket: WheelSlice[] = []
-    const safeSlices = slices.map(s => ({ ...s, percentage: (s as any).percentage ?? 0 }))
-
-    // Garantir soma 100 (se não for, normaliza)
-    const sum = safeSlices.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0)
-    const normalized = sum > 0
-      ? safeSlices.map(s => ({ ...s, percentage: (Number(s.percentage) || 0) * (100 / sum) }))
-      : safeSlices.map(s => ({ ...s, percentage: 100 / safeSlices.length }))
-
-    for (const sl of normalized) {
-      const count = Math.round(sl.percentage)
-      for (let i = 0; i < count && bucket.length < 100; i++) bucket.push(sl)
-    }
-
-    // Ajuste final para ficar exatamente 100
-    while (bucket.length < 100) bucket.push(normalized[normalized.length - 1])
-    if (bucket.length > 100) bucket.length = 100
+    // ✅ HAMILTON METHOD: Distribuição exata de 100 slots
+    const bucket = hamiltonMethod(slices)
 
     // Escolher vencedor determinístico dentro do ciclo de 100
     const pos = (typeof newTotal === 'number' ? (newTotal - 1) : Math.floor(Math.random() * 100)) % 100
@@ -210,7 +234,8 @@ export default function WheelPage() {
       setStep('spin')
       return
     }
-    const id = await captureLeadAPI()
+    const id = await captureLead
+API()
     if (id) setLeadId(id)
     setStep('spin')
   }
@@ -240,8 +265,7 @@ export default function WheelPage() {
       </div>
       {confetti.map((c,i) => <div key={i} className={styles.confettiPiece} style={{left:`${c.x}%`,background:c.color,width:c.size,height:c.size*0.6,animationDuration:`${c.speed}s`,animationDelay:`${(i%5)*0.1}s`,transform:`rotate(${c.angle}deg)`}} />)}
       <div className={styles.card}>
-        {magnet.cover_image_url && step !== 'result' && <img src={
-magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
+        {magnet.cover_image_url && step !== 'result' && <img src={magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
         <div className={styles.header}>
           <h1>{magnet.title}</h1>
           {magnet.description && <p className={styles.description}>{magnet.description}</p>}
