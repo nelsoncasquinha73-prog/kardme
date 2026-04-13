@@ -25,7 +25,6 @@ type Props = {
 // Lista expandida de patterns/efeitos
 const PATTERN_OPTIONS = [
   { value: 'none', label: 'Nenhum', category: 'none' },
-  { value: 'animated-gradient', label: '✨ Gradiente Animado', category: 'animated' },
   // Geométricos
   { value: 'dots', label: 'Pontinhos', category: 'geometric' },
   { value: 'grid', label: 'Grelha', category: 'geometric' },
@@ -684,86 +683,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </select>
           </Row>
 
-          {effectsEnabled && currentKind === 'animated-gradient' && (
-            <>
-              <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
-
-              <Row label="Cores da animação">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', minWidth: 60 }}>Cor {i + 1}</span>
-                      <ColorPickerPro
-                        value={animGradColors[i] ?? '#ffffff'}
-                        onChange={(hex) => {
-                          const newColors = [...animGradColors]
-                          newColors[i] = hex
-                          setAnimGradColors(newColors)
-                          patchOverlay({ colors: newColors })
-                        }}
-                        onEyedropper={() =>
-                          pickEyedropper((hex) => {
-                            const newColors = [...animGradColors]
-                            newColors[i] = hex
-                            setAnimGradColors(newColors)
-                            patchOverlay({ colors: newColors })
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Row>
-
-              <Row label="Velocidade">
-                <select
-                  value={animGradSpeed}
-                  onChange={(e) => {
-                    setAnimGradSpeed(e.target.value as AnimatedGradientSpeed)
-                    patchOverlay({ speed: e.target.value })
-                  }}
-                  style={{ ...selectStyle, width: '100%' }}
-                >
-                  <option value="slow">🐢 Lenta (12s)</option>
-                  <option value="normal">⚡ Normal (8s)</option>
-                  <option value="fast">🚀 Rápida (4s)</option>
-                </select>
-              </Row>
-
-              <Row label="Estilo">
-                <select
-                  value={animGradStyle}
-                  onChange={(e) => {
-                    setAnimGradStyle(e.target.value as AnimatedGradientStyle)
-                    patchOverlay({ style: e.target.value })
-                  }}
-                  style={{ ...selectStyle, width: '100%' }}
-                >
-                  <option value="shift">🔄 Shift (roda suavemente)</option>
-                  <option value="pulse">💫 Pulse (cores pulsam)</option>
-                  <option value="wave">🌊 Wave (onda suave)</option>
-                </select>
-              </Row>
-
-              <Row label="Ângulo">
-                <input
-                  type="range"
-                  min={0}
-                  max={360}
-                  step={15}
-                  value={animGradAngle}
-                  onChange={(e) => {
-                    setAnimGradAngle(Number(e.target.value))
-                    patchOverlay({ angle: Number(e.target.value) })
-                  }}
-                  style={{ flex: 1 }}
-                />
-                <span style={rightNum}>{animGradAngle}°</span>
-              </Row>
-            </>
-          )}
-
-          {effectsEnabled && currentKind !== 'animated-gradient' && (
+          {effectsEnabled && (
             <>
               <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
