@@ -194,15 +194,16 @@ export default function HeaderBlock({
   const horizontalBleed = 16
 
   // Gerar keyframes para animated-gradient se existir
-  const animatedGradientOverlay = v1.overlays?.find((o: any) => o.kind === 'animated-gradient') as any
+  const isAnimatedGradient = v1.base.kind === 'animated-gradient'
+  const animatedGradientBase = isAnimatedGradient ? (v1.base as any) : null
   let animatedGradientStyles = ''
-  if (animatedGradientOverlay) {
+  if (animatedGradientBase) {
     const { keyframes, animationName, duration } = generateAnimatedGradientCSS(
       'header',
-      animatedGradientOverlay.colors || ['#ffffff', '#f3f4f6'],
-      animatedGradientOverlay.style || 'shift',
-      animatedGradientOverlay.angle || 45,
-      animatedGradientOverlay.speed || 'normal'
+      animatedGradientBase.colors || ['#ffffff', '#f3f4f6'],
+      animatedGradientBase.style || 'shift',
+      animatedGradientBase.angle || 45,
+      animatedGradientBase.speed || 'normal'
     )
     animatedGradientStyles = keyframes
   }
@@ -220,7 +221,7 @@ export default function HeaderBlock({
           overflow: 'hidden',
           marginLeft: 0,
           marginRight: 0,
-          animation: animatedGradientOverlay && (showCover || headerBgEnabled) ? `${animatedGradientOverlay.style ? 'ag_header_' + animatedGradientOverlay.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientOverlay?.colors || ['#fff', '#f3f4f6'], animatedGradientOverlay?.style || 'shift', animatedGradientOverlay?.angle || 45, animatedGradientOverlay?.speed || 'normal').duration}s infinite linear` : 'none',
+          animation: animatedGradientBase && (showCover || headerBgEnabled) ? `${animatedGradientBase.style ? 'ag_header_' + animatedGradientBase.style : 'none'} ${generateAnimatedGradientCSS('header', animatedGradientBase?.colors || ['#fff', '#f3f4f6'], animatedGradientBase?.style || 'shift', animatedGradientBase?.angle || 45, animatedGradientBase?.speed || 'normal').duration}s infinite linear` : 'none',
         }}
       >
       {showCover && (coverVideoSrc || coverSrc) ? (
