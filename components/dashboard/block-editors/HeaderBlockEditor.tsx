@@ -26,7 +26,6 @@ type Props = {
 const PATTERN_OPTIONS = [
   { value: 'none', label: 'Nenhum', category: 'none' },
   { value: 'animated-gradient', label: '✨ Gradiente Animado', category: 'animated' },
-  { value: 'animated-gradient', label: '✨ Gradiente Animado', category: 'animated' },
   // Geométricos
   { value: 'dots', label: 'Pontinhos', category: 'geometric' },
   { value: 'grid', label: 'Grelha', category: 'geometric' },
@@ -656,6 +655,11 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             >
               <optgroup label="— Sem efeito —">
                 <option value="none">{t('header_editor.option_none')}</option>
+              </optgroup>
+              <optgroup label="✨ Animados">
+                {PATTERN_OPTIONS.filter(p => p.category === 'animated').map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
               </optgroup>
               <optgroup label="🔷 Geométricos">
                 {PATTERN_OPTIONS.filter(p => p.category === 'geometric').map(p => (
