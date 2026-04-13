@@ -3,6 +3,7 @@
 import React from 'react'
 import { bgToStyle } from '@/lib/bgToCss'
 import { migrateCardBg, type CardBgV1, type ImageBase } from '@/lib/cardBg'
+import { generateAnimatedGradientCSS } from '@/lib/animatedGradient'
 
 type Props = {
   bg?: CardBgV1 | null
