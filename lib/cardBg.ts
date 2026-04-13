@@ -50,6 +50,7 @@ export type CardBgV1 = {
   base:
     | { kind: 'solid'; color: string }
     | { kind: 'gradient'; angle?: number; stops: ColorStop[] }
+    | { kind: 'animated-gradient'; colors: string[]; speed: 'slow' | 'normal' | 'fast'; style: 'shift' | 'pulse' | 'wave'; angle: number }
     | ImageBase
   imageOverlay?: ImageOverlay
   overlays?: PatternOverlay[]

@@ -175,7 +175,9 @@ export function bgToStyle(bg: CardBg | null | undefined): BgStyleResult {
   const cssStringForOutside =
     v1.base.kind === 'solid'
       ? v1.base.color
-      : `linear-gradient(${(v1.base.angle ?? 180)}deg, ${stopsToCss(v1.base.stops)})`
+      : v1.base.kind === 'animated-gradient'
+      ? `linear-gradient(${v1.base.angle ?? 45}deg, ${v1.base.colors.join(', ')})`
+      : `linear-gradient(${(v1.base.angle ?? 180)}deg, ${stopsToCss((v1.base as any).stops)})`
 
   return { style, opacity, cssStringForOutside }
 }

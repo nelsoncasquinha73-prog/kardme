@@ -75,8 +75,8 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const [uploadingBadge, setUploadingBadge] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>('base')
   const [animGradColors, setAnimGradColors] = useState<string[]>(['#d4af37', '#f4d03f', '#d4af37', '#c9a961'])
-  const [animGradSpeed, setAnimGradSpeed] = useState<AnimatedGradientSpeed>('normal')
-  const [animGradStyle, setAnimGradStyle] = useState<AnimatedGradientStyle>('shift')
+  const [animGradSpeed, setAnimGradSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
+  const [animGradStyle, setAnimGradStyle] = useState<'shift' | 'pulse' | 'wave'>('shift')
   const [animGradAngle, setAnimGradAngle] = useState(45)
 
   const { openPicker } = useColorPicker()
@@ -265,6 +265,23 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                 }
               >
                 🖼 Imagem
+              </MiniButton>
+              <MiniButton
+                active={v1.base.kind === 'animated-gradient'}
+                onClick={() =>
+                  onChangeCardBg({
+                    ...v1,
+                    base: {
+                      kind: 'animated-gradient',
+                      colors: ['#d4af37', '#f4d03f', '#d4af37', '#c9a961'],
+                      speed: 'normal',
+                      style: 'shift',
+                      angle: 45,
+                    },
+                  })
+                }
+              >
+                ✨ Animado
               </MiniButton>
             </div>
           </Row>
@@ -610,6 +627,73 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   </Row>
                 </>
               )}
+            </>
+          )}
+
+          {/* Gradiente Animado */}
+          {v1.base.kind === 'animated-gradient' && (
+            <>
+              <Row label="Cores da animação">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', minWidth: 60 }}>Cor {i + 1}</span>
+                      <ColorPickerPro
+                        value={(v1.base as any).colors?.[i] ?? '#ffffff'}
+                        onChange={(hex) => {
+                          const colors = [...((v1.base as any).colors ?? [])]
+                          colors[i] = hex
+                          onChangeCardBg({ ...v1, base: { ...(v1.base as any), colors } })
+                        }}
+                        onEyedropper={() =>
+                          pickEyedropper((hex) => {
+                            const colors = [...((v1.base as any).colors ?? [])]
+                            colors[i] = hex
+                            onChangeCardBg({ ...v1, base: { ...(v1.base as any), colors } })
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </Row>
+
+              <Row label="Velocidade">
+                <select
+                  value={(v1.base as any).speed ?? 'normal'}
+                  onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), speed: e.target.value } })}
+                  style={{ ...selectStyle, width: '100%' }}
+                >
+                  <option value="slow">🐢 Lenta (12s)</option>
+                  <option value="normal">⚡ Normal (8s)</option>
+                  <option value="fast">🚀 Rápida (4s)</option>
+                </select>
+              </Row>
+
+              <Row label="Estilo">
+                <select
+                  value={(v1.base as any).style ?? 'shift'}
+                  onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), style: e.target.value } })}
+                  style={{ ...selectStyle, width: '100%' }}
+                >
+                  <option value="shift">🔄 Shift (roda suavemente)</option>
+                  <option value="pulse">💫 Pulse (cores pulsam)</option>
+                  <option value="wave">🌊 Wave (onda suave)</option>
+                </select>
+              </Row>
+
+              <Row label="Ângulo">
+                <input
+                  type="range"
+                  min={0}
+                  max={360}
+                  step={15}
+                  value={(v1.base as any).angle ?? 45}
+                  onChange={(e) => onChangeCardBg({ ...v1, base: { ...(v1.base as any), angle: Number(e.target.value) } })}
+                  style={{ flex: 1 }}
+                />
+                <span style={rightNum}>{(v1.base as any).angle ?? 45}°</span>
+              </Row>
             </>
           )}
 
