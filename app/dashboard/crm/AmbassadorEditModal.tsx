@@ -28,7 +28,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
 
   if (!formData?.id) return null
 
-  const canPublish = formData.subscription_status === 'active' || formData.is_admin_override === true
+  const canPublish = true
 
   const handlePublish = async () => {
     if (!formData?.id) return
@@ -262,7 +262,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
               fontSize: 12,
             }}
           />
-          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>URL pública: kardme.com/embaixador/{formData.slug || 'seu-slug'}</p>
+          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>URL pública: kardme.com/emb/{formData.slug || 'seu-slug'}</p>
         </div>
 
         <div style={{ marginBottom: 24, padding: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}>
