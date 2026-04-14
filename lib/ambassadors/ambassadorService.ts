@@ -148,7 +148,7 @@ export async function getAmbassadorBySlug(slug: string) {
     .from('ambassadors')
     .select('*')
     .eq('slug', slug)
-    .eq('is_published', true)  // ← MUDADO: is_published em vez de is_active
+    .eq('is_active', true)  // ← MUDADO: is_published em vez de is_active
     .single()
 
   if (error) throw error
