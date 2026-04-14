@@ -391,8 +391,6 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
         <div style={{ display: 'flex', gap: 12 }}>
           <button
             onClick={handleSave}
-            disabled={saving
-}
             disabled={saving}
             style={{
               flex: 1,
