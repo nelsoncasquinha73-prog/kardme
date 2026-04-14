@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { FiPhone, FiMail } from 'react-icons/fi'
-import { getAmbassadorBySlug, createAmbassadorLead, type Ambassador } from '@/lib/ambassadors/ambassadorService'
+import { getAmbassadorBySlug, type Ambassador } from '@/lib/ambassadors/ambassadorService'
 import AmbassadorFloatingActions from '@/components/public/AmbassadorFloatingActions'
 
 export default function AmbassadorPage() {
@@ -51,16 +51,28 @@ export default function AmbassadorPage() {
 
     try {
       setSubmitting(true)
-      await createAmbassadorLead(ambassador!.id, {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
-        interest_type: formData.interest_type || undefined,
-        location: formData.location || undefined,
-        budget: formData.budget || undefined,
-        notes: formData.notes || undefined,
-        marketing_opt_in: formData.marketing_opt_in,
+      const response = await fetch('/api/ambassadors/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          zone: formData.location || undefined,
+          message: formData.notes || undefined,
+          leadType: formData.interest_type || undefined,
+          budget: formData.budget || undefined,
+          consentGiven: true,
+          marketingOptIn: formData.marketing_opt_in,
+        }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao enviar formulário')
+      }
+
       alert('Lead criado com sucesso!')
       setFormData({
         name: '',
@@ -203,7 +215,7 @@ export default function AmbassadorPage() {
           <div style={{
             width: '100%',
             height: 200,
-            background: `url(${ambassador.cover_url})`,
+            background: `url(\${ambassador.cover_url})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             borderRadius: 12,
@@ -224,7 +236,7 @@ export default function AmbassadorPage() {
                 height: 120,
                 borderRadius: '50%',
                 marginBottom: 16,
-                border: `3px solid ${bioColor}`,
+                border: `3px solid \${bioColor}`,
               }}
             />
           )}
@@ -247,7 +259,7 @@ export default function AmbassadorPage() {
           }}>
             {ambassador.email && (
               <a
-                href={`mailto:${ambassador.email}`}
+                href={`mailto:\${ambassador.email}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -269,7 +281,7 @@ export default function AmbassadorPage() {
 
             {ambassador.phone && (
               <a
-                href={`tel:${ambassador.phone}`}
+                href={`tel:\${ambassador.phone}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -441,7 +453,9 @@ export default function AmbassadorPage() {
                             background: 'rgba(255,255,255,0.05)',
                             color: textColor,
                             fontSize: 13,
-                            fontFamily: 'inherit',
+                            font
+cat >> "./app/embaixador/[slug]/page.tsx" << 'EOF'
+Family: 'inherit',
                           }}
                         >
                           <option value="">Seleciona uma opção</option>
