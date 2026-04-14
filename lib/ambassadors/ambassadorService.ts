@@ -21,6 +21,8 @@ export interface Ambassador {
   stats_commission_paid: number
   avatar_url?: string
   cover_url?: string
+  avatar_settings?: { positionX: number; positionY: number; scale: number }
+  cover_settings?: { positionX: number; positionY: number; scale: number }
   background_color: string
   text_color: string
   bio_color: string
