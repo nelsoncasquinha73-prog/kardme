@@ -54,7 +54,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
   }
 
   const addCustomField = () => {
-    const newField = { id: `custom_${Date.now()}`, label: 'Novo campo', type: 'text' as const, required: false, enabled: true }
+    const newField = { id: `custom_\${Date.now()}`, label: 'Novo campo', type: 'text' as const, required: false, enabled: true }
     setFormData({ ...formData, custom_fields: [...(formData.custom_fields || []), newField] })
   }
 
@@ -68,6 +68,9 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
     const newFields = (formData.custom_fields || []).filter((_, i) => i !== index)
     setFormData({ ...formData, custom_fields: newFields })
   }
+
+  // Permite publicar se: subscription_status='active' OU is_admin_override=true
+  const canPublish = formData.subscription_status === 'active' || formData.is_admin_override === true
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
@@ -103,7 +106,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             <div style={{
               width: '100%',
               height: 120,
-              background: `url(${formData.cover_url})`,
+              background: `url(\${formData.cover_url})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               borderRadius: 8,
@@ -139,25 +142,28 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             </div>
             <button 
               onClick={handlePublish}
-              disabled={publishLoading || formData.subscription_status !== 'active'}
-              title={formData.subscription_status !== 'active' ? 'Ativa a subscrição para publicar' : ''}
+              disabled={publishLoading || !canPublish}
+              title={!canPublish ? 'Ativa a subscrição para publicar' : ''}
               style={{ 
                 padding: '8px 16px', 
                 borderRadius: 8, 
                 background: formData.is_published ? '#ef4444' : '#10b981',
                 color: '#fff', 
                 border: 'none', 
-                cursor: (publishLoading || formData.subscription_status !== 'active') ? 'not-allowed' : 'pointer', 
+                cursor: (publishLoading || !canPublish) ? 'not-allowed' : 'pointer', 
                 fontSize: 12, 
                 fontWeight: 600,
-                opacity: (publishLoading || formData.subscription_status !== 'active') ? 0.5 : 1
+                opacity: (publishLoading || !canPublish) ? 0.5 : 1
               }}
             >
               {publishLoading ? '...' : formData.is_published ? 'Despublicar' : 'Publicar'}
             </button>
           </div>
-          {formData.subscription_status !== 'active' && (
+          {!canPublish && (
             <p style={{ fontSize: 11, color: '#fbbf24', marginTop: 8, margin: '8px 0 0 0' }}>⚠️ Ativa a subscrição para publicar o cartão</p>
+          )}
+          {formData.is_admin_override && (
+            <p style={{ fontSize: 11, color: '#10b981', marginTop: 8, margin: '8px 0 0 0' }}>✅ Embaixador criado pelo admin (sem custo)</p>
           )}
         </div>
 
@@ -205,7 +211,10 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
           {(formData.custom_fields || []).map((field, index) => (
             <div key={field.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                <input type="text" placeholder="Label" value={field.label} onChange={(e) => updateCustomField(index, { label: e.target.value })} style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }} />
+                <input type="text" placeholder="Label" value={field.label} onChange={(e) => updateCustomField(index, { label: e.target.value })} style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 
+
+cat >> ./app/dashboard/crm/AmbassadorEditModal.tsx << 'EOF'
+}} />
                 <select value={field.type} onChange={(e) => updateCustomField(index, { type: e.target.value })} style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}>
                   <option value="text">Texto</option>
                   <option value="textarea">Textarea</option>
