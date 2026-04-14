@@ -13,6 +13,7 @@ type Lead = {
   lead_type_id: string | null
   lead_source: string | null
   country: string | null
+  audience_ids: string[]
 }
 
 type LeadType = {
@@ -25,6 +26,7 @@ type LeadSource = {
   id: string
   label: string
   emoji: string
+  value?: string
 }
 
 type Country = {
@@ -39,6 +41,7 @@ export default function EditLeadModal({
   leadTypes,
   leadSources,
   countries,
+  audiences,
   loading,
 }: {
   lead: Lead
@@ -47,6 +50,7 @@ export default function EditLeadModal({
   leadTypes: LeadType[]
   leadSources: LeadSource[]
   countries: Country[]
+  audiences: LeadType[]
   loading: boolean
 }) {
   const [formData, setFormData] = useState<Partial<Lead>>({
@@ -58,6 +62,7 @@ export default function EditLeadModal({
     lead_type_id: lead.lead_type_id,
     lead_source: lead.lead_source,
     country: lead.country,
+    audience_ids: lead.audience_ids || [],
   })
 
   const [error, setError] = useState<string | null>(null)
@@ -81,6 +86,14 @@ export default function EditLeadModal({
     }
   }
 
+  const toggleAudience = (audienceId: string) => {
+    const current = formData.audience_ids || []
+    const updated = current.includes(audienceId)
+      ? current.filter(id => id !== audienceId)
+      : [...current, audienceId]
+    setFormData({ ...formData, audience_ids: updated })
+  }
+
   return (
     <div
       style={{
@@ -100,7 +113,7 @@ export default function EditLeadModal({
           borderRadius: 20,
           padding: 32,
           width: '100%',
-          maxWidth: 500,
+          maxWidth: 520,
           border: '1px solid rgba(255,255,255,0.1)',
           maxHeight: '90vh',
           overflow: 'auto',
@@ -240,7 +253,7 @@ export default function EditLeadModal({
             />
           </div>
 
-          {/* Tipo de Lead */}
+          {/* Tipo de Lead (compat) */}
           <div>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 6 }}>
               Tipo de Lead
@@ -293,7 +306,7 @@ export default function EditLeadModal({
             >
               <option value="">Sem fonte</option>
               {leadSources.map((s) => (
-                <option key={s.id} value={s.id} style={{ background: '#1a1a2e' }}>
+                <option key={s.id} value={(s as any).value || ''} style={{ background: '#1a1a2e' }}>
                   {s.emoji} {s.label}
                 </option>
               ))}
@@ -323,11 +336,64 @@ export default function EditLeadModal({
             >
               <option value="">Sem país</option>
               {countries.map((c) => (
-                <option key={c.id} value={c.id} style={{ background: '#1a1a2e' }}>
+                <option key={c.id} value={c.name} style={{ background: '#1a1a2e' }}>
                   {c.name}
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Audiências */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 6 }}>
+              Audiências
+            </label>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 8,
+                padding: '10px 14px',
+                minHeight: '44px',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.05)',
+                alignContent: 'flex-start',
+              }}
+            >
+              {audiences.length === 0 ? (
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Sem audiências</span>
+              ) : (
+                audiences.map((aud) => {
+                  const isSelected = (formData.audience_ids || []).includes(aud.id)
+                  return (
+                    <button
+                      key={aud.id}
+                      type="button"
+                      onClick={() => toggleAudience(aud.id)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 999,
+                        border: isSelected ? `2px solid ${aud.color}` : '1px solid rgba(255,255,255,0.2)',
+                        background: isSelected ? `${aud.color}20` : 'transparent',
+                        color: isSelected ? aud.color : 'rgba(255,255,255,0.75)',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                      }}
+                    >
+                      {isSelected ? '✓ ' : ''}{aud.name}
+                    </button>
+                  )
+                })
+              )}
+            </div>
+
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+              Dica: podes selecionar várias audiências.
+            </p>
           </div>
 
           {/* Marketing Opt-in */}
@@ -351,6 +417,7 @@ export default function EditLeadModal({
 
         <div style={{ display: 'flex', gap: 12, marginTop: 28 }}>
           <button
+            type="button"
             onClick={onClose}
             style={{
               flex: 1,
@@ -359,7 +426,7 @@ export default function EditLeadModal({
               border: '1px solid rgba(255,255,255,0.15)',
               background: 'transparent',
               color: '#fff',
-              fontWeight: 700,
+              fontWeight: 800,
               cursor: 'pointer',
               fontSize: 14,
             }}
@@ -367,6 +434,7 @@ export default function EditLeadModal({
             Cancelar
           </button>
           <button
+            type="button"
             onClick={handleSave}
             disabled={loading}
             style={{
@@ -376,7 +444,7 @@ export default function EditLeadModal({
               border: 'none',
               background: '#3b82f6',
               color: '#fff',
-              fontWeight: 700,
+              fontWeight: 900,
               cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: 14,
               opacity: loading ? 0.7 : 1,

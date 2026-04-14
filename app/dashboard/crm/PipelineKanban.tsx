@@ -37,6 +37,7 @@ type Lead = {
   lead_type_id: string | null
   lead_source: string | null
   country: string | null
+  audience_ids: string[]
 }
 
 type LeadType = {

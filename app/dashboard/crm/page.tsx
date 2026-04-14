@@ -57,6 +57,7 @@ type Lead = {
   lead_type_id: string | null
   lead_source: string | null
   country: string | null
+  audience_ids: string[]
   isUnsubscribed?: boolean
 }
 
@@ -195,6 +196,7 @@ Melhores cumprimentos,
   const [filterLeadSource, setFilterLeadSource] = useState<string | null>(null)
   const [filterCountry, setFilterCountry] = useState<string | null>(null)
   const [countries, setCountries] = useState<Country[]>([])
+  const [audiences, setAudiences] = useState<any[]>([])
   const [showCountriesModal, setShowCountriesModal] = useState(false)
   const [newCountryName, setNewCountryName] = useState('')
 
@@ -372,8 +374,10 @@ Melhores cumprimentos,
             created.push(t)
           }
           setLeadTypes(created)
+          setAudiences(created)
         } else {
           setLeadTypes(types)
+          setAudiences(types)
         }
       } catch (e) {
         console.error(e)
@@ -491,6 +495,7 @@ Melhores cumprimentos,
           lead_type_id: data.lead_type_id,
           lead_source: data.lead_source,
           country: data.country,
+          audience_ids: data.audience_ids || [],
         })
         .eq('id', editingLead.id)
 
@@ -3649,6 +3654,7 @@ Melhores cumprimentos,
           leadTypes={leadTypes}
           leadSources={leadSources}
           countries={countries}
+          audiences={audiences}
           loading={editLoading}
         />
       )}
