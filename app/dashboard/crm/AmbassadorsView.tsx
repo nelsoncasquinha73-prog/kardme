@@ -146,7 +146,27 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const handleSaveAmbassador = async (data: Partial<Ambassador>) => {
     if (editingAmbassador) {
       try {
-        await updateAmbassador(editingAmbassador.id, data);
+    const safeData = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      bio: data.bio,
+      avatar_url: data.avatar_url,
+      cover_url: data.cover_url,
+      avatar_settings: data.avatar_settings,
+      cover_settings: data.cover_settings,
+      background_color: data.background_color,
+      text_color: data.text_color,
+      bio_color: data.bio_color,
+      font_family: data.font_family,
+      show_interest_type: data.show_interest_type,
+      show_location: data.show_location,
+      show_budget: data.show_budget,
+      custom_fields: data.custom_fields,
+      is_published: data.is_published,
+    }
+
+        await updateAmbassador(editingAmbassador.id, safeData);
         setEditingAmbassador(null);
         loadAmbassadors();
       } catch (error) {
