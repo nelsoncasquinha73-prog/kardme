@@ -2473,8 +2473,8 @@ Melhores cumprimentos,
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button
-                onClick={() => {
-                  updateNotes(selectedLead.id, noteText)
+                onClick={async () => {
+                  await updateNotes(selectedLead.id, noteText)
                   setSelectedLead(null)
                 }}
                 style={{
