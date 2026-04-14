@@ -47,6 +47,9 @@ export interface Ambassador {
   deactivated_at?: string
   access_token?: string
   is_published: boolean
+  is_admin_override?: boolean
+  is_complimentary?: boolean
+  ambassador_type?: string
   created_at: string
   updated_at: string
 }
@@ -137,13 +140,13 @@ export async function getAmbassador(id: string) {
   return data as Ambassador
 }
 
-// Obter embaixador por slug (público)
+// Obter embaixador por slug (público) - CORRIGIDO
 export async function getAmbassadorBySlug(slug: string) {
   const { data, error } = await supabase
     .from('ambassadors')
     .select('*')
     .eq('slug', slug)
-    .eq('is_active', true)
+    .eq('is_published', true)  // ← MUDADO: is_published em vez de is_active
     .single()
 
   if (error) throw error
