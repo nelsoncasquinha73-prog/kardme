@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Ambassador, toggleAmbassadorPublished } from '@/lib/ambassadors/ambassadorService'
-import { FiX, FiUpload, FiPlus, FiTrash2 } from 'react-icons/fi'
+import { FiX, FiUpload, FiPlus, FiTrash2, FiSliders } from 'react-icons/fi'
+import ImagePositioner from './ImagePositioner'
 
 interface AmbassadorEditModalProps {
   ambassador: Ambassador | null
@@ -16,6 +17,8 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
   const [saving, setSaving] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
   const avatarRef = useRef<HTMLInputElement>(null)
+  const [showAvatarPositioner, setShowAvatarPositioner] = useState(false)
+  const [showCoverPositioner, setShowCoverPositioner] = useState(false)
   const coverRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -130,6 +133,26 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             >
               <FiUpload size={14} /> Upload
             </button>
+            {formData.avatar_url && (
+              <button
+                onClick={() => setShowAvatarPositioner(true)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  background: '#8b5cf6',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <FiSliders size={14} /> Ajustar
+              </button>
+            )}
             <input
               ref={avatarRef}
               type="file"
@@ -139,7 +162,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
                 const file = e.target.files?.[0]
                 if (file) {
                   const reader = new FileReader()
-                  reader.onload = (event) => setFormData({ ...formData, avatar_url: event.target?.result as string })
+                  reader.onload = (event) => setFormData({ ...formData, avatar_url: event.target?.result as string, avatar_settings: undefined })
                   reader.readAsDataURL(file)
                 }
               }}
@@ -154,7 +177,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
               style={{
                 width: '100%',
                 height: 120,
-                background: `url(\${formData.cover_url})`,
+                background: `url(${formData.cover_url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 borderRadius: 8,
@@ -180,6 +203,27 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
           >
             <FiUpload size={14} /> Upload
           </button>
+          {formData.cover_url && (
+            <button
+              onClick={() => setShowCoverPositioner(true)}
+              style={{
+                padding: "8px 16px",
+                borderRadius: 8,
+                background: "#8b5cf6",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <FiSliders size={14} /> Ajustar
+            </button>
+          )}
+
           <input
             ref={coverRef}
             type="file"
@@ -189,7 +233,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
               const file = e.target.files?.[0]
               if (file) {
                 const reader = new FileReader()
-                reader.onload = (event) => setFormData({ ...formData, cover_url: event.target?.result as string })
+                reader.onload = (event) => setFormData({ ...formData, cover_url: event.target?.result as string, cover_settings: undefined })
                 reader.readAsDataURL(file)
               }
             }}
@@ -388,6 +432,38 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
           ))}
         </div>
 
+
+      {showAvatarPositioner && formData.avatar_url && (
+        <ImagePositioner
+          imageUrl={formData.avatar_url}
+          title="Ajustar Foto de Perfil"
+          isCircle={true}
+          onConfirm={(settings) => {
+            setFormData({
+              ...formData,
+              avatar_settings: settings,
+            })
+            setShowAvatarPositioner(false)
+          }}
+          onCancel={() => setShowAvatarPositioner(false)}
+        />
+      )}
+
+      {showCoverPositioner && formData.cover_url && (
+        <ImagePositioner
+          imageUrl={formData.cover_url}
+          title="Ajustar Foto de Cover"
+          isCircle={false}
+          onConfirm={(settings) => {
+            setFormData({
+              ...formData,
+              cover_settings: settings,
+            })
+            setShowCoverPositioner(false)
+          }}
+          onCancel={() => setShowCoverPositioner(false)}
+        />
+      )}
         <div style={{ display: 'flex', gap: 12 }}>
           <button
             onClick={handleSave}
