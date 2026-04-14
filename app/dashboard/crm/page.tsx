@@ -2171,7 +2171,7 @@ Melhores cumprimentos,
                     </td>
                     <td style={td}>
                       <select
-                        value={lead.lead_source || 'cartão'}
+                        value={(lead.lead_source?.startsWith('ambassador:') ? 'ambassador' : (lead.lead_source || 'cartão'))}
                         onChange={async (e) => {
                           const val = e.target.value
                           await updateLeadSource(lead.id, val)
