@@ -348,7 +348,7 @@ export async function toggleAmbassadorPublished(id: string, isPublished: boolean
   console.log('toggleAmbassadorPublished called with:', { id, isPublished, userId })
   const { data, error } = await supabase
     .from('ambassadors')
-    .update({ is_published: isPublished, updated_at: new Date().toISOString() })
+    .update({ is_published: isPublished, is_active: isPublished, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
