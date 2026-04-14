@@ -12,23 +12,22 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
   try {
     ambassador = await getAmbassadorBySlug(slug)
   } catch (error) {
-    console.error('[AmbassadorPage] Error:', error)
     notFound()
   }
 
   if (!ambassador) {
-    console.log('[AmbassadorPage] Ambassador is null, calling notFound()')
     notFound()
   }
 
   // Aplicar settings de crop ao cover
   const coverStyle: React.CSSProperties = {
     width: '100%',
-    height: 300,
-    backgroundColor: ambassador.background_color || '#ffffff',
+    height: 160,
+    backgroundColor: ambassador.background_color || '#1e293b',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     overflow: 'hidden',
+    borderRadius: '12px 12px 0 0',
   }
 
   if (ambassador.cover_url && ambassador.cover_settings) {
@@ -42,15 +41,13 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
 
   // Aplicar settings de crop ao avatar
   const avatarStyle: React.CSSProperties = {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     borderRadius: '50%',
     backgroundColor: '#e2e8f0',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    border: '4px solid #ffffff',
-    marginTop: -60,
-    marginLeft: 24,
+    border: '4px solid #1e293b',
     overflow: 'hidden',
   }
 
@@ -64,134 +61,151 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      {/* Cover */}
-      <div style={coverStyle} />
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <div style={{ width: '100%', maxWidth: 500, backgroundColor: '#1e293b', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+        {/* Cover */}
+        <div style={coverStyle} />
 
-      {/* Avatar + Info */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', paddingBottom: 32 }}>
+        {/* Content */}
+        <div style={{ padding: '0 24px 32px', textAlign: 'center', position: 'relative' }}>
           {/* Avatar */}
-          <div style={avatarStyle} />
+          <div style={{ ...avatarStyle, margin: '-50px auto 16px', position: 'relative', zIndex: 10 }} />
 
-          {/* Name & Bio */}
-          <div style={{ padding: '0 24px', marginTop: 24 }}>
-            <h1
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: ambassador.text_color || '#1e293b',
-                margin: '0 0 8px 0',
-                fontFamily: ambassador.font_family || 'system-ui, -apple-system, sans-serif',
-              }}
-            >
-              {ambassador.name}
-            </h1>
+          {/* Name */}
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', margin: '0 0 24px 0' }}>
+            {ambassador.name}
+          </h1>
 
-            {ambassador.bio && (
-              <p
+          {/* Bio */}
+          {ambassador.bio && (
+            <p style={{ fontSize: 14, color: '#cbd5e1', margin: '0 0 24px 0', lineHeight: 1.6 }}>
+              {ambassador.bio}
+            </p>
+          )}
+
+          {/* Contact Buttons */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
+            {ambassador.email && (
+              <a
+                href={`mailto:${ambassador.email}`}
                 style={{
-                  fontSize: 16,
-                  color: ambassador.bio_color || '#64748b',
-                  margin: '0 0 16px 0',
-                  lineHeight: 1.6,
-                  fontFamily: ambassador.font_family || 'system-ui, -apple-system, sans-serif',
+                  flex: 1,
+                  padding: '12px 16px',
+                  backgroundColor: '#94a3b8',
+                  color: '#1e293b',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
                 }}
               >
-                {ambassador.bio}
-              </p>
+                ✉️ Email
+              </a>
             )}
+            {ambassador.phone && (
+              <a
+                href={`tel:${ambassador.phone}`}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  backgroundColor: '#94a3b8',
+                  color: '#1e293b',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                }}
+              >
+                📞 Ligar
+              </a>
+            )}
+          </div>
 
-            {/* Contact Info */}
-            <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-              {ambassador.email && (
-                <a
-                  href={`mailto:${ambassador.email}`}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
-                    color: '#ffffff',
-                    borderRadius: 8,
-                    textDecoration: 'none',
-                    fontSize: 14,
-                    fontWeight: 600,
-                  }}
-                >
-                  ✉️ Email
-                </a>
-              )}
-              {ambassador.phone && (
-                <a
-                  href={`tel:${ambassador.phone}`}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#10b981',
-                    color: '#ffffff',
-                    borderRadius: 8,
-                    textDecoration: 'none',
-                    fontSize: 14,
-                    fontWeight: 600,
-                  }}
-                >
-                  📱 Ligar
-                </a>
-              )}
-            </div>
+          {/* Contact Form */}
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1', marginBottom: 16, textAlign: 'left' }}>
+              Deixe seu contacto
+            </h3>
+            <form style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input
+                type="text"
+                placeholder="Nome completo"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #475569',
+                  backgroundColor: '#334155',
+                  color: '#f1f5f9',
+                  fontSize: 14,
+                  fontFamily: 'inherit',
+                }}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #475569',
+                  backgroundColor: '#334155',
+                  color: '#f1f5f9',
+                  fontSize: 14,
+                  fontFamily: 'inherit',
+                }}
+              />
+              <input
+                type="tel"
+                placeholder="Telefone (opcional)"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #475569',
+                  backgroundColor: '#334155',
+                  color: '#f1f5f9',
+                  fontSize: 14,
+                  fontFamily: 'inherit',
+                }}
+              />
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#cbd5e1', cursor: 'pointer' }}>
+                <input type="checkbox" style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                Autorizo receber comunicações
+              </label>
+              <button
+                type="submit"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  backgroundColor: '#3b82f6',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginTop: 8,
+                }}
+              >
+                Enviar
+              </button>
+            </form>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              padding: 16,
-              backgroundColor: '#f0fdf4',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#15803d' }}>
-              {ambassador.stats_leads}
-            </div>
-            <div style={{ fontSize: 12, color: '#65a30d', marginTop: 4 }}>Leads Capturados</div>
-          </div>
-
-          <div
-            style={{
-              padding: 16,
-              backgroundColor: '#fef3c7',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#d97706' }}>
-              {ambassador.stats_deals_closed}
-            </div>
-            <div style={{ fontSize: 12, color: '#b45309', marginTop: 4 }}>Deals Fechados</div>
-          </div>
-
-          <div
-            style={{
-              padding: 16,
-              backgroundColor: '#dbeafe',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#0284c7' }}>
-              {ambassador.stats_commission_paid}€
-            </div>
-            <div style={{ fontSize: 12, color: '#0369a1', marginTop: 4 }}>Comissão Paga</div>
-          </div>
-        </div>
+      {/* Footer */}
+      <div style={{ position: 'fixed', bottom: 16, right: 16, fontSize: 12, color: '#64748b' }}>
+        Powered by Kardme
       </div>
     </div>
   )
