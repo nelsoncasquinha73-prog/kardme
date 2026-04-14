@@ -2,18 +2,22 @@ import { getAmbassadorBySlug } from '@/lib/ambassadors/ambassadorService'
 import { notFound } from 'next/navigation'
 
 interface AmbassadorPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
+  const { slug } = await params
+  
   let ambassador
   try {
-    ambassador = await getAmbassadorBySlug(params.slug)
+    ambassador = await getAmbassadorBySlug(slug)
   } catch (error) {
+    console.error('[AmbassadorPage] Error:', error)
     notFound()
   }
 
   if (!ambassador) {
+    console.log('[AmbassadorPage] Ambassador is null, calling notFound()')
     notFound()
   }
 
