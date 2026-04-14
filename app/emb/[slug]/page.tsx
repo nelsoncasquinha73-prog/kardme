@@ -1,5 +1,6 @@
 import { getAmbassadorBySlug } from '@/lib/ambassadors/ambassadorService'
 import { notFound } from 'next/navigation'
+import EmbContactForm from './EmbContactForm'
 
 interface AmbassadorPageProps {
   params: Promise<{ slug: string }>
@@ -138,67 +139,7 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
             <h3 style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1', marginBottom: 16, textAlign: 'left' }}>
               Deixe seu contacto
             </h3>
-            <form style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input
-                type="text"
-                placeholder="Nome completo"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 8,
-                  border: '1px solid #475569',
-                  backgroundColor: '#334155',
-                  color: '#f1f5f9',
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                }}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 8,
-                  border: '1px solid #475569',
-                  backgroundColor: '#334155',
-                  color: '#f1f5f9',
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                }}
-              />
-              <input
-                type="tel"
-                placeholder="Telefone (opcional)"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 8,
-                  border: '1px solid #475569',
-                  backgroundColor: '#334155',
-                  color: '#f1f5f9',
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                }}
-              />
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#cbd5e1', cursor: 'pointer' }}>
-                <input type="checkbox" style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                Autorizo receber comunicações
-              </label>
-              <button
-                type="submit"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 8,
-                  backgroundColor: '#3b82f6',
-                  color: '#fff',
-                  border: 'none',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  marginTop: 8,
-                }}
-              >
-                Enviar
-              </button>
-            </form>
+            <EmbContactForm slug={slug} ambassadorEmail={ambassador.email || ''} ambassadorName={ambassador.name || ''} />
           </div>
         </div>
       </div>
