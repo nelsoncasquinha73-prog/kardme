@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { FiPlus, FiDownload, FiCheck, FiEdit2, FiTrash2 } from 'react-icons/fi';
-import { getAmbassadors, createAmbassador, updateAmbassador, deleteAmbassador, markContractAsSigned, Ambassador } from '@/lib/ambassadors/ambassadorService';
+import { getAmbassadors, createAmbassador, updateAmbassador, deleteAmbassador, markContractAsSigned, Ambassador, getAmbassadorLeads, AmbassadorLead } from '@/lib/ambassadors/ambassadorService';
 import AmbassadorEditModal from './AmbassadorEditModal';
+
 
 interface FormData {
   name: string;
@@ -40,6 +41,9 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const [openPlanDropdown, setOpenPlanDropdown] = useState<string | null>(null)
   const [cancelConfirm, setCancelConfirm] = useState<{ id: string; periodEnd: string | null } | null>(null)
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [showLeadsModal, setShowLeadsModal] = useState<string | null>(null);
+  const [ambassadorLeads, setAmbassadorLeads] = useState<AmbassadorLead[]>([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -99,6 +103,19 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
 
   const handleEdit = (amb: Ambassador) => {
     setEditingAmbassador(amb);
+  };
+
+  const handleShowLeads = async (ambassadorId: string) => {
+    setAmbassadorLeads([]);
+    setLeadsLoading(true);
+    try {
+      const leads = await getAmbassadorLeads(ambassadorId);
+      setAmbassadorLeads(leads || []);
+    } catch (error) {
+      console.error('Erro ao carregar leads:', error);
+    } finally {
+      setLeadsLoading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -300,6 +317,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
                   <button onClick={() => handleMarkSigned(amb.id)} title="Confirmar Assinatura" style={{ padding: '8px 12px', borderRadius: 8, background: '#dcfce7', color: '#16a34a', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiCheck size={14} /> Confirmar assinatura</button>
                 )}
                 <button onClick={() => window.open(`/embaixador/${amb.slug}`, '_blank')} title="Ver Página Pública" style={{ padding: '8px 12px', borderRadius: 8, background: '#e0e7ff', color: '#4f46e5', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>👁️ Ver</button>
+                <button onClick={() => { setShowLeadsModal(amb.id); handleShowLeads(amb.id); }} title="Ver Leads" style={{ padding: '8px 12px', borderRadius: 8, background: '#f0fdf4', color: '#15803d', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}>📊 Leads</button>
                 <button onClick={() => handleEdit(amb)} title="Editar" style={{ padding: '8px 12px', borderRadius: 8, background: '#fef3c7', color: '#d97706', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiEdit2 size={14} /></button>
                 <button onClick={() => handleDelete(amb.id)} title="Deletar" style={{ padding: '8px 12px', borderRadius: 8, background: '#fee2e2', color: '#dc2626', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600 }}><FiTrash2 size={14} /></button>
               </div>
@@ -347,6 +365,46 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
               >
                 {cancelLoading ? 'A cancelar...' : 'Confirmar cancelamento'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLeadsModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 12, padding: 32, maxWidth: 900, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>📊 Leads do Embaixador</h3>
+              <button onClick={() => { setShowLeadsModal(null); setAmbassadorLeads([]); }} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 24, cursor: 'pointer' }}>✕</button>
+            </div>
+            <p style={{ color: '#cbd5e1', fontSize: 14, marginBottom: 20 }}>Total: <strong>{ambassadorLeads.length}</strong> leads capturadas</p>
+            <div style={{ background: '#111827', borderRadius: 8, border: '1px solid #374151', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#1f2937', borderBottom: '1px solid #374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9ca3af', fontSize: 12, fontWeight: 600 }}>Nome</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9ca3af', fontSize: 12, fontWeight: 600 }}>Email</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9ca3af', fontSize: 12, fontWeight: 600 }}>Telefone</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9ca3af', fontSize: 12, fontWeight: 600 }}>Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leadsLoading ? (
+                    <tr><td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#9ca3af' }}>⏳ Carregando leads...</td></tr>
+                  ) : ambassadorLeads.length === 0 ? (
+                    <tr><td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#9ca3af' }}>Nenhuma lead capturada ainda</td></tr>
+                  ) : (
+                    ambassadorLeads.map((lead) => (
+                      <tr key={lead.id} style={{ borderBottom: '1px solid #374151' }}>
+                        <td style={{ padding: '12px 16px', color: '#e5e7eb', fontSize: 13 }}>{lead.name}</td>
+                        <td style={{ padding: '12px 16px', color: '#e5e7eb', fontSize: 13 }}>{lead.email || '—'}</td>
+                        <td style={{ padding: '12px 16px', color: '#e5e7eb', fontSize: 13 }}>{lead.phone || '—'}</td>
+                        <td style={{ padding: '12px 16px', color: '#9ca3af', fontSize: 12 }}>{new Date(lead.created_at).toLocaleDateString('pt-PT')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
