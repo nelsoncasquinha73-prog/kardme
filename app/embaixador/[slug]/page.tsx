@@ -450,12 +450,11 @@ export default function AmbassadorPage() {
                             padding: '12px 14px',
                             borderRadius: 8,
                             border: '1px solid rgba(255,255,255,0.2)',
-                            background: 'rgba(255,255,255,0.05)',
+                            background: 'rgba(255,255,255,
+05)',
                             color: textColor,
                             fontSize: 13,
-                            font
-cat >> "./app/embaixador/[slug]/page.tsx" << 'EOF'
-Family: 'inherit',
+                            fontFamily: 'inherit',
                           }}
                         >
                           <option value="">Seleciona uma opção</option>
