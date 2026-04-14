@@ -224,7 +224,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <label style={{color:'rgba(255,255,255,0.6)',fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Capturar email antes de girar?</label>
                   <select value={(form as any).wheel_config?.capture_before_spin ? 'true' : 'false'}
                     onChange={e=>setForm(f=>({...f,wheel_config:{...(f as any).wheel_config,capture_before_spin:e.target.value==='true'}}))}
-                    style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none'}}>
+                    style={{width:'100%',padding:'10px 14px',minHeight:'44px',lineHeight:'1.5',borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none'}}>
                     <option value="true">✅ Sim — email antes de girar</option>
                     <option value="false">🎡 Não — girar primeiro, email depois</option>
                   </select>
