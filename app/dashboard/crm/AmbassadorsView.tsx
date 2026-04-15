@@ -159,9 +159,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
       text_color: data.text_color,
       bio_color: data.bio_color,
       font_family: data.font_family,
-      show_interest_type: data.show_interest_type,
-      show_location: data.show_location,
-      show_budget: data.show_budget,
+      default_fields: data.default_fields,
       custom_fields: data.custom_fields,
       is_published: data.is_published,
     }

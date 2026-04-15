@@ -178,7 +178,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Foto de Cover</label>
           {formData.cover_url && (
-            <div style={{ width: '100%', height: 120, background: `url(\${formData.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 8, marginBottom: 12 }} />
+            <div style={{ width: '100%', height: 120, backgroundImage: `url(\${formData.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 8, marginBottom: 12 }} />
           )}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <button
@@ -265,9 +265,12 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
                 </div>
                 {field.id !== 'name' && field.id !== 'email' && (
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#cbd5e1', fontSize: 12, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={field.required} onChange={(e) => updateDefaultField(field.id, { required: e.target.checked })} />
-                    <span>Obrigatório</span
- <span>Obrigatório</span>
+ <input
+                      type="checkbox"
+                      checked={field.required}
+                      onChange={(e) => updateDefaultField(field.id, { required: e.target.checked })}
+                    />
+                    Obrigatório
                   </label>
                 )}
               </div>
@@ -283,7 +286,20 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
               <button
                 key={preset.id}
                 onClick={() => addCustomField(preset)}
-                style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', cursor: 'pointer', fontSize: 12, fontWeight: 600, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6 }}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  color: '#60a5fa',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
               >
                 <FiPlus size={14} /> {preset.label}
               </button>
@@ -292,26 +308,65 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
 
           <button
             onClick={() => addCustomField()}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16 }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 8,
+              background: '#10b981',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              marginBottom: 16,
+            }}
           >
             <FiPlus size={14} /> Campo Customizado
           </button>
 
           {customFields.map((field, index) => (
-            <div key={`custom_field_${index}`} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+            <div
+              key={`custom_field_${index}`}
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 8,
+              }}
+            >
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                 <input
                   type="text"
                   placeholder="Label"
                   value={field.label}
                   onChange={(e) => updateCustomField(index, { label: e.target.value })}
-                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#fff',
+                    fontSize: 12,
+                  }}
                 />
 
                 <select
                   value={field.type}
                   onChange={(e) => updateCustomField(index, { type: e.target.value as any })}
-                  style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#fff',
+                    fontSize: 12,
+                  }}
                 >
                   <option value="text">Texto</option>
                   <option value="textarea">Textarea</option>
@@ -320,7 +375,18 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
 
                 <button
                   onClick={() => deleteCustomField(index)}
-                  style={{ padding: '6px 10px', borderRadius: 6, background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    background: '#ef4444',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
                 >
                   <FiTrash2 size={14} />
                 </button>
@@ -332,10 +398,20 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
                     placeholder="Opções (uma por linha)"
                     value={(field.options || []).join('\n')}
                     onChange={(e) => {
-                      const options = e.target.value.split('\n').filter(o => o.trim())
+                      const options = e.target.value.split('\n').map((o) => o.trim()).filter(Boolean)
                       updateCustomField(index, { options })
                     }}
-                    style={{ width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12, minHeight: '60px', fontFamily: 'inherit' }}
+                    style={{
+                      width: '100%',
+                      padding: '6px 10px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#fff',
+                      fontSize: 12,
+                      minHeight: '60px',
+                      fontFamily: 'inherit',
+                    }}
                   />
                 </div>
               )}
@@ -383,13 +459,32 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
           <button
             onClick={handleSave}
             disabled={saving}
-            style={{ flex: 1, padding: '12px 24px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{
+              flex: 1,
+              padding: '12px 24px',
+              borderRadius: 8,
+              background: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 700,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              opacity: saving ? 0.6 : 1,
+            }}
           >
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
           <button
             onClick={onClose}
-            style={{ flex: 1, padding: '12px 24px', borderRadius: 8, background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer' }}
+            style={{
+              flex: 1,
+              padding: '12px 24px',
+              borderRadius: 8,
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
           >
             Cancelar
           </button>
