@@ -35,11 +35,10 @@ export async function POST(req: Request) {
       zone,
       consentGiven,
       marketingOptIn,
-      leadType,
-      budget,
-      notes,
+      customFieldsData,
     } = body || {}
 
+    // Validação de campos obrigatórios
     if (!slug || !name || !email) {
       return NextResponse.json(
         { error: 'Campos obrigatórios em falta (slug, name, email).' },
@@ -47,10 +46,18 @@ export async function POST(req: Request) {
       )
     }
 
+    // Validação de consentimento (obrigatório)
+    if (consentGiven !== true) {
+      return NextResponse.json(
+        { error: 'Consentimento é obrigatório.' },
+        { status: 400 }
+      )
+    }
+
     // 1) Buscar embaixador (public)
     const { data: ambassador, error: ambErr } = await supabaseServer
       .from('ambassadors')
-      .select('id, user_id, name, email, is_published, ambassador_type, stats_leads')
+      .select('id, user_id, name, email, is_published, ambassador_type, stats_leads, custom_fields')
       .eq('slug', slug)
       .single()
 
@@ -76,11 +83,38 @@ export async function POST(req: Request) {
 
     const ownerEmail = ownerProfile?.email || null
 
-    // 4) Inserir lead no CRM (tabela leads)
+    // 4) Construir notas estruturadas com formulário
+    let leadNotes = ''
+
+    // Seção do formulário do embaixador (se houver custom_fields preenchidos)
+    if (customFieldsData && Object.keys(customFieldsData).length > 0) {
+      const customFields = ambassador.custom_fields || []
+      const formLines: string[] = []
+
+      customFields.forEach((field: any) => {
+        if (field.enabled && customFieldsData[field.id]) {
+          const value = customFieldsData[field.id]
+          formLines.push(`• ${field.label}: ${value}`)
+        }
+      })
+
+      if (formLines.length > 0) {
+        leadNotes += 'Formulário do Embaixador:\n'
+        leadNotes += formLines.join('\n')
+        leadNotes += '\n\n'
+      }
+    }
+
+    // Adicionar mensagem se existir
+    if (message) {
+      leadNotes += `Mensagem: ${message}\n\n`
+    }
+
+    // Rodapé com info do embaixador
+    leadNotes += `Lead captada via Embaixador: ${ambassador.name || slug} (${slug})`
+
+    // 5) Inserir lead no CRM (tabela leads)
     const leadSource = `ambassador:${slug}`
-    const leadNotes =
-      (notes ? String(notes) + '\n\n' : '') +
-      `Lead captada via Embaixador: ${ambassador.name || slug} (${slug})`
 
     const { data: leadData, error: leadError } = await supabaseServer
       .from('leads')
@@ -91,12 +125,11 @@ export async function POST(req: Request) {
           name,
           email,
           phone: phone || null,
-          message: message || null,
           zone: zone || null,
           notes: leadNotes,
           lead_source: leadSource,
-          consent_given: consentGiven ?? true,
-          marketing_opt_in: marketingOptIn ?? false,
+          consent_given: true,
+          marketing_opt_in: Boolean(marketingOptIn),
           consent_timestamp: new Date().toISOString(),
           consent_version: '1.0',
         },
@@ -104,12 +137,13 @@ export async function POST(req: Request) {
       .select('id')
 
     if (leadError) {
+      console.error('[api/ambassadors/lead] Lead insert error:', leadError)
       return NextResponse.json({ error: leadError.message }, { status: 500 })
     }
 
     const leadId = leadData?.[0]?.id as string | undefined
 
-    // 5) Guardar também em ambassador_leads (para stats/token/painel)
+    // 6) Guardar também em ambassador_leads (para stats/painel do embaixador)
     const { error: ambLeadErr } = await supabaseServer.from('ambassador_leads').insert([
       {
         ambassador_id: ambassador.id,
@@ -117,26 +151,24 @@ export async function POST(req: Request) {
         name,
         email,
         phone: phone || null,
-        lead_type: leadType || null,
         zone: zone || null,
-        budget: budget || null,
         notes: leadNotes,
-        marketing_opt_in: marketingOptIn ?? false,
+        marketing_opt_in: Boolean(marketingOptIn),
         status: 'new',
       },
     ])
 
     if (ambLeadErr) {
-      console.error('Failed to insert ambassador_leads:', ambLeadErr)
+      console.error('[api/ambassadors/lead] ambassador_leads insert error:', ambLeadErr)
     }
 
-    // 6) Incrementar stats do embaixador
+    // 7) Incrementar stats do embaixador
     await supabaseServer
       .from('ambassadors')
       .update({ stats_leads: (ambassador.stats_leads || 0) + 1 })
       .eq('id', ambassador.id)
 
-    // 7) Emails
+    // 8) Emails
     if (ownerEmail) {
       await sendEmail({
         userId: ownerUserId,
@@ -176,7 +208,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true }, { status: 200 })
   } catch (e: any) {
-    console.error('Error in POST /api/ambassadors/lead:', e)
+    console.error('[api/ambassadors/lead] Exception:', e)
     return NextResponse.json({ error: e?.message || 'Erro interno' }, { status: 500 })
   }
 }
