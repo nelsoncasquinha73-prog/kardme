@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     // Buscar card owner e verificar CRM Pro
     const { data: cardData } = await supabaseAdmin
       .from('cards')
-      .select('user_id, title, crm_pro_welcome_subject, crm_pro_welcome_body')
+      .select('user_id, name, crm_pro_welcome_subject, crm_pro_welcome_body')
       .eq('id', cardId)
       .single()
 
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
             ownerEmail: ownerData.email,
             leadName: name,
             leadEmail: email,
-            cardTitle: cardData.title || 'Kardme',
+            cardTitle: cardData.name || 'Kardme',
           })
 
           // Enviar email ao lead (só se opt-in)
@@ -137,12 +137,12 @@ export async function POST(req: Request) {
             const renderedSubject = renderWelcomeMessage(customSubject, {
               nome: name,
               email,
-              cardTitle: cardData.title || 'Kardme',
+              cardTitle: cardData.name || 'Kardme',
             })
             const renderedBody = renderWelcomeMessage(customBody, {
               nome: name,
               email,
-              cardTitle: cardData.title || 'Kardme',
+              cardTitle: cardData.name || 'Kardme',
             })
 
             welcomeRes = await sendWelcomeEmail({
@@ -150,7 +150,7 @@ export async function POST(req: Request) {
               leadId,
               toEmail: email,
               leadName: name,
-              cardTitle: cardData.title || 'Kardme',
+              cardTitle: cardData.name || 'Kardme',
               subject: renderedSubject,
               body: renderedBody,
             })
