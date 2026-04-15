@@ -130,12 +130,29 @@ export async function POST(req: Request) {
           // Enviar email ao lead (só se opt-in)
           let welcomeRes: any = null
           if (marketingOptIn && email) {
+            // Preparar subject e body com replace de variáveis
+            const customSubject = cardData.crm_pro_welcome_subject || 'Bem-vindo à {cardTitle}! 🎉'
+            const customBody = cardData.crm_pro_welcome_body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
+            
+            const renderedSubject = renderWelcomeMessage(customSubject, {
+              nome: name,
+              email,
+              cardTitle: cardData.title || 'Kardme',
+            })
+            const renderedBody = renderWelcomeMessage(customBody, {
+              nome: name,
+              email,
+              cardTitle: cardData.title || 'Kardme',
+            })
+
             welcomeRes = await sendWelcomeEmail({
               userId: cardData.user_id,
               leadId,
               toEmail: email,
               leadName: name,
               cardTitle: cardData.title || 'Kardme',
+              subject: renderedSubject,
+              body: renderedBody,
             })
           }
 
