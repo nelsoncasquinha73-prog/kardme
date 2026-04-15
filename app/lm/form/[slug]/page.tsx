@@ -108,26 +108,20 @@ export default function FormPage() {
         })
         .join('\n')
 
-      const { error } = await supabase
-        .from('leads')
-        .insert([
-          {
-            user_id: magnet!.user_id,
-            card_id: null,
-            name: formData.name || 'Sem nome',
-            email: formData.email || null,
-            phone: formData.phone || null,
-            notes: `Resposta do Lead Magnet "${magnet!.title}":\n\n${formDataSummary}`,
-            lead_source: 'Lead Magnet',
-            lead_magnet_id: magnet!.id,
-            form_data: formData,
-            created_at: new Date().toISOString(),
-          },
-        ])
+      const res = await fetch('/api/lead-magnets/submit-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: magnet!.slug,
+          formData,
+        }),
+      })
 
-      if (error) throw error
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json?.error || 'Erro ao enviar formulário')
+      }
 
-      await supabase.rpc('increment_lead_magnet_leads', { magnet_id: magnet!.id })
 
       setSubmitted(true)
     } catch (e: any) {
