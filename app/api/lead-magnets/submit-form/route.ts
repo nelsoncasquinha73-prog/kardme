@@ -127,7 +127,7 @@ export async function POST(request: Request) {
           title: ownerEmailRes
             ? 'Email de notificação enviado ao owner'
             : 'Falha ao enviar email de notificação ao owner',
-          meta: { details: ownerEmailRes?.details || null },
+          meta: { error: ownerEmailRes?.error || null },
         },
         {
           lead_id: leadId,
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
           title: leadEmailRes
             ? 'Email de boas-vindas enviado ao candidato'
             : 'Falha ao enviar email de boas-vindas ao candidato',
-          meta: { details: leadEmailRes?.details || null },
+          meta: { error: leadEmailRes?.error || null },
         },
       ])
     }
