@@ -12,6 +12,39 @@ interface AmbassadorEditModalProps {
   onRefresh?: () => void
 }
 
+type DefaultField = {
+  id: 'name' | 'email' | 'phone'
+  label: string
+  type: 'text' | 'email' | 'tel'
+  required: boolean
+  enabled: boolean
+}
+
+type CustomField = {
+  id: string
+  label: string
+  type: 'text' | 'textarea' | 'select'
+  required?: boolean
+  enabled?: boolean
+  options?: string[]
+}
+
+const DEFAULT_FIELDS: DefaultField[] = [
+  { id: 'name', label: 'Nome', type: 'text', required: true, enabled: true },
+  { id: 'email', label: 'Email', type: 'email', required: true, enabled: true },
+  { id: 'phone', label: 'Telefone', type: 'tel', required: false, enabled: true },
+]
+
+const PRESET_FIELDS: Array<Pick<CustomField, 'id' | 'label' | 'type'> & { options?: string[] }> = [
+  { id: 'interest_type', label: 'Tipo de Interesse', type: 'select', options: ['Comprador', 'Vendedor', 'Investidor'] },
+  { id: 'location', label: 'Localização', type: 'text' },
+  { id: 'budget', label: 'Orçamento', type: 'text' },
+]
+
+function generateUniqueId(): string {
+  return `\${Date.now()}_\${Math.random().toString(36).substr(2, 9)}`
+}
+
 export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRefresh }: AmbassadorEditModalProps) {
   const [formData, setFormData] = useState<Partial<Ambassador>>(ambassador || {})
   const [saving, setSaving] = useState(false)
@@ -22,8 +55,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
   const coverRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    console.log('Modal abriu com ambassador:', ambassador)
-    setFormData(ambassador || {})
+    setFormData({ ...ambassador, default_fields: ambassador?.default_fields || DEFAULT_FIELDS, custom_fields: ambassador?.custom_fields || [] })
   }, [ambassador])
 
   if (!formData?.id) return null
@@ -34,11 +66,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
     if (!formData?.id) return
     setPublishLoading(true)
     try {
-      const updatedAmbassador = await toggleAmbassadorPublished(
-        formData.id!,
-        !formData.is_published,
-        formData.user_id
-      )
+      const updatedAmbassador = await toggleAmbassadorPublished(formData.id!, !formData.is_published, formData.user_id)
       setFormData(updatedAmbassador)
       onRefresh?.()
     } catch (error) {
@@ -59,51 +87,52 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
     }
   }
 
-  const addCustomField = () => {
-    const newField = {
-      id: `custom_\${Date.now()}`,
-      label: 'Novo campo',
-      type: 'text' as const,
-      required: false,
-      enabled: true,
-    }
-    setFormData({ ...formData, custom_fields: [...(formData.custom_fields || []), newField] })
+  const defaultFields: DefaultField[] = ((formData as any).default_fields || DEFAULT_FIELDS) as DefaultField[]
+
+  const updateDefaultField = (fieldId: DefaultField['id'], updates: Partial<DefaultField>) => {
+    const updated = defaultFields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f))
+    setFormData({ ...formData, default_fields: updated } as any)
   }
 
-  const updateCustomField = (index: number, updates: any) => {
-    const newFields = [...(formData.custom_fields || [])]
-    newFields[index] = { ...newFields[index], ...updates }
-    setFormData({ ...formData, custom_fields: newFields })
+  const addCustomField = (preset?: (typeof PRESET_FIELDS)[number]) => {
+    const newField: CustomField = preset
+      ? {
+          id: `preset_\${preset.id}_\${generateUniqueId()}`,
+          label: preset.label,
+          type: preset.type,
+          required: false,
+          enabled: true,
+          options: preset.options,
+        }
+      : {
+          id: `custom_\${generateUniqueId()}`,
+          label: 'Novo campo',
+          type: 'text',
+          required: false,
+          enabled: true,
+        }
+
+    setFormData({ ...formData, custom_fields: [...(((formData as any).custom_fields || []) as CustomField[]), newField] } as any)
+  }
+
+  const updateCustomField = (index: number, updates: Partial<CustomField>) => {
+    const current = (((formData as any).custom_fields || []) as CustomField[])
+    const next = [...current]
+    next[index] = { ...next[index], ...updates }
+    setFormData({ ...formData, custom_fields: next } as any)
   }
 
   const deleteCustomField = (index: number) => {
-    const newFields = (formData.custom_fields || []).filter((_, i) => i !== index)
-    setFormData({ ...formData, custom_fields: newFields })
+    const current = (((formData as any).custom_fields || []) as CustomField[])
+    const next = current.filter((_, i) => i !== index)
+    setFormData({ ...formData, custom_fields: next } as any)
   }
 
+  const customFields = (((formData as any).custom_fields || []) as CustomField[])
+
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          background: '#1e293b',
-          borderRadius: 16,
-          padding: 32,
-          maxWidth: 600,
-          maxHeight: '90vh',
-          overflow: 'auto',
-          width: '90%',
-        }}
-      >
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+      <div style={{ background: '#1e293b', borderRadius: 16, padding: 32, maxWidth: 600, maxHeight: '90vh', overflow: 'auto', width: '90%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: 0 }}>Editar Embaixador</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 24 }}>
@@ -117,38 +146,14 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             {formData.avatar_url && <img src={formData.avatar_url} alt="Avatar" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover' }} />}
             <button
               onClick={() => avatarRef.current?.click()}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                background: '#3b82f6',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}
+              style={{ padding: '8px 16px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <FiUpload size={14} /> Upload
             </button>
             {formData.avatar_url && (
               <button
                 onClick={() => setShowAvatarPositioner(true)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: 8,
-                  background: '#8b5cf6',
-                  color: '#fff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}
+                style={{ padding: '8px 16px', borderRadius: 8, background: '#8b5cf6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
               >
                 <FiSliders size={14} /> Ajustar
               </button>
@@ -173,56 +178,24 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Foto de Cover</label>
           {formData.cover_url && (
-            <div
-              style={{
-                width: '100%',
-                height: 120,
-                background: `url(${formData.cover_url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                borderRadius: 8,
-                marginBottom: 12,
-              }}
-            />
+            <div style={{ width: '100%', height: 120, background: `url(\${formData.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 8, marginBottom: 12 }} />
           )}
-          <button
-            onClick={() => coverRef.current?.click()}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 8,
-              background: '#3b82f6',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 12,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            <FiUpload size={14} /> Upload
-          </button>
-          {formData.cover_url && (
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <button
-              onClick={() => setShowCoverPositioner(true)}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 8,
-                background: "#8b5cf6",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
+              onClick={() => coverRef.current?.click()}
+              style={{ padding: '8px 16px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
             >
-              <FiSliders size={14} /> Ajustar
+              <FiUpload size={14} /> Upload
             </button>
-          )}
+            {formData.cover_url && (
+              <button
+                onClick={() => setShowCoverPositioner(true)}
+                style={{ padding: '8px 16px', borderRadius: 8, background: '#8b5cf6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <FiSliders size={14} /> Ajustar
+              </button>
+            )}
+          </div>
 
           <input
             ref={coverRef}
@@ -252,15 +225,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
                 slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
               })
             }
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
-              color: '#fff',
-              fontSize: 12,
-            }}
+            style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}
           />
           <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>URL pública: kardme.com/emb/{formData.slug || 'seu-slug'}</p>
         </div>
@@ -274,129 +239,66 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
             <button
               onClick={handlePublish}
               disabled={publishLoading || !canPublish}
-              title={!canPublish ? 'Ativa a subscrição para publicar' : ''}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                background: formData.is_published ? '#ef4444' : '#10b981',
-                color: '#fff',
-                border: 'none',
-                cursor: publishLoading || !canPublish ? 'not-allowed' : 'pointer',
-                fontSize: 12,
-                fontWeight: 600,
-                opacity: publishLoading || !canPublish ? 0.5 : 1,
-              }}
+              style={{ padding: '8px 16px', borderRadius: 8, background: formData.is_published ? '#ef4444' : '#10b981', color: '#fff', border: 'none', cursor: publishLoading || !canPublish ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, opacity: publishLoading || !canPublish ? 0.5 : 1 }}
             >
               {publishLoading ? '...' : formData.is_published ? 'Despublicar' : 'Publicar'}
             </button>
-          </div>
-
-          {!canPublish && (
-            <p style={{ fontSize: 11, color: '#fbbf24', marginTop: 8, margin: '8px 0 0 0' }}>⚠️ Ativa a subscrição para publicar o cartão</p>
-          )}
-
-          {formData.is_admin_override && (
-            <p style={{ fontSize: 11, color: '#10b981', marginTop: 8, margin: '8px 0 0 0' }}>✅ Embaixador com override do admin (sem custo)</p>
-          )}
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-          {(['background_color', 'text_color', 'bio_color'] as const).map((field) => (
-            <div key={field}>
-              <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
-                {field === 'background_color' ? 'Cor de Fundo' : field === 'text_color' ? 'Cor do Texto' : 'Cor da Bio'}
-              </label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="color"
-                  value={(formData as any)[field] || '#000'}
-                  onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                  style={{ width: 50, height: 40, borderRadius: 8, border: 'none', cursor: 'pointer' }}
-                />
-                <input
-                  type="text"
-                  value={(formData as any)[field] || ''}
-                  onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.05)',
-                    color: '#fff',
-                    fontSize: 12,
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-
-          <div>
-            <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Fonte</label>
-            <select
-              value={formData.font_family || 'system-ui'}
-              onChange={(e) => setFormData({ ...formData, font_family: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.05)',
-                color: '#fff',
-                fontSize: 12,
-              }}
-            >
-              <option value="system-ui">System UI</option>
-              <option value="serif">Serif</option>
-              <option value="monospace">Monospace</option>
-            </select>
           </div>
         </div>
 
         <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 12 }}>Campos do Formulário</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(['show_interest_type', 'show_location', 'show_budget'] as const).map((field) => (
-              <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#cbd5e1', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={(formData as any)[field] || false}
-                  onChange={() => setFormData({ ...formData, [field]: !(formData as any)[field] })}
-                  style={{ cursor: 'pointer' }}
-                />
-                <span style={{ fontSize: 12 }}>
-                  {field === 'show_interest_type' ? 'Tipo de Interesse' : field === 'show_location' ? 'Localização' : 'Orçamento'}
-                </span>
-              </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {defaultFields.map((field) => (
+              <div key={field.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={field.label}
+                    onChange={(e) => updateDefaultField(field.id, { label: e.target.value })}
+                    style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}
+                  />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#cbd5e1', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <input type="checkbox" checked={field.enabled} onChange={(e) => updateDefaultField(field.id, { enabled: e.target.checked })} />
+                    Ativo
+                  </label>
+                </div>
+                {field.id !== 'name' && field.id !== 'email' && (
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#cbd5e1', fontSize: 12, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={field.required} onChange={(e) => updateDefaultField(field.id, { required: e.target.checked })} />
+                    <span>Obrigatório</span
+ <span>Obrigatório</span>
+                  </label>
+                )}
+              </div>
             ))}
           </div>
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>Campos Customizados</h3>
-            <button
-              onClick={addCustomField}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                background: '#10b981',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              <FiPlus size={14} /> Adicionar
-            </button>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 12px 0' }}>Adicionar Campo</h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            {PRESET_FIELDS.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => addCustomField(preset)}
+                style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', cursor: 'pointer', fontSize: 12, fontWeight: 600, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <FiPlus size={14} /> {preset.label}
+              </button>
+            ))}
           </div>
 
-          {(formData.custom_fields || []).map((field, index) => (
-            <div key={field.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+          <button
+            onClick={() => addCustomField()}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16 }}
+          >
+            <FiPlus size={14} /> Campo Customizado
+          </button>
+
+          {customFields.map((field, index) => (
+            <div key={`custom_field_${index}`} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                 <input
                   type="text"
@@ -408,7 +310,7 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
 
                 <select
                   value={field.type}
-                  onChange={(e) => updateCustomField(index, { type: e.target.value })}
+                  onChange={(e) => updateCustomField(index, { type: e.target.value as any })}
                   style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12 }}
                 >
                   <option value="text">Texto</option>
@@ -424,76 +326,70 @@ export default function AmbassadorEditModal({ ambassador, onClose, onSave, onRef
                 </button>
               </div>
 
+              {field.type === 'select' && (
+                <div style={{ marginBottom: 8 }}>
+                  <textarea
+                    placeholder="Opções (uma por linha)"
+                    value={(field.options || []).join('\n')}
+                    onChange={(e) => {
+                      const options = e.target.value.split('\n').filter(o => o.trim())
+                      updateCustomField(index, { options })
+                    }}
+                    style={{ width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 12, minHeight: '60px', fontFamily: 'inherit' }}
+                  />
+                </div>
+              )}
+
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#cbd5e1', fontSize: 12, cursor: 'pointer' }}>
-                <input type="checkbox" checked={field.required || false} onChange={(e) => updateCustomField(index, { required: e.target.checked })} style={{ cursor: 'pointer' }} />
+                <input type="checkbox" checked={field.required || false} onChange={(e) => updateCustomField(index, { required: e.target.checked })} />
                 <span>Obrigatório</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#cbd5e1', fontSize: 12, cursor: 'pointer', marginTop: 8 }}>
+                <input type="checkbox" checked={field.enabled !== false} onChange={(e) => updateCustomField(index, { enabled: e.target.checked })} />
+                <span>Ativo</span>
               </label>
             </div>
           ))}
         </div>
 
+        {showAvatarPositioner && formData.avatar_url && (
+          <ImagePositioner
+            imageUrl={formData.avatar_url}
+            title="Ajustar Foto de Perfil"
+            isCircle={true}
+            onConfirm={(settings) => {
+              setFormData({ ...formData, avatar_settings: settings })
+              setShowAvatarPositioner(false)
+            }}
+            onCancel={() => setShowAvatarPositioner(false)}
+          />
+        )}
 
-      {showAvatarPositioner && formData.avatar_url && (
-        <ImagePositioner
-          imageUrl={formData.avatar_url}
-          title="Ajustar Foto de Perfil"
-          isCircle={true}
-          onConfirm={(settings) => {
-            setFormData({
-              ...formData,
-              avatar_settings: settings,
-            })
-            setShowAvatarPositioner(false)
-          }}
-          onCancel={() => setShowAvatarPositioner(false)}
-        />
-      )}
+        {showCoverPositioner && formData.cover_url && (
+          <ImagePositioner
+            imageUrl={formData.cover_url}
+            title="Ajustar Foto de Cover"
+            isCircle={false}
+            onConfirm={(settings) => {
+              setFormData({ ...formData, cover_settings: settings })
+              setShowCoverPositioner(false)
+            }}
+            onCancel={() => setShowCoverPositioner(false)}
+          />
+        )}
 
-      {showCoverPositioner && formData.cover_url && (
-        <ImagePositioner
-          imageUrl={formData.cover_url}
-          title="Ajustar Foto de Cover"
-          isCircle={false}
-          onConfirm={(settings) => {
-            setFormData({
-              ...formData,
-              cover_settings: settings,
-            })
-            setShowCoverPositioner(false)
-          }}
-          onCancel={() => setShowCoverPositioner(false)}
-        />
-      )}
         <div style={{ display: 'flex', gap: 12 }}>
           <button
             onClick={handleSave}
             disabled={saving}
-            style={{
-              flex: 1,
-              padding: '12px 24px',
-              borderRadius: 8,
-              background: '#3b82f6',
-              color: '#fff',
-              border: 'none',
-              fontWeight: 700,
-              cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.6 : 1,
-            }}
+            style={{ flex: 1, padding: '12px 24px', borderRadius: 8, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
           <button
             onClick={onClose}
-            style={{
-              flex: 1,
-              padding: '12px 24px',
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.1)',
-              color: '#fff',
-              border: 'none',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
+            style={{ flex: 1, padding: '12px 24px', borderRadius: 8, background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer' }}
           >
             Cancelar
           </button>
