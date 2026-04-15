@@ -230,7 +230,7 @@ function AmbassadorEditModalContent({
             Editar Embaixador
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => { console.log("CLOSE CLICK"); onClose(); }}
             style={{
               background: "none",
               border: "none",
@@ -779,7 +779,7 @@ function AmbassadorEditModalContent({
           }}
         >
           <button
-            onClick={onClose}
+            onClick={() => { console.log("CLOSE CLICK"); onClose(); }}
             style={{
               flex: 1,
               padding: "12px 16px",
