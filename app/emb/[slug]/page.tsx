@@ -62,7 +62,7 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <div style={{ width: '100%', maxWidth: 500, backgroundColor: '#1e293b', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+      <div style={{ width: '100%', maxWidth: 600, backgroundColor: '#1e293b', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
         {/* Cover */}
         <div style={coverStyle} />
 
