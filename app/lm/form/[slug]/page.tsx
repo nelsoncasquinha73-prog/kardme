@@ -25,7 +25,7 @@ export default function FormPage() {
     try {
       const { data, error } = await supabase
         .from('lead_magnets')
-        .select('*, lead_magnet_forms(id, title, fields)')
+        .select('*, lead_magnet_forms!lead_magnets_form_id_fkey(id, title, fields)')
         .eq('slug', params.slug)
         .eq('is_active', true)
         .single()
