@@ -69,7 +69,7 @@ function AmbassadorEditModalContent({
 
     try {
       const fileName = `${formData.id}/${type}-${Date.now()}.${file.name.split(".").pop()}`;
-      const bucketName = "ambassadors";
+      const bucketName = "avatars";
 
       // Upload para Supabase Storage
       const { data, error } = await supabase.storage
