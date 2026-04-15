@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import AmbassadorsTab from "@/app/dashboard/admin/clients/AmbassadorsTab"
 import {
   LineChart,
   Line,
@@ -66,7 +67,7 @@ export default function AdminClienteDetailPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [cards, setCards] = useState<CardRow[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "resumo" | "cartoes" | "dominios" | "analytics"
+    "resumo" | "cartoes" | "dominios" | "analytics" | "embaixadores"
   >("resumo");
 
   type DomainRow = {
@@ -563,7 +564,7 @@ export default function AdminClienteDetailPage() {
           paddingBottom: 12,
         }}
       >
-        {(["resumo", "cartoes", "dominios", "analytics"] as const).map(
+        {(["resumo", "cartoes", "dominios", "analytics", "embaixadores"] as const).map(
           (tab) => (
             <button
               key={tab}
@@ -584,6 +585,7 @@ export default function AdminClienteDetailPage() {
               {tab === "cartoes" && "📇 Cartões"}
               {tab === "dominios" && "🌐 Domínios"}
               {tab === "analytics" && "📊 Analytics"}
+              {tab === "embaixadores" && "👥 Embaixadores"}
             </button>
           ),
         )}
@@ -1291,6 +1293,14 @@ export default function AdminClienteDetailPage() {
         </div>
       )}
 
+
+      {activeTab === "embaixadores" && (
+        <div style={cardStyle}>
+          <h2 style={{ marginTop: 0, fontSize: 16, color: "#fff" }}>Embaixadores do Cliente</h2>
+          <AmbassadorsTab userId={userId} />
+        </div>
+      )}
+
       {activeTab === "analytics" && (
         <div style={{ display: "grid", gap: 16 }}>
           <div style={{ display: "flex", gap: 8 }}>
@@ -1452,3 +1462,4 @@ export default function AdminClienteDetailPage() {
     </div>
   );
 }
+
