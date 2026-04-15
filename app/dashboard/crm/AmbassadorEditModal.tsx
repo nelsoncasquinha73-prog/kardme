@@ -34,6 +34,8 @@ function AmbassadorEditModalContent({
   useEffect(() => {
     if (ambassador) {
       setFormData({ ...ambassador });
+    } else {
+      setFormData(null);
     }
   }, [ambassador]);
 
