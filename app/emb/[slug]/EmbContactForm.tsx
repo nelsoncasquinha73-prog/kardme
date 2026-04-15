@@ -123,6 +123,7 @@ export default function EmbContactForm({
   }
 
   const inputStyle = {
+    width: '100%',
     padding: '12px 16px',
     borderRadius: 8,
     border: '1px solid #475569',
@@ -130,6 +131,7 @@ export default function EmbContactForm({
     color: '#f1f5f9',
     fontSize: 14,
     fontFamily: 'inherit',
+    boxSizing: 'border-box' as const,
   }
 
   // Renderizar campos default habilitados
@@ -260,6 +262,7 @@ export default function EmbContactForm({
         type="submit"
         disabled={loading}
         style={{
+          width: '100%',
           padding: '12px 16px',
           borderRadius: 8,
           backgroundColor: loading ? '#64748b' : '#3b82f6',
@@ -270,6 +273,7 @@ export default function EmbContactForm({
           cursor: loading ? 'not-allowed' : 'pointer',
           marginTop: 8,
           opacity: loading ? 0.7 : 1,
+          boxSizing: 'border-box',
         }}
       >
         {loading ? 'A enviar...' : 'Enviar'}
