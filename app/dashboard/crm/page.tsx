@@ -694,13 +694,14 @@ Melhores cumprimentos,
     // carregar cards do utilizador (para filtro + settings)
     const loadCards = async () => {
       if (!userId) return
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('cards')
-        .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body, business_category, business_subcategory, description')
+        .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
+      if (error) console.error('loadCards error:', error)
+      console.log('loadCards userId:', userId, 'data:', data)
       setCardsList(data || [])
-      console.log('CRM Pro cardsList:', data)
     }
     loadCards()
 
@@ -3151,7 +3152,7 @@ Melhores cumprimentos,
                     // Recarregar cards para refletir mudanças
                     const { data } = await supabase
                       .from('cards')
-                      .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body, business_category, description')
+                      .select('id, title, name, slug, crm_pro_welcome_subject, crm_pro_welcome_body, business_category')
                       .eq('user_id', userId)
                       .order('created_at', { ascending: false })
                     setCardsList(data || [])
