@@ -25,14 +25,19 @@ export default function FormPage() {
     try {
       const { data, error } = await supabase
         .from('lead_magnets')
-        .select('*')
+        .select('*, lead_magnet_forms(id, title, fields)')
         .eq('slug', params.slug)
         .eq('is_active', true)
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
       if (data) {
-        setMagnet(data)
+        // Mapear lead_magnet_forms.fields para form_fields
+        const formWithFields = {
+          ...data,
+          form_fields: data.lead_magnet_forms?.[0]?.fields || []
+        }
+        setMagnet(formWithFields)
         // Incrementar views_count via RPC
         await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
       }
