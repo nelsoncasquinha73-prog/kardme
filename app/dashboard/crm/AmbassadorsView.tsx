@@ -344,7 +344,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
         </div>
       )}
 
-      <AmbassadorEditModal ambassador={editingAmbassador} onClose={() => setEditingAmbassador(null)} onSave={handleSaveAmbassador} onRefresh={loadAmbassadors} />
+      <AmbassadorEditModal ambassador={editingAmbassador} onClose={() => setEditingAmbassador(null)} onSave={handleSaveAmbassador} />
 
       {cancelConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
