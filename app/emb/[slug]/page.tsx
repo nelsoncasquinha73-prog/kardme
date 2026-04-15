@@ -143,6 +143,11 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
               ambassadorEmail={ambassador.email || ''} 
               ambassadorName={ambassador.name || ''}
               customFields={ambassador.custom_fields || []}
+              defaultFields={ambassador.default_fields || [
+                { id: 'name', label: 'Nome', type: 'text', required: true, enabled: true },
+                { id: 'email', label: 'Email', type: 'email', required: true, enabled: true },
+                { id: 'phone', label: 'Telefone', type: 'tel', required: false, enabled: true },
+              ]}
             />
           </div>
         </div>

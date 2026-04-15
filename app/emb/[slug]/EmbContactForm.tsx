@@ -7,6 +7,14 @@ interface CustomField {
   label: string
   type: 'text' | 'textarea' | 'select'
   options?: string[]
+  required?: boolean
+  enabled?: boolean
+}
+
+interface DefaultField {
+  id: 'name' | 'email' | 'phone'
+  label: string
+  type: 'text' | 'email' | 'tel'
   required: boolean
   enabled: boolean
 }
@@ -16,13 +24,19 @@ interface EmbContactFormProps {
   ambassadorEmail: string
   ambassadorName: string
   customFields?: CustomField[]
+  defaultFields?: DefaultField[]
 }
 
 export default function EmbContactForm({ 
   slug, 
   ambassadorEmail, 
   ambassadorName,
-  customFields = []
+  customFields = [],
+  defaultFields = [
+    { id: 'name', label: 'Nome', type: 'text', required: true, enabled: true },
+    { id: 'email', label: 'Email', type: 'email', required: true, enabled: true },
+    { id: 'phone', label: 'Telefone', type: 'tel', required: false, enabled: true },
+  ]
 }: EmbContactFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>({
     name: '',
@@ -42,13 +56,18 @@ export default function EmbContactForm({
     e.preventDefault()
     setMessage(null)
 
-    if (!formData.name || !formData.email) {
-      setMessage({ type: 'error', text: 'Nome e email são obrigatórios.' })
-      return
+    // Validar campos default obrigatórios
+    const enabledDefaultFields = defaultFields.filter(f => f.enabled && f.required)
+    for (const field of enabledDefaultFields) {
+      if (!formData[field.id]) {
+        setMessage({ type: 'error', text: `${field.label} é obrigatório.` })
+        return
+      }
     }
 
-    const enabledRequiredFields = customFields.filter(f => f.enabled && f.required)
-    for (const field of enabledRequiredFields) {
+    // Validar campos custom obrigatórios
+    const enabledRequiredCustomFields = customFields.filter(f => (f.enabled ?? true) && (f.required ?? false))
+    for (const field of enabledRequiredCustomFields) {
       if (!formData[field.id]) {
         setMessage({ type: 'error', text: `${field.label} é obrigatório.` })
         return
@@ -63,6 +82,13 @@ export default function EmbContactForm({
     setLoading(true)
 
     try {
+      const customFieldsData = customFields
+        .filter(f => f.enabled ?? true)
+        .reduce((acc, field) => {
+          acc[field.id] = formData[field.id] || ''
+          return acc
+        }, {} as Record<string, string>)
+
       const response = await fetch('/api/ambassadors/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,12 +99,7 @@ export default function EmbContactForm({
           phone: formData.phone || null,
           consentGiven: true,
           marketingOptIn: consent,
-          customFieldsData: customFields
-            .filter(f => f.enabled)
-            .reduce((acc, field) => {
-              acc[field.id] = formData[field.id] || ''
-              return acc
-            }, {} as Record<string, string>),
+          customFieldsData,
         }),
       })
 
@@ -111,43 +132,17 @@ export default function EmbContactForm({
     fontFamily: 'inherit',
   }
 
-  const enabledCustomFields = customFields.filter(f => f.enabled)
+  // Renderizar campos default habilitados
+  const enabledDefaultFields = defaultFields.filter(f => f.enabled)
+  
+  // Renderizar campos custom habilitados
+  const enabledCustomFields = customFields.filter(f => f.enabled ?? true)
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <input
-        type="text"
-        name="name"
-        placeholder="Nome completo"
-        value={formData.name}
-        onChange={handleChange}
-        required
-        style={inputStyle as React.CSSProperties}
-      />
-      <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-        style={inputStyle as React.CSSProperties}
-      />
-      <input
-        type="tel"
-        name="phone"
-        placeholder="Telefone (opcional)"
-        value={formData.phone}
-        onChange={handleChange}
-        style={inputStyle as React.CSSProperties}
-      />
-
-      {enabledCustomFields.map((field) => (
+      {/* Campos Default */}
+      {enabledDefaultFields.map((field) => (
         <div key={field.id}>
-          <label style={{ display: 'block', fontSize: 13, color: '#cbd5e1', marginBottom: 6, fontWeight: 500 }}>
-            {field.label}
-            {field.required && <span style={{ color: '#ef4444' }}>*</span>}
-          </label>
           {field.type === 'text' && (
             <input
               type="text"
@@ -159,13 +154,56 @@ export default function EmbContactForm({
               style={inputStyle as React.CSSProperties}
             />
           )}
+          {field.type === 'email' && (
+            <input
+              type="email"
+              name={field.id}
+              placeholder={field.label}
+              value={formData[field.id] || ''}
+              onChange={handleChange}
+              required={field.required}
+              style={inputStyle as React.CSSProperties}
+            />
+          )}
+          {field.type === 'tel' && (
+            <input
+              type="tel"
+              name={field.id}
+              placeholder={field.label}
+              value={formData[field.id] || ''}
+              onChange={handleChange}
+              required={field.required}
+              style={inputStyle as React.CSSProperties}
+            />
+          )}
+        </div>
+      ))}
+
+      {/* Campos Custom */}
+      {enabledCustomFields.map((field) => (
+        <div key={field.id}>
+          <label style={{ display: 'block', fontSize: 13, color: '#cbd5e1', marginBottom: 6, fontWeight: 500 }}>
+            {field.label}
+            {(field.required ?? false) && <span style={{ color: '#ef4444' }}>*</span>}
+          </label>
+          {field.type === 'text' && (
+            <input
+              type="text"
+              name={field.id}
+              placeholder={field.label}
+              value={formData[field.id] || ''}
+              onChange={handleChange}
+              required={field.required ?? false}
+              style={inputStyle as React.CSSProperties}
+            />
+          )}
           {field.type === 'textarea' && (
             <textarea
               name={field.id}
               placeholder={field.label}
               value={formData[field.id] || ''}
               onChange={handleChange}
-              required={field.required}
+              required={field.required ?? false}
               style={{
                 ...inputStyle,
                 minHeight: '100px',
@@ -178,7 +216,7 @@ export default function EmbContactForm({
               name={field.id}
               value={formData[field.id] || ''}
               onChange={handleChange}
-              required={field.required}
+              required={field.required ?? false}
               style={inputStyle as React.CSSProperties}
             >
               <option value="">Seleciona uma opção</option>
