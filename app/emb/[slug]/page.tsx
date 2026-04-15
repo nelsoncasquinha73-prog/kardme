@@ -29,7 +29,6 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
     backgroundPosition: 'center',
     overflow: 'hidden',
     borderRadius: '12px 12px 0 0',
-    position: 'relative',
   }
 
   if (ambassador.cover_url && ambassador.cover_settings) {
@@ -61,14 +60,17 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
     avatarStyle.backgroundImage = `url(${ambassador.avatar_url})`
   }
 
+  // Card background color from ambassador settings
+  const cardBackgroundColor = ambassador.background_color || '#1e293b'
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <div style={{ width: '100%', maxWidth: 600, backgroundColor: '#1e293b', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+      <div style={{ width: '100%', maxWidth: 700, backgroundColor: cardBackgroundColor, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
         {/* Cover */}
         <div style={coverStyle} />
 
         {/* Content */}
-        <div style={{ padding: '0 24px 32px', textAlign: 'center', position: 'relative' }}>
+        <div style={{ padding: '0 32px 32px', textAlign: 'center', position: 'relative' }}>
           {/* Avatar */}
           <div style={{ ...avatarStyle, margin: '-50px auto 16px', position: 'relative', zIndex: 10 }} />
 
@@ -85,13 +87,13 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
           )}
 
           {/* Contact Buttons */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 32, justifyContent: 'center', flexWrap: 'wrap' }}>
             {ambassador.email && (
               <a
                 href={`mailto:${ambassador.email}`}
                 style={{
-                  flex: 1,
-                  minWidth: 120,
+                  flex: '1 1 auto',
+                  minWidth: 140,
                   padding: '12px 16px',
                   backgroundColor: '#94a3b8',
                   color: '#1e293b',
@@ -114,8 +116,8 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
               <a
                 href={`tel:${ambassador.phone}`}
                 style={{
-                  flex: 1,
-                  minWidth: 120,
+                  flex: '1 1 auto',
+                  minWidth: 140,
                   padding: '12px 16px',
                   backgroundColor: '#94a3b8',
                   color: '#1e293b',
