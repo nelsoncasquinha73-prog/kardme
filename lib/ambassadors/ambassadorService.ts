@@ -30,6 +30,13 @@ export interface Ambassador {
   show_interest_type: boolean
   show_location: boolean
   show_budget: boolean
+  default_fields?: Array<{
+    id: 'name' | 'email' | 'phone'
+    label: string
+    type: 'text' | 'email' | 'tel'
+    required: boolean
+    enabled: boolean
+  }>
   custom_fields: Array<{
     id: string
     label: string
@@ -146,9 +153,9 @@ export async function getAmbassador(id: string) {
 export async function getAmbassadorBySlug(slug: string) {
   const { data, error } = await supabase
     .from('ambassadors')
-    .select('*')
+    .select('id, user_id, name, email, phone, bio, slug, avatar_url, cover_url, avatar_settings, cover_settings, background_color, text_color, bio_color, font_family, is_published, is_active, stats_leads, custom_fields, default_fields, ambassador_type')
     .eq('slug', slug)
-    .eq('is_active', true)  // ← MUDADO: is_published em vez de is_active
+    .eq('is_published', true)
     .single()
 
   if (error) throw error
@@ -157,17 +164,22 @@ export async function getAmbassadorBySlug(slug: string) {
 
 // Atualizar embaixador
 export async function updateAmbassador(id: string, data: Partial<Ambassador>) {
-  console.log('[ambassadorService] Updating ambassador with data:', data);
-  const { data: ambassador, error } = await supabase
-    .from('ambassadors')
-    .update(data)
-    .eq('id', id)
-    .select()
-    .single()
+  console.log("[ambassadorService] Updating ambassador with data:", data)
 
-  if (error) throw error
-  console.log('[ambassadorService] Update response:', ambassador);
-  return ambassador as Ambassador
+  const res = await fetch("/api/ambassadors/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, ...data }),
+  })
+
+  const payload = await res.json().catch(() => ({}))
+
+  if (!res.ok) {
+    throw new Error(payload?.error || "Failed to update ambassador")
+  }
+
+  console.log("[ambassadorService] Update response:", payload)
+  return payload as Ambassador
 }
 
 // Marcar contrato como assinado
