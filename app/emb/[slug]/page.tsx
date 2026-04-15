@@ -1,4 +1,4 @@
-import { getAmbassadorBySlug } from '@/lib/ambassadors/ambassadorService'
+import { getAmbassadorBySlugPublic } from '@/lib/ambassadors/ambassadorServiceServer'
 import { notFound } from 'next/navigation'
 import EmbContactForm from './EmbContactForm'
 
@@ -11,8 +11,9 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
   
   let ambassador
   try {
-    ambassador = await getAmbassadorBySlug(slug)
+    ambassador = await getAmbassadorBySlugPublic(slug)
   } catch (error) {
+    console.error('[emb slug] Error fetching ambassador:', error)
     notFound()
   }
 
@@ -20,7 +21,6 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
     notFound()
   }
 
-  // Aplicar settings de crop ao cover
   const coverStyle: React.CSSProperties = {
     width: '100%',
     height: 160,
@@ -40,7 +40,6 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
     coverStyle.backgroundImage = `url(${ambassador.cover_url})`
   }
 
-  // Aplicar settings de crop ao avatar
   const avatarStyle: React.CSSProperties = {
     width: 100,
     height: 100,
@@ -139,7 +138,12 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
             <h3 style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1', marginBottom: 16, textAlign: 'left' }}>
               Deixe seu contacto
             </h3>
-            <EmbContactForm slug={slug} ambassadorEmail={ambassador.email || ''} ambassadorName={ambassador.name || ''} />
+            <EmbContactForm 
+              slug={slug} 
+              ambassadorEmail={ambassador.email || ''} 
+              ambassadorName={ambassador.name || ''}
+              customFields={ambassador.custom_fields || []}
+            />
           </div>
         </div>
       </div>
