@@ -29,6 +29,7 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
     backgroundPosition: 'center',
     overflow: 'hidden',
     borderRadius: '12px 12px 0 0',
+    position: 'relative',
   }
 
   if (ambassador.cover_url && ambassador.cover_settings) {
@@ -84,12 +85,13 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
           )}
 
           {/* Contact Buttons */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
             {ambassador.email && (
               <a
                 href={`mailto:${ambassador.email}`}
                 style={{
                   flex: 1,
+                  minWidth: 120,
                   padding: '12px 16px',
                   backgroundColor: '#94a3b8',
                   color: '#1e293b',
@@ -113,6 +115,7 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
                 href={`tel:${ambassador.phone}`}
                 style={{
                   flex: 1,
+                  minWidth: 120,
                   padding: '12px 16px',
                   backgroundColor: '#94a3b8',
                   color: '#1e293b',
