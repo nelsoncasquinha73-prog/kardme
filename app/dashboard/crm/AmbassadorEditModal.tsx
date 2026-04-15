@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ColorPickerProvider } from "@/components/editor/ColorPickerContext";
 import ColorPickerPro from "@/components/editor/ColorPickerPro";
@@ -25,6 +25,10 @@ function AmbassadorEditModalContent({
   const [newFieldLabel, setNewFieldLabel] = useState("");
   const [newFieldType, setNewFieldType] = useState("text");
   const [showAddField, setShowAddField] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const { openPicker } = useColorPicker();
 
   useEffect(() => {
@@ -40,6 +44,66 @@ function AmbassadorEditModalContent({
     formData.is_active === true &&
     (!formData.subscription_current_period_end ||
       new Date(formData.subscription_current_period_end) > new Date());
+
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "avatar" | "cover"
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validação
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("Apenas JPG, PNG e WebP são permitidos");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Imagem deve ter menos de 5MB");
+      return;
+    }
+
+    const isAvatar = type === "avatar";
+    if (isAvatar) setUploadingAvatar(true);
+    else setUploadingCover(true);
+
+    try {
+      const fileName = `${formData.id}/${type}-${Date.now()}.${file.name.split(".").pop()}`;
+      const bucketName = "ambassadors";
+
+      // Upload para Supabase Storage
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file, { upsert: true });
+
+      if (error) throw error;
+
+      // Gerar URL pública
+      const { data: publicData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+
+      const imageUrl = publicData.publicUrl;
+
+      // Atualizar formData
+      if (isAvatar) {
+        setFormData({ ...formData, avatar_url: imageUrl });
+      } else {
+        setFormData({ ...formData, cover_url: imageUrl });
+      }
+
+      alert(`${type === "avatar" ? "Avatar" : "Capa"} carregado com sucesso!`);
+    } catch (error: any) {
+      console.error("Erro ao fazer upload:", error);
+      alert(`Erro ao carregar ${type === "avatar" ? "avatar" : "capa"}: ${error.message}`);
+    } finally {
+      if (isAvatar) setUploadingAvatar(false);
+      else setUploadingCover(false);
+      // Limpar input
+      if (isAvatar && avatarInputRef.current) avatarInputRef.current.value = "";
+      else if (coverInputRef.current) coverInputRef.current.value = "";
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -111,49 +175,6 @@ function AmbassadorEditModalContent({
       ...formData,
       custom_fields: formData.custom_fields.filter((f) => f.id !== id),
     });
-  };
-
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "cover") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Ficheiro muito grande (máx 5MB)");
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      alert("Por favor, seleciona uma imagem");
-      return;
-    }
-
-    try {
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substr(2, 9);
-      const ext = file.name.split(".").pop();
-      const fileName = `ambassador-${type}-${formData?.id}-${timestamp}-${random}.${ext}`;
-      const path = `ambassadors/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("card-assets")
-        .upload(path, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("card-assets").getPublicUrl(path);
-
-      if (type === "avatar") {
-        setFormData({ ...formData, avatar_url: data.publicUrl });
-      } else {
-        setFormData({ ...formData, cover_url: data.publicUrl });
-      }
-
-      alert(`${type === "avatar" ? "Avatar" : "Capa"} carregado com sucesso!`);
-    } catch (error: any) {
-      console.error("Erro no upload:", error);
-      alert("Erro ao carregar imagem: " + error?.message);
-    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -276,52 +297,185 @@ function AmbassadorEditModalContent({
             🖼️ Imagens
           </h3>
 
-          <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>Avatar URL</label>
-            <input
-              type="text"
-              value={formData.avatar_url || ""}
-              onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-              style={inputStyle}
-              placeholder="https://..."
-            />
-            {formData.avatar_url && (
-              <img
-                src={formData.avatar_url}
-                alt="Avatar"
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  marginTop: 8,
-                  objectFit: "cover",
-                }}
-              />
-            )}
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Avatar</label>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              {formData.avatar_url ? (
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={formData.avatar_url}
+                    alt="Avatar"
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid rgba(59,130,246,0.3)",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, avatar_url: undefined })}
+                    style={{
+                      position: "absolute",
+                      top: -8,
+                      right: -8,
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background: "rgba(239,68,68,0.9)",
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "2px dashed rgba(255,255,255,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#94a3b8",
+                    fontSize: 12,
+                  }}
+                >
+                  Sem imagem
+                </div>
+              )}
+              <div style={{ flex: 1 }}>
+                <input
+                  type="file"
+                  ref={avatarInputRef}
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => handleImageUpload(e, "avatar")}
+                />
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(59,130,246,0.35)",
+                    background: "rgba(59,130,246,0.12)",
+                    color: "#93c5fd",
+                    cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    marginBottom: 8,
+                    opacity: uploadingAvatar ? 0.6 : 1,
+                  }}
+                >
+                  {uploadingAvatar ? "⏳ A carregar..." : "📤 Carregar Avatar"}
+                </button>
+                <p style={{ fontSize: 11, color: "#94a3b8", margin: 0 }}>
+                  JPG, PNG. Máx 5MB. Será cortado em círculo.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>Cover URL</label>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Foto de Capa</label>
+            <div style={{ marginBottom: 12 }}>
+              {formData.cover_url ? (
+                <div style={{ position: "relative" }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 140,
+                      backgroundImage: `url(${formData.cover_url})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      borderRadius: 8,
+                      border: "2px solid rgba(59,130,246,0.3)",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, cover_url: undefined })}
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background: "rgba(239,68,68,0.9)",
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: 140,
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "2px dashed rgba(255,255,255,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#94a3b8",
+                    fontSize: 12,
+                  }}
+                >
+                  Sem imagem
+                </div>
+              )}
+            </div>
             <input
-              type="text"
-              value={formData.cover_url || ""}
-              onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
-              style={inputStyle}
-              placeholder="https://..."
+              type="file"
+              ref={coverInputRef}
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => handleImageUpload(e, "cover")}
             />
-            {formData.cover_url && (
-              <div
-                style={{
-                  width: "100%",
-                  height: 120,
-                  backgroundImage: `url(\${formData.cover_url})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  borderRadius: 8,
-                  marginTop: 8,
-                }}
-              />
-            )}
+            <button
+              type="button"
+              onClick={() => coverInputRef.current?.click()}
+              disabled={uploadingCover}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(59,130,246,0.35)",
+                background: "rgba(59,130,246,0.12)",
+                color: "#93c5fd",
+                cursor: uploadingCover ? "not-allowed" : "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                opacity: uploadingCover ? 0.6 : 1,
+              }}
+            >
+              {uploadingCover ? "⏳ A carregar..." : "📤 Carregar Capa"}
+            </button>
+            <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
+              JPG, PNG. Máx 5MB. Recomendado: 1200x300px.
+            </p>
           </div>
         </div>
 
