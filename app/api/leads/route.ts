@@ -100,6 +100,11 @@ export async function POST(req: Request) {
       .eq('id', cardId)
       .single()
 
+    const safeCardTitle =
+      (cardData?.name && String(cardData.name).trim().length > 0)
+        ? String(cardData.name).trim()
+        : 'o meu cartão digital'
+
     if (cardData?.user_id) {
       // Verificar se owner tem CRM Pro
       const { data: addonData } = await supabaseAdmin
@@ -124,7 +129,7 @@ export async function POST(req: Request) {
             ownerEmail: ownerData.email,
             leadName: name,
             leadEmail: email,
-            cardTitle: cardData.name || 'Kardme',
+            cardTitle: safeCardTitle,
           })
 
           // Enviar email ao lead (só se opt-in)
@@ -137,12 +142,12 @@ export async function POST(req: Request) {
             const renderedSubject = renderWelcomeMessage(customSubject, {
               nome: name,
               email,
-              cardTitle: cardData.name || 'Kardme',
+              cardTitle: safeCardTitle,
             })
             const renderedBody = renderWelcomeMessage(customBody, {
               nome: name,
               email,
-              cardTitle: cardData.name || 'Kardme',
+              cardTitle: safeCardTitle,
             })
 
             welcomeRes = await sendWelcomeEmail({
@@ -150,7 +155,7 @@ export async function POST(req: Request) {
               leadId,
               toEmail: email,
               leadName: name,
-              cardTitle: cardData.name || 'Kardme',
+              cardTitle: safeCardTitle,
               subject: renderedSubject,
               body: renderedBody,
             })
