@@ -35,7 +35,7 @@ export default function FormPage() {
         // Mapear lead_magnet_forms.fields para form_fields
         const formWithFields = {
           ...data,
-          form_fields: data.lead_magnet_forms?.[0]?.fields || []
+          form_fields: (data as any).lead_magnet_forms?.fields || []
         }
         setMagnet(formWithFields)
         // Incrementar views_count via RPC
