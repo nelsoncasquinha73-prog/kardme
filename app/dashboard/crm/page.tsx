@@ -2605,6 +2605,22 @@ Melhores cumprimentos,
                   {icon} Fazer agora
                 </button>
                 <button
+                  onClick={() => {
+                    setSelectedLeadForTask(lead || null)
+                    setTaskTitle(task.title)
+                    setTaskDesc(task.description || '')
+                    setTaskDueDate(task.due_at.split('T')[0])
+                    setTaskDueTime(task.due_at.split('T')[1].slice(0, 5))
+                    setTaskActionType(task.action_type || 'follow_up')
+                    setEditingTaskId(task.id)
+                    setShowTaskModal(true)
+                    setSelectedCalendarTask(null)
+                  }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                >
+                  ✏️ Editar
+                </button>
+                <button
                   onClick={async () => {
                     await markTaskDone({ taskId: task.id })
                     await logLeadActivity({ leadId: task.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${task.title}` })
