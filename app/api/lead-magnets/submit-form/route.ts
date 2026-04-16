@@ -100,6 +100,7 @@ export async function POST(request: Request) {
         ownerEmailRes = await sendEmail({
           to: ownerEmail,
           subject: `Nova candidatura recebida: ${leadName}`,
+          fromName: cardName,
           html: `
             <p>Olá,</p>
             <p>Recebeste uma nova candidatura no teu Lead Magnet "<strong>${magnet.title}</strong>":</p>
