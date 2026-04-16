@@ -2195,7 +2195,7 @@ Melhores cumprimentos,
                           minWidth: 110,
                         }}
                       >
-                        {LEAD_SOURCES_DEFAULT.map(s => (
+                        {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.id, label: `${s.emoji} ${s.label}` }))].map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
                         ))}
                       </select>
