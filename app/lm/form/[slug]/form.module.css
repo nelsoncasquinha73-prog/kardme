@@ -41,12 +41,11 @@
   }
   
   .coverImage {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    margin-bottom: 16px;
+    width: calc(100% + 40px);
     margin-left: -20px;
     margin-right: -20px;
-    width: calc(100% + 40px);
+    aspect-ratio: 3 / 2;
+    margin-bottom: 16px;
     border-radius: 0;
   }
 }
