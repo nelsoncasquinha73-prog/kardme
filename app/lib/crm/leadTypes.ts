@@ -66,14 +66,12 @@ export async function fetchLeadSources(userId: string): Promise<LeadSource[]> {
 }
 
 export async function createLeadSource(userId: string, label: string, emoji: string): Promise<LeadSource> {
-  console.log('createLeadSource called:', { userId, label, emoji })
   const { data, error } = await supabase
     .from('crm_lead_sources')
     .insert([{ user_id: userId, label, emoji }])
     .select()
     .single()
   
-  console.log('createLeadSource response:', { data, error })
   if (error) throw error
   return data
 }
