@@ -8,6 +8,7 @@ import styles from './form.module.css'
 
 export default function FormPage() {
   const params = useParams()
+  const slug = Array.isArray((params as any).slug) ? (params as any).slug[0] : (params as any).slug
   const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -17,17 +18,17 @@ export default function FormPage() {
 
   useEffect(() => {
     loadMagnet()
-  }, [params.slug])
+  }, [slug])
 
   async function loadMagnet() {
     setLoading(true)
-    console.log("slug:", params.slug)
+    console.log("slug:", slug)
     try {
       console.log("Iniciando loadMagnet...")
       const { data, error } = await supabase
         .from('lead_magnets')
         .select('*')
-        .eq('slug', params.slug)
+        .eq('slug', slug)
         .eq('is_active', true)
         .single()
 
@@ -45,7 +46,11 @@ export default function FormPage() {
             .single()
           console.log("Form data:", formData)
           console.log("Form error:", formError)
-          formFields = formData?.fields || []
+          const rawFields: any = formData?.fields
+          if (Array.isArray(rawFields)) formFields = rawFields
+          else if (typeof rawFields === 'string') {
+            try { formFields = JSON.parse(rawFields) } catch { formFields = [] }
+          } else formFields = []
           console.log("Form fields:", formFields)
         }
         
@@ -198,6 +203,10 @@ export default function FormPage() {
 
         <h1>{magnet.title}</h1>
         {magnet.description && <p className={styles.description}>{magnet.description}</p>}
+
+        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 10 }}>
+          debug: slug={String(slug)} | form_id={(magnet as any)?.form_id || 'null'} | fields={(magnet as any)?.form_fields?.length ?? 'null'}
+        </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {visibleFields.map((field) => (
