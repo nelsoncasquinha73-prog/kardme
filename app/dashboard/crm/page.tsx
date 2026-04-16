@@ -153,6 +153,7 @@ export default function CrmProPage() {
   const [taskDueDate, setTaskDueDate] = useState('')
   const [taskDueTime, setTaskDueTime] = useState('09:00')
   const [taskActionType, setTaskActionType] = useState('follow_up')
+  const [createdTask, setCreatedTask] = useState<any>(null)
   const [leadActivities, setLeadActivities] = useState<any[]>([])
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
@@ -874,7 +875,7 @@ Melhores cumprimentos,
       return
     }
     await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
-    setShowTaskModal(false)
+    setCreatedTask({ title: taskTitle, dueDate: taskDueDate, dueTime: taskDueTime })
     setTaskTitle('')
     setTaskDesc('')
     setTaskDueDate('')
@@ -2819,7 +2820,7 @@ Melhores cumprimentos,
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Tipo de Ação</label>
-              <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box', color: '#111827', background: '#fff' }}>
+              <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '12px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box', color: '#111827', background: '#fff' }}>
                 <option value="follow_up">✅ Follow-up</option>
                 <option value="email">📧 Email</option>
                 <option value="whatsapp">💬 WhatsApp</option>
@@ -2829,10 +2830,21 @@ Melhores cumprimentos,
               </select>
             </div>
             
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
-              <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
-            </div>
+            {!createdTask ? (
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
+                <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00'); setCreatedTask(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 20 }}>Tarefa agendada com sucesso!</p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => { setCreatedTask(null); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Editar</button>
+                  <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00'); setCreatedTask(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Fechar</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
