@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     // 1) Buscar o lead magnet
     const { data: magnet, error: magnetError } = await supabase
       .from('lead_magnets')
-      .select('id, user_id, title, welcome_email_subject, welcome_email_body')
+      .select('id, user_id, title, card_id, welcome_email_subject, welcome_email_body')
       .eq('slug', slug)
       .eq('is_active', true)
       .single()
@@ -27,6 +27,19 @@ export async function POST(request: Request) {
         { error: 'Lead Magnet não encontrado' },
         { status: 404 }
       )
+    }
+
+    // Buscar card associado (se existir)
+    let cardName = magnet.title
+    if (magnet.card_id) {
+      const { data: cardData } = await supabase
+        .from('cards')
+        .select('name')
+        .eq('id', magnet.card_id)
+        .single()
+      if (cardData?.name) {
+        cardName = cardData.name
+      }
     }
 
     // 2) Preparar dados do lead
