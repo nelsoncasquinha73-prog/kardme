@@ -23,6 +23,7 @@ export default function FormPage() {
     setLoading(true)
     console.log("slug:", params.slug)
     try {
+      console.log("Iniciando loadMagnet...")
       const { data, error } = await supabase
         .from('lead_magnets')
         .select('*')
@@ -32,21 +33,27 @@ export default function FormPage() {
 
       if (error && error.code !== 'PGRST116') throw error
       if (data) {
+        console.log("Lead magnet encontrado:", data)
+        console.log("form_id:", data.form_id)
         // Buscar o formulário associado
         let formFields: FormField[] = []
         if (data.form_id) {
-          const { data: formData } = await supabase
+          const { data: formData, error: formError } = await supabase
             .from('lead_magnet_forms')
             .select('fields')
             .eq('id', data.form_id)
             .single()
+          console.log("Form data:", formData)
+          console.log("Form error:", formError)
           formFields = formData?.fields || []
+          console.log("Form fields:", formFields)
         }
         
         const formWithFields = {
           ...data,
           form_fields: formFields
         }
+        console.log("Magnet final:", formWithFields)
         setMagnet(formWithFields)
         // Incrementar views_count via RPC
         await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
