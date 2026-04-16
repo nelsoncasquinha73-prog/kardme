@@ -204,8 +204,8 @@ export default function FormPage() {
         <h1>{magnet.title}</h1>
         {magnet.description && <p className={styles.description}>{magnet.description}</p>}
 
-        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 10 }}>
-          debug: slug={String(slug)} | form_id={(magnet as any)?.form_id || 'null'} | fields={(magnet as any)?.form_fields?.length ?? 'null'}
+        <div style={{ fontSize: 12, padding: 8, marginBottom: 10, background: '#fff', color: '#000', borderRadius: 4 }}>
+          <strong>DEBUG:</strong> slug={String(slug)} | form_id={(magnet as any)?.form_id || 'null'} | fields={(magnet as any)?.form_fields?.length ?? 'null'}
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
