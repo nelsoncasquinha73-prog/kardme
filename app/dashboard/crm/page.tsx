@@ -757,10 +757,7 @@ Melhores cumprimentos,
   }
 
   const handleAddLead = async () => {
-    if (!newLead.email.trim()) {
-      addToast('Email é obrigatório', 'error')
-      return
-    }
+
 
     setSavingNewLead(true)
     try {
@@ -3248,7 +3245,7 @@ Melhores cumprimentos,
                   <input type="text" value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Email *</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Email</label>
                   <input type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
                 </div>
               </div>
