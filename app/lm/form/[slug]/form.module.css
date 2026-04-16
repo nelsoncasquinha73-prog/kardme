@@ -29,13 +29,25 @@
 }
 
 @media (max-width: 480px) {
+  .container {
+    padding: 0;
+  }
+  
+  .card {
+    max-width: 100%;
+    padding: 20px;
+    margin: 0;
+    border-radius: 0;
+  }
+  
   .coverImage {
-    width: calc(100% + 32px);
-    margin-left: -16px;
-    margin-right: -16px;
-    aspect-ratio: 4 / 3;
-    border-radius: 12px 12px 0 0;
+    width: 100%;
+    aspect-ratio: 3 / 2;
     margin-bottom: 16px;
+    margin-left: -20px;
+    margin-right: -20px;
+    width: calc(100% + 40px);
+    border-radius: 0;
   }
 }
 
