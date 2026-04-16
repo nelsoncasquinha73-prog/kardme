@@ -349,7 +349,7 @@ export default function FormBuilder({
   }
 
   return (
-    <div>
+    <div style={{ touchAction: 'pan-y' }}>
       <div style={{ marginBottom: 16 }}>
         {fields.map((field, idx) => (
           <div
