@@ -2820,7 +2820,7 @@ Melhores cumprimentos,
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13, color: '#111827' }}>Tipo de Ação</label>
-              <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '12px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box', color: '#111827', background: '#fff' }}>
+              <select value={taskActionType} onChange={(e) => setTaskActionType(e.target.value)} style={{ width: '100%', padding: '12px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13, boxSizing: 'border-box', color: '#111827', background: '#fff', height: 44 }}>
                 <option value="follow_up">✅ Follow-up</option>
                 <option value="email">📧 Email</option>
                 <option value="whatsapp">💬 WhatsApp</option>
