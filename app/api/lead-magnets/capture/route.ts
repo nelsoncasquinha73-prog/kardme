@@ -125,7 +125,25 @@ export async function POST(req: Request) {
       }
     } catch (_) {}
 
-    // Enviar email de boas-vindas à pessoa (se aceitou marketing)
+
+    // Buscar dados do cartão para usar como remetente (se card_id existe)
+    let cardName = 'Kardme'
+    if (magnet.card_id) {
+      try {
+        const { data: card } = await supabaseAdmin
+          .from('cards')
+          .select('name')
+          .eq('id', magnet.card_id)
+          .single()
+        if (card) {
+          cardName = card.name || 'Kardme'
+        }
+      } catch (e) {
+        console.error('Erro ao buscar cartão:', e)
+      }
+    }
+
+        // Enviar email de boas-vindas à pessoa (se aceitou marketing)
     if (marketing_opt_in && email && leadId) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
@@ -161,6 +179,7 @@ export async function POST(req: Request) {
             recipientEmail: email,
             subject: emailSubject,
             body: emailBody,
+            fromName: cardName,
           }),
         })
 

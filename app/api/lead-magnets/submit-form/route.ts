@@ -29,19 +29,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Buscar card associado (se existir)
-    let cardName = magnet.title
-    if (magnet.card_id) {
-      const { data: cardData } = await supabase
-        .from('cards')
-        .select('name')
-        .eq('id', magnet.card_id)
-        .single()
-      if (cardData?.name) {
-        cardName = cardData.name
-      }
-    }
-
     // 2) Preparar dados do lead
     const leadName = formData.name || 'Sem nome'
     const leadEmail = formData.email || null
@@ -89,6 +76,23 @@ export async function POST(request: Request) {
 
     const ownerEmail = ownerData?.email
 
+    // Buscar dados do cartão para usar como remetente
+    let cardName = 'Kardme'
+    if (magnet.card_id) {
+      try {
+        const { data: card } = await supabase
+          .from('cards')
+          .select('name')
+          .eq('id', magnet.card_id)
+          .single()
+        if (card) {
+          cardName = card.name || 'Kardme'
+        }
+      } catch (e) {
+        console.error('Erro ao buscar cartão:', e)
+      }
+    }
+
     // 5) Enviar email ao owner (sempre)
     let ownerEmailRes = null
     if (ownerEmail) {
@@ -124,6 +128,7 @@ export async function POST(request: Request) {
           to: leadEmail,
           subject,
           html: body.replace(/\n/g, '<br/>'),
+          fromName: cardName,
         })
       } catch (err: any) {
         console.error('Erro ao enviar email ao lead:', err)
