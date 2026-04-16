@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { subscribeToVideoViews } from '@/lib/crm/videoNotifications'
 import { supabase } from '@/lib/supabaseClient'
 import { RealtimeChannel } from '@supabase/supabase-js'
@@ -20,6 +20,7 @@ export default function VideoNotificationCenter({ userId }: VideoNotificationCen
   const [notifications, setNotifications] = useState<VideoNotification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [subscription, setSubscription] = useState<RealtimeChannel | null>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!userId) return
@@ -54,22 +55,42 @@ export default function VideoNotificationCenter({ userId }: VideoNotificationCen
     }
   }, [userId, isOpen, subscription])
 
+  // Click outside para fechar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
   return (
     <div style={{ position: 'relative' }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
           position: 'relative',
-          background: 'transparent',
-          border: 'none',
+          background: isOpen ? '#f0f9ff' : 'transparent',
+          border: isOpen ? '1px solid #3b82f6' : '1px solid rgba(0,0,0,0.08)',
           color: '#111827',
-          fontSize: 20,
+          fontSize: 13,
+          fontWeight: 700,
           cursor: 'pointer',
-          padding: '8px',
+          padding: '8px 12px',
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          transition: 'all 0.2s ease',
         }}
         title="Notificações de vídeos"
       >
-        🔔
+        📹 Video Notifications
         {notifications.length > 0 && (
           <span
             style={{
@@ -95,6 +116,7 @@ export default function VideoNotificationCenter({ userId }: VideoNotificationCen
 
       {isOpen && (
         <div
+          ref={popoverRef}
           style={{
             position: 'absolute',
             top: '100%',
