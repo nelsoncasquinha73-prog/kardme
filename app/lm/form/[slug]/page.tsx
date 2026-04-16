@@ -22,9 +22,7 @@ export default function FormPage() {
 
   async function loadMagnet() {
     setLoading(true)
-    console.log("slug:", slug)
     try {
-      console.log("Iniciando loadMagnet...")
       const { data, error } = await supabase
         .from('lead_magnets')
         .select('*')
@@ -34,8 +32,6 @@ export default function FormPage() {
 
       if (error && error.code !== 'PGRST116') throw error
       if (data) {
-        console.log("Lead magnet encontrado:", data)
-        console.log("form_id:", data.form_id)
         // Buscar o formulário associado
         let formFields: FormField[] = []
         if (data.form_id) {
@@ -44,21 +40,17 @@ export default function FormPage() {
             .select('fields')
             .eq('id', data.form_id)
             .single()
-          console.log("Form data:", formData)
-          console.log("Form error:", formError)
           const rawFields: any = formData?.fields
           if (Array.isArray(rawFields)) formFields = rawFields
           else if (typeof rawFields === 'string') {
             try { formFields = JSON.parse(rawFields) } catch { formFields = [] }
           } else formFields = []
-          console.log("Form fields:", formFields)
         }
         
         const formWithFields = {
           ...data,
           form_fields: formFields
         }
-        console.log("Magnet final:", formWithFields)
         setMagnet(formWithFields)
         // Incrementar views_count via RPC
         await supabase.rpc('increment_lead_magnet_views', { magnet_id: data.id })
@@ -203,10 +195,6 @@ export default function FormPage() {
 
         <h1>{magnet.title}</h1>
         {magnet.description && <p className={styles.description}>{magnet.description}</p>}
-
-        <div style={{ fontSize: 12, padding: 8, marginBottom: 10, background: '#fff', color: '#000', borderRadius: 4 }}>
-          <strong>DEBUG:</strong> slug={String(slug)} | form_id={(magnet as any)?.form_id || 'null'} | fields={(magnet as any)?.form_fields?.length ?? 'null'}
-        </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {visibleFields.map((field) => (
