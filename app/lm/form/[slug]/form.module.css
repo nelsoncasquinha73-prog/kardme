@@ -18,13 +18,11 @@
 }
 
 .coverImage {
-  width: calc(100% + 80px);
-  margin-left: -40px;
-  margin-right: -40px;
+  width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: 12px 12px 0 0;
+  border-radius: 8px;
   margin-bottom: 24px;
 }
 
@@ -35,6 +33,8 @@
   
   .coverImage {
     width: 100%;
+    margin-left: 0;
+    margin-right: 0;
     aspect-ratio: 3 / 2;
     margin-bottom: 16px;
     border-radius: 8px;
