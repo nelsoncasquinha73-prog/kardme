@@ -1,5 +1,5 @@
 .container {
-  min-height: 100svh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,22 +157,4 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
   line-height: 1.6;
-}
-
-/* Safari/iOS fallback: evita bug de backdrop-filter que pode esconder conteúdo */
-@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
-  .card {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(15, 23, 42, 0.92);
-  }
-}
-
-/* Mesmo quando suporta, iOS às vezes buga com blur + border-radius */
-@media (max-width: 768px) {
-  .card {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(15, 23, 42, 0.92);
-  }
 }
