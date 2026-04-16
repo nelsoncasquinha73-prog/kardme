@@ -548,7 +548,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               borderTop: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               gap: 8,
-              justifyContent: 'flex-end',
+              justifyContent: 'center',
             }}
           >
             <button
@@ -623,7 +623,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               }}
               title="Guardar este email como template"
             >
-              💾 Gravar
+              💾 Guardar como Template
             </button>
             <button
               onClick={onClose}
