@@ -1378,6 +1378,7 @@ Melhores cumprimentos,
           )}
         </div>
 
+
         <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -1423,6 +1424,8 @@ Melhores cumprimentos,
           ⚙️ Configurar Boas-vindas
         </button>
         </div>
+
+        <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <button
@@ -1500,7 +1503,9 @@ Melhores cumprimentos,
         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#78350f' }}>Gmail não ligado</strong><p style={{ fontSize: 13, color: '#92400e', margin: '4px 0 0 0' }}>Liga o teu Gmail para enviar emails direto do CRM.</p></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
+            <VideoNotificationCenter userId={userId} />
+
+        <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
                 onClick={() => setShowGmailInfoModal(true)}
                 style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
@@ -1517,7 +1522,9 @@ Melhores cumprimentos,
         <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#065f46' }}>✓ Gmail ligado</strong><p style={{ fontSize: 13, color: '#047857', margin: '4px 0 0 0' }}>Podes enviar emails direto do CRM ou voltar a configurar a conta.</p></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
+            <VideoNotificationCenter userId={userId} />
+
+        <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
                 onClick={() => setShowGmailInfoModal(true)}
                 style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
