@@ -190,7 +190,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
 
       {showForm && (
         <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>setShowForm(false)}>
-          <div style={{background:'#1a1a2e',borderRadius:20,padding:32,maxWidth:520,width:'100%',maxHeight:'85vh',overflowY:'auto',border:'1px solid rgba(255,255,255,0.1)'}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:'#1a1a2e',borderRadius:20,padding:32,maxWidth:520,width:'100%',maxHeight:'85vh',overflowY:'auto',border:'1px solid rgba(255,255,255,0.1)',touchAction:'pan-y'}} onClick={e=>e.stopPropagation()}>
             <h2 style={{fontSize:18,fontWeight:900,color:'#fff',margin:'0 0 24px'}}>{editingMagnet?'Editar Campanha':'Nova Campanha'}</h2>
 
             <div style={{marginBottom:16}}>
