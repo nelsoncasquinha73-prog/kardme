@@ -1427,38 +1427,6 @@ Melhores cumprimentos,
 
         <VideoNotificationCenter userId={userId} />
 
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <button
-            onClick={() => setShowTemplatesInfoModal(true)}
-            style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#6366f1', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}
-          >
-            ?
-          </button>
-
-          <button
-          onClick={() => router.push("/dashboard/crm/email-templates")}
-          title="Gerir templates de email"
-          style={{
-            padding: "10px 14px",
-            borderRadius: 10,
-            background: "#6366f1",
-            color: "#ffffff",
-            border: "none",
-            fontWeight: 900,
-            cursor: "pointer",
-            fontSize: 13,
-            minHeight: 40,
-            lineHeight: "20px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            whiteSpace: "nowrap",
-            marginLeft: 8,
-          }}
-        >
-          📋 Templates
-        </button>
-        </div>
       </div>
 
       {tasksToday.length > 0 && (
@@ -2799,7 +2767,14 @@ Melhores cumprimentos,
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'end' }}>
+              <div style={{ display: 'flex', alignItems: 'end', gap: 10 }}>
+                <button
+                  onClick={() => setShowTemplatesInfoModal(true)}
+                  style={{ padding: '14px 12px', borderRadius: 10, background: '#4f46e5', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
+                  title="Abrir biblioteca de templates"
+                >
+                  📁 Templates
+                </button>
                 <button
                   onClick={() => {
                     setShowSaveTemplateModal(true)

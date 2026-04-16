@@ -588,6 +588,44 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               <FiEye size={14} /> Preview
             </button>
             <button
+              onClick={() => window.location.href = '/dashboard/crm/email-templates'}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid rgba(99,102,241,0.5)',
+                background: 'rgba(99,102,241,0.15)',
+                color: '#818cf8',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              title="Abrir biblioteca de templates"
+            >
+              📁 Templates
+            </button>
+            <button
+              onClick={() => alert('Gravar como template — em desenvolvimento')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid rgba(34,197,94,0.5)',
+                background: 'rgba(34,197,94,0.15)',
+                color: '#86efac',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              title="Guardar este email como template"
+            >
+              💾 Gravar
+            </button>
+            <button
               onClick={onClose}
               style={{
                 padding: '8px 14px',
