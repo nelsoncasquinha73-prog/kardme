@@ -2886,7 +2886,7 @@ Melhores cumprimentos,
       {/* Editor de email inline — massa ou individual */}
       {showInlineEmailEditor && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ background: '#0f172a', borderRadius: 16, width: '100%', maxWidth: 1100, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+          <div style={{ background: '#0f172a', borderRadius: 16, width: '100%', maxWidth: 1400, maxHeight: '95vh', overflowY: 'auto', position: 'relative' }}>
             <button
               onClick={() => { setShowInlineEmailEditor(false); setInlineEmailLeadIds([]) }}
               style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontWeight: 700 }}
