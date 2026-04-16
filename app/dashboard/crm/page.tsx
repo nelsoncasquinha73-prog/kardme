@@ -1379,7 +1379,6 @@ Melhores cumprimentos,
         </div>
 
 
-        <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <button
@@ -1424,6 +1423,7 @@ Melhores cumprimentos,
           ⚙️ Configurar Boas-vindas
         </button>
         </div>
+
 
         <VideoNotificationCenter userId={userId} />
 
@@ -1503,7 +1503,6 @@ Melhores cumprimentos,
         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#78350f' }}>Gmail não ligado</strong><p style={{ fontSize: 13, color: '#92400e', margin: '4px 0 0 0' }}>Liga o teu Gmail para enviar emails direto do CRM.</p></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
@@ -1522,7 +1521,6 @@ Melhores cumprimentos,
         <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 12, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div><strong style={{ color: '#065f46' }}>✓ Gmail ligado</strong><p style={{ fontSize: 13, color: '#047857', margin: '4px 0 0 0' }}>Podes enviar emails direto do CRM ou voltar a configurar a conta.</p></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <VideoNotificationCenter userId={userId} />
 
         <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
