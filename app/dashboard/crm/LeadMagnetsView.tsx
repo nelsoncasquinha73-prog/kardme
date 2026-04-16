@@ -24,6 +24,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [magnets, setMagnets] = useState<LeadMagnet[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
   const [editingMagnet, setEditingMagnet] = useState<LeadMagnet | null>(null)
   const [saving, setSaving] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
@@ -97,7 +98,10 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
     try {
       if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) }
       else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) }
-      await load(); setShowForm(false)
+      await load()
+      setToast('✅ Gravado')
+      setTimeout(() => setToast(null), 2000)
+      setShowForm(false)
     } catch(e:any){alert(e.message)}
     setSaving(false)
   }
@@ -371,6 +375,26 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
           </div>
         </div>
       )}
+      {toast && (
+        <div style={{
+          position:'fixed',
+          bottom:24,
+          left:'50%',
+          transform:'translateX(-50%)',
+          background:'rgba(16,185,129,0.15)',
+          border:'1px solid rgba(16,185,129,0.35)',
+          color:'#34d399',
+          padding:'10px 14px',
+          borderRadius:12,
+          fontWeight:800,
+          fontSize:13,
+          zIndex:10000,
+          backdropFilter:'blur(10px)',
+        }}>
+          {toast}
+        </div>
+      )}
+
     </div>
   )
 }
