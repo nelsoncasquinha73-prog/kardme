@@ -640,23 +640,6 @@ export default function FormBuilder({
         >
           + Adicionar pergunta
         </button>
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: 'none',
-            background: saving ? 'rgba(59,130,246,0.5)' : '#3b82f6',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: 12,
-            cursor: saving ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {saving ? 'A guardar...' : 'Guardar perguntas'}
-        </button>
       </div>
 
       {showTypeModal && (

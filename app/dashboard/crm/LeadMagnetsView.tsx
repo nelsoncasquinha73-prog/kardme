@@ -366,7 +366,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
 
             <div style={{display:'flex',gap:10}}>
               <button onClick={()=>setShowForm(false)} style={{flex:1,padding:'12px 0',borderRadius:12,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'rgba(255,255,255,0.6)',fontWeight:700,fontSize:14,cursor:'pointer'}}>Cancelar</button>
-              <button onClick={handleSave} disabled={saving} style={{flex:2,padding:'12px 0',borderRadius:12,border:'none',background:'linear-gradient(135deg,#10b981,#059669)',color:'#fff',fontWeight:800,fontSize:14,cursor:'pointer',opacity:saving?0.6:1}}>{saving?'A guardar...':editingMagnet?'Guardar alteracoes':'Criar campanha'}</button>
+              <button onClick={handleSave} disabled={saving} style={{flex:2,padding:'12px 0',borderRadius:12,border:'none',background:'linear-gradient(135deg,#10b981,#059669)',color:'#fff',fontWeight:800,fontSize:14,cursor:'pointer',opacity:saving?0.6:1}}>{saving?'A guardar...':'Guardar'}</button>
             </div>
           </div>
         </div>
