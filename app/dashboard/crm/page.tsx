@@ -154,6 +154,8 @@ export default function CrmProPage() {
   const [taskDueTime, setTaskDueTime] = useState('09:00')
   const [taskActionType, setTaskActionType] = useState('follow_up')
   const [createdTask, setCreatedTask] = useState<any>(null)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set())
   const [leadActivities, setLeadActivities] = useState<any[]>([])
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
@@ -862,33 +864,80 @@ Melhores cumprimentos,
       return
     }
     const dueAtISO = new Date(`${taskDueDate}T${taskDueTime}:00`).toISOString()
-    const { error } = await createLeadTask({
-      leadId: selectedLeadForTask.id,
-      userId,
-      title: taskTitle,
-      description: taskDesc || undefined,
-      dueAtISO,
-      actionType: taskActionType || 'follow_up',
-    })
-    if (error) {
-      alert('Erro ao guardar tarefa: ' + error.message)
-      return
+    
+    // Se estamos em modo edição, atualizar a tarefa existente
+    if (editingTaskId) {
+      const { error } = await supabase
+        .from('lead_tasks')
+        .update({
+          title: taskTitle,
+          description: taskDesc || null,
+          due_at: dueAtISO,
+          action_type: taskActionType || 'follow_up',
+        })
+        .eq('id', editingTaskId)
+      if (error) {
+        alert('Erro ao atualizar tarefa: ' + error.message)
+        return
+      }
+      await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_updated', title: `Tarefa atualizada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
+      addToast('✅ Tarefa atualizada', 'success')
+    } else {
+      // Criar nova tarefa
+      const { error } = await createLeadTask({
+        leadId: selectedLeadForTask.id,
+        userId,
+        title: taskTitle,
+        description: taskDesc || undefined,
+        dueAtISO,
+        actionType: taskActionType || 'follow_up',
+      })
+      if (error) {
+        alert('Erro ao guardar tarefa: ' + error.message)
+        return
+      }
+      await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
+      addToast('✅ Tarefa agendada', 'success')
     }
-    await logLeadActivity({ leadId: selectedLeadForTask.id, userId, type: 'task_created', title: `Tarefa agendada: ${taskTitle}`, meta: { dueAt: dueAtISO } })
-    setCreatedTask({ title: taskTitle, dueDate: taskDueDate, dueTime: taskDueTime })
+    
+    setShowTaskModal(false)
     setTaskTitle('')
     setTaskDesc('')
     setTaskDueDate('')
     setTaskDueTime('09:00')
+    setEditingTaskId(null)
+    setCreatedTask(null)
     await loadTasksForToday()
-    // Recarregar calendário para o mês da tarefa criada
+    
+    // Recarregar tarefas da lead se o modal de tarefas está aberto
+    if (showLeadTasksModal && selectedLeadForTasks) {
+      await loadTasksForLead(selectedLeadForTasks.id)
+    }
+    
+    // Recarregar calendário para o mês da tarefa
     const taskMonth = taskDueDate.slice(0, 7)
-    const start = new Date(taskMonth + '-01T00:00:00')
-    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999)
     const { data: freshTasks } = await fetchTasksForMonth({ userId, yearMonth: taskMonth })
     if (taskMonth === calendarYearMonth) {
       setCalendarTasks(freshTasks || [])
     }
+  }
+
+  const deleteLeadTask = async (taskId: string) => {
+    if (!confirm('Tens a certeza que queres apagar esta tarefa?')) return
+    const { error } = await supabase
+      .from('lead_tasks')
+      .delete()
+      .eq('id', taskId)
+    if (error) {
+      alert('Erro ao apagar tarefa: ' + error.message)
+      return
+    }
+    addToast('✅ Tarefa apagada', 'success')
+    // Recarregar tarefas se o modal está aberto
+    if (showLeadTasksModal && selectedLeadForTasks) {
+      await loadTasksForLead(selectedLeadForTasks.id)
+    }
+    await loadTasksForToday()
   }
 
   const deleteLead = async (id: string) => {
@@ -2830,21 +2879,10 @@ Melhores cumprimentos,
               </select>
             </div>
             
-            {!createdTask ? (
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Agendar Tarefa</button>
-                <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00'); setCreatedTask(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 20 }}>Tarefa agendada com sucesso!</p>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={() => { setCreatedTask(null); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00') }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Editar</button>
-                  <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00'); setCreatedTask(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Fechar</button>
-                </div>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={createTaskForLead} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>{editingTaskId ? 'Guardar alterações' : 'Agendar Tarefa'}</button>
+              <button onClick={() => { setShowTaskModal(false); setTaskTitle(''); setTaskDesc(''); setTaskDueDate(''); setTaskDueTime('09:00'); setEditingTaskId(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
+            </div>
           </div>
         </div>
       )}
@@ -2996,7 +3034,12 @@ Melhores cumprimentos,
                 <h2 style={{ marginBottom: 4 }}>Tarefas de {selectedLeadForTasks.name}</h2>
                 <p style={{ fontSize: 13, opacity: 0.6 }}>{selectedLeadForTasks.email}</p>
               </div>
-              <button onClick={() => setShowLeadTasksModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>✕</button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {selectedTaskIds.size > 0 && (
+                  <button onClick={async () => { for (const id of selectedTaskIds) await deleteLeadTask(id); setSelectedTaskIds(new Set()); }} style={{ padding: '6px 12px', borderRadius: 8, background: '#ef4444', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>🗑️ Apagar {selectedTaskIds.size}</button>
+                )}
+                <button onClick={() => setShowLeadTasksModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>✕</button>
+              </div>
             </div>
 
             {leadTasksLoading && <p style={{ opacity: 0.6 }}>A carregar tarefas…</p>}
@@ -3010,8 +3053,9 @@ Melhores cumprimentos,
                 {leadTasks.map(t => {
                   const isPast = new Date(t.due_at) < new Date()
                   return (
-                    <div key={t.id} style={{ background: '#f9fafb', padding: 12, borderRadius: 10, borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}` }}>
+                    <div key={t.id} style={{ background: '#f9fafb', padding: 12, borderRadius: 10, borderLeft: `4px solid ${isPast ? '#dc2626' : '#f59e0b'}`, opacity: selectedTaskIds.has(t.id) ? 0.6 : 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 12 }}>
+                        <input type="checkbox" checked={selectedTaskIds.has(t.id)} onChange={(e) => { const newSet = new Set(selectedTaskIds); if (e.target.checked) newSet.add(t.id); else newSet.delete(t.id); setSelectedTaskIds(newSet) }} style={{ marginTop: 2, cursor: 'pointer' }} />
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
                             <strong style={{ fontSize: 13 }}>{t.title}</strong>
@@ -3029,7 +3073,9 @@ Melhores cumprimentos,
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button onClick={() => handleTaskAction(t, selectedLeadForTasks)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Fazer</button>
+                          <button onClick={() => { setTaskTitle(t.title); setTaskDesc(t.description || ''); setTaskDueDate(t.due_at.split('T')[0]); setTaskDueTime(t.due_at.split('T')[1].slice(0, 5)); setEditingTaskId(t.id); setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ padding: '6px 12px', borderRadius: 8, background: '#f59e0b', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✏️</button>
                           <button onClick={async () => { await markTaskDone({ taskId: t.id }); await loadTasksForLead(selectedLeadForTasks.id) }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓</button>
+                          <button onClick={() => deleteLeadTask(t.id)} style={{ padding: '6px 12px', borderRadius: 8, background: '#ef4444', color: '#ffffff', border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>🗑️</button>
                         </div>
                       </div>
                     </div>
@@ -3039,7 +3085,7 @@ Melhores cumprimentos,
             )}
 
             <button onClick={() => { setSelectedLeadForTask(selectedLeadForTasks); setShowTaskModal(true); setShowLeadTasksModal(false) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}>+ Nova Tarefa</button>
-            <button onClick={() => setShowLeadTasksModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
+            <button onClick={() => { setShowLeadTasksModal(false); setSelectedTaskIds(new Set()) }} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>Fechar</button>
           </div>
         </div>
       )}
