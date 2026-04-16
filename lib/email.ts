@@ -2,10 +2,17 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+// Extrair email de "Nome <email@domain.com>"
+function extractEmailFromResendFrom(resendFrom: string): string {
+  const match = resendFrom.match(/<(.+?)>/)
+  return match ? match[1] : resendFrom
+}
+
 export async function sendEmail(params: {
   to: string
   subject: string
   html: string
+  fromName?: string
   attachments?: Array<{
     filename: string
     content: string | Buffer
@@ -17,7 +24,10 @@ export async function sendEmail(params: {
     throw new Error('Missing RESEND_API_KEY')
   }
 
-  const from = process.env.RESEND_FROM || 'Kardme <onboarding@resend.dev>'
+  const resendFromConfig = process.env.RESEND_FROM || 'Kardme <onboarding@resend.dev>'
+  const baseEmail = extractEmailFromResendFrom(resendFromConfig)
+  const displayName = params.fromName || 'Kardme'
+  const from = `${displayName} <${baseEmail}>`
 
   console.log('RESEND_SEND_ATTEMPT', {
     to: params.to,
