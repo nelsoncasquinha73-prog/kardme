@@ -68,13 +68,43 @@ export async function POST(request: Request) {
     const leadId = leadData?.[0]?.id
 
     // 4) Buscar owner email
-    const { data: ownerData } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', magnet.user_id)
-      .single()
-
-    const ownerEmail = ownerData?.email
+    // 4) Buscar owner email (do cartão se existir, senão do user do magnet)
+    let ownerEmail = null
+    let ownerUserId = magnet.user_id
+    
+    if (magnet.card_id) {
+      try {
+        const { data: cardData } = await supabase
+          .from('cards')
+          .select('user_id')
+          .eq('id', magnet.card_id)
+          .single()
+        if (cardData?.user_id) {
+          ownerUserId = cardData.user_id
+        }
+      } catch (e) {
+        console.error('Erro ao buscar card user_id:', e)
+      }
+    }
+    
+    // Buscar email de profiles
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', ownerUserId)
+        .single()
+      ownerEmail = profileData?.email
+    } catch (e) {
+      console.error('Erro ao buscar email de profiles:', e)
+    }
+    
+    console.log('OWNER_EMAIL_DEBUG', {
+      magnet_id: magnet.id,
+      magnet_card_id: magnet.card_id,
+      ownerUserId,
+      ownerEmail,
+    })
 
     // Buscar dados do cartão para usar como remetente
     let cardName = 'Kardme'
