@@ -1,0 +1,1 @@
+ALTER TABLE lead_magnets ADD COLUMN card_id UUID REFERENCES cards(id) ON DELETE SET NULL;

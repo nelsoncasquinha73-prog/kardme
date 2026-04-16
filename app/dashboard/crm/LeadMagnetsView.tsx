@@ -20,6 +20,7 @@ const DEFAULT_SLICES = [
 ]
 
 export default function LeadMagnetsView({ userId }: { userId: string }) {
+  const [cards, setCards] = useState<Array<{ id: string; name: string }>>([])
   const [magnets, setMagnets] = useState<LeadMagnet[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -30,18 +31,49 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
-  const emptyForm = {
+  type LeadMagnetFormState = {
+    title: string
+    description: string
+    magnet_type: MagnetType
+    cover_image_url: string
+    file_url: string
+    thank_you_message: string
+    welcome_email_subject: string
+    welcome_email_body: string
+    form_fields: any[]
+    is_active: boolean
+    raffle_config: any
+    wheel_config: any
+    card_id: string | null
+  }
+
+  const emptyForm: LeadMagnetFormState = {
     title: '', description: '', magnet_type: 'ebook' as MagnetType,
     cover_image_url: '', file_url: '',
     thank_you_message: 'Obrigado! O teu download vai comecar automaticamente.',
     welcome_email_subject: '', welcome_email_body: '',
     form_fields: DEFAULT_FORM_FIELDS, is_active: true,
     raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] },
-    wheel_config: { slices: [], capture_before_spin: true, max_spins_per_email: 1 }
+    wheel_config: { slices: [], capture_before_spin: true, max_spins_per_email: 1 },
+    card_id: null
   }
   const [form, setForm] = useState(emptyForm)
 
-  useEffect(() => { load() }, [])
+  async function loadCards() {
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('id, name')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setCards((data || []).map((c: any) => ({ id: c.id, name: c.name })))
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+    useEffect(() => { load(); loadCards() }, [])
   async function load() { setLoading(true); try { setMagnets(await getLeadMagnets(userId)) } catch(e) { console.error(e) } setLoading(false) }
   function openCreate() { setForm(emptyForm); setEditingMagnet(null); setShowForm(true) }
   function openEdit(m: LeadMagnet) {
@@ -53,7 +85,8 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
       welcome_email_body: (m as any).welcome_email_body||'',
       form_fields: m.form_fields, is_active: m.is_active,
       raffle_config: { grid_size: m.raffle_config?.grid_size||49, prize_description: m.raffle_config?.prize_description||'', winning_numbers: m.raffle_config?.winning_numbers||[] } as any,
-      wheel_config: (m as any).wheel_config || { slices: [], capture_before_spin: true, max_spins_per_email: 1 }
+      wheel_config: (m as any).wheel_config || { slices: [], capture_before_spin: true, max_spins_per_email: 1 },
+      card_id: (m as any).card_id ?? null
     })
     setEditingMagnet(m); setShowForm(true)
   }
@@ -181,6 +214,13 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="form">📝 Formulário / Diagnóstico</option>
                 <option value="raffle">🎰 Sorteio / Grelha</option>
                 <option value="wheel">🎡 Roleta da Sorte</option>
+              </select>
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Cartão (opcional)</label>
+              <select value={form.card_id || ''} onChange={e=>setForm(f=>({...f,card_id:e.target.value||null}))} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}>
+                <option value="">— Nenhum cartão selecionado</option>
+                {cards.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
 
