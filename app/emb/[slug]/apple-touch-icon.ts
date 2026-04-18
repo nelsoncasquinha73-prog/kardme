@@ -2,36 +2,69 @@ import { ImageResponse } from 'next/og'
 import { supabaseServer } from '@/lib/supabaseServer'
 
 export const runtime = 'nodejs'
-export const size = {
-  width: 180,
-  height: 180,
-}
+export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
 
 export default async function Icon({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  // Buscar o embaixador
   const { data: ambassador } = await supabaseServer
     .from('ambassadors')
-    .select('id, avatar_url')
+    .select('avatar_url')
     .eq('slug', slug)
     .eq('is_published', true)
     .single()
 
-  if (!ambassador) {
-    // Fallback: favicon genérico
-    const response = await fetch('https://kardme.com/apple-icon.png')
-    return response
+  const avatarUrl = ambassador?.avatar_url
+
+  // Fallback simples (círculo com K)
+  if (!avatarUrl) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#8B5CF6',
+            color: 'white',
+            fontSize: 96,
+            fontWeight: 800,
+            borderRadius: 36,
+          }}
+        >
+          K
+        </div>
+      ),
+      size
+    )
   }
 
-  if (ambassador.avatar_url) {
-    // Se tiver avatar, faz redirect para o avatar
-    const response = await fetch(ambassador.avatar_url)
-    return response
-  }
-
-  // Fallback: favicon genérico
-  const response = await fetch('https://kardme.com/apple-icon.png')
-  return response
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#ffffff',
+        }}
+      >
+        <img
+          src={avatarUrl}
+          style={{
+            width: 180,
+            height: 180,
+            objectFit: 'cover',
+            borderRadius: 36,
+          }}
+        />
+      </div>
+    ),
+    size
+  )
 }
