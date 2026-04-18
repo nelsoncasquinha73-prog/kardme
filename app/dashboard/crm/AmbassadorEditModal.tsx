@@ -27,6 +27,7 @@ function AmbassadorEditModalContent({
   const [showAddField, setShowAddField] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const { openPicker } = useColorPicker();
@@ -39,13 +40,32 @@ function AmbassadorEditModalContent({
     }
   }, [ambassador]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const email = data?.user?.email?.toLowerCase() || "";
+        const adminEmails = ["admin@kardme.com", "nelson@kardme.com"];
+        if (mounted) setIsAdmin(adminEmails.includes(email));
+      } catch (e) {
+        console.error("Failed to detect admin user", e);
+        if (mounted) setIsAdmin(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   if (!formData) return null;
 
-  const canPublish =
+  // Admin pode sempre publicar; embaixadores precisam de subscrição ativa
+  const canPublish = isAdmin || (
     formData.subscription_status === "active" &&
     formData.is_active === true &&
     (!formData.subscription_current_period_end ||
-      new Date(formData.subscription_current_period_end) > new Date());
+      new Date(formData.subscription_current_period_end) > new Date())
+  );
+
 
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
