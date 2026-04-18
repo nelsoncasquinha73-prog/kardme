@@ -12,12 +12,14 @@ type AmbassadorEditModalProps = {
   ambassador: Ambassador | null;
   onClose: () => void;
   onSave: (ambassador: Ambassador) => void;
+  slug?: string;
 };
 
 function AmbassadorEditModalContent({
   ambassador,
   onClose,
   onSave,
+  slug = '',
 }: AmbassadorEditModalProps) {
   const [formData, setFormData] = useState<Ambassador | null>(null);
   const [loading, setLoading] = useState(false);
@@ -218,6 +220,7 @@ function AmbassadorEditModalContent({
   };
 
   return (
+    <>
     <div
       style={{
         position: "fixed",
@@ -846,7 +849,7 @@ function AmbassadorEditModalContent({
               border: "1px solid rgba(59,130,246,0.35)",
               background: "rgba(59,130,246,0.15)",
               color: "#93c5fd",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
               fontSize: 13,
               fontWeight: 700,
               opacity: loading ? 0.7 : 1,
@@ -854,9 +857,14 @@ function AmbassadorEditModalContent({
           >
             {loading ? "Guardando..." : "Guardar Alterações"}
           </button>
+
+
         </div>
       </div>
     </div>
+
+
+  </>
   );
 }
 

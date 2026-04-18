@@ -1,6 +1,8 @@
 import { getAmbassadorBySlugPublic } from '@/lib/ambassadors/ambassadorServiceServer'
 import { notFound } from 'next/navigation'
 import EmbContactForm from './EmbContactForm'
+import { LanguageProvider } from '@/components/language/LanguageProvider'
+import AmbassadorFloatingActions from '@/app/dashboard/crm/AmbassadorFloatingActions'
 
 interface AmbassadorPageProps {
   params: Promise<{ slug: string }>
@@ -64,6 +66,11 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
   const cardBackgroundColor = ambassador.background_color || '#1e293b'
 
   return (
+    <LanguageProvider>
+      <AmbassadorFloatingActions
+        ambassadorUrl={`https://kardme.com/emb/${slug}`}
+        ambassadorSlug={slug}
+      />
     <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <div style={{ width: '100%', maxWidth: 700, backgroundColor: cardBackgroundColor, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
         {/* Cover */}
@@ -163,6 +170,7 @@ export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
         Powered by Kardme
       </div>
     </div>
+    </LanguageProvider>
   )
 }
 
