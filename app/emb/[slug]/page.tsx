@@ -8,6 +8,44 @@ interface AmbassadorPageProps {
   params: Promise<{ slug: string }>
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  
+  let ambassador
+  try {
+    ambassador = await getAmbassadorBySlugPublic(slug)
+  } catch (error) {
+    return {
+      title: 'Kardme',
+    }
+  }
+
+  if (!ambassador) {
+    return {
+      title: 'Kardme',
+    }
+  }
+
+  return {
+    title: `${ambassador.name} — Kardme`,
+    description: ambassador.bio || 'Cartão de embaixador Kardme',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: ambassador.name || 'Kardme',
+    },
+    icons: {
+      apple: [
+        {
+          url: `/emb/${slug}/apple-touch-icon.png`,
+          sizes: '180x180',
+          type: 'image/png',
+        },
+      ],
+    },
+  }
+}
+
 export default async function AmbassadorPage({ params }: AmbassadorPageProps) {
   const { slug } = await params
   
