@@ -3,10 +3,10 @@
 import React, { useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 
 type IconMode = 'none' | 'library' | 'upload'
 
@@ -514,7 +514,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label={t('cta_editor.label_bg_color')}>
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={btn.bgColor ?? '#111827'}
             onChange={(val) => updateBtnStyle({ bgColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ bgColor: hex }))}
@@ -524,7 +524,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label={t('cta_editor.label_text_color')}>
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={btn.textColor ?? '#ffffff'}
             onChange={(val) => updateBtnStyle({ textColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ textColor: hex }))}
@@ -552,7 +552,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
         </Row>
 
         <Row label={t('cta_editor.label_border_color')}>
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={btn.borderColor ?? 'rgba(255,255,255,0.25)'}
             onChange={(val) => updateBtnStyle({ borderColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateBtnStyle({ borderColor: hex }))}
@@ -599,7 +599,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
 
         {(container.bgColor ?? "transparent") !== "transparent" && (
           <Row label={t('cta_editor.label_bg_color_container')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={container.bgColor ?? "#ffffff"}
               onChange={(val) => updateContainer({ bgColor: val })}
               onEyedropper={() => pickEyedropper((hex) => updateContainer({ bgColor: hex }))}
@@ -626,7 +626,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label={t('cta_editor.label_border_color')}>
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={container.borderColor ?? "rgba(0,0,0,0.12)"}
                 onChange={(val) => updateContainer({ borderColor: val })}
                 onEyedropper={() => pickEyedropper((hex) => updateContainer({ borderColor: hex }))}

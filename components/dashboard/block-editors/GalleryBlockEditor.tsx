@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import imageCompression from "browser-image-compression";
 import { supabase } from "@/lib/supabaseClient";
 import { useColorPicker } from "@/components/editor/ColorPickerContext";
-import ColorPickerPro from "@/components/editor/ColorPickerPro";
+import ColorPickerProUnified from "@/components/editor/ColorPickerProUnified";
 import FontPicker from "@/components/editor/FontPicker";
 import { useLanguage } from "@/components/language/LanguageProvider";
 
@@ -682,7 +682,7 @@ export default function GalleryBlockEditor({
           </div>
         </Row>
         <Row label="Cor">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={st.headingColor ?? "#111827"}
             onChange={(hex) => setStyle({ headingColor: hex })}
             onEyedropper={() =>
@@ -906,7 +906,7 @@ export default function GalleryBlockEditor({
         }
       >
         <Row label="Fundo setas">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={st.carouselArrowsBg ?? "rgba(255,255,255,0.9)"}
             onChange={(hex) => setStyle({ carouselArrowsBg: hex })}
             onEyedropper={() =>
@@ -915,7 +915,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
         <Row label="Ícone setas">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={st.carouselArrowsIconColor ?? "#111827"}
             onChange={(hex) => setStyle({ carouselArrowsIconColor: hex })}
             onEyedropper={() =>
@@ -926,7 +926,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
         <Row label="Pontos inativos">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={st.carouselDotsColor ?? "rgba(0,0,0,0.25)"}
             onChange={(hex) => setStyle({ carouselDotsColor: hex })}
             onEyedropper={() =>
@@ -935,7 +935,7 @@ export default function GalleryBlockEditor({
           />
         </Row>
         <Row label="Pontos ativos">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={st.carouselDotsActiveColor ?? "rgba(0,0,0,0.65)"}
             onChange={(hex) => setStyle({ carouselDotsActiveColor: hex })}
             onEyedropper={() =>
@@ -969,7 +969,7 @@ export default function GalleryBlockEditor({
         </Row>
         {bgEnabled && (
           <Row label="Cor">
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={container.bgColor ?? "#ffffff"}
               onChange={(hex) => setContainer({ bgColor: hex })}
               onEyedropper={() =>
@@ -1006,7 +1006,7 @@ export default function GalleryBlockEditor({
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={container.borderColor ?? "rgba(0,0,0,0.08)"}
                 onChange={(hex) => setContainer({ borderColor: hex })}
                 onEyedropper={() =>

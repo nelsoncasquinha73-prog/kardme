@@ -214,6 +214,9 @@ export default function ServicesBlockEditor({
   onChangeStyle,
 }: Props) {
   const { openPicker } = useColorPicker()
+  const pickEyedropper = (apply: (hex: string) => void) => {
+    openPicker({ mode: 'eyedropper', onPick: apply })
+  }
   const { t } = useLanguage()
 
   // 🔒 evita resets enquanto estás a escrever

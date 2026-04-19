@@ -4,8 +4,8 @@ import React, { useMemo } from 'react'
 import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent, useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import FontPicker from '@/components/editor/FontPicker'
 
@@ -291,7 +291,7 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
         </Row>
 
         <Row label="Cor de fundo">
-          <ColorPickerPro
+          <ColorPickerProUnified
             value={canvas.bgColor ?? '#f3f4f6'}
             onChange={(val) => updateCanvas({ bgColor: val })}
             onEyedropper={() => pickEyedropper((hex) => updateCanvas({ bgColor: hex }))}
@@ -635,7 +635,7 @@ export default function ShapeCanvasBlockEditor({ settings, style, onChangeSettin
               </Row>
 
               <Row label="Cor">
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={selected.bgColor ?? '#ffffff'}
                   onChange={(val) => updateItem(selected.id, { bgColor: val })}
                   onEyedropper={() => pickEyedropper((hex) => updateItem(selected.id, { bgColor: hex }))}

@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import type { HeaderSettings } from '@/components/blocks/HeaderBlock'
 import { uploadCardImage } from '@/lib/uploadCardImage'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import type { CardBgV1 } from '@/lib/cardBg'
 import { CARD_BG_PRESETS } from '@/lib/bgPresets'
 import { generateAnimatedGradientCSS, type AnimatedGradientSpeed, type AnimatedGradientStyle } from '@/lib/animatedGradient'
@@ -72,6 +72,10 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const badgeRef = useRef<HTMLInputElement>(null)
 
   const [uploading, setUploading] = useState(false)
+  const { openPicker } = useColorPicker()
+  const pickEyedropper = (apply: (hex: string) => void) => {
+    openPicker({ mode: 'eyedropper', onPick: apply })
+  }
   const [uploadingBadge, setUploadingBadge] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>('base')
   const [animGradColors, setAnimGradColors] = useState<string[]>(['#d4af37', '#f4d03f', '#d4af37', '#c9a961'])
@@ -79,7 +83,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
   const [animGradStyle, setAnimGradStyle] = useState<'shift' | 'pulse' | 'wave'>('shift')
   const [animGradAngle, setAnimGradAngle] = useState(45)
 
-  const { openPicker } = useColorPicker()
   const { t } = useLanguage()
 
   const layout = settings.layout ?? {}
@@ -104,9 +107,6 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
       layout: { ...layout, ...patch },
     })
 
-  const pickEyedropper = (apply: (hex: string) => void) => {
-    openPicker({ mode: 'eyedropper', onPick: apply })
-  }
 
   // Upload handlers
   async function onPickCover(file: File) {
@@ -289,7 +289,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           {/* Cor sólida */}
           {v1.base.kind === 'solid' && (
             <Row label={t('header_editor.label_color')}>
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={v1.base.color ?? '#ffffff'}
                 onChange={(val) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: val } })}
                 onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...v1, base: { kind: 'solid', color: hex } }))}
@@ -301,7 +301,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
           {v1.base.kind === 'gradient' && (
             <>
               <Row label={t('header_editor.label_start_color')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={gBase.stops?.[0]?.color ?? '#ffffff'}
                   onChange={(hex) => {
                     const stops = [...(gBase.stops ?? [])]
@@ -321,7 +321,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </Row>
 
               <Row label={t('header_editor.label_end_color')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={gBase.stops?.[gBase.stops.length - 1]?.color ?? '#f3f4f6'}
                   onChange={(hex) => {
                     const stops = [...(gBase.stops ?? [])]
@@ -607,7 +607,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               {v1.imageOverlay?.enabled && (
                 <>
                   <Row label={t('header_editor.label_overlay_color')}>
-                    <ColorPickerPro
+                    <ColorPickerProUnified
                       value={v1.imageOverlay?.color ?? '#000000'}
                       onChange={(hex) => onChangeCardBg({ ...v1, imageOverlay: { ...v1.imageOverlay, color: hex } })}
                       onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...v1, imageOverlay: { ...v1.imageOverlay, color: hex } }))}
@@ -638,7 +638,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
                   {[0, 1, 2, 3].map(i => (
                     <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', minWidth: 60 }}>Cor {i + 1}</span>
-                      <ColorPickerPro
+                      <ColorPickerProUnified
                         value={(v1.base as any).colors?.[i] ?? '#ffffff'}
                         onChange={(hex) => {
                           const colors = [...((v1.base as any).colors ?? [])]
@@ -713,7 +713,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
           {/* Cor da barra do browser */}
           <Row label={t('header_editor.label_mobile_bar_color')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={v1.browserBarColor ?? '#000000'}
               onChange={(hex) => onChangeCardBg({ ...v1, browserBarColor: hex })}
               onEyedropper={() => pickEyedropper((hex) => onChangeCardBg({ ...v1, browserBarColor: hex }))}
@@ -772,7 +772,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
 
               <Row label={t('header_editor.label_color_a')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={currentColorA}
                   onChange={(hex) => patchOverlay({ colorA: hex })}
                   onEyedropper={() => pickEyedropper((hex) => patchOverlay({ colorA: hex }))}
@@ -780,7 +780,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
               </Row>
 
               <Row label={t('header_editor.label_color_b')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={currentColorB}
                   onChange={(hex) => patchOverlay({ colorB: hex })}
                   onEyedropper={() => pickEyedropper((hex) => patchOverlay({ colorB: hex }))}
@@ -1068,7 +1068,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             {overlayEnabled && (
               <>
                 <Row label={t('header_editor.label_overlay_color')}>
-                  <ColorPickerPro
+                  <ColorPickerProUnified
                     value={overlayColor}
                     onChange={(hex) => setLayout({ ...(layout as any), overlayColor: hex } as any)}
                     onEyedropper={() => pickEyedropper((hex) => setLayout({ ...(layout as any), overlayColor: hex } as any))}
@@ -1109,7 +1109,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             {coverFadeEnabled && (
               <>
                 <Row label={t('header_editor.label_fade_color')}>
-                  <ColorPickerPro
+                  <ColorPickerProUnified
                     value={coverFadeColor}
                     onChange={(hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any)}
                     onEyedropper={() => pickEyedropper((hex) => setLayout({ ...(layout as any), coverFadeColor: hex } as any))}
@@ -1186,7 +1186,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
         {headerBgEnabled && (
           <Row label={t('header_editor.label_color')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={headerBgColor}
               onChange={(hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any)}
               onEyedropper={() => pickEyedropper((hex) => setLayout({ ...(layout as any), headerBgColor: hex } as any))}
@@ -1305,7 +1305,7 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
 
             {badgeBgEnabled && (
               <Row label={t('header_editor.label_bg_color')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={badgeBgColor}
                   onChange={(hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any)}
                   onEyedropper={() => pickEyedropper((hex) => setLayout({ ...(layout as any), badge: { ...badge, bgColor: hex } } as any))}

@@ -12,6 +12,7 @@ import '@/styles/card-frame.css'
 import '@/styles/card-preview.css'
 import TrackingWrapper from '@/components/TrackingWrapper'
 import FloatingActions from '@/components/public/FloatingActions'
+import AmbassadorFloatingActions from '@/app/dashboard/crm/AmbassadorFloatingActions'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -141,7 +142,18 @@ export default async function CardPage({ params }: Props) {
     .eq('published', true)
     .single()
 
-  if (error || !card) notFound()
+  let ambassador = null
+  if (error || !card) {
+    const { data: ambassadorData } = await supabaseServer
+      .from('ambassadors')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .single()
+    
+    if (!ambassadorData) notFound()
+    ambassador = ambassadorData
+  }
 
   const { data: blocksData, error: blocksError } = await supabaseServer
     .from('card_blocks')
@@ -218,12 +230,19 @@ export default async function CardPage({ params }: Props) {
                   fullBleed={true}
                   cardBg={cardBgV1}
                 />
-                <FloatingActions
-                  cardUrl={cardUrl}
-                  cardTitle={card.title}
-                  cardId={card.id}
-                  settings={floatingActions}
-                />
+                {ambassador ? (
+                  <AmbassadorFloatingActions
+                    ambassadorUrl={cardUrl}
+                    ambassadorSlug={slug}
+                  />
+                ) : (
+                  <FloatingActions
+                    cardUrl={cardUrl}
+                    cardTitle={card.title}
+                    cardId={card.id}
+                    settings={floatingActions}
+                  />
+                )}
               </ThemeProvider>
             </LanguageProvider>
           </div>

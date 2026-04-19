@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 
@@ -112,7 +112,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
       </CollapsibleSection>
 
       <CollapsibleSection title="Titulo" subtitle="Cor, tamanho, fonte" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
-        <Row label="Cor"><ColorPickerPro value={st.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} /></Row>
+        <Row label="Cor"><ColorPickerProUnified value={st.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} /></Row>
         <Row label="Tamanho"><input type="range" min={10} max={40} value={st.titleFontSize ?? 15} onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{st.titleFontSize ?? 15}px</span></Row>
         <Row label="Alinhamento">
           <div style={{ display: 'flex', gap: 6 }}>
@@ -126,7 +126,7 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
       </CollapsibleSection>
 
       <CollapsibleSection title="Texto" subtitle="Cor, tamanho, fonte" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
-        <Row label="Cor"><ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} /></Row>
+        <Row label="Cor"><ColorPickerProUnified value={st.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} /></Row>
         <Row label="Tamanho"><input type="range" min={10} max={26} value={st.fontSize ?? 14} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{st.fontSize ?? 14}px</span></Row>
         <Row label="Altura linha"><input type="range" min={1.1} max={2.0} step={0.05} value={st.lineHeight ?? 1.5} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{(st.lineHeight ?? 1.5).toFixed(2)}</span></Row>
         <Row label="Alinhamento">
@@ -142,11 +142,11 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
 
       <CollapsibleSection title="Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
         <Row label="Fundo"><Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} /></Row>
-        {bgEnabled && <Row label="Cor fundo"><ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} /></Row>}
+        {bgEnabled && <Row label="Cor fundo"><ColorPickerProUnified value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} /></Row>}
         <Row label="Borda"><Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} /></Row>
         {borderEnabled && (<>
           <Row label="Espessura"><input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.borderWidth ?? 1}px</span></Row>
-          <Row label="Cor borda"><ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} /></Row>
+          <Row label="Cor borda"><ColorPickerProUnified value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} /></Row>
         </>)}
         <Row label="Sombra"><Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} /></Row>
         <Row label="Raio"><input type="range" min={0} max={32} value={c.radius ?? 14} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.radius ?? 14}px</span></Row>

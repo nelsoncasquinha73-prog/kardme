@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
@@ -251,7 +251,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
           </div>
         </Row>
         <Row label="Cor">
-          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.headingColor = hex))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.headingColor = hex)))} />
+          <ColorPickerProUnified value={st.headingColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.headingColor = hex))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.headingColor = hex)))} />
         </Row>
         <Row label="Negrito">
           <Toggle active={st.headingBold ?? true} onClick={() => patch((d) => (d.style.headingBold = !(st.headingBold ?? true)))} />
@@ -326,7 +326,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
         {bgEnabled && (
           <Row label="Cor">
-            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => patch((d) => (d.style.container = { ...container, bgColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.container = { ...container, bgColor: hex })))} />
+            <ColorPickerProUnified value={container.bgColor ?? '#ffffff'} onChange={(hex) => patch((d) => (d.style.container = { ...container, bgColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.container = { ...container, bgColor: hex })))} />
           </Row>
         )}
         <Row label="Sombra">
@@ -342,7 +342,7 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => patch((d) => (d.style.container = { ...container, borderColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.container = { ...container, borderColor: hex })))} />
+              <ColorPickerProUnified value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => patch((d) => (d.style.container = { ...container, borderColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.container = { ...container, borderColor: hex })))} />
             </Row>
           </>
         )}
@@ -374,16 +374,16 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
         </Row>
         {defaultsBgMode === 'solid' && (
           <Row label="Cor fundo">
-            <ColorPickerPro value={btn.bgColor ?? '#ffffff'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex })))} />
+            <ColorPickerProUnified value={btn.bgColor ?? '#ffffff'} onChange={(color) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: color }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgColor: hex })))} />
           </Row>
         )}
         {defaultsBgMode === 'gradient' && (
           <>
             <Row label="Cor inicial">
-              <ColorPickerPro value={btn.bgGradient?.from ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } })))} />
+              <ColorPickerProUnified value={btn.bgGradient?.from ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), from: hex } })))} />
             </Row>
             <Row label="Cor final">
-              <ColorPickerPro value={btn.bgGradient?.to ?? '#374151'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } })))} />
+              <ColorPickerProUnified value={btn.bgGradient?.to ?? '#374151'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), to: hex } })))} />
             </Row>
             <Row label="Ângulo">
               <input type="range" min={0} max={360} step={15} value={btn.bgGradient?.angle ?? 135} onChange={(e) => patch((d) => (d.style.buttonDefaults = { ...btn, bgGradient: { ...(btn.bgGradient || {}), angle: Number(e.target.value) } }))} style={{ flex: 1 }} />
@@ -401,15 +401,15 @@ export default function SocialBlockEditor({ settings, style, onChange }: Props) 
               <span style={rightNum}>{btn.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro value={btn.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex })))} />
+              <ColorPickerProUnified value={btn.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, borderColor: hex })))} />
             </Row>
           </>
         )}
         <Row label="Cor ícone">
-          <ColorPickerPro value={btn.iconColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex })))} />
+          <ColorPickerProUnified value={btn.iconColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, iconColor: hex })))} />
         </Row>
         <Row label="Cor texto">
-          <ColorPickerPro value={btn.textColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))} />
+          <ColorPickerProUnified value={btn.textColor ?? '#111827'} onChange={(hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex }))} onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.style.buttonDefaults = { ...btn, textColor: hex })))} />
         </Row>
         <Row label="Fonte"><FontPicker value={btn.fontFamily ?? ""} onChange={(v) => patch((d) => (d.style.buttonDefaults = { ...btn, fontFamily: v || "" }))} /></Row>
         <Row label="Peso">

@@ -27,6 +27,7 @@ export function ColorPickerProvider({ children }: { children: React.ReactNode })
   const [picker, setPicker] = useState<PickerState>({ active: false, mode: 'modal' })
 
   const openPicker: Ctx['openPicker'] = (opts) => {
+    console.log('🎯 openPicker', opts)
     setPicker({
       active: true,
       mode: opts.mode ?? 'modal',

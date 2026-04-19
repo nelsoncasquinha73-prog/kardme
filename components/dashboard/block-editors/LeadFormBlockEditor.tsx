@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 
 type LeadFormSettings = {
@@ -136,7 +136,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
           </div>
         </Row>
         <Row label="Cor">
-          <ColorPickerPro value={heading.color ?? '#111827'} onChange={(hex) => setHeading({ color: hex })} onEyedropper={() => pickEyedropper((hex) => setHeading({ color: hex }))} />
+          <ColorPickerProUnified value={heading.color ?? '#111827'} onChange={(hex) => setHeading({ color: hex })} onEyedropper={() => pickEyedropper((hex) => setHeading({ color: hex }))} />
         </Row>
         <Row label="Fonte"><FontPicker value={heading.fontFamily ?? ""} onChange={(v) => setHeading({ fontFamily: v || "" })} /></Row>
         <Row label="Peso">
@@ -164,7 +164,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         </Row>
         {bgEnabled && (
           <Row label="Cor">
-            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
+            <ColorPickerProUnified value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
           </Row>
         )}
         <Row label="Sombra">
@@ -180,7 +180,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.12)'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
+              <ColorPickerProUnified value={container.borderColor ?? 'rgba(0,0,0,0.12)'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
             </Row>
           </>
         )}
@@ -209,23 +209,23 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
       {/* ========== INPUTS ========== */}
       <CollapsibleSection title="✏️ Inputs" subtitle="Cores, tamanhos, bordas" isOpen={activeSection === 'inputs'} onToggle={() => setActiveSection(activeSection === 'inputs' ? null : 'inputs')}>
         <Row label="Cor label">
-          <ColorPickerPro value={inputs.labelColor ?? 'rgba(17,24,39,0.75)'} onChange={(hex) => setInputs({ labelColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ labelColor: hex }))} />
+          <ColorPickerProUnified value={inputs.labelColor ?? 'rgba(17,24,39,0.75)'} onChange={(hex) => setInputs({ labelColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ labelColor: hex }))} />
         </Row>
         <Row label="Tamanho label">
           <input type="range" min={10} max={18} value={inputs.labelSize ?? 12} onChange={(e) => setInputs({ labelSize: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{inputs.labelSize ?? 12}px</span>
         </Row>
         <Row label="Cor placeholder">
-          <ColorPickerPro value={inputs.placeholderColor ?? 'rgba(0,0,0,0.4)'} onChange={(hex) => setInputs({ placeholderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ placeholderColor: hex }))} />
+          <ColorPickerProUnified value={inputs.placeholderColor ?? 'rgba(0,0,0,0.4)'} onChange={(hex) => setInputs({ placeholderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ placeholderColor: hex }))} />
         </Row>
         <Row label="Fundo input">
-          <ColorPickerPro value={inputs.bgColor ?? '#ffffff'} onChange={(hex) => setInputs({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ bgColor: hex }))} />
+          <ColorPickerProUnified value={inputs.bgColor ?? '#ffffff'} onChange={(hex) => setInputs({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ bgColor: hex }))} />
         </Row>
         <Row label="Texto input">
-          <ColorPickerPro value={inputs.textColor ?? '#111827'} onChange={(hex) => setInputs({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ textColor: hex }))} />
+          <ColorPickerProUnified value={inputs.textColor ?? '#111827'} onChange={(hex) => setInputs({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ textColor: hex }))} />
         </Row>
         <Row label="Borda input">
-          <ColorPickerPro value={inputs.borderColor ?? 'rgba(0,0,0,0.14)'} onChange={(hex) => setInputs({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ borderColor: hex }))} />
+          <ColorPickerProUnified value={inputs.borderColor ?? 'rgba(0,0,0,0.14)'} onChange={(hex) => setInputs({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setInputs({ borderColor: hex }))} />
         </Row>
         <Row label="Raio input">
           <input type="range" min={6} max={24} value={inputs.radius ?? 12} onChange={(e) => setInputs({ radius: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -253,7 +253,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
       {/* ========== CHECKBOX CONSENTIMENTO ========== */}
       <CollapsibleSection title="✅ Checkbox Consentimento" subtitle="Cor, fonte, tamanho" isOpen={activeSection === 'consent'} onToggle={() => setActiveSection(activeSection === 'consent' ? null : 'consent')}>
         <Row label="Cor">
-          <ColorPickerPro value={consentCheckbox.textColor ?? 'rgba(17,24,39,0.75)'} onChange={(hex) => setConsentCheckbox({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setConsentCheckbox({ textColor: hex }))} />
+          <ColorPickerProUnified value={consentCheckbox.textColor ?? 'rgba(17,24,39,0.75)'} onChange={(hex) => setConsentCheckbox({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setConsentCheckbox({ textColor: hex }))} />
         </Row>
         <Row label="Fonte">
           <FontPicker value={consentCheckbox.fontFamily ?? ""} onChange={(v) => setConsentCheckbox({ fontFamily: v || "" })} />
@@ -275,10 +275,10 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
       {/* ========== BOTÃO ========== */}
       <CollapsibleSection title="🔘 Botão" subtitle="Cor, altura, raio, borda, sombra" isOpen={activeSection === 'button'} onToggle={() => setActiveSection(activeSection === 'button' ? null : 'button')}>
         <Row label="Cor fundo">
-          <ColorPickerPro value={button.bgColor ?? '#3b82f6'} onChange={(hex) => setButton({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ bgColor: hex }))} />
+          <ColorPickerProUnified value={button.bgColor ?? '#3b82f6'} onChange={(hex) => setButton({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ bgColor: hex }))} />
         </Row>
         <Row label="Cor texto">
-          <ColorPickerPro value={button.textColor ?? '#ffffff'} onChange={(hex) => setButton({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ textColor: hex }))} />
+          <ColorPickerProUnified value={button.textColor ?? '#ffffff'} onChange={(hex) => setButton({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ textColor: hex }))} />
         </Row>
         <Row label="Altura">
           <input type="range" min={36} max={64} value={button.height ?? 44} onChange={(e) => setButton({ height: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -298,7 +298,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
               <span style={rightNum}>{button.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro value={button.borderColor ?? 'rgba(0,0,0,0.15)'} onChange={(hex) => setButton({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ borderColor: hex }))} />
+              <ColorPickerProUnified value={button.borderColor ?? 'rgba(0,0,0,0.15)'} onChange={(hex) => setButton({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setButton({ borderColor: hex }))} />
             </Row>
           </>
         )}

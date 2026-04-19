@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 
@@ -30,6 +30,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const modals = settings.modals || {}
   const setSettings = (patch: Partial<BioSettings>) => onChangeSettings({ ...settings, ...patch })
   const upsertModal = (id: string, patch: Partial<ModalItem>) => {
+  const { openPicker } = useColorPicker()
     const prev = modals[id] || { label: '', content: '' }
     setSettings({ modals: { ...modals, [id]: { ...prev, ...patch } } })
   }
@@ -57,7 +58,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
       {/* ========== TEXTO ========== */}
       <CollapsibleSection title="📝 Texto" subtitle="Bio com formatação" isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
         <RichTextEditor value={settings.text || ''} onChange={(html) => setSettings({ text: html })} placeholder="Escreve a tua bio..." minHeight={120} />
-        <Row label="Cor texto"><ColorPickerPro value={s.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} /></Row>
+        <Row label="Cor texto"><ColorPickerProUnified value={s.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} /></Row>
         <Row label="Fonte base"><FontPicker value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} /></Row>
         <Row label="Tamanho base">
           <input type="range" min={12} max={22} value={s.fontSize ?? 15} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -79,11 +80,11 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
       {/* ========== CONTAINER ========== */}
       <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
         <Row label="Fundo"><Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} /></Row>
-        {bgEnabled && <Row label="Cor fundo"><ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} supportsGradient={true} /></Row>}
+        {bgEnabled && <Row label="Cor fundo"><ColorPickerProUnified value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} supportsGradient={true} /></Row>}
         <Row label="Borda"><Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} /></Row>
         {borderEnabled && (<>
           <Row label="Espessura"><input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.borderWidth ?? 1}px</span></Row>
-          <Row label="Cor borda"><ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} supportsGradient={false} /></Row>
+          <Row label="Cor borda"><ColorPickerProUnified value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} supportsGradient={false} /></Row>
         </>)}
         <Row label="Sombra"><Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} /></Row>
         <Row label="Raio"><input type="range" min={0} max={32} value={c.radius ?? 18} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.radius ?? 18}px</span></Row>

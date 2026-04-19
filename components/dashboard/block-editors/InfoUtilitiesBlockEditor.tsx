@@ -3,9 +3,9 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
 export type InfoItemType = 'address' | 'wifi' | 'image_button' | 'link' | 'hours_text' | 'reviews_embed'
@@ -268,7 +268,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       {/* ========== TÍTULO ========== */}
       <CollapsibleSection title={`📝 ${t('info_utilities_editor.section_title')}`} subtitle={t('info_utilities_editor.section_title_subtitle')} isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
         <Row label={t('info_utilities_editor.label_color')}>
-          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => updateStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))} />
+          <ColorPickerProUnified value={st.headingColor ?? '#111827'} onChange={(hex) => updateStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ headingColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_alignment')}>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -300,7 +300,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       {/* ========== TEXTO ========== */}
       <CollapsibleSection title={`✏️ ${t('info_utilities_editor.section_text')}`} subtitle={t('info_utilities_editor.section_text_subtitle')} isOpen={activeSection === 'text'} onToggle={() => setActiveSection(activeSection === 'text' ? null : 'text')}>
         <Row label={t('info_utilities_editor.label_color')}>
-          <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
+          <ColorPickerProUnified value={st.textColor ?? '#111827'} onChange={(hex) => updateStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ textColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_font')}><FontPicker value={st.textFontFamily ?? ""} onChange={(v) => updateStyle({ textFontFamily: v || undefined })} /></Row>
         <Row label={t('info_utilities_editor.label_weight')}>
@@ -324,7 +324,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
         </Row>
         {bgEnabled && (
           <Row label={t('info_utilities_editor.label_color')}>
-            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => updateStyle({ container: { ...container, bgColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, bgColor: hex } }))} />
+            <ColorPickerProUnified value={container.bgColor ?? '#ffffff'} onChange={(hex) => updateStyle({ container: { ...container, bgColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, bgColor: hex } }))} />
           </Row>
         )}
         <Row label={t('info_utilities_editor.label_shadow')}>
@@ -340,7 +340,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label={t('info_utilities_editor.label_border_color')}>
-              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => updateStyle({ container: { ...container, borderColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, borderColor: hex } }))} />
+              <ColorPickerProUnified value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => updateStyle({ container: { ...container, borderColor: hex } })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ container: { ...container, borderColor: hex } }))} />
             </Row>
           </>
         )}
@@ -379,7 +379,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
         </Row>
         {(st.rowBorderWidth ?? 0) > 0 && (
           <Row label={t('info_utilities_editor.label_border_color')}>
-            <ColorPickerPro value={st.rowBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ rowBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))} />
+            <ColorPickerProUnified value={st.rowBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ rowBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ rowBorderColor: hex }))} />
           </Row>
         )}
         <Row label={t('info_utilities_editor.label_radius')}>
@@ -395,10 +395,10 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
           <span style={rightNum}>{st.iconSizePx ?? 24}px</span>
         </Row>
         <Row label={t('info_utilities_editor.label_color')}>
-          <ColorPickerPro value={st.iconColor ?? '#111827'} onChange={(hex) => updateStyle({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))} />
+          <ColorPickerProUnified value={st.iconColor ?? '#111827'} onChange={(hex) => updateStyle({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_background')}>
-          <ColorPickerPro value={st.iconBgColor ?? 'transparent'} onChange={(hex) => updateStyle({ iconBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))} />
+          <ColorPickerProUnified value={st.iconBgColor ?? 'transparent'} onChange={(hex) => updateStyle({ iconBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ iconBgColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_radius')}>
           <input type="range" min={0} max={24} value={st.iconRadiusPx ?? 6} onChange={(e) => updateStyle({ iconRadiusPx: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -409,10 +409,10 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
       {/* ========== BOTÕES ========== */}
       <CollapsibleSection title={`🔘 ${t('info_utilities_editor.section_buttons')}`} subtitle={t('info_utilities_editor.section_buttons_subtitle')} isOpen={activeSection === 'buttons'} onToggle={() => setActiveSection(activeSection === 'buttons' ? null : 'buttons')}>
         <Row label={t('info_utilities_editor.label_text_color')}>
-          <ColorPickerPro value={st.buttonTextColor ?? '#111827'} onChange={(hex) => updateStyle({ buttonTextColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))} />
+          <ColorPickerProUnified value={st.buttonTextColor ?? '#111827'} onChange={(hex) => updateStyle({ buttonTextColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonTextColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_background')}>
-          <ColorPickerPro value={st.buttonBgColor ?? '#f0f0f0'} onChange={(hex) => updateStyle({ buttonBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))} />
+          <ColorPickerProUnified value={st.buttonBgColor ?? '#f0f0f0'} onChange={(hex) => updateStyle({ buttonBgColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBgColor: hex }))} />
         </Row>
         <Row label={t('info_utilities_editor.label_border')}>
           <input type="range" min={0} max={6} value={st.buttonBorderWidth ?? 0} onChange={(e) => updateStyle({ buttonBorderWidth: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -420,7 +420,7 @@ export default function InfoUtilitiesBlockEditor({ cardId, settings, style, onCh
         </Row>
         {(st.buttonBorderWidth ?? 0) > 0 && (
           <Row label={t('info_utilities_editor.label_border_color')}>
-            <ColorPickerPro value={st.buttonBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ buttonBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))} />
+            <ColorPickerProUnified value={st.buttonBorderColor ?? '#e5e7eb'} onChange={(hex) => updateStyle({ buttonBorderColor: hex })} onEyedropper={() => pickEyedropper((hex) => updateStyle({ buttonBorderColor: hex }))} />
           </Row>
         )}
         <Row label={t('info_utilities_editor.label_radius')}>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
@@ -214,7 +214,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
           </div>
         </Row>
         <Row label={t('contact_editor.label_color')}>
-          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => setStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ headingColor: hex }))} />
+          <ColorPickerProUnified value={st.headingColor ?? '#111827'} onChange={(hex) => setStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ headingColor: hex }))} />
         </Row>
         <Row label={t('contact_editor.label_bold')}>
           <Toggle active={st.headingBold ?? true} onClick={() => setStyle({ headingBold: !(st.headingBold ?? true) })} />
@@ -289,7 +289,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
         </Row>
         {bgEnabled && (
           <Row label={t('contact_editor.label_color')}>
-            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
+            <ColorPickerProUnified value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
           </Row>
         )}
         <Row label={t('contact_editor.label_shadow')}>
@@ -305,7 +305,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label={t('contact_editor.label_border_color')}>
-              <ColorPickerPro value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
+              <ColorPickerProUnified value={container.borderColor ?? 'rgba(0,0,0,0.08)'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
             </Row>
           </>
         )}
@@ -337,16 +337,16 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
         </Row>
         {defaultsBgMode === 'solid' && (
           <Row label={t('contact_editor.label_bg_color')}>
-            <ColorPickerPro value={btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtnDefaults({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgColor: hex }))} />
+            <ColorPickerProUnified value={btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtnDefaults({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgColor: hex }))} />
           </Row>
         )}
         {defaultsBgMode === 'gradient' && (
           <>
             <Row label={t('contact_editor.label_gradient_start')}>
-              <ColorPickerPro value={btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))} />
+              <ColorPickerProUnified value={btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, from: hex } }))} />
             </Row>
             <Row label={t('contact_editor.label_gradient_end')}>
-              <ColorPickerPro value={btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))} />
+              <ColorPickerProUnified value={btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, to: hex } }))} />
             </Row>
             <Row label="Ângulo">
               <input type="range" min={0} max={360} step={15} value={btnDefaults.bgGradient?.angle ?? 135} onChange={(e) => setBtnDefaults({ bgGradient: { ...btnDefaults.bgGradient, angle: Number(e.target.value) } })} style={{ flex: 1 }} />
@@ -364,15 +364,15 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               <span style={rightNum}>{btnDefaults.borderWidth ?? 1}px</span>
             </Row>
             <Row label={t('contact_editor.label_border_color')}>
-              <ColorPickerPro value={btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => setBtnDefaults({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ borderColor: hex }))} />
+              <ColorPickerProUnified value={btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => setBtnDefaults({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ borderColor: hex }))} />
             </Row>
           </>
         )}
         <Row label={t('contact_editor.label_icon_color')}>
-          <ColorPickerPro value={btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ iconColor: hex }))} />
+          <ColorPickerProUnified value={btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ iconColor: hex }))} />
         </Row>
         <Row label={t('contact_editor.label_text_color')}>
-          <ColorPickerPro value={btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))} />
+          <ColorPickerProUnified value={btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtnDefaults({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtnDefaults({ textColor: hex }))} />
         </Row>
         <Row label={t('contact_editor.label_font')}><FontPicker value={btnDefaults.fontFamily ?? ""} onChange={(v) => setBtnDefaults({ fontFamily: v || undefined })} /></Row>
         <Row label={t('contact_editor.label_weight')}>
@@ -422,16 +422,16 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               </Row>
               {bBgMode === 'solid' && (
                 <Row label={t('contact_editor.label_bg_color')}>
-                  <ColorPickerPro value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} />
+                  <ColorPickerProUnified value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} />
                 </Row>
               )}
               {bBgMode === 'gradient' && (
                 <>
                   <Row label={t('contact_editor.label_gradient_start')}>
-                    <ColorPickerPro value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))} />
+                    <ColorPickerProUnified value={b.bgGradient?.from ?? btnDefaults.bgGradient?.from ?? '#111827'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), from: hex } }))} />
                   </Row>
                   <Row label={t('contact_editor.label_gradient_end')}>
-                    <ColorPickerPro value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))} />
+                    <ColorPickerProUnified value={b.bgGradient?.to ?? btnDefaults.bgGradient?.to ?? '#374151'} onChange={(hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), to: hex } }))} />
                   </Row>
                   <Row label="Ângulo">
                     <input type="range" min={0} max={360} step={15} value={b.bgGradient?.angle ?? btnDefaults.bgGradient?.angle ?? 135} onChange={(e) => setBtn(key, { bgGradient: { ...(b.bgGradient || {}), angle: Number(e.target.value) } })} style={{ flex: 1 }} />
@@ -449,15 +449,15 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
                     <span style={rightNum}>{b.borderWidth ?? btnDefaults.borderWidth ?? 1}px</span>
                   </Row>
                   <Row label={t('contact_editor.label_border_color')}>
-                    <ColorPickerPro value={b.borderColor ?? btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => setBtn(key, { borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { borderColor: hex }))} />
+                    <ColorPickerProUnified value={b.borderColor ?? btnDefaults.borderColor ?? 'rgba(0,0,0,0.10)'} onChange={(hex) => setBtn(key, { borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { borderColor: hex }))} />
                   </Row>
                 </>
               )}
               <Row label={t('contact_editor.label_icon_color')}>
-                <ColorPickerPro value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtn(key, { iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { iconColor: hex }))} />
+                <ColorPickerProUnified value={b.iconColor ?? btnDefaults.iconColor ?? '#111827'} onChange={(hex) => setBtn(key, { iconColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { iconColor: hex }))} />
               </Row>
               <Row label={t('contact_editor.label_text_color')}>
-                <ColorPickerPro value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
+                <ColorPickerProUnified value={b.textColor ?? btnDefaults.textColor ?? '#111827'} onChange={(hex) => setBtn(key, { textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { textColor: hex }))} />
               </Row>
               <Row label={t('contact_editor.label_font')}><FontPicker value={b.fontFamily ?? btnDefaults.fontFamily ?? ""} onChange={(v) => setBtn(key, { fontFamily: v || undefined })} /></Row>
               <Row label={t('contact_editor.label_weight')}>

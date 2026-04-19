@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import { uploadCardVideo } from '@/lib/uploadCardVideo'
 
 type VideoSettings = { url: string; title?: string; thumbnailUrl?: string }
@@ -95,7 +95,7 @@ export default function VideoBlockEditor({ cardId, settings, style, onChangeSett
         <CollapsibleSection title="📝 Título" subtitle="Cor, tamanho, alinhamento" isOpen={activeSection === 'title'} onToggle={() => setActiveSection(activeSection === 'title' ? null : 'title')}>
           <Row label="Mostrar"><Toggle active={s.showTitle !== false} onClick={() => setStyle({ showTitle: s.showTitle === false })} /></Row>
           {s.showTitle !== false && (<>
-            <Row label="Cor"><ColorPickerPro value={s.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} /></Row>
+            <Row label="Cor"><ColorPickerProUnified value={s.titleColor ?? '#111827'} onChange={(hex) => setStyle({ titleColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ titleColor: hex }))} /></Row>
             <Row label="Tamanho"><input type="range" min={12} max={24} value={s.titleFontSize ?? 14} onChange={(e) => setStyle({ titleFontSize: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{s.titleFontSize ?? 14}px</span></Row>
             <Row label="Alinhamento"><div style={{ display: 'flex', gap: 6 }}>{(['left', 'center', 'right'] as const).map((a) => (<MiniButton key={a} active={(s.titleAlign ?? 'left') === a} onClick={() => setStyle({ titleAlign: a })}>{a === 'left' ? '◀' : a === 'center' ? '●' : '▶'}</MiniButton>))}</div></Row>
           </>)}
@@ -104,11 +104,11 @@ export default function VideoBlockEditor({ cardId, settings, style, onChangeSett
 
       <CollapsibleSection title="📦 Container" subtitle="Fundo, borda, sombra" isOpen={activeSection === 'container'} onToggle={() => setActiveSection(activeSection === 'container' ? null : 'container')}>
         <Row label="Fundo"><Toggle active={bgEnabled} onClick={() => setContainer({ bgColor: bgEnabled ? 'transparent' : '#ffffff' })} /></Row>
-        {bgEnabled && <Row label="Cor fundo"><ColorPickerPro value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} /></Row>}
+        {bgEnabled && <Row label="Cor fundo"><ColorPickerProUnified value={c.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} /></Row>}
         <Row label="Borda"><Toggle active={borderEnabled} onClick={() => setContainer({ borderWidth: borderEnabled ? 0 : 1 })} /></Row>
         {borderEnabled && (<>
           <Row label="Espessura"><input type="range" min={1} max={6} value={c.borderWidth ?? 1} onChange={(e) => setContainer({ borderWidth: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.borderWidth ?? 1}px</span></Row>
-          <Row label="Cor borda"><ColorPickerPro value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} /></Row>
+          <Row label="Cor borda"><ColorPickerProUnified value={c.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} /></Row>
         </>)}
         <Row label="Sombra"><Toggle active={c.shadow === true} onClick={() => setContainer({ shadow: !c.shadow })} /></Row>
         <Row label="Raio"><input type="range" min={0} max={32} value={c.radius ?? 0} onChange={(e) => setContainer({ radius: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{c.radius ?? 0}px</span></Row>

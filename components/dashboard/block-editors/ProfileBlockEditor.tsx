@@ -3,8 +3,8 @@
 import { useRef, useState } from 'react'
 import { ProfileSettings } from '@/components/blocks/types/profile'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import { uploadCardImage } from '@/lib/uploadCardImage'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import FontPicker from '@/components/editor/FontPicker'
 import { useLanguage } from '@/components/language/LanguageProvider'
 
@@ -226,7 +226,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
 
             {(local.avatar?.borderWidth ?? 0) > 0 && (
               <Row label={t('profile_editor.label_border_color')}>
-                <ColorPickerPro
+                <ColorPickerProUnified
                   value={local.avatar?.borderColor ?? '#FFFFFF'}
                   onChange={(hex) => patch((d) => (d.avatar!.borderColor = hex))}
                   onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.avatar!.borderColor = hex)))}
@@ -310,7 +310,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </Row>
 
             <Row label={t('profile_editor.label_glow_color')}>
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={(local.avatar?.glow as any)?.color ?? 'rgba(59,130,246,0.25)'}
                 onChange={(hex) => patch((d) => {
                   d.avatar = d.avatar || {}
@@ -377,7 +377,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         {((local.avatar?.effect3d as any)?.enabled ?? false) && (
           <>
             <Row label={t('profile_editor.label_frame_color')}>
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={(local.avatar?.effect3d as any)?.bgColor ?? '#ffffff'}
                 onChange={(hex) => patch((d) => {
                   d.avatar = d.avatar || {}
@@ -460,7 +460,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           </div>
 
           <Row label={t('profile_editor.label_color')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={local.name?.color ?? '#0B1220'}
               onChange={(hex) => patch((d) => (d.name.color = hex))}
               onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.name.color = hex)))}
@@ -508,7 +508,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           </div>
 
           <Row label={t('profile_editor.label_color')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={local.profession?.color ?? '#374151'}
               onChange={(hex) => patch((d) => (d.profession.color = hex))}
               onEyedropper={() => pickEyedropper((hex) => patch((d) => (d.profession.color = hex)))}
@@ -564,7 +564,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
           </div>
 
           <Row label={t('profile_editor.label_color')}>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={local.company?.color ?? '#6B7280'}
               onChange={(hex) => patch((d) => {
                 d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
@@ -634,7 +634,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
         {(local.container?.enabled ?? false) && (
           <>
             <Row label={t('profile_editor.label_bg_color')}>
-              <ColorPickerPro
+              <ColorPickerProUnified
                 value={local.container?.bgColor ?? '#ffffff'}
                 onChange={(hex) => patch((d) => {
                   d.container = d.container || {}
@@ -686,7 +686,7 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
                 </Row>
 
                 <Row label={t('profile_editor.label_border_color')}>
-                  <ColorPickerPro
+                  <ColorPickerProUnified
                     value={local.container?.borderColor ?? 'rgba(0,0,0,0.12)'}
                     onChange={(hex) => patch((d) => {
                       d.container = d.container || {}

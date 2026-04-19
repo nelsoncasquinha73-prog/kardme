@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient'
+import { type EmailBlock } from '@/app/dashboard/crm/EmailCampaignEditor'
 
 export type EmailTemplate = {
   id: string
@@ -7,6 +8,7 @@ export type EmailTemplate = {
   category: string
   subject: string
   body: string
+  blocks?: EmailBlock[] | null
   created_at: string
 }
 
@@ -30,6 +32,7 @@ export async function createEmailTemplate(params: {
   category: string
   subject: string
   body: string
+  blocks?: EmailBlock[] | null
 }) {
   return supabase.from('email_templates').insert({
     user_id: params.userId,
@@ -37,6 +40,7 @@ export async function createEmailTemplate(params: {
     category: params.category,
     subject: params.subject,
     body: params.body,
+    blocks: params.blocks || null,
   })
 }
 
@@ -51,6 +55,7 @@ export async function updateEmailTemplate(params: {
   category: string
   subject: string
   body: string
+  blocks?: EmailBlock[] | null
 }) {
   return supabase
     .from('email_templates')
@@ -59,6 +64,7 @@ export async function updateEmailTemplate(params: {
       category: params.category,
       subject: params.subject,
       body: params.body,
+      blocks: params.blocks || null,
     })
     .eq('id', params.templateId)
 }

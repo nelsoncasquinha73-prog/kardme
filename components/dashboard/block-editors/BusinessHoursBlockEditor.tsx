@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 
 type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -102,7 +102,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
           <input value={s.heading ?? 'Horário'} onChange={(e) => setSettings({ heading: e.target.value })} style={inputStyle} placeholder="Horário" />
         </Row>
         <Row label="Cor">
-          <ColorPickerPro value={st.headingColor ?? '#111827'} onChange={(hex) => setStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ headingColor: hex }))} />
+          <ColorPickerProUnified value={st.headingColor ?? '#111827'} onChange={(hex) => setStyle({ headingColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ headingColor: hex }))} />
         </Row>
         <Row label="Tamanho">
           <input type="range" min={10} max={32} value={st.headingFontSize ?? 13} onChange={(e) => setStyle({ headingFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -184,7 +184,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
       {/* ========== TIPOGRAFIA ========== */}
       <CollapsibleSection title="🔤 Tipografia" subtitle="Texto das linhas" isOpen={activeSection === 'typo'} onToggle={() => setActiveSection(activeSection === 'typo' ? null : 'typo')}>
         <Row label="Cor texto">
-          <ColorPickerPro value={st.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} />
+          <ColorPickerProUnified value={st.textColor ?? '#111827'} onChange={(hex) => setStyle({ textColor: hex })} onEyedropper={() => pickEyedropper((hex) => setStyle({ textColor: hex }))} />
         </Row>
         <Row label="Tamanho">
           <input type="range" min={10} max={22} value={st.textFontSize ?? 13} onChange={(e) => setStyle({ textFontSize: Number(e.target.value) })} style={{ flex: 1 }} />
@@ -217,7 +217,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
         </Row>
         {bgEnabled && (
           <Row label="Cor fundo">
-            <ColorPickerPro value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
+            <ColorPickerProUnified value={container.bgColor ?? '#ffffff'} onChange={(hex) => setContainer({ bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ bgColor: hex }))} />
           </Row>
         )}
         <Row label="Borda">
@@ -230,7 +230,7 @@ export default function BusinessHoursBlockEditor({ settings, style, onChangeSett
               <span style={rightNum}>{container.borderWidth ?? 1}px</span>
             </Row>
             <Row label="Cor borda">
-              <ColorPickerPro value={container.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
+              <ColorPickerProUnified value={container.borderColor ?? '#e5e7eb'} onChange={(hex) => setContainer({ borderColor: hex })} onEyedropper={() => pickEyedropper((hex) => setContainer({ borderColor: hex }))} />
             </Row>
           </>
         )}

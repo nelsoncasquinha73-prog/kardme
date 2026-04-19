@@ -54,6 +54,7 @@ export default function EmailTextBlockEditor({ content, onChange, placeholder, o
   }
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: false,
