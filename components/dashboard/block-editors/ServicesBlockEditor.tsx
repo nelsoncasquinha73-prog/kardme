@@ -5,10 +5,10 @@ import React, { useMemo, useRef, useState } from 'react'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useColorPicker } from '@/components/editor/ColorPickerContext'
+import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import SwatchRow from '@/components/editor/SwatchRow'
 import FontPicker from '@/components/editor/FontPicker'
-import ColorPickerPro from '@/components/editor/ColorPickerPro'
 import { Section, Row, Toggle, input, select, rightNum } from '@/components/editor/ui'
 
 export type ServiceItem = {
@@ -1241,7 +1241,7 @@ export default function ServicesBlockEditor({
         <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
 
         <Row label={t("editor.title_color")}>
-          <ColorPickerPro value={st.titleColor ?? "#111827"} onChange={(hex) => updateStyle({ titleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ titleColor: hex }))} supportsGradient={false} />
+          <ColorPickerProUnified value={st.titleColor ?? "#111827"} onChange={(hex) => updateStyle({ titleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ titleColor: hex }))} supportsGradient={false} />
         </Row>
         <Row label={t("editor.title_size")}>
           <input type="range" min={14} max={28} value={st.titleFontSize ?? 18} onChange={(e) => updateStyle({ titleFontSize: clampNum(e.target.value, 18) })} style={{ flex: 1 }} />
@@ -1259,7 +1259,7 @@ export default function ServicesBlockEditor({
         <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
 
         <Row label={t("editor.subtitle_color")}>
-          <ColorPickerPro value={st.subtitleColor ?? "#4b5563"} onChange={(hex) => updateStyle({ subtitleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ subtitleColor: hex }))} supportsGradient={false} />
+          <ColorPickerProUnified value={st.subtitleColor ?? "#4b5563"} onChange={(hex) => updateStyle({ subtitleColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ subtitleColor: hex }))} supportsGradient={false} />
         </Row>
         <Row label={t("editor.subtitle_size")}>
           <input type="range" min={12} max={18} value={st.subtitleFontSize ?? 14} onChange={(e) => updateStyle({ subtitleFontSize: clampNum(e.target.value, 14) })} style={{ flex: 1 }} />
@@ -1276,7 +1276,7 @@ export default function ServicesBlockEditor({
         <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
 
         <Row label={t("editor.price_color")}>
-          <ColorPickerPro value={st.priceColor ?? "#111827"} onChange={(hex) => updateStyle({ priceColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ priceColor: hex }))} supportsGradient={false} />
+          <ColorPickerProUnified value={st.priceColor ?? "#111827"} onChange={(hex) => updateStyle({ priceColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ priceColor: hex }))} supportsGradient={false} />
         </Row>
         <Row label={t("editor.price_size")}>
           <input type="range" min={12} max={24} value={st.priceFontSize ?? 16} onChange={(e) => updateStyle({ priceFontSize: clampNum(e.target.value, 16) })} style={{ flex: 1 }} />
@@ -1294,7 +1294,7 @@ export default function ServicesBlockEditor({
         <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 12, paddingTop: 12 }} />
 
         <Row label={t("editor.description_color")}>
-          <ColorPickerPro value={st.descriptionColor ?? "#374151"} onChange={(hex) => updateStyle({ descriptionColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ descriptionColor: hex }))} supportsGradient={false} />
+          <ColorPickerProUnified value={st.descriptionColor ?? "#374151"} onChange={(hex) => updateStyle({ descriptionColor: hex })} onEyedropper={() => pick((hex) => updateStyle({ descriptionColor: hex }))} supportsGradient={false} />
         </Row>
         <Row label={t("editor.description_size")}>
           <input type="range" min={12} max={18} value={st.descriptionFontSize ?? 14} onChange={(e) => updateStyle({ descriptionFontSize: clampNum(e.target.value, 14) })} style={{ flex: 1 }} />
