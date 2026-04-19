@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ColorPickerProvider } from "@/components/editor/ColorPickerContext";
-import ColorPickerPro from "@/components/editor/ColorPickerPro";
+import ColorPickerProUnified from "@/components/editor/ColorPickerProUnified";
 import FontPicker from "@/components/editor/FontPicker";
 import { useColorPicker } from "@/components/editor/ColorPickerContext";
 import { Ambassador } from "@/lib/ambassadors/ambassadorService";
@@ -540,7 +540,7 @@ function AmbassadorEditModalContent({
 
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Fundo do Cartão</label>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={formData.background_color || "#ffffff"}
               onChange={(val) => setFormData({ ...formData, background_color: val })}
               onEyedropper={() =>
@@ -555,7 +555,7 @@ function AmbassadorEditModalContent({
 
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Cor do Texto</label>
-            <ColorPickerPro
+            <ColorPickerProUnified
               value={formData.text_color || "#000000"}
               onChange={(val) => setFormData({ ...formData, text_color: val })}
               onEyedropper={() =>
