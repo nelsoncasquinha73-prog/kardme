@@ -337,6 +337,17 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                 </>
               )}
 
+              {b.actionType === "maps" && (
+                <>
+                  <Row label="Google Maps URL">
+                    <input value={b.url ?? ""} onChange={(e) => updateButton(b.id, { url: e.target.value })} style={input} placeholder="https://maps.google.com/..." />
+                  </Row>
+                  <Row label={t('cta_editor.label_open_new_tab')}>
+                    <Toggle active={b.openInNewTab === true} onClick={() => updateButton(b.id, { openInNewTab: !(b.openInNewTab === true) })} />
+                  </Row>
+                </>
+              )}
+
               {b.actionType === "phone" && (
                 <Row label={t('cta_editor.label_phone_number')}>
                   <input value={b.phone ?? ""} onChange={(e) => updateButton(b.id, { phone: e.target.value })} style={input} placeholder="+351 912 345 678" />
