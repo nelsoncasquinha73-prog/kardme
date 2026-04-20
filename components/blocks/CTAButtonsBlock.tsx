@@ -165,8 +165,8 @@ function getButtonHref(b: CtaButton): string {
       return b.fileUrl || '#'
       
     case 'maps':
-      if (b.mapsAddress) {
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.mapsAddress)}`
+      if (b.url) {
+        return b.url
       }
       return '#'
       
