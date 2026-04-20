@@ -163,7 +163,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
   const setStyle = (patch: Partial<ContactStyle>) => patchStyle((x) => Object.assign(x, patch))
   const setContainer = (patch: Partial<NonNullable<ContactStyle['container']>>) => patchStyle((x) => { x.container = { ...x.container, ...patch } })
   const setBtnDefaults = (patch: Partial<ButtonStyle>) => patchStyle((x) => { x.buttonDefaults = { ...x.buttonDefaults, ...patch } })
-  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) => patchStyle((x) => { x.buttons = { ...x.buttons, [ch]: { ...(x.buttons?.[ch] || {}), ...patch } } })
+  const setBtn = (ch: ContactChannel, patch: Partial<ButtonStyle>) => { patchStyle((x) => { x.buttons = { ...x.buttons, [ch]: { ...(x.buttons?.[ch] || {}), ...patch } } }) }
 
   const bgEnabled = (container.bgColor ?? 'transparent') !== 'transparent'
   const borderEnabled = (container.borderWidth ?? 0) > 0
@@ -422,7 +422,7 @@ export default function ContactBlockEditor({ settings, style, onChangeSettings, 
               </Row>
               {bBgMode === 'solid' && (
                 <Row label={t('contact_editor.label_bg_color')}>
-                  <ColorPickerProUnified value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} />
+                  <ColorPickerProUnified value={b.bgColor ?? btnDefaults.bgColor ?? '#ffffff'} onChange={(hex) => setBtn(key, { bgColor: hex, bgGradient: undefined })} onEyedropper={() => pickEyedropper((hex) => setBtn(key, { bgColor: hex }))} supportsGradient={false} />
                 </Row>
               )}
               {bBgMode === 'gradient' && (

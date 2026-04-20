@@ -237,13 +237,13 @@ export default function ContactBlock({ settings, style }: Props) {
       if (!isNonEmpty(item.value)) return null
       const href = buildHref(ch, item as ContactItem)
       if (!href) return null
-      return { ch, item: item as ContactItem, href }
+return { ch, item: item as ContactItem, href }
     })
     .filter(Boolean) as Array<{ ch: ContactChannel; item: ContactItem; href: string }>
 
   if (visible.length === 0) return null
 
-  const firstBs = mergeBtn(st.buttonDefaults, st.buttons?.[visible[0].ch])
+const firstBs = mergeBtn(st.buttonDefaults, st.buttons?.[visible[0].ch])
 
   const uniformWidthPx =
     st.uniformWidthPx ?? computeUniformWidthPx(showLabel, firstBs.sizePx)

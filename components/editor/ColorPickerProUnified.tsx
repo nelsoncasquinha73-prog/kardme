@@ -225,18 +225,16 @@ export default function ColorPickerProUnified({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(e.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(e.target as Node)
-      ) {
+      const path = e.composedPath()
+      const isInModal = path.some((el) => (modalRef.current ? modalRef.current.contains(el as Node) : false))
+      const isInButton = path.some((el) => (buttonRef.current ? buttonRef.current.contains(el as Node) : false))
+      if (!isInModal && !isInButton) {
         setIsOpen(false)
       }
     }
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
     }
   }, [isOpen])
 
@@ -292,23 +290,36 @@ export default function ColorPickerProUnified({
 
       {isOpen && typeof document !== 'undefined' &&
         createPortal(
-          <div
-            ref={modalRef}
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: '#fff',
-              borderRadius: 16,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-              padding: 20,
-              zIndex: 10000,
-              width: 320,
-              maxHeight: '80vh',
-              overflowY: 'auto',
-            }}
-          >
+          <>
+            <div
+              onMouseDown={() => setIsOpen(false)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 9999,
+              }}
+            />
+            <div
+              ref={modalRef}
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: '#fff',
+                borderRadius: 16,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                padding: 20,
+                zIndex: 10000,
+                width: 320,
+                maxHeight: '80vh',
+                overflowY: 'auto',
+              }}
+            >
             <div
               style={{
                 display: 'flex',
@@ -529,7 +540,8 @@ export default function ColorPickerProUnified({
                 </div>
               </>
             )}
-          </div>,
+          </div>
+          </>,
           document.body
         )}
     </div>
@@ -540,7 +552,7 @@ function TabButton({ children, active, onClick }: { children: React.ReactNode; a
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(e) => { e.stopPropagation(); onClick() }}
       style={{
         flex: 1,
         padding: '10px 16px',
@@ -560,10 +572,11 @@ function TabButton({ children, active, onClick }: { children: React.ReactNode; a
 }
 
 function ColorSwatch({ color, selected, onClick }: { color: string; selected: boolean; onClick: () => void }) {
+  
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(e) => { e.stopPropagation(); onClick() }}
       style={{
         width: 28,
         height: 28,
