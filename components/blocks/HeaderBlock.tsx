@@ -40,6 +40,7 @@ export type HeaderSettings = {
     customWidthPx?: number
     headerBgEnabled?: boolean
     headerBgColor?: string
+    offsetY?: number
   }
 }
 
@@ -220,6 +221,7 @@ export default function HeaderBlock({
           overflow: 'hidden',
           marginLeft: 0,
           marginRight: 0,
+          marginTop: layout?.offsetY ?? 0,
         }}
       >
       {showCover && (coverVideoSrc || coverSrc) ? (

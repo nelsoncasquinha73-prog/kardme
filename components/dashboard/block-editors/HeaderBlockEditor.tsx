@@ -286,6 +286,22 @@ export default function HeaderBlockEditor({ cardId, settings, onChange, cardBg, 
             </div>
           </Row>
 
+          {/* Offset Vertical (para deslocar o header quando há banner) */}
+          <Row label="Posição Vertical (px)">
+            <input
+              type="range"
+              min={-200}
+              max={200}
+              value={layout.offsetY ?? 0}
+              onChange={(e) => setLayout({ offsetY: Number(e.target.value) })}
+              style={{ flex: 1 }}
+            />
+            <span style={{ fontSize: 11, opacity: 0.6, minWidth: 50, textAlign: 'right' }}>
+              {layout.offsetY ?? 0}px
+            </span>
+          </Row>
+
+
           {/* Cor sólida */}
           {v1.base.kind === 'solid' && (
             <Row label={t('header_editor.label_color')}>
