@@ -22,6 +22,7 @@ import FreeTextBlock from '@/components/blocks/FreeTextBlock'
 import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
 import ShapeCanvasBlock from '@/components/blocks/ShapeCanvasBlock'
 import VideoBlock from '@/components/blocks/VideoBlock'
+import BannerBlock from '@/components/blocks/BannerBlock'
 import { trackEvent } from '@/lib/trackEvent'
 import { migrateCardBg, type CardBg } from '@/lib/cardBg'
 
@@ -432,6 +433,8 @@ export default function CardPreview({
                       <VideoBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'info_utilities' ? (
                       <InfoUtilitiesBlock settings={block.settings} style={block.style} />
+                    ) : block.type === 'banner' ? (
+                      <BannerBlock settings={block.settings} />
                     ) : null}
                   </div>
                 )

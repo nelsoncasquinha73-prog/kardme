@@ -16,6 +16,7 @@ import BioBlock from '@/components/blocks/BioBlock'
 import LeadFormBlock from '@/components/blocks/LeadFormBlock'
 import BusinessHoursBlock from '@/components/blocks/BusinessHoursBlock'
 import CTAButtonsBlock from '@/components/blocks/CTAButtonsBlock'
+import BannerBlock from '@/components/blocks/BannerBlock'
 import ShapeCanvasBlock from '@/components/blocks/ShapeCanvasBlock'
 import InfoUtilitiesBlock from '@/components/blocks/InfoUtilitiesBlock'
 import FreeTextBlock from '@/components/blocks/FreeTextBlock'
@@ -74,6 +75,7 @@ function renderBlock(block: Block, index: number, templateId: string) {
     case 'business_hours': return <BusinessHoursBlock key={key} {...props} />
     case 'shape_canvas': return <ShapeCanvasBlock key={key} {...props} />
     case 'cta_buttons': return <CTAButtonsBlock key={key} {...props} />
+    case 'banner': return <BannerBlock key={key} {...props} />
     case 'info_utilities': return <InfoUtilitiesBlock key={key} {...props} />
     case 'free_text': return <FreeTextBlock key={key} {...props} />
     case 'decoration': return <DecorationBlock key={key} {...props} />
