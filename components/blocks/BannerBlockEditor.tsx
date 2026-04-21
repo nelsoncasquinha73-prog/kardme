@@ -127,6 +127,7 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
         max={max}
         value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{ flex: 1, cursor: 'pointer' }}
       />
       <input
@@ -409,7 +410,7 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
             <Slider
               value={s.logoSize}
               min={40}
-              max={120}
+              max={280}
               onChange={(v) => update({ logoSize: v })}
             />
           </Row>
