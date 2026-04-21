@@ -40,6 +40,7 @@ export default function AddBlockModal({
   const catalog: CatalogItem[] = useMemo(
     () => [
       { type: 'header', title: 'Header', description: 'Capa, avatar e topo do cartão', defaultSettings: {}, defaultStyle: {} },
+      { type: 'banner', title: 'Banner', description: 'Separador ou bandeira sticky com logo', defaultSettings: { enabled: true, mode: 'separator', height: 150, fullWidth: true, borderRadius: 0, margin: { top: 0, bottom: 0 }, backgroundType: 'solid', backgroundColor: '#3b82f6', fadeTopEnabled: false, fadeBottomEnabled: false, overlayOpacity: 0, vignetteEnabled: false, grainEnabled: false }, defaultStyle: {} },
       { type: 'profile', title: 'Perfil', description: 'Nome, cargo, empresa, avatar', defaultSettings: {}, defaultStyle: {} },
       { type: 'bio', title: 'Bio', description: 'Texto curto / apresentação', defaultSettings: { text: '' }, defaultStyle: {} },
       { type: 'contact', title: 'Contacto', description: 'Telefone, email, WhatsApp, etc.', defaultSettings: {}, defaultStyle: {} },
