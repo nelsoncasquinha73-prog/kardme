@@ -109,7 +109,16 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
     </div>
   )
 
-  const Slider = ({
+  
+  // DEBUG_RAW_RANGE (remover depois): slider cru para testar drag do thumb
+  const DebugRawRange = () => (
+    <div style={{ padding: 8, border: '1px dashed #e5e7eb', borderRadius: 8, marginBottom: 12 }}>
+      <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>DEBUG: raw range drag test</div>
+      <input type="range" min={0} max={100} defaultValue={50} style={{ width: '100%' }} />
+    </div>
+  )
+
+const Slider = ({
     value,
     min,
     max,
@@ -175,6 +184,8 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
   )
 
   return (
+    <>
+      <DebugRawRange />
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* MODO */}
       <Accordion title="🎯 Modo" id="mode">
@@ -477,5 +488,6 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
         </Accordion>
       )}
     </div>
+    </>
   )
 }
