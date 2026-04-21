@@ -138,20 +138,12 @@ const Slider = ({
         max={max}
         value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerMove={(e) => e.stopPropagation()}
-        onPointerUp={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
         style={{ flex: 1, cursor: 'pointer' }}
       />
       <input
         type="number"
         value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
         style={{
           width: 50,
           padding: '4px 6px',
