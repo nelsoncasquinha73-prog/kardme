@@ -45,6 +45,8 @@ function normalize(input: Partial<BannerSettings>): BannerSettings {
     parallaxEnabled: input.parallaxEnabled ?? false,
     blurContentBelow: input.blurContentBelow ?? false,
     stickyZIndex: input.stickyZIndex ?? 10,
+    offsetX: input.offsetX ?? 0,
+    offsetY: input.offsetY ?? 0,
   }
 }
 
@@ -213,54 +215,42 @@ const Slider = ({
       {/* LAYOUT */}
       <Accordion title="📐 Layout" id="layout">
         <Row label="Altura (px)">
-          <Slider
-            value={s.height}
-            min={80}
-            max={300}
-            onChange={(v) => update({ height: v })}
-          />
+          <input type="range" min={80} max={300} value={s.height} onChange={(e) => update({ height: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.height}</span>
         </Row>
         <Row label="Raio da borda (px)">
-          <Slider
-            value={s.borderRadius || 0}
-            min={0}
-            max={50}
-            onChange={(v) => update({ borderRadius: v })}
-          />
+          <input type="range" min={0} max={50} value={s.borderRadius || 0} onChange={(e) => update({ borderRadius: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.borderRadius || 0}</span>
         </Row>
         <Toggle
           label="Largura completa"
           checked={s.fullWidth}
           onChange={(v) => update({ fullWidth: v })}
         />
+        <Row label="Offset X (px)">
+          <input type="range" min={-500} max={500} value={s.offsetX || 0} onChange={(e) => update({ offsetX: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetX || 0}</span>
+        </Row>
+        <Row label="Offset Y (px)">
+          <input type="range" min={-500} max={500} value={s.offsetY || 0} onChange={(e) => update({ offsetY: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetY || 0}</span>
+        </Row>
         {s.mode === 'separator' && (
           <>
             <Row label="Margem superior (px)">
-              <Slider
-                value={s.margin!.top}
-                min={0}
-                max={60}
-                onChange={(v) => update({ margin: { top: v, bottom: s.margin!.bottom } })}
-              />
+              <input type="range" min={0} max={60} value={s.margin!.top} onChange={(e) => update({ margin: { top: Number(e.target.value), bottom: s.margin!.bottom } })} style={{ flex: 1, cursor: "grab" }} />
+              <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.top}</span>
             </Row>
             <Row label="Margem inferior (px)">
-              <Slider
-                value={s.margin!.bottom}
-                min={0}
-                max={60}
-                onChange={(v) => update({ margin: { top: s.margin!.top, bottom: v } })}
-              />
+              <input type="range" min={0} max={60} value={s.margin!.bottom} onChange={(e) => update({ margin: { top: s.margin!.top, bottom: Number(e.target.value) } })} style={{ flex: 1, cursor: "grab" }} />
+              <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.bottom}</span>
             </Row>
           </>
         )}
         {s.mode === 'sticky' && (
           <Row label="Z-Index">
-            <Slider
-              value={s.stickyZIndex || 10}
-              min={1}
-              max={100}
-              onChange={(v) => update({ stickyZIndex: v })}
-            />
+            <input type="range" min={1} max={100} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+            <span style={{ fontSize: 12, minWidth: 50 }}>{s.stickyZIndex || 10}</span>
           </Row>
         )}
       </Accordion>

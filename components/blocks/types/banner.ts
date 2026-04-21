@@ -7,6 +7,8 @@ export type BannerSettings = {
   fullWidth: boolean
   borderRadius?: number
   margin?: { top: number; bottom: number }
+  offsetX?: number
+  offsetY?: number
   
   // Background
   backgroundType: 'image' | 'gradient' | 'solid' | 'pattern'
