@@ -58,6 +58,8 @@ export default function BannerBlock({ settings, style }: Props) {
         borderRadius: settings.borderRadius ? `${settings.borderRadius}px` : undefined,
         margin: !isSticky ? `${settings.margin?.top || 0}px 0 ${settings.margin?.bottom || 0}px 0` : undefined,
         overflow: 'hidden',
+        transform: `translate3d(${settings.offsetX || 0}px, ${settings.offsetY || 0}px, 0)`,
+        willChange: 'transform',
         ...style,
       }}
     >
