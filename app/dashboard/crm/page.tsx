@@ -97,6 +97,88 @@ function NewLeadSourceForm({ userId, onCreated }: { userId: string, onCreated: (
 }
 
 export default function CrmProPage() {
+
+  const openPrintTask = (t: any, lead: any) => {
+    const w = window.open('', '_blank', 'height=720,width=900')
+    if (!w) return
+
+    const title = t.title || 'Tarefa'
+    const leadName = lead?.name || '—'
+    const leadEmail = lead?.email || '—'
+    const due = new Date(t.due_at).toLocaleString('pt-PT')
+    const typeLabel =
+      t.action_type === 'email' ? 'Email' :
+      t.action_type === 'whatsapp' ? 'WhatsApp' :
+      t.action_type === 'call' ? 'Ligar' :
+      t.action_type === 'sms' ? 'SMS' :
+      t.action_type === 'meeting' ? 'Reunião' :
+      (!t.action_type || t.action_type === 'follow_up') ? 'Follow-up' :
+      t.action_type
+
+    const desc = (t.description || '').trim()
+
+    const escapeHtml = (str: string) =>
+      String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;')
+
+    const html = `<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+  <style>
+    :root { --text:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb; --chip:#eef2ff; --chipText:#3730a3; }
+    * { box-sizing:border-box; }
+    body { font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--text); margin:24px; }
+    .header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    h1 { font-size:20px; margin:0; }
+    .meta { color:var(--muted); font-size:12px; margin-top:6px; }
+    .chip { display:inline-block; padding:4px 10px; border-radius:999px; background:var(--chip); color:var(--chipText); font-weight:700; font-size:12px; white-space:nowrap; }
+    .card { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .grid { display:grid; grid-template-columns:180px 1fr; }
+    .row { display:contents; }
+    .k { padding:10px 12px; background:var(--bg); border-bottom:1px solid var(--border); font-weight:700; font-size:12px; color:#374151; }
+    .v { padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+    .desc { padding:12px; }
+    .desc h2 { font-size:13px; margin:0 0 8px 0; color:#374151; }
+    .desc p { margin:0; white-space:pre-wrap; line-height:1.35; }
+    @media print { body { margin:0; padding:0; } .card { border:none; } .k { background:#fff; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>${title}</h1>
+      <div class="meta">Gerado em ${new Date().toLocaleString('pt-PT')}</div>
+    </div>
+    <div class="chip">${typeLabel}</div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="row"><div class="k">Lead</div><div class="v">${leadName}</div></div>
+      <div class="row"><div class="k">Email</div><div class="v">${leadEmail}</div></div>
+      <div class="row"><div class="k">Data/Hora</div><div class="v">${due}</div></div>
+      <div class="row"><div class="k">ID da tarefa</div><div class="v">${t.id}</div></div>
+    </div>
+    ${desc ? `<div class="desc"><h2>Notas</h2><p>${escapeHtml(desc)}</p></div>` : ''}
+  </div>
+
+  <script>window.focus(); window.print();</script>
+</body>
+</html>`
+
+    w.document.open()
+    w.document.write(html)
+    w.document.close()
+  }
+
+
   const router = useRouter()
   const [showWelcomeInfoModal, setShowWelcomeInfoModal] = useState(false)
   const [showTemplatesInfoModal, setShowTemplatesInfoModal] = useState(false)
@@ -1454,6 +1536,7 @@ Melhores cumprimentos,
                   </div>
 
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button onClick={() => openPrintTask(t, lead)} style={{ padding: '6px 12px', borderRadius: 8, background: '#6b7280', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>🖨️ Imprimir</button>
                     <button onClick={() => handleTaskAction(t, lead)} style={{ padding: '6px 12px', borderRadius: 8, background: '#3b82f6', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Fazer</button>
                     <button onClick={async () => { await markTaskDone({ taskId: t.id }); await logLeadActivity({ leadId: t.lead_id, userId, type: 'task_done', title: `Tarefa concluída: ${t.title}` }); await loadTasksForToday() }} style={{ padding: '6px 12px', borderRadius: 8, background: '#10b981', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ Feita</button>
                   </div>

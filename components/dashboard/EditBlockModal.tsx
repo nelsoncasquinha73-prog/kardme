@@ -6,9 +6,10 @@ import { supabase } from '@/lib/supabaseClient'
 // EDITORS
 import HeaderBlockEditor from '@/components/dashboard/block-editors/HeaderBlockEditor'
 import ShapeCanvasBlockEditor from '@/components/dashboard/block-editors/ShapeCanvasBlockEditor'
+import BannerBlockEditor from '@/components/blocks/BannerBlockEditor'
 
 type Props = {
-  cardId: string // adiciona esta prop para receber o cardId
+  cardId: string
   block: {
     id: string
     type: string
@@ -19,7 +20,7 @@ type Props = {
 }
 
 export default function EditBlockModal({
-  cardId, // recebe o cardId aqui
+  cardId,
   block,
   onClose,
   onSaved,
@@ -45,7 +46,16 @@ export default function EditBlockModal({
       case 'header':
         return (
           <HeaderBlockEditor
-            cardId={cardId} // passa o cardId aqui
+            cardId={cardId}
+            settings={settings}
+            onChange={setSettings}
+          />
+        )
+
+      case 'banner':
+        return (
+          <BannerBlockEditor
+            cardId={cardId}
             settings={settings}
             onChange={setSettings}
           />
