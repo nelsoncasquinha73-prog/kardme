@@ -19,6 +19,7 @@ import FreeTextBlockEditor from '@/components/dashboard/block-editors/FreeTextBl
 import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButtonsBlockEditor'
 import ShapeCanvasBlockEditor from '@/components/dashboard/block-editors/ShapeCanvasBlockEditor'
 import VideoBlockEditor from '@/components/dashboard/block-editors/VideoBlockEditor'
+import BannerBlockEditor from '@/components/blocks/BannerBlockEditor'
 import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
 import ThemeDecorationsEditor from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
@@ -526,6 +527,13 @@ export default function ThemePageClientRight({
             onChangeStyle={onChangeStyle}
           />
         )}
+        {activeBlock?.type === 'banner' && (
+          <BannerBlockEditor
+            cardId={card.id}
+            settings={activeBlock.settings || {}}
+            onChange={(nextSettings) => onChangeSettings(nextSettings)}
+          />
+        )}
 
         {activeBlock &&
           ![
@@ -544,7 +552,9 @@ export default function ThemePageClientRight({
             'free_text',
             'shape_canvas',
             'cta_buttons',
+            'banner',
           ].includes(activeBlock.type) && (
+
             <p style={{ fontSize: 14, opacity: 0.65 }}>
               Editor ainda não disponível para: <b>{activeBlock.type}</b>
             </p>
