@@ -122,9 +122,6 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
   }) => (
     <div
       style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
     >
       <input
         type="range"
