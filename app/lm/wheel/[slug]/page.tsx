@@ -99,9 +99,18 @@ export default function WheelPage() {
 
   function lightenColor(hex: string, amount: number): string {
     try {
-      const num = parseInt(hex.replace('#', ''), 16)
-      return `rgb(\${Math.min(255,(num>>16)+amount)},\${Math.min(255,((num>>8)&0xff)+amount)},\${Math.min(255,(num&0xff)+amount)})`
-    } catch { return hex }
+      const clean = (hex || '').trim()
+      if (!clean.startsWith('#')) return '#3b82f6'
+      const full = clean.length === 4
+        ? '#' + clean[1] + clean[1] + clean[2] + clean[2] + clean[3] + clean[3]
+        : clean
+      if (full.length !== 7) return '#3b82f6'
+      const num = parseInt(full.slice(1), 16)
+      const r = Math.min(255, (num >> 16) + amount)
+      const g = Math.min(255, ((num >> 8) & 0xff) + amount)
+      const b = Math.min(255, (num & 0xff) + amount)
+      return `rgb(${r},${g},${b})`
+    } catch { return '#3b82f6' }
   }
 
   const drawWheel = useCallback((rot: number) => {
@@ -124,7 +133,8 @@ export default function WheelPage() {
     slices.forEach((slice, i) => {
       const start = rot + i * arc; const end = start + arc; const mid = start + arc / 2
       const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R)
-      grad.addColorStop(0, lightenColor(slice.color, 40)); grad.addColorStop(1, slice.color)
+      const sliceColor = slice.color && slice.color.startsWith('#') ? slice.color : '#3b82f6'
+      grad.addColorStop(0, lightenColor(sliceColor, 40)); grad.addColorStop(1, sliceColor)
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, start, end); ctx.closePath(); ctx.fillStyle = grad; ctx.fill()
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, start, end); ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke()
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R*Math.cos(start), cy + R*Math.sin(start)); ctx.strokeStyle = 'rgba(245,158,11,0.5)'; ctx.lineWidth = 1; ctx.stroke()
