@@ -276,11 +276,15 @@ export default function CardPreview({
                   }}
                   onMouseDown={(e) => {
                     if (!isActive) return
+                    const t = e.target as HTMLElement
+                    if (t?.closest?.('input, textarea, select, button, a, [contenteditable="true"]')) return
                     e.preventDefault()
                     e.stopPropagation()
                   }}
                   onPointerDown={(e) => {
                     if (!isActive) return
+                    const t = e.target as HTMLElement
+                    if (t?.closest?.('input, textarea, select, button, a, [contenteditable="true"]')) return
                     e.preventDefault()
                     e.stopPropagation()
                   }}

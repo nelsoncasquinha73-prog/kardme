@@ -129,10 +129,7 @@ const Slider = ({
     >
       <input
         type="range"
-            onPointerDownCapture={(e) => e.stopPropagation()}
-            onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()}
-        min={min}
+                                            min={min}
         max={max} step={1} value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
         style={{ flex: 1 }}
