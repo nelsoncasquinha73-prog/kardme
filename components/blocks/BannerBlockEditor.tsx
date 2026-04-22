@@ -129,6 +129,9 @@ const Slider = ({
     >
       <input
         type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()}
         min={min}
         max={max} step={1} value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
@@ -214,11 +217,17 @@ const Slider = ({
       {/* LAYOUT */}
       <Accordion title="📐 Layout" id="layout">
         <Row label="Altura (px)">
-          <input type="range" min={80} max={300} step={1} value={s.height} onChange={(e) => update({ height: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={80} max={300} step={1} value={s.height} onChange={(e) => update({ height: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.height}</span>
         </Row>
         <Row label="Raio da borda (px)">
-          <input type="range" min={0} max={50} step={1} value={s.borderRadius || 0} onChange={(e) => update({ borderRadius: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={50} step={1} value={s.borderRadius || 0} onChange={(e) => update({ borderRadius: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.borderRadius || 0}</span>
         </Row>
         <Toggle
@@ -227,27 +236,42 @@ const Slider = ({
           onChange={(v) => update({ fullWidth: v })}
         />
         <Row label="Offset X (px)">
-          <input type="range" min={-500} max={500} step={1} value={s.offsetX || 0} onChange={(e) => update({ offsetX: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetX || 0} onChange={(e) => update({ offsetX: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetX || 0}</span>
         </Row>
         <Row label="Offset Y (px)">
-          <input type="range" min={-500} max={500} step={1} value={s.offsetY || 0} onChange={(e) => update({ offsetY: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetY || 0} onChange={(e) => update({ offsetY: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetY || 0}</span>
         </Row>
         {s.mode === 'separator' && (
           <>
             <Row label="Margem superior (px)">
-              <input type="range" min={0} max={60} step={1} value={s.margin!.top} onChange={(e) => update({ margin: { top: Number(e.target.value), bottom: s.margin!.bottom } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+              <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.top} onChange={(e) => update({ margin: { top: Number(e.target.value), bottom: s.margin!.bottom } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
               <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.top}</span>
             </Row>
             <Row label="Margem inferior (px)">
-              <input type="range" min={0} max={60} step={1} value={s.margin!.bottom} onChange={(e) => update({ margin: { top: s.margin!.top, bottom: Number(e.target.value) } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+              <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.bottom} onChange={(e) => update({ margin: { top: s.margin!.top, bottom: Number(e.target.value) } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
               <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.bottom}</span>
             </Row>
           </>
         )}
         <Row label="Z-Index (sobreposição)">
-          <input type="range" min={1} max={100} step={1} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={1} max={100} step={1} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.stickyZIndex || 10}</span>
         </Row>
       </Accordion>
@@ -316,7 +340,10 @@ const Slider = ({
         />
         {s.fadeTopEnabled && (
           <Row label="Tamanho fade superior (px)">
-            <input type="range" min={5} max={100} step={1} value={s.fadeTopSize} onChange={(e) => update({ fadeTopSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeTopSize} onChange={(e) => update({ fadeTopSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeTopSize}</span>
           </Row>
         )}
@@ -328,7 +355,10 @@ const Slider = ({
         />
         {s.fadeBottomEnabled && (
           <Row label="Tamanho fade inferior (px)">
-            <input type="range" min={5} max={100} step={1} value={s.fadeBottomSize} onChange={(e) => update({ fadeBottomSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeBottomSize} onChange={(e) => update({ fadeBottomSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeBottomSize}</span>
           </Row>
         )}
@@ -344,7 +374,10 @@ const Slider = ({
         </Row>
 
         <Row label="Opacidade overlay (%)">
-          <input type="range" min={0} max={100} step={1} value={s.overlayOpacity} onChange={(e) => update({ overlayOpacity: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={100} step={1} value={s.overlayOpacity} onChange={(e) => update({ overlayOpacity: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.overlayOpacity}</span>
         </Row>
 
@@ -385,7 +418,10 @@ const Slider = ({
           </Row>
 
           <Row label="Tamanho (px)">
-            <input type="range" min={40} max={280} step={1} value={s.logoSize} onChange={(e) => update({ logoSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            <input type="range"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()} min={40} max={280} step={1} value={s.logoSize} onChange={(e) => update({ logoSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.logoSize}</span>
           </Row>
 
