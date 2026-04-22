@@ -18,6 +18,7 @@ import {
   FiEdit2,
 } from 'react-icons/fi'
 import EditLeadModal from '@/components/crm/EditLeadModal'
+import { updateLeadCard } from '@/lib/crm/cards'
 import VideoNotificationCenter from './VideoNotificationCenter'
 
 import { supabase } from '@/lib/supabaseClient'
@@ -2178,7 +2179,38 @@ Melhores cumprimentos,
                         {lead.email}
                       </span>
                     </td>
-                    <td style={td}>{(lead as any).cards?.name || (lead as any).cards?.slug || '—'}</td>
+                    <td style={td}>
+                      <select
+                        value={lead.card_id || ''}
+                        onChange={async (e) => {
+                          const newCardId = e.target.value
+                          if (!newCardId) return
+                          try {
+                            await updateLeadCard(lead.id, newCardId)
+                            setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, card_id: newCardId } : l))
+                            addToast('Cartão atualizado com sucesso!', 'success')
+                          } catch (err: any) {
+                            addToast(err.message || 'Erro ao atualizar cartão', 'error')
+                          }
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: 'rgba(59,130,246,0.15)',
+                          color: '#3b82f6',
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          minWidth: 140,
+                        }}
+                      >
+                        <option value="">Escolher cartão...</option>
+                        {cardsList.map((card: any) => (
+                          <option key={card.id} value={card.id}>{card.name || card.title || card.slug}</option>
+                        ))}
+                      </select>
+                    </td>
                     <td style={td}>{lead.zone || '—'}</td>
                     <td style={td}>
                       <div style={{ position: 'relative' }}>
