@@ -2441,147 +2441,197 @@ Melhores cumprimentos,
                     </td>
                     <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
                     <td style={td}>
-                      <div style={{ display: 'flex', gap: 6 }}>
+                      <div style={{ position: 'relative' }}>
                         <button
                           onClick={() => {
-                            setInlineEmailLeadIds([lead.id])
-                            setShowInlineEmailEditor(true)
+                            const dropdownId = `dropdown-${lead.id}`
+                            const dropdown = document.getElementById(dropdownId)
+                            if (dropdown) dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
                           }}
-                          disabled={!gmail.isConnected}
-                          title={gmail.isConnected ? 'Enviar email agora' : 'Liga o Gmail para enviar emails'}
                           style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
+                            padding: '8px 12px',
+                            borderRadius: 8,
                             border: 'none',
-                            background: gmail.isConnected ? '#10b981' : '#d1d5db',
+                            background: 'rgba(255,255,255,0.08)',
                             color: '#ffffff',
-                            fontWeight: 800,
-                            fontSize: 12,
-                            cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <FiMail size={15} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            const phone = normalizePhone(lead.phone)
-                            if (!phone) {
-                              alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
-                              return
-                            }
-                            setSelectedLeadForWhatsApp(lead)
-                            setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
-                            setShowWhatsAppModal(true)
-                          }}
-                          title="Enviar WhatsApp"
-                          style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
-                            border: 'none',
-                            background: '#25d366',
-                            color: '#ffffff',
-                            fontWeight: 800,
-                            fontSize: 12,
+                            fontWeight: 600,
+                            fontSize: 13,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
+                            gap: 6,
                           }}
                         >
-                          <FaWhatsapp size={14} />
+                          Ações <span style={{ fontSize: 10 }}>▾</span>
                         </button>
-                        <button
-                          onClick={async () => {
-                            setSelectedLeadForView(lead)
-                            setShowViewLeadModal(true)
-                            await loadLeadActivities(lead.id)
-                          }}
-                          title="Ver detalhes"
+                        <div
+                          id={`dropdown-${lead.id}`}
                           style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
-                            border: '1px solid #e5e7eb',
-                            background: '#ffffff',
-                            color: '#111827',
-                            fontWeight: 800,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            display: 'none',
+                            position: 'absolute',
+                            top: '100%',
+                            right: 0,
+                            marginTop: 6,
+                            background: '#0f172a',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 8,
+                            minWidth: 200,
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                            zIndex: 1000,
                           }}
                         >
-                          <FiEye size={15} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedLead(lead)
-                            setNoteText(lead.notes || '')
-                          }}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 10,
-                          border: 'none',
-                          background: 'var(--color-primary)',
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <FiFileText size={14} />
-                      </button>
-                        <button
-                          onClick={() => deleteLead(lead.id)}
-                          disabled={deletingId === lead.id}
-                          title="Apagar lead"
-                          style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
-                            border: 'none',
-                            background: '#fee2e2',
-                            color: '#b91c1c',
-                            fontWeight: 700,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <FiTrash2 size={14} />
-                        </button>
-                        <button
-                          onClick={() => { setSelectedLeadForTask(lead); setShowTaskModal(true) }}
-                          title="Agendar tarefa"
-                          style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
-                            border: 'none',
-                            background: '#dbeafe',
-                            color: '#0c4a6e',
-                            fontWeight: 700,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <FiCalendar size={14} />
-                        </button>
+                          <button
+                            onClick={() => {
+                              setInlineEmailLeadIds([lead.id])
+                              setShowInlineEmailEditor(true)
+                              document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
+                            }}
+                            disabled={!gmail.isConnected}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: gmail.isConnected ? '#ffffff' : '#9ca3af',
+                              fontSize: 13,
+                              cursor: gmail.isConnected ? 'pointer' : 'not-allowed',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              opacity: gmail.isConnected ? 1 : 0.5,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FiMail size={14} /> Enviar email
+                          </button>
+                          <button
+                            onClick={() => {
+                              const phone = normalizePhone(lead.phone)
+                              if (!phone) {
+                                alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
+                                return
+                              }
+                              setSelectedLeadForWhatsApp(lead)
+                              setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
+                              setShowWhatsAppModal(true)
+                              document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#ffffff',
+                              fontSize: 13,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FaWhatsapp size={13} /> WhatsApp
+                          </button>
+                          <button
+                            onClick={async () => {
+                              setSelectedLeadForView(lead)
+                              setShowViewLeadModal(true)
+                              await loadLeadActivities(lead.id)
+                              document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#ffffff',
+                              fontSize: 13,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FiEye size={14} /> Ver detalhes
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedLead(lead)
+                              setNoteText(lead.notes || '')
+                              document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#ffffff',
+                              fontSize: 13,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FiFileText size={14} /> Notas
+                          </button>
+                          <button
+                            onClick={() => { setSelectedLeadForTask(lead); setShowTaskModal(true); document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none' }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#ffffff',
+                              fontSize: 13,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FiCalendar size={14} /> Agendar tarefa
+                          </button>
+                          <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />
+                          <button
+                            onClick={() => {
+                              deleteLead(lead.id)
+                              document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
+                            }}
+                            disabled={deletingId === lead.id}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              textAlign: 'left',
+                              border: 'none',
+                              background: 'transparent',
+                              color: '#ef4444',
+                              fontSize: 13,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              opacity: deletingId === lead.id ? 0.5 : 1,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <FiTrash2 size={14} /> Apagar
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -3864,13 +3914,13 @@ Melhores cumprimentos,
 
 const th = {
   textAlign: 'left' as const,
-  padding: '8px 6px',
-  fontWeight: 700,
-  fontSize: 11,
+  padding: '10px 8px',
+  fontWeight: 800,
+  fontSize: 13,
   whiteSpace: 'nowrap' as const,
 }
 
 const td = {
-  padding: '8px 6px',
-  fontSize: 12,
+  padding: '10px 8px',
+  fontSize: 14,
 }
