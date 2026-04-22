@@ -2128,7 +2128,8 @@ Melhores cumprimentos,
         <table
           style={{
             width: '100%',
-            borderCollapse: 'collapse',
+            borderCollapse: 'separate',
+            borderSpacing: '0 8px',
             fontSize: 13,
           }}
         >
@@ -2169,7 +2170,25 @@ Melhores cumprimentos,
               filteredLeads.map(lead => {
                 const colors = stepColor(lead.step)
                 return (
-                  <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <tr key={lead.id} style={{
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 14,
+                    background: 'rgba(255,255,255,0.02)',
+                    margin: '8px 0',
+                    display: 'table',
+                    width: '100%',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'
+                  }}
+                  >
 
                     <td style={{ ...td, textAlign: 'center' }}>
                         <input
@@ -2439,7 +2458,7 @@ Melhores cumprimentos,
                         )}
                       </div>
                     </td>
-                    <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td style={{ ...td, fontSize: 12 }}>{new Date(lead.created_at).toLocaleDateString()}</td>
                     <td style={td}>
                       <div style={{ position: 'relative' }}>
                         <button
@@ -3916,7 +3935,7 @@ const th = {
   textAlign: 'left' as const,
   padding: '10px 8px',
   fontWeight: 800,
-  fontSize: 13,
+  fontSize: 15,
   whiteSpace: 'nowrap' as const,
 }
 
