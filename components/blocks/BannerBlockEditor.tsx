@@ -317,12 +317,8 @@ const Slider = ({
         />
         {s.fadeTopEnabled && (
           <Row label="Tamanho fade superior (px)">
-            <Slider
-              value={s.fadeTopSize}
-              min={5}
-              max={100}
-              onChange={(v) => update({ fadeTopSize: v })}
-            />
+            <input type="range" min={5} max={100} value={s.fadeTopSize} onChange={(e) => update({ fadeTopSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+            <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeTopSize}</span>
           </Row>
         )}
 
@@ -333,12 +329,8 @@ const Slider = ({
         />
         {s.fadeBottomEnabled && (
           <Row label="Tamanho fade inferior (px)">
-            <Slider
-              value={s.fadeBottomSize}
-              min={5}
-              max={100}
-              onChange={(v) => update({ fadeBottomSize: v })}
-            />
+            <input type="range" min={5} max={100} value={s.fadeBottomSize} onChange={(e) => update({ fadeBottomSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+            <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeBottomSize}</span>
           </Row>
         )}
 
@@ -353,12 +345,8 @@ const Slider = ({
         </Row>
 
         <Row label="Opacidade overlay (%)">
-          <Slider
-            value={s.overlayOpacity}
-            min={0}
-            max={100}
-            onChange={(v) => update({ overlayOpacity: v })}
-          />
+          <input type="range" min={0} max={100} value={s.overlayOpacity} onChange={(e) => update({ overlayOpacity: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.overlayOpacity}</span>
         </Row>
 
         <Toggle
@@ -398,12 +386,8 @@ const Slider = ({
           </Row>
 
           <Row label="Tamanho (px)">
-            <Slider
-              value={s.logoSize}
-              min={40}
-              max={280}
-              onChange={(v) => update({ logoSize: v })}
-            />
+            <input type="range" min={40} max={280} value={s.logoSize} onChange={(e) => update({ logoSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+            <span style={{ fontSize: 12, minWidth: 50 }}>{s.logoSize}</span>
           </Row>
 
           <Row label="Posição">
