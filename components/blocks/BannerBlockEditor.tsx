@@ -129,9 +129,10 @@ const Slider = ({
     >
       <input
         type="range"
-                                            min={min}
+        min={min}
         max={max} step={1} value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
+        onPointerMove={(e) => e.preventDefault()}
         style={{ flex: 1, touchAction: "none" }}
       />
       <input
