@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fi'
 import EditLeadModal from '@/components/crm/EditLeadModal'
 import { updateLeadCard } from '@/lib/crm/cards'
+import { getLocalActiveCardId, setLocalActiveCardId, saveActiveCardIdToDB, getActiveCardIdFromDB } from '@/lib/crm/activeCard'
 import VideoNotificationCenter from './VideoNotificationCenter'
 
 import { supabase } from '@/lib/supabaseClient'
@@ -784,6 +785,20 @@ Melhores cumprimentos,
 
     // carregar cards do utilizador (para filtro + settings)
     const loadCards = async () => {
+      // Restaurar cartão ativo da DB ou localStorage
+      if (userId) {
+        try {
+          const dbCardId = await getActiveCardIdFromDB(userId)
+          const localCardId = getLocalActiveCardId()
+          const cardIdToUse = dbCardId || localCardId || 'all'
+          
+          if (cardIdToUse !== selectedCardId) {
+            setSelectedCardId(cardIdToUse)
+          }
+        } catch (e) {
+          console.error('Erro ao restaurar cartão ativo:', e)
+        }
+      }
       if (!userId) return
       const { data, error } = await supabase
         .from('cards')
@@ -1411,9 +1426,15 @@ Melhores cumprimentos,
               }}
             >
               <button
-                onClick={() => {
+                onClick={async () => {
                   setSelectedCardId('all')
                   setShowCardDropdown(false)
+                  try {
+                    setLocalActiveCardId(null)
+                    if (userId) await saveActiveCardIdToDB(userId, null)
+                  } catch (e) {
+                    console.error(e)
+                  }
                 }}
                 style={{
                   width: '100%',
@@ -1435,9 +1456,15 @@ Melhores cumprimentos,
               {cardsList.map((card: any) => (
                 <button
                   key={card.id}
-                  onClick={() => {
+                  onClick={async () => {
                     setSelectedCardId(card.id)
                     setShowCardDropdown(false)
+                    try {
+                      setLocalActiveCardId(card.id)
+                      if (userId) await saveActiveCardIdToDB(userId, card.id)
+                    } catch (e) {
+                      console.error(e)
+                    }
                   }}
                   style={{
                     width: '100%',
