@@ -135,19 +135,13 @@ const Slider = ({
         min={min}
         max={max} step={1} value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
-        style={{ flex: 1, cursor: 'grab', position: 'relative', zIndex: 2, pointerEvents: 'auto', touchAction: 'none' }}
+        style={{ flex: 1 }}
       />
       <input
         type="number"
         value={value}
         onChange={(e) => onSliderChange(Number(e.target.value))}
-        style={{
-          width: 50,
-          padding: '4px 6px',
-          border: '1px solid #d1d5db',
-          borderRadius: 4,
-          fontSize: 12,
-        }}
+        style={{ flex: 1 }}
       />
     </div>
   )
@@ -161,52 +155,32 @@ const Slider = ({
     checked: boolean
     onChange: (v: boolean) => void
   }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ flex: 1 }}>
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onToggleChange(e.target.checked)}
-        style={{ cursor: 'pointer', width: 18, height: 18 }}
+        style={{ flex: 1 }}
       />
-      <label style={{ fontSize: 12, cursor: 'pointer' }}>{label}</label>
+      <label style={{ flex: 1 }}>{label}</label>
     </div>
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{ flex: 1 }}>
       {/* MODO */}
       <Accordion title="🎯 Modo" id="mode">
         <Row label="Tipo">
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1 }}>
             <button
               onClick={() => update({ mode: 'separator' })}
-              style={{
-                flex: 1,
-                padding: '8px',
-                background: s.mode === 'separator' ? '#3b82f6' : '#e5e7eb',
-                color: s.mode === 'separator' ? '#fff' : '#374151',
-                border: 'none',
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              style={{ flex: 1 }}
             >
               Separador
             </button>
             <button
               onClick={() => update({ mode: 'sticky' })}
-              style={{
-                flex: 1,
-                padding: '8px',
-                background: s.mode === 'sticky' ? '#3b82f6' : '#e5e7eb',
-                color: s.mode === 'sticky' ? '#fff' : '#374151',
-                border: 'none',
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              style={{ flex: 1 }}
             >
               Sticky (Bandeira)
             </button>
@@ -217,17 +191,25 @@ const Slider = ({
       {/* LAYOUT */}
       <Accordion title="📐 Layout" id="layout">
         <Row label="Altura (px)">
-          <input type="range"
-            onPointerDownCapture={(e) => e.stopPropagation()}
-            onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={80} max={300} step={1} value={s.height} onChange={(e) => update({ height: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input
+            type="range"
+            min={80}
+            max={300}
+            value={s.height}
+            onChange={(e) => update({ height: Number(e.target.value) })}
+            style={{ flex: 1 }}
+          />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.height}</span>
         </Row>
         <Row label="Raio da borda (px)">
-          <input type="range"
-            onPointerDownCapture={(e) => e.stopPropagation()}
-            onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={50} step={1} value={s.borderRadius || 0} onChange={(e) => update({ borderRadius: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+          <input
+            type="range"
+            min={0}
+            max={50}
+            value={s.borderRadius || 0}
+            onChange={(e) => update({ borderRadius: Number(e.target.value) })}
+            style={{ flex: 1 }}
+          />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.borderRadius || 0}</span>
         </Row>
         <Toggle
@@ -239,14 +221,14 @@ const Slider = ({
           <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetX || 0} onChange={(e) => update({ offsetX: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetX || 0} onChange={(e) => update({ offsetX: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetX || 0}</span>
         </Row>
         <Row label="Offset Y (px)">
           <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetY || 0} onChange={(e) => update({ offsetY: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={-500} max={500} step={1} value={s.offsetY || 0} onChange={(e) => update({ offsetY: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.offsetY || 0}</span>
         </Row>
         {s.mode === 'separator' && (
@@ -255,14 +237,14 @@ const Slider = ({
               <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.top} onChange={(e) => update({ margin: { top: Number(e.target.value), bottom: s.margin!.bottom } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.top} onChange={(e) => update({ margin: { top: Number(e.target.value), bottom: s.margin!.bottom } })} style={{ flex: 1 }} />
               <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.top}</span>
             </Row>
             <Row label="Margem inferior (px)">
               <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.bottom} onChange={(e) => update({ margin: { top: s.margin!.top, bottom: Number(e.target.value) } })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={60} step={1} value={s.margin!.bottom} onChange={(e) => update({ margin: { top: s.margin!.top, bottom: Number(e.target.value) } })} style={{ flex: 1 }} />
               <span style={{ fontSize: 12, minWidth: 50 }}>{s.margin!.bottom}</span>
             </Row>
           </>
@@ -271,7 +253,7 @@ const Slider = ({
           <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={1} max={100} step={1} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={1} max={100} step={1} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.stickyZIndex || 10}</span>
         </Row>
       </Accordion>
@@ -320,12 +302,7 @@ const Slider = ({
                   update({ backgroundImage: publicUrl })
                 }
               }}
-              style={{
-                padding: '6px',
-                border: '1px solid #d1d5db',
-                borderRadius: 4,
-                fontSize: 12,
-              }}
+              style={{ flex: 1 }}
             />
           </Row>
         )}
@@ -343,7 +320,7 @@ const Slider = ({
             <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeTopSize} onChange={(e) => update({ fadeTopSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeTopSize} onChange={(e) => update({ fadeTopSize: Number(e.target.value) })} style={{ flex: 1 }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeTopSize}</span>
           </Row>
         )}
@@ -358,7 +335,7 @@ const Slider = ({
             <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeBottomSize} onChange={(e) => update({ fadeBottomSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={5} max={100} step={1} value={s.fadeBottomSize} onChange={(e) => update({ fadeBottomSize: Number(e.target.value) })} style={{ flex: 1 }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.fadeBottomSize}</span>
           </Row>
         )}
@@ -377,7 +354,7 @@ const Slider = ({
           <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={100} step={1} value={s.overlayOpacity} onChange={(e) => update({ overlayOpacity: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={0} max={100} step={1} value={s.overlayOpacity} onChange={(e) => update({ overlayOpacity: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={{ fontSize: 12, minWidth: 50 }}>{s.overlayOpacity}</span>
         </Row>
 
@@ -408,12 +385,7 @@ const Slider = ({
                   update({ logoUrl: publicUrl })
                 }
               }}
-              style={{
-                padding: '6px',
-                border: '1px solid #d1d5db',
-                borderRadius: 4,
-                fontSize: 12,
-              }}
+              style={{ flex: 1 }}
             />
           </Row>
 
@@ -421,7 +393,7 @@ const Slider = ({
             <input type="range"
             onPointerDownCapture={(e) => e.stopPropagation()}
             onMouseDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()} min={40} max={280} step={1} value={s.logoSize} onChange={(e) => update({ logoSize: Number(e.target.value) })} style={{ flex: 1, cursor: "grab", position: "relative", zIndex: 2, pointerEvents: "auto", touchAction: "none" }} />
+            onTouchStartCapture={(e) => e.stopPropagation()} min={40} max={280} step={1} value={s.logoSize} onChange={(e) => update({ logoSize: Number(e.target.value) })} style={{ flex: 1 }} />
             <span style={{ fontSize: 12, minWidth: 50 }}>{s.logoSize}</span>
           </Row>
 
