@@ -2124,12 +2124,11 @@ Melhores cumprimentos,
         </button>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', marginLeft: -24, marginRight: -24, paddingLeft: 24, paddingRight: 24 }}>
         <table
           style={{
             width: '100%',
-            borderCollapse: 'separate',
-            borderSpacing: '0 8px',
+            borderCollapse: 'collapse',
             fontSize: 13,
           }}
         >
