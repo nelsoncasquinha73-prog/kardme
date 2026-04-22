@@ -1374,7 +1374,7 @@ Melhores cumprimentos,
 
 
     return crmProActive === false ? crmProLanding : (
-    <main style={{ padding: 32 }}>
+    <main style={{ padding: '32px 12px' }}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ margin: 0, flex: 1 }}>CRM Pro</h1>
 
@@ -2124,7 +2124,7 @@ Melhores cumprimentos,
         </button>
       </div>
 
-      <div style={{ overflowX: 'auto', marginLeft: -24, marginRight: -24, paddingLeft: 24, paddingRight: 24 }}>
+      <div style={{ overflowX: 'auto' }}>
         <table
           style={{
             width: '100%',
@@ -2169,25 +2169,7 @@ Melhores cumprimentos,
               filteredLeads.map(lead => {
                 const colors = stepColor(lead.step)
                 return (
-                  <tr key={lead.id} style={{
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 14,
-                    background: 'rgba(255,255,255,0.02)',
-                    margin: '8px 0',
-                    display: 'table',
-                    width: '100%',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'
-                  }}
-                  >
+                  <tr key={lead.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
 
                     <td style={{ ...td, textAlign: 'center' }}>
                         <input
@@ -2457,7 +2439,7 @@ Melhores cumprimentos,
                         )}
                       </div>
                     </td>
-                    <td style={{ ...td, fontSize: 12 }}>{new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td style={td}>{new Date(lead.created_at).toLocaleDateString()}</td>
                     <td style={td}>
                       <div style={{ position: 'relative' }}>
                         <button
@@ -2692,9 +2674,30 @@ Melhores cumprimentos,
               {selectedLead.email} • {selectedLead.zone || 'Sem zona'}
             </p>
 
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, fontSize: 13, color: '#111827' }}>
-              Notas
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <label style={{ fontWeight: 600, fontSize: 13, color: '#111827' }}>
+                Notas
+              </label>
+              <button
+                onClick={() => {
+                  // Botão "Editar" — já está em modo edição (textarea ativo)
+                  // Pode servir para expandir ou focar no textarea
+                  document.querySelector('textarea')?.focus()
+                }}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  background: 'rgba(59,130,246,0.1)',
+                  color: '#3b82f6',
+                  border: '1px solid rgba(59,130,246,0.3)',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                ✏️ Editar
+              </button>
+            </div>
             <textarea
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
@@ -3934,7 +3937,7 @@ const th = {
   textAlign: 'left' as const,
   padding: '10px 8px',
   fontWeight: 800,
-  fontSize: 15,
+  fontSize: 13,
   whiteSpace: 'nowrap' as const,
 }
 
