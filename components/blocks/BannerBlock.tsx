@@ -48,7 +48,7 @@ export default function BannerBlock({ settings, style }: Props) {
       style={{
         position: isSticky ? 'sticky' : 'relative',
         top: isSticky ? 0 : undefined,
-        zIndex: isSticky ? (settings.stickyZIndex || 10) : undefined,
+        zIndex: settings.stickyZIndex || 10,
         height: `${settings.height}px`,
         width: settings.fullWidth ? '100%' : '100%',
         backgroundImage: settings.backgroundType === 'image' ? `url(${settings.backgroundImage})` : undefined,

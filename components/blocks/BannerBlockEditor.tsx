@@ -247,12 +247,10 @@ const Slider = ({
             </Row>
           </>
         )}
-        {s.mode === 'sticky' && (
-          <Row label="Z-Index">
-            <input type="range" min={1} max={100} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
-            <span style={{ fontSize: 12, minWidth: 50 }}>{s.stickyZIndex || 10}</span>
-          </Row>
-        )}
+        <Row label="Z-Index (sobreposição)">
+          <input type="range" min={1} max={100} value={s.stickyZIndex || 10} onChange={(e) => update({ stickyZIndex: Number(e.target.value) })} style={{ flex: 1, cursor: "grab" }} />
+          <span style={{ fontSize: 12, minWidth: 50 }}>{s.stickyZIndex || 10}</span>
+        </Row>
       </Accordion>
 
       {/* BACKGROUND */}
