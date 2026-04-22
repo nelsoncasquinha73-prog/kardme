@@ -105,9 +105,9 @@ export default function BannerBlockEditor({ cardId, settings, onChange }: Props)
   )
 
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div style={{ marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{label}</label>
-      {children}
+    <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8, minWidth: 120 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1 }}>{children}</div>
     </div>
   )
 
