@@ -111,8 +111,8 @@ export default function DecorationBlockEditor({ cardId, settings, onChangeSettin
           <Row label="Alt">
             <input value={active.alt || ''} onChange={(e) => patchDecoration(active.id, { alt: e.target.value })} placeholder="Descrição" style={inputStyle} />
           </Row>
-          <Row label="X (%)"><input type="range" min={0} max={100} value={active.x} onChange={(e) => patchDecoration(active.id, { x: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.x}%</span></Row>
-          <Row label="Y (%)"><input type="range" min={0} max={100} value={active.y} onChange={(e) => patchDecoration(active.id, { y: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.y}%</span></Row>
+          <Row label="X (%)"><input type="range" min={0} max={100} step="0.5" value={active.x} onChange={(e) => patchDecoration(active.id, { x: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.x}%</span></Row>
+          <Row label="Y (%)"><input type="range" min={0} max={100} step="0.5" value={active.y} onChange={(e) => patchDecoration(active.id, { y: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.y}%</span></Row>
           <Row label="Largura"><input type="range" min={20} max={500} value={active.width} onChange={(e) => patchDecoration(active.id, { width: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.width}px</span></Row>
           <Row label="Altura"><input type="range" min={20} max={500} value={active.height} onChange={(e) => patchDecoration(active.id, { height: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.height}px</span></Row>
           <Row label="Rotação"><input type="range" min={-180} max={180} value={active.rotation} onChange={(e) => patchDecoration(active.id, { rotation: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{active.rotation}°</span></Row>
