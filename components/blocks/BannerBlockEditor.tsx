@@ -125,7 +125,7 @@ const Slider = ({
     onChange: (v: number) => void
   }) => (
     <div
-      style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+      style={{ display: 'flex', gap: 8, alignItems: 'center', touchAction: 'none' }}
     >
       <input
         type="range"
