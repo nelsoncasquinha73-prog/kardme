@@ -93,8 +93,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   }
   async function handleSave() {
     if(!form.title.trim()) return alert('Da um nome!')
-    if(form.magnet_type !== 'form' && form.magnet_type !== 'raffle' && form.magnet_type !== 'wheel' && !form.file_url.trim()) return alert('Upload ficheiro!')
-    setSaving(true)
+        setSaving(true)
     try {
       if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) }
       else { await createLeadMagnet({...form, user_id: userId, slug: generateSlug(form.title), views_count:0, leads_count:0}) }
@@ -238,7 +237,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
             </div>
 
             <div style={{marginBottom:16}}>
-              <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Ficheiro para download *</label>
+              <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Ficheiro para download</label>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
                 <input value={form.file_url} onChange={e=>setForm(f=>({...f,file_url:e.target.value}))} placeholder="URL do ficheiro ou faz upload" style={{flex:1,padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
                 <button onClick={()=>fileInputRef.current?.click()} style={{padding:'10px 14px',borderRadius:10,border:'1px solid rgba(16,185,129,0.4)',background:'rgba(16,185,129,0.1)',color:'#10b981',fontWeight:700,fontSize:12,cursor:'pointer',whiteSpace:'nowrap'}}>{uploadingFile?'..':'📎 Upload'}</button>
