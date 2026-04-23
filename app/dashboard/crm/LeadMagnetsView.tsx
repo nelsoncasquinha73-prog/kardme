@@ -46,6 +46,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
     raffle_config: any
     wheel_config: any
     card_id: string | null
+    custom_type_label: string | null
   }
 
   const emptyForm: LeadMagnetFormState = {
@@ -56,7 +57,8 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
     form_fields: DEFAULT_FORM_FIELDS, is_active: true,
     raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] },
     wheel_config: { slices: [], capture_before_spin: true, max_spins_per_email: 1 },
-    card_id: null
+    card_id: null,
+    custom_type_label: null
   }
   const [form, setForm] = useState(emptyForm)
 
@@ -87,12 +89,14 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
       form_fields: m.form_fields, is_active: m.is_active,
       raffle_config: { grid_size: m.raffle_config?.grid_size||49, prize_description: m.raffle_config?.prize_description||'', winning_numbers: m.raffle_config?.winning_numbers||[] } as any,
       wheel_config: (m as any).wheel_config || { slices: [], capture_before_spin: true, max_spins_per_email: 1 },
-      card_id: (m as any).card_id ?? null
+      card_id: (m as any).card_id ?? null,
+      custom_type_label: (m as any).custom_type_label || null
     })
     setEditingMagnet(m); setShowForm(true)
   }
   async function handleSave() {
     if(!form.title.trim()) return alert('Da um nome!')
+    if(form.magnet_type === 'custom' && !(form.custom_type_label||'').trim()) return alert('Escreve o nome do tipo customizado!')
         setSaving(true)
     try {
       if(editingMagnet) { await updateLeadMagnet(editingMagnet.id, form) }
@@ -217,8 +221,15 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <option value="form">📝 Formulário / Diagnóstico</option>
                 <option value="raffle">🎰 Sorteio / Grelha</option>
                 <option value="wheel">🎡 Roleta da Sorte</option>
+                <option value="custom">➕ Outro (customizado)</option>
               </select>
             </div>
+            {form.magnet_type === "custom" && (
+              <div style={{marginBottom:16}}>
+                <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Nome do tipo customizado *</label>
+                <input value={(form as any).custom_type_label||''} onChange={e=>setForm(f=>({...f,custom_type_label:e.target.value}))} placeholder="Ex: Ebook Premium, Masterclass, etc" style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}/>
+              </div>
+            )}
             <div style={{marginBottom:16}}>
               <label style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)',textTransform:'uppercase',letterSpacing:1,marginBottom:6,display:'block'}}>Cartão (opcional)</label>
               <select value={form.card_id || ''} onChange={e=>setForm(f=>({...f,card_id:e.target.value||null}))} style={{width:'100%',padding:'12px 14px',height:44,borderRadius:10,border:'1px solid rgba(255,255,255,0.15)',fontSize:13,background:'rgba(255,255,255,0.07)',color:'#fff',outline:'none',boxSizing:'border-box'}}>
