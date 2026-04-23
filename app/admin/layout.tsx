@@ -64,7 +64,7 @@ function AdminLayoutContent({
       userEmail={userEmail}
       isAdmin={isAdmin}
       navItems={NAV_ITEMS}
-      getPageTitle={getPageTitle}
+      getPageTitle={() => getPageTitle(pathname)}
       pathname={pathname}
     >
       {children}
