@@ -1,0 +1,14 @@
+.nameCell a,
+.nameCell {
+  color: #0f172a !important; /* slate-900 */
+  font-weight: 800 !important;
+}
+
+.nameCell a:hover {
+  color: #1d4ed8 !important; /* blue-700 */
+  text-decoration: underline;
+}
+
+.tableText {
+  color: #334155 !important; /* slate-700 */
+}
