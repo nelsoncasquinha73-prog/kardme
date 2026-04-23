@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form' | 'raffle' | 'wheel'
+export type MagnetType = 'ebook' | 'guia' | 'checklist' | 'desconto' | 'webinar' | 'formulario' | 'sorteio' | 'wheel' | 'custom' | 'raffle' | 'wheel'
 
 export type FormFieldType =
   | 'text'
