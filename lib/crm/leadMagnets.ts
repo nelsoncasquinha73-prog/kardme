@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export type MagnetType = 'ebook' | 'guia' | 'checklist' | 'desconto' | 'webinar' | 'formulario' | 'sorteio' | 'wheel' | 'custom' | 'raffle' | 'wheel'
+export type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar' | 'form' | 'raffle' | 'wheel' | 'custom'
 
 export type FormFieldType =
   | 'text'
@@ -152,6 +152,7 @@ export const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
   form: '📝 Formulário',
   raffle: '🎰 Sorteio',
   wheel: '🎡 Roleta da Sorte',
+  custom: '➕ Outro (customizado)',
 }
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
