@@ -65,8 +65,7 @@ function AdminLayoutContent({
       isAdmin={isAdmin}
       navItems={NAV_ITEMS}
       getPageTitle={() => getPageTitle(pathname)}
-      pathname={pathname}
-    >
+          >
       {children}
     </AppChrome>
   )
@@ -138,8 +137,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminLayoutContent
           userEmail={state.userEmail}
           isAdmin={state.isAdmin}
-          pathname={pathname}
-        >
+                  >
           {children}
         </AdminLayoutContent>
         <ToastContainer />
