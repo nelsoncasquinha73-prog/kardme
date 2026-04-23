@@ -3,11 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+function jsonOk(slug: string | null) {
+  return NextResponse.json({ success: true, slug });
+}
+
+function jsonErr(message: string, status = 500) {
+  return NextResponse.json({ success: false, error: message }, { status });
+}
 
 export async function GET(req: Request) {
   try {
@@ -15,9 +17,24 @@ export async function GET(req: Request) {
     const hostRaw = (searchParams.get("host") || "").trim().toLowerCase();
     const host = hostRaw.split(":")[0];
 
-    if (!host) {
-      return NextResponse.json({ success: false, error: "host é obrigatório" }, { status: 400 });
+    if (!host) return jsonErr("host é obrigatório", 400);
+
+    // ✅ DEV: localhost nunca deve tentar resolver domínio custom
+    if (host === "localhost" || host.endsWith(".localhost")) {
+      return jsonOk(null);
     }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceKey) {
+      // Não rebentar o app por config — apenas não resolve domínio
+      return jsonOk(null);
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     const { data: domainRow, error: domErr } = await supabaseAdmin
       .from("custom_domains")
@@ -25,8 +42,8 @@ export async function GET(req: Request) {
       .eq("domain", host)
       .maybeSingle();
 
-    if (domErr) return NextResponse.json({ success: false, error: domErr.message }, { status: 500 });
-    if (!domainRow?.card_id) return NextResponse.json({ success: true, slug: null });
+    if (domErr) return jsonErr(domErr.message, 500);
+    if (!domainRow?.card_id) return jsonOk(null);
 
     const { data: card, error: cardErr } = await supabaseAdmin
       .from("cards")
@@ -34,10 +51,10 @@ export async function GET(req: Request) {
       .eq("id", domainRow.card_id)
       .maybeSingle();
 
-    if (cardErr) return NextResponse.json({ success: false, error: cardErr.message }, { status: 500 });
+    if (cardErr) return jsonErr(cardErr.message, 500);
 
-    return NextResponse.json({ success: true, slug: card?.slug || null });
+    return jsonOk(card?.slug || null);
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err?.message || "Erro desconhecido" }, { status: 500 });
+    return jsonErr(err?.message || "Erro desconhecido", 500);
   }
 }

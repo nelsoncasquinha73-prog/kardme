@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import AppChrome from '@/components/layout/AppChrome'
@@ -22,19 +22,50 @@ import { ToastProvider } from '@/lib/toast-context'
 import { ToastContainer } from '@/components/Toast'
 import SyncLanguageToProfile from '@/components/SyncLanguageToProfile'
 
+const NAV_ITEMS = [
+  { label: 'Dashboard', href: '/dashboard', icon: FiHome },
+  { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
+  { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
+  { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
+  { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiTrendingUp },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
+  { label: 'Analytics Global', href: '/admin/analytics', icon: FiBarChart2 },
+  { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
+  { label: 'Pedidos de Cartão', href: '/admin/card-orders', icon: FiShoppingCart },
+  { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
+  { label: 'Loja de Templates', href: '/admin/template-shop', icon: FiTag },
+  { label: 'Cupões', href: '/admin/coupons', icon: FiGift },
+  { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
+]
+
+const getPageTitle = (pathname: string | null) => {
+  if (!pathname) return 'Admin'
+  const path = pathname.split('/').filter(Boolean)
+  if (path[0] === 'admin') {
+    if (path[1] === 'card-orders') return 'Pedidos de Cartão'
+    if (path[1] === 'templates') return 'Gerir Templates'
+    if (path[1] === 'template-shop') return 'Loja de Templates'
+    if (path[1] === 'coupons') return 'Cupões'
+    if (path[1] === 'settings') return 'Configurações'
+    if (path[1] === 'analytics') return 'Analytics Global'
+    if (path[1] === 'clientes') return 'Clientes'
+  }
+  return 'Admin'
+}
+
 function AdminLayoutContent({
   children,
   userEmail,
   isAdmin,
-  navItems,
-  getPageTitle,
+  pathname,
 }: any) {
   return (
     <AppChrome
       userEmail={userEmail}
       isAdmin={isAdmin}
-      navItems={navItems}
+      navItems={NAV_ITEMS}
       getPageTitle={getPageTitle}
+      pathname={pathname}
     >
       {children}
     </AppChrome>
@@ -56,6 +87,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   })
 
   useEffect(() => {
+    // Se já carregou, não faz nada (evita re-fetch durante navegação)
+    if (state.loaded) return
+
     const boot = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
 
@@ -84,93 +118,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     boot()
-  }, [router])
-
-  const navItems = useMemo(
-    () => [
-      { label: 'Dashboard', href: '/dashboard', icon: FiHome },
-      { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
-      { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
-      { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
-      { label: 'Embaixadores', href: '/dashboard/embaixadores', icon: FiTrendingUp },
-      { label: 'Analytics', href: '/dashboard/analytics', icon: FiBarChart2 },
-      { label: 'Analytics Global', href: '/admin/analytics', icon: FiBarChart2 },
-      { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
-      { label: 'Pedidos de Cartão', href: '/admin/card-orders', icon: FiShoppingCart },
-      { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
-      { label: 'Loja de Templates', href: '/admin/catalog', icon: FiShoppingCart },
-      { label: 'Cupões', href: '/admin/coupons', icon: FiTag },
-      { label: 'Configurações', href: '/admin/settings', icon: FiSettings },
-    ],
-    []
-  )
-
-  const titleByPrefix: Array<{ prefix: string; title: string }> = [
-    { prefix: '/dashboard/crm', title: 'CRM Pro' },
-    { prefix: '/dashboard/lead-magnets', title: 'Lead Magnets' },
-    { prefix: '/dashboard/email-marketing', title: 'Email Marketing' },
-    { prefix: '/dashboard/embaixadores', title: 'Embaixadores' },
-    { prefix: '/dashboard/analytics', title: 'Analytics' },
-    { prefix: '/dashboard', title: 'Dashboard' },
-    { prefix: '/admin/clientes', title: 'Clientes' },
-    { prefix: '/admin/card-orders', title: 'Pedidos de Cartão' },
-    { prefix: '/admin/templates', title: 'Gerir Templates' },
-    { prefix: '/admin/analytics', title: 'Analytics Global' },
-    { prefix: '/admin/catalog', title: 'Loja de Templates' },
-    { prefix: '/admin/coupons', title: 'Cupões' },
-    { prefix: '/admin/settings', title: 'Configurações' },
-  ]
-
-  const getPageTitle = () => {
-    if (pathname.match(/^\/admin\/templates\/[^/]+\/theme/)) return '✏️ Editor'
-    const match = titleByPrefix.find((x) => pathname === x.prefix || pathname.startsWith(x.prefix + '/'))
-    return match?.title || 'Kardme'
-  }
+  }, [state.loaded, router])
 
   if (!state.loaded) {
     return (
       <LanguageProvider>
-        <div
-          style={{
-            padding: 40,
-            textAlign: 'center',
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <p>A verificar sessão…</p>
-        </div>
-      </LanguageProvider>
-    )
-  }
-
-  if (!state.isAdmin) {
-    return (
-      <LanguageProvider>
-        <div style={{ padding: 40, textAlign: 'center' }}>
-          <h2>Sem permissões</h2>
-          <p>Este painel só está disponível para admin.</p>
-        </div>
+        <ToastProvider>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <p>A carregar...</p>
+          </div>
+        </ToastProvider>
       </LanguageProvider>
     )
   }
 
   return (
-    <ToastProvider>
-      <LanguageProvider>
-        <SyncLanguageToProfile />
-        <ToastContainer />
+    <LanguageProvider>
+      <ToastProvider>
         <AdminLayoutContent
           userEmail={state.userEmail}
           isAdmin={state.isAdmin}
-          navItems={navItems}
-          getPageTitle={getPageTitle}
+          pathname={pathname}
         >
           {children}
         </AdminLayoutContent>
-      </LanguageProvider>
-    </ToastProvider>
+        <ToastContainer />
+        <SyncLanguageToProfile />
+      </ToastProvider>
+    </LanguageProvider>
   )
 }

@@ -98,7 +98,16 @@ export default function AppChrome({
     router.push('/login')
   }
 
-  const items = useMemo(() => navItems, [navItems])
+  const items = useMemo(() => {
+    return navItems.filter(item => {
+      // Items de admin só aparecem se isAdmin === true
+      const adminOnlyItems = ['/admin/card-orders', '/admin/templates', '/admin/template-shop', '/admin/coupons', '/admin/settings', '/admin/analytics', '/admin/clientes']
+      if (adminOnlyItems.includes(item.href)) {
+        return isAdmin
+      }
+      return true
+    })
+  }, [navItems, isAdmin])
 
   const getLabel = (item: NavItem) => {
     const translated = t(item.label)
