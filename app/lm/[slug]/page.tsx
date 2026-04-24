@@ -157,7 +157,7 @@ export default function LeadMagnetPage() {
                 color: '#a5b4fc',
                 marginBottom: 16,
               }}>
-                {magnet?.magnet_type === 'custom' ? magnet?.custom_type_label : (MAGNET_TYPE_LABELS[magnet?.magnet_type as MagnetType] || '📄 Recurso')}
+                {magnet && magnet.magnet_type === 'custom' ? magnet.custom_type_label : (MAGNET_TYPE_LABELS[magnet?.magnet_type as MagnetType] || '📄 Recurso')}
               </div>
 
               <h1 style={{
