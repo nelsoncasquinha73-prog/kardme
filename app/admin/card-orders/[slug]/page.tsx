@@ -18,6 +18,16 @@ interface CardOrder {
   foto_perfil?: string
   fotos_galeria?: string[]
   cores_preferidas?: { colors?: string[] }
+  telefone?: string
+  whatsapp?: string
+  instagram?: string
+  facebook?: string
+  tiktok?: string
+  linkedin?: string
+  youtube?: string
+  website?: string
+  outros_links?: Array<{ label?: string; url: string }>
+  slogan?: string
   created_at?: string
   updated_at?: string
 }
@@ -273,6 +283,46 @@ export default function CardOrderDetailPage() {
           </div>
         </div>
       )}
+
+      
+      {order.telefone || order.whatsapp || order.email ? (
+        <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+          <h3 style={{ marginTop: 0, color: 'white' }}>Contactos</h3>
+          {order.email && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Email:</strong> {order.email}</p>}
+          {order.telefone && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Telefone:</strong> {order.telefone}</p>}
+          {order.whatsapp && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>WhatsApp:</strong> {order.whatsapp}</p>}
+        </div>
+      ) : null}
+
+      {order.instagram || order.facebook || order.tiktok || order.linkedin || order.youtube || order.website || (order.outros_links && order.outros_links.length > 0) ? (
+        <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+          <h3 style={{ marginTop: 0, color: 'white' }}>Links</h3>
+          {order.website && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Website:</strong> <a href={order.website} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{order.website}</a></p>}
+          {order.instagram && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Instagram:</strong> <a href={order.instagram} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>@instagram</a></p>}
+          {order.facebook && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Facebook:</strong> <a href={order.facebook} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>facebook.com</a></p>}
+          {order.tiktok && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>TikTok:</strong> <a href={order.tiktok} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>@tiktok</a></p>}
+          {order.linkedin && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>LinkedIn:</strong> <a href={order.linkedin} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>linkedin.com</a></p>}
+          {order.youtube && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>YouTube:</strong> <a href={order.youtube} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>youtube.com</a></p>}
+          {order.outros_links && order.outros_links.length > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <strong style={{ color: '#cbd5e1' }}>Outros Links:</strong>
+              <ul style={{ margin: '8px 0 0 20px', color: '#cbd5e1' }}>
+                {order.outros_links.map((link: any, idx: number) => (
+                  <li key={idx}><a href={link.url} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{link.label || link.url}</a></li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {order.slogan || order.bio ? (
+        <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+          <h3 style={{ marginTop: 0, color: 'white' }}>Texto</h3>
+          {order.slogan && <p style={{ color: '#cbd5e1', margin: '6px 0', fontWeight: 600 }}><strong>Slogan:</strong> {order.slogan}</p>}
+          {order.bio && <div style={{ color: '#cbd5e1', margin: '12px 0 0 0', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}><strong>Bio:</strong><br/>{order.bio}</div>}
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
         <h3 style={{ marginTop: 0, color: 'white', marginBottom: 16 }}>Status</h3>
