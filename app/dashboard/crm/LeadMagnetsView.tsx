@@ -95,6 +95,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
     setEditingMagnet(m); setShowForm(true)
   }
   async function handleSave() {
+    console.log('DEBUG: custom_type_label =', (form as any).custom_type_label, 'magnet_type =', form.magnet_type)
     if(!form.title.trim()) return alert('Da um nome!')
     if(form.magnet_type === 'custom' && !(form.custom_type_label||'').trim()) return alert('Escreve o nome do tipo customizado!')
         setSaving(true)
