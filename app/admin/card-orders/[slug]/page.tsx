@@ -361,37 +361,37 @@ export default function CardOrderDetailPage() {
           {order.website && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Website:</strong> <a href={order.website} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.website)}</a></span>
-              <button onClick={() => copyField('website', order.website)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="website" value={order.website} />
             </p>
           )}
           {order.instagram && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Instagram:</strong> <a href={order.instagram} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.instagram)}</a></span>
-              <button onClick={() => copyField('instagram', order.instagram)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="instagram" value={order.instagram} />
             </p>
           )}
           {order.facebook && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Facebook:</strong> <a href={order.facebook} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.facebook)}</a></span>
-              <button onClick={() => copyField('facebook', order.facebook)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="facebook" value={order.facebook} />
             </p>
           )}
           {order.tiktok && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>TikTok:</strong> <a href={order.tiktok} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.tiktok)}</a></span>
-              <button onClick={() => copyField('tiktok', order.tiktok)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="tiktok" value={order.tiktok} />
             </p>
           )}
           {order.linkedin && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>LinkedIn:</strong> <a href={order.linkedin} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.linkedin)}</a></span>
-              <button onClick={() => copyField('linkedin', order.linkedin)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="linkedin" value={order.linkedin} />
             </p>
           )}
           {order.youtube && (
             <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>YouTube:</strong> <a href={order.youtube} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.youtube)}</a></span>
-              <button onClick={() => copyField('youtube', order.youtube)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
+              <CopyBtn k="youtube" value={order.youtube} />
             </p>
           )}
           {order.outros_links && order.outros_links.length > 0 && (
@@ -401,7 +401,7 @@ export default function CardOrderDetailPage() {
                 {order.outros_links.map((link: any, idx: number) => (
                   <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <a href={link.url} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{link.label || link.url}</a>
-                    <button onClick={() => copyField(`outro_${idx}`, link.url)} style={{ padding: '2px 6px', fontSize: 11, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 3, cursor: 'pointer' }}>{copiedKey ? '📋' : '📋'}</button>
+                    <CopyBtn k={`outro_${idx}`} value={link.url} />
                   </li>
                 ))}
               </ul>
