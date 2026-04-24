@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { MagnetType, MAGNET_TYPE_LABELS } from '@/lib/crm/leadMagnets'
 import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
@@ -9,15 +10,7 @@ const supabasePublic = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-type MagnetType = 'ebook' | 'discount' | 'guide' | 'checklist' | 'webinar'
 
-const MAGNET_TYPE_LABELS: Record<MagnetType, string> = {
-  ebook: '📘 E-book',
-  discount: '🎁 Desconto',
-  guide: '📋 Guia',
-  checklist: '✅ Checklist',
-  webinar: '🎥 Webinar',
-}
 
 type LeadMagnet = {
   id: string
@@ -28,6 +21,7 @@ type LeadMagnet = {
   file_url: string | null
   thank_you_message: string | null
   is_active: boolean
+  custom_type_label?: string | null
 }
 
 export default function LeadMagnetPage() {
