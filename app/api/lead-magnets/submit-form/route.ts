@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // 1) Buscar o lead magnet
     const { data: magnet, error: magnetError } = await supabase
       .from('lead_magnets')
-      .select('id, user_id, title, card_id, welcome_email_subject, welcome_email_body')
+      .select('id, user_id, title, card_id, welcome_email_subject, welcome_email_body, file_url')
       .eq('slug', slug)
       .eq('is_active', true)
       .single()
