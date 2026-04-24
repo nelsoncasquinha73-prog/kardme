@@ -22,6 +22,8 @@ type LeadMagnet = {
   thank_you_message: string | null
   is_active: boolean
   custom_type_label?: string | null
+  show_download_button?: boolean
+  download_button_text?: string
 }
 
 export default function LeadMagnetPage() {
@@ -47,7 +49,7 @@ export default function LeadMagnetPage() {
   async function loadMagnet() {
     const { data, error } = await supabasePublic
       .from('lead_magnets')
-      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active')
+      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text')
       .eq('slug', slug)
       .single()
 
@@ -265,7 +267,7 @@ export default function LeadMagnetPage() {
               <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 28 }}>
                 O teu recurso está pronto para download.
               </p>
-              {fileUrl && (
+              {magnet?.show_download_button && fileUrl && (
                 <a
                   href={fileUrl}
                   download
@@ -282,7 +284,7 @@ export default function LeadMagnetPage() {
                     textDecoration: 'none',
                   }}
                 >
-                  📥 Fazer Download
+                  {magnet?.download_button_text || '📥 Fazer Download'}
                 </a>
               )}
               <p style={{ fontSize: 12, color: '#475569', marginTop: 24 }}>

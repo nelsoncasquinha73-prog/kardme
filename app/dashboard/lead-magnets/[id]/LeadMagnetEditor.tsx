@@ -23,6 +23,8 @@ interface LeadMagnet {
   capture_page_image: string | null
   capture_page_button_text: string
   capture_page_success_message: string
+  show_download_button: boolean
+  download_button_text: string
   leads_count: number
   created_at: string
   updated_at: string
@@ -170,6 +172,8 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
           cover_image_url: magnet.capture_page_image,
           capture_page_button_text: magnet.capture_page_button_text,
           capture_page_success_message: magnet.capture_page_success_message,
+          show_download_button: magnet.show_download_button,
+          download_button_text: magnet.download_button_text,
           updated_at: new Date().toISOString(),
         })
         .eq('id', magnet.id)
@@ -570,6 +574,30 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                     rows={4}
                   />
                 </div>
+
+                <div className={styles.field}>
+                  <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+                    <input
+                      type="checkbox"
+                      checked={magnet.show_download_button}
+                      onChange={(e) => handleChange('show_download_button', e.target.checked)}
+                      style={{width:18,height:18,cursor:'pointer',accentColor:'#6366f1'}}
+                    />
+                    <span>Mostrar botão de download</span>
+                  </label>
+                </div>
+
+                {magnet.show_download_button && (
+                  <div className={styles.field}>
+                    <label>Texto do Botão</label>
+                    <input
+                      type="text"
+                      value={magnet.download_button_text}
+                      onChange={(e) => handleChange('download_button_text', e.target.value)}
+                      placeholder="Ex: 📥 Fazer Download"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

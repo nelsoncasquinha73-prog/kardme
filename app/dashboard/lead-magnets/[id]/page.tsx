@@ -22,6 +22,8 @@ interface LeadMagnet {
   capture_page_image: string | null
   capture_page_button_text: string
   capture_page_success_message: string
+  show_download_button: boolean
+  download_button_text: string
   leads_count: number
   created_at: string
   updated_at: string
