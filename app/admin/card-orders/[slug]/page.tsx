@@ -72,6 +72,38 @@ export default function CardOrderDetailPage() {
     }
   }
 
+
+  const CopyBtn = ({ k, value }: { k: string; value?: string }) => (
+    <button
+      onClick={() => copyField(k, value)}
+      style={{
+        marginLeft: 8,
+        width: 28,
+        height: 28,
+        borderRadius: 8,
+        border: '1px solid rgba(255,255,255,0.18)',
+        background: 'rgba(255,255,255,0.06)',
+        color: copiedKey === k ? '#34d399' : '#cbd5e1',
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+      title={copiedKey === k ? 'Copiado' : 'Copiar'}
+    >
+      {copiedKey === k ? '✓' : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 3h7v7" />
+          <path d="M10 14L21 3" />
+          <path d="M21 14v7h-7" />
+          <path d="M3 10V3h7" />
+          <path d="M3 21h7" />
+        </svg>
+      )}
+    </button>
+  )
+
   useEffect(() => {
     if (!slug) return
 
