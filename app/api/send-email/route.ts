@@ -108,6 +108,7 @@ export async function POST(req: NextRequest) {
       body,
       templateId,
       attachments,
+      fromName,
     } = await req.json()
 
     if (!userId || !leadId || !recipientEmail || !subject || !body) {
@@ -184,7 +185,8 @@ export async function POST(req: NextRequest) {
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
 
-    const fromEmail = integration.sender_email || 'me'
+    const senderEmail = integration.sender_email || 'me'
+    const fromEmail = fromName ? `${fromName} <${senderEmail}>` : senderEmail
 
     const raw = buildRawEmail({
       fromEmail,

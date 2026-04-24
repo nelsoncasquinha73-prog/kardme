@@ -2,6 +2,17 @@ import { supabaseServer } from '@/lib/supabaseServer'
 import { sendEmail } from '@/lib/email'
 import { NextResponse } from 'next/server'
 
+function normalizeEmailBody(body: string): string {
+  if (!body) return ''
+  let normalized = body.replace(/\r\n/g, '\n')
+  const paragraphs = normalized.split(/\n\n+/).filter(p => p.trim())
+  const htmlParagraphs = paragraphs.map(p => {
+    const withBr = p.replace(/\n/g, '<br/>')
+    return `<p>${withBr}</p>`
+  })
+  return htmlParagraphs.join('')
+}
+
 export async function POST(request: Request) {
   try {
     const { slug, formData } = await request.json()
@@ -67,7 +78,6 @@ export async function POST(request: Request) {
 
     const leadId = leadData?.[0]?.id
 
-    // 4) Buscar owner email
     // 4) Buscar owner email (do cartão se existir, senão do user do magnet)
     let ownerEmail = null
     let ownerUserId = magnet.user_id
@@ -158,7 +168,7 @@ export async function POST(request: Request) {
         leadEmailRes = await sendEmail({
           to: leadEmail,
           subject,
-          html: body.replace(/\n/g, '<br/>'),
+          html: normalizeEmailBody(body),
           fromName: cardName,
         })
       } catch (err: any) {

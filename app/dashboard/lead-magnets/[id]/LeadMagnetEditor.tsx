@@ -86,6 +86,10 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   const [magnet, setMagnet] = useState<LeadMagnet>(initialMagnet)
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  type CardOption = { id: string; name: string | null }
+
+  const [cards, setCards] = useState<CardOption[]>([])
+  const [isLoadingCards, setIsLoadingCards] = useState(false)
   const [showSections, setShowSections] = useState({
     capture: true,
     welcome: true,
@@ -97,6 +101,35 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       setMagnet(initialMagnet)
     }
   }, [initialMagnet])
+
+  useEffect(() => {
+    if (!userId) return
+
+    let isMounted = true
+    const loadCards = async () => {
+      setIsLoadingCards(true)
+      try {
+        const { data, error } = await supabase
+          .from('cards')
+          .select('id, name')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        if (isMounted) setCards(data || [])
+      } catch (e) {
+        console.error(e)
+        addToast('Erro ao carregar cartões', 'error')
+      } finally {
+        if (isMounted) setIsLoadingCards(false)
+      }
+    }
+
+    loadCards()
+    return () => {
+      isMounted = false
+    }
+  }, [userId, addToast])
 
   const handleChange = useCallback((field: keyof LeadMagnet, value: any) => {
     setMagnet(prev => ({ ...prev, [field]: value }))
@@ -134,6 +167,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
           capture_page_title: magnet.capture_page_title,
           capture_page_subtitle: magnet.capture_page_subtitle,
           capture_page_image: magnet.capture_page_image,
+          cover_image_url: magnet.capture_page_image,
           capture_page_button_text: magnet.capture_page_button_text,
           capture_page_success_message: magnet.capture_page_success_message,
           updated_at: new Date().toISOString(),
@@ -255,11 +289,53 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
           </div>
 
           <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>📨 Remetente (Cartão)</h3>
+
+            <div className={styles.field}>
+              <label>Escolhe o cartão que vai enviar os emails desta campanha</label>
+              <select
+                value={magnet.card_id || ''}
+                onChange={(e) => handleChange('card_id', e.target.value || null)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.07)',
+                  color: '#fff',
+                  outline: 'none',
+                }}
+                disabled={isLoadingCards}
+              >
+                <option value="">
+                  {isLoadingCards ? 'A carregar cartões...' : '— Selecionar cartão —'}
+                </option>
+                {cards.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || '(Sem nome)'} ({c.id.slice(0, 6)}…)
+                  </option>
+                ))}
+              </select>
+
+              <small style={{ opacity: 0.65, marginTop: 8, display: 'block' }}>
+                Obrigatório para enviar emails com o Gmail certo (cada cartão pode ter um Gmail diferente).
+              </small>
+            </div>
+          </div>
+
+          <div className={styles.section}>
             <label className={styles.checkboxLabel}>
               <input
                 type="checkbox"
                 checked={magnet.is_active}
-                onChange={(e) => handleChange('is_active', e.target.checked)}
+                onChange={(e) => {
+                  const next = e.target.checked
+                  if (next && !magnet.card_id) {
+                    addToast('Para ativar a campanha, escolhe primeiro o cartão remetente.', 'error')
+                    return
+                  }
+                  handleChange('is_active', next)
+                }}
               />
               <span>Campanha ativa</span>
             </label>

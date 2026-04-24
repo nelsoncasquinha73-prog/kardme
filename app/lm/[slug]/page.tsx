@@ -141,18 +141,7 @@ export default function LeadMagnetPage() {
         <div style={{ padding: '32px 32px 40px' }}>
           {step === 'form' ? (
             <>
-              <div style={{
-                display: 'inline-block',
-                background: 'rgba(99,102,241,0.2)',
-                border: '1px solid rgba(99,102,241,0.4)',
-                borderRadius: 20,
-                padding: '4px 12px',
-                fontSize: 12,
-                color: '#a5b4fc',
-                marginBottom: 16,
-              }}>
-                {magnet && magnet.magnet_type === 'custom' ? magnet.custom_type_label : (MAGNET_TYPE_LABELS[magnet?.magnet_type as MagnetType] || '📄 Recurso')}
-              </div>
+
 
               <h1 style={{
                 fontSize: 28,

@@ -68,6 +68,14 @@ export type LeadMagnet = {
   raffle_config?: RaffleConfig
   wheel_config?: WheelConfig
   card_id?: string | null
+  welcome_email_subject?: string
+  welcome_email_body?: string
+  capture_page_title?: string
+  capture_page_subtitle?: string
+  capture_page_image?: string | null
+  capture_page_button_text?: string
+  capture_page_success_message?: string
+  custom_type_label?: string | null
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {
