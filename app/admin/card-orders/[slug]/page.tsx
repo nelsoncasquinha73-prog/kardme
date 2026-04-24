@@ -57,6 +57,20 @@ export default function CardOrderDetailPage() {
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [modalImage, setModalImage] = useState<string | null>(null)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  const copyField = async (key: string, value?: string) => {
+    if (!value) return
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedKey(key)
+      window.setTimeout(() => {
+        setCopiedKey((prev) => (prev === key ? null : prev))
+      }, 1200)
+    } catch (e) {
+      console.error('Erro ao copiar:', e)
+    }
+  }
 
   useEffect(() => {
     if (!slug) return
@@ -313,39 +327,39 @@ export default function CardOrderDetailPage() {
         <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Links</h3>
           {order.website && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Website:</strong> <a href={order.website} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.website)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.website!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('website', order.website)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.instagram && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Instagram:</strong> <a href={order.instagram} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.instagram)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.instagram!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('instagram', order.instagram)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.facebook && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>Facebook:</strong> <a href={order.facebook} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.facebook)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.facebook!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('facebook', order.facebook)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.tiktok && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>TikTok:</strong> <a href={order.tiktok} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.tiktok)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.tiktok!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('tiktok', order.tiktok)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.linkedin && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>LinkedIn:</strong> <a href={order.linkedin} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.linkedin)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.linkedin!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('linkedin', order.linkedin)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.youtube && (
-            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span><strong>YouTube:</strong> <a href={order.youtube} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.youtube)}</a></span>
-              <button onClick={() => { navigator.clipboard.writeText(order.youtube!); alert('✅ Copiado!') }} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap', marginLeft: 8 }}>📋</button>
+              <button onClick={() => copyField('youtube', order.youtube)} style={{ padding: '4px 8px', fontSize: 12, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copiedKey ? '📋' : '📋'}</button>
             </p>
           )}
           {order.outros_links && order.outros_links.length > 0 && (
@@ -353,9 +367,9 @@ export default function CardOrderDetailPage() {
               <strong style={{ color: '#cbd5e1' }}>Outros Links:</strong>
               <ul style={{ margin: '8px 0 0 20px', color: '#cbd5e1' }}>
                 {order.outros_links.map((link: any, idx: number) => (
-                  <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <a href={link.url} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{link.label || link.url}</a>
-                    <button onClick={() => { navigator.clipboard.writeText(link.url); alert('✅ Copiado!') }} style={{ padding: '2px 6px', fontSize: 11, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 3, cursor: 'pointer', marginLeft: 8 }}>📋</button>
+                    <button onClick={() => copyField(`outro_${idx}`, link.url)} style={{ padding: '2px 6px', fontSize: 11, background: 'rgba(96,165,250,0.2)', border: '1px solid rgba(96,165,250,0.3)', color: '#60a5fa', borderRadius: 3, cursor: 'pointer' }}>{copiedKey ? '📋' : '📋'}</button>
                   </li>
                 ))}
               </ul>
