@@ -507,8 +507,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                 <input
                   type="file"
                   accept="image/*"
-                  multiple
-                  onChange={(e) => e.target.files && handleFotosGaleriaUpload(e.target.files)}
+                  onChange={(e) => e.target.files && handleFotosGaleriaUpload(e.target.files[0])}
                   className={styles.fileInput}
                   disabled={uploading}
                 />
