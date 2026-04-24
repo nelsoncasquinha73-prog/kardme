@@ -208,8 +208,8 @@ export default function CardOrderDetailPage() {
       <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={{ padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Identidade</h3>
-          <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Empresa:</strong> {order.empresa || '—'}</p>
-          <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Cargo:</strong> {order.cargo || '—'}</p>
+          <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Empresa:</strong><span>{order.empresa || '—'}</span>{order.empresa && <CopyBtn k="empresa" value={order.empresa} />}</p>
+          <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Cargo:</strong><span>{order.cargo || '—'}</span>{order.cargo && <CopyBtn k="cargo" value={order.cargo} />}</p>
         </div>
 
         <div style={{ padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
