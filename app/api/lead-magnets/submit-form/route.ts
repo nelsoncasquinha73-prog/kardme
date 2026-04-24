@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 function normalizeEmailBody(body: string): string {
   if (!body) return ''
   let normalized = body.replace(/\r\n/g, '\n')
-  const paragraphs = normalized.split(/\n\n+/).filter(p => p.trim())
+  const paragraphs = normalized.split(/\n\s*\n+/).filter(p => p.trim())
   const htmlParagraphs = paragraphs.map(p => {
     const withBr = p.replace(/\n/g, '<br/>')
     return `<p>${withBr}</p>`
@@ -163,7 +163,11 @@ export async function POST(request: Request) {
     if (leadEmail) {
       try {
         const subject = magnet.welcome_email_subject || 'Obrigado pela tua candidatura!'
-        const body = magnet.welcome_email_body || 'Recebemos a tua candidatura com sucesso. Em breve entraremos em contacto.'
+        const bodyTemplate = magnet.welcome_email_body || 'Recebemos a tua candidatura com sucesso. Em breve entraremos em contacto.'
+        const link = magnet.file_url || ''
+        const body = bodyTemplate
+          .replace(/\{\{\s*name\s*\}\}/gi, leadName)
+          .replace(/\{\{\s*link\s*\}\}/gi, link)
 
         leadEmailRes = await sendEmail({
           to: leadEmail,

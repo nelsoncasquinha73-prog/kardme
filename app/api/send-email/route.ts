@@ -21,6 +21,13 @@ function toBase64Url(str: string) {
     .replace(/=+$/g, '')
 }
 
+function encodeFromNameRFC2047(name: string) {
+  if (!name) return ''
+  if (/^[ -~]*$/.test(name)) return name
+  const encoded = Buffer.from(name, 'utf-8').toString('base64')
+  return `=?UTF-8?B?${encoded}?=`
+}
+
 function encodeSubjectRFC2047(subject: string) {
   // Se não tem caracteres especiais, retorna como está
   if (/^[ -~]*$/.test(subject)) return subject
@@ -186,7 +193,8 @@ export async function POST(req: NextRequest) {
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
 
     const senderEmail = integration.sender_email || 'me'
-    const fromEmail = fromName ? `${fromName} <${senderEmail}>` : senderEmail
+    const safeFromName = fromName ? encodeFromNameRFC2047(String(fromName)) : ''
+    const fromEmail = safeFromName ? `${safeFromName} <${senderEmail}>` : senderEmail
 
     const raw = buildRawEmail({
       fromEmail,
