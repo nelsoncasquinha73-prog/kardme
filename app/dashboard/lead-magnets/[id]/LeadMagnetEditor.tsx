@@ -538,7 +538,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                     rows={8}
                   />
                   <small style={{ opacity: 0.6, marginTop: 8, display: 'block' }}>
-                    Variáveis: nome, link, numero, premio
+                    Variáveis: {'{nome}'}, {'{link}'}, {'{numero}'}, {'{premio}'}
                   </small>
                 </div>
                 <div className={styles.field}>
