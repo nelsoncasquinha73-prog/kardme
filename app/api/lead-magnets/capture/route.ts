@@ -175,7 +175,7 @@ export async function POST(req: Request) {
 
         const emailSubject = magnet.welcome_email_subject || defaultSubject
         let emailBody = (magnet.welcome_email_body || defaultBody)
-          .replace(/\{\{?\s*nome\s*\}?\}/gi, name)
+          .replace(/\{\{?\s*nome\s*\}?\}|$\s*nome\s*$/gi, name)
           .replace(/\{\{?\s*link\s*\}?\}|$\s*link\s*$/gi, magnet.file_url || '')
           .replace(/\{\{?\s*numero\s*\}?\}|$\s*numero\s*$/gi, number_chosen ? String(number_chosen) : '')
           .replace(/\{\{?\s*premio\s*\}?\}|$\s*premio\s*$/gi, wheel_prize ? String(wheel_prize) : '')
