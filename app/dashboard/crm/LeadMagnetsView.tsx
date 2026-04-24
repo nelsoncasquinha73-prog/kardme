@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import {
   LeadMagnet, MagnetType,
@@ -20,6 +21,7 @@ const DEFAULT_SLICES = [
 ]
 
 export default function LeadMagnetsView({ userId }: { userId: string }) {
+  const router = useRouter()
   const [cards, setCards] = useState<Array<{ id: string; name: string }>>([])
   const [magnets, setMagnets] = useState<LeadMagnet[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,7 +187,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <button onClick={()=>copyLink(m)} style={{background:copiedId===m.id?'#10b981':'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>{copiedId===m.id?'✓ Copiado!':'📋 Copiar'}</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
-                  <button onClick={()=>openEdit(m)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'#fff',fontWeight:700,fontSize:12,cursor
+                  <button onClick={() => router.push('/dashboard/lead-magnets/' + m.id)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'#fff',fontWeight:700,fontSize:12,cursor
 :'pointer'}}>✏️ Editar</button>
                   <button onClick={()=>handleToggle(m)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid '+(m.is_active?'rgba(239,68,68,0.3)':'rgba(16,185,129,0.3)'),background:'transparent',color:m.is_active?'#ef4444':'#10b981',fontWeight:700,fontSize:12,cursor:'pointer'}}>{m.is_active?'⏸ Pausar':'▶ Ativar'}</button>
                   <button onClick={()=>handleDelete(m.id)} style={{padding:'8px 12px',borderRadius:8,border:'1px solid rgba(239,68,68,0.3)',background:'transparent',color:'#ef4444',fontWeight:700,fontSize:12,cursor:'pointer'}}>🗑</button>

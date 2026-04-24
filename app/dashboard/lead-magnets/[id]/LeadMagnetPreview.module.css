@@ -1,0 +1,153 @@
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.previewSection {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.previewTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #000;
+}
+
+.mockup {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.mockupHeader {
+  height: 24px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 4px;
+}
+
+.mockupBar {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.mockupContent {
+  padding: 24px;
+  text-align: center;
+}
+
+.mockupImage {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.mockupTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #000;
+}
+
+.mockupSubtitle {
+  font-size: 13px;
+  opacity: 0.7;
+  margin: 0 0 16px 0;
+  color: #666;
+}
+
+.mockupButton {
+  padding: 12px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.mockupButton:hover {
+  background: #2563eb;
+}
+
+.emailPreview {
+  background: #f9f9f9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.emailHeader {
+  padding: 12px;
+  background: #f0f0f0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.emailBody {
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.successPreview {
+  padding: 16px;
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 8px;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.infoBox {
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.infoBox p {
+  margin: 6px 0;
+  color: #333;
+}
+
+.infoBox strong {
+  color: #000;
+}
+
+@media (max-width: 768px) {
+  .previewContainer {
+    gap: 16px;
+  }
+
+  .previewSection {
+    padding: 12px;
+  }
+
+  .mockupContent {
+    padding: 16px;
+  }
+
+  .mockupTitle {
+    font-size: 16px;
+  }
+}
