@@ -111,33 +111,27 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
     }
   }
 
-  const handleFotosGaleriaUpload = async (files: FileList) => {
+  const handleFotosGaleriaUpload = async (file: File) => {
     setUploading(true)
     setUploadError(null)
     try {
-      const urls: string[] = []
-      for (let i = 0; i < Math.min(files.length, 10); i++) {
-        const file = files[i]
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('slug', slug)
-        formData.append('type', 'galeria')
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('slug', slug)
+      formData.append('type', 'galeria')
 
-        const res = await fetch('/api/card-orders/upload', {
-          method: 'POST',
-          body: formData,
-        })
+      const res = await fetch('/api/card-orders/upload', {
+        method: 'POST',
+        body: formData,
+      })
 
-        if (!res.ok) {
-          const { error } = await res.json()
-          throw new Error(error || 'Erro ao fazer upload')
-        }
-
-        const { url } = await res.json()
-        urls.push(url)
+      if (!res.ok) {
+        const { error } = await res.json()
+        throw new Error(error || 'Erro ao fazer upload')
       }
 
-      handleChange('fotos_galeria', [...(order.fotos_galeria || []), ...urls])
+      const { url } = await res.json()
+      handleChange('fotos_galeria', [...(order.fotos_galeria || []), url])
     } catch (err: any) {
       setUploadError(err.message || 'Erro ao fazer upload')
     } finally {
