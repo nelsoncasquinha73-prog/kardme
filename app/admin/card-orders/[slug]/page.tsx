@@ -414,7 +414,7 @@ export default function CardOrderDetailPage() {
         <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Texto</h3>
           {order.slogan && <p style={{ color: '#cbd5e1', margin: '6px 0', fontWeight: 600, display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Slogan:</strong><span>{order.slogan}</span><CopyBtn k="slogan" value={order.slogan} /></p>}
-          {order.bio && <div style={{ color: '#cbd5e1', margin: '12px 0 0 0', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}><strong>Bio:</strong><br/>{order.bio}</div>}
+          {order.bio && <div style={{ color: '#cbd5e1', margin: '12px 0 0 0' }}><div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}><strong style={{ marginRight: 6 }}>Bio:</strong><CopyBtn k="bio" value={order.bio} /></div><div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{order.bio}</div></div>}
         </div>
       ) : null}
 
