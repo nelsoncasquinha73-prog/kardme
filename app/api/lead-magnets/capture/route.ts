@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+
+
+
+function normalizeEmailBody(body: string): string {
+  if (!body) return ""
+  let normalized = body.replace(/\r\n/g, "\n")
+  const paragraphs = normalized.split(/\n\s*\n+/).filter(p => p.trim())
+  const htmlParagraphs = paragraphs.map(p => {
+    const withBr = p.replace(/\n/g, "<br/>")
+    return `<p>${withBr}</p>`
+  })
+  return htmlParagraphs.join("")
+}
+
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -160,10 +175,13 @@ export async function POST(req: Request) {
 
         const emailSubject = magnet.welcome_email_subject || defaultSubject
         let emailBody = (magnet.welcome_email_body || defaultBody)
-          .replace(/{nome}/g, name)
-          .replace(/{link}/g, magnet.file_url || '')
-          .replace(/{numero}/g, number_chosen ? String(number_chosen) : '')
-          .replace(/{premio}/g, wheel_prize ? String(wheel_prize) : '')
+          .replace(/\{\{?\s*nome\s*\}?\}/gi, name)
+          .replace(/\{\{?\s*link\s*\}?\}/gi, magnet.file_url || '')
+          .replace(/\{\{?\s*numero\s*\}?\}/gi, number_chosen ? String(number_chosen) : '')
+          .replace(/\{\{?\s*premio\s*\}?\}/gi, wheel_prize ? String(wheel_prize) : '')
+        
+        // Normaliza o body para HTML com parágrafos
+        emailBody = normalizeEmailBody(emailBody)
 
         // Se for sorteio e o número não estiver no body, adiciona no final
         if (isRaffle && number_chosen && !emailBody.includes(String(number_chosen))) {
