@@ -46,10 +46,10 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
       id: '',
       slug,
       status: 'rascunho',
+      foto_perfil: undefined,
       outros_links: [],
       fotos_galeria: [],
       cores_preferidas: { colors: ['#0b1220', '#3b82f6', '#ffffff'], pantone: '' },
-      notas_estilo: '',
     }
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
