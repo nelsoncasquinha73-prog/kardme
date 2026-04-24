@@ -24,6 +24,7 @@ type LeadMagnet = {
   custom_type_label?: string | null
   show_download_button?: boolean
   download_button_text?: string
+  capture_page_button_text?: string | null
 }
 
 export default function LeadMagnetPage() {
@@ -49,7 +50,7 @@ export default function LeadMagnetPage() {
   async function loadMagnet() {
     const { data, error } = await supabasePublic
       .from('lead_magnets')
-      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text')
+      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text, capture_page_button_text')
       .eq('slug', slug)
       .single()
 
@@ -249,7 +250,7 @@ export default function LeadMagnetPage() {
                       transition: 'all 0.2s',
                     }}
                   >
-                    {submitting ? 'A enviar...' : '📥 Quero acesso gratuito'}
+                    {submitting ? 'A enviar...' : magnet?.capture_page_button_text || '📥 Quero acesso gratuito'}
                   </button>
                 </div>
               </form>
