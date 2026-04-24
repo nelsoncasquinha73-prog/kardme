@@ -317,9 +317,9 @@ export default function CardOrderDetailPage() {
       {order.telefone || order.whatsapp || order.email ? (
         <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Contactos</h3>
-          {order.email && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Email:</strong> {order.email}</p>}
-          {order.telefone && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Telefone:</strong> {order.telefone}</p>}
-          {order.whatsapp && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>WhatsApp:</strong> {order.whatsapp}</p>}
+          {order.email && <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Email:</strong><span>{order.email}</span><CopyBtn k="email" value={order.email} /></p>}
+          {order.telefone && <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Telefone:</strong><span>{order.telefone}</span><CopyBtn k="telefone" value={order.telefone} /></p>}
+          {order.whatsapp && <p style={{ color: '#cbd5e1', margin: '6px 0', display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>WhatsApp:</strong><span>{order.whatsapp}</span><CopyBtn k="whatsapp" value={order.whatsapp} /></p>}
         </div>
       ) : null}
 
@@ -381,7 +381,7 @@ export default function CardOrderDetailPage() {
       {order.slogan || order.bio ? (
         <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Texto</h3>
-          {order.slogan && <p style={{ color: '#cbd5e1', margin: '6px 0', fontWeight: 600 }}><strong>Slogan:</strong> {order.slogan}</p>}
+          {order.slogan && <p style={{ color: '#cbd5e1', margin: '6px 0', fontWeight: 600, display: 'flex', alignItems: 'center' }}><strong style={{ marginRight: 6 }}>Slogan:</strong><span>{order.slogan}</span><CopyBtn k="slogan" value={order.slogan} /></p>}
           {order.bio && <div style={{ color: '#cbd5e1', margin: '12px 0 0 0', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}><strong>Bio:</strong><br/>{order.bio}</div>}
         </div>
       ) : null}
