@@ -32,6 +32,21 @@ interface CardOrder {
   updated_at?: string
 }
 
+const displayUrl = (url?: string) => {
+  if (!url) return '—'
+  try {
+    const u = new URL(url)
+    const host = u.host.replace(/^www\./, '')
+    const path = (u.pathname || '').replace(/\/$/, '')
+    const shortPath = path.length > 28 ? path.slice(0, 28) + '…' : path
+    const q = u.search ? '…' : ''
+    return host + (shortPath && shortPath !== '/' ? shortPath : '') + q
+  } catch {
+    // fallback se não for URL válida
+    return url.length > 48 ? url.slice(0, 48) + '…' : url
+  }
+}
+
 export default function CardOrderDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
@@ -297,12 +312,12 @@ export default function CardOrderDetailPage() {
       {order.instagram || order.facebook || order.tiktok || order.linkedin || order.youtube || order.website || (order.outros_links && order.outros_links.length > 0) ? (
         <div style={{ marginTop: 16, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
           <h3 style={{ marginTop: 0, color: 'white' }}>Links</h3>
-          {order.website && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Website:</strong> <a href={order.website} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{order.website}</a></p>}
-          {order.instagram && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Instagram:</strong> <a href={order.instagram} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>@instagram</a></p>}
-          {order.facebook && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Facebook:</strong> <a href={order.facebook} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>facebook.com</a></p>}
-          {order.tiktok && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>TikTok:</strong> <a href={order.tiktok} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>@tiktok</a></p>}
-          {order.linkedin && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>LinkedIn:</strong> <a href={order.linkedin} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>linkedin.com</a></p>}
-          {order.youtube && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>YouTube:</strong> <a href={order.youtube} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>youtube.com</a></p>}
+          {order.website && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Website:</strong> <a href={order.website} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.website)}</a></p>}
+          {order.instagram && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Instagram:</strong> <a href={order.instagram} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.instagram)}</a></p>}
+          {order.facebook && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>Facebook:</strong> <a href={order.facebook} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.facebook)}</a></p>}
+          {order.tiktok && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>TikTok:</strong> <a href={order.tiktok} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.tiktok)}</a></p>}
+          {order.linkedin && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>LinkedIn:</strong> <a href={order.linkedin} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.linkedin)}</a></p>}
+          {order.youtube && <p style={{ color: '#cbd5e1', margin: '6px 0' }}><strong>YouTube:</strong> <a href={order.youtube} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{displayUrl(order.youtube)}</a></p>}
           {order.outros_links && order.outros_links.length > 0 && (
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
               <strong style={{ color: '#cbd5e1' }}>Outros Links:</strong>
