@@ -166,8 +166,10 @@ export async function POST(request: Request) {
         const bodyTemplate = magnet.welcome_email_body || 'Recebemos a tua candidatura com sucesso. Em breve entraremos em contacto.'
         const link = magnet.file_url || ''
         const body = bodyTemplate
-          .replace(/\{\{\s*name\s*\}\}/gi, leadName)
-          .replace(/\{\{\s*link\s*\}\}/gi, link)
+          .replace(/\{\{?\s*nome\s*\}?\}/gi, leadName)
+          .replace(/\{\{?\s*link\s*\}?\}|$\s*link\s*$/gi, link)
+          .replace(/\{\{?\s*numero\s*\}?\}|$\s*numero\s*$/gi, '')
+          .replace(/\{\{?\s*premio\s*\}?\}|$\s*premio\s*$/gi, '')
 
         leadEmailRes = await sendEmail({
           to: leadEmail,
