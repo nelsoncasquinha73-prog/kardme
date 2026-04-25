@@ -117,13 +117,36 @@ export default function WheelPage() {
   }
 
   const getSlices = useCallback(() => magnet?.wheel_config?.slices?.length ? magnet.wheel_config.slices : DEFAULT_SLICES, [magnet])
+  async function incrementSpinCount(leadId: string, newCount: number) {
+    try {
+      await supabase.from("leads").update({ spin_count: newCount }).eq("id", leadId)
+    } catch (e) { console.error(e) }
+  }
+
+  function spawnConfetti(isPrize: boolean) {
+    const pieces = isPrize ? 30 : 10
+    const newConfetti = Array.from({length: pieces}).map(() => ({
+      x: Math.random() * 100,
+      y: -10,
+      color: isPrize ? ["#f59e0b", "#10b981", "#8b5cf6"][Math.floor(Math.random()*3)] : "#4b5563",
+      size: 4 + Math.random() * 8,
+      speed: 2 + Math.random() * 2,
+      angle: Math.random() * 360
+    }))
+    setConfetti(prev => [...prev, ...newConfetti])
+    setTimeout(() => setConfetti([]), 3000)
+  }
+
+  const handleSpin = async () => {
+    const slices = getSlices()
 
   
     const bucket = hamiltonMethod(slices)
     // Escolher vencedor determinístico (se houver contador) ou aleatório (fallback)
-    const pos = (typeof newTotal === 'number' ? (newTotal - 1) : Math.floor(Math.random() * 100)) % 100
+    const pos = Math.floor(Math.random() * 100) % 100
     const winner = bucket[pos] ?? slices[Math.floor(Math.random() * slices.length)]
     const winnerIndex = slices.findIndex(s => s.id === winner.id)
+    const arc = (2 * Math.PI) / slices.length
     const targetSliceAngle = winnerIndex * arc + arc / 2
     const targetRot = -Math.PI/2 - targetSliceAngle
     const spins = 6 + Math.random()*4
@@ -150,7 +173,7 @@ export default function WheelPage() {
           setExhausted(true)
           setStep('result')
         } else {
-          setTimeout(() => { setResult(null); setStep('spin'); setTimeout(() => // wheel drawn by component, 50) }, 2500)
+          setTimeout(() => { setResult(null); setStep('spin') }, 2500)
         }
       }
     }
@@ -203,7 +226,6 @@ export default function WheelPage() {
   function handleTryAgain() {
     setResult(null)
     setStep('spin')
-    setTimeout(() => // wheel drawn by component, 50)
   }
 
   const spinsLeft = maxSpins - spinCount
