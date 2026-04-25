@@ -73,6 +73,7 @@ export default function WheelPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rotationRef = useRef(0)
   const animFrameRef = useRef<number>(0)
+  const lastRenderRef = useRef(0)
   const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
   const [loading, setLoading] = useState(true)
   const [spinning, setSpinning] = useState(false)
@@ -157,8 +158,11 @@ export default function WheelPage() {
     function animate(now: number) {
       const t = Math.min((now - startTime) / duration, 1)
       const rot = startRot + (finalRot - startRot) * easeOutQuart(t)
-      setRotation(rot)
       rotationRef.current = rot
+      if (now - lastRenderRef.current > 50) {
+        lastRenderRef.current = now
+        setRotation(rot)
+      }
       if (t < 1) { animFrameRef.current = requestAnimationFrame(animate) }
       else {
         rotationRef.current = finalRot
