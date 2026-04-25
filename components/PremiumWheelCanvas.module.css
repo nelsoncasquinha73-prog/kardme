@@ -1,0 +1,5 @@
+.canvas {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+  image-rendering: crisp-edges;
+  display: block;
+}

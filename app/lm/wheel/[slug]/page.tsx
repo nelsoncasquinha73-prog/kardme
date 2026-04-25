@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import styles from './wheel.module.css'
+import PremiumWheelCanvas from '@/components/PremiumWheelCanvas'
 
 interface WheelSlice { id: string; label: string; color: string; is_prize: boolean }
 interface WheelConfig { slices: WheelSlice[]; capture_before_spin: boolean; max_spins_per_email: number }
@@ -100,7 +101,6 @@ export default function WheelPage() {
     return () => window.removeEventListener('resize', computeSize)
   }, [])
 
-
   async function loadData() {
     setLoading(true)
     try {
@@ -118,183 +118,8 @@ export default function WheelPage() {
 
   const getSlices = useCallback(() => magnet?.wheel_config?.slices?.length ? magnet.wheel_config.slices : DEFAULT_SLICES, [magnet])
 
-  function lightenColor(hex: string, amount: number): string {
-    try {
-      const clean = (hex || '').trim()
-      if (!clean.startsWith('#')) return '#3b82f6'
-      const full = clean.length === 4
-        ? '#' + clean[1] + clean[1] + clean[2] + clean[2] + clean[3] + clean[3]
-        : clean
-      if (full.length !== 7) return '#3b82f6'
-      const num = parseInt(full.slice(1), 16)
-      const r = Math.min(255, (num >> 16) + amount)
-      const g = Math.min(255, ((num >> 8) & 0xff) + amount)
-      const b = Math.min(255, (num & 0xff) + amount)
-      return `rgb(${r},${g},${b})`
-    } catch { return '#3b82f6' }
-  }
-
-  const drawWheel = useCallback((rot: number) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const slices = magnet?.wheel_config?.slices?.length ? magnet.wheel_config.slices : DEFAULT_SLICES
-    const n = slices.length
-    const arc = (2 * Math.PI) / n
-    const cx = canvas.width / 2
-    const cy = canvas.height / 2
-    const R = cx - 12
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // 🌟 GLOW PREMIUM (fundo)
-    const glowGrad = ctx.createRadialGradient(cx, cy, R-20, cx, cy, R+20)
-    glowGrad.addColorStop(0, 'rgba(245,158,11,0.4)')
-    glowGrad.addColorStop(0.5, 'rgba(245,158,11,0.1)')
-    glowGrad.addColorStop(1, 'rgba(245,158,11,0)')
-    ctx.beginPath(); ctx.arc(cx, cy, R+20, 0, 2*Math.PI); ctx.fillStyle = glowGrad; ctx.fill()
-
-    // 🎨 FATIAS com gradiente radial
-    slices.forEach((slice, i) => {
-      const start = rot + i * arc
-      const end = start + arc
-      const mid = start + arc / 2
-
-      const sliceColor = slice.color && slice.color.startsWith('#') ? slice.color : '#3b82f6'
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R)
-      grad.addColorStop(0, lightenColor(sliceColor, 50))
-      grad.addColorStop(1, sliceColor)
-
-      ctx.beginPath()
-      ctx.moveTo(cx, cy)
-      ctx.arc(cx, cy, R, start, end)
-      ctx.closePath()
-      ctx.fillStyle = grad
-      ctx.fill()
-
-      // Borda entre fatias (ouro)
-      ctx.beginPath()
-      ctx.moveTo(cx, cy)
-      ctx.lineTo(cx + R*Math.cos(start), cy + R*Math.sin(start))
-      ctx.strokeStyle = 'rgba(245,158,11,0.6)'
-      ctx.lineWidth = 1.5
-      ctx.stroke()
-
-      // Borda externa (sombra)
-      ctx.beginPath()
-      ctx.arc(cx, cy, R, start, end)
-      ctx.strokeStyle = 'rgba(0,0,0,0.4)'
-      ctx.lineWidth = 2
-      ctx.stroke()
-
-      // 📝 TEXTO (premium + legível): 2 linhas radiais (fora maior, dentro menor)
-      drawFunnelText(ctx, slice.label, cx, cy, R, mid, n)
-    })
-
-    // ✨ BORDA DUPLA (premium)
-    ctx.beginPath(); ctx.arc(cx, cy, R+2, 0, 2*Math.PI)
-    ctx.strokeStyle = 'rgba(245,158,11,0.9)'; ctx.lineWidth = 3; ctx.stroke()
-    ctx.beginPath(); ctx.arc(cx, cy, R+5, 0, 2*Math.PI)
-    ctx.strokeStyle = 'rgba(245,158,11,0.3)'; ctx.lineWidth = 1; ctx.stroke()
-
-    // 💎 HUB 3D (centro)
-    const hubGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 45)
-    hubGrad.addColorStop(0, '#2d2d44')
-    hubGrad.addColorStop(0.5, '#1a1a2e')
-    hubGrad.addColorStop(1, '#0f0f1a')
-    ctx.beginPath(); ctx.arc(cx, cy, 42, 0, 2*Math.PI); ctx.fillStyle = hubGrad; ctx.fill()
-
-    // Hub borda
-    ctx.beginPath(); ctx.arc(cx, cy, 42, 0, 2*Math.PI)
-    ctx.strokeStyle = 'rgba(245,158,11,0.7)'; ctx.lineWidth = 2; ctx.stroke()
-
-    // ✨ GLOSS (highlight no topo do hub)
-    const glossGrad = ctx.createLinearGradient(cx-30, cy-30, cx+30, cy+10)
-    glossGrad.addColorStop(0, 'rgba(255,255,255,0.3)')
-    glossGrad.addColorStop(0.5, 'rgba(255,255,255,0)')
-    ctx.beginPath(); ctx.arc(cx, cy, 40, 0, 2*Math.PI); ctx.fillStyle = glossGrad; ctx.fill()
-
-    // Emoji no centro
-    ctx.font = '28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🎡', cx, cy)
-  }, [magnet])
-
-
-  // 📝 Helper: texto reto com efeito "funil" (fora grande → dentro pequeno)
-  function drawFunnelText(ctx: CanvasRenderingContext2D, text: string, cx: number, cy: number, R: number, mid: number, totalSlices: number) {
-    const clean = (text || '').trim()
-    if (!clean) return
-
-    // Adaptar tamanho máximo e fonte conforme número de fatias
-    let maxLen: number
-    let fontSize: number
-    let positionRadius: number
-
-    if (totalSlices <= 4) {
-      maxLen = 24
-      fontSize = 18
-      positionRadius = R - 20
-    } else if (totalSlices <= 6) {
-      maxLen = 18
-      fontSize = 16
-      positionRadius = R - 22
-    } else if (totalSlices <= 8) {
-      maxLen = 14
-      fontSize = 14
-      positionRadius = R - 24
-    } else {
-      maxLen = 12
-      fontSize = 13
-      positionRadius = R - 26
-    }
-
-    const label = clean.length > maxLen ? clean.substring(0, maxLen)+'…' : clean
-
-    ctx.save()
-    ctx.translate(cx, cy)
-    ctx.rotate(mid)
-
-    ctx.fillStyle = '#fff'
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'middle'
-    ctx.shadowColor = 'rgba(0,0,0,0.95)'
-    ctx.shadowBlur = 6
-    ctx.font = `bold ${fontSize}px Inter, sans-serif`
-    ctx.fillText(label, positionRadius, 0)
-
-    ctx.restore()
-  }
-
-  useEffect(() => { if (magnet && (step === 'spin')) drawWheel(rotationRef.current) }, [magnet, step, drawWheel])
-
-  function spawnConfetti(isPrize: boolean) {
-    if (!isPrize) return
-    const colors = ['#f59e0b','#8b5cf6','#10b981','#ef4444','#3b82f6','#ec4899']
-    setConfetti(Array.from({ length: 60 }, () => ({ x: Math.random()*100, y: -10, color: colors[Math.floor(Math.random()*colors.length)], size: 4+Math.random()*8, speed: 1+Math.random()*3, angle: Math.random()*360 })))
-    setTimeout(() => setConfetti([]), 4000)
-  }
-
-  async function incrementSpinCount(currentLeadId: string, count: number) {
-    await supabase.from('leads').update({ spin_count: count }).eq('id', currentLeadId)
-  }
-
-  async function handleSpin() {
-    if (spinning || !magnet) return
-    setSpinning(true)
-    const slices = getSlices(); const n = slices.length; const arc = (2*Math.PI)/n
-    
-    // Incrementa contador global (atómico) e obtém o total (se existir RPC)
-    let newTotal: number | null = null
-    try {
-      const { data, error } = await supabase.rpc('increment_lead_magnet_total_spins', { magnet_id: magnet.id })
-      if (!error && typeof data === 'number') newTotal = data
-    } catch {
-      // fallback silencioso
-    }
-
-    // ✅ HAMILTON METHOD: Distribuição exata de 100 slots
+  
     const bucket = hamiltonMethod(slices)
-
     // Escolher vencedor determinístico (se houver contador) ou aleatório (fallback)
     const pos = (typeof newTotal === 'number' ? (newTotal - 1) : Math.floor(Math.random() * 100)) % 100
     const winner = bucket[pos] ?? slices[Math.floor(Math.random() * slices.length)]
@@ -308,10 +133,10 @@ export default function WheelPage() {
     function animate(now: number) {
       const t = Math.min((now - startTime) / duration, 1)
       const rot = startRot + (finalRot - startRot) * easeOutQuart(t)
-      rotationRef.current = rot; drawWheel(rot)
+      rotationRef.current = rot
       if (t < 1) { animFrameRef.current = requestAnimationFrame(animate) }
       else {
-        rotationRef.current = finalRot; drawWheel(finalRot)
+        rotationRef.current = finalRot
         setResult(winner); setSpinning(false)
         spawnConfetti(winner.is_prize)
         if (winner.is_prize) {
@@ -325,7 +150,7 @@ export default function WheelPage() {
           setExhausted(true)
           setStep('result')
         } else {
-          setTimeout(() => { setResult(null); setStep('spin'); setTimeout(() => drawWheel(rotationRef.current), 50) }, 2500)
+          setTimeout(() => { setResult(null); setStep('spin'); setTimeout(() => // wheel drawn by component, 50) }, 2500)
         }
       }
     }
@@ -378,7 +203,7 @@ export default function WheelPage() {
   function handleTryAgain() {
     setResult(null)
     setStep('spin')
-    setTimeout(() => drawWheel(rotationRef.current), 50)
+    setTimeout(() => // wheel drawn by component, 50)
   }
 
   const spinsLeft = maxSpins - spinCount
@@ -432,7 +257,7 @@ export default function WheelPage() {
                   <circle cx="16" cy="12" r="4" fill="#fef3c7" stroke="#92400e" strokeWidth="1"/>
                 </svg>
               </div>
-              <canvas ref={canvasRef} width={wheelSize} height={wheelSize} className={styles.canvas} />
+              <PremiumWheelCanvas slices={getSlices()} rotation={rotationRef.current} wheelSize={wheelSize} />
             </div>
             <button className={styles.btnSpin} onClick={handleSpin} disabled={spinning}>
               {spinning ? <span className={styles.spinningText}><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span></span> : '🎡 Girar a Roleta!'}
