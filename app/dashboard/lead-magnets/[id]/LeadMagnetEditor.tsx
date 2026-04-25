@@ -5,6 +5,7 @@ import { useToast } from '@/lib/toast-context'
 import { FiArrowLeft, FiSave, FiCopy, FiTrash2 } from 'react-icons/fi'
 import LeadMagnetPreview from './LeadMagnetPreview'
 import styles from './LeadMagnetEditor.module.css'
+import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
 
 interface LeadMagnet {
   id: string
@@ -174,6 +175,12 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
           capture_page_success_message: magnet.capture_page_success_message,
           show_download_button: magnet.show_download_button,
           download_button_text: magnet.download_button_text,
+
+          // configs por tipo
+          form_fields: magnet.form_fields,
+          raffle_config: magnet.raffle_config,
+          wheel_config: magnet.wheel_config,
+
           updated_at: new Date().toISOString(),
         })
         .eq('id', magnet.id)
@@ -292,6 +299,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
             </div>
           </div>
 
+          {magnet.magnet_type === 'wheel' && (
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>🎡 Configuração da Roda</h3>
+              <WheelConfigurator
+                config={magnet.wheel_config || null}
+                onChange={(cfg) => handleChange('wheel_config' as any, cfg)}
+              />
+            </div>
+          )}
+
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>📨 Remetente (Cartão)</h3>
 
@@ -326,6 +343,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
               </small>
             </div>
           </div>
+
 
           <div className={styles.section}>
             <label className={styles.checkboxLabel}>

@@ -12,12 +12,12 @@ import {
 import FormBuilder from './FormBuilder'
 
 const DEFAULT_SLICES = [
-  {id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true,probability:1.5},
-  {id:'2',label:'Tenta outra vez',color:'#6b7280',is_prize:false,probability:25},
-  {id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true,probability:15},
-  {id:'4',label:'Quase!',color:'#6b7280',is_prize:false,probability:25},
-  {id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true,probability:15},
-  {id:'6',label:'Tenta outra vez',color:'#6b7280',is_prize:false,probability:10},
+  {id:'1',label:'🏆 Prémio Principal',color:'#f59e0b',is_prize:true,percentage:20},
+  {id:'2',label:'Tenta outra vez',color:'#4b5563',is_prize:false,percentage:15},
+  {id:'3',label:'🎁 Brinde Surpresa',color:'#8b5cf6',is_prize:true,percentage:20},
+  {id:'4',label:'Quase!',color:'#374151',is_prize:false,percentage:15},
+  {id:'5',label:'🥈 2º Prémio',color:'#10b981',is_prize:true,percentage:20},
+  {id:'6',label:'Tenta outra vez',color:'#4b5563',is_prize:false,percentage:10},
 ]
 
 export default function LeadMagnetsView({ userId }: { userId: string }) {
