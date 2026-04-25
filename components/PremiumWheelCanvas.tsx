@@ -223,7 +223,7 @@ export default function PremiumWheelCanvas({ slices, rotation, wheelSize, onDraw
     if (offscreenRef.current) {
       ctx.save()
       ctx.translate(wheelSize / 2, wheelSize / 2)
-      ctx.rotate((rotation * Math.PI) / 180)
+      ctx.rotate(rotation)
       ctx.translate(-wheelSize / 2, -wheelSize / 2)
       ctx.drawImage(offscreenRef.current, 0, 0)
       ctx.restore()
