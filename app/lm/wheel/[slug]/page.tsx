@@ -87,6 +87,7 @@ export default function WheelPage() {
   const [prizes, setPrizes] = useState<WheelSlice[]>([])
   const [confetti, setConfetti] = useState<{x:number;y:number;color:string;size:number;speed:number;angle:number}[]>([])
   const [wheelSize, setWheelSize] = useState(420)
+  const [rotation, setRotation] = useState(0)
 
   useEffect(() => { if (slug) loadData() }, [slug])
 
@@ -156,10 +157,12 @@ export default function WheelPage() {
     function animate(now: number) {
       const t = Math.min((now - startTime) / duration, 1)
       const rot = startRot + (finalRot - startRot) * easeOutQuart(t)
+      setRotation(rot)
       rotationRef.current = rot
       if (t < 1) { animFrameRef.current = requestAnimationFrame(animate) }
       else {
         rotationRef.current = finalRot
+        setRotation(finalRot)
         setResult(winner); setSpinning(false)
         spawnConfetti(winner.is_prize)
         if (winner.is_prize) {
@@ -279,7 +282,7 @@ export default function WheelPage() {
                   <circle cx="16" cy="12" r="4" fill="#fef3c7" stroke="#92400e" strokeWidth="1"/>
                 </svg>
               </div>
-              <PremiumWheelCanvas slices={getSlices()} rotation={rotationRef.current} wheelSize={wheelSize} />
+              <PremiumWheelCanvas slices={getSlices()} rotation={rotation} wheelSize={wheelSize} />
             </div>
             <button className={styles.btnSpin} onClick={handleSpin} disabled={spinning}>
               {spinning ? <span className={styles.spinningText}><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span></span> : '🎡 Girar a Roleta!'}
