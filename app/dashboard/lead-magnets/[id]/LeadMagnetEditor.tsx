@@ -29,7 +29,27 @@ interface LeadMagnet {
   leads_count: number
   created_at: string
   updated_at: string
+  form_fields?: any[]
+  raffle_config?: any
+  wheel_config?: any
 }
+
+
+// Helpers para normalizar email text (\\n ↔ \n)
+const uiEmailText = (str: string) => (str || '').replace(/\\n/g, '\n');
+
+const dbEmailText = (str: string) => (str || '').replace(/\r\n/g, '\n');
+
+// Normalizar variáveis antigas ({{name}} → {nome}, etc.)
+const normalizeVariables = (text: string) => {
+  if (!text) return text;
+  return text
+    .replace(/{{name}}/g, '{nome}')
+    .replace(/{{link}}/g, '{link}')
+    .replace(/{{numero}}/g, '{numero}')
+    .replace(/{{premio}}/g, '{premio}');
+};
+
 
 const MAGNET_TYPES = [
   { id: 'ebook', label: '📚 E-book', icon: '📚' },
@@ -49,7 +69,16 @@ const PRESETS: Record<string, Partial<LeadMagnet>> = {
     capture_page_subtitle: 'Aprende as melhores práticas com este guia completo',
     capture_page_button_text: 'Receber E-book',
     welcome_email_subject: '📚 O teu e-book está pronto!',
-    welcome_email_body: 'Olá {{name}},\\n\\nObrigado pelo teu interesse!\\n\\nAqui está o link para o teu e-book:\\n{{link}}\\n\\nPodes fazer download a qualquer momento.\\n\\nMelhores cumprimentos',
+    welcome_email_body: `Olá {nome},
+
+Obrigado pelo teu interesse!
+
+Aqui está o link para o teu e-book:
+{link}
+
+Podes fazer download a qualquer momento.
+
+Melhores cumprimentos`,
     thank_you_message: 'Obrigado! O teu e-book está a ser enviado para o teu email.',
   },
   checklist: {
@@ -57,7 +86,14 @@ const PRESETS: Record<string, Partial<LeadMagnet>> = {
     capture_page_subtitle: 'Não percas nenhum passo importante',
     capture_page_button_text: 'Receber Checklist',
     welcome_email_subject: '✅ A tua checklist está pronta!',
-    welcome_email_body: 'Olá {{name}},\\n\\nAqui está a checklist que pediste:\\n{{link}}\\n\\nUsa-a para garantir que não esqueces nada!\\n\\nMelhores cumprimentos',
+    welcome_email_body: `Olá {nome},
+
+Aqui está a checklist que pediste:
+{link}
+
+Usa-a para garantir que não esqueces nada!
+
+Melhores cumprimentos`,
     thank_you_message: 'Perfeito! A checklist foi enviada para o teu email.',
   },
   wheel: {
@@ -65,7 +101,13 @@ const PRESETS: Record<string, Partial<LeadMagnet>> = {
     capture_page_subtitle: 'Gira e ganha um prémio exclusivo',
     capture_page_button_text: 'Girar Roleta',
     welcome_email_subject: '🎡 O teu resultado na roleta!',
-    welcome_email_body: 'Olá {{name}},\\n\\nObrigado por participares na roleta!\\n\\nO teu resultado foi: {{premio}}\\n\\nMelhores cumprimentos',
+    welcome_email_body: `Olá {nome},
+
+Obrigado por participares na roleta!
+
+O teu resultado foi: {premio}
+
+Melhores cumprimentos`,
     thank_you_message: 'Parabéns! O teu resultado foi enviado para o teu email.',
   },
   raffle: {
@@ -73,7 +115,17 @@ const PRESETS: Record<string, Partial<LeadMagnet>> = {
     capture_page_subtitle: 'Preenche o formulário e tenta ganhar',
     capture_page_button_text: 'Participar',
     welcome_email_subject: '🎰 A tua participação no sorteio!',
-    welcome_email_body: 'Olá {{name}},\\n\\nObrigado por participares no sorteio!\\n\\nO teu número da sorte é: {{numero}}\\n\\nGuarda este email — se fores o vencedor entraremos em contacto contigo.\\n\\nBoa sorte!\\n\\nMelhores cumprimentos',
+    welcome_email_body: `Olá {nome},
+
+Obrigado por participares no sorteio!
+
+O teu número da sorte é: {numero}
+
+Guarda este email — se fores o vencedor entraremos em contacto contigo.
+
+Boa sorte!
+
+Melhores cumprimentos`,
     thank_you_message: 'Obrigado! O teu número foi registado. Boa sorte!',
   },
 }
@@ -319,12 +371,15 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                 onChange={(e) => handleChange('card_id', e.target.value || null)}
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
+                  minHeight: '48px',
+                  padding: '12px',
                   borderRadius: 10,
                   border: '1px solid rgba(255,255,255,0.15)',
                   background: 'rgba(255,255,255,0.07)',
                   color: '#fff',
                   outline: 'none',
+                  fontSize: '14px',
+                  lineHeight: '1.4',
                 }}
                 disabled={isLoadingCards}
               >
@@ -550,9 +605,9 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                 <div className={styles.field}>
                   <label>Corpo do Email</label>
                   <textarea
-                    value={magnet.welcome_email_body}
-                    onChange={(e) => handleChange('welcome_email_body', e.target.value)}
-                    placeholder="Use {{name}}, {{link}}, {{numero}}, {{premio}} para variáveis dinâmicas"
+                    value={uiEmailText(normalizeVariables(magnet.welcome_email_body))}
+                    onChange={(e) => handleChange('welcome_email_body', normalizeVariables(dbEmailText(e.target.value)))}
+                    placeholder="Use {nome}, {link}, {numero}, {premio} para variáveis dinâmicas"
                     rows={8}
                   />
                   <small style={{ opacity: 0.6, marginTop: 8, display: 'block' }}>
