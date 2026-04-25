@@ -1,0 +1,200 @@
+.wheelContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  border-radius: 20px;
+  min-height: 600px;
+}
+
+.wheelWrapper {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheelSvg {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+  transform-origin: center;
+  will-change: transform;
+}
+
+.pointer {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #ffd700;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.sliceText {
+  pointer-events: none;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.stand {
+  position: relative;
+  width: 200px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.standTop {
+  width: 80px;
+  height: 15px;
+  background: linear-gradient(180deg, #3a3a4e 0%, #2a2a3e 100%);
+  border-radius: 50% 50% 0 0;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.standMiddle {
+  width: 50px;
+  height: 35px;
+  background: linear-gradient(90deg, #2a2a3e 0%, #3a3a4e 50%, #2a2a3e 100%);
+  box-shadow:
+    inset -2px 0 4px rgba(0, 0, 0, 0.3),
+    inset 2px 0 4px rgba(255, 255, 255, 0.05),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.standMiddle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.standBase {
+  width: 180px;
+  height: 20px;
+  background: linear-gradient(180deg, #3a3a4e 0%, #2a2a3e 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.standBase::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.1), transparent);
+  border-radius: 50%;
+}
+
+.spinButton {
+  padding: 16px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 8px 20px rgba(255, 215, 0, 0.4),
+    0 4px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.spinButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.spinButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 24px rgba(255, 215, 0, 0.5),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spinButton:hover:not(:disabled)::before {
+  transform: translateX(100%);
+}
+
+.spinButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 12px rgba(255, 215, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.spinButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .wheelContainer {
+    padding: 20px 10px;
+    min-height: auto;
+    gap: 15px;
+  }
+
+  .wheelWrapper {
+    width: 320px;
+    height: 320px;
+  }
+
+  .wheelSvg {
+    width: 320px;
+    height: 320px;
+  }
+
+  .stand {
+    width: 150px;
+    height: 60px;
+  }
+
+  .standTop {
+    width: 60px;
+    height: 12px;
+  }
+
+  .standMiddle {
+    width: 40px;
+    height: 28px;
+  }
+
+  .standBase {
+    width: 140px;
+    height: 16px;
+  }
+
+  .spinButton {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+}

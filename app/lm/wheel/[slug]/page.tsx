@@ -20,8 +20,16 @@ const DEFAULT_SLICES: WheelSlice[] = [
 
 // ✅ HAMILTON METHOD - Distribuição exata de 100 slots sem distorção
 function hamiltonMethod(slices: WheelSlice[]): WheelSlice[] {
+  // Fallback: se percentages não somam 100, normaliza
+  const totalPercentage = slices.reduce((sum, s) => sum + (Number((s as any).percentage) || 0), 0)
+  const normalizedSlices = totalPercentage === 0 
+    ? slices.map(s => ({ ...s, percentage: 100 / slices.length }))
+    : totalPercentage !== 100
+    ? slices.map(s => ({ ...s, percentage: (Number((s as any).percentage) || 0) * (100 / totalPercentage) }))
+    : slices
+
   const bucket: WheelSlice[] = []
-  const slots = slices.map((s, i) => ({
+  const slots = normalizedSlices.map((s, i) => ({
     slice: s,
     index: i,
     percentage: Number((s as any).percentage) || 0,
@@ -92,17 +100,6 @@ export default function WheelPage() {
     return () => window.removeEventListener('resize', computeSize)
   }, [])
 
-  useEffect(() => {
-    function compute() {
-      const vw = window.innerWidth
-      // mobile: quase full width do card; desktop: maior
-      const size = Math.max(340, Math.min(520, Math.floor(vw * 0.72)))
-      setWheelSize(size)
-    }
-    compute()
-    window.addEventListener('resize', compute)
-    return () => window.removeEventListener('resize', compute)
-  }, [])
 
   async function loadData() {
     setLoading(true)
