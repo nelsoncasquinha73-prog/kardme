@@ -90,7 +90,7 @@ export default function RafflePage() {
   }
 
   async function handleSubmit() {
-    if (!modal.name.trim() || !modal.email.trim() || !modal.consent) return
+    if (!modal.name.trim() || !modal.email.trim() || !modal.phone.trim() || !modal.consent) return
     if (!magnet) return
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(modal.email)) return alert('Email inválido')

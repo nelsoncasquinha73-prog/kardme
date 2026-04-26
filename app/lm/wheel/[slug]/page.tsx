@@ -202,7 +202,7 @@ export default function WheelPage() {
   }
 
   async function handleFormSubmit() {
-    if (!form.name.trim() || !form.email.trim() || !form.consent) return
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.consent) return
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { alert('Email inválido'); return }
     if (!magnet) return
     const { data: existing } = await supabase.from('leads').select('id, spin_count').eq('email', form.email.toLowerCase()).eq('lead_magnet_id', magnet.id).maybeSingle()
@@ -257,9 +257,9 @@ export default function WheelPage() {
             <p className={styles.formTitle}>🎡 Preenche os teus dados para girar!</p>
             <div className={styles.formGroup}><label>Nome *</label><input className={styles.input} type="text" placeholder="O teu nome" value={form.name} onChange={e => setForm(p => ({...p, name: e.target.value}))} /></div>
             <div className={styles.formGroup}><label>Email *</label><input className={styles.input} type="email" placeholder="O teu email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} /></div>
-            <div className={styles.formGroup}><label>Telefone (opcional)</label><input className={styles.input} type="tel" placeholder="O teu telefone" value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} /></div>
+            <div className={styles.formGroup}><label>Telefone (opcional)</label><input className={styles.input} type="tel" placeholder="O teu telefone" required value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} /></div>
             <label className={styles.checkboxLabel}><input type="checkbox" checked={form.consent} onChange={e => setForm(p => ({...p, consent: e.target.checked}))} /> Aceito receber comunicações e promoções.</label>
-            <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.consent} onClick={handleFormSubmit}>🎡 Quero girar a roleta!</button>
+            <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.phone || !form.consent} onClick={handleFormSubmit}>🎡 Quero girar a roleta!</button>
           </div>
         )}
         {step === 'spin' && (

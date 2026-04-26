@@ -69,8 +69,8 @@ export default function LeadMagnetPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!form.name.trim() || !form.email.trim()) {
-      setError('Por favor preenche o nome e email.')
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.marketing_opt_in) {
+      setError('Por favor preenche todos os campos e aceita as comunicações.')
       return
     }
     setSubmitting(true)
@@ -203,7 +203,7 @@ export default function LeadMagnetPage() {
                   />
                   <input
                     type="tel"
-                    placeholder="Telefone (opcional)"
+                    placeholder="Telefone" required
                     value={form.phone}
                     onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                     style={{
