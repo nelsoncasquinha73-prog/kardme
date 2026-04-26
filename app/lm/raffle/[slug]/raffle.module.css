@@ -454,3 +454,9 @@ display: inline-flex;
   color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
 }
+
+.req {
+  color: #ef4444;
+  font-weight: 700;
+  margin-left: 4px;
+}

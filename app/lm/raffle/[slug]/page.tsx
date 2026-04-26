@@ -310,7 +310,7 @@ export default function RafflePage() {
                 onChange={e => setModal(p => ({ ...p, email: e.target.value }))} />
             </div>
             <div className={styles.formGroup}>
-              <label>Telefone</label>
+              <label>Telefone <span className={styles.req}>*</span></label>
               <input className={styles.input} type="tel" placeholder="O teu telefone" value={modal.phone}
                 onChange={e => setModal(p => ({ ...p, phone: e.target.value }))} />
             </div>
