@@ -1402,7 +1402,7 @@ Melhores cumprimentos,
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {selectedCardId === 'all'
                 ? '— Todos os cartões —'
-                : cardsList.find((c: any) => c.id === selectedCardId)?.name || cardsList.find((c: any) => c.id === selectedCardId)?.title || 'Seleciona um cartão'}
+                : cardsList.find((c: any) => c.id === selectedCardId)?.name || cardsList.find((c: any) => c.id === selectedCardId)?.slug || 'Seleciona um cartão'}
             </span>
             <span style={{ marginLeft: 10, fontSize: 12, opacity: 0.7, display: 'inline-flex', alignItems: 'center' }}><FiChevronDown size={14} /></span>
           </button>

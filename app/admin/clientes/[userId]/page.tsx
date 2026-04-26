@@ -1211,7 +1211,7 @@ export default function AdminClienteDetailPage() {
                               color: "rgba(255,255,255,0.85)",
                             }}
                           >
-                            {card ? card.title || "Sem título" : d.card_id}
+                            {card ? card.name || card.slug || "Sem título" : d.card_id}
                           </td>
                           <td style={{ padding: "10px 8px" }}>
                             <span

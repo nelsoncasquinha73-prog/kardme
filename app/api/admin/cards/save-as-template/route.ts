@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       .from('templates')
       .insert({
         name: templateName,
-        description: `Template criado a partir do cartão "${card.title || 'Sem título'}"`,
+        description: `Template criado a partir do cartão "${card.name || card.slug || 'Sem título'}"`,
         preview_json: {
           theme: card.theme,
           blocks: blocks || []
