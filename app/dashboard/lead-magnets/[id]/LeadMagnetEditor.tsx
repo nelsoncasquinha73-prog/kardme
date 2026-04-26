@@ -652,7 +652,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                 <div className={styles.field}>
                   <label>Mensagem de Sucesso (página pública)</label>
                   <textarea
-                    value={magnet.success_message || 'O teu recurso está pronto para download.'}
+                    value={magnet.success_message || ''}
                     onChange={(e) => handleChange('success_message', e.target.value)}
                     placeholder="Ex: O teu recurso está pronto para download."
                     rows={3}
