@@ -27,6 +27,7 @@ interface LeadMagnet {
   show_download_button: boolean
   download_button_text: string
   success_message?: string
+  show_success_message?: boolean
   leads_count: number
   created_at: string
   updated_at: string
@@ -650,13 +651,40 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                 </div>
 
                 <div className={styles.field}>
-                  <label>Mensagem de Sucesso (página pública)</label>
+                <div className={styles.field}>
+                  <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+                    <input
+                      type="checkbox"
+                      checked={magnet.show_success_message !== false}
+                      onChange={(e) => handleChange('show_success_message', e.target.checked)}
+                      style={{width:18,height:18,cursor:'pointer',accentColor:'#6366f1'}}
+                    />
+                    <span>Mostrar mensagem de sucesso</span>
+                  </label>
+                </div>
+
+                                  <label>Mensagem de Sucesso (página pública)</label>
                   <textarea
                     value={magnet.success_message || ''}
                     onChange={(e) => handleChange('success_message', e.target.value)}
                     placeholder="Ex: O teu recurso está pronto para download."
                     rows={3}
                   />
+                </div>
+
+                <div className={styles.field}>
+                  <label style={{fontSize: 12, color: '#64748b', marginTop: 12}}>Preview:</label>
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: '#1e293b',
+                    borderRadius: '6px',
+                    color: '#94a3b8',
+                    fontSize: '14px',
+                    minHeight: '40px',
+                    border: '1px solid #334155'
+                  }}>
+                    {magnet.success_message || '(vazio)'}
+                  </div>
                 </div>
 
                 <div className={styles.field}>

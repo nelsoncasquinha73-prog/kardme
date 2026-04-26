@@ -26,6 +26,7 @@ type LeadMagnet = {
   download_button_text?: string
   capture_page_button_text?: string | null
   success_message?: string | null
+  show_success_message?: boolean
 }
 
 export default function LeadMagnetPage() {
@@ -266,9 +267,11 @@ export default function LeadMagnetPage() {
               <h2 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>
                 {thankYou || 'Obrigado!'}
               </h2>
+              {magnet?.show_success_message !== false && (
               <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 28 }}>
                 {magnet?.success_message || ""}
               </p>
+              )}
               {magnet?.show_download_button && fileUrl && (
                 <a
                   href={fileUrl}
