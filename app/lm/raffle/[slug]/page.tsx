@@ -310,7 +310,7 @@ export default function RafflePage() {
                 onChange={e => setModal(p => ({ ...p, email: e.target.value }))} />
             </div>
             <div className={styles.formGroup}>
-              <label>Telefone (opcional)</label>
+              <label>Telefone</label>
               <input className={styles.input} type="tel" placeholder="O teu telefone" value={modal.phone}
                 onChange={e => setModal(p => ({ ...p, phone: e.target.value }))} />
             </div>
@@ -323,7 +323,7 @@ export default function RafflePage() {
 
             <div className={styles.btnRow}>
               <button className={styles.btnCancel} onClick={() => setSelectedNumber(null)}>Cancelar</button>
-              <button className={styles.btnSubmit} disabled={submitting || !modal.name || !modal.email || !modal.consent}
+              <button className={styles.btnSubmit} disabled={submitting || !modal.name || !modal.email || !modal.phone || !modal.consent}
                 onClick={handleSubmit}>
                 {submitting ? 'A registar...' : '🎯 Confirmar'}
               </button>
