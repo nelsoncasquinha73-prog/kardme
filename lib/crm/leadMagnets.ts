@@ -78,6 +78,7 @@ export type LeadMagnet = {
   custom_type_label?: string | null
   show_download_button?: boolean
   download_button_text?: string
+  success_message?: string
 }
 
 export async function getLeadMagnets(userId: string): Promise<LeadMagnet[]> {

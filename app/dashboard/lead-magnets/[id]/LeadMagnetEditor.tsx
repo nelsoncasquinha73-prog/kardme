@@ -26,6 +26,7 @@ interface LeadMagnet {
   capture_page_success_message: string
   show_download_button: boolean
   download_button_text: string
+  success_message?: string
   leads_count: number
   created_at: string
   updated_at: string
@@ -645,6 +646,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                     onChange={(e) => handleChange('thank_you_message', e.target.value)}
                     placeholder="Ex: Obrigado! O teu e-book está a ser enviado."
                     rows={4}
+                  />
+                </div>
+
+                <div className={styles.field}>
+                  <label>Mensagem de Sucesso (página pública)</label>
+                  <textarea
+                    value={magnet.success_message || 'O teu recurso está pronto para download.'}
+                    onChange={(e) => handleChange('success_message', e.target.value)}
+                    placeholder="Ex: O teu recurso está pronto para download."
+                    rows={3}
                   />
                 </div>
 
