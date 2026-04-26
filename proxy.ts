@@ -13,32 +13,36 @@ export async function proxy(req: NextRequest) {
     host.endsWith('.vercel.app') ||
     host.endsWith('.sintra.site')
   ) {
-    return undefined // passa para o Next handler normal
+    return undefined
   }
 
   const url = req.nextUrl.clone()
   const baseUrl = `${url.protocol}//${hostHeader}`
 
   try {
-    const res = await fetch(`${baseUrl}/api/public/resolve-domain?host=${encodeURIComponent(host)}`, {
+    const res = await fetch(`${baseUrl}/api/public/resolve-domain?host=${encodeURIComponent(host.replace(/^www\./, ''))}`, {
       cache: 'no-store',
     })
 
     if (!res.ok) return undefined
 
     const data = await res.json().catch(() => null)
-    if (data?.slug) {
-      url.pathname = `/${data.slug}`
-      return new Response(null, {
-        status: 307,
-        headers: { location: url.toString() },
-      })
-    }
-  } catch (err) {
-    // nunca quebrar o app
-  }
+    const slug = data?.slug as string | undefined
+    if (!slug) return undefined
 
-  return undefined
+    // ✅ Anti-loop: se já estamos no path certo, não fazer redirect
+    if (url.pathname === `/${slug}` || url.pathname.startsWith(`/${slug}/`)) {
+      return undefined
+    }
+
+    url.pathname = `/${slug}`
+    return new Response(null, {
+      status: 307,
+      headers: { location: url.toString() },
+    })
+  } catch {
+    return undefined
+  }
 }
 
 export const config = {
