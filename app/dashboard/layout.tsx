@@ -106,6 +106,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // MENU DO ADMIN (fixo, sem mudanças)
   const adminNavItems = useMemo(() => [
     { label: 'Dashboard', href: '/dashboard', icon: FiHome },
+    { label: 'Os Meus Cartões', href: '/dashboard/my-cards', icon: FiLayout },
     { label: 'CRM Pro', href: '/dashboard/crm', icon: FiMail },
     { label: 'Lead Magnets', href: '/dashboard/lead-magnets', icon: FiGift },
     { label: 'Email Marketing', href: '/dashboard/email-marketing', icon: FiZap },
@@ -141,6 +142,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const titleByPrefix: Array<{ prefix: string; title: string }> = [
     { prefix: '/dashboard', title: 'Dashboard' },
+    { prefix: '/dashboard/my-cards', title: 'Os Meus Cartões' },
     { prefix: '/dashboard/crm', title: 'CRM Pro' },
     { prefix: '/dashboard/lead-magnets', title: 'Lead Magnets' },
     { prefix: '/dashboard/email-marketing', title: 'Email Marketing' },

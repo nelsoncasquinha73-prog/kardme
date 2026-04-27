@@ -259,6 +259,51 @@ export default function ThemePageClientRight({
           <>
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 6, fontWeight: 900, fontSize: 12, color: '#111827', lineHeight: 1.4 }}>
+                🔗 Slug (URL)
+              </label>
+              <p style={{ fontSize: 11, opacity: 0.55, marginBottom: 10, color: '#111827', lineHeight: 1.3 }}>
+                kardme.com/<strong>{slugEdit}</strong>
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="text"
+                  value={slugEdit}
+                  onChange={(e) => setSlugEdit(e.target.value)}
+                  placeholder="slug-do-cartao"
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(0,0,0,0.18)',
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                  }}
+                />
+                <button
+                  onClick={saveSlug}
+                  disabled={slugSaving}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#6366f1',
+                    color: 'white',
+                    fontWeight: 700,
+                    cursor: slugSaving ? 'not-allowed' : 'pointer',
+                    fontSize: 12,
+                    opacity: slugSaving ? 0.7 : 1,
+                  }}
+                >
+                  {slugSaving ? '⏳' : '✓'}
+                </button>
+              </div>
+              {slugError && (
+                <p style={{ fontSize: 11, color: '#ef4444', marginTop: 8 }}>❌ {slugError}</p>
+              )}
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 900, fontSize: 12, color: '#111827', lineHeight: 1.4 }}>
                 🏢 Área de negócio
               </label>
               <p style={{ fontSize: 11, opacity: 0.55, marginBottom: 10, color: '#111827', lineHeight: 1.3 }}>
