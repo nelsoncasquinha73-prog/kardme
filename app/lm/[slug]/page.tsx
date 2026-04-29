@@ -25,6 +25,8 @@ type LeadMagnet = {
   show_download_button?: boolean
   download_button_text?: string
   capture_page_button_text?: string | null
+  capture_page_subtitle?: string | null
+  capture_page_subtitle?: string | null
   success_message?: string | null
   show_success_message?: boolean
 }
@@ -52,7 +54,7 @@ export default function LeadMagnetPage() {
   async function loadMagnet() {
     const { data, error } = await supabasePublic
       .from('lead_magnets')
-      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text, capture_page_button_text')
+      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text, capture_page_button_text, capture_page_subtitle')
       .eq('slug', slug)
       .single()
 
@@ -157,6 +159,30 @@ export default function LeadMagnetPage() {
               }}>
                 {magnet?.title}
               </h1>
+
+              {magnet?.capture_page_subtitle && (
+                <p style={{
+                  fontSize: 16,
+                  color: '#cbd5e1',
+                  marginBottom: 28,
+                  lineHeight: 1.6,
+                  fontWeight: 500,
+                }}>
+                  {magnet.capture_page_subtitle}
+                </p>
+              )}
+
+              {magnet?.capture_page_subtitle && (
+                <p style={{
+                  fontSize: 16,
+                  color: '#cbd5e1',
+                  marginBottom: 28,
+                  lineHeight: 1.6,
+                  fontWeight: 500,
+                }}>
+                  {magnet.capture_page_subtitle}
+                </p>
+              )}
 
               {magnet?.description && (
                 <p style={{
