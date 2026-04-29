@@ -172,15 +172,16 @@ export default function LeadMagnetPage() {
               )}
 
 
-              {magnet?.description && (
-                <p style={{
-                  fontSize: 15,
-                  color: '#94a3b8',
-                  marginBottom: 28,
-                  lineHeight: 1.6,
-                }}>
-                  {magnet.description}
-                </p>
+              {magnet?.description &&
+                magnet.description.trim() !== (magnet.capture_page_subtitle || '').trim() && (
+                  <p style={{
+                    fontSize: 15,
+                    color: '#94a3b8',
+                    marginBottom: 28,
+                    lineHeight: 1.6,
+                  }}>
+                    {magnet.description}
+                  </p>
               )}
 
               <form onSubmit={handleSubmit}>
