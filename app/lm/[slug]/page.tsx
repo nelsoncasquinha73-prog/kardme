@@ -171,15 +171,6 @@ export default function LeadMagnetPage() {
                 </p>
               )}
 
-                <p style={{
-                  fontSize: 16,
-                  color: '#cbd5e1',
-                  marginBottom: 28,
-                  lineHeight: 1.6,
-                  fontWeight: 500,
-                }}>
-                </p>
-              )}
 
               {magnet?.description && (
                 <p style={{
