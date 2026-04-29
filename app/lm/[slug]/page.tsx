@@ -26,7 +26,6 @@ type LeadMagnet = {
   download_button_text?: string
   capture_page_button_text?: string | null
   capture_page_subtitle?: string | null
-  capture_page_subtitle?: string | null
   success_message?: string | null
   show_success_message?: boolean
 }
@@ -172,7 +171,6 @@ export default function LeadMagnetPage() {
                 </p>
               )}
 
-              {magnet?.capture_page_subtitle && (
                 <p style={{
                   fontSize: 16,
                   color: '#cbd5e1',
@@ -180,7 +178,6 @@ export default function LeadMagnetPage() {
                   lineHeight: 1.6,
                   fontWeight: 500,
                 }}>
-                  {magnet.capture_page_subtitle}
                 </p>
               )}
 
