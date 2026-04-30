@@ -59,6 +59,7 @@ export default function LeadMagnetPage() {
       .eq('slug', slug)
       .single()
 
+    console.log('DEBUG loadMagnet:', { data, error, slug });
     if (error || !data || !data.is_active) {
       setNotFound(true)
     } else {
