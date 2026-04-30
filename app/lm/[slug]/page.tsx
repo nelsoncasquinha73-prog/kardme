@@ -1,5 +1,7 @@
 'use client'
 
+// deploy ping
+
 import { useEffect, useState } from 'react'
 import { MagnetType, MAGNET_TYPE_LABELS } from '@/lib/crm/leadMagnets'
 import { useParams } from 'next/navigation'
