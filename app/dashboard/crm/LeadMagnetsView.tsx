@@ -136,7 +136,11 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
               </div>
               <div style={{padding:16}}>
                 <h3 style={{fontSize:15,fontWeight:800,color:'#fff',margin:'0 0 6px'}}>{m.title}</h3>
-                {(m.capture_page_subtitle || m.description) && <p style={{fontSize:12,color:'rgba(255,255,255,0.5)',margin:'0 0 12px',lineHeight:1.5}}>{m.capture_page_subtitle || m.description}</p>}
+                {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim())) ? (
+                  <p style={{fontSize:12,color:'rgba(255,255,255,0.5)',margin:'0 0 12px',lineHeight:1.5}}>
+                    {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim()))}
+                  </p>
+                ) : null}
                 <div style={{display:'flex',gap:16,marginBottom:14}}>
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#60a5fa'}}>{m.views_count}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>VISITAS</div></div>
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#10b981'}}>{m.leads_count}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>LEADS</div></div>
