@@ -491,6 +491,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
                         if (!file) return
+                        
+                        const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+                        const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
+                        
+                        // Validar tamanho
+                        if (file.size > MAX_SIZE) {
+                          alert(`❌ Imagem muito grande!\n\nTamanho: ${sizeMB}MB\nMáximo permitido: 5MB\n\nPor favor, redimensiona a imagem e tenta novamente.`)
+                          if (e.target) e.target.value = ''
+                          return
+                        }
                         try {
                           const formData = new FormData()
                           formData.append('file', file)
@@ -550,6 +560,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
                         if (!file) return
+                        
+                        const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+                        const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
+                        
+                        // Validar tamanho
+                        if (file.size > MAX_SIZE) {
+                          alert(`❌ Imagem muito grande!\n\nTamanho: ${sizeMB}MB\nMáximo permitido: 5MB\n\nPor favor, redimensiona a imagem e tenta novamente.`)
+                          if (e.target) e.target.value = ''
+                          return
+                        }
                         try {
                           const formData = new FormData()
                           formData.append('file', file)
