@@ -173,6 +173,7 @@ export default function LeadMagnetPage() {
 
 
               {magnet?.description &&
+                !magnet.capture_page_subtitle &&
                 magnet.description.replace(/\s+/g, ' ').trim() !== (magnet.capture_page_subtitle || '').replace(/\s+/g, ' ').trim() && (
                   <p style={{
                     fontSize: 15,
