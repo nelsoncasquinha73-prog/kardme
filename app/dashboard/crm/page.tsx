@@ -2041,113 +2041,7 @@ Melhores cumprimentos,
 
 
       <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select
-          value={`${sortBy}:${sortOrder}`}
-          onChange={(e) => {
-            const [field, order] = e.target.value.split(':')
-            setSortBy(field as any)
-            setSortOrder(order as any)
-          }}
-          style={{
-            padding: '0 12px',
-            height: 44,
-            lineHeight: '44px',
-            borderRadius: 12,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            fontWeight: 800,
-            minWidth: 220,
-            width: 220,
-            maxWidth: 220,
-            flex: '0 0 220px',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="created_at:desc">Data (mais recentes)</option>
-          <option value="created_at:asc">Data (mais antigas)</option>
-          <option value="name:asc">Nome (A–Z)</option>
-          <option value="name:desc">Nome (Z–A)</option>
-          <option value="zone:asc">Localidade/Zona (A–Z)</option>
-          <option value="zone:desc">Localidade/Zona (Z–A)</option>
-        </select>
 
-        <button
-          onClick={() => setShowAddLeadModal(true)}
-          style={{
-            padding: '8px 14px',
-            borderRadius: 10,
-            background: '#6366f1',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: 'pointer',
-            fontSize: 13,
-            height: 38,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-          }}
-        >
-          + Adicionar Lead
-        </button>
-
-        <button
-          onClick={handleExportCSV}
-          disabled={selectedCardId === 'all'}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            background: selectedCardId === 'all' ? '#e5e7eb' : '#111827',
-            color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            height: 38,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-          }}
-          title={selectedCardId === 'all' ? 'Seleciona um cartão para exportar' : 'Exportar CSV'}
-        >
-          <FiDownload size={15} />
-          <span>Exportar CSV</span>
-        </button>
-
-        <button
-          onClick={() => setShowImportModal(true)}
-          disabled={selectedCardId === 'all'}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            background: selectedCardId === 'all' ? '#e5e7eb' : '#10b981',
-            color: selectedCardId === 'all' ? '#6b7280' : '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: selectedCardId === 'all' ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            height: 38,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-          }}
-          title={selectedCardId === 'all' ? 'Seleciona um cartão para importar' : 'Importar CSV'}
-        >
-          <FiUpload size={15} />
-          <span>Importar CSV</span>
-        </button>
-
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Dedupe: <strong>(cartão + email)</strong>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <button
           onClick={() => {
             setInlineEmailLeadIds(Array.from(selectedLeadIds))
@@ -2195,108 +2089,10 @@ Melhores cumprimentos,
           }}
         >
           <option value="">{selectedLeadIds.size > 0 ? `Mudar step de ${selectedLeadIds.size} ${selectedLeadIds.size === 1 ? 'lead' : 'leads'}...` : 'Mudar step...'}</option>
-          {STEPS.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        <select
-          defaultValue=""
-          onChange={(e) => {
-            const v = e.target.value
-            if (!v) return
-            applyBulkCard(v)
-            e.currentTarget.value = ''
-          }}
-          disabled={selectedLeadIds.size === 0}
-          style={{
-            padding: '0 12px',
-            height: 42,
-            lineHeight: '42px',
-            borderRadius: 10,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            fontWeight: 700,
-            minWidth: 190,
-            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
-            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
-          }}
-          title="Alocar cartão em massa"
-        >
-          <option value="">{selectedLeadIds.size > 0 ? `Alocar cartão (${selectedLeadIds.size})...` : 'Alocar cartão...'}</option>
-          {cardsList.map((card: any) => (
-            <option key={card.id} value={card.id}>{card.name || card.title || card.slug}</option>
+          {STEPS.map((st) => (
+            <option key={st} value={st}>{st}</option>
           ))}
         </select>
-
-        <select
-          defaultValue=""
-          onChange={(e) => {
-            const v = e.target.value
-            if (!v) return
-            applyBulkSource(v)
-            e.currentTarget.value = ''
-          }}
-          disabled={selectedLeadIds.size === 0}
-          style={{
-            padding: '0 12px',
-            height: 42,
-            lineHeight: '42px',
-            borderRadius: 10,
-            border: '1px solid rgba(0,0,0,0.12)',
-            fontSize: 13,
-            background: '#fff',
-            color: '#111827',
-            fontWeight: 700,
-            minWidth: 190,
-            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
-            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
-          }}
-          title="Definir origem em massa"
-        >
-          <option value="">{selectedLeadIds.size > 0 ? `Definir origem (${selectedLeadIds.size})...` : 'Definir origem...'}</option>
-          {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.id, label: `${s.emoji} ${s.label}` }))].map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-
-        <button
-          onClick={() => applyBulkStep('Fechado')}
-          disabled={selectedLeadIds.size === 0}
-          style={{
-            padding: '10px 14px',
-            borderRadius: 10,
-            background: selectedLeadIds.size === 0 ? '#374151' : '#10b981',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
-          }}
-          title="Marcar selecionadas como Fechado (cliente ganho)"
-        >
-          ✅ Fechado
-        </button>
-
-        <button
-          onClick={applyBulkDelete}
-          disabled={selectedLeadIds.size === 0}
-          style={{
-            padding: '10px 14px',
-            borderRadius: 10,
-            background: selectedLeadIds.size === 0 ? '#374151' : '#ef4444',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
-          }}
-          title="Apagar leads selecionadas"
-        >
-          🗑️ Apagar
-        </button>
 
         <select
           defaultValue=""
@@ -2355,8 +2151,8 @@ Melhores cumprimentos,
           title="Definir origem em massa"
         >
           <option value="">{selectedLeadIds.size > 0 ? `Definir origem (${selectedLeadIds.size})...` : 'Definir origem...'}</option>
-          {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.id, label: `${s.emoji} ${s.label}` }))].map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+          {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(src => ({ value: src.id, label: `${src.emoji} ${src.label}` }))].map(src => (
+            <option key={src.value} value={src.value}>{src.label}</option>
           ))}
         </select>
 
@@ -2397,8 +2193,6 @@ Melhores cumprimentos,
         >
           🗑️ Apagar
         </button>
-
-        </select>
 
         <button
           onClick={() => setSelectedLeadIds(new Set())}
@@ -2417,6 +2211,7 @@ Melhores cumprimentos,
         >
           Limpar seleção
         </button>
+
       </div>
 
       <div style={{ overflowX: 'auto' }}>
