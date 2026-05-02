@@ -203,7 +203,7 @@ export default function CrmProPage() {
   const [crmProChecking, setCRMProChecking] = useState(false)
   const [buyingCRMPro, setBuyingCRMPro] = useState<'monthly' | 'annual' | null>(null)
 
-  const [filterMarketing, setFilterMarketing] = useState<boolean | null>(null)
+  const [filterMarketing, setFilterMarketing] = useState<null | 'optin' | 'no_consent' | 'unsub'>(null)
   const [filterStep, setFilterStep] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
@@ -407,8 +407,13 @@ Melhores cumprimentos,
       query = query.eq('card_id', selectedCardId)
     }
 
-    if (filterMarketing !== null) {
-      query = query.eq('marketing_opt_in', filterMarketing)
+    // Filtro de marketing:
+    // - optin / no_consent: filtra por marketing_opt_in na query
+    // - unsub: é filtrado depois (porque vem de email_unsubscribes)
+    if (filterMarketing === 'optin') {
+      query = query.eq('marketing_opt_in', true)
+    } else if (filterMarketing === 'no_consent') {
+      query = query.eq('marketing_opt_in', false)
     }
 
     if (filterStep !== null) {
@@ -431,7 +436,16 @@ Melhores cumprimentos,
         ...l,
         isUnsubscribed: unsubSet.has(l.email?.toLowerCase())
       }))
-      setLeads(leadsWithUnsub)
+      const filteredLeads =
+        filterMarketing === 'unsub'
+          ? leadsWithUnsub.filter((l: any) => !!l.isUnsubscribed)
+          : filterMarketing === 'optin'
+            ? leadsWithUnsub.filter((l: any) => l.marketing_opt_in === true && !l.isUnsubscribed)
+            : filterMarketing === 'no_consent'
+              ? leadsWithUnsub.filter((l: any) => l.marketing_opt_in === false && !l.isUnsubscribed)
+              : leadsWithUnsub
+
+      setLeads(filteredLeads)
     }
 
     setLoading(false)
@@ -1786,7 +1800,11 @@ Melhores cumprimentos,
             )}
             {filterMarketing !== null && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
-                {filterMarketing ? 'Com autorização' : 'Sem autorização'}
+                {filterMarketing === 'optin'
+                  ? 'Com autorização'
+                  : filterMarketing === 'no_consent'
+                    ? 'Sem autorização'
+                    : 'Unsub'}
                 <button onClick={() => setFilterMarketing(null)} style={{ background: 'none', border: 'none', color: '#fbbf24', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
               </span>
             )}
@@ -1840,16 +1858,17 @@ Melhores cumprimentos,
                 <button onClick={() => setShowOptinInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#f59e0b', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
               </label>
               <select
-                value={filterMarketing === null ? '' : filterMarketing ? 'true' : 'false'}
+                value={filterMarketing === null ? '' : filterMarketing}
                 onChange={(e) => {
                   if (e.target.value === '') setFilterMarketing(null)
-                  else setFilterMarketing(e.target.value === 'true')
+                  else setFilterMarketing(e.target.value as any)
                 }}
                 style={{ padding: '0 12px', height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600, minWidth: 190, cursor: 'pointer' }}
               >
                 <option value="">Todas</option>
-                <option value="true">Com autorização</option>
-                <option value="false">Sem autorização</option>
+                <option value="optin">Com autorização</option>
+                <option value="no_consent">Sem autorização</option>
+                <option value="unsub">Unsub</option>
               </select>
             </div>
 
