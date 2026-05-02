@@ -2088,7 +2088,7 @@ Melhores cumprimentos,
             opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
           }}
         >
-          <option value="">{selectedLeadIds.size > 0 ? `Mudar step de ${selectedLeadIds.size} ${selectedLeadIds.size === 1 ? 'lead' : 'leads'}...` : 'Mudar step...'}</option>
+          <option value="">{selectedLeadIds.size > 0 ? `Qualificar ${selectedLeadIds.size} ${selectedLeadIds.size === 1 ? 'lead' : 'leads'}...` : 'Qualificar leads...'}</option>
           {STEPS.map((st) => (
             <option key={st} value={st}>{st}</option>
           ))}
@@ -2157,25 +2157,6 @@ Melhores cumprimentos,
         </select>
 
         <button
-          onClick={() => applyBulkStep('Fechado')}
-          disabled={selectedLeadIds.size === 0}
-          style={{
-            padding: '10px 14px',
-            borderRadius: 10,
-            background: selectedLeadIds.size === 0 ? '#374151' : '#10b981',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 900,
-            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
-            fontSize: 13,
-            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
-          }}
-          title="Marcar selecionadas como Fechado (cliente ganho)"
-        >
-          ✅ Fechado
-        </button>
-
-        <button
           onClick={applyBulkDelete}
           disabled={selectedLeadIds.size === 0}
           style={{
@@ -2211,6 +2192,7 @@ Melhores cumprimentos,
         >
           Limpar seleção
         </button>
+
 
       </div>
 
