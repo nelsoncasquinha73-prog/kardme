@@ -51,6 +51,8 @@ type Lead = {
   message: string
   marketing_opt_in: boolean
   consent_given: boolean
+  consent_timestamp: string | null
+  consent_version: string | null
   step: string
   notes: string | null
   created_at: string
@@ -395,7 +397,7 @@ Melhores cumprimentos,
     let query = supabase
       .from('leads')
       .select(`
-        id, name, email, phone, zone, message, marketing_opt_in, consent_given,
+        id, name, email, phone, zone, message, marketing_opt_in, consent_given, consent_timestamp, consent_version,
         step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country, audience_ids,
         cards ( user_id, name, slug )
       `)
@@ -2418,22 +2420,97 @@ Melhores cumprimentos,
                     <td style={td}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{
-                            display: 'inline-block',
-                            width: 12, height: 12, borderRadius: '50%',
-                            background: lead.marketing_opt_in ? '#10b981' : '#ef4444',
-                            boxShadow: lead.marketing_opt_in ? '0 0 6px #10b981' : '0 0 6px #ef4444',
-                          }} />
+                          <button
+                            type="button"
+                            title={
+                              (lead as any).isUnsubscribed
+                                ? '🚫 Este contacto pediu para não receber mais (Unsub). Remove da lista de Unsubscribes para reativar.'
+                                : lead.marketing_opt_in
+                                  ? '✅ Com autorização de marketing (clique para remover)'
+                                  : '⚪ Sem autorização (clique para marcar como Opt‑in manual)'
+                            }
+                            disabled={(lead as any).isUnsubscribed}
+                            onClick={async () => {
+                              if ((lead as any).isUnsubscribed) return
+
+                              const nextOptIn = !lead.marketing_opt_in
+
+                              const { error } = await supabase
+                                .from('leads')
+                                .update({
+                                  marketing_opt_in: nextOptIn,
+                                  consent_given: nextOptIn,
+                                  consent_timestamp: nextOptIn ? new Date().toISOString() : lead.consent_timestamp,
+                                  consent_version: nextOptIn ? 'manual' : (lead as any).consent_version,
+                                })
+                                .eq('id', lead.id)
+
+                              if (error) {
+                                console.error(error)
+                                alert('❌ Não foi possível atualizar a autorização de marketing.')
+                                return
+                              }
+
+                              setLeads((prev) =>
+                                prev.map((l) =>
+                                  l.id === lead.id
+                                    ? {
+                                        ...l,
+                                        marketing_opt_in: nextOptIn,
+                                        consent_given: nextOptIn,
+                                        consent_timestamp: nextOptIn ? new Date().toISOString() : (l as any).consent_timestamp,
+                                        consent_version: nextOptIn ? 'manual' : (l as any).consent_version,
+                                      }
+                                    : l
+                                )
+                              )
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: 18,
+                              height: 18,
+                              borderRadius: 999,
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: (lead as any).isUnsubscribed ? 'not-allowed' : 'pointer',
+                              opacity: (lead as any).isUnsubscribed ? 0.6 : 1,
+                              padding: 0,
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                width: 12,
+                                height: 12,
+                                borderRadius: '50%',
+                                background: (lead as any).isUnsubscribed
+                                  ? '#ef4444'
+                                  : lead.marketing_opt_in
+                                    ? '#10b981'
+                                    : '#9ca3af',
+                                boxShadow: (lead as any).isUnsubscribed
+                                  ? '0 0 6px #ef4444'
+                                  : lead.marketing_opt_in
+                                    ? '0 0 6px #10b981'
+                                    : '0 0 6px #9ca3af',
+                              }}
+                            />
+                          </button>
                         </span>
+
                         {(lead as any).isUnsubscribed && (
-                          <span style={{
-                            padding: '4px 8px',
-                            borderRadius: 8,
-                            fontSize: 11,
-                            fontWeight: 700,
-                            background: '#fef3c7',
-                            color: '#92400e',
-                          }}>
+                          <span
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 8,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              background: '#fee2e2',
+                              color: '#991b1b',
+                            }}
+                          >
                             🚫 Unsub
                           </span>
                         )}
