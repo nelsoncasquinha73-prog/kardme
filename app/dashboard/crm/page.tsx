@@ -51,8 +51,8 @@ type Lead = {
   message: string
   marketing_opt_in: boolean
   consent_given: boolean
-  consent_timestamp: string | null
-  consent_version: string | null
+  consent_timestamp?: string | null
+  consent_version?: string | null
   step: string
   notes: string | null
   created_at: string
