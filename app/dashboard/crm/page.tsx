@@ -870,6 +870,80 @@ Melhores cumprimentos,
     setSelectedLeadIds(new Set())
   }
 
+  const applyBulkCard = async (cardId: string) => {
+    if (!cardId || selectedLeadIds.size === 0) return
+    const ids = Array.from(selectedLeadIds)
+    const count = ids.length
+
+    const { error } = await supabase
+      .from('leads')
+      .update({ card_id: cardId })
+      .in('id', ids)
+
+    if (error) {
+      addToast('Erro ao alocar cartão em massa', 'error')
+      return
+    }
+
+    setLeads(prev =>
+      prev.map(l =>
+        selectedLeadIds.has(l.id) ? { ...l, card_id: cardId } : l
+      )
+    )
+
+    addToast(`Cartão atualizado em ${count} ${count === 1 ? 'lead' : 'leads'}`, 'success')
+    setSelectedLeadIds(new Set())
+  }
+
+  const applyBulkSource = async (source: string) => {
+    if (!source || selectedLeadIds.size === 0) return
+    const ids = Array.from(selectedLeadIds)
+    const count = ids.length
+
+    const { error } = await supabase
+      .from('leads')
+      .update({ lead_source: source })
+      .in('id', ids)
+
+    if (error) {
+      addToast('Erro ao atualizar origem em massa', 'error')
+      return
+    }
+
+    setLeads(prev =>
+      prev.map(l =>
+        selectedLeadIds.has(l.id) ? { ...l, lead_source: source } : l
+      )
+    )
+
+    addToast(`Origem atualizada em ${count} ${count === 1 ? 'lead' : 'leads'}`, 'success')
+    setSelectedLeadIds(new Set())
+  }
+
+  const applyBulkDelete = async () => {
+    if (selectedLeadIds.size === 0) return
+    const ids = Array.from(selectedLeadIds)
+    const count = ids.length
+
+    const confirmText = prompt(`Vais apagar ${count} lead(s). Escreve APAGAR para confirmar:`)
+    if (confirmText !== 'APAGAR') return
+
+    const { error } = await supabase
+      .from('leads')
+      .delete()
+      .in('id', ids)
+
+    if (error) {
+      addToast('Erro ao apagar leads em massa', 'error')
+      return
+    }
+
+    setLeads(prev => prev.filter(l => !selectedLeadIds.has(l.id)))
+    addToast(`🗑️ ${count} lead(s) apagada(s)`, 'success')
+    setSelectedLeadIds(new Set())
+  }
+
+
   const handleAddLead = async () => {
 
 
@@ -2124,6 +2198,106 @@ Melhores cumprimentos,
           {STEPS.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) return
+            applyBulkCard(v)
+            e.currentTarget.value = ''
+          }}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '0 12px',
+            height: 42,
+            lineHeight: '42px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 190,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+          title="Alocar cartão em massa"
+        >
+          <option value="">{selectedLeadIds.size > 0 ? `Alocar cartão (${selectedLeadIds.size})...` : 'Alocar cartão...'}</option>
+          {cardsList.map((card: any) => (
+            <option key={card.id} value={card.id}>{card.name || card.title || card.slug}</option>
+          ))}
+        </select>
+
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) return
+            applyBulkSource(v)
+            e.currentTarget.value = ''
+          }}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '0 12px',
+            height: 42,
+            lineHeight: '42px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 190,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+          title="Definir origem em massa"
+        >
+          <option value="">{selectedLeadIds.size > 0 ? `Definir origem (${selectedLeadIds.size})...` : 'Definir origem...'}</option>
+          {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.id, label: `${s.emoji} ${s.label}` }))].map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={() => applyBulkStep('Fechado')}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 ? '#374151' : '#10b981',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
+          }}
+          title="Marcar selecionadas como Fechado (cliente ganho)"
+        >
+          ✅ Fechado
+        </button>
+
+        <button
+          onClick={applyBulkDelete}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 ? '#374151' : '#ef4444',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
+          }}
+          title="Apagar leads selecionadas"
+        >
+          🗑️ Apagar
+        </button>
+
         </select>
 
         <button
