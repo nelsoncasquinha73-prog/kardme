@@ -2298,6 +2298,106 @@ Melhores cumprimentos,
           🗑️ Apagar
         </button>
 
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) return
+            applyBulkCard(v)
+            e.currentTarget.value = ''
+          }}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '0 12px',
+            height: 42,
+            lineHeight: '42px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 190,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+          title="Alocar cartão em massa"
+        >
+          <option value="">{selectedLeadIds.size > 0 ? `Alocar cartão (${selectedLeadIds.size})...` : 'Alocar cartão...'}</option>
+          {cardsList.map((card: any) => (
+            <option key={card.id} value={card.id}>{card.name || card.title || card.slug}</option>
+          ))}
+        </select>
+
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) return
+            applyBulkSource(v)
+            e.currentTarget.value = ''
+          }}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '0 12px',
+            height: 42,
+            lineHeight: '42px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            fontSize: 13,
+            background: '#fff',
+            color: '#111827',
+            fontWeight: 700,
+            minWidth: 190,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedLeadIds.size === 0 ? 0.6 : 1,
+          }}
+          title="Definir origem em massa"
+        >
+          <option value="">{selectedLeadIds.size > 0 ? `Definir origem (${selectedLeadIds.size})...` : 'Definir origem...'}</option>
+          {[...LEAD_SOURCES_DEFAULT, ...leadSources.map(s => ({ value: s.id, label: `${s.emoji} ${s.label}` }))].map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={() => applyBulkStep('Fechado')}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 ? '#374151' : '#10b981',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
+          }}
+          title="Marcar selecionadas como Fechado (cliente ganho)"
+        >
+          ✅ Fechado
+        </button>
+
+        <button
+          onClick={applyBulkDelete}
+          disabled={selectedLeadIds.size === 0}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: selectedLeadIds.size === 0 ? '#374151' : '#ef4444',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: selectedLeadIds.size === 0 ? 'not-allowed' : 'pointer',
+            fontSize: 13,
+            opacity: selectedLeadIds.size === 0 ? 0.55 : 1,
+          }}
+          title="Apagar leads selecionadas"
+        >
+          🗑️ Apagar
+        </button>
+
         </select>
 
         <button
