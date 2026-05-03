@@ -19,9 +19,9 @@ export default function ThemeToggle() {
         width: 38,
         height: 38,
         borderRadius: 10,
-        border: '1px solid rgba(255,255,255,0.14)',
-        background: 'rgba(255,255,255,0.06)',
-        color: '#fff',
+        border: '1px solid var(--km-border)',
+        background: 'var(--km-surface)',
+        color: 'var(--km-text)',
         cursor: 'pointer',
       }}
     >

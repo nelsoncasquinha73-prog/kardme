@@ -152,3 +152,32 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   opacity: 0.9;
   cursor: pointer;
 }
+
+/* === Kardme UI Tokens (base para dark/light premium) === */
+:root[data-theme="dark"] {
+  --km-bg: #0b1220;
+  --km-surface: rgba(255,255,255,0.06);
+  --km-surface-2: rgba(255,255,255,0.08);
+  --km-border: rgba(255,255,255,0.14);
+  --km-text: #ffffff;
+  --km-muted: rgba(255,255,255,0.65);
+  --km-primary: #3b82f6;
+  --km-focus: rgba(59,130,246,0.25);
+}
+
+:root[data-theme="light"] {
+  --km-bg: #f7f9fc;
+  --km-surface: #ffffff;
+  --km-surface-2: #f1f5f9;
+  --km-border: rgba(15,23,42,0.10);
+  --km-text: #0f172a;
+  --km-muted: rgba(15,23,42,0.65);
+  --km-primary: #2563eb;
+  --km-focus: rgba(37,99,235,0.18);
+}
+
+/* Mapear para as vars atuais (para ir migrando sem partir) */
+:root[data-theme] {
+  --background: var(--km-bg);
+  --foreground: var(--km-text);
+}
