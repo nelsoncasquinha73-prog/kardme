@@ -1,5 +1,7 @@
 'use client'
 
+const __kmIsLight = () => typeof document !== 'undefined' && document.documentElement?.dataset?.theme === 'light'
+
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -117,10 +119,10 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
       </div>
 
       {magnets.length===0 && (
-        <div style={{textAlign:'center',padding:'60px 20px',background:'rgba(255,255,255,0.03)',borderRadius:16,border:'1px dashed rgba(255,255,255,0.1)'}}>
+        <div style={{textAlign:'center',padding:'60px 20px',color:(__kmIsLight() ? 'rgba(15,23,42,0.75)' : '#fff'),background:(__kmIsLight() ? 'rgba(15,23,42,0.03)' : 'rgba(255,255,255,0.03)'),borderRadius:16,border:(__kmIsLight() ? '1px dashed rgba(15,23,42,0.18)' : '1px dashed rgba(255,255,255,0.1)')}}>
           <div style={{fontSize:48,marginBottom:16}}>🧲</div>
-          <h3 style={{color:'#fff',fontWeight:800,margin:'0 0 8px'}}>Nenhuma campanha ainda</h3>
-          <p style={{color:'rgba(255,255,255,0.4)',fontSize:13,margin:'0 0 24px'}}>Cria a tua primeira campanha</p>
+          <h3 style={{color:(__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'),fontWeight:800,margin:'0 0 8px'}}>Nenhuma campanha ainda</h3>
+          <p style={{color:(__kmIsLight() ? 'rgba(15,23,42,0.60)' : 'rgba(255,255,255,0.4)'),fontSize:13,margin:'0 0 24px'}}>Cria a tua primeira campanha</p>
           <button onClick={handleCreateNew} disabled={creatingNew} style={{padding:'12px 24px',borderRadius:12,border:'none',background:'linear-gradient(135deg,#10b981,#059669)',color:'#fff',fontWeight:800,fontSize:14,cursor:'pointer',opacity:creatingNew?0.6:1}}>+ Criar primeira campanha</button>
         </div>
       )}
@@ -128,14 +130,14 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
       {magnets.length>0 && (
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:16}}>
           {magnets.map(m=>(
-            <div key={m.id} style={{background:'rgba(255,255,255,0.05)',borderRadius:16,border:'1px solid '+(m.is_active?'rgba(16,185,129,0.3)':'rgba(255,255,255,0.08)'),overflow:'hidden'}}>
-              <div style={{height:140,background:'linear-gradient(135deg,#1e293b,#0f172a)',position:'relative',overflow:'hidden'}}>
+            <div key={m.id} style={{background:(__kmIsLight() ? 'var(--km-surface)' : 'rgba(255,255,255,0.05)'),borderRadius:16,border:'1px solid '+(m.is_active?(__kmIsLight()?'rgba(16,185,129,0.35)':'rgba(16,185,129,0.3)'):(__kmIsLight()?'rgba(15,23,42,0.10)':'rgba(255,255,255,0.08)')),overflow:'hidden',color:(__kmIsLight() ? 'var(--km-text)' : '#fff')}}>
+              <div style={{height:140,background:(__kmIsLight() ? 'linear-gradient(135deg, rgba(37,99,235,0.10), rgba(139,92,246,0.08))' : 'linear-gradient(135deg,#1e293b,#0f172a)'),position:'relative',overflow:'hidden'}}>
                 {m.cover_image_url ? <img src={m.cover_image_url} alt={m.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',fontSize:48}}>{MAGNET_TYPE_LABELS[m.magnet_type].split(' ')[0]}</div>}
                 <span style={{position:'absolute',top:10,right:10,padding:'3px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:m.is_active?'rgba(16,185,129,0.9)':'rgba(100,100,100,0.9)',color:'#fff'}}>{m.is_active?'● Ativo':'○ Inativo'}</span>
-                <span style={{position:'absolute',top:10,left:10,padding:'3px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:'rgba(0,0,0,0.6)',color:'#fff'}}>{MAGNET_TYPE_LABELS[m.magnet_type]}</span>
+                <span style={{position:'absolute',top:10,left:10,padding:'3px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:(__kmIsLight() ? 'rgba(15,23,42,0.65)' : 'rgba(0,0,0,0.6)'),color:'#fff'}}>{MAGNET_TYPE_LABELS[m.magnet_type]}</span>
               </div>
               <div style={{padding:16}}>
-                <h3 style={{fontSize:15,fontWeight:800,color:'#fff',margin:'0 0 6px'}}>{m.title}</h3>
+                <h3 style={{fontSize:15,fontWeight:800,color:(__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'),margin:'0 0 6px'}}>{m.title}</h3>
                 {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim())) ? (
                   <p style={{fontSize:12,color:'rgba(255,255,255,0.5)',margin:'0 0 12px',lineHeight:1.5}}>
                     {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim()))}
@@ -146,12 +148,12 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#10b981'}}>{m.leads_count}</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>LEADS</div></div>
                   <div style={{textAlign:'center'}}><div style={{fontSize:18,fontWeight:900,color:'#f59e0b'}}>{m.views_count>0?Math.round((m.leads_count/m.views_count)*100):0}%</div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600}}>CONVERSAO</div></div>
                 </div>
-                <div style={{background:'rgba(255,255,255,0.05)',borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
+                <div style={{background:(__kmIsLight() ? 'rgba(15,23,42,0.03)' : 'rgba(255,255,255,0.05)'),borderRadius:8,padding:'8px 12px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
                   <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.magnet_type==='form'?`/lm/form/${m.slug}`:m.magnet_type==='raffle'?`/lm/raffle/${m.slug}`:m.magnet_type==='wheel'?`/lm/wheel/${m.slug}`:`/lm/${m.slug}`}</span>
                   <button onClick={()=>copyLink(m)} style={{background:'#3b82f6',border:'none',color:'#fff',borderRadius:6,padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>📋 Copiar</button>
                 </div>
                 <div style={{display:'flex',gap:8}}>
-                  <button onClick={() => router.push('/dashboard/lead-magnets/' + m.id)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer'}}>✏️ Editar</button>
+                  <button onClick={() => router.push('/dashboard/lead-magnets/' + m.id)} style={{flex:1,padding:'8px 0',borderRadius:8,border:(__kmIsLight() ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.15)'),background:'transparent',color:(__kmIsLight() ? 'rgba(15,23,42,0.85)' : '#fff'),fontWeight:700,fontSize:12,cursor:'pointer'}}>✏️ Editar</button>
                   <button onClick={()=>handleToggle(m)} style={{flex:1,padding:'8px 0',borderRadius:8,border:'1px solid '+(m.is_active?'rgba(239,68,68,0.3)':'rgba(16,185,129,0.3)'),background:'transparent',color:m.is_active?'#ef4444':'#10b981',fontWeight:700,fontSize:12,cursor:'pointer'}}>{m.is_active?'⏸ Pausar':'▶ Ativar'}</button>
                   <button onClick={()=>handleDelete(m.id)} style={{padding:'8px 12px',borderRadius:8,border:'1px solid rgba(239,68,68,0.3)',background:'transparent',color:'#ef4444',fontWeight:700,fontSize:12,cursor:'pointer'}}>🗑</button>
                 </div>
