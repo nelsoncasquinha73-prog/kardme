@@ -1847,7 +1847,7 @@ Melhores cumprimentos,
           >
             🎛️ Filtros
             {(filterStep || filterMarketing !== null || filterLeadType || filterLeadSource || filterCountry) && (
-              <span style={{ background: '#6366f1', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), borderRadius: 20, padding: '1px 8px', fontSize: 11, fontWeight: 900 }}>
+              <span style={{ background: '#6366f1', color: '#fff', borderRadius: 20, padding: '1px 8px', fontSize: 11, fontWeight: 900 }}>
                 {[filterStep, filterMarketing !== null ? '1' : null, filterLeadType, filterLeadSource, filterCountry].filter(Boolean).length}
               </span>
             )}
@@ -1931,7 +1931,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 11, fontWeight: 700, color: (__kmIsLight() ? 'rgba(15,23,42,0.60)' : 'rgba(255,255,255,0.5)'), textTransform: 'uppercase', letterSpacing: 1 }}>
                 Autorização Marketing
-                <button onClick={() => setShowOptinInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#f59e0b', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+                <button onClick={() => setShowOptinInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#f59e0b', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
               </label>
               <select
                 value={filterMarketing === null ? '' : filterMarketing}
@@ -1951,7 +1951,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 11, fontWeight: 700, color: (__kmIsLight() ? 'rgba(15,23,42,0.60)' : 'rgba(255,255,255,0.5)'), textTransform: 'uppercase', letterSpacing: 1 }}>
                 Audiência
-                <button onClick={() => setShowTiposInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+                <button onClick={() => setShowTiposInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
               </label>
               <select
                 value={filterLeadType || ''}
@@ -1968,7 +1968,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 11, fontWeight: 700, color: (__kmIsLight() ? 'rgba(15,23,42,0.60)' : 'rgba(255,255,255,0.5)'), textTransform: 'uppercase', letterSpacing: 1 }}>
                 Origem do Contacto
-                <button onClick={() => setShowOrigemInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
+                <button onClick={() => setShowOrigemInfoModal(true)} style={{ marginLeft: 6, width: 16, height: 16, borderRadius: '50%', background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 10, verticalAlign: 'middle' }}>?</button>
               </label>
               <select
                 value={filterLeadSource || ''}
@@ -2932,7 +2932,7 @@ Melhores cumprimentos,
               <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                 <button
                   onClick={() => { setPendingCalendarAction({ task, lead }); setSelectedCalendarTask(null) }}
-                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
                 >
                   {icon} Fazer agora
                 </button>
@@ -2948,7 +2948,7 @@ Melhores cumprimentos,
                     setShowTaskModal(true)
                     setSelectedCalendarTask(null)
                   }}
-                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f59e0b', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
                 >
                   ✏️ Editar
                 </button>
@@ -2960,7 +2960,7 @@ Melhores cumprimentos,
                     await loadTasksForToday()
                     setSelectedCalendarTask(null)
                   }}
-                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}
                 >
                   ✓ Marcar feita
                 </button>
@@ -3632,7 +3632,7 @@ Melhores cumprimentos,
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               <button onClick={() => setShowAddLeadModal(false)} style={{ flex: 1, padding: '12px', borderRadius: 10, background: '#f3f4f6', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Cancelar</button>
-              <button onClick={handleAddLead} disabled={savingNewLead} style={{ flex: 2, padding: '12px', borderRadius: 10, background: '#6366f1', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: savingNewLead ? 'not-allowed' : 'pointer', fontSize: 14, opacity: savingNewLead ? 0.7 : 1 }}>
+              <button onClick={handleAddLead} disabled={savingNewLead} style={{ flex: 2, padding: '12px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: savingNewLead ? 'not-allowed' : 'pointer', fontSize: 14, opacity: savingNewLead ? 0.7 : 1 }}>
                 {savingNewLead ? 'A guardar...' : '+ Adicionar Lead'}
               </button>
             </div>
@@ -3657,7 +3657,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
               <button
                 onClick={() => importFileInputRef.current?.click()}
-                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 📁 Escolher ficheiro
               </button>
@@ -3693,7 +3693,7 @@ Melhores cumprimentos,
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
               <button
                 onClick={handleImportPreview}
-                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 👀 Preview
               </button>
@@ -3701,7 +3701,7 @@ Melhores cumprimentos,
               <button
                 onClick={handleImportCSV}
                 disabled={importing}
-                style={{ padding: '10px 14px', borderRadius: 10, background: importing ? '#a7f3d0' : '#10b981', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
+                style={{ padding: '10px 14px', borderRadius: 10, background: importing ? '#a7f3d0' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
               >
                 {importing ? 'A importar...' : 'Importar agora'}
               </button>
@@ -3779,7 +3779,7 @@ Melhores cumprimentos,
               </div>
             </div>
 
-            <button onClick={() => setShowWelcomeInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+            <button onClick={() => setShowWelcomeInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#8b5cf6', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
       )}
@@ -3819,7 +3819,7 @@ Melhores cumprimentos,
               </div>
             </div>
 
-            <button onClick={() => setShowTemplatesInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#6366f1', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
+            <button onClick={() => setShowTemplatesInfoModal(false)} style={{ width: '100%', padding: '12px 14px', borderRadius: 10, background: '#6366f1', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>Entendi</button>
           </div>
         </div>
       )}
@@ -3965,7 +3965,7 @@ Melhores cumprimentos,
                             addToast('Erro ao eliminar origem', 'error')
                           }
                         }}
-                        style={{ background: '#ef4444', border: 'none', borderRadius: 6, padding: '4px 8px', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
+                        style={{ background: '#ef4444', border: 'none', borderRadius: 6, padding: '4px 8px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
                       >
                         🗑️
                       </button>
@@ -4002,7 +4002,7 @@ Melhores cumprimentos,
               <button
                 onClick={handleCreateCountry}
                 disabled={!newCountryName.trim()}
-                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '14px 24px', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), fontWeight: 900, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 16, opacity: newCountryName.trim() ? 1 : 0.5, whiteSpace: 'nowrap' }}
+                style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '14px 24px', color: '#fff', fontWeight: 900, cursor: newCountryName.trim() ? 'pointer' : 'not-allowed', fontSize: 16, opacity: newCountryName.trim() ? 1 : 0.5, whiteSpace: 'nowrap' }}
               >
                 ✓ Criar
               </button>
@@ -4028,7 +4028,7 @@ Melhores cumprimentos,
                             addToast(e?.message || 'Erro ao eliminar país', 'error')
                           }
                         }}
-                        style={{ background: '#dc2626', border: 'none', borderRadius: 8, padding: '8px 12px', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), fontWeight: 800, cursor: 'pointer', fontSize: 14 }}
+                        style={{ background: '#dc2626', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}
                       >
                         🗑️ Eliminar
                       </button>
@@ -4048,7 +4048,7 @@ Melhores cumprimentos,
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
               Cria e personaliza tipos de cliente (ex: Comprador, Vendedor, Investidor) com cores diferentes para organizar melhor as tuas leads.
             </p>
-            <button onClick={() => setShowTiposInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
+            <button onClick={() => setShowTiposInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
           </div>
         </div>
       )}
@@ -4060,7 +4060,7 @@ Melhores cumprimentos,
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
               Filtra as leads pela origem. Origens de sistema: <strong style={{ color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff') }}>Cartão</strong> (via NFC/QR), <strong style={{ color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff') }}>Manual</strong> (adicionada por ti), <strong style={{ color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff') }}>Importado</strong> (CSV) ou <strong style={{ color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff') }}>Lead Form</strong> (formulário de lead). Podes criar origens personalizadas em <strong style={{ color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff') }}>Gerir Origens</strong>.
             </p>
-            <button onClick={() => setShowOrigemInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'), fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
+            <button onClick={() => setShowOrigemInfoModal(false)} style={{ marginTop: 20, width: '100%', padding: '10px 0', borderRadius: 10, background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Entendido</button>
           </div>
         </div>
       )}
