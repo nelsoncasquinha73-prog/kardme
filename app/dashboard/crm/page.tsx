@@ -2207,7 +2207,7 @@ Melhores cumprimentos,
           }}
         >
           <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+            <tr style={{ background: (__kmIsLight() ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)') }}>
               <th style={{ ...th, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Sel.</div>
                 <input
@@ -4088,9 +4088,13 @@ const th = {
   fontWeight: 800,
   fontSize: 13,
   whiteSpace: 'nowrap' as const,
+  color: (__kmIsLight() ? 'rgba(15,23,42,0.70)' : 'rgba(255,255,255,0.70)'),
+  borderBottom: (__kmIsLight() ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(255,255,255,0.10)'),
 }
 
 const td = {
   padding: '10px 8px',
   fontSize: 14,
+  color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : 'rgba(255,255,255,0.92)'),
+  borderBottom: (__kmIsLight() ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(255,255,255,0.08)'),
 }
