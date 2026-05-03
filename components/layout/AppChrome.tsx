@@ -11,6 +11,7 @@ import { ColorPickerProvider } from '@/components/editor/ColorPickerContext'
 import { FiLogOut, FiLock, FiX } from 'react-icons/fi'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import LanguageDropdown from '@/components/language/LanguageDropdown'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 type NavItem = { label: string; href: string; icon: any; emoji?: string; locked?: boolean }
 
@@ -196,7 +197,10 @@ export default function AppChrome({
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong>{getPageTitle()}</strong>
-            <LanguageDropdown />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <ThemeToggle />
+              <LanguageDropdown />
+            </div>
           </header>
 
           <main style={{ padding: 24, flex: 1, overflow: 'auto' }}>{children}</main>

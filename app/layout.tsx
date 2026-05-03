@@ -165,6 +165,7 @@ import '@fontsource/ibm-plex-mono/600.css'
 import '@fontsource/ibm-plex-mono/700.css'
 import '@fontsource/space-mono/400.css'
 import '@fontsource/space-mono/700.css'
+import { ThemeProvider } from './providers/ThemeProvider'
 
 export const metadata: Metadata = {
   title: 'Kardme',
@@ -194,7 +195,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt" suppressHydrationWarning>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased"><ThemeProvider>{children}</ThemeProvider></body>
     </html>
   )
 }
