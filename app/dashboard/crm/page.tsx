@@ -1,5 +1,7 @@
 'use client'
 
+const __kmIsLight = () => typeof document !== 'undefined' && document.documentElement?.dataset?.theme === 'light'
+
 import { useToast } from '@/lib/toast-context'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
@@ -1529,7 +1531,7 @@ Melhores cumprimentos,
                 style={{
                   width: '100%',
                   padding: '12px 12px',
-                  background: selectedCardId === 'all' ? 'rgba(255,255,255,0.12)' : '#0b1220',
+                  background: selectedCardId === 'all' ? (__kmIsLight() ? 'rgba(37,99,235,0.10)' : 'rgba(255,255,255,0.12)') : (__kmIsLight() ? 'var(--km-surface)' : '#0b1220'),
                   color: '#ffffff',
                   border: 'none',
                   textAlign: 'left',
@@ -1559,7 +1561,7 @@ Melhores cumprimentos,
                   style={{
                     width: '100%',
                     padding: '12px 12px',
-                    background: selectedCardId === card.id ? 'rgba(255,255,255,0.12)' : '#0b1220',
+                    background: selectedCardId === card.id ? (__kmIsLight() ? 'rgba(37,99,235,0.10)' : 'rgba(255,255,255,0.12)') : (__kmIsLight() ? 'var(--km-surface)' : '#0b1220'),
                     color: '#ffffff',
                     border: 'none',
                     textAlign: 'left',
@@ -2619,7 +2621,7 @@ Melhores cumprimentos,
                             top: '100%',
                             right: 0,
                             marginTop: 6,
-                            background: '#0f172a',
+                            background: (__kmIsLight() ? 'var(--km-surface)' : '#0f172a'),
                             border: '1px solid rgba(255,255,255,0.1)',
                             borderRadius: 8,
                             minWidth: 200,
@@ -3243,7 +3245,7 @@ Melhores cumprimentos,
       {/* Editor de email inline — massa ou individual */}
       {showInlineEmailEditor && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ background: '#0f172a', borderRadius: 16, width: '100%', maxWidth: 1400, maxHeight: '95vh', overflowY: 'auto', position: 'relative' }}>
+          <div style={{ background: (__kmIsLight() ? 'var(--km-surface)' : '#0f172a'), borderRadius: 16, width: '100%', maxWidth: 1400, maxHeight: '95vh', overflowY: 'auto', position: 'relative' }}>
             <button
               onClick={() => { setShowInlineEmailEditor(false); setInlineEmailLeadIds([]) }}
               style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontWeight: 700 }}
