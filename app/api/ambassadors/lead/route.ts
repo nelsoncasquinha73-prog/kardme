@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     // 1) Buscar embaixador (public)
     const { data: ambassador, error: ambErr } = await supabaseServer
       .from('ambassadors')
-      .select('id, user_id, name, email, is_published, ambassador_type, stats_leads, custom_fields')
+      .select('id, user_id, name, email, is_published, ambassador_type, stats_leads, custom_fields, card_id')
       .eq('slug', slug)
       .single()
 
