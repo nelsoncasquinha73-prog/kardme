@@ -65,14 +65,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Embaixador não encontrado.' }, { status: 404 })
     }
 
-    console.log("[api/ambassadors/lead] ambassador fetched", {
-      id: ambassador.id,
-      slug,
-      ambassador_type: ambassador.ambassador_type,
-      user_id: ambassador.user_id,
-      card_id: (ambassador as any).card_id,
-    })
-
 
     if (!ambassador.is_published) {
       return NextResponse.json({ error: 'Embaixador não publicado.' }, { status: 403 })
@@ -140,7 +132,6 @@ export async function POST(req: Request) {
     }
 
     // 5) Inserir lead no CRM (tabela leads)
-    console.log("[api/ambassadors/lead] inserting lead with sourceCardId", { sourceCardId })
     const leadSource = `ambassador:${slug}`
 
     const { data: leadData, error: leadError } = await supabaseServer
