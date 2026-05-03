@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiDownload, FiCheck, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { getAmbassadors, createAmbassador, updateAmbassador, deleteAmbassador, markContractAsSigned, Ambassador, getAmbassadorLeads, AmbassadorLead } from '@/lib/ambassadors/ambassadorService';
 import AmbassadorEditModal from './AmbassadorEditModal';
+import { supabase } from '@/lib/supabaseClient';
 
 
 interface FormData {
@@ -11,6 +12,7 @@ interface FormData {
   email?: string;
   phone?: string;
   card_type: 'digital' | 'pvc' | 'metallic';
+  card_id?: string;
   commission_type: 'fixed' | 'percentage';
   commission_value: number;
   bio?: string;
@@ -44,11 +46,14 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const [showLeadsModal, setShowLeadsModal] = useState<string | null>(null);
   const [ambassadorLeads, setAmbassadorLeads] = useState<AmbassadorLead[]>([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
+  const [availableCards, setAvailableCards] = useState<{ id: string; name: string }[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
     card_type: 'digital',
+    card_id: '',
     commission_type: 'percentage',
     commission_value: 20,
     bio: '',
@@ -56,6 +61,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
 
   useEffect(() => {
     loadAmbassadors();
+    loadCards();
   }, []);
 
   const loadAmbassadors = async () => {
@@ -67,12 +73,33 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
     }
   };
 
+  const loadCards = async () => {
+    setCardsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('id, name')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setAvailableCards((data || []) as any)
+    } catch (error) {
+      console.error('Erro ao carregar cartões:', error)
+      setAvailableCards([])
+    } finally {
+      setCardsLoading(false)
+    }
+  }
+
+
   const resetForm = () => {
     setFormData({
       name: '',
       email: '',
       phone: '',
       card_type: 'digital',
+      card_id: '',
       commission_type: 'percentage',
       commission_value: 20,
       bio: '',
@@ -84,6 +111,11 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
   const handleSubmit = async () => {
     if (!formData.name || !formData.email) {
       alert('Nome e email são obrigatórios');
+      return;
+    }
+
+    if (!formData.card_id) {
+      alert('Seleciona o cartão associado');
       return;
     }
 
@@ -236,6 +268,15 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
             <input type="text" placeholder="Nome" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
             <input type="email" placeholder="Email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
             <input type="tel" placeholder="Telefone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
+            <select value={formData.card_id || ''} onChange={(e) => setFormData({ ...formData, card_id: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', minHeight: '48px', lineHeight: '1.2' }}>
+              <option value="">{cardsLoading ? 'A carregar cartões...' : 'Seleciona o cartão associado'}</option>
+              {availableCards.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
             <select value={formData.card_type} onChange={(e) => setFormData({ ...formData, card_type: e.target.value as any })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', minHeight: '48px', lineHeight: '1.2' }}>
               <option value="digital">Cartão Digital</option>
               <option value="pvc">Cartão PVC</option>
