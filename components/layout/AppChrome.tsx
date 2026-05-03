@@ -125,7 +125,7 @@ export default function AppChrome({
           onViewPlans={() => { router.push('/dashboard/plans'); setLockedModal(null) }}
         />
       )}
-      <div className="editor-ui dashboard-scope" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div className="editor-ui dashboard-scope" style={{ display: 'flex', minHeight: '100vh', background: 'var(--km-bg)', color: 'var(--km-text)' }}>
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
             <h2 className="sidebar-logo">Kardme</h2>
@@ -174,17 +174,17 @@ export default function AppChrome({
             <div
               style={{
                 fontSize: 11,
-                color: 'rgba(255,255,255,0.55)',
+                color: 'var(--km-muted)',
                 marginBottom: 12,
                 paddingBottom: 12,
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                borderBottom: '1px solid var(--km-border)',
                 wordBreak: 'break-all',
               }}
             >
               <div style={{ marginBottom: 4 }}>{t('common.logged_as')}</div>
-              <strong style={{ color: 'rgba(255,255,255,0.75)' }}>{userEmail}</strong>
+              <strong style={{ color: 'var(--km-text)' }}>{userEmail}</strong>
               {isAdmin && (
-                <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>ADMIN</div>
+                <div style={{ marginTop: 6, color: 'var(--km-text)', fontWeight: 700 }}>ADMIN</div>
               )}
             </div>
             <button className="sidebar-logout" onClick={logout}>
@@ -195,7 +195,7 @@ export default function AppChrome({
         </aside>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <header className="dashboard-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--km-surface)", borderBottom: "1px solid var(--km-border)", color: "var(--km-text)" }}>
             <strong>{getPageTitle()}</strong>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <ThemeToggle />
@@ -203,7 +203,7 @@ export default function AppChrome({
             </div>
           </header>
 
-          <main style={{ padding: 24, flex: 1, overflow: 'auto' }}>{children}</main>
+          <main style={{ padding: 24, flex: 1, overflow: 'auto', background: 'transparent' }}>{children}</main>
         </div>
       </div>
     </ColorPickerProvider>
