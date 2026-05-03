@@ -1,0 +1,22 @@
+.field {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.field::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.field:focus {
+  border-color: rgba(59, 130, 246, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background: rgba(255, 255, 255, 0.075);
+  outline: none;
+}
+
+/* Para selects: opções legíveis */
+.field option {
+  color: #111827;
+}

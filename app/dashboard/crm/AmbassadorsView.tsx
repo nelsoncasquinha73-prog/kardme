@@ -5,6 +5,7 @@ import { FiPlus, FiDownload, FiCheck, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { getAmbassadors, createAmbassador, updateAmbassador, deleteAmbassador, markContractAsSigned, Ambassador, getAmbassadorLeads, AmbassadorLead } from '@/lib/ambassadors/ambassadorService';
 import AmbassadorEditModal from './AmbassadorEditModal';
 import { supabase } from '@/lib/supabaseClient';
+import styles from './AmbassadorsView.module.css'
 
 
 interface FormData {
@@ -227,6 +228,37 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
     }
   }
 
+
+
+  const fieldStyle: React.CSSProperties = {
+    padding: '14px 14px',
+    borderRadius: 10,
+    border: '1px solid rgba(255,255,255,0.14)',
+    fontSize: 13,
+    fontFamily: 'inherit',
+    minHeight: '48px',
+    lineHeight: '1.2',
+    width: '100%',
+    boxSizing: 'border-box',
+    background: 'rgba(255,255,255,0.06)',
+    color: '#fff',
+    outline: 'none',
+  }
+
+  const selectStyle: React.CSSProperties = {
+    ...fieldStyle,
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    MozAppearance: 'none',
+  }
+
+  const textareaStyle: React.CSSProperties = {
+    ...fieldStyle,
+    minHeight: 96,
+    resize: 'vertical',
+  }
+
+
   const handleCheckout = async (ambassadorId: string, planType: 'monthly' | 'yearly') => {
     try {
       const response = await fetch('/api/stripe/checkout', {
@@ -265,10 +297,10 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
           <h3 style={{ marginBottom: 16, fontWeight: 700, fontSize: 14 }}>Novo Embaixador</h3>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            <input type="text" placeholder="Nome" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
-            <input type="email" placeholder="Email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
-            <input type="tel" placeholder="Telefone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
-            <select value={formData.card_id || ''} onChange={(e) => setFormData({ ...formData, card_id: e.target.value })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', minHeight: '48px', lineHeight: '1.2' }}>
+            <input type="text" placeholder="Nome" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={fieldStyle} />
+            <input type="email" placeholder="Email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} style={fieldStyle} />
+            <input type="tel" placeholder="Telefone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} style={fieldStyle} />
+            <select value={formData.card_id || ''} onChange={(e) => setFormData({ ...formData, card_id: e.target.value })} style={fieldStyle}>
               <option value="">{cardsLoading ? 'A carregar cartões...' : 'Seleciona o cartão associado'}</option>
               {availableCards.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -277,7 +309,7 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
               ))}
             </select>
 
-            <select value={formData.card_type} onChange={(e) => setFormData({ ...formData, card_type: e.target.value as any })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', minHeight: '48px', lineHeight: '1.2' }}>
+            <select value={formData.card_type} onChange={(e) => setFormData({ ...formData, card_type: e.target.value as any })} style={fieldStyle}>
               <option value="digital">Cartão Digital</option>
               <option value="pvc">Cartão PVC</option>
               <option value="metallic">Cartão Metálico</option>
@@ -285,14 +317,14 @@ export default function AmbassadorsView({ userId }: AmbassadorsViewProps) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            <select value={formData.commission_type} onChange={(e) => setFormData({ ...formData, commission_type: e.target.value as any })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', minHeight: '48px', lineHeight: '1.2' }}>
+            <select value={formData.commission_type} onChange={(e) => setFormData({ ...formData, commission_type: e.target.value as any })} style={fieldStyle}>
               <option value="fixed">Comissão Fixa</option>
               <option value="percentage">Comissão %</option>
             </select>
-            <input type="number" placeholder={formData.commission_type === 'percentage' ? 'Ex: 20' : 'Ex: 50'} value={formData.commission_value} onChange={(e) => setFormData({ ...formData, commission_value: parseFloat(e.target.value) || 0 })} style={{ padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit' }} />
+            <input type="number" placeholder={formData.commission_type === 'percentage' ? 'Ex: 20' : 'Ex: 50'} value={formData.commission_value} onChange={(e) => setFormData({ ...formData, commission_value: parseFloat(e.target.value) || 0 })} style={fieldStyle} />
           </div>
 
-          <textarea placeholder="Bio / Descrição" value={formData.bio || ''} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} style={{ width: '100%', padding: '14px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, minHeight: 80 }} />
+          <textarea placeholder="Bio / Descrição" value={formData.bio || ''} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} style={fieldStyle} />
 
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={handleSubmit} style={{ padding: '10px 16px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Criar Embaixador</button>
