@@ -61,6 +61,8 @@ export async function POST(req: Request) {
       const { error: updateError } = await supabaseAdmin
         .from('leads')
         .update({
+          card_id: magnet.card_id || null,
+          source_card_id: magnet.card_id || null,
           lead_source: leadSource,
           lead_magnet_id: magnet.id,
           marketing_opt_in: marketing_opt_in || false,
@@ -79,6 +81,8 @@ export async function POST(req: Request) {
         .from('leads')
         .insert([{
           user_id: magnet.user_id,
+          card_id: magnet.card_id || null,
+          source_card_id: magnet.card_id || null,
           name,
           email: email.toLowerCase().trim(),
           phone: phone || null,

@@ -113,6 +113,21 @@ export async function POST(req: Request) {
     // Rodapé com info do embaixador
     leadNotes += `Lead captada via Embaixador: ${ambassador.name || slug} (${slug})`
 
+    // 4.5) Determinar card de origem do embaixador (para tracking)
+    // Regra: usar last_active_card_id do user do embaixador
+    let sourceCardId: string | null = null
+    try {
+      const { data: ambProfile } = await supabaseServer
+        .from("profiles")
+        .select("last_active_card_id")
+        .eq("id", ambassador.user_id)
+        .single()
+
+      sourceCardId = ambProfile?.last_active_card_id || null
+    } catch (e) {
+      console.error("[api/ambassadors/lead] Failed to fetch ambassador last_active_card_id", e)
+    }
+
     // 5) Inserir lead no CRM (tabela leads)
     const leadSource = `ambassador:${slug}`
 
@@ -121,7 +136,8 @@ export async function POST(req: Request) {
       .insert([
         {
           user_id: ownerUserId,
-          card_id: null,
+          card_id: sourceCardId,
+          source_card_id: sourceCardId,
           name,
           email,
           phone: phone || null,

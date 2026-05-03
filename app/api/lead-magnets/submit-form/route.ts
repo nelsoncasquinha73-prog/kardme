@@ -59,7 +59,8 @@ export async function POST(request: Request) {
       .insert([
         {
           user_id: magnet.user_id,
-          card_id: null,
+          card_id: magnet.card_id || null,
+          source_card_id: magnet.card_id || null,
           name: leadName,
           email: leadEmail,
           phone: leadPhone,
