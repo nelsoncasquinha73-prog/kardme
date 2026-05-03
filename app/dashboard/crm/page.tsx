@@ -553,7 +553,7 @@ Melhores cumprimentos,
         </div>
 
         <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
-          <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#ffffff' }}>Ativa o CRM Pro</div>
+          <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#ffffff') }}>Ativa o CRM Pro</div>
           <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 14, color: 'rgba(255,255,255,0.88)' }}>
             Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
           </div>
@@ -647,7 +647,7 @@ Melhores cumprimentos,
           </div>
 
           <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
-            <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#ffffff' }}>Ativa o CRM Pro</div>
+            <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#ffffff') }}>Ativa o CRM Pro</div>
             <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 14, color: 'rgba(255,255,255,0.88)' }}>
               Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
             </div>
@@ -1433,7 +1433,7 @@ Melhores cumprimentos,
         </div>
 
         <div style={{ marginTop: 18, background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 18, padding: 18 }}>
-          <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: '#ffffff' }}>Ativa o CRM Pro</div>
+          <div style={{ fontWeight: 950, fontSize: 16, marginBottom: 6, color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#ffffff') }}>Ativa o CRM Pro</div>
           <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 14, color: 'rgba(255,255,255,0.88)' }}>
             Escolhe o plano mensal ou anual e começa a gerir leads, follow-ups e contactos num só lugar.
           </div>
@@ -1532,7 +1532,7 @@ Melhores cumprimentos,
                   width: '100%',
                   padding: '12px 12px',
                   background: selectedCardId === 'all' ? (__kmIsLight() ? 'rgba(37,99,235,0.10)' : 'rgba(255,255,255,0.12)') : (__kmIsLight() ? 'var(--km-surface)' : '#0b1220'),
-                  color: '#ffffff',
+                  color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#ffffff'),
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -1562,7 +1562,7 @@ Melhores cumprimentos,
                     width: '100%',
                     padding: '12px 12px',
                     background: selectedCardId === card.id ? (__kmIsLight() ? 'rgba(37,99,235,0.10)' : 'rgba(255,255,255,0.12)') : (__kmIsLight() ? 'var(--km-surface)' : '#0b1220'),
-                    color: '#ffffff',
+                    color: (__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#ffffff'),
                     border: 'none',
                     textAlign: 'left',
                     cursor: 'pointer',
