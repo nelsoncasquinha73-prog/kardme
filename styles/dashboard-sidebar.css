@@ -165,3 +165,61 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* =========================
+   Light theme overrides
+   (não mexe no dark)
+   ========================= */
+:root[data-theme="light"] .dashboard-sidebar,
+:root[data-theme="light"] .dashboard-scope .dashboard-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  color: var(--km-text);
+  border-right: 1px solid var(--km-border);
+}
+
+:root[data-theme="light"] .sidebar-header {
+  border-bottom: 1px solid var(--km-border);
+}
+
+:root[data-theme="light"] .sidebar-logo {
+  color: var(--km-text);
+}
+
+:root[data-theme="light"] .sidebar-tagline {
+  color: rgba(15,23,42,0.55);
+}
+
+:root[data-theme="light"] .sidebar-link {
+  color: rgba(15,23,42,0.72);
+}
+
+:root[data-theme="light"] .sidebar-link:hover {
+  background: rgba(37,99,235,0.08);
+  color: rgba(15,23,42,0.92);
+}
+
+:root[data-theme="light"] .sidebar-link.active {
+  background: rgba(37,99,235,0.12);
+  border-left-color: rgba(37,99,235,0.95);
+  color: rgba(15,23,42,0.95);
+}
+
+:root[data-theme="light"] .sidebar-link.active .sidebar-icon {
+  color: rgba(37,99,235,0.95);
+}
+
+:root[data-theme="light"] .sidebar-footer {
+  border-top: 1px solid var(--km-border);
+}
+
+:root[data-theme="light"] .sidebar-logout {
+  border: 1px solid rgba(239,68,68,0.22);
+  background: rgba(239,68,68,0.08);
+  color: rgba(185,28,28,0.92);
+}
+
+:root[data-theme="light"] .sidebar-logout:hover {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.32);
+  color: rgba(153,27,27,0.95);
+}
