@@ -293,8 +293,7 @@ export default function LeadMagnetPage() {
               )}
               {magnet?.show_download_button && fileUrl && (
                 <a
-                  href={fileUrl}
-                  download
+                  href={(fileUrl || '').trim()}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

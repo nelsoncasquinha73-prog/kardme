@@ -112,7 +112,7 @@ export async function POST(req: Request) {
           magnet_id: magnet.id,
           magnet_title: magnet.title,
           magnet_type: magnet.magnet_type,
-          file_url: magnet.file_url,
+          file_url: (magnet.file_url || '').trim(),
         },
       }])
     }
@@ -175,7 +175,7 @@ export async function POST(req: Request) {
           ? `Olá ${name},\n\nObrigado por participares na roleta "${magnet.title}"!\n\n${wheel_prize ? `O teu resultado foi: 🎡 ${wheel_prize}` : ''}\n\nMelhores cumprimentos`
           : isRaffle
           ? `Olá ${name},\n\nObrigado por participares no sorteio "${magnet.title}"!\n\nO teu número da sorte é: 🎰 ${number_chosen}\n\nGuarda este email — se fores o vencedor entraremos em contacto contigo.\n\nBoa sorte!\n\nMelhores cumprimentos`
-          : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${magnet.file_url}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
+          : `Olá ${name},\n\nObrigado pelo teu interesse!\n\nAqui está o link para o teu recurso "${magnet.title}":\n${(magnet.file_url || '').trim()}\n\nPodes fazer download a qualquer momento.\n\nMelhores cumprimentos`
 
         const emailSubject = magnet.welcome_email_subject || defaultSubject
         let emailBody = (magnet.welcome_email_body || defaultBody)
@@ -219,7 +219,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true, lead_id: leadId,
-      file_url: magnet.file_url,
+      file_url: (magnet.file_url || '').trim(),
       thank_you_message: magnet.thank_you_message || 'Obrigado! O teu download está pronto.',
     }, { status: 200 })
 
