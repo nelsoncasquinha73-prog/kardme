@@ -809,9 +809,18 @@ Melhores cumprimentos,
           const dbCardId = await getActiveCardIdFromDB(userId)
           const localCardId = getLocalActiveCardId()
           const cardIdToUse = dbCardId || localCardId || 'all'
-          
-          if (cardIdToUse !== selectedCardId) {
-            setSelectedCardId(cardIdToUse)
+
+          // Nota: aqui ainda não temos cardsList carregado, por isso só evitamos valores "lixo".
+          const isUuid = (v: string) =>
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)
+
+          const safeCardIdToUse =
+            cardIdToUse === 'all' || (typeof cardIdToUse === 'string' && isUuid(cardIdToUse))
+              ? cardIdToUse
+              : 'all'
+
+          if (safeCardIdToUse !== selectedCardId) {
+            setSelectedCardId(safeCardIdToUse)
           }
         } catch (e) {
           console.error('Erro ao restaurar cartão ativo:', e)
@@ -826,6 +835,12 @@ Melhores cumprimentos,
       if (error) console.error('loadCards error:', error)
       console.log('loadCards userId:', userId, 'data:', data)
       setCardsList(data || [])
+
+      // Se o cartão ativo restaurado já não existir (apagado), volta para 'all' para evitar FK no insert
+      const ids = new Set((data || []).map((c: any) => c.id))
+      if (selectedCardId !== 'all' && !ids.has(selectedCardId)) {
+        setSelectedCardId('all')
+      }
     }
     loadCards()
 
@@ -948,17 +963,26 @@ Melhores cumprimentos,
 
   const handleAddLead = async () => {
 
+    console.log('[AddLead] selectedCardId=', selectedCardId)
+    console.log('[AddLead] userId=', userId)
+
 
     setSavingNewLead(true)
     try {
-      const { data, error } = await supabase.from('leads').insert({
+      
+    const selectedCardExists =
+      selectedCardId !== 'all' && cardsList?.some((c: any) => c.id === selectedCardId)
+
+    const cardIdForInsert = selectedCardExists ? selectedCardId : null
+
+const { data, error } = await supabase.from('leads').insert({
         name: newLead.name.trim() || null,
         email: newLead.email.trim().toLowerCase(),
         phone: newLead.phone.trim() || null,
         zone: newLead.zone.trim() || null,
         country: newLead.country.trim() || null,
         notes: newLead.notes.trim() || null,
-        card_id: selectedCardId === 'all' ? null : selectedCardId,
+        card_id: cardIdForInsert,
         user_id: userId,
         lead_source: 'Manual',
         step: 'Novo',
@@ -2043,6 +2067,24 @@ Melhores cumprimentos,
 
 
       <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button
+          onClick={() => setShowAddLeadModal(true)}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: '#10b981',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: 'pointer',
+            fontSize: 13,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ➕ Lead
+        </button>
+
+
 
         <button
           onClick={() => {
@@ -3574,6 +3616,12 @@ Melhores cumprimentos,
                       .eq('user_id', userId)
                       .order('created_at', { ascending: false })
                     setCardsList(data || [])
+
+      // Se o cartão ativo restaurado já não existir (apagado), volta para 'all' para evitar FK no insert
+      const ids = new Set((data || []).map((c: any) => c.id))
+      if (selectedCardId !== 'all' && !ids.has(selectedCardId)) {
+        setSelectedCardId('all')
+      }
                   } catch (err: any) {
                     alert('Erro ao guardar: ' + err?.message)
                   }
