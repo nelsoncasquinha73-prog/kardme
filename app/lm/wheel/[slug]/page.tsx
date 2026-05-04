@@ -237,13 +237,14 @@ export default function WheelPage() {
 
   const spinsLeft = maxSpins - spinCount
 
-  const pageTitle = (magnet as any)?.capture_page_title || magnet.title
-  const pageSubtitle = (magnet as any)?.capture_page_subtitle || magnet.description || ''
-  const pageImage = (magnet as any)?.capture_page_image || magnet.cover_image_url || ''
-  const pageButtonText = (magnet as any)?.capture_page_button_text || 'Girar Roleta'
-
   if (loading) return <div className={styles.container}><div className={styles.card}><p style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:40}}>A carregar...</p></div></div>
   if (!magnet) return <div className={styles.container}><div className={styles.card}><h1 style={{color:'#fff',textAlign:'center',padding:40}}>Roleta não encontrada</h1></div></div>
+
+  const pageTitle = magnet.capture_page_title || magnet.title
+  const pageSubtitle = magnet.capture_page_subtitle || magnet.description || ''
+  const pageImage = magnet.capture_page_image || magnet.cover_image_url || ''
+  const pageButtonText = magnet.capture_page_button_text || 'Girar Roleta'
+
 
   return (
     <div className={styles.container}>
