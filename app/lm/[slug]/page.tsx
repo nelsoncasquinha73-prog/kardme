@@ -310,6 +310,20 @@ export default function LeadMagnetPage() {
                   {magnet?.download_button_text || '📥 Fazer Download'}
                 </a>
               )}
+
+              {magnet?.show_download_button && (
+                <p style={{ marginTop: 14, fontSize: 12, color: '#94a3b8' }}>
+                  Se não abrir no teu browser, usa este link:{" "}
+                  <a
+                    href={`/api/lm/download/${slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#a5b4fc', textDecoration: 'underline' }}
+                  >
+                    abrir o PDF
+                  </a>
+                </p>
+              )}
               <p style={{ fontSize: 12, color: '#475569', marginTop: 24 }}>
                 Powered by <strong style={{ color: '#6366f1' }}>Kardme</strong>
               </p>
