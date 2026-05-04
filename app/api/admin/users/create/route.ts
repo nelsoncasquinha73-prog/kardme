@@ -36,6 +36,17 @@ async function isRequesterAdmin(req: NextRequest) {
   return false
 }
 
+function isEmailExistsError(msg: string) {
+  const m = (msg || '').toLowerCase()
+  return (
+    m.includes('already') ||
+    m.includes('registered') ||
+    m.includes('exists') ||
+    m.includes('duplicate') ||
+    (m.includes('email') && m.includes('taken'))
+  )
+}
+
 export async function POST(req: NextRequest) {
   try {
     // ✅ Segurança: só admin pode criar clientes
@@ -51,17 +62,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Email e password são obrigatórios' }, { status: 400 })
     }
 
+    // 1) Tenta criar user no Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     })
 
-    if (authError || !authData.user) {
-      return NextResponse.json({ success: false, error: authError?.message || 'Erro ao criar user' }, { status: 400 })
+    // 2) Se o email já existir, reaproveita o user existente (em vez de falhar)
+    let userId: string | null = authData?.user?.id || null
+
+    if (authError) console.error('createUser authError:', authError)
+
+    if ((authError || !userId) && (authError?.message || '').toLowerCase().includes('already')) {
+      const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+      if (listError) {
+        console.error('listUsers listError:', listError)
+        return NextResponse.json({ success: false, error: listError.message || 'Erro ao listar users' }, { status: 400 })
+      }
+      const existing = (listData?.users || []).find(u => (u.email || '').toLowerCase() == String(email).toLowerCase())
+      if (!existing?.id) {
+        return NextResponse.json({ success: false, error: 'User já existe mas não foi possível obter o ID' }, { status: 400 })
+      }
+      userId = existing.id
     }
 
-    const userId = authData.user.id
+    if (authError && !userId) {
+      return NextResponse.json({ success: false, error: authError.message || 'Erro ao criar user' }, { status: 400 })
+    }
+
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Erro ao criar/obter userId' }, { status: 400 })
+    }
 
     // ✅ Upsert no profile (cria se não existir)
     const { error: profileError } = await supabaseAdmin.from('profiles').upsert(
@@ -79,7 +111,7 @@ export async function POST(req: NextRequest) {
 
     if (profileError) {
       console.error('Erro ao upsert profile:', profileError)
-      // não falhar criação do user, mas reportar
+      return NextResponse.json({ success: false, error: 'Erro ao criar perfil: ' + (profileError.message || 'unknown') }, { status: 400 })
     }
 
     return NextResponse.json({ success: true, userId, message: 'Cliente criado com sucesso' })
