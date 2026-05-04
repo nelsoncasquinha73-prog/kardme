@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { lead_id, slug, prize_label } = await req.json()
+    const { lead_id, slug, prize_label, final } = await req.json()
     if (!lead_id || !slug || !prize_label) {
       return NextResponse.json({ error: 'Campos em falta' }, { status: 400 })
     }
@@ -45,8 +45,12 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
 
-    if (owner?.email) {
-      await fetch(baseUrl + '/api/send-email', {
+    const shouldSendEmails = final === true
+
+    if (shouldSendEmails && owner?.email) {
+      if (shouldSendEmails) {
+
+    await fetch(baseUrl + '/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,6 +74,8 @@ export async function POST(req: Request) {
         body: `Olá ${lead.name},\n\nParabéns! 🎉\n\nGanhaste na roleta "${magnet.title}"!\n\nO teu prémio: 🎡 ${prize_label}\n\n${magnet.thank_you_message || 'Entraremos em contacto brevemente para entregar o teu prémio.'}\n\nMelhores cumprimentos,\nKardme`,
       }),
     })
+
+    }
 
     return NextResponse.json({ ok: true })
   } catch (e: any) {

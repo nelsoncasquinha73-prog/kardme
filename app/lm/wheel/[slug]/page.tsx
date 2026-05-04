@@ -8,7 +8,7 @@ import PremiumWheelCanvas from '@/components/PremiumWheelCanvas'
 
 interface WheelSlice { id: string; label: string; color: string; is_prize: boolean }
 interface WheelConfig { slices: WheelSlice[]; capture_before_spin: boolean; max_spins_per_email: number }
-interface LeadMagnet { id: string; title: string; description?: string; cover_image_url?: string; thank_you_message?: string; wheel_config: WheelConfig; user_id: string; slug: string }
+interface LeadMagnet { id: string; title: string; description?: string; cover_image_url?: string; thank_you_message?: string; wheel_config: WheelConfig; user_id: string; slug: string; capture_page_title?: string; capture_page_subtitle?: string; capture_page_image?: string; capture_page_button_text?: string }
 
 const DEFAULT_SLICES: WheelSlice[] = [
   { id: '1', label: '🏆 Prémio Principal', color: '#f59e0b', is_prize: true },
@@ -171,7 +171,6 @@ export default function WheelPage() {
         spawnConfetti(winner.is_prize)
         if (winner.is_prize) {
           setPrizes(prev => [...prev, winner])
-          if (leadId) notifyWinner(winner.label)
         }
         const newCount = spinCount + 1
         setSpinCount(newCount)
@@ -179,6 +178,7 @@ export default function WheelPage() {
         if (newCount >= maxSpins) {
           setExhausted(true)
           setStep('result')
+          if (leadId) notifyWinner(winner.label, true)
         } else {
           setTimeout(() => { setResult(null); setStep('spin') }, 2500)
         }
@@ -223,10 +223,10 @@ export default function WheelPage() {
     setStep('spin')
   }
 
-  async function notifyWinner(prizeLabel: string) {
+  async function notifyWinner(prizeLabel: string, final: boolean = false) {
     if (!magnet || !leadId) return
     try {
-      await fetch("/api/lead-magnets/wheel-winner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_id: leadId, slug: magnet.slug, prize_label: prizeLabel }) })
+      await fetch("/api/lead-magnets/wheel-winner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_id: leadId, slug: magnet.slug, prize_label: prizeLabel, final }) })
     } catch (e) { console.error(e) }
   }
 
@@ -236,6 +236,11 @@ export default function WheelPage() {
   }
 
   const spinsLeft = maxSpins - spinCount
+
+  const pageTitle = (magnet as any)?.capture_page_title || magnet.title
+  const pageSubtitle = (magnet as any)?.capture_page_subtitle || magnet.description || ''
+  const pageImage = (magnet as any)?.capture_page_image || magnet.cover_image_url || ''
+  const pageButtonText = (magnet as any)?.capture_page_button_text || 'Girar Roleta'
 
   if (loading) return <div className={styles.container}><div className={styles.card}><p style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:40}}>A carregar...</p></div></div>
   if (!magnet) return <div className={styles.container}><div className={styles.card}><h1 style={{color:'#fff',textAlign:'center',padding:40}}>Roleta não encontrada</h1></div></div>
@@ -247,10 +252,10 @@ export default function WheelPage() {
       </div>
       {confetti.map((c,i) => <div key={i} className={styles.confettiPiece} style={{left:`${c.x}%`,background:c.color,width:c.size,height:c.size*0.6,animationDuration:`${c.speed}s`,animationDelay:`${(i%5)*0.1}s`,transform:`rotate(${c.angle}deg)`}} />)}
       <div className={styles.card}>
-        {magnet.cover_image_url && step !== 'result' && <img src={magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />}
+        {pageImage && step !== 'result' && <img src={pageImage} alt={pageTitle} className={styles.coverImage} />}
         <div className={styles.header}>
-          <h1>{magnet.title}</h1>
-          {magnet.description && <p className={styles.description}>{magnet.description}</p>}
+          <h1>{pageTitle}</h1>
+          {pageSubtitle && <p className={styles.description}>{pageSubtitle}</p>}
         </div>
         {step === 'form' && (
           <div className={styles.formSection}>
@@ -259,7 +264,7 @@ export default function WheelPage() {
             <div className={styles.formGroup}><label>Email *</label><input className={styles.input} type="email" placeholder="O teu email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} /></div>
             <div className={styles.formGroup}><label>Telefone <span className={styles.req}>*</span></label><input className={styles.input} type="tel" placeholder="O teu telefone" required value={form.phone} onChange={e => setForm(p => ({...p, phone: e.target.value}))} /></div>
             <label className={styles.checkboxLabel}><input type="checkbox" checked={form.consent} onChange={e => setForm(p => ({...p, consent: e.target.checked}))} /> Aceito receber comunicações e promoções.</label>
-            <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.phone || !form.consent} onClick={handleFormSubmit}>🎡 Quero girar a roleta!</button>
+            <button className={styles.btnSpin} disabled={!form.name || !form.email || !form.phone || !form.consent} onClick={handleFormSubmit}>{pageButtonText}</button>
           </div>
         )}
         {step === 'spin' && (
@@ -289,7 +294,7 @@ export default function WheelPage() {
               <PremiumWheelCanvas slices={getSlices()} rotation={rotation} wheelSize={wheelSize} />
             </div>
             <button className={styles.btnSpin} onClick={handleSpin} disabled={spinning}>
-              {spinning ? <span className={styles.spinningText}><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span></span> : '🎡 Girar a Roleta!'}
+              {spinning ? <span className={styles.spinningText}><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span><span className={styles.spinDot}>●</span></span> : pageButtonText}
             </button>
           </div>
         )}
