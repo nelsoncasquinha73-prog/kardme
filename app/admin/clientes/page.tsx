@@ -103,6 +103,7 @@ export default function AdminClientesPage() {
         body: JSON.stringify(newClient),
       })
       const json = await res.json()
+      console.log('[admin create client] status=', res.status, 'json=', json)
       if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao criar cliente')
       alert(t('dashboard.client_created'))
       setShowModal(false)
