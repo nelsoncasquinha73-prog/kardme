@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (authError) console.error('createUser authError:', authError)
 
-    if ((authError || !userId) && (authError?.message || '').toLowerCase().includes('already')) {
+    if ((authError || !userId) && isEmailExistsError(authError?.message || '')) {
       const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
       if (listError) {
         console.error('listUsers listError:', listError)
@@ -88,7 +88,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (authError && !userId) {
-      return NextResponse.json({ success: false, error: authError.message || 'Erro ao criar user' }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: authError.message || 'Erro ao criar user',
+          debug: {
+            status: (authError as any).status,
+            code: (authError as any).code,
+            name: (authError as any).name,
+          },
+        },
+        { status: 400 }
+      )
     }
 
     if (!userId) {
