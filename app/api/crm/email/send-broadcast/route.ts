@@ -45,10 +45,8 @@ function buildRawEmail(params: {
 }
 
 function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
-  return htmlBody.replace(
-    /https:\/\/www\.kardme\.com\/video-preview\/([a-f0-9-]+)(?=["\s>])/g,
-    `https://www.kardme.com/video-preview/$1?lead=${leadId}`
-  )
+  // Replace {{leadId}} placeholder with actual leadId
+  return htmlBody.replace(/\{\{leadId\}\}/g, leadId)
 }
 
 // Substitui {{nome}} e outros placeholders pelo dados reais do lead
