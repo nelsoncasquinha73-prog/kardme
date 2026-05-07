@@ -102,6 +102,28 @@ function NewLeadSourceForm({ userId, onCreated }: { userId: string, onCreated: (
   )
 }
 
+
+// Video Opens Cell Component
+function VideoOpensCell({ leadId, count }: { leadId: string; count: number }) {
+  if (count === 0) return <span style={{ fontSize: 11, opacity: 0.3 }}>—</span>
+  
+  return (
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      background: 'rgba(59,130,246,0.15)',
+      padding: '4px 8px',
+      borderRadius: 6,
+      fontSize: 12,
+      fontWeight: 600,
+      color: '#3b82f6',
+    }}>
+      📹 {count}
+    </div>
+  )
+}
+
 export default function CrmProPage() {
 
   const openPrintTask = (t: any, lead: any) => {
@@ -1170,6 +1192,24 @@ const { data, error } = await supabase.from('leads').insert({
     const matchesCountry = filterCountry === null || l.country === filterCountry
     return matchesSearch && matchesType && matchesSource && matchesCountry
   })
+
+  // Fetch video opens counts for all filtered leads
+  const [videoOpensCounts, setVideoOpensCounts] = useState<Record<string, number>>({})
+  useEffect(() => {
+    if (filteredLeads.length === 0) {
+      setVideoOpensCounts({})
+      return
+    }
+    const leadIds = filteredLeads.map(l => l.id)
+    fetch('/api/crm/video-opens/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leadIds }),
+    })
+      .then((res) => res.json())
+      .then((data) => setVideoOpensCounts(data))
+      .catch((err) => console.error('[FETCH_VIDEO_OPENS_BULK]', err))
+  }, [filteredLeads.length, filteredLeads.map(l => l.id).join(',')])
 
 
   const loadLeadActivities = async (leadId: string) => {
@@ -2277,7 +2317,7 @@ const { data, error } = await supabase.from('leads').insert({
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan={12} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
+                <td colSpan={13} style={{ padding: 24, textAlign: 'center', opacity: 0.7 }}>
                   Nenhuma lead encontrada.
                 </td>
               </tr>
@@ -2312,6 +2352,9 @@ const { data, error } = await supabase.from('leads').insert({
                       >
                         <FiEdit2 size={14} />
                       </button>
+                    </td>
+                    <td style={{ ...td, textAlign: 'center' }}>
+                      <VideoOpensCell leadId={lead.id} count={videoOpensCounts[lead.id] || 0} />
                     </td>
                     <td style={td}>
                       <strong>{lead.name}</strong>
