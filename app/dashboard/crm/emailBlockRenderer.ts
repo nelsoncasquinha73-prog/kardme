@@ -60,6 +60,7 @@ export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string 
       return `<div style="height: ${content.height || 24}px; margin-bottom: 16px;"></div>`
 
     case 'video': {
+      console.log('[VIDEO BLOCK] content:', content)
       console.log('[VIDEO BLOCK] ctx:', ctx)
       let videoLink = content.videoUrl || '#'
       if (content.isTrackable && content.previewId) {
