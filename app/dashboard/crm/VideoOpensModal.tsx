@@ -33,7 +33,10 @@ export default function VideoOpensModal({
     setLoading(true);
     fetch(`/api/crm/video-opens?leadId=${leadId}`)
       .then((res) => res.json())
-      .then((data) => setOpens(data.opens || []))
+      .then((data) => {
+        console.log('[VIDEO_OPENS_MODAL] data:', data)
+        setOpens(data.opens || [])
+      })
       .catch((err) => console.error('[FETCH_VIDEO_OPENS]', err))
       .finally(() => setLoading(false));
   }, [isOpen, leadId]);
