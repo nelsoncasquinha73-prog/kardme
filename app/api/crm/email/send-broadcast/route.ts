@@ -145,6 +145,7 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("[SEND] Attempting to send to " + recipientEmail + " (leadId: " + leadId + ", name: " + leadName + ")")
+        console.log("[DEBUG] recipientLeadIds:", recipientLeadIds, "index:", i, "leadId:", leadId)
 
         let personalizedHtmlBody = htmlBody
 

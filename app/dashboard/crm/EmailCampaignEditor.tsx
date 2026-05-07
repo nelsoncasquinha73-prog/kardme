@@ -229,6 +229,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
       // Render blocks to HTML for email
       console.log('[EMAIL SEND] bcastId:', bcastId)
+      console.log('[HANDLE SEND] About to call sendBroadcast with:', { userId, bcastId, recipientsCount: recipients.length, recipients })
       const htmlBody = generateEmailHtmlBody(blocks, subject, preheader, bcastId)
       
       const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients, subject, htmlBody)
