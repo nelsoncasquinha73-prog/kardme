@@ -3,7 +3,8 @@ import { supabase } from '@/lib/supabaseClient'
 export async function recordVideoOpen(
   previewId: string,
   leadId: string,
-  userId?: string
+  userId?: string,
+  broadcastId?: string | null
 ) {
   try {
     // Se não temos userId, tentamos obter da sessão
@@ -24,6 +25,7 @@ export async function recordVideoOpen(
         preview_id: previewId,
         lead_id: leadId,
         user_id: finalUserId,
+        broadcast_id: broadcastId || null,
         opened_at: new Date().toISOString(),
       })
 

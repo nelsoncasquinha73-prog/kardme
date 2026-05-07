@@ -24,6 +24,7 @@ export default function VideoPreviewPage() {
   const searchParams = useSearchParams()
   const id = params.id as string
   const leadId = searchParams.get('lead') as string | null
+  const broadcastId = searchParams.get('broadcastId') as string | null
   const [preview, setPreview] = useState<EmailVideoPreview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +40,7 @@ export default function VideoPreviewPage() {
 
         // Registar abertura com lead_id se existir
         if (leadId) {
-          await recordVideoOpen(id, leadId)
+          await recordVideoOpen(id, leadId, undefined, broadcastId)
         }
       } catch (err) {
         console.error('Erro ao carregar preview:', err)

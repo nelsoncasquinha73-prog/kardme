@@ -226,7 +226,8 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
       }
 
       // Render blocks to HTML for email
-      const htmlBody = generateEmailHtmlBody(blocks, subject, preheader)
+      console.log('[EMAIL SEND] bcastId:', bcastId)
+      const htmlBody = generateEmailHtmlBody(blocks, subject, preheader, bcastId)
       
       const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients, subject, htmlBody)
       addToast(`✅ ${result.sent} emails enviados!`, 'success')
@@ -1139,7 +1140,7 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
       case 'video': {
         let videoLink = content.videoUrl || '#'
         if (content.isTrackable && content.previewId) {
-          videoLink = `https://www.kardme.com/video-preview/${content.previewId}?lead={{leadId}}`
+          videoLink = `https://www.kardme.com/video-preview/${content.previewId}?lead={{leadId}}&broadcastId=${broadcastId || ''}`
         } else if (content.previewId) {
           videoLink = `https://www.kardme.com/video-preview/${content.previewId}`
         }

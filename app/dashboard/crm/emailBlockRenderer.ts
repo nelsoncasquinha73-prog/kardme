@@ -22,7 +22,7 @@ async function getSignedImageUrl(publicUrl: string): Promise<string> {
   return publicUrl
 }
 
-export function renderEmailBlockToHtml(block: any): string {
+export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string }): string {
   const { type, content } = block
 
   switch (type) {
@@ -93,8 +93,9 @@ export function renderEmailBlockToHtml(block: any): string {
   }
 }
 
-export function generateEmailHtmlBody(blocks: any[], subject: string, preheader: string): string {
-  const blockHtml = blocks.map(block => renderEmailBlockToHtml(block)).join('')
+export function generateEmailHtmlBody(blocks: any[], subject: string, preheader: string, broadcastId?: string): string {
+  console.log('[GENERATE EMAIL] broadcastId:', broadcastId)
+  const blockHtml = blocks.map(block => renderEmailBlockToHtml(block, { broadcastId })).join('')
   
   return `<!DOCTYPE html>
 <html>
