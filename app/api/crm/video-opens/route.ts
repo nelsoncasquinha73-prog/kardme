@@ -17,7 +17,14 @@ export async function GET(req: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('email_video_opens')
-      .select('id, preview_id, opened_at, created_at')
+      .select(`
+        id,
+        preview_id,
+        opened_at,
+        created_at,
+        broadcast_id,
+        email_broadcasts(subject)
+      `)
       .eq('lead_id', leadId)
       .order('opened_at', { ascending: false });
 

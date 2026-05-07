@@ -5,6 +5,8 @@ interface VideoOpen {
   id: string;
   preview_id: string;
   opened_at: string;
+  broadcast_id?: string;
+  email_broadcasts?: { subject: string } | null;
 }
 
 interface VideoOpensModalProps {
@@ -129,17 +131,24 @@ export default function VideoOpensModal({
                     borderRadius: 6,
                     padding: 10,
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    flexDirection: 'column',
+                    gap: 6,
                     fontSize: 12,
                   }}
                 >
-                  <span style={{ fontWeight: 600, color: '#111827' }}>
-                    Abertura {idx + 1}
-                  </span>
-                  <span style={{ color: '#6b7280' }}>
-                    {new Date(open.opened_at).toLocaleString('pt-PT')}
-                  </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontWeight: 600, color: '#111827' }}>
+                      Abertura {idx + 1}
+                    </span>
+                    <span style={{ color: '#6b7280', textAlign: 'right' }}>
+                      {new Date(open.opened_at).toLocaleString('pt-PT')}
+                    </span>
+                  </div>
+                  {open.email_broadcasts?.subject && (
+                    <div style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>
+                      📧 {open.email_broadcasts.subject}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
