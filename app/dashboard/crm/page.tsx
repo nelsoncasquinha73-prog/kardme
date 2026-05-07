@@ -23,6 +23,7 @@ import EditLeadModal from '@/components/crm/EditLeadModal'
 import { updateLeadCard } from '@/lib/crm/cards'
 import { getLocalActiveCardId, setLocalActiveCardId, saveActiveCardIdToDB, getActiveCardIdFromDB } from '@/lib/crm/activeCard'
 import VideoNotificationCenter from './VideoNotificationCenter'
+import VideoOpensModal from './VideoOpensModal'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
@@ -104,23 +105,45 @@ function NewLeadSourceForm({ userId, onCreated }: { userId: string, onCreated: (
 
 
 // Video Opens Cell Component
-function VideoOpensCell({ leadId, count }: { leadId: string; count: number }) {
+function VideoOpensCell({ 
+  leadId, 
+  count, 
+  lead,
+  onOpenModal 
+}: { 
+  leadId: string; 
+  count: number;
+  lead: any;
+  onOpenModal: (lead: any) => void;
+}) {
   if (count === 0) return <span style={{ fontSize: 11, opacity: 0.3 }}>—</span>
   
   return (
-    <div style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 4,
-      background: 'rgba(59,130,246,0.15)',
-      padding: '4px 8px',
-      borderRadius: 6,
-      fontSize: 12,
-      fontWeight: 600,
-      color: '#3b82f6',
-    }}>
+    <button
+      onClick={() => onOpenModal(lead)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        background: 'rgba(59,130,246,0.15)',
+        padding: '4px 8px',
+        borderRadius: 6,
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#3b82f6',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(59,130,246,0.25)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(59,130,246,0.15)'
+      }}
+    >
       📹 {count}
-    </div>
+    </button>
   )
 }
 
@@ -1195,6 +1218,8 @@ const { data, error } = await supabase.from('leads').insert({
 
   // Fetch video opens counts for all filtered leads
   const [videoOpensCounts, setVideoOpensCounts] = useState<Record<string, number>>({})
+  const [videoOpensModalOpen, setVideoOpensModalOpen] = useState(false)
+  const [selectedLeadForVideoOpens, setSelectedLeadForVideoOpens] = useState<any>(null)
   useEffect(() => {
     if (filteredLeads.length === 0) {
       setVideoOpensCounts({})
@@ -2355,7 +2380,7 @@ const { data, error } = await supabase.from('leads').insert({
                       </button>
                     </td>
                     <td style={{ ...td, textAlign: 'center' }}>
-                      <VideoOpensCell leadId={lead.id} count={videoOpensCounts[lead.id] || 0} />
+                      <VideoOpensCell leadId={lead.id} count={videoOpensCounts[lead.id] || 0} lead={lead} onOpenModal={(l) => { setSelectedLeadForVideoOpens(l); setVideoOpensModalOpen(true); }} />
                     </td>
                     <td style={td}>
                       <strong>{lead.name}</strong>
@@ -4170,6 +4195,14 @@ const { data, error } = await supabase.from('leads').insert({
         />
       )}
 
+
+      <VideoOpensModal
+        isOpen={videoOpensModalOpen}
+        onClose={() => setVideoOpensModalOpen(false)}
+        leadId={selectedLeadForVideoOpens?.id || ''}
+        leadName={selectedLeadForVideoOpens?.name || ''}
+        leadEmail={selectedLeadForVideoOpens?.email || ''}
+      />
     </main>
   )
 }
