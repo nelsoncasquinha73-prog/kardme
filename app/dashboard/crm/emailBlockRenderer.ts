@@ -60,8 +60,6 @@ export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string 
       return `<div style="height: ${content.height || 24}px; margin-bottom: 16px;"></div>`
 
     case 'video': {
-      console.log('[VIDEO BLOCK] content:', content)
-      console.log('[VIDEO BLOCK] ctx:', ctx)
       let videoLink = content.videoUrl || '#'
       if (content.isTrackable && content.previewId) {
         videoLink = `https://www.kardme.com/video-preview/${content.previewId}?lead={{leadId}}&broadcastId=${ctx?.broadcastId || ''}`
@@ -101,7 +99,6 @@ export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string 
 }
 
 export function generateEmailHtmlBody(blocks: any[], subject: string, preheader: string, broadcastId?: string): string {
-  console.log('[GENERATE EMAIL] broadcastId:', broadcastId)
   const blockHtml = blocks.map(block => renderEmailBlockToHtml(block, { broadcastId })).join('')
   
   return `<!DOCTYPE html>

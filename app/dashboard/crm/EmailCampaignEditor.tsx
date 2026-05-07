@@ -172,7 +172,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
     setSending(true)
     try {
       let recipients: Array<{ email: string; leadId?: string; name?: string | null }> = []
-      console.log('[HANDLE SEND] leads:', leads.slice(0, 2))
 
       if (sendingTo === 'audience' && selectedAudiences.size > 0) {
         const audIds = Array.from(selectedAudiences)
@@ -197,7 +196,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
         recipients = [{ email: manualEmail.trim() }]
       }
 
-      console.log('[HANDLE SEND] recipients:', recipients)
       if (recipients.length === 0) {
         addToast('Sem destinatários selecionados', 'error')
         setSending(false)
@@ -228,8 +226,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
       }
 
       // Render blocks to HTML for email
-      console.log('[EMAIL SEND] bcastId:', bcastId)
-      console.log('[HANDLE SEND] About to call sendBroadcast with:', { userId, bcastId, recipientsCount: recipients.length, recipients })
       const htmlBody = generateEmailHtmlBody(blocks, subject, preheader, bcastId)
       
       const result: { sent: number; failed: number } = await sendBroadcast(userId, bcastId, recipients, subject, htmlBody)
