@@ -122,6 +122,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    const finalBody = String(body).replaceAll('{{leadId}}', String(leadId))
+
     const atts: AttachmentPayload[] = Array.isArray(attachments) ? attachments : []
     if (atts.length > 5) {
       return NextResponse.json({ error: 'Too many attachments (max 5)' }, { status: 400 })
@@ -200,7 +202,7 @@ export async function POST(req: NextRequest) {
       fromEmail,
       to: recipientEmail,
       subject,
-      htmlBody: body,
+      htmlBody: finalBody,
       attachments: atts,
     })
 
@@ -219,7 +221,7 @@ export async function POST(req: NextRequest) {
       template_id: templateId || null,
       recipient_email: recipientEmail,
       subject,
-      body,
+      body: finalBody,
       message_id: messageId,
       sent_at: new Date().toISOString(),
     })

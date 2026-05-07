@@ -127,6 +127,20 @@ export const DEFAULT_EMAIL_BLOCKS: Array<{
     },
   },
   {
+    name: 'Vídeo (Tracking)',
+    block_type: 'video',
+    content: {
+      videoUrl: '',
+      thumbnail: '',
+      previewId: '',
+      width: '100%',
+      align: 'center',
+      paddingTop: 0,
+      paddingBottom: 0,
+      isTrackable: true,
+    },
+  },
+  {
     name: 'Vídeo',
     block_type: 'video',
     content: {
@@ -137,6 +151,7 @@ export const DEFAULT_EMAIL_BLOCKS: Array<{
       align: 'center',
       paddingTop: 0,
       paddingBottom: 0,
+      isTrackable: false,
     },
   },
   {

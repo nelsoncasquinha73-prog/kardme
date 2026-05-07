@@ -1137,7 +1137,12 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
         return `<div style="height: ${content.height || 20}px;"></div>`
 
       case 'video': {
-        const videoLink = content.previewId ? `https://www.kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
+        let videoLink = content.videoUrl || '#'
+        if (content.isTrackable && content.previewId) {
+          videoLink = `https://www.kardme.com/video-preview/${content.previewId}?lead={{leadId}}`
+        } else if (content.previewId) {
+          videoLink = `https://www.kardme.com/video-preview/${content.previewId}`
+        }
         return content.thumbnail ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0;"><a href="${videoLink}" target="_blank" style="display: inline-block; text-decoration: none;"><img src="${content.thumbnail}" alt="Video" style="display: block; width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; margin: 0 auto;" /></a></div>` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
       }
 
