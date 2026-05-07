@@ -2300,7 +2300,8 @@ const { data, error } = await supabase.from('leads').insert({
                     disabled={filteredLeads.length === 0}
                 />
               </th>
-              <th style={{ ...th, textAlign: 'center', width: 40 }}>✏️</th>
+              <th style={{ ...th, textAlign: 'center', width: 50 }}>✏️</th>
+              <th style={{ ...th, textAlign: 'center', width: 50 }}>📹</th>
               <th style={th}>Nome</th>
               <th style={th}>Email</th>
               <th style={th}>Cartão</th>
