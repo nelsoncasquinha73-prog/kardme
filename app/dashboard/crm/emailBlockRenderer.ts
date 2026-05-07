@@ -60,7 +60,13 @@ export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string 
       return `<div style="height: ${content.height || 24}px; margin-bottom: 16px;"></div>`
 
     case 'video': {
-      const videoLink = content.previewId ? `https://www.kardme.com/video-preview/${content.previewId}` : content.videoUrl || '#'
+      console.log('[VIDEO BLOCK] ctx:', ctx)
+      let videoLink = content.videoUrl || '#'
+      if (content.isTrackable && content.previewId) {
+        videoLink = `https://www.kardme.com/video-preview/${content.previewId}?lead={{leadId}}&broadcastId=${ctx?.broadcastId || ''}`
+      } else if (content.previewId) {
+        videoLink = `https://www.kardme.com/video-preview/${content.previewId}`
+      }
       return content.thumbnail
         ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0; margin-bottom: 16px;">
             <a href="${escapeHtml(videoLink)}" target="_blank" style="display: inline-block; text-decoration: none; position: relative;">
