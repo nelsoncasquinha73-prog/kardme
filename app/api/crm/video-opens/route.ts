@@ -15,24 +15,38 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabase
+    // Buscar aberturas de vídeo
+    const { data: opens, error: opensError } = await supabase
       .from('email_video_opens')
-      .select(`
-        id,
-        preview_id,
-        opened_at,
-        created_at,
-        broadcast_id,
-        email_broadcasts(subject)
-      `)
+      .select('id, preview_id, opened_at, created_at, broadcast_id')
       .eq('lead_id', leadId)
       .order('opened_at', { ascending: false });
 
-    if (error) throw error;
+    if (opensError) throw opensError;
+
+    // Para cada abertura, buscar o assunto do broadcast
+    const enrichedOpens = await Promise.all(
+      (opens || []).map(async (open: any) => {
+        if (!open.broadcast_id) return open;
+        
+        const { data: broadcast } = await supabase
+          .from('email_broadcasts')
+          .select('subject')
+          .eq('id', open.broadcast_id)
+          .single();
+        
+        return {
+          ...open,
+          email_broadcasts: broadcast ? { subject: broadcast.subject } : null,
+        };
+      })
+    );
+
+    console.log('[VIDEO_OPENS_API] leadId:', leadId, 'opens count:', enrichedOpens?.length);
 
     return NextResponse.json({
-      count: data?.length || 0,
-      opens: data || [],
+      count: enrichedOpens?.length || 0,
+      opens: enrichedOpens || [],
     });
   } catch (err: any) {
     console.error('[VIDEO_OPENS_ERROR]', err);
