@@ -1,4 +1,5 @@
 import React from 'react'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { supabaseServer } from '@/lib/supabaseServer'
 
@@ -209,7 +210,10 @@ export default async function CardPage({ params }: Props) {
     socialLinks,
   }
   
-  const cardUrl = typeof window !== 'undefined' ? `${window.location.origin}/${slug}` : `https://kardme.com/${slug}`
+  const headersList = await headers()
+  const host = headersList.get('host') ?? 'kardme.com'
+  const protocol = host.includes('localhost') ? 'http' : 'https'
+  const cardUrl = `${protocol}://${host}/${slug}`
 
   const floatingActions = card?.theme?.floatingActions || {}
 
