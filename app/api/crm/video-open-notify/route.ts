@@ -38,26 +38,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    // Buscar último registo de abertura deste lead para este vídeo
-    const { data: lastOpen, error: lastOpenError } = await supabaseAdmin
-      .from('email_video_opens')
-      .select('id, last_notification_sent_at')
-      .eq('lead_id', leadId)
+    // Verificar cooldown: última notificação nos últimos 5 minutos
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    const { data: recentNotification } = await supabaseAdmin
+      .from('email_video_open_notifications')
+      .select('id')
       .eq('broadcast_id', broadcastId)
-      .order('opened_at', { ascending: false })
+      .eq('lead_id', leadId)
+      .gt('sent_at', fiveMinutesAgo)
       .limit(1)
       .single()
 
-    // Verificar cooldown de 5 minutos
-    if (lastOpen?.last_notification_sent_at) {
-      const lastSent = new Date(lastOpen.last_notification_sent_at)
-      const now = new Date()
-      const diffMinutes = (now.getTime() - lastSent.getTime()) / (1000 * 60)
-
-      if (diffMinutes < 5) {
-        console.log('[VIDEO_OPEN_NOTIFY] Cooldown ativo, notificação não enviada')
-        return NextResponse.json({ success: true, cooldown: true })
-      }
+    if (recentNotification) {
+      console.log('[VIDEO_OPEN_NOTIFY] Cooldown ativo, notificação não enviada')
+      return NextResponse.json({ success: true, cooldown: true })
     }
 
     // Buscar lead
@@ -101,11 +95,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 })
     }
 
-    // Atualizar timestamp de última notificação enviada
+    // Registar notificação na tabela nova
     await supabaseAdmin
-      .from('email_video_opens')
-      .update({ last_notification_sent_at: new Date().toISOString() })
-      .eq('id', lastOpen?.id)
+      .from('email_video_open_notifications')
+      .insert({
+        broadcast_id: broadcastId,
+        lead_id: leadId,
+        sent_at: new Date().toISOString(),
+      })
 
     return NextResponse.json({ success: true })
   } catch (err) {
