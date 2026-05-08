@@ -454,11 +454,18 @@ export async function POST(req: Request) {
           await updateCRMProAddon(row.user_id, isActive)
         }
 
+        const interval = sub.items?.data?.[0]?.price?.recurring?.interval || null
+        const planType = interval === 'year' ? 'yearly' : interval === 'month' ? 'monthly' : null
+
         await supabaseAdmin
           .from('user_subscriptions')
           .update({
             status: sub.status,
+            plan_type: planType,
             cancel_at_period_end: sub.cancel_at_period_end,
+            current_period_start: (sub as any).current_period_start
+              ? new Date((sub as any).current_period_start * 1000).toISOString()
+              : null,
             next_billing_date: (sub as any).current_period_end
               ? new Date((sub as any).current_period_end * 1000).toISOString()
               : null,
