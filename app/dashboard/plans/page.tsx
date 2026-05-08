@@ -147,7 +147,7 @@ export default function PlansPage() {
         <div style={cardStyle(false)}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
-              {t('plans.monthly') || 'Mensal'}
+              Kardme Pro — Mensal
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
@@ -208,7 +208,7 @@ export default function PlansPage() {
 
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
-              {t('plans.yearly') || 'Anual'}
+              Kardme Pro — Anual
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
