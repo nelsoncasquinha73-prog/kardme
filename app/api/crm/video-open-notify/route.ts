@@ -15,7 +15,6 @@ function getAdminSupabase() {
 export async function POST(req: NextRequest) {
   try {
     const { broadcastId, leadId } = await req.json()
-    console.log('[VIDEO_OPEN_NOTIFY] payload', { broadcastId, leadId })
 
     if (!broadcastId || !leadId) {
       return NextResponse.json({ error: 'Missing broadcastId or leadId' }, { status: 400 })
@@ -35,7 +34,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Se notificacao nao esta ativada, sair
-    console.log('[VIDEO_OPEN_NOTIFY] broadcast found', { id: broadcast.id, notify: broadcast.notify_on_video_opens, user_id: broadcast.user_id, subject: broadcast.subject })
 
     if (!broadcast.notify_on_video_opens) {
       return NextResponse.json({ success: true })
@@ -60,7 +58,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Enviar email via /api/send-email
-    console.log('[VIDEO_OPEN_NOTIFY] sending email to', user.email, 'subject:', `Video aberto: ${lead.name}`)
     const response = await fetch(new URL('/api/send-email', req.url), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
