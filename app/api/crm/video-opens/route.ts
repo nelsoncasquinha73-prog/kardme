@@ -42,7 +42,6 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    console.log('[VIDEO_OPENS_API] leadId:', leadId, 'opens count:', enrichedOpens?.length);
 
     return NextResponse.json({
       count: enrichedOpens?.length || 0,

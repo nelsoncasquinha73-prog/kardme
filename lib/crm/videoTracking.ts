@@ -35,6 +35,19 @@ export async function recordVideoOpen(
     }
 
     console.log('[VIDEO TRACKING] Abertura registada:', { previewId, leadId })
+
+    // Se há broadcastId, chamar endpoint de notificação
+    if (broadcastId) {
+      try {
+        await fetch('/api/crm/video-open-notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcastId, leadId }),
+        })
+      } catch (err) {
+        console.error('[VIDEO TRACKING] Erro ao notificar:', err)
+      }
+    }
   } catch (err) {
     console.error('[VIDEO TRACKING] Erro:', err)
   }

@@ -54,6 +54,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [preheader, setPreheader] = useState('')
+  const [notifyOnVideoOpens, setNotifyOnVideoOpens] = useState(false)
   const [currentBroadcastId, setCurrentBroadcastId] = useState<string | undefined>(initialBroadcastId)
   const [blocks, setBlocks] = useState<EmailBlock[]>([])
   const [audiences, setAudiences] = useState<LeadType[]>([])
@@ -103,6 +104,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           setTitle(data.title)
           setSubject(data.subject)
           setPreheader(data.preheader || '')
+          setNotifyOnVideoOpens(data.notify_on_video_opens || false)
           setBlocks(data.html_content?.blocks || [])
         }
       }
@@ -267,6 +269,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           subject,
           preheader,
           html_content: htmlContent,
+          notify_on_video_opens: notifyOnVideoOpens,
         })
         addToast('Campanha atualizada!', 'success')
       } else {
@@ -275,6 +278,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           subject,
           preheader,
           html_content: htmlContent,
+          notify_on_video_opens: notifyOnVideoOpens,
         })
         if (newBroadcast?.id) setCurrentBroadcastId(newBroadcast.id)
         addToast('Campanha criada!', 'success')
@@ -488,6 +492,18 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                     {v.label}
                   </button>
                 ))}
+              </div>
+              {/* Notificar por email quando alguém abrir vídeo */}
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={notifyOnVideoOpens}
+                    onChange={(e) => setNotifyOnVideoOpens(e.target.checked)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, color: '#fff' }}>Notificar por email quando alguém abrir o vídeo</span>
+                </label>
               </div>
             </div>
           </div>

@@ -25,7 +25,6 @@ export default function VideoPreviewPage() {
   const id = params.id as string
   const leadId = searchParams.get('lead') as string | null
   const broadcastId = searchParams.get('broadcastId') as string | null
-  console.log('[VIDEO_PREVIEW] leadId:', leadId, 'broadcastId:', broadcastId)
   const [preview, setPreview] = useState<EmailVideoPreview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
