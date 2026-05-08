@@ -76,12 +76,22 @@ export default function PlansPage() {
     }
   }
 
-  const benefits = [
-    { icon: FiLayout, label: t('plans.benefit_templates') || '30+ templates incluídos' },
-    { icon: FiBarChart2, label: t('plans.benefit_analytics') || 'Analytics completo' },
-    { icon: FiUsers, label: t('plans.benefit_leads') || 'Gestão de leads/contactos' },
-    { icon: FiZap, label: t('plans.benefit_nfc') || 'NFC disponível (compra única)' },
-    { icon: FiCreditCard, label: t('plans.benefit_billing') || 'Faturação e portal de cliente' },
+  const proBenefits = [
+    '30+ templates profissionais',
+    'Cartões digitais + NFC',
+    'Analytics (views, clicks, leads)',
+    'Exportar leads (CSV)',
+  ]
+
+  const crmProBenefits = [
+    'Mensagem de boas-vindas automática',
+    'Aviso de nova lead (notificação)',
+    'Video Tracking (sabe quem viu)',
+    'Email Marketing (campanhas + templates)',
+    'Lead Magnets (e-book, raffle, wheel)',
+    'Pipeline Kanban (organiza leads)',
+    'Follow-ups & Calendário (tarefas)',
+    'Qualificação de leads (status, tags, filtros)',
   ]
 
   const cardStyle = (highlighted: boolean) => ({
@@ -255,6 +265,50 @@ export default function PlansPage() {
           </button>
         </div>
 
+
+      {/* O QUE ESTÁ INCLUÍDO */}
+      <div style={{ marginTop: 40, maxWidth: 900, margin: '40px auto 0' }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'rgba(255,255,255,0.95)', textAlign: 'center' }}>
+          O que está incluído
+        </h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
+          {/* KARDME PRO */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 14 }}>
+              📇 Kardme Pro
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {proBenefits.map((txt) => (
+                <div key={txt} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>
+                  <span style={{ color: '#22c55e', fontWeight: 700, marginTop: 2, flexShrink: 0 }}>✓</span>
+                  <span>{txt}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CRM PRO */}
+          <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 16, padding: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 14 }}>
+              🧠 + CRM Pro
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {crmProBenefits.map((txt) => (
+                <div key={txt} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>
+                  <span style={{ color: '#3b82f6', fontWeight: 700, marginTop: 2, flexShrink: 0 }}>✓</span>
+                  <span>{txt}</span>
+                </div>
+              ))}
+            </div>
+            {!hasPublishedCard && (
+              <div style={{ marginTop: 14, padding: 10, background: 'rgba(255,193,7,0.1)', borderRadius: 8, fontSize: 12, color: 'rgba(255,193,7,0.8)' }}>
+                ⚠️ Publica um cartão para ativar o CRM Pro
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div
