@@ -34,9 +34,30 @@ export async function POST(req: NextRequest) {
     }
 
     // Se notificacao nao esta ativada, sair
-
     if (!broadcast.notify_on_video_opens) {
       return NextResponse.json({ success: true })
+    }
+
+    // Buscar último registo de abertura deste lead para este vídeo
+    const { data: lastOpen, error: lastOpenError } = await supabaseAdmin
+      .from('email_video_opens')
+      .select('id, last_notification_sent_at')
+      .eq('lead_id', leadId)
+      .eq('broadcast_id', broadcastId)
+      .order('opened_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // Verificar cooldown de 5 minutos
+    if (lastOpen?.last_notification_sent_at) {
+      const lastSent = new Date(lastOpen.last_notification_sent_at)
+      const now = new Date()
+      const diffMinutes = (now.getTime() - lastSent.getTime()) / (1000 * 60)
+
+      if (diffMinutes < 5) {
+        console.log('[VIDEO_OPEN_NOTIFY] Cooldown ativo, notificação não enviada')
+        return NextResponse.json({ success: true, cooldown: true })
+      }
     }
 
     // Buscar lead
@@ -79,6 +100,12 @@ export async function POST(req: NextRequest) {
       console.error('[VIDEO_OPEN_NOTIFY] Erro ao enviar email:', error)
       return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 })
     }
+
+    // Atualizar timestamp de última notificação enviada
+    await supabaseAdmin
+      .from('email_video_opens')
+      .update({ last_notification_sent_at: new Date().toISOString() })
+      .eq('id', lastOpen?.id)
 
     return NextResponse.json({ success: true })
   } catch (err) {
