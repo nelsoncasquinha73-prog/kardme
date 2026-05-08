@@ -5,7 +5,7 @@ const __kmIsLight = () => typeof document !== 'undefined' && document.documentEl
 import { useToast } from '@/lib/toast-context'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FaWhatsapp } from 'react-icons/fa'
 import {
   FiSettings,
