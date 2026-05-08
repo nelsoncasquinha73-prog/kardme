@@ -209,7 +209,7 @@ export default async function CardPage({ params }: Props) {
     socialLinks,
   }
   
-  const cardUrl = `https://kardme.com/${slug}`
+  const cardUrl = typeof window !== 'undefined' ? `${window.location.origin}/${slug}` : `https://kardme.com/${slug}`
 
   const floatingActions = card?.theme?.floatingActions || {}
 
