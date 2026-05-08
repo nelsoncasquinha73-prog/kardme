@@ -1,6 +1,13 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
+const resend = new Proxy({} as Resend, {
+  get(_, prop) { return (getResend() as any)[prop] },
+})
 
 // Extrair email de "Nome <email@domain.com>"
 function extractEmailFromResendFrom(resendFrom: string): string {

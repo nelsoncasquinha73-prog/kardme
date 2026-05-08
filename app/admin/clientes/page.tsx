@@ -121,6 +121,7 @@ export default function AdminClientesPage() {
   if (loading) return <div style={{ padding: 24, color: '#fff' }}>A carregar clientes…</div>
 
   const inputStyle = { padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: '#fff', width: '100%' }
+  const selectStyle = { ...inputStyle, padding: '12px 12px', height: 44, fontSize: 14 }
   const labelStyle = { display: 'grid', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.8)' }
 
   return (
@@ -218,7 +219,7 @@ export default function AdminClientesPage() {
                   <select
                     value={newClient.phone_country}
                     onChange={(e) => setNewClient({ ...newClient, phone_country: e.target.value })}
-                    style={{ ...inputStyle, width: 110, flexShrink: 0 }}
+                    style={{ ...selectStyle, width: 120, flexShrink: 0 }}
                   >
                     <option value="+351">🇵🇹 +351</option>
                     <option value="+55">🇧🇷 +55</option>
@@ -247,7 +248,7 @@ export default function AdminClientesPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <label style={labelStyle}>
                   Plano
-                  <select value={newClient.plan} onChange={(e) => setNewClient({ ...newClient, plan: e.target.value })} style={inputStyle}>
+                  <select value={newClient.plan} onChange={(e) => setNewClient({ ...newClient, plan: e.target.value })} style={selectStyle}>
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
                     <option value="agency">Agency</option>
