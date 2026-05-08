@@ -96,6 +96,8 @@ export default function PlansPage() {
 
   const cardStyle = (highlighted: boolean) => ({
     flex: 1,
+    minWidth: 280,
+    minHeight: 520,
     background: highlighted
       ? 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.10))'
       : 'rgba(255,255,255,0.03)',
@@ -277,6 +279,9 @@ export default function PlansPage() {
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
               Mensal
             </div>
+            <div style={{ fontSize: 12, color: 'rgba(99,102,241,0.7)', marginTop: 6 }}>
+              Complemento do Kardme Pro — automação, email, video tracking
+            </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
                 €5,99
@@ -333,6 +338,9 @@ export default function PlansPage() {
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
               Anual
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(99,102,241,0.7)', marginTop: 6 }}>
+              Complemento do Kardme Pro — automação, email, video tracking
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
