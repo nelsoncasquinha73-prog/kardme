@@ -546,6 +546,8 @@ export default function AdminClienteDetailPage() {
 
   const inputStyle: React.CSSProperties = {
     padding: "10px 12px",
+    height: 44,
+    fontSize: 14,
     borderRadius: 10,
     border: "1px solid rgba(255,255,255,0.18)",
     background: "rgba(255,255,255,0.06)",
