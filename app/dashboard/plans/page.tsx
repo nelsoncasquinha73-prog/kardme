@@ -266,6 +266,123 @@ export default function PlansPage() {
         </div>
 
 
+      {/* CRM PRO STANDALONE CARDS */}
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center', marginTop: 20 }}>
+        {/* CRM PRO MENSAL */}
+        <div style={cardStyle(false)}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+              🧠 CRM Pro
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Mensal
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
+                €5,99
+              </span>
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                /{t('plans.month') || 'mês'}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
+            <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/mês</p>
+            <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
+              €5,99
+            </p>
+          </div>
+
+          <button
+            onClick={() => startCheckout('monthly', 'monthly')}
+            disabled={loading === 'monthly' || !hasPublishedCard}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.08)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: (loading === 'monthly' || !hasPublishedCard) ? 'not-allowed' : 'pointer',
+              opacity: (loading === 'monthly' || !hasPublishedCard) ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            {loading === 'monthly' ? (t('plans.loading') || 'A abrir...') : (t('plans.subscribe') || 'Subscrever')}
+          </button>
+
+          {!hasPublishedCard && (
+            <p style={{ fontSize: 12, color: 'rgba(255,193,7,0.8)', marginTop: 10, textAlign: 'center' }}>
+              ⚠️ Publica um cartão primeiro
+            </p>
+          )}
+        </div>
+
+        {/* CRM PRO ANUAL */}
+        <div style={cardStyle(true)}>
+          <div style={badgeStyle}>
+            {t('plans.recommended') || '⭐ Recomendado'}
+          </div>
+
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+              🧠 CRM Pro
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Anual
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontSize: 36, fontWeight: 900, color: '#fff' }}>
+                €59
+              </span>
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>
+                /{t('plans.year') || 'ano'}
+              </span>
+            </div>
+            <div style={{ fontSize: 12, color: '#22c55e', fontWeight: 600, marginTop: 4 }}>
+              {t('plans.save_2_months') || 'Poupa 2 meses! 🎉'}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
+            <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/ano</p>
+            <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
+              €59,00
+            </p>
+          </div>
+
+          <button
+            onClick={() => startCheckout('yearly', 'yearly')}
+            disabled={loading === 'yearly' || !hasPublishedCard}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              borderRadius: 12,
+              border: 'none',
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: (loading === 'yearly' || !hasPublishedCard) ? 'not-allowed' : 'pointer',
+              opacity: (loading === 'yearly' || !hasPublishedCard) ? 0.5 : 1,
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 20px rgba(59,130,246,0.3)',
+            }}
+          >
+            {loading === 'yearly' ? (t('plans.loading') || 'A abrir...') : (t('plans.subscribe') || 'Subscrever')}
+          </button>
+
+          {!hasPublishedCard && (
+            <p style={{ fontSize: 12, color: 'rgba(255,193,7,0.8)', marginTop: 10, textAlign: 'center' }}>
+              ⚠️ Publica um cartão primeiro
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* O QUE ESTÁ INCLUÍDO */}
       <div style={{ marginTop: 40, maxWidth: 900, margin: '40px auto 0' }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 950, color: 'rgba(255,255,255,0.98)', textAlign: 'center' }}>
