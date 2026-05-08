@@ -268,11 +268,11 @@ export default function PlansPage() {
 
       {/* O QUE ESTÁ INCLUÍDO */}
       <div style={{ marginTop: 40, maxWidth: 900, margin: '40px auto 0' }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'rgba(255,255,255,0.95)', textAlign: 'center' }}>
-          O que está incluído em cada plano
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 950, color: 'rgba(255,255,255,0.98)', textAlign: 'center' }}>
+          Kardme Pro
         </h2>
-        <p style={{ margin: '8px auto 0', color: 'rgba(255,255,255,0.55)', fontSize: 13, textAlign: 'center', maxWidth: 600 }}>
-          Todos os planos incluem Kardme Pro. O CRM Pro é um add-on opcional para automação e vendas.
+        <p style={{ margin: '8px auto 0', color: 'rgba(255,255,255,0.55)', fontSize: 13, textAlign: 'center', maxWidth: 680 }}>
+          Escolhe Mensal ou Anual. Se quiseres, adiciona o <b style={{ color: 'rgba(255,255,255,0.85)' }}>CRM Pro</b> para automação, follow-ups e vendas.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 24 }}>
