@@ -890,7 +890,31 @@ export default function AdminClienteDetailPage() {
                 </button>
               </div>
             ) : (
-              <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>Sem subscrição Stripe ativa</p>
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>Sem Kardme Pro ativo</p>
+            )}
+          </div>
+
+          <div style={cardStyle}>
+            <h2 style={{ marginTop: 0, fontSize: 16, color: "#fff" }}>
+              CRM Pro (Add-on)
+            </h2>
+            {crmProActive ? (
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Status</p>
+                  <p style={{ margin: 0, fontSize: 14, color: '#fff', fontWeight: 600 }}>Ativo</p>
+                </div>
+                {crmProExpiresAt && (
+                  <div>
+                    <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Expira em</p>
+                    <p style={{ margin: 0, fontSize: 13, color: '#fff' }}>
+                      {new Date(crmProExpiresAt).toLocaleDateString('pt-PT')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>Sem CRM Pro ativo</p>
             )}
           </div>
 
