@@ -83,8 +83,8 @@ export async function POST(req: NextRequest) {
         subject: `Video aberto: ${lead.name}`,
         body: `
           <p>Olá,</p>
-          <p><strong>${lead.name}</strong> (${lead.email}) abriu o vídeo da sua campanha <strong>"${broadcast.subject}"</strong> às ${new Date().toLocaleString('pt-PT')}.</p>
-          <p><a href="https://kardme.com/dashboard/crm" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">Ver detalhes</a></p>
+          <p><strong>${lead.name}</strong> (${lead.email}) abriu o vídeo da sua campanha <strong>"${broadcast.subject}"</strong> às ${new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })}.</p>
+          <p><a href="https://kardme.com/dashboard/crm?lead=${leadId}" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">Ver lead</a></p>
         `,
       }),
     })
