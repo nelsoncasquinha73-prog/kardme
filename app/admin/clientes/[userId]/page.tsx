@@ -32,6 +32,8 @@ type Profile = {
   plan_auto_renew: boolean | null;
   created_at: string | null;
   disabled: boolean | null;
+  phone_country: string | null;
+  phone: string | null;
 };
 
 type CardRow = {
@@ -178,6 +180,8 @@ export default function AdminClienteDetailPage() {
   const [limit, setLimit] = useState<number>(1);
   const [nome, setNome] = useState("");
   const [apelido, setApelido] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState("+351");
+  const [phone, setPhone] = useState("");
   const [disabled, setDisabled] = useState(false);
   const [planStartedAt, setPlanStartedAt] = useState<string | null>(null);
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
@@ -202,6 +206,8 @@ export default function AdminClienteDetailPage() {
       setLimit(profile.published_card_limit ?? 1);
       setNome(profile.nome ?? "");
       setApelido(profile.apelido ?? "");
+      setPhoneCountry(profile.phone_country ?? "+351");
+      setPhone(profile.phone ?? "");
       setDisabled(profile.disabled ?? false);
       setPlanStartedAt(profile.plan_started_at);
       setPlanExpiresAt(profile.plan_expires_at);
@@ -383,6 +389,8 @@ export default function AdminClienteDetailPage() {
           userId,
           nome,
           apelido,
+          phone_country: phoneCountry,
+          phone,
           plan,
           billing,
           published_card_limit: limit,
@@ -685,6 +693,38 @@ export default function AdminClienteDetailPage() {
                   disabled
                   style={{ ...inputStyle, opacity: 0.6 }}
                 />
+              </label>
+              <label style={labelStyle}>
+                Telemóvel
+                <div style={{ display: "flex", gap: 8 }}>
+                  <select
+                    value={phoneCountry}
+                    onChange={(e) => setPhoneCountry(e.target.value)}
+                    style={{ ...inputStyle, width: 120, flexShrink: 0 }}
+                  >
+                    <option value="+351">🇵🇹 +351</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+31">🇳🇱 +31</option>
+                    <option value="+32">🇧🇪 +32</option>
+                    <option value="+41">🇨🇭 +41</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+244">🇦🇴 +244</option>
+                    <option value="+258">🇲🇿 +258</option>
+                    <option value="+238">🇨🇻 +238</option>
+                  </select>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="912 345 678"
+                    style={inputStyle}
+                  />
+                </div>
               </label>
             </div>
           </div>

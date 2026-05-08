@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { userId, nome, apelido, plan, billing, published_card_limit, plan_started_at, plan_expires_at, plan_auto_renew, disabled, crm_pro_active, crm_pro_expires_at } = body
+    const { userId, nome, apelido, phone_country, phone, plan, billing, published_card_limit, plan_started_at, plan_expires_at, plan_auto_renew, disabled, crm_pro_active, crm_pro_expires_at } = body
 
     if (!userId) {
       return NextResponse.json({ success: false, error: 'userId é obrigatório' }, { status: 400 })
@@ -22,6 +22,8 @@ export async function POST(req: Request) {
       .update({
         nome,
         apelido,
+        phone_country,
+        phone,
         plan,
         billing,
         published_card_limit,
