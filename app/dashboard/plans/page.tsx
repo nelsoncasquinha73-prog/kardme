@@ -269,14 +269,20 @@ export default function PlansPage() {
       {/* O QUE ESTÁ INCLUÍDO */}
       <div style={{ marginTop: 40, maxWidth: 900, margin: '40px auto 0' }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'rgba(255,255,255,0.95)', textAlign: 'center' }}>
-          O que está incluído
+          O que está incluído em cada plano
         </h2>
+        <p style={{ margin: '8px auto 0', color: 'rgba(255,255,255,0.55)', fontSize: 13, textAlign: 'center', maxWidth: 600 }}>
+          Todos os planos incluem Kardme Pro. O CRM Pro é um add-on opcional para automação e vendas.
+        </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 24 }}>
           {/* KARDME PRO */}
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
               📇 Kardme Pro
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 14 }}>
+              Incluído em todos os planos
             </div>
             <div style={{ display: 'grid', gap: 10 }}>
               {proBenefits.map((txt) => (
@@ -290,8 +296,11 @@ export default function PlansPage() {
 
           {/* CRM PRO */}
           <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 16, padding: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 14 }}>
-              🧠 + CRM Pro
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+              🧠 CRM Pro (Add-on opcional)
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(99,102,241,0.7)', marginBottom: 14 }}>
+              Automação, follow-ups e vendas
             </div>
             <div style={{ display: 'grid', gap: 10 }}>
               {crmProBenefits.map((txt) => (
