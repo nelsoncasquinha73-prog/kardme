@@ -184,6 +184,10 @@ export default function AdminClienteDetailPage() {
   const [planAutoRenew, setPlanAutoRenew] = useState(false);
   const [crmProActive, setCrmProActive] = useState(false);
   const [crmProExpiresAt, setCrmProExpiresAt] = useState<string | null>(null);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
+  const [editingStripeModal, setEditingStripeModal] = useState(false);
+  const [editingStripePeriodEnd, setEditingStripePeriodEnd] = useState<string | null>(null);
+  const [savingStripe, setSavingStripe] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [cardSummary, setCardSummary] = useState<CardSummary[]>([]);
@@ -208,6 +212,17 @@ export default function AdminClienteDetailPage() {
         .then(({ crm_pro_active, crm_pro_expires_at }) => {
           setCrmProActive(crm_pro_active ?? false);
           setCrmProExpiresAt(crm_pro_expires_at ?? null);
+        })
+        .catch(() => {});
+      
+      // Carregar subscrição Stripe
+      fetch(`/api/admin/users/subscription?userId=${userId}`)
+        .then(r => r.json())
+        .then(({ subscription }) => {
+          setStripeSubscription(subscription ?? null);
+          if (subscription?.current_period_end) {
+            setEditingStripePeriodEnd(subscription.current_period_end.split('T')[0]);
+          }
         })
         .catch(() => {});
     }
@@ -483,6 +498,40 @@ export default function AdminClienteDetailPage() {
       alert("Erro: " + e?.message);
     }
   }
+  async function saveStripeSubscription() {
+    if (!editingStripePeriodEnd) {
+      alert('Data de fim é obrigatória');
+      return;
+    }
+    setSavingStripe(true);
+    try {
+      const token = (await supabase.auth.getSession())?.data?.session?.access_token;
+      if (!token) throw new Error('Sem autenticação');
+
+      const res = await fetch('/api/admin/users/update-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          currentPeriodEnd: editingStripePeriodEnd + 'T23:59:59Z',
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success) throw new Error(json?.error || 'Erro ao atualizar');
+      
+      setStripeSubscription({ ...stripeSubscription, current_period_end: editingStripePeriodEnd + 'T23:59:59Z' });
+      setEditingStripeModal(false);
+      alert('Subscrição atualizada!');
+    } catch (e: any) {
+      alert('Erro: ' + e?.message);
+    } finally {
+      setSavingStripe(false);
+    }
+  }
+
   if (loading)
     return <div style={{ padding: 24, color: "#fff" }}>A carregar…</div>;
   if (!profile)
@@ -796,6 +845,53 @@ export default function AdminClienteDetailPage() {
                 )}
               </div>
             </div>
+          </div>
+
+          <div style={cardStyle}>
+            <h2 style={{ marginTop: 0, fontSize: 16, color: "#fff" }}>
+              Subscrição Stripe
+            </h2>
+            {stripeSubscription ? (
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Plano</p>
+                  <p style={{ margin: 0, fontSize: 14, color: '#fff', fontWeight: 600 }}>
+                    {stripeSubscription.plan_type === 'yearly' ? 'Pro Anual' : 'Pro Mensal'} ({stripeSubscription.status})
+                  </p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Começa em</p>
+                    <p style={{ margin: 0, fontSize: 14, color: '#fff' }}>
+                      {stripeSubscription.current_period_start ? new Date(stripeSubscription.current_period_start).toLocaleDateString('pt-PT') : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Expira em</p>
+                    <p style={{ margin: 0, fontSize: 14, color: '#fff' }}>
+                      {stripeSubscription.current_period_end ? new Date(stripeSubscription.current_period_end).toLocaleDateString('pt-PT') : '—'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingStripeModal(true)}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'rgba(59,130,246,0.2)',
+                    color: '#93c5fd',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                  }}
+                >
+                  ✏️ Editar data de fim
+                </button>
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>Sem subscrição Stripe ativa</p>
+            )}
           </div>
 
           <div style={cardStyle}>
@@ -1457,6 +1553,58 @@ export default function AdminClienteDetailPage() {
               )}
             </>
           )}
+        </div>
+      )}
+
+      {editingStripeModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setEditingStripeModal(false)}>
+          <div style={{ background: '#1e1e2e', borderRadius: 16, padding: 24, width: 400, maxWidth: '90vw', border: '1px solid rgba(255,255,255,0.1)' }} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, color: '#fff' }}>Editar Data de Fim</h2>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <label style={labelStyle}>
+                Data de fim (YYYY-MM-DD)
+                <input
+                  type="date"
+                  value={editingStripePeriodEnd || ''}
+                  onChange={(e) => setEditingStripePeriodEnd(e.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
+                  onClick={() => setEditingStripeModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'transparent',
+                    color: '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveStripeSubscription}
+                  disabled={savingStripe}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#22c55e',
+                    color: 'white',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {savingStripe ? 'A guardar...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
