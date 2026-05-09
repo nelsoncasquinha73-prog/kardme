@@ -2193,8 +2193,7 @@ const { data, error } = await supabase.from('leads').insert({
 
         <button
           onClick={() => {
-            setInlineEmailLeadIds(Array.from(selectedLeadIds))
-            setShowInlineEmailEditor(true)
+            setShowBulkEmailModal(true)
           }}
           disabled={selectedLeadIds.size === 0}
           style={{
