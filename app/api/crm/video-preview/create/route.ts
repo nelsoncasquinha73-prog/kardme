@@ -10,14 +10,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'video_url obrigatório' }, { status: 400 })
     }
 
-    // Obter user_id da sessão
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user?.id) {
+    // Obter user da sessão (via cookies)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
     // Criar preview
-    const preview = await createEmailVideoPreview(session.user.id, {
+    const preview = await createEmailVideoPreview(user.id, {
       video_url,
       thumbnail_url,
       title: title || 'Video',
