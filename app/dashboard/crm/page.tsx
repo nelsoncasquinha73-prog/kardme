@@ -2195,7 +2195,7 @@ const { data, error } = await supabase.from('leads').insert({
 
         <button
           onClick={() => {
-            setShowBulkEmailModal(true)
+            setShowBulkEmailEditorMode(true)
           }}
           disabled={selectedLeadIds.size === 0}
           style={{
@@ -4402,6 +4402,27 @@ const { data, error } = await supabase.from('leads').insert({
         leadName={selectedLeadForVideoOpens?.name || ''}
         leadEmail={selectedLeadForVideoOpens?.email || ''}
       />
+
+      {showBulkEmailEditorMode && !bulkEmailEditorBroadcast && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000', zIndex: 2000 }}>
+          <EmailCampaignEditor
+            userId={userId}
+            isBulkMode={true}
+            bulkLeadIds={Array.from(selectedLeadIds)}
+            preSelectedLeadIds={Array.from(selectedLeadIds)}
+            onClose={() => {
+              setShowBulkEmailEditorMode(false)
+            }}
+            onSave={() => {
+              setShowBulkEmailEditorMode(false)
+            }}
+            onSendBulkEmail={async (cardId, timing, scheduledAt) => {
+              // TODO: implementar envio/agendamento em bulk
+              console.log('onSendBulkEmail:', { cardId, timing, scheduledAt, leadIds: Array.from(selectedLeadIds) })
+            }}
+          />
+        </div>
+      )}
 
       {showBulkEmailEditorMode && bulkEmailEditorBroadcast && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000', zIndex: 2000 }}>

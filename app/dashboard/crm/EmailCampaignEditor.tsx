@@ -32,9 +32,15 @@ interface EmailCampaignEditorProps {
   preSelectedLeadIds?: string[]
   onClose: () => void
   onSave: () => void
+  isBulkMode?: boolean
+  bulkLeadIds?: string[]
+  bulkEmailCardId?: string
+  bulkSendTiming?: 'now' | 'scheduled'
+  bulkScheduledAt?: string
+  onSendBulkEmail?: (cardId: string, timing: 'now' | 'scheduled', scheduledAt?: string) => Promise<void>
 }
 
-export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, preSelectedLeadIds, onClose, onSave }: EmailCampaignEditorProps) {
+export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, preSelectedLeadIds, onClose, onSave, isBulkMode, bulkLeadIds: initialBulkLeadIds, bulkEmailCardId: initialBulkEmailCardId, bulkSendTiming: initialBulkSendTiming, bulkScheduledAt: initialBulkScheduledAt, onSendBulkEmail }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
 
   // Buscar contexto do cartão principal do utilizador para a IA
@@ -77,6 +83,12 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   const [sendingTo, setSendingTo] = useState<'audience' | 'all' | 'individual' | 'manual'>(preSelectedLeadIds && preSelectedLeadIds.length === 1 ? 'individual' : preSelectedLeadIds && preSelectedLeadIds.length > 1 ? 'all' : 'audience')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(preSelectedLeadIds?.length === 1 ? preSelectedLeadIds[0] : null)
   const [manualEmail, setManualEmail] = useState<string>('')
+  const [bulkLeadIds, setBulkLeadIds] = useState<string[]>(initialBulkLeadIds || [])
+  const [bulkEmailCardId, setBulkEmailCardId] = useState<string>(initialBulkEmailCardId || '')
+  const [bulkSendTiming, setBulkSendTiming] = useState<'now' | 'scheduled'>(initialBulkSendTiming || 'now')
+  const [bulkScheduledAt, setBulkScheduledAt] = useState<string>(initialBulkScheduledAt || '')
+  const [showBulkLeadSelector, setShowBulkLeadSelector] = useState(false)
+  const [bulkLeadSearch, setBulkLeadSearch] = useState('')
   const [leads, setLeads] = useState<any[]>([])
 
   useEffect(() => {
@@ -325,9 +337,9 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           }}
         >
           <h3 style={{ color: '#fff', fontWeight: 800, margin: 0, fontSize: 13 }}>Blocos</h3>
-          {DEFAULT_EMAIL_BLOCKS.map((template) => (
+          {DEFAULT_EMAIL_BLOCKS.map((template, idx) => (
             <button
-              key={template.block_type}
+              key={`${template.block_type}-${idx}`}
               onClick={() => addBlock(template.block_type)}
               style={{
                 padding: '10px',
@@ -657,7 +669,40 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               Cancelar
             </button>
             <button
-              onClick={() => setShowSendModal(true)}
+              onClick={async () => {
+                if (isBulkMode) {
+                  if (!bulkLeadIds || bulkLeadIds.length === 0) {
+                    addToast('Seleciona pelo menos 1 lead', 'error')
+                    return
+                  }
+                  if (!bulkEmailCardId) {
+                    addToast('Seleciona um cartão (remetente)', 'error')
+                    return
+                  }
+                  if (bulkSendTiming === 'scheduled' && !bulkScheduledAt) {
+                    addToast('Escolhe data/hora para agendar', 'error')
+                    return
+                  }
+                  if (!onSendBulkEmail) {
+                    addToast('Ação de envio em massa não configurada', 'error')
+                    return
+                  }
+                  try {
+                    setSending(true)
+                    await onSendBulkEmail(bulkEmailCardId, bulkSendTiming, bulkScheduledAt || undefined)
+                    addToast(bulkSendTiming === 'scheduled' ? '✅ Emails agendados!' : '✅ Emails enviados!', 'success')
+                    onClose()
+                  } catch (e: any) {
+                    console.error(e)
+                    addToast(e?.message || 'Erro ao enviar/agendar', 'error')
+                  } finally {
+                    setSending(false)
+                  }
+                  return
+                }
+
+                setShowSendModal(true)
+              }}
               disabled={saving || sending}
               style={{
                 padding: '8px 16px',
@@ -671,7 +716,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                 opacity: (saving || sending) ? 0.6 : 1,
               }}
             >
-              {sending ? 'A enviar...' : '✉️ Enviar'}
+              {sending ? 'A enviar...' : (isBulkMode ? (bulkSendTiming === 'scheduled' ? `⏰ Agendar para ${bulkLeadIds.length} leads` : `✉️ Enviar para ${bulkLeadIds.length} leads`) : '✉️ Enviar')}
             </button>
             <button
               onClick={handleSave}
