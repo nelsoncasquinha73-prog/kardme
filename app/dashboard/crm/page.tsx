@@ -3540,7 +3540,6 @@ const { data, error } = await supabase.from('leads').insert({
                 </div>
               )}
 
-              <div style={{ marginTop: 10, fontSize: 11, opacity: 0.75 }}>
               {selectedBroadcastId && (
                 <button
                   onClick={() => {
@@ -3567,6 +3566,9 @@ const { data, error } = await supabase.from('leads').insert({
                   ✏️ Abrir no Editor de Blocos
                 </button>
               )}
+
+
+              <div style={{ marginTop: 10, fontSize: 11, opacity: 0.75 }}>
 
                 Variáveis suportadas: {'{nome}'}, {'{email}'} (serão substituídas por lead no envio).
               </div>
