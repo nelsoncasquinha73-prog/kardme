@@ -1629,11 +1629,15 @@ function renderBlockInspector(
               placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
               onBlur={async (e) => {
                 const url = e.currentTarget.value.trim()
+                console.log('[VIDEO] onBlur url:', url)
                 if (!url) return
                 
                 const info = parseVideoLink(url)
+                console.log('[VIDEO] parseVideoLink:', info)
                 if (info.type === 'youtube' || info.type === 'vimeo') {
+                  console.log('[VIDEO] a gerar thumbnail...')
                   const thumb = await generateThumbnailFromVideoUrl(url, userId)
+                  console.log('[VIDEO] thumb:', thumb)
                   onUpdate({ videoUrl: url, thumbnail: thumb || undefined })
                 } else if (info.type === 'upload') {
                   onUpdate({ videoUrl: url })

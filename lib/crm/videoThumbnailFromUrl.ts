@@ -1,12 +1,8 @@
-import { generateThumbnailWithPlayButton } from './videoThumbnailGenerator'
-import { uploadEmailImage } from './emailImageUpload'
-
 export async function generateThumbnailFromVideoUrl(
   videoUrl: string,
   userId: string
 ): Promise<string | null> {
   try {
-    // 1. Buscar a imagem original (thumbnail)
     let imageUrl: string | null = null
 
     // YouTube - tenta em cascata (maxres → sd → hq → mq)
@@ -31,7 +27,7 @@ export async function generateThumbnailFromVideoUrl(
       }
     }
 
-    // Vimeo (precisa de fetch)
+    // Vimeo
     const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/)
     if (vimeoMatch) {
       const videoId = vimeoMatch[1]
@@ -44,26 +40,8 @@ export async function generateThumbnailFromVideoUrl(
       }
     }
 
-    if (!imageUrl) return null
-
-    // 2. Fazer download da imagem com validação
-    const imgRes = await fetch(imageUrl)
-    if (!imgRes.ok) return null
-    
-    const blob = await imgRes.blob()
-    if (!blob || blob.size === 0) return null
-    
-    const file = new File([blob], `thumbnail-${Date.now()}.jpg`, { type: 'image/jpeg' })
-
-    // 3. Gerar thumbnail com play button
-    const thumbnailFile = await generateThumbnailWithPlayButton(file, '#10b981')
-    if (!thumbnailFile || thumbnailFile.size === 0) return null
-
-    // 4. Upload da thumbnail final
-    const { url } = await uploadEmailImage(userId, thumbnailFile)
-    return url
-  } catch (error) {
-    console.error('[THUMBNAIL] erro ao gerar de URL:', error)
+    return imageUrl
+  } catch {
     return null
   }
 }
