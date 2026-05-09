@@ -3507,7 +3507,19 @@ const { data, error } = await supabase.from('leads').insert({
                       if (!bc) return
                       setBulkEmailSourceId(bc.id)
                       setBulkSubject(bc.subject || bc.title || '')
-                      setBulkBody(`__KARDME_BLOCKS__:${JSON.stringify(bc.html_content || {})}`)
+                      const htmlBody = (() => {
+                        const blocks = bc.html_content
+                        if (!blocks || typeof blocks !== 'object') return ''
+                        const parts: string[] = []
+                        if (Array.isArray(blocks)) {
+                          blocks.forEach((b: any) => {
+                            if (b.type === 'text' && b.content?.text) parts.push(`<p>${b.content.text}</p>`)
+                            else if (b.type === 'heading' && b.content?.text) parts.push(`<h2>${b.content.text}</h2>`)
+                          })
+                        }
+                        return parts.join('\n') || ''
+                      })()
+                      setBulkBody(htmlBody)
                     }}
                     style={{ width: '100%', padding: '12px 12px', minHeight: 46, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
                   >
