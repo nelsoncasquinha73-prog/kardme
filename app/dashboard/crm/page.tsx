@@ -323,6 +323,8 @@ Melhores cumprimentos,
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
+  const [showBulkEmailEditorMode, setShowBulkEmailEditorMode] = useState(false)
+  const [bulkEmailEditorBroadcast, setBulkEmailEditorBroadcast] = useState<any>(null)
   const [bulkEmailMode, setBulkEmailMode] = useState<'new' | 'broadcast' | 'email_template'>('new')
   const [emailBroadcasts, setEmailBroadcasts] = useState<EmailBroadcast[]>([])
 //   const [campaignTemplates, setCampaignTemplates] = useState<EmailCampaignTemplate[]>([])
@@ -3539,6 +3541,33 @@ const { data, error } = await supabase.from('leads').insert({
               )}
 
               <div style={{ marginTop: 10, fontSize: 11, opacity: 0.75 }}>
+              {selectedBroadcastId && (
+                <button
+                  onClick={() => {
+                    const bc = emailBroadcasts.find(x => x.id === selectedBroadcastId)
+                    if (bc) {
+                      setBulkEmailEditorBroadcast(bc)
+                      setShowBulkEmailEditorMode(true)
+                      setShowBulkEmailModal(false)
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    background: '#3b82f6',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    marginBottom: 12,
+                  }}
+                >
+                  ✏️ Abrir no Editor de Blocos
+                </button>
+              )}
+
                 Variáveis suportadas: {'{nome}'}, {'{email}'} (serão substituídas por lead no envio).
               </div>
             </div>
@@ -4369,6 +4398,27 @@ const { data, error } = await supabase.from('leads').insert({
         leadName={selectedLeadForVideoOpens?.name || ''}
         leadEmail={selectedLeadForVideoOpens?.email || ''}
       />
+
+      {showBulkEmailEditorMode && bulkEmailEditorBroadcast && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000', zIndex: 2000 }}>
+          <EmailCampaignEditor
+            userId={userId}
+            broadcastId={selectedBroadcastId}
+            preSelectedLeadIds={Array.from(selectedLeadIds)}
+            onClose={() => {
+              setShowBulkEmailEditorMode(false)
+              setBulkEmailEditorBroadcast(null)
+              setShowBulkEmailModal(true)
+            }}
+            onSave={() => {
+              setShowBulkEmailEditorMode(false)
+              setBulkEmailEditorBroadcast(null)
+              setShowBulkEmailModal(true)
+            }}
+          />
+        </div>
+      )}
+
     </main>
   )
 }
