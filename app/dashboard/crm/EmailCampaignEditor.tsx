@@ -1213,9 +1213,25 @@ function renderEmailBlocksToHtml(blocks: EmailBlock[], broadcastId?: string): st
         } else if (content.previewId) {
           videoLink = `https://www.kardme.com/video-preview/${content.previewId}`
         }
-        return content.thumbnail ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0;"><a href="${videoLink}" target="_blank" style="display: inline-block; text-decoration: none;"><img src="${content.thumbnail}" alt="Video" style="display: block; width: ${content.width || '100%'}; max-width: 500px; border-radius: 8px; margin: 0 auto;" /></a></div>` : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
-      }
 
+        if (!content.thumbnail) {
+          return `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Vídeo</div>`
+        }
+
+        return `
+          <div style="text-align: ${content.align || 'center'}; padding: 16px 0;">
+            <a href="${videoLink}" target="_blank" style="display: inline-block; text-decoration: none;">
+              <div style="position: relative; display: inline-block; width: 100%; max-width: 500px;">
+                <img src="${content.thumbnail}" alt="Video" style="display: block; width: 100%; border-radius: 8px; margin: 0 auto;" />
+                <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; border-radius: 50%; background: rgba(16, 185, 129, 0.92); color: #fff; font-size: 32px; line-height: 64px; text-align: center; pointer-events: none;">▶</div>
+              </div>
+            </a>
+            <div style="text-align: center; margin-top: 12px;">
+              <a href="${videoLink}" target="_blank" style="display: inline-block; background: #10b981; color: #fff; padding: 10px 16px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 14px;">Ver vídeo</a>
+            </div>
+          </div>
+        `
+      }
       case 'table': {
         const tableHeaders = (content.headers || []).map((h: string) =>
           `<th style="padding: 10px 14px; background: ${content.headerBg || '#1e293b'}; color: ${content.headerColor || '#ffffff'}; text-align: left; font-weight: 700; border: 1px solid ${content.borderColor || '#e5e7eb'};">${h}</th>`
@@ -1634,7 +1650,28 @@ function renderBlockInspector(
                 const info = parseVideoLink(url)
                 if (info.type === 'youtube' || info.type === 'vimeo') {
                   const thumb = await generateThumbnailFromVideoUrl(url, userId)
-                  onUpdate({ videoUrl: url, thumbnail: thumb || undefined })
+                  
+                  // Se isTrackable, criar previewId
+                  let previewId = undefined
+                  if (content.isTrackable) {
+                    try {
+                      const res = await fetch('/api/crm/video-preview/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          video_url: url,
+                          thumbnail_url: thumb,
+                          title: 'YouTube Video',
+                        }),
+                      })
+                      const data = await res.json()
+                      previewId = data.id
+                    } catch (err) {
+                      console.error('Erro ao criar preview:', err)
+                    }
+                  }
+                  
+                  onUpdate({ videoUrl: url, thumbnail: thumb || undefined, previewId })
                 } else if (info.type === 'upload') {
                   onUpdate({ videoUrl: url })
                 }
