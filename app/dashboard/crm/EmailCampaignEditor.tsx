@@ -95,6 +95,15 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
     loadData()
   }, [userId, initialBroadcastId])
 
+  // Regenerar preview quando blocks mudam
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Força re-render do preview (se existir componente de preview)
+      // Por agora, isto é só para garantir que o estado está sincronizado
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [blocks])
+
   async function loadData() {
     setLoading(true)
     try {

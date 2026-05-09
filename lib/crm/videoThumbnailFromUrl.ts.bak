@@ -9,26 +9,11 @@ export async function generateThumbnailFromVideoUrl(
     // 1. Buscar a imagem original (thumbnail)
     let imageUrl: string | null = null
 
-    // YouTube - tenta em cascata (maxres → sd → hq → mq)
+    // YouTube
     const youtubeMatch = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
     if (youtubeMatch) {
       const videoId = youtubeMatch[1]
-      const candidates = [
-        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-        `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-        `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-      ]
-
-      for (const c of candidates) {
-        try {
-          const r = await fetch(c, { method: 'GET' })
-          if (r.ok) {
-            imageUrl = c
-            break
-          }
-        } catch {}
-      }
+      imageUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
     }
 
     // Vimeo (precisa de fetch)
@@ -46,13 +31,9 @@ export async function generateThumbnailFromVideoUrl(
 
     if (!imageUrl) return null
 
-    // 2. Fazer download da imagem com validação
+    // 2. Fazer download da imagem
     const imgRes = await fetch(imageUrl)
-    if (!imgRes.ok) return null
-    
     const blob = await imgRes.blob()
-    if (!blob || blob.size === 0) return null
-    
     const file = new File([blob], `thumbnail-${Date.now()}.jpg`, { type: 'image/jpeg' })
 
     // 3. Gerar thumbnail com play button
