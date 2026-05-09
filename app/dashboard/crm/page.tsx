@@ -332,6 +332,8 @@ Melhores cumprimentos,
   const [bulkEmailSourceId, setBulkEmailSourceId] = useState<string | null>(null)
   const [bulkSubject, setBulkSubject] = useState('')
   const [bulkBody, setBulkBody] = useState('')
+  const [bulkSendTiming, setBulkSendTiming] = useState<'now' | 'scheduled'>('now')
+  const [bulkScheduledAt, setBulkScheduledAt] = useState(new Date().toISOString().slice(0, 16))
   const [bulkSending, setBulkSending] = useState(false)
   const [bulkScheduleDate, setBulkScheduleDate] = useState('')
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
@@ -1417,8 +1419,16 @@ const { data, error } = await supabase.from('leads').insert({
       return
     }
 
-    const scheduleDate = bulkScheduleDate || new Date().toISOString().split('T')[0]
-    const dueAtISO = new Date(`${scheduleDate}T${bulkScheduleTime}:00`).toISOString()
+//     const scheduleDate = bulkScheduleDate || new Date().toISOString().split('T')[0]
+//     const dueAtISO = new Date(`${scheduleDate}T${bulkScheduleTime}:00`).toISOString()
+    if (!bulkScheduledAt) {
+      alert('Escolhe a data e hora para agendar.')
+      return
+    }
+
+    const dueAtISO = new Date(bulkScheduledAt).toISOString()
+    const dueAtLabel = bulkScheduledAt.replace('T', ' ')
+
 
     setBulkSending(true)
     let created = 0
@@ -3385,6 +3395,47 @@ const { data, error } = await supabase.from('leads').insert({
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
+
+            <div style={{ marginBottom: 16, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#f9fafb' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Quando enviar?</label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="send_timing"
+                    value="now"
+                    checked={bulkSendTiming === 'now'}
+                    onChange={(e) => setBulkSendTiming(e.target.value as any)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Enviar agora</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="send_timing"
+                    value="scheduled"
+                    checked={bulkSendTiming === 'scheduled'}
+                    onChange={(e) => setBulkSendTiming(e.target.value as any)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Agendar para...</span>
+                </label>
+              </div>
+
+              {bulkSendTiming === 'scheduled' && (
+                <div style={{ marginTop: 12 }}>
+                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Data e hora</label>
+                  <input
+                    type="datetime-local"
+                    value={bulkScheduledAt}
+                    onChange={(e) => setBulkScheduledAt(e.target.value)}
+                    style={{ width: '100%', padding: '12px 12px', minHeight: 46, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                  />
+                </div>
+              )}
+            </div>
+
 
             <div style={{ marginBottom: 16, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#f9fafb' }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Fonte do email</label>
