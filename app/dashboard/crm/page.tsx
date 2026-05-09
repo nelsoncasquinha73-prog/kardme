@@ -3509,6 +3509,7 @@ const { data, error } = await supabase.from('leads').insert({
                       setBulkSubject(bc.subject || bc.title || '')
                       const htmlBody = (() => {
                         const raw = bc.html_content
+                        console.log('DEBUG broadcast html_content:', raw, 'blocks:', raw?.blocks, 'content.blocks:', raw?.content?.blocks)
                         const blocks =
                           (raw && raw.blocks && Array.isArray(raw.blocks) ? raw.blocks : null) ||
                           (raw && raw.content && raw.content.blocks && Array.isArray(raw.content.blocks) ? raw.content.blocks : null) ||
