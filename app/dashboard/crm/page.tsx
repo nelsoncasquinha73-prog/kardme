@@ -3505,6 +3505,7 @@ const { data, error } = await supabase.from('leads').insert({
                     value={selectedBroadcastId}
                     onChange={(e) => {
                       const id = e.target.value
+                      setSelectedBroadcastId(id)
                       console.log("onChange fired, id:", id)
                       const bc = emailBroadcasts.find(x => x.id === id)
                       if (!bc) return
