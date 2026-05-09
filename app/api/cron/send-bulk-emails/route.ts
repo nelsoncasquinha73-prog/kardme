@@ -35,15 +35,19 @@ export async function POST(req: NextRequest) {
 
     for (const task of tasks) {
       try {
-        // Call /api/send-email to send the email
+        // Call /api/send-email with correct payload
         const sendRes = await fetch(`${baseUrl}/api/send-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            to: task.email_recipient,
+            userId: task.user_id,
+            leadId: task.lead_id,
+            recipientEmail: task.email_recipient,
             subject: task.email_subject,
-            htmlBody: task.email_body,
+            body: task.email_body,
+            templateId: task.email_template_id,
             attachments: task.attachments || [],
+            fromName: task.email_source_type === 'broadcast' ? 'Kardme' : undefined,
           }),
         })
 
@@ -65,14 +69,15 @@ export async function POST(req: NextRequest) {
         processed++
       } catch (err: any) {
         failed++
-        console.error(`Failed to send task ${task.id}:`, err?.message || String(err))
+        const errorMsg = err?.message || String(err)
+        console.error(`Failed to send task ${task.id}:`, errorMsg)
 
         // Mark as failed with error message
         await supabase
           .from('scheduled_tasks')
           .update({
             send_status: 'failed',
-            send_error: (err?.message || String(err)).slice(0, 500),
+            send_error: errorMsg.slice(0, 500),
             updated_at: new Date().toISOString(),
           })
           .eq('id', task.id)
