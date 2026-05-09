@@ -335,6 +335,7 @@ Melhores cumprimentos,
   const [bulkSendTiming, setBulkSendTiming] = useState<'now' | 'scheduled'>('now')
   const [bulkScheduledAt, setBulkScheduledAt] = useState(new Date().toISOString().slice(0, 16))
   const [bulkSending, setBulkSending] = useState(false)
+  const [bulkEmailCardId, setBulkEmailCardId] = useState<string>('')
   const [bulkScheduleDate, setBulkScheduleDate] = useState('')
   const [bulkScheduleTime, setBulkScheduleTime] = useState('09:00')
   const [bulkStep, setBulkStep] = useState('')
@@ -1349,6 +1350,10 @@ const { data, error } = await supabase.from('leads').insert({
   }
 
   const sendBulkEmails = async () => {
+    if (!bulkEmailCardId) {
+      alert('Escolhe um cartão (remetente)')
+      return
+    }
     if (!bulkSubject || !bulkBody) {
       alert('Preenche assunto e mensagem')
       return
@@ -1389,7 +1394,24 @@ const { data, error } = await supabase.from('leads').insert({
       const personalizedBody = processEmailTemplate(bulkBody, { nome: lead.name, email: lead.email })
 
       try {
-        await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody, selectedTemplate?.id, selectedAttachments)
+//         await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody, selectedTemplate?.id, selectedAttachments)
+        const senderCard = cardsList.find(c => c.id === bulkEmailCardId)
+        const sendRes = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            leadId: lead.id,
+            recipientEmail: lead.email,
+            subject: personalizedSubject,
+            body: personalizedBody,
+            templateId: selectedTemplate?.id,
+            attachments: selectedAttachments || [],
+            fromName: senderCard?.name,
+          }),
+        })
+        if (!sendRes.ok) throw new Error(`Send failed: ${sendRes.status}`)
+        await sendRes.json()
         sent++
         await logLeadActivity({ leadId: lead.id, userId, type: 'email_sent', title: `Email em massa enviado: ${personalizedSubject}` })
       } catch (err) {
@@ -3438,6 +3460,20 @@ const { data, error } = await supabase.from('leads').insert({
 
 
             <div style={{ marginBottom: 16, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#f9fafb' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Cartão (remetente)</label>
+              <select
+                value={bulkEmailCardId}
+                onChange={(e) => setBulkEmailCardId(e.target.value)}
+                style={{ width: '100%', padding: '12px 12px', minHeight: 46, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827', marginBottom: 16 }}
+              >
+                <option value="">— Escolher cartão —</option>
+                {cardsList.map((card: any) => (
+                  <option key={card.id} value={card.id}>
+                    {card.name}
+                  </option>
+                ))}
+              </select>
+
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Fonte do email</label>
               <select
                 value={bulkEmailMode}
