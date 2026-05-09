@@ -53,3 +53,19 @@ export async function getScheduledTask(taskId: string) {
   if (error) throw error
   return data
 }
+
+export async function createScheduledTask(userId: string, payload: any): Promise<string> {
+  // Wrapper para compatibilidade com código antigo
+  return createScheduledEmailTask({
+    user_id: userId,
+    title: payload.title,
+    email_subject: payload.email_subject,
+    email_body: payload.email_body,
+    email_recipient: payload.email_recipient,
+    lead_id: payload.lead_id,
+    due_at: payload.due_at,
+    attachments: payload.attachments,
+    email_source_type: payload.email_source_type,
+    email_source_id: payload.email_source_id,
+  })
+}
