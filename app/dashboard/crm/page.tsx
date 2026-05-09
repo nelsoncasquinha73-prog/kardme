@@ -3508,15 +3508,19 @@ const { data, error } = await supabase.from('leads').insert({
                       setBulkEmailSourceId(bc.id)
                       setBulkSubject(bc.subject || bc.title || '')
                       const htmlBody = (() => {
-                        const blocks = bc.html_content
-                        if (!blocks || typeof blocks !== 'object') return ''
+                        const raw = bc.html_content
+                        const blocks =
+                          (raw && raw.blocks && Array.isArray(raw.blocks) ? raw.blocks : null) ||
+                          (raw && raw.content && raw.content.blocks && Array.isArray(raw.content.blocks) ? raw.content.blocks : null) ||
+                          (Array.isArray(raw) ? raw : null)
+
+                        if (!blocks) return ''
                         const parts: string[] = []
-                        if (Array.isArray(blocks)) {
-                          blocks.forEach((b: any) => {
-                            if (b.type === 'text' && b.content?.text) parts.push(`<p>${b.content.text}</p>`)
-                            else if (b.type === 'heading' && b.content?.text) parts.push(`<h2>${b.content.text}</h2>`)
-                          })
-                        }
+                        blocks.forEach((b: any) => {
+                          if (b.type === 'text' && b.content?.text) parts.push(`<p>${b.content.text}</p>`)
+                          else if (b.type === 'heading' && b.content?.text) parts.push(`<h2>${b.content.text}</h2>`)
+                          else if (b.type === 'button' && b.content?.text) parts.push(`<p><a href="${b.content.url || '#'}">${b.content.text}</a></p>`)
+                        })
                         return parts.join('\n') || ''
                       })()
                       setBulkBody(htmlBody)
