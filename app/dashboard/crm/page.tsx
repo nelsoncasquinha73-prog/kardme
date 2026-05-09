@@ -3418,6 +3418,7 @@ const { data, error } = await supabase.from('leads').insert({
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
+            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 12 }}>BUILD: 65b4f1b</div>
 
             <div style={{ marginBottom: 16, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#f9fafb' }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Quando enviar?</label>
