@@ -41,10 +41,10 @@ import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
 import EmailMarketingView from './EmailMarketingView'
-import { getBroadcasts, type EmailBroadcast } from '../../../lib/crm/emailMarketing'
+import { getBroadcasts, getEmailCampaignTemplates, type EmailBroadcast, type EmailCampaignTemplate } from '@/lib/crm/emailMarketing'
 import EmailCampaignEditor from './EmailCampaignEditor'
 import PipelineKanban from './PipelineKanban'
-import { processEmailTemplate } from '../../lib/processEmailTemplate'
+import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
 type Lead = {
   id: string
@@ -323,12 +323,12 @@ Melhores cumprimentos,
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
-  const [bulkEmailMode, setBulkEmailMode] = useState<'new' | 'broadcast' | 'email_template'>('new')
+  const [bulkEmailMode, setBulkEmailMode] = useState<'new' | 'broadcast' | 'campaign_template' | 'email_template'>('new')
   const [emailBroadcasts, setEmailBroadcasts] = useState<EmailBroadcast[]>([])
-//   const [campaignTemplates, setCampaignTemplates] = useState<EmailCampaignTemplate[]>([])
+  const [campaignTemplates, setCampaignTemplates] = useState<EmailCampaignTemplate[]>([])
   const [selectedBroadcastId, setSelectedBroadcastId] = useState<string>('')
-//   const [selectedCampaignTemplateId, setSelectedCampaignTemplateId] = useState<string>('')
-  const [bulkEmailSourceType, setBulkEmailSourceType] = useState<'new' | 'broadcast' | 'email_template'>('new')
+  const [selectedCampaignTemplateId, setSelectedCampaignTemplateId] = useState<string>('')
+  const [bulkEmailSourceType, setBulkEmailSourceType] = useState<'new' | 'broadcast' | 'campaign_template' | 'email_template'>('new')
   const [bulkEmailSourceId, setBulkEmailSourceId] = useState<string | null>(null)
   const [bulkSubject, setBulkSubject] = useState('')
   const [bulkBody, setBulkBody] = useState('')
@@ -3385,61 +3385,6 @@ const { data, error } = await supabase.from('leads').insert({
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1004 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 700, width: '90%', maxHeight: '80vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 16, color: '#111827', fontSize: 18, fontWeight: 900 }}>📣 Email em massa ({selectedLeadIds.size} leads)</h2>
-
-            <div style={{ marginBottom: 16, padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.10)', background: '#f9fafb' }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Fonte do email</label>
-              <select
-                value={bulkEmailMode}
-                onChange={async (e) => {
-                  const mode = e.target.value as any
-                  setBulkEmailMode(mode)
-                  setBulkEmailSourceType(mode)
-                  setBulkEmailSourceId(null)
-                  setSelectedBroadcastId('')
-//                   setSelectedCampaignTemplateId('')
-                  if (mode === 'broadcast') {
-                    const b = await getBroadcasts(userId)
-                    setEmailBroadcasts(b)
-                  }
-                }}
-                style={{ width: '100%', padding: '12px 12px', minHeight: 46, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827', fontWeight: 800 }}
-              >
-                <option value="new">✍️ Novo email</option>
-                <option value="broadcast">📨 Campanha (Email Marketing)</option>
-                <option value="email_template">📄 Email Template</option>
-              </select>
-
-              {bulkEmailMode === 'broadcast' && (
-                <div style={{ marginTop: 12 }}>
-                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 900, fontSize: 13, color: '#111827' }}>Campanha</label>
-                  <select
-                    value={selectedBroadcastId}
-                    onChange={(e) => {
-                      const id = e.target.value
-                      setSelectedBroadcastId(id)
-                      const bc = emailBroadcasts.find(x => x.id === id)
-                      if (!bc) return
-                      setBulkEmailSourceId(bc.id)
-                      setBulkSubject(bc.subject || bc.title || '')
-                      setBulkBody(`__KARDME_BLOCKS__:${JSON.stringify(bc.html_content || {})}`)
-                    }}
-                    style={{ width: '100%', padding: '12px 12px', minHeight: 46, borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, boxSizing: 'border-box', background: '#fff', color: '#111827' }}
-                  >
-                    <option value="">— Escolher campanha —</option>
-                    {emailBroadcasts.map(bc => (
-                      <option key={bc.id} value={bc.id}>
-                        {bc.title} [{bc.status}]
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div style={{ marginTop: 10, fontSize: 11, opacity: 0.75 }}>
-                Variáveis suportadas: {'{nome}'}, {'{email}'} (serão substituídas por lead no envio).
-              </div>
-            </div>
-
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 240 }}>
