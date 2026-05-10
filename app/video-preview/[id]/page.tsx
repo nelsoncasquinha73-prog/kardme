@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { incrementVideoPreviewView, incrementVideoPreviewClick } from '@/lib/crm/emailVideoPreviews'
 import { recordVideoOpen } from '@/lib/crm/videoTracking'
+import { parseVideoLink } from '@/lib/crm/videoUtils'
 
 interface EmailVideoPreview {
   id: string
@@ -123,18 +124,64 @@ export default function VideoPreviewPage() {
           overflow: 'hidden',
           background: '#000',
         }}>
-          <video
-            src={preview.video_url}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-            }}
-            controls
-            poster={preview.thumbnail_url || undefined}
-          />
+          {(() => {
+            const videoInfo = parseVideoLink(preview.video_url)
+            
+            // YouTube
+            if (videoInfo.type === 'youtube') {
+              return (
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoInfo.id}?autoplay=1`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                  }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )
+            }
+            
+            // Vimeo
+            if (videoInfo.type === 'vimeo') {
+              return (
+                <iframe
+                  src={`https://player.vimeo.com/video/${videoInfo.id}?autoplay=1`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                  }}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              )
+            }
+            
+            // Upload direto (MP4, WebM, etc.)
+            return (
+              <video
+                src={preview.video_url}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                }}
+                controls
+                poster={preview.thumbnail_url || undefined}
+                autoPlay
+              />
+            )
+          })()}
         </div>
 
         <div style={{
