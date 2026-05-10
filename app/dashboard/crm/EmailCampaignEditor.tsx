@@ -156,7 +156,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   }
 
   function updateBlock(blockId: string, updates: Record<string, any>) {
-    console.log(`[UPDATE BLOCK] ${blockId}:`, updates)
     setBlocks(
       blocks.map((b) =>
         b.id === blockId
@@ -279,7 +278,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
     setSaving(true)
     try {
-      console.log('[HANDLE SAVE] blocks before save:', JSON.stringify(blocks, null, 2))
       const htmlContent = {
         blocks,
         createdAt: new Date().toISOString(),
@@ -778,7 +776,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               </div>
 
               {renderBlockInspector(userId, selectedBlock, (updates) => {
-                console.log('[renderBlockInspector] updates:', updates)
                 updateBlock(selectedBlock.id, updates)
               })}
 
