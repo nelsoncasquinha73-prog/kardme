@@ -279,6 +279,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
     setSaving(true)
     try {
+      console.log('[HANDLE SAVE] blocks before save:', JSON.stringify(blocks, null, 2))
       const htmlContent = {
         blocks,
         createdAt: new Date().toISOString(),
@@ -1642,6 +1643,7 @@ function renderBlockInspector(
             </label>
             <input
               type="text"
+              value={content.videoUrl || ''}
               placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
               onBlur={async (e) => {
                 const url = e.currentTarget.value.trim()

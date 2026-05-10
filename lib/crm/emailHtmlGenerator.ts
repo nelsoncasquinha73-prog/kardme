@@ -79,11 +79,19 @@ function renderEmailBlockToHtml(block: any): string {
       return `<div style="height: ${content.height || 24}px; margin-bottom: 16px;"></div>`
 
     case 'video':
+      const videoUrl = content.videoUrl || '#'
+      const videoLink = content.previewId && content.isTrackable 
+        ? `/video-preview/${content.previewId}?lead={{leadId}}&broadcastId={{broadcastId}}`
+        : videoUrl
+      
       return `<div style="width: ${content.width || '100%'}; margin: 0 auto 16px; text-align: ${content.align || 'center'};">
-        <div style="position: relative; display: inline-block; width: 100%; max-width: 500px; background-color: #000; border-radius: 8px; overflow: hidden;">
-          ${content.thumbnail ? `<img src="${escapeHtml(content.thumbnail)}" alt="Video thumbnail" style="width: 100%; height: auto; display: block;" />` : `<div style="width: 100%; padding-bottom: 56.25%; background-color: #1a1a1a;"></div>`}
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(16, 185, 129, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; text-decoration: none;">▶️</div>
-        </div>
+        <a href="${escapeHtml(videoLink)}" style="text-decoration: none; display: inline-block; width: 100%; max-width: 500px;">
+          <div style="position: relative; display: inline-block; width: 100%; max-width: 500px; background-color: #000; border-radius: 8px; overflow: hidden;">
+            ${content.thumbnail ? `<img src="${escapeHtml(content.thumbnail)}" alt="Video thumbnail" style="width: 100%; height: auto; display: block;" />` : `<div style="width: 100%; padding-bottom: 56.25%; background-color: #1a1a1a;"></div>`}
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(16, 185, 129, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; text-decoration: none; color: white;">▶️</div>
+          </div>
+        </a>
+        ${content.videoUrl ? `<div style="text-align: center; margin-top: 12px;"><a href="${escapeHtml(videoLink)}" style="display: inline-block; padding: 10px 20px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 14px;">Ver vídeo</a></div>` : ''}
       </div>`
 
     case 'table':
