@@ -6,7 +6,10 @@ import { createClient } from '@supabase/supabase-js'
 function getAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !serviceKey) throw new Error('Missing env vars')
+  if (!url || !serviceKey) {
+    console.error('[SEND-BROADCAST] Missing env vars', { hasUrl: !!url, hasServiceKey: !!serviceKey })
+    throw new Error('Missing env vars')
+  }
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
@@ -62,8 +65,10 @@ function replacePlaceholders(html: string, name: string | null, email?: string):
 }
 
 export async function POST(req: NextRequest) {
+  console.log('[SEND-BROADCAST] request body keys:', Object.keys(await req.clone().json()).join(', '))
   try {
     const { userId, broadcastId, recipients, recipientNames, subject, htmlBody, recipientLeadIds } = await req.json()
+    console.log('[SEND-BROADCAST] userId:', userId, 'recipients count:', recipients?.length)
 
     if (!userId || !broadcastId || !recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })

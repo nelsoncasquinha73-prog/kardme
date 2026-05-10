@@ -243,6 +243,15 @@ export default function CrmProPage() {
   const { addToast } = useToast()
   const { t } = useLanguage()
   const [userId, setUserId] = useState('')
+
+  // Inicializar userId na montagem
+  useEffect(() => {
+    const initUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.id) setUserId(user.id)
+    }
+    initUser()
+  }, [])
   const gmail = useGmailIntegration(userId)
   const chatgpt = useChatGPT()
   const [leads, setLeads] = useState<Lead[]>([])

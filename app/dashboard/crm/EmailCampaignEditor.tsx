@@ -1657,7 +1657,7 @@ function renderBlockInspector(
                     try {
                       const res = await fetch('/api/crm/video-preview/create', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
                         body: JSON.stringify({
                           video_url: url,
                           thumbnail_url: thumb,
@@ -1665,7 +1665,9 @@ function renderBlockInspector(
                         }),
                       })
                       const data = await res.json()
-                      previewId = data.id
+                      console.log('[VIDEO TRACK] create status:', res.status)
+                      console.log('[VIDEO TRACK] create response:', data)
+                      previewId = data.id || data?.previewId || data?.data?.id
                     } catch (err) {
                       console.error('Erro ao criar preview:', err)
                     }
