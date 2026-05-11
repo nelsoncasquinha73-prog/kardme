@@ -44,6 +44,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
+    // Disparar notificação por email (não bloquear resposta)
+    if (broadcastId) {
+      fetch(new URL('/api/crm/video-open-notify', req.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ broadcastId, leadId }),
+      })
+        .then(async (r) => {
+          if (!r.ok) {
+            const t = await r.text()
+            console.error('[VIDEO-OPEN] notify failed:', r.status, t)
+          }
+        })
+        .catch((e) => console.error('[VIDEO-OPEN] notify error:', e))
+    }
+
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('[VIDEO-OPEN] error:', err)
