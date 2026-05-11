@@ -8,6 +8,7 @@ import styles from './LeadMagnetEditor.module.css'
 import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
 import FormConfigurator from './FormConfigurator'
 import ChecklistConfigurator from './ChecklistConfigurator'
+import DiscountConfigurator from './DiscountConfigurator'
 
 interface LeadMagnet {
   id: string
@@ -35,6 +36,7 @@ interface LeadMagnet {
   updated_at: string
   form_fields?: any[]
   checklist_items?: any[]
+  discount_config?: any
   raffle_config?: any
   wheel_config?: any
 }
@@ -114,6 +116,24 @@ O teu resultado foi: {premio}
 
 Melhores cumprimentos`,
     thank_you_message: 'Parabéns! O teu resultado foi enviado para o teu email.',
+  },
+  desconto: {
+    capture_page_title: 'Desconto Exclusivo à Espera',
+    capture_page_subtitle: 'Preenche o formulário e recebe o teu código de desconto',
+    capture_page_button_text: 'Receber Desconto',
+    welcome_email_subject: '🎟️ O teu código de desconto!',
+    welcome_email_body: `Olá {nome},
+
+Obrigado pelo teu interesse!
+
+Aqui está o teu código de desconto exclusivo:
+
+{codigo}
+
+Usa-o no checkout para ativar o desconto.
+
+Melhores cumprimentos`,
+    thank_you_message: 'Parabéns! O teu código de desconto está pronto. Copia-o acima!',
   },
   raffle: {
     capture_page_title: 'Participa no Sorteio',
@@ -197,6 +217,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   }, [])
 
   const handleTypeChange = (typeId: string) => {
+    console.log('handleTypeChange typeId:', typeId)
     const preset = PRESETS[typeId] || {}
     setMagnet(prev => ({
       ...prev,
@@ -236,6 +257,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
           // configs por tipo
           form_fields: magnet.form_fields,
           checklist_items: magnet.checklist_items,
+          discount_config: magnet.discount_config,
           raffle_config: magnet.raffle_config,
           wheel_config: magnet.wheel_config,
 
@@ -356,6 +378,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
               ))}
             </div>
           </div>
+
+          {magnet.magnet_type === 'discount' && (
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>🎟️ Configuração do Desconto</h3>
+              <DiscountConfigurator
+                config={magnet.discount_config || null}
+                onChange={(cfg) => handleChange('discount_config' as any, cfg)}
+              />
+            </div>
+          )}
 
           {magnet.magnet_type === 'wheel' && (
             <div className={styles.section}>
