@@ -1696,6 +1696,14 @@ function renderBlockInspector(
             onUpload={(data) => onUpdate({ videoUrl: data.videoUrl, thumbnail: data.thumbnail, previewId: data.previewId })}
           />
 
+          {content.videoUrl && (
+            <ImageUploadInput
+              userId={userId}
+              currentUrl={content.thumbnail}
+              onUpload={(url) => onUpdate({ thumbnail: url })}
+            />
+          )}
+
           <div style={{ marginTop: 16 }}>
             <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 700 }}>
               Thumbnail (URL)
