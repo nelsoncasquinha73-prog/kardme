@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getAdminSupabase()
 
-    // Buscar user_id do preview
     const { data: preview, error: previewError } = await supabaseAdmin
       .from('email_video_previews')
       .select('user_id')
@@ -40,8 +39,16 @@ export async function POST(req: NextRequest) {
       })
 
     if (error) {
-      console.error('[VIDEO-OPEN] insert error:', error)
       return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    // Trigger notification (await to ensure it runs on serverless)
+    if (broadcastId) {
+      await fetch(new URL('/api/crm/video-open-notify', req.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ broadcastId, leadId }),
+      }).catch(() => {})
     }
 
     return NextResponse.json({ success: true })
