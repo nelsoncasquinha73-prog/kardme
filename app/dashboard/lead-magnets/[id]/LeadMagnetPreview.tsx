@@ -2,296 +2,10 @@
 
 import styles from './LeadMagnetEditor.module.css'
 
-interface LeadMagnetPreviewProps {
-  magnet: any
-}
+export default function LeadMagnetPreview({ magnet }: { magnet: any }) {
+  const t = String(magnet?.magnet_type || '').trim().toLowerCase()
 
-export default function LeadMagnetPreview({ magnet }: LeadMagnetPreviewProps) {
-  const renderPreview = () => {
-    switch (magnet.magnet_type) {
-      case 'ebook':
-        return (
-          <div style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-              📚 eBook
-            </div>
-            {magnet.capture_page_image && (
-              <img
-                src={magnet.capture_page_image}
-                alt="eBook"
-                style={{ maxWidth: 200, borderRadius: 8, marginBottom: 16 }}
-              />
-            )}
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
-              {magnet.title}
-            </h3>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>
-              {magnet.description}
-            </p>
-            <button
-              style={{
-                padding: '10px 20px',
-                borderRadius: 6,
-                border: 'none',
-                background: '#10b981',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Baixar eBook
-            </button>
-          </div>
-        )
-
-      case 'desconto':
-        const discountConfig = magnet.discount_config
-        return (
-          <div style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-              🎟️ Desconto Exclusivo
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 24 }}>
-              {magnet.title}
-            </h3>
-            {discountConfig?.displayStyle === 'coupon' ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: 24,
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  borderRadius: 8,
-                  marginBottom: 16,
-                }}
-              >
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', marginBottom: 8 }}>
-                  Desconto de
-                </div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
-                  {discountConfig?.value}
-                  {discountConfig?.type === 'percent' ? '%' : '€'}
-                </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: '#fff',
-                    letterSpacing: 2,
-                    fontFamily: 'monospace',
-                    marginBottom: 12,
-                  }}
-                >
-                  {discountConfig?.code}
-                </div>
-                {discountConfig?.expiresAt && (
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)' }}>
-                    Válido até {new Date(discountConfig.expiresAt).toLocaleDateString('pt-PT')}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: 'inline-block',
-                  padding: '12px 20px',
-                  background: '#10b981',
-                  borderRadius: 6,
-                  color: '#fff',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  marginBottom: 16,
-                }}
-              >
-                {discountConfig?.code} • {discountConfig?.value}
-                {discountConfig?.type === 'percent' ? '%' : '€'}
-              </div>
-            )}
-            <button
-              style={{
-                padding: '10px 20px',
-                borderRadius: 6,
-                border: 'none',
-                background: '#3b82f6',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Copiar Código
-            </button>
-          </div>
-        )
-
-      case 'form':
-        return (
-          <div style={{ padding: 24 }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-              📋 Formulário
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 16 }}>
-              {magnet.title}
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {(magnet.form_fields || []).map((field: any, idx: number) => (
-                <div key={idx}>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#fff', display: 'block', marginBottom: 4 }}>
-                    {field.label} {field.required && <span style={{ color: '#ef4444' }}>*</span>}
-                  </label>
-                  {field.type === 'textarea' ? (
-                    <textarea
-                      placeholder={field.placeholder}
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        borderRadius: 4,
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        fontSize: 12,
-                      }}
-                    />
-                  ) : field.type === 'select' ? (
-                    <select
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        borderRadius: 4,
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        fontSize: 12,
-                      }}
-                    >
-                      <option>Seleciona uma opção</option>
-                      {(field.options || []).map((opt: string, i: number) => (
-                        <option key={i}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : field.type === 'checkbox' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {(field.options || []).map((opt: string, i: number) => (
-                        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
-                          <input type="checkbox" />
-                          <span style={{ color: 'rgba(255,255,255,0.8)' }}>{opt}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ) : field.type === 'radio' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {(field.options || []).map((opt: string, i: number) => (
-                        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
-                          <input type="radio" name={field.id} />
-                          <span style={{ color: 'rgba(255,255,255,0.8)' }}>{opt}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ) : (
-                    <input
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        borderRadius: 4,
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        fontSize: 12,
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <button
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: 6,
-                border: 'none',
-                background: '#10b981',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-                marginTop: 16,
-              }}
-            >
-              Enviar
-            </button>
-          </div>
-        )
-
-      case 'checklist':
-        return (
-          <div style={{ padding: 24 }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-              ✅ Checklist
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 16 }}>
-              {magnet.title}
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {(magnet.checklist_items || []).map((item: any, idx: number) => (
-                <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
-                  <input type="checkbox" />
-                  <span style={{ color: 'rgba(255,255,255,0.8)' }}>{item.text}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )
-
-      case 'roda_sorte':
-        return (
-          <div style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-              🎡 Roda da Sorte
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 16 }}>
-              {magnet.title}
-            </h3>
-            <div
-              style={{
-                width: 200,
-                height: 200,
-                margin: '0 auto 16px',
-                borderRadius: '50%',
-                background: 'conic-gradient(from 0deg, #10b981, #3b82f6, #f59e0b, #ef4444)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>Girar</div>
-            </div>
-            <button
-              style={{
-                padding: '10px 20px',
-                borderRadius: 6,
-                border: 'none',
-                background: '#f59e0b',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Girar Roda
-            </button>
-          </div>
-        )
-
-      default:
-        return (
-          <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
-            Tipo não reconhecido
-          </div>
-        )
-    }
-  }
+  const discount = magnet?.discount_config || null
 
   return (
     <div
@@ -302,7 +16,106 @@ export default function LeadMagnetPreview({ magnet }: LeadMagnetPreviewProps) {
         overflow: 'hidden',
       }}
     >
-      {renderPreview()}
+      {/* Preview genérico da Página de Captura */}
+      <div style={{ padding: 18 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: 1, marginBottom: 10 }}>
+          PREVIEW • PÁGINA DE CAPTURA
+        </div>
+
+        {magnet?.capture_page_image ? (
+          <img
+            src={magnet.capture_page_image}
+            alt="Capa"
+            style={{
+              width: '100%',
+              height: 140,
+              objectFit: 'cover',
+              borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.08)',
+              marginBottom: 12,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: 140,
+              borderRadius: 8,
+              border: '1px dashed rgba(255,255,255,0.18)',
+              background: 'rgba(255,255,255,0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255,255,255,0.35)',
+              fontSize: 12,
+              marginBottom: 12,
+            }}
+          >
+            Sem imagem
+          </div>
+        )}
+
+        <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
+          {magnet?.capture_page_title || 'Título da Página'}
+        </div>
+
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, marginBottom: 14 }}>
+          {magnet?.capture_page_subtitle || 'Subtítulo / descrição curta'}
+        </div>
+
+        <button
+          type="button"
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 8,
+            border: 'none',
+            background: '#10b981',
+            color: '#fff',
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: 'default',
+            opacity: 0.95,
+          }}
+        >
+          {magnet?.capture_page_button_text || 'Botão'}
+        </button>
+      </div>
+
+      {/* Bloco específico por tipo (só quando fizer sentido) */}
+      {t === 'discount' && (
+        <div style={{ padding: 18, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: 1, marginBottom: 10 }}>
+            PREVIEW • DESCONTO
+          </div>
+
+          <div
+            style={{
+              padding: 16,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          >
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', marginBottom: 6 }}>
+              Desconto de
+            </div>
+
+            <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 10 }}>
+              {discount?.value ?? 0}
+              {discount?.type === 'percent' ? '%' : '€'}
+            </div>
+
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', fontFamily: 'monospace', letterSpacing: 2 }}>
+              {discount?.code || 'CODIGO'}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+            (No público, aqui aparece “Copiar código” e o CTA.)
+          </div>
+        </div>
+      )}
     </div>
   )
 }
