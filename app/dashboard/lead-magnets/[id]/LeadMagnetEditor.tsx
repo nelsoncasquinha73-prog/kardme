@@ -7,6 +7,7 @@ import LeadMagnetPreview from './LeadMagnetPreview'
 import styles from './LeadMagnetEditor.module.css'
 import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
 import FormConfigurator from './FormConfigurator'
+import ChecklistConfigurator from './ChecklistConfigurator'
 
 interface LeadMagnet {
   id: string
@@ -33,6 +34,7 @@ interface LeadMagnet {
   created_at: string
   updated_at: string
   form_fields?: any[]
+  checklist_items?: any[]
   raffle_config?: any
   wheel_config?: any
 }
@@ -233,6 +235,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
 
           // configs por tipo
           form_fields: magnet.form_fields,
+          checklist_items: magnet.checklist_items,
           raffle_config: magnet.raffle_config,
           wheel_config: magnet.wheel_config,
 
@@ -370,6 +373,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
               <FormConfigurator
                 config={magnet.form_fields || null}
                 onChange={(fields) => handleChange('form_fields' as any, fields)}
+              />
+            </div>
+          )}
+
+          {magnet.magnet_type === 'checklist' && (
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>✅ Itens da Checklist</h3>
+              <ChecklistConfigurator
+                config={magnet.form_fields || null}
+                onChange={(items) => handleChange('form_fields' as any, items)}
               />
             </div>
           )}

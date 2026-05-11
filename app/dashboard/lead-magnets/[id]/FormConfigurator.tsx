@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { FiPlus, FiTrash2 } from 'react-icons/fi'
+import { FiPlus, FiTrash2, FiChevronDown } from 'react-icons/fi'
 
 export type FormField = {
   id: string
   label: string
-  type: 'text' | 'email' | 'phone' | 'textarea' | 'select'
+  type: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox' | 'radio'
   required: boolean
   placeholder?: string
   options?: string[]
@@ -48,6 +48,44 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
     setFields(updated)
     onChange(updated)
   }
+
+  const addOption = (fieldId: string) => {
+    const updated = fields.map((f) => {
+      if (f.id === fieldId) {
+        return { ...f, options: [...(f.options || []), 'Nova opção'] }
+      }
+      return f
+    })
+    setFields(updated)
+    onChange(updated)
+  }
+
+  const updateOption = (fieldId: string, optionIdx: number, text: string) => {
+    const updated = fields.map((f) => {
+      if (f.id === fieldId) {
+        const opts = [...(f.options || [])]
+        opts[optionIdx] = text
+        return { ...f, options: opts }
+      }
+      return f
+    })
+    setFields(updated)
+    onChange(updated)
+  }
+
+  const removeOption = (fieldId: string, optionIdx: number) => {
+    const updated = fields.map((f) => {
+      if (f.id === fieldId) {
+        const opts = (f.options || []).filter((_, i) => i !== optionIdx)
+        return { ...f, options: opts.length > 0 ? opts : undefined }
+      }
+      return f
+    })
+    setFields(updated)
+    onChange(updated)
+  }
+
+  const needsOptions = (type: string) => ['select', 'checkbox', 'radio'].includes(type)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -141,7 +179,9 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
                 <option value="email">Email</option>
                 <option value="phone">Telefone</option>
                 <option value="textarea">Texto longo</option>
-                <option value="select">Dropdown</option>
+                <option value="select">Dropdown (uma resposta)</option>
+                <option value="radio">Radio buttons (uma resposta)</option>
+                <option value="checkbox">Checkboxes (múltiplas respostas)</option>
               </select>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
@@ -153,22 +193,81 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
                 <span style={{ color: 'rgba(255,255,255,0.7)' }}>Obrigatório</span>
               </label>
 
-              <input
-                type="text"
-                value={field.placeholder || ''}
-                onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                placeholder="Placeholder (opcional)"
-                style={{
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: 6,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
-                  fontSize: 12,
-                  outline: 'none',
-                }}
-              />
+              {!needsOptions(field.type) && (
+                <input
+                  type="text"
+                  value={field.placeholder || ''}
+                  onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                  placeholder="Placeholder (opcional)"
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#fff',
+                    fontSize: 12,
+                    outline: 'none',
+                  }}
+                />
+              )}
+
+              {needsOptions(field.type) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
+                    Opções
+                  </div>
+                  {(field.options || []).map((opt, optIdx) => (
+                    <div key={optIdx} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        value={opt}
+                        onChange={(e) => updateOption(field.id, optIdx, e.target.value)}
+                        placeholder="Opção"
+                        style={{
+                          flex: 1,
+                          padding: '6px 8px',
+                          borderRadius: 4,
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          background: 'rgba(255,255,255,0.03)',
+                          color: '#fff',
+                          fontSize: 11,
+                          outline: 'none',
+                        }}
+                      />
+                      <button
+                        onClick={() => removeOption(field.id, optIdx)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#ef4444',
+                          cursor: 'pointer',
+                          padding: 0,
+                          fontSize: 12,
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => addOption(field.id)}
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: 4,
+                      border: '1px dashed rgba(255,255,255,0.2)',
+                      background: 'transparent',
+                      color: 'rgba(255,255,255,0.6)',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      marginTop: 4,
+                    }}
+                  >
+                    + Adicionar opção
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
