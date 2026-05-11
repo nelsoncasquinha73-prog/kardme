@@ -11,7 +11,6 @@ function getAdminSupabase() {
 export async function POST(req: NextRequest) {
   try {
     const { previewId, leadId, broadcastId } = await req.json()
-    console.log('[VIDEO-OPEN] Received:', { previewId, leadId, broadcastId })
 
     if (!previewId || !leadId) {
       return NextResponse.json({ error: 'Missing previewId or leadId' }, { status: 400 })
@@ -19,7 +18,6 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getAdminSupabase()
 
-    // Buscar user_id do preview
     const { data: preview, error: previewError } = await supabaseAdmin
       .from('email_video_previews')
       .select('user_id')
@@ -27,7 +25,6 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (previewError || !preview) {
-      console.error('[VIDEO-OPEN] Preview not found:', previewError)
       return NextResponse.json({ error: 'Preview not found' }, { status: 404 })
     }
 
@@ -46,31 +43,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    console.log('[VIDEO-OPEN] Insert successful, broadcastId:', broadcastId)
-
-    // Disparar notificação por email (não bloquear resposta)
+    // FIX: chamar notify de forma síncrona (serverless-safe)
     if (broadcastId) {
-      console.log('[VIDEO-OPEN] Calling video-open-notify...')
-      const notifyUrl = new URL('/api/crm/video-open-notify', req.url)
-      console.log('[VIDEO-OPEN] Notify URL:', notifyUrl.toString())
-      
-      fetch(notifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ broadcastId, leadId }),
-      })
-        .then(async (r) => {
-          console.log('[VIDEO-OPEN] Notify response status:', r.status)
-          if (!r.ok) {
-            const t = await r.text()
-            console.error('[VIDEO-OPEN] notify failed:', r.status, t)
-          } else {
-            console.log('[VIDEO-OPEN] Notify sent successfully')
-          }
+      try {
+        const notifyResp = await fetch(new URL('/api/crm/video-open-notify', req.url), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcastId, leadId }),
         })
-        .catch((e) => console.error('[VIDEO-OPEN] notify error:', e))
-    } else {
-      console.log('[VIDEO-OPEN] No broadcastId, skipping notify')
+
+        const txt = await notifyResp.text()
+        if (!notifyResp.ok) {
+          console.error('[VIDEO-OPEN] notify failed:', notifyResp.status, txt)
+        } else {
+          console.log('[VIDEO-OPEN] notify ok:', notifyResp.status, txt)
+        }
+      } catch (e) {
+        console.error('[VIDEO-OPEN] notify error:', e)
+      }
     }
 
     return NextResponse.json({ success: true })
