@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         lead_id: leadId,
         broadcast_id: broadcastId || null,
         opened_at: new Date().toISOString(),
+        user_id: null,
       })
 
     if (error) {
