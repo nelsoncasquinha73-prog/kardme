@@ -1641,6 +1641,7 @@ function renderBlockInspector(
             <input
               type="text"
               value={content.videoUrl || ''}
+              onChange={(e) => onUpdate({ ...content, videoUrl: e.target.value })}
               placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
               onBlur={async (e) => {
                 const url = e.currentTarget.value.trim()
