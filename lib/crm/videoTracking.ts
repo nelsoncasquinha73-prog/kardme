@@ -7,24 +7,11 @@ export async function recordVideoOpen(
   broadcastId?: string | null
 ) {
   try {
-    // Se não temos userId, tentamos obter da sessão
-    let finalUserId = userId
-    if (!finalUserId) {
-      const { data: { user } } = await supabase.auth.getUser()
-      finalUserId = user?.id
-    }
-
-    if (!finalUserId) {
-      console.warn('[VIDEO TRACKING] Sem user_id, não registando abertura')
-      return
-    }
-
     const { error } = await supabase
       .from('email_video_opens')
       .insert({
         preview_id: previewId,
         lead_id: leadId,
-        user_id: finalUserId,
         broadcast_id: broadcastId || null,
         opened_at: new Date().toISOString(),
       })

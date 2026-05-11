@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getAdminSupabase()
 
+    console.log('[VIDEO-PREVIEW-CREATE] Inserting:', { video_url, thumbnail_url, title, broadcast_id })
     const { data, error } = await supabaseAdmin
       .from('email_video_previews')
       .insert({
@@ -36,9 +37,11 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('[VIDEO-PREVIEW-CREATE] insert error:', error)
+      console.log('[VIDEO-PREVIEW-CREATE] Attempted insert:', { video_url, thumbnail_url, title })
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
+    console.log('[VIDEO-PREVIEW-CREATE] Success, created:', data)
     return NextResponse.json(data)
   } catch (error) {
     console.error('[VIDEO-PREVIEW-CREATE]', error)

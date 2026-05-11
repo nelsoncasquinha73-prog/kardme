@@ -41,6 +41,7 @@ export default function VideoPreviewPage() {
 
         // Registar abertura com lead_id se existir
         if (leadId) {
+          console.log('[VIDEO-OPEN] Recording open:', { id, leadId, broadcastId })
           await recordVideoOpen(id, leadId, undefined, broadcastId)
         }
       } catch (err) {
