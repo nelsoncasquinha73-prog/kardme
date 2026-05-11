@@ -66,16 +66,30 @@ export function renderEmailBlockToHtml(block: any, ctx?: { broadcastId?: string 
       } else if (content.previewId) {
         videoLink = `https://www.kardme.com/video-preview/${content.previewId}`
       }
-      return content.thumbnail
-        ? `<div style="text-align: ${content.align || 'center'}; padding: 16px 0; margin-bottom: 16px;">
-            <a href="${escapeHtml(videoLink)}" target="_blank" style="display: inline-block; text-decoration: none; position: relative;">
-              <div style="position: relative; display: inline-block; width: 100%; max-width: 500px;">
-                <img src="${escapeHtml(content.thumbnail)}" alt="Video" style="display: block; width: 100%; border-radius: 8px; margin: 0 auto;" />
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(16, 185, 129, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">▶️</div>
-              </div>
-            </a>
-          </div>`
-        : `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; text-align: center; line-height: 200px; color: #999; margin-bottom: 16px;">Vídeo</div>`
+
+      if (!content.thumbnail) {
+        return `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; text-align: center; line-height: 200px; color: #999; margin-bottom: 16px;">Vídeo</div>`
+      }
+
+      const width = content.width || '100%'
+      const align = content.align || 'center'
+
+      return `<div style="text-align: ${align}; padding: 16px 0; margin-bottom: 16px;">
+        <a href="${escapeHtml(videoLink)}" target="_blank" style="display: inline-block; text-decoration: none;">
+          <img src="${escapeHtml(content.thumbnail)}" alt="Vídeo" style="display: block; width: ${width}; max-width: 500px; border-radius: 8px; margin: 0 auto; border: none;" />
+        </a>
+
+        <div style="margin-top: 12px;">
+          <a href="${escapeHtml(videoLink)}" target="_blank"
+             style="display: inline-block; padding: 10px 18px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 800; font-size: 14px;">
+            ▶ Ver vídeo
+          </a>
+        </div>
+
+        <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+          Clique para ver o vídeo
+        </div>
+      </div>`
     }
 
     case 'table':
