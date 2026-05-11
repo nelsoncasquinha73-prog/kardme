@@ -30,6 +30,7 @@ export default function VideoPreviewPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log('[VIDEO-PREVIEW] useEffect triggered:', { id, leadId, broadcastId })
     async function loadPreview() {
       try {
         const res = await fetch(`/api/video-preview/${id}`)
@@ -39,6 +40,7 @@ export default function VideoPreviewPage() {
         await incrementVideoPreviewView(id)
 
         // Registar abertura com lead_id se existir
+        console.log('[VIDEO-PREVIEW] leadId check:', leadId)
         if (leadId) {
           console.log('[VIDEO-OPEN] Recording open:', { id, leadId, broadcastId })
           try {
