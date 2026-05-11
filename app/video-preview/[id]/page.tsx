@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { incrementVideoPreviewView, incrementVideoPreviewClick } from '@/lib/crm/emailVideoPreviews'
-import { recordVideoOpen } from '@/lib/crm/videoTracking'
 import { parseVideoLink } from '@/lib/crm/videoUtils'
 
 interface EmailVideoPreview {
@@ -42,7 +41,15 @@ export default function VideoPreviewPage() {
         // Registar abertura com lead_id se existir
         if (leadId) {
           console.log('[VIDEO-OPEN] Recording open:', { id, leadId, broadcastId })
-          await recordVideoOpen(id, leadId, undefined, broadcastId)
+          try {
+            await fetch('/api/crm/video-open', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ previewId: id, leadId, broadcastId }),
+            })
+          } catch (err) {
+            console.error('[VIDEO-OPEN] Falha ao registar abertura:', err)
+          }
         }
       } catch (err) {
         console.error('Erro ao carregar preview:', err)
