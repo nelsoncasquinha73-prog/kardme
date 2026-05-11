@@ -6,6 +6,7 @@ import { FiArrowLeft, FiSave, FiCopy, FiTrash2 } from 'react-icons/fi'
 import LeadMagnetPreview from './LeadMagnetPreview'
 import styles from './LeadMagnetEditor.module.css'
 import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
+import FormConfigurator from './FormConfigurator'
 
 interface LeadMagnet {
   id: string
@@ -359,6 +360,16 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
               <WheelConfigurator
                 config={magnet.wheel_config || null}
                 onChange={(cfg) => handleChange('wheel_config' as any, cfg)}
+              />
+            </div>
+          )}
+
+          {magnet.magnet_type === 'form' && (
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>📋 Configuração do Formulário</h3>
+              <FormConfigurator
+                config={magnet.form_fields || null}
+                onChange={(fields) => handleChange('form_fields' as any, fields)}
               />
             </div>
           )}
