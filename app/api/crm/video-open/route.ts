@@ -18,6 +18,17 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getAdminSupabase()
 
+    // Buscar user_id do preview
+    const { data: preview, error: previewError } = await supabaseAdmin
+      .from('email_video_previews')
+      .select('user_id')
+      .eq('id', previewId)
+      .single()
+
+    if (previewError || !preview) {
+      return NextResponse.json({ error: 'Preview not found' }, { status: 404 })
+    }
+
     const { error } = await supabaseAdmin
       .from('email_video_opens')
       .insert({
@@ -25,7 +36,7 @@ export async function POST(req: NextRequest) {
         lead_id: leadId,
         broadcast_id: broadcastId || null,
         opened_at: new Date().toISOString(),
-        user_id: null,
+        user_id: preview.user_id,
       })
 
     if (error) {
