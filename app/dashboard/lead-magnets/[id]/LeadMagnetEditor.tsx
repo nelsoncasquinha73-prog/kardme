@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/lib/toast-context'
 import { FiArrowLeft, FiSave, FiCopy, FiTrash2 } from 'react-icons/fi'
 import LeadMagnetPreview from './LeadMagnetPreview'
+import EventConfigurator from './EventConfigurator'
 import styles from './LeadMagnetEditor.module.css'
 import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
 import FormConfigurator from './FormConfigurator'
@@ -171,7 +172,9 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   const [cards, setCards] = useState<CardOption[]>([])
   const [isLoadingCards, setIsLoadingCards] = useState(false)
   const [showSections, setShowSections] = useState({
+    event: true,
     capture: true,
+    email: true,
     welcome: true,
     success: true,
   })
@@ -325,6 +328,124 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       console.error(e)
       addToast('Erro ao apagar lead magnet', 'error')
     }
+  }
+
+  if (magnet.magnet_type === 'webinar') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.editor}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div>
+              <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: '16px', marginBottom: '10px' }}>
+                ← Voltar
+              </button>
+              <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 700 }}>🎥 {magnet.title}</h1>
+              <p style={{ margin: '5px 0 0 0', color: '#94a3b8', fontSize: '14px' }}>Webinar / Evento</p>
+            </div>
+            <button onClick={handleSave} disabled={isSaving} style={{ padding: '10px 20px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, opacity: isSaving ? 0.6 : 1 }}>
+              {isSaving ? '💾 Guardando...' : '💾 Guardar'}
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+            <div>
+              <div className={styles.section}>
+                <button onClick={() => setShowSections(prev => ({ ...prev, event: !prev.event }))} className={styles.sectionToggle}>
+                  <span>{showSections.event ? '▼' : '▶'}</span>
+                  <h3>📅 Detalhes do Evento</h3>
+                </button>
+                {showSections.event && (
+                  <div className={styles.sectionContent}>
+                    <EventConfigurator config={(magnet as any).event_config || null} onChange={(cfg) => handleChange('event_config' as any, cfg)} />
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.section}>
+                <button onClick={() => setShowSections(prev => ({ ...prev, capture: !prev.capture }))} className={styles.sectionToggle}>
+                  <span>{showSections.capture ? '▼' : '▶'}</span>
+                  <h3>🎯 Página de Captura</h3>
+                </button>
+                {showSections.capture && (
+                  <div className={styles.sectionContent}>
+                    <div className={styles.field}>
+                      <label>Título</label>
+                      <input type="text" value={magnet.capture_page_title} onChange={(e) => handleChange('capture_page_title', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Subtítulo</label>
+                      <input type="text" value={magnet.capture_page_subtitle} onChange={(e) => handleChange('capture_page_subtitle', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Imagem</label>
+                      <input type="text" value={magnet.capture_page_image || ''} onChange={(e) => handleChange('capture_page_image', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Texto do Botão</label>
+                      <input type="text" value={magnet.capture_page_button_text} onChange={(e) => handleChange('capture_page_button_text', e.target.value)} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.section}>
+                <button onClick={() => setShowSections(prev => ({ ...prev, email: !prev.email }))} className={styles.sectionToggle}>
+                  <span>{showSections.email ? '▼' : '▶'}</span>
+                  <h3>📧 Email de Confirmação</h3>
+                </button>
+                {showSections.email && (
+                  <div className={styles.sectionContent}>
+                    <div className={styles.field}>
+                      <label>Assunto</label>
+                      <input type="text" value={magnet.welcome_email_subject} onChange={(e) => handleChange('welcome_email_subject', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Corpo do Email</label>
+                      <textarea value={magnet.welcome_email_body} onChange={(e) => handleChange('welcome_email_body', e.target.value)} rows={8} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.section}>
+                <button onClick={() => setShowSections(prev => ({ ...prev, success: !prev.success }))} className={styles.sectionToggle}>
+                  <span>{showSections.success ? '▼' : '▶'}</span>
+                  <h3>✅ Mensagem de Sucesso</h3>
+                </button>
+                {showSections.success && (
+                  <div className={styles.sectionContent}>
+                    <div className={styles.field}>
+                      <label>Mensagem</label>
+                      <textarea value={(magnet as any).success_message || ''} onChange={(e) => handleChange('success_message' as any, e.target.value)} rows={4} />
+                    </div>
+                    <div className={styles.field}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={(magnet as any).show_success_message !== false} onChange={(e) => handleChange('show_success_message' as any, e.target.checked)} style={{ width: 18, height: 18 }} />
+                        <span>Mostrar mensagem de sucesso</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ position: 'sticky', top: '20px' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '15px', fontSize: '16px', fontWeight: 600 }}>👁️ Preview</h3>
+                <div style={{ background: '#1e293b', borderRadius: '12px', padding: '20px', border: '1px solid #334155', minHeight: '600px' }}>
+                  {magnet.capture_page_image && <img src={magnet.capture_page_image} alt="Event" style={{ width: '100%', borderRadius: '8px', marginBottom: '15px', maxHeight: '200px', objectFit: 'cover' }} />}
+                  <h2 style={{ margin: '0 0 10px 0', fontSize: '20px', color: '#fff' }}>{magnet.capture_page_title || 'Título'}</h2>
+                  <p style={{ margin: '0 0 15px 0', color: '#cbd5e1', fontSize: '14px' }}>{magnet.capture_page_subtitle || 'Subtítulo'}</p>
+                  <button style={{ width: '100%', padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600 }}>
+                    {magnet.capture_page_button_text || 'Registar-me'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

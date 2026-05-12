@@ -63,6 +63,68 @@ export default function LeadMagnetPreview({ magnet }: { magnet: any }) {
           {magnet?.capture_page_subtitle || 'Subtítulo / descrição curta'}
         </div>
 
+        {t === 'webinar' && (
+          <div style={{ marginTop: 14, padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.55)', letterSpacing: 1, marginBottom: 10 }}>
+              DETALHES DO EVENTO
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Tipo</div>
+                <div style={{ fontWeight: 800, color: '#fff' }}>
+                  {(magnet?.event_config?.eventType || 'webinar') === 'presentation'
+                    ? 'Apresentação'
+                    : (magnet?.event_config?.eventType || 'webinar') === 'event'
+                    ? 'Evento'
+                    : 'Webinar'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Timezone</div>
+                <div style={{ fontWeight: 700, color: '#fff' }}>{magnet?.event_config?.timezone || 'Europe/Lisbon'}</div>
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Início</div>
+                <div style={{ fontWeight: 700, color: '#fff' }}>
+                  {magnet?.event_config?.startAt ? new Date(magnet.event_config.startAt).toLocaleString('pt-PT') : '—'}
+                </div>
+              </div>
+
+              {magnet?.event_config?.endAt && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Fim</div>
+                  <div style={{ fontWeight: 700, color: '#fff' }}>
+                    {new Date(magnet.event_config.endAt).toLocaleString('pt-PT')}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Local</div>
+                <div style={{ fontWeight: 700, color: '#fff' }}>
+                  {magnet?.event_config?.locationType === 'in_person' ? 'Presencial' : 'Online'}
+                </div>
+              </div>
+
+              {magnet?.event_config?.locationType === 'in_person' ? (
+                <div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Morada</div>
+                  <div style={{ fontWeight: 700, color: '#fff' }}>{magnet?.event_config?.address || '—'}</div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Link</div>
+                  <div style={{ fontWeight: 700, color: '#fff' }}>{magnet?.event_config?.joinUrl ? '✓ definido' : '—'}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {t !== 'webinar' && (
         <button
           type="button"
           style={{
@@ -80,6 +142,7 @@ export default function LeadMagnetPreview({ magnet }: { magnet: any }) {
         >
           {magnet?.capture_page_button_text || 'Botão'}
         </button>
+        )}
       </div>
 
       {/* Bloco específico por tipo (só quando fizer sentido) */}
