@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react'
 export type EventConfig = {
   eventType: 'webinar' | 'presentation' | 'event'
   startAt: string
+  startTime?: string
   endAt?: string
+  endTime?: string
   timezone?: string
   locationType: 'online' | 'in_person'
   joinUrl?: string
@@ -66,6 +68,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           >
             <option value="webinar">Webinar</option>
@@ -91,6 +97,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>
@@ -103,8 +113,8 @@ export default function EventConfigurator({
           </label>
           <input
             type="datetime-local"
-            value={evt.startAt ? new Date(evt.startAt).toISOString().slice(0, 16) : ''}
-            onChange={(e) => setField('startAt', e.target.value ? new Date(e.target.value).toISOString() : '')}
+            value={evt.startTime || ''}
+            onChange={(e) => setField('startTime', e.target.value)}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -114,6 +124,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>
@@ -124,8 +138,8 @@ export default function EventConfigurator({
           </label>
           <input
             type="datetime-local"
-            value={evt.endAt ? new Date(evt.endAt).toISOString().slice(0, 16) : ''}
-            onChange={(e) => setField('endAt', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
+            value={evt.endTime || ''}
+            onChange={(e) => setField('endTime', e.target.value)}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -135,6 +149,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>
@@ -157,6 +175,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           >
             <option value="online">Online</option>
@@ -182,6 +204,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>
@@ -205,6 +231,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>
@@ -226,6 +256,10 @@ export default function EventConfigurator({
               color: '#fff',
               fontSize: 13,
               outline: 'none',
+              height: '42px',
+              lineHeight: '1.5',
+              WebkitAppearance: 'menulist',
+              appearance: 'menulist',
             }}
           />
         </div>

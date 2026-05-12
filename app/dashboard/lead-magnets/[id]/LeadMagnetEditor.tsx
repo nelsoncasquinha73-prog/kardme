@@ -40,6 +40,7 @@ interface LeadMagnet {
   discount_config?: any
   raffle_config?: any
   wheel_config?: any
+  event_config?: any
 }
 
 
@@ -237,42 +238,68 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
     }
     setIsSaving(true)
     try {
-      const { error } = await supabase
-        .from('lead_magnets')
-        .update({
-          title: magnet.title,
-          magnet_type: magnet.magnet_type,
-          card_id: magnet.card_id,
-          is_active: magnet.is_active,
-          welcome_email_subject: magnet.welcome_email_subject,
-          welcome_email_body: magnet.welcome_email_body,
-          file_url: magnet.file_url,
-          thank_you_message: magnet.thank_you_message,
-          capture_page_title: magnet.capture_page_title,
-          capture_page_subtitle: magnet.capture_page_subtitle,
-          capture_page_image: magnet.capture_page_image,
-          cover_image_url: magnet.capture_page_image,
-          capture_page_button_text: magnet.capture_page_button_text,
-          capture_page_success_message: magnet.capture_page_success_message,
-          show_download_button: magnet.show_download_button,
-          download_button_text: magnet.download_button_text,
+      const isNew = magnet.id === 'NEW'
+      const saveData = {
+        title: magnet.title,
+        magnet_type: magnet.magnet_type,
+        card_id: magnet.card_id,
+        is_active: magnet.is_active,
+        welcome_email_subject: magnet.welcome_email_subject,
+        welcome_email_body: magnet.welcome_email_body,
+        file_url: magnet.file_url,
+        thank_you_message: magnet.thank_you_message,
+        capture_page_title: magnet.capture_page_title,
+        capture_page_subtitle: magnet.capture_page_subtitle,
+        capture_page_image: magnet.capture_page_image,
+        cover_image_url: magnet.capture_page_image,
+        capture_page_button_text: magnet.capture_page_button_text,
+        capture_page_success_message: magnet.capture_page_success_message,
+        show_download_button: magnet.show_download_button,
+        download_button_text: magnet.download_button_text,
+        form_fields: magnet.form_fields,
+        checklist_items: magnet.checklist_items,
+        discount_config: magnet.discount_config,
+        raffle_config: magnet.raffle_config,
+        wheel_config: magnet.wheel_config,
+        event_config: magnet.event_config,
+        updated_at: new Date().toISOString(),
+      }
 
-          // configs por tipo
-          form_fields: magnet.form_fields,
-          checklist_items: magnet.checklist_items,
-          discount_config: magnet.discount_config,
-          raffle_config: magnet.raffle_config,
-          wheel_config: magnet.wheel_config,
+      let result
+      if (isNew) {
+        // Gera slug único
+        const slug = `\${magnet.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-\${Date.now()}`
+        result = await supabase
+          .from('lead_magnets')
+          .insert({
+            ...saveData,
+            user_id: userId,
+            slug: slug,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+      } else {
+        result = await supabase
+          .from('lead_magnets')
+          .update(saveData)
+          .eq('id', magnet.id)
+          .eq('user_id', userId)
+          .select()
+          .single()
+      }
 
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', magnet.id)
-        .eq('user_id', userId)
-
-      if (error) throw error
+      if (result.error) throw result.error
 
       setHasChanges(false)
       addToast('Lead magnet guardado com sucesso', 'success')
+      
+      // Se era novo, redireciona para o id real
+      if (isNew && result.data) {
+        setTimeout(() => {
+          window.location.href = `/dashboard/lead-magnets/\${result.data.id}`
+        }, 500)
+      }
     } catch (e) {
       console.error(e)
       addToast('Erro ao guardar lead magnet', 'error')
@@ -378,7 +405,18 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                     </div>
                     <div className={styles.field}>
                       <label>Imagem</label>
-                      <input type="text" value={magnet.capture_page_image || ''} onChange={(e) => handleChange('capture_page_image', e.target.value)} />
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input type="text" value={magnet.capture_page_image || ''} onChange={(e) => handleChange('capture_page_image', e.target.value)} placeholder="URL da imagem" style={{ flex: 1 }} />
+                        <button type="button" onClick={() => document.getElementById('webinar-image-input')?.click()} style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                          📷 Upload
+                        </button>
+                        {magnet.capture_page_image && (
+                          <button type="button" onClick={() => handleChange('capture_page_image', '')} style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(239,68,68,0.3)', background: 'transparent', color: '#ef4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+                            🗑
+                          </button>
+                        )}
+                        <input id="webinar-image-input" type="file" accept="image/*" style={{ display: 'none' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const MAX_SIZE = 5 * 1024 * 1024; const sizeMB = (file.size / (1024 * 1024)).toFixed(2); if (file.size > MAX_SIZE) { alert(`❌ Imagem muito grande!\n\nTamanho: ${sizeMB}MB\nMáximo permitido: 5MB\n\nPor favor, redimensiona a imagem e tenta novamente.`); if (e.target) e.target.value = ''; return; } try { const formData = new FormData(); formData.append('file', file); formData.append('type', 'capture_page_image'); const res = await fetch('/api/lead-magnets/upload', { method: 'POST', body: formData, headers: { 'x-user-id': userId } }); const data = await res.json(); if (data.url) handleChange('capture_page_image', data.url); } catch (err) { console.error(err); } finally { if (e.target) e.target.value = ''; } }} />
+                      </div>
                     </div>
                     <div className={styles.field}>
                       <label>Texto do Botão</label>
@@ -436,6 +474,63 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
                   {magnet.capture_page_image && <img src={magnet.capture_page_image} alt="Event" style={{ width: '100%', borderRadius: '8px', marginBottom: '15px', maxHeight: '200px', objectFit: 'cover' }} />}
                   <h2 style={{ margin: '0 0 10px 0', fontSize: '20px', color: '#fff' }}>{magnet.capture_page_title || 'Título'}</h2>
                   <p style={{ margin: '0 0 15px 0', color: '#cbd5e1', fontSize: '14px' }}>{magnet.capture_page_subtitle || 'Subtítulo'}</p>
+
+                  {(magnet as any).event_config && (
+                    <div style={{ background: '#0f172a', padding: '14px', borderRadius: '10px', border: '1px solid #334155', marginBottom: '14px' }}>
+                      <div style={{ fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
+                        Detalhes do Evento
+                      </div>
+
+                      {(magnet as any).event_config.eventType && (
+                        <div style={{ color: '#e2e8f0', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Tipo:</strong> {(magnet as any).event_config.eventType}
+                        </div>
+                      )}
+
+                      {(magnet as any).event_config.timezone && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Timezone:</strong> {(magnet as any).event_config.timezone}
+                        </div>
+                      )}
+
+                      {((magnet as any).event_config.startAt || (magnet as any).event_config.startTime) && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Início:</strong> {(magnet as any).event_config.startAt || '—'} {(magnet as any).event_config.startTime ? `às ${(magnet as any).event_config.startTime}` : ''}
+                        </div>
+                      )}
+
+                      {((magnet as any).event_config.endAt || (magnet as any).event_config.endTime) && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Fim:</strong> {(magnet as any).event_config.endAt || '—'} {(magnet as any).event_config.endTime ? `às ${(magnet as any).event_config.endTime}` : ''}
+                        </div>
+                      )}
+
+                      {(magnet as any).event_config.locationType && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Local:</strong> {(magnet as any).event_config.locationType === 'online' ? 'Online' : 'Presencial'}
+                        </div>
+                      )}
+
+                      {(magnet as any).event_config.joinUrl && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Link:</strong> {(magnet as any).event_config.joinUrl}
+                        </div>
+                      )}
+
+                      {(magnet as any).event_config.address && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 6 }}>
+                          <strong>Morada:</strong> {(magnet as any).event_config.address}
+                        </div>
+                      )}
+
+                      {((magnet as any).event_config.capacity !== undefined && (magnet as any).event_config.capacity !== null && (magnet as any).event_config.capacity !== '') && (
+                        <div style={{ color: '#cbd5e1', fontSize: 13 }}>
+                          <strong>Capacidade:</strong> {(magnet as any).event_config.capacity}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <button style={{ width: '100%', padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600 }}>
                     {magnet.capture_page_button_text || 'Registar-me'}
                   </button>

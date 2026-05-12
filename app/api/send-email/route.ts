@@ -42,6 +42,16 @@ type AttachmentPayload = {
   base64: string
 }
 
+function convertTextToHtml(text: string): string {
+  // Converte \n em <br> e agrupa parágrafos
+  return text
+    .split('\n\n')
+    .map(para => para.replace(/\n/g, '<br>').trim())
+    .filter(para => para.length > 0)
+    .map(para => `<p style="margin: 0 0 12px 0; line-height: 1.6; color: #333;">${para}</p>`)
+    .join('')
+}
+
 function buildRawEmail(params: {
   fromEmail: string
   to: string
@@ -122,7 +132,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const finalBody = String(body).replaceAll('{{leadId}}', String(leadId))
+    const finalBody = convertTextToHtml(String(body).replaceAll('{{leadId}}', String(leadId)))
 
     const atts: AttachmentPayload[] = Array.isArray(attachments) ? attachments : []
     if (atts.length > 5) {

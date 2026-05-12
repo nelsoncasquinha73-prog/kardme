@@ -57,35 +57,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   }
 
   async function handleCreateNew() {
-    setCreatingNew(true)
-    try {
-      const newMagnet = await createLeadMagnet({
-        user_id: userId,
-        slug: generateSlug('Nova Campanha'),
-        title: 'Nova Campanha',
-        magnet_type: 'ebook' as MagnetType,
-        description: '',
-        cover_image_url: '',
-        file_url: '',
-        thank_you_message: 'Obrigado! O teu download vai começar automaticamente.',
-        welcome_email_subject: '',
-        welcome_email_body: '',
-        form_fields: DEFAULT_FORM_FIELDS,
-        is_active: true,
-        views_count: 0,
-        leads_count: 0,
-        raffle_config: { grid_size: 49, prize_description: '', winning_numbers: [] },
-        wheel_config: { slices: DEFAULT_SLICES, capture_before_spin: true, max_spins_per_email: 1 },
-        card_id: null,
-        custom_type_label: null
-      })
-      router.push(`/dashboard/lead-magnets/${newMagnet.id}`)
-    } catch(e: any) {
-      console.error(e)
-      setToast('❌ Erro ao criar campanha')
-      setTimeout(() => setToast(null), 2000)
-      setCreatingNew(false)
-    }
+    router.push('/dashboard/lead-magnets/new')
   }
 
   async function handleDelete(id: string) { 
