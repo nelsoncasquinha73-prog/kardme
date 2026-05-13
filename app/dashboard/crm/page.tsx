@@ -1061,7 +1061,7 @@ const { data, error } = await supabase.from('leads').insert({
       }).select().single()
       if (error) throw error
       setLeads(prev => [data, ...prev])
-      setNewLead({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '', audience: '', origin: '', step: 'Novo' })
+      setNewLead({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '', audience: '', origin: 'Manual', step: 'Novo' })
       setShowAddLeadModal(false)
       addToast('Lead adicionada com sucesso!', 'success')
     } catch (e: any) {
@@ -3930,37 +3930,37 @@ const { data, error } = await supabase.from('leads').insert({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Nome</label>
-                  <input type="text" value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
+                  <input type="text" value={newLead.name} onChange={e => setNewLead(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Email</label>
-                  <input type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
+                  <input type="email" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Telefone</label>
-                  <input type="text" value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} placeholder="+351 912 345 678" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
+                  <input type="text" value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} placeholder="+351 912 345 678" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Zona</label>
-                  <input type="text" value={newLead.zone} onChange={e => setNewLead(p => ({ ...p, zone: e.target.value }))} placeholder="Lisboa, Porto..." style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
+                  <input type="text" value={newLead.zone} onChange={e => setNewLead(p => ({ ...p, zone: e.target.value }))} placeholder="Lisboa, Porto..." style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Audiência</label>
-                  <select value={newLead.audience} onChange={e => setNewLead(p => ({ ...p, audience: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                  <select value={newLead.audience} onChange={e => setNewLead(p => ({ ...p, audience: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }}>
                     <option value="">—</option>
                     {audiences.map(a => (
-                      <option key={a.id} value={a.value || a.id}>{a.emoji ? `${a.emoji} ` : ''}{a.label || a.value || a.id}</option>
+                      <option key={a.id} value={a.id}>{a.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Origem</label>
-                  <select value={newLead.origin} onChange={e => setNewLead(p => ({ ...p, origin: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                  <select value={newLead.origin} onChange={e => setNewLead(p => ({ ...p, origin: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }}>
                     <option value="">Manual</option>
                     {LEAD_SOURCES_DEFAULT.map(src => (
                       <option key={src.value} value={src.value}>{src.label}</option>
@@ -3973,7 +3973,7 @@ const { data, error } = await supabase.from('leads').insert({
 
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Step</label>
-                  <select value={newLead.step} onChange={e => setNewLead(p => ({ ...p, step: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                  <select value={newLead.step} onChange={e => setNewLead(p => ({ ...p, step: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }}>
                     {STEPS.map(st => (
                       <option key={st} value={st}>{st}</option>
                     ))}
@@ -3983,7 +3983,7 @@ const { data, error } = await supabase.from('leads').insert({
 
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>País</label>
-                <select value={newLead.country} onChange={e => setNewLead(p => ({ ...p, country: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                <select value={newLead.country} onChange={e => setNewLead(p => ({ ...p, country: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff', height: '42px', lineHeight: '1.5' }}>
                   {countries.map(c => (
                     <option key={c.id} value={c.name}>{c.name}</option>
                   ))}
