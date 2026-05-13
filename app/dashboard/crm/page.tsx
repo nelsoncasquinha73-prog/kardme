@@ -370,7 +370,7 @@ Melhores cumprimentos,
 
   const [showImportModal, setShowImportModal] = useState(false)
   const [showAddLeadModal, setShowAddLeadModal] = useState(false)
-  const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '' })
+  const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '', audience: '', origin: '', step: 'Novo' })
   const [savingNewLead, setSavingNewLead] = useState(false)
   const [importFileName, setImportFileName] = useState('')
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
@@ -1049,10 +1049,11 @@ const { data, error } = await supabase.from('leads').insert({
         zone: newLead.zone.trim() || null,
         country: newLead.country.trim() || null,
         notes: newLead.notes.trim() || null,
+        audience: newLead.audience.trim() || null,
+        lead_source: newLead.origin.trim() || 'Manual',
+        step: newLead.step || 'Novo',
         card_id: cardIdForInsert,
         user_id: userId,
-        lead_source: 'Manual',
-        step: 'Novo',
         contacted: false,
         marketing_opt_in: false,
         consent_given: false,
@@ -1060,7 +1061,7 @@ const { data, error } = await supabase.from('leads').insert({
       }).select().single()
       if (error) throw error
       setLeads(prev => [data, ...prev])
-      setNewLead({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '' })
+      setNewLead({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '', audience: '', origin: '', step: 'Novo' })
       setShowAddLeadModal(false)
       addToast('Lead adicionada com sucesso!', 'success')
     } catch (e: any) {
@@ -3946,9 +3947,47 @@ const { data, error } = await supabase.from('leads').insert({
                   <input type="text" value={newLead.zone} onChange={e => setNewLead(p => ({ ...p, zone: e.target.value }))} placeholder="Lisboa, Porto..." style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
                 </div>
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Audiência</label>
+                  <select value={newLead.audience} onChange={e => setNewLead(p => ({ ...p, audience: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                    <option value="">—</option>
+                    {audiences.map(a => (
+                      <option key={a.id} value={a.value || a.id}>{a.emoji ? `${a.emoji} ` : ''}{a.label || a.value || a.id}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Origem</label>
+                  <select value={newLead.origin} onChange={e => setNewLead(p => ({ ...p, origin: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                    <option value="">Manual</option>
+                    {LEAD_SOURCES_DEFAULT.map(src => (
+                      <option key={src.value} value={src.value}>{src.label}</option>
+                    ))}
+                    {leadSources.map(src => (
+                      <option key={src.id} value={src.value || src.id}>{src.emoji ? `${src.emoji} ` : ''}{src.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Step</label>
+                  <select value={newLead.step} onChange={e => setNewLead(p => ({ ...p, step: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                    {STEPS.map(st => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>País</label>
-                <input type="text" value={newLead.country} onChange={e => setNewLead(p => ({ ...p, country: e.target.value }))} placeholder="Portugal" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }} />
+                <select value={newLead.country} onChange={e => setNewLead(p => ({ ...p, country: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, boxSizing: 'border-box' as const, color: '#111827', background: '#fff' }}>
+                  {countries.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4, color: '#374151' }}>Notas</label>
