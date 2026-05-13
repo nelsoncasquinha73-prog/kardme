@@ -165,7 +165,7 @@ export default function FormPage() {
       <div className={styles.container}>
         <div className={styles.card}>
           <h1>✅ Obrigado!</h1>
-          <p>{magnet.thank_you_message || 'A tua resposta foi guardada com sucesso.'}</p>
+          <p>{magnet.capture_page_success_message || magnet.thank_you_message || 'A tua resposta foi guardada com sucesso.'}</p>
         </div>
       </div>
     )
@@ -176,12 +176,18 @@ export default function FormPage() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        {magnet.cover_image_url && (
-          <img src={magnet.cover_image_url} alt={magnet.title} className={styles.coverImage} />
+        {(magnet.capture_page_image || magnet.cover_image_url) && (
+          <img
+            src={(magnet.capture_page_image || magnet.cover_image_url) as any}
+            alt={magnet.title}
+            className={styles.coverImage}
+          />
         )}
 
-        <h1>{magnet.title}</h1>
-        {magnet.description && <p className={styles.description}>{magnet.description}</p>}
+        <h1>{magnet.capture_page_title || magnet.title}</h1>
+        {(magnet.capture_page_subtitle || magnet.description) && (
+          <p className={styles.description}>{magnet.capture_page_subtitle || magnet.description}</p>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {visibleFields.map((field) => (
