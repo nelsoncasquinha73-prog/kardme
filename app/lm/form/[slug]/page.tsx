@@ -32,21 +32,8 @@ export default function FormPage() {
 
       if (error && error.code !== 'PGRST116') throw error
       if (data) {
-        // Buscar o formulário associado
-        let formFields: FormField[] = []
-        if (data.form_id) {
-          const { data: formData, error: formError } = await supabase
-            .from('lead_magnet_forms')
-            .select('fields')
-            .eq('id', data.form_id)
-            .single()
-          const rawFields: any = formData?.fields
-          if (Array.isArray(rawFields)) formFields = rawFields
-          else if (typeof rawFields === 'string') {
-            try { formFields = JSON.parse(rawFields) } catch { formFields = [] }
-          } else formFields = []
-        }
-        
+        // form_fields vem diretamente do lead_magnets
+        const formFields = Array.isArray(data.form_fields) ? data.form_fields : []
         const formWithFields = {
           ...data,
           form_fields: formFields
