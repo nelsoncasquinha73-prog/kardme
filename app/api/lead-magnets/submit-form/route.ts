@@ -2,6 +2,20 @@ import { supabaseServer } from '@/lib/supabaseServer'
 import { sendEmail } from '@/lib/email'
 import { NextResponse } from 'next/server'
 
+
+// Helper: mapear fieldId para label usando form_fields do magnet
+function mapFormDataToLabels(formData: any, formFields: any[] | undefined): Record<string, any> {
+  if (!formFields || !Array.isArray(formFields)) return formData
+  
+  const fieldMap = new Map(formFields.map((f: any) => [f.id, f.label || f.id]))
+  
+  return Object.entries(formData).reduce((acc, [key, value]) => {
+    const label = fieldMap.get(key) || key
+    acc[label] = value
+    return acc
+  }, {} as Record<string, any>)
+}
+
 function normalizeEmailBody(body: string): string {
   if (!body) return ''
   let normalized = body.replace(/\r\n/g, '\n')
@@ -28,7 +42,7 @@ export async function POST(request: Request) {
     // 1) Buscar o lead magnet
     const { data: magnet, error: magnetError } = await supabase
       .from('lead_magnets')
-      .select('id, user_id, title, card_id, welcome_email_subject, welcome_email_body, file_url')
+      .select('id, user_id, title, card_id, welcome_email_subject, welcome_email_body, file_url, form_fields')
       .eq('slug', slug)
       .eq('is_active', true)
       .single()
@@ -45,11 +59,14 @@ export async function POST(request: Request) {
     const leadEmail = formData.email || null
     const leadPhone = formData.phone || null
 
-    // Montar resumo do formulário
-    const formDataSummary = Object.entries(formData)
-      .map(([key, value]) => {
+    // Mapear fieldIds para labels usando form_fields do magnet
+    const mappedFormData = mapFormDataToLabels(formData, magnet.form_fields as any)
+    
+    // Montar resumo do formulário com labels legíveis
+    const formDataSummary = Object.entries(mappedFormData)
+      .map(([label, value]) => {
         const displayValue = Array.isArray(value) ? value.join(', ') : value
-        return `${key}: ${displayValue}`
+        return `${label}: ${displayValue}`
       })
       .join('\n')
 
