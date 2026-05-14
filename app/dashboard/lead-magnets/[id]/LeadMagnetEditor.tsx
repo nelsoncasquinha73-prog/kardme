@@ -297,7 +297,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       // Se era novo, redireciona para o id real
       if (isNew && result.data) {
         setTimeout(() => {
-          window.location.href = `/dashboard/lead-magnets/\${result.data.id}`
+          window.location.href = `/dashboard/lead-magnets/${result.data.id}`
         }, 500)
       }
     } catch (e) {
