@@ -65,7 +65,7 @@ const MAGNET_TYPES = [
   { id: 'guide', label: '📖 Guia', icon: '📖' },
   { id: 'checklist', label: '✅ Checklist', icon: '✅' },
   { id: 'discount', label: '🏷️ Desconto', icon: '🏷️' },
-  { id: 'webinar', label: '🎥 Webinar', icon: '🎥' },
+  { id: 'webinar', label: '🎥 Eventos e Webinars', icon: '🎥' },
   { id: 'form', label: '📋 Formulário', icon: '📋' },
   { id: 'raffle', label: '🎰 Sorteio', icon: '🎰' },
   { id: 'wheel', label: '🎡 Roda da Sorte', icon: '🎡' },
