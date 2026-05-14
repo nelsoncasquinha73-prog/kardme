@@ -77,7 +77,7 @@ export default function LeadMagnetPreview({ magnet }: { magnet: any }) {
                     ? 'Apresentação'
                     : (magnet?.event_config?.eventType || 'webinar') === 'event'
                     ? 'Evento'
-                    : 'Webinar'}
+                    : 'Eventos e Webinars'}
                 </div>
               </div>
 

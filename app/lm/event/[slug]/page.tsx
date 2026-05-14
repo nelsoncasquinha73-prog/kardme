@@ -79,7 +79,7 @@ export default function EventLandingPage() {
                   ? 'Apresentação'
                   : cfg.eventType === 'event'
                   ? 'Evento'
-                  : 'Webinar'}
+                  : 'Eventos e Webinars'}
               </div>
             </div>
 
