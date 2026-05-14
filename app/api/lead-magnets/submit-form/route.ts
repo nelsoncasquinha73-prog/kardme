@@ -27,6 +27,37 @@ function normalizeEmailBody(body: string): string {
   return htmlParagraphs.join('')
 }
 
+
+// Helper: extrair name, email, phone dos form_fields e formData
+function extractLeadInfo(formData: any, formFields: any[] | undefined): { name: string; email: string | null; phone: string | null } {
+  let name = 'Sem nome'
+  let email: string | null = null
+  let phone: string | null = null
+
+  if (!formFields || !Array.isArray(formFields)) {
+    return { name, email, phone }
+  }
+
+  // Procurar fields por tipo
+  for (const field of formFields) {
+    const value = formData[field.id]
+    if (!value) continue
+
+    if (field.type === 'email' && !email) {
+      email = String(value).trim()
+    } else if (field.type === 'phone' && !phone) {
+      phone = String(value).trim()
+    } else if (!name || name === 'Sem nome') {
+      // Primeiro field text/textarea ou label contendo "nome"
+      if (field.type === 'text' || field.type === 'textarea' || field.label?.toLowerCase().includes('nome')) {
+        name = String(value).trim()
+      }
+    }
+  }
+
+  return { name, email, phone }
+}
+
 export async function POST(request: Request) {
   try {
     const { slug, formData } = await request.json()
@@ -54,10 +85,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2) Preparar dados do lead
-    const leadName = formData.name || 'Sem nome'
-    const leadEmail = formData.email || null
-    const leadPhone = formData.phone || null
+    // 2) Preparar dados do lead (extrair automaticamente dos form_fields)
+    const { name: leadName, email: leadEmail, phone: leadPhone } = extractLeadInfo(formData, magnet.form_fields as any)
 
     // Mapear fieldIds para labels usando form_fields do magnet
     const mappedFormData = mapFormDataToLabels(formData, magnet.form_fields as any)
