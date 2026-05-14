@@ -38,19 +38,52 @@ function extractLeadInfo(formData: any, formFields: any[] | undefined): { name: 
     return { name, email, phone }
   }
 
-  // Procurar fields por tipo
+  const norm = (v: any) => {
+    if (v == null) return ''
+    if (Array.isArray(v)) return v.join(', ')
+    if (typeof v === 'object') {
+      if (typeof (v as any).number === 'string') return (v as any).number
+      if (typeof (v as any).value === 'string') return (v as any).value
+      return JSON.stringify(v)
+    }
+    return String(v)
+  }
+
+  // 1) primeira passagem: por type
   for (const field of formFields) {
-    const value = formData[field.id]
+    const raw = (formData as any)?.[field.id]
+    const value = norm(raw).trim()
     if (!value) continue
 
-    if (field.type === 'email' && !email) {
-      email = String(value).trim()
-    } else if (field.type === 'phone' && !phone) {
-      phone = String(value).trim()
-    } else if (!name || name === 'Sem nome') {
-      // Primeiro field text/textarea ou label contendo "nome"
-      if (field.type === 'text' || field.type === 'textarea' || field.label?.toLowerCase().includes('nome')) {
-        name = String(value).trim()
+    if (field.type === 'email' && !email) email = value
+    if (field.type === 'phone' && !phone) phone = value
+
+    const label = ((field.label || '') as string).toLowerCase()
+    if ((field.type === 'text' || field.type === 'textarea' || label.includes('nome')) && (name === 'Sem nome' || !name)) {
+      name = value
+    }
+  }
+
+  // 2) fallback: procurar phone por label (telemóvel/telefone/whatsapp)
+  if (!phone) {
+    for (const field of formFields) {
+      const label = ((field.label || '') as string).toLowerCase()
+      if (!label) continue
+
+      const looksLikePhone =
+        label.includes('telem') ||
+        label.includes('telef') ||
+        label.includes('whats') ||
+        label.includes('celular') ||
+        label.includes('contacto')
+
+      if (!looksLikePhone) continue
+
+      const raw = (formData as any)?.[field.id]
+      const value = norm(raw).trim()
+      if (value) {
+        phone = value
+        break
       }
     }
   }
