@@ -37,7 +37,6 @@ interface LeadMagnet {
   updated_at: string
   form_fields?: any[]
   checklist_items?: any[]
-  checklist_items?: any[]
   discount_config?: any
   raffle_config?: any
   wheel_config?: any
@@ -262,7 +261,6 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
         show_download_button: magnet.show_download_button,
         download_button_text: magnet.download_button_text,
         form_fields: magnet.form_fields,
-        checklist_items: (magnet as any).checklist_items,
         checklist_items: magnet.checklist_items,
         discount_config: magnet.discount_config,
         raffle_config: magnet.raffle_config,

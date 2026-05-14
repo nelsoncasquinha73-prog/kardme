@@ -33,7 +33,6 @@ interface LeadMagnet {
   raffle_config?: any
   wheel_config?: any
   event_config?: any
-  card_id?: string | null
 }
 
 export default function LeadMagnetPage({ params }: { params: Promise<{ id: string }> }) {
