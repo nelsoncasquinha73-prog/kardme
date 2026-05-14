@@ -314,6 +314,17 @@ export default function FormPage() {
             </div>
           ))}
 
+          <div className={styles.formGroup} style={{ marginTop: 10 }}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+              />
+              Autorizo o contacto para dar seguimento ao meu pedido e comunicação de novidades.
+            </label>
+          </div>
+
           <button type="submit" disabled={submitting} className={styles.submitButton}>
             {submitting ? 'A enviar...' : 'Enviar'}
           </button>
