@@ -268,7 +268,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       let result
       if (isNew) {
         // Gera slug único
-        const slug = await generateUniqueSlug(magnet.title)
+        const slug = `\${magnet.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-\${Date.now()}`
         result = await supabase
           .from('lead_magnets')
           .insert({
