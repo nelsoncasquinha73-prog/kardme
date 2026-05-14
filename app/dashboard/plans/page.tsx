@@ -33,6 +33,10 @@ export default function PlansPage() {
   const [includeCRMProMonthly, setIncludeCRMProMonthly] = useState(false)
   const [includeCRMProYearly, setIncludeCRMProYearly] = useState(false)
   const [hasPublishedCard, setHasPublishedCard] = useState(false)
+  const [quantityMonthly, setQuantityMonthly] = useState(1)
+  const [quantityYearly, setQuantityYearly] = useState(1)
+  const [quantityCRMMonthly, setQuantityCRMMonthly] = useState(1)
+  const [quantityCRMYearly, setQuantityCRMYearly] = useState(1)
 
 
   const startCheckout = async (billing: 'monthly' | 'yearly', upsell_cycle?: string | null) => {
@@ -47,9 +51,21 @@ export default function PlansPage() {
         return
       }
 
+      let quantity = 1
+      if (billing === 'monthly' && upsell_cycle === 'monthly') {
+        quantity = quantityCRMMonthly
+      } else if (billing === 'yearly' && upsell_cycle === 'yearly') {
+        quantity = quantityCRMYearly
+      } else if (billing === 'monthly') {
+        quantity = quantityMonthly
+      } else if (billing === 'yearly') {
+        quantity = quantityYearly
+      }
+
       const payload: any = {
         user_id: authData.user.id,
         billing,
+        quantity,
         upsell_crm_pro: upsell_cycle ? true : false,
         upsell_cycle: upsell_cycle || null,
       }
@@ -126,10 +142,11 @@ export default function PlansPage() {
     letterSpacing: 0.5,
   }
 
-  const calculateTotal = (billing: 'monthly' | 'yearly', includeCRM: boolean) => {
+  const calculateTotal = (billing: 'monthly' | 'yearly', includeCRM: boolean, quantity: number = 1) => {
     const basePrice = billing === 'monthly' ? 6.99 : 69
     const crmPrice = billing === 'monthly' ? 5.99 : 59
-    const total = includeCRM ? basePrice + crmPrice : basePrice
+    const pricePerUnit = includeCRM ? basePrice + crmPrice : basePrice
+    const total = pricePerUnit * quantity
     return total.toFixed(2)
   }
 
@@ -174,10 +191,24 @@ export default function PlansPage() {
             </span>
           </label>
 
+          <div>
+            <label style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 8, display: 'block' }}>
+              Quantidade de cartões: <strong>{quantityMonthly}</strong>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={quantityMonthly}
+              onChange={(e) => setQuantityMonthly(parseInt(e.target.value))}
+              style={{ width: '100%', cursor: 'pointer' }}
+            />
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
             <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/mês</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
-              €{calculateTotal('monthly', includeCRMProMonthly)}
+              €{calculateTotal('monthly', includeCRMProMonthly, quantityMonthly)}
             </p>
           </div>
 
@@ -238,10 +269,24 @@ export default function PlansPage() {
             </span>
           </label>
 
+          <div>
+            <label style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 8, display: 'block' }}>
+              Quantidade de cartões: <strong>{quantityYearly}</strong>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={quantityYearly}
+              onChange={(e) => setQuantityYearly(parseInt(e.target.value))}
+              style={{ width: '100%', cursor: 'pointer' }}
+            />
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
             <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/ano</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
-              €{calculateTotal('yearly', includeCRMProYearly)}
+              €{calculateTotal('yearly', includeCRMProYearly, quantityYearly)}
             </p>
           </div>
 
@@ -292,10 +337,24 @@ export default function PlansPage() {
             </div>
           </div>
 
+          <div>
+            <label style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 8, display: 'block' }}>
+              Quantidade de cartões: <strong>{quantityCRMMonthly}</strong>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={quantityCRMMonthly}
+              onChange={(e) => setQuantityCRMMonthly(parseInt(e.target.value))}
+              style={{ width: '100%', cursor: 'pointer' }}
+            />
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
             <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/mês</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
-              €5,99
+              €{(5.99 * quantityCRMMonthly).toFixed(2)}
             </p>
           </div>
 
@@ -355,10 +414,24 @@ export default function PlansPage() {
             </div>
           </div>
 
+          <div>
+            <label style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 8, display: 'block' }}>
+              Quantidade de cartões: <strong>{quantityCRMYearly}</strong>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={quantityCRMYearly}
+              onChange={(e) => setQuantityCRMYearly(parseInt(e.target.value))}
+              style={{ width: '100%', cursor: 'pointer' }}
+            />
+          </div>
+
           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
             <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Total/ano</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
-              €59,00
+              €{(59 * quantityCRMYearly).toFixed(2)}
             </p>
           </div>
 
