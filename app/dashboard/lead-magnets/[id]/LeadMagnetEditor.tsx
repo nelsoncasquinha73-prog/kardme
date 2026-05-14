@@ -314,7 +314,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
         .from('lead_magnets')
         .insert({
           user_id: userId,
-          slug: `\${magnet.slug}-copia-\${Date.now()}`,
+          slug: `${magnet.slug}-copia-${Date.now()}`,
           title: `\${magnet.title} (cópia)`,
           magnet_type: magnet.magnet_type,
           card_id: magnet.card_id,
