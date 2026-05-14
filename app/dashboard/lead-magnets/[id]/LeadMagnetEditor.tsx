@@ -308,14 +308,45 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
     }
   }
 
+
+  // Gera slug único: base-123a (3 dígitos + 1 letra)
+  const generateUniqueSlug = async (title: string): Promise<string> => {
+    const slugify = (str: string) => str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    
+    const base = slugify(title)
+    
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const num = Math.floor(Math.random() * 900) + 100 // 100-999
+      const letter = String.fromCharCode(Math.floor(Math.random() * 26) + 97) // a-z
+      const suffix = `${num}${letter}`
+      const candidate = `${base}-${suffix}`
+      
+      // Verifica se já existe (global)
+      const { data } = await supabase
+        .from('lead_magnets')
+        .select('id')
+        .eq('slug', candidate)
+        .single()
+      
+      if (!data) return candidate // Não existe, usa este
+    }
+    
+    throw new Error('Não consegui gerar slug único após 10 tentativas')
+  }
+
+
   const handleDuplicate = async () => {
     try {
       const { error } = await supabase
         .from('lead_magnets')
         .insert({
           user_id: userId,
-          slug: `${magnet.slug}-copia-${Date.now()}`,
-          title: `\${magnet.title} (cópia)`,
+          slug: await generateUniqueSlug(magnet.title),
+          title: `${magnet.title} (cópia)`,
           magnet_type: magnet.magnet_type,
           card_id: magnet.card_id,
           is_active: false,
