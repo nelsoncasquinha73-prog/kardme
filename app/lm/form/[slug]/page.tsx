@@ -163,7 +163,36 @@ export default function FormPage() {
   if (submitted) {
     return (
       <div className={styles.container}>
-        <div className={styles.card}>
+        <div className={styles.card} style={{ position: 'relative' }}>
+          <button
+            onClick={() => {
+              setSubmitted(false)
+              setFormData({})
+              setErrors({})
+            }}
+            style={{
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '28px',
+              cursor: 'pointer',
+              padding: '0',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,1)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
           <h1>✅ Obrigado!</h1>
           <p>{magnet.capture_page_success_message || magnet.thank_you_message || 'A tua resposta foi guardada com sucesso.'}</p>
         </div>
