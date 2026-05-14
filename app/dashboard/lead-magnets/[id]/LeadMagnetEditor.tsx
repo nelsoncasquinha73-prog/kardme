@@ -37,6 +37,7 @@ interface LeadMagnet {
   updated_at: string
   form_fields?: any[]
   checklist_items?: any[]
+  checklist_items?: any[]
   discount_config?: any
   raffle_config?: any
   wheel_config?: any
@@ -181,10 +182,12 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   })
 
   useEffect(() => {
-    if (initialMagnet) {
+    console.log('useEffect sync check:', { initialId: initialMagnet?.id, currentId: magnet.id, willSync: initialMagnet && initialMagnet.id !== magnet.id })
+    if (initialMagnet && initialMagnet.id !== magnet.id) {
+      console.log('SYNCING magnet from initialMagnet')
       setMagnet(initialMagnet)
     }
-  }, [initialMagnet])
+  }, [initialMagnet, magnet.id])
 
   useEffect(() => {
     if (!userId) return
@@ -216,11 +219,13 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   }, [userId, addToast])
 
   const handleChange = useCallback((field: keyof LeadMagnet, value: any) => {
+    console.log('handleChange:', field, value?.length ? `[array with ${value.length} items]` : value)
     setMagnet(prev => ({ ...prev, [field]: value }))
     setHasChanges(true)
   }, [])
 
   const handleTypeChange = (typeId: string) => {
+    if (typeId === magnet.magnet_type) return
     console.log('handleTypeChange typeId:', typeId)
     const preset = PRESETS[typeId] || {}
     setMagnet(prev => ({
@@ -257,6 +262,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
         show_download_button: magnet.show_download_button,
         download_button_text: magnet.download_button_text,
         form_fields: magnet.form_fields,
+        checklist_items: (magnet as any).checklist_items,
         checklist_items: magnet.checklist_items,
         discount_config: magnet.discount_config,
         raffle_config: magnet.raffle_config,
@@ -660,8 +666,8 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>✅ Itens da Checklist</h3>
               <ChecklistConfigurator
-                config={magnet.form_fields || null}
-                onChange={(items) => handleChange('form_fields' as any, items)}
+                config={(magnet as any).checklist_items || null}
+                onChange={(items) => handleChange('checklist_items' as any, items)}
               />
             </div>
           )}

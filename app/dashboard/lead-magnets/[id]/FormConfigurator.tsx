@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FiPlus, FiTrash2, FiChevronDown } from 'react-icons/fi'
 
 export type FormField = {
@@ -20,14 +20,37 @@ interface FormConfiguratorProps {
 export default function FormConfigurator({ config, onChange }: FormConfiguratorProps) {
   const [fields, setFields] = useState<FormField[]>(config || [])
 
-  useEffect(() => {
-    setFields(config || [])
+  const uid = () => `field-${Date.now()}-${Math.random()}`
+
+  const normalizedConfig = useMemo(() => {
+    const next = (config || []).map((f: any) => ({ ...f, id: f?.id || uid() }))
+    return next
   }, [config])
+
+  useEffect(() => {
+    const hasMissing = (config || []).some((f: any) => !f?.id)
+    if (hasMissing) {
+      onChange(normalizedConfig as any)
+      setFields(normalizedConfig as any)
+    }
+  }, [config])
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const next = config || []
+    const nextIds = next.map((f) => f.id).join('|')
+    const currIds = fields.map((f) => f.id).join('|')
+
+    // Só sincroniza quando a estrutura mudou (add/remove/reorder)
+    if (next.length !== fields.length || nextIds !== currIds) {
+      setFields(next)
+    }
+  }, [config, fields])
 
   const addField = () => {
     const newField: FormField = {
-      id: `field-${Date.now()}`,
-      label: 'Nova pergunta',
+      id: `field-${Date.now()}-${Math.random()}`,
+      label: '',
       type: 'text',
       required: true,
       placeholder: '',
@@ -38,7 +61,9 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
   }
 
   const updateField = (id: string, updates: Partial<FormField>) => {
+    console.log('🔵 updateField:', { targetId: id, currentFieldIds: fields.map(f => f.id), updates })
     const updated = fields.map((f) => (f.id === id ? { ...f, ...updates } : f))
+    console.log('🟢 result:', updated.map(f => ({ id: f.id, label: f.label })))
     setFields(updated)
     onChange(updated)
   }
@@ -95,6 +120,7 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
         </span>
         <button
           onClick={addField}
+          disabled={editingId !== null}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -102,11 +128,11 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
             padding: '8px 12px',
             borderRadius: 6,
             border: 'none',
-            background: '#10b981',
+            background: editingId !== null ? '#6b7280' : '#10b981',
             color: '#fff',
             fontSize: 12,
             fontWeight: 600,
-            cursor: 'pointer',
+            cursor: editingId !== null ? 'not-allowed' : 'pointer',
           }}
         >
           <FiPlus size={14} /> Adicionar pergunta
@@ -148,7 +174,7 @@ export default function FormConfigurator({ config, onChange }: FormConfiguratorP
                 type="text"
                 value={field.label}
                 onChange={(e) => updateField(field.id, { label: e.target.value })}
-                placeholder="Pergunta"
+                placeholder="Escreve a pergunta (ex: Qual é o teu objetivo?)"
                 style={{
                   width: '100%',
                   padding: '8px 10px',

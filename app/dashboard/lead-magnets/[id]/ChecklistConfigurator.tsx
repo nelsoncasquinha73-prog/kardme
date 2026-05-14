@@ -21,26 +21,31 @@ export default function ChecklistConfigurator({ config, onChange }: ChecklistCon
     setItems(config || [])
   }, [config])
 
+  const uid = () => {
+    // IDs únicos mesmo com cliques rápidos
+    // @ts-ignore
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+    return `${Date.now()}-${Math.random()}`
+  }
+
+
   const addItem = () => {
     const newItem: ChecklistItem = {
-      id: `item-${Date.now()}`,
+      id: `item-${Date.now()}-${Math.random()}`,
       text: 'Novo item',
       completed: false,
     }
     const updated = [...items, newItem]
-    setItems(updated)
     onChange(updated)
   }
 
   const updateItem = (id: string, text: string) => {
     const updated = items.map((item) => (item.id === id ? { ...item, text } : item))
-    setItems(updated)
     onChange(updated)
   }
 
   const removeItem = (id: string) => {
     const updated = items.filter((item) => item.id !== id)
-    setItems(updated)
     onChange(updated)
   }
 

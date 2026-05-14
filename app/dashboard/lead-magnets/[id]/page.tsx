@@ -27,6 +27,13 @@ interface LeadMagnet {
   leads_count: number
   created_at: string
   updated_at: string
+  form_fields?: any[]
+  checklist_items?: any[]
+  discount_config?: any
+  raffle_config?: any
+  wheel_config?: any
+  event_config?: any
+  card_id?: string | null
 }
 
 export default function LeadMagnetPage({ params }: { params: Promise<{ id: string }> }) {
