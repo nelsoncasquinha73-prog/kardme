@@ -15,6 +15,7 @@ export default function FormPage() {
   const [submitted, setSubmitted] = useState(false)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [consent, setConsent] = useState(false)
 
   useEffect(() => {
     loadMagnet()
@@ -99,6 +100,11 @@ export default function FormPage() {
       return
     }
 
+    if (!consent) {
+      alert('Tens de autorizar para podermos entrar em contacto contigo.')
+      return
+    }
+
     setSubmitting(true)
     try {
       const formDataSummary = visibleFields
@@ -115,6 +121,7 @@ export default function FormPage() {
         body: JSON.stringify({
           slug: magnet!.slug,
           formData,
+          marketing_opt_in: consent,
         }),
       })
 
@@ -169,6 +176,7 @@ export default function FormPage() {
               setSubmitted(false)
               setFormData({})
               setErrors({})
+              setConsent(false)
             }}
             style={{
               position: 'absolute',

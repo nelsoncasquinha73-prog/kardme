@@ -27,6 +27,7 @@ export default function DiscountPage() {
   const [magnet, setMagnet] = useState<LeadMagnet | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [consent, setConsent] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -65,6 +66,11 @@ export default function DiscountPage() {
     // Validação básica: email obrigatório
     if (!formData.email) {
       setErrors({ email: 'Email é obrigatório' })
+      return
+    }
+
+    if (!consent) {
+      alert('Tens de autorizar para podermos entrar em contacto contigo.')
       return
     }
 
