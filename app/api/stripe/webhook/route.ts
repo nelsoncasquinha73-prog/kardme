@@ -76,6 +76,20 @@ async function updateCRMProAddon(userId: string, active: boolean, subscriptionId
 }
 
 
+
+async function updatePublishedCardLimit(userId: string, limit: number) {
+  try {
+    const safe = Math.max(1, Math.min(50, Math.floor(limit || 1)))
+    await supabaseAdmin
+      .from('profiles')
+      .update({ published_card_limit: safe, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+    console.log('published_card_limit updated', { userId, safe })
+  } catch (err) {
+    console.error('Error updating published_card_limit:', err)
+  }
+}
+
 async function getUserByCustomerId(customerId: string) {
   try {
     const { data: subRow } = await supabaseAdmin
@@ -191,6 +205,12 @@ export async function POST(req: Request) {
             billing_email: session.customer_details?.email || null,
             updated_at: new Date().toISOString(),
           })
+
+
+          // Atualizar limite de cartões publicados com base na quantity comprada
+          const qtyFromSession = parseInt((session.metadata?.quantity as string) || '1', 10) || 1
+          await updatePublishedCardLimit(userId, qtyFromSession)
+
         }
       }
 
@@ -452,6 +472,13 @@ export async function POST(req: Request) {
         if (isCRMPro) {
           const isActive = event.type !== 'customer.subscription.deleted' && sub.status === 'active'
           await updateCRMProAddon(row.user_id, isActive)
+        }
+
+
+        const purchaseType = (sub as any).metadata?.purchase_type || null
+        if (purchaseType === 'pro_subscription') {
+          const qtyFromSub = (sub.items?.data?.[0]?.quantity as number | undefined) || 1
+          await updatePublishedCardLimit(row.user_id, qtyFromSub)
         }
 
         const interval = sub.items?.data?.[0]?.price?.recurring?.interval || null
