@@ -10,16 +10,22 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { user_id, billing, upsell_crm_pro, upsell_cycle } = body as {
+    const { user_id, billing, upsell_crm_pro, upsell_cycle, quantity } = body as {
       user_id: string
       billing: 'monthly' | 'yearly'
       upsell_crm_pro?: boolean
       upsell_cycle?: string | null
+      quantity?: number
     }
 
     if (!user_id) return NextResponse.json({ error: 'Missing user_id' }, { status: 400 })
     if (billing !== 'monthly' && billing !== 'yearly')
       return NextResponse.json({ error: 'Invalid billing' }, { status: 400 })
+
+    const qty = Number.isFinite(quantity as any) ? Number(quantity) : 1
+    if (!Number.isInteger(qty) || qty < 1 || qty > 50) {
+      return NextResponse.json({ error: 'Invalid quantity (1-50)' }, { status: 400 })
+    }
 
     const priceId =
       billing === 'monthly'
@@ -59,10 +65,10 @@ export async function POST(req: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
     // 2) build line items
-    const lineItems: any[] = [{ price: priceId, quantity: 1 }]
+    const lineItems: any[] = [{ price: priceId, quantity: qty }]
 
     if (upsell_crm_pro && crmProPriceId) {
-      lineItems.push({ price: crmProPriceId, quantity: 1 })
+      lineItems.push({ price: crmProPriceId, quantity: qty })
     }
 
     // 3) create checkout session
@@ -77,6 +83,7 @@ export async function POST(req: Request) {
           purchase_type: 'pro_subscription',
           billing,
           upsell_crm_pro: upsell_crm_pro ? 'true' : 'false',
+        quantity: String(qty),
         },
       },
       success_url: `${siteUrl}/dashboard?checkout=success`,
@@ -86,6 +93,7 @@ export async function POST(req: Request) {
         purchase_type: 'pro_subscription',
         billing,
         upsell_crm_pro: upsell_crm_pro ? 'true' : 'false',
+        quantity: String(qty),
       },
     })
 
