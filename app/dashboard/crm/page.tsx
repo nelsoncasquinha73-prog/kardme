@@ -401,6 +401,36 @@ Melhores cumprimentos,
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const [showImportModal, setShowImportModal] = useState(false)
+
+
+  const toolbarBtnPrimary: React.CSSProperties = {
+    padding: '10px 16px',
+    height: 42,
+    borderRadius: 10,
+    border: 'none',
+    fontWeight: 900,
+    cursor: 'pointer',
+    fontSize: 13,
+    whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+  }
+
+  const toolbarBtnSecondary: React.CSSProperties = {
+    padding: '10px 16px',
+    height: 42,
+    borderRadius: 10,
+    border: 'none',
+    fontWeight: 900,
+    cursor: 'pointer',
+    fontSize: 13,
+    whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+  }
+
   const [showAddLeadModal, setShowAddLeadModal] = useState(false)
   const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', zone: '', country: 'Portugal', notes: '', audience: '', origin: '', step: 'Novo' })
   const [savingNewLead, setSavingNewLead] = useState(false)
@@ -2238,7 +2268,8 @@ const { data, error } = await supabase.from('leads').insert({
         <button
           onClick={() => setShowImportModal(true)}
           style={{
-            padding: '10px 14px',
+            padding: '10px 16px',
+            height: 42,
             borderRadius: 10,
             background: '#111827',
             color: '#ffffff',
@@ -2247,6 +2278,9 @@ const { data, error } = await supabase.from('leads').insert({
             cursor: 'pointer',
             fontSize: 13,
             whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
           📥 Importar (CSV)
@@ -2255,7 +2289,8 @@ const { data, error } = await supabase.from('leads').insert({
         <button
           onClick={() => exportCSV()}
           style={{
-            padding: '10px 14px',
+            padding: '10px 16px',
+            height: 42,
             borderRadius: 10,
             background: '#e5e7eb',
             color: '#111827',
@@ -2264,6 +2299,9 @@ const { data, error } = await supabase.from('leads').insert({
             cursor: 'pointer',
             fontSize: 13,
             whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
           ⬇️ Exportar (CSV)
