@@ -331,6 +331,38 @@ Melhores cumprimentos,
 
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
+
+  const exportCSV = () => {
+    const rows = (filteredLeads || []).map((l: any) => ({
+      nome: l.name || '',
+      email: l.email || '',
+      telefone: l.phone || '',
+      zona: l.zone || '',
+      pais: l.country || '',
+      step: l.step || '',
+      origem: l.lead_source || '',
+      cartao_id: l.card_id || '',
+      marketing_opt_in: (l as any).marketing_opt_in ?? '',
+      created_at: l.created_at || '',
+      notas: l.notes || '',
+    }))
+
+    const headers = Object.keys(rows[0] || { nome: '', email: '' })
+    const escape = (v: any) => `"${String(v ?? '').replaceAll('"', '""')}"`
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => headers.map(h => escape((r as any)[h])).join(',')),
+    ].join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `leads-${new Date().toISOString().slice(0,10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false)
   const [showBulkEmailEditorMode, setShowBulkEmailEditorMode] = useState(false)
   const [bulkEmailEditorBroadcast, setBulkEmailEditorBroadcast] = useState<any>(null)
@@ -2200,6 +2232,41 @@ const { data, error } = await supabase.from('leads').insert({
           }}
         >
           ➕ Lead
+        </button>
+
+
+        <button
+          onClick={() => setShowImportModal(true)}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: '#111827',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 900,
+            cursor: 'pointer',
+            fontSize: 13,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          📥 Importar (CSV)
+        </button>
+
+        <button
+          onClick={() => exportCSV()}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: '#e5e7eb',
+            color: '#111827',
+            border: 'none',
+            fontWeight: 900,
+            cursor: 'pointer',
+            fontSize: 13,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ⬇️ Exportar (CSV)
         </button>
 
 
