@@ -137,6 +137,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
   const removeButton = (id: string) => updateSettings({ buttons: buttons.filter((b) => b.id !== id) })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const pdfInputRef = useRef<HTMLInputElement | null>(null)
 
   const pickFileFor = (buttonId: string) => {
     if (fileInputRef.current) {
@@ -145,6 +146,15 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
       fileInputRef.current.click()
     }
   }
+  const pickPdfFor = (buttonId: string) => {
+    if (pdfInputRef.current) {
+      pdfInputRef.current.dataset.targetId = buttonId
+      pdfInputRef.current.value = ''
+      pdfInputRef.current.click()
+    }
+  }
+
+
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -163,12 +173,16 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
       const safeTargetId = safeSeg(targetId)
       const path = `cards/${safeCardId}/cta-icons/${safeTargetId}-${Date.now()}.${ext}`
 
+      console.log('[CTA PDF] bucket/path:', bucket, path)
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
         upsert: true,
         contentType: file.type,
         cacheControl: '3600',
       })
-      if (upErr) throw upErr
+      if (upErr) {
+        console.error('[CTA PDF] upload error:', upErr)
+        throw upErr
+      }
 
       const { data } = supabase.storage.from(bucket).getPublicUrl(path)
       const publicUrl = data?.publicUrl
@@ -190,6 +204,54 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
     }
   }
 
+  const onPdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    const targetId = e.target.dataset.targetId
+    if (!file || !targetId) return
+
+    try {
+      const isPdf =
+        file.type === 'application/pdf' ||
+        (file.name || '').toLowerCase().endsWith('.pdf')
+
+      if (!isPdf) {
+        alert('Escolhe um PDF.')
+        return
+      }
+
+      // usar o mesmo padrão dos ícones: upload direto no Storage via supabase client
+      const bucket = 'icons'
+      const ext = (file.name.split('.').pop() || 'pdf').toLowerCase()
+      const safeCardId = cardId && cardId.trim() ? safeSeg(cardId) : 'temp'
+      const safeTargetId = safeSeg(targetId)
+      const path = `cards/${safeCardId}/cta-files/${safeTargetId}-${Date.now()}.${ext}`
+
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+        upsert: true,
+        contentType: file.type || 'application/pdf',
+        cacheControl: '3600',
+      })
+      if (upErr) throw upErr
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+      const publicUrl = data?.publicUrl
+      if (!publicUrl) throw new Error('Não foi possível obter o URL público do PDF.')
+
+      updateButton(targetId, {
+        actionType: 'file',
+        fileUrl: publicUrl,
+        openInNewTab: true,
+        url: '',
+      })
+    } catch (err: any) {
+      console.error(err)
+      alert(err?.message || 'Erro no upload do PDF.')
+    } finally {
+      if (e.target) e.target.value = ''
+    }
+  }
+
+
   const btn = st.button || {}
   const updateBtnStyle = (patch: Partial<NonNullable<CTAButtonsStyle['button']>>) =>
     updateStyle({ button: { ...(st.button || {}), ...patch } })
@@ -201,6 +263,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
+      <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={onPdfChange} style={{ display: 'none' }} />
 
       <Section title={t('cta_editor.section_buttons')}>
         <Row label={t('cta_editor.label_layout')}>
@@ -314,12 +377,20 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
               </Row>
 
               <Row label={t('cta_editor.label_action_type')}>
-                <select value={b.actionType ?? "link"} onChange={(e) => updateButton(b.id, { actionType: e.target.value as any })} style={select}>
+                <select value={b.actionType ?? "link"} onChange={(e) => {
+                    const v = e.target.value as any
+                    if (v === 'file_upload') {
+                      pickPdfFor(b.id)
+                      return
+                    }
+                    updateButton(b.id, { actionType: v })
+                  }} style={select}>
                   <option value="link">{t('cta_editor.option_url')}</option>
                   <option value="phone">{t('cta_editor.option_phone')}</option>
                   <option value="whatsapp">{t('cta_editor.option_whatsapp')}</option>
                   <option value="email">{t('cta_editor.option_email')}</option>
                   <option value="sms">{t('cta_editor.option_sms')}</option>
+                  <option value="file_upload">📄 Upload PDF</option>
                   <option value="file">{t('cta_editor.option_file')}</option>
                   <option value="maps">{t('cta_editor.option_maps')}</option>
                   <option value="calendar">{t('cta_editor.option_calendar')}</option>
