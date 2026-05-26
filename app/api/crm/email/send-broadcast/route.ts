@@ -25,16 +25,22 @@ function encodeSubjectRFC2047(subject: string) {
 
 function buildRawEmail(params: {
   fromEmail: string
+  fromName?: string | null
+  replyTo?: string | null
   to: string
   subject: string
   htmlBody: string
   unsubscribeUrl?: string
 }) {
+  const safeFromName = (params.fromName || '').replace(/"/g, '\\"')
+  const fromHeader = params.fromName ? `From: "${safeFromName}" <${params.fromEmail}>` : `From: ${params.fromEmail}`
+  const replyToHeader = `Reply-To: ${params.replyTo || params.fromEmail}`
+
   const headers = [
-    `From: ${params.fromEmail}`,
+    fromHeader,
     `To: ${params.to}`,
     `Subject: ${encodeSubjectRFC2047(params.subject)}`,
-    `Reply-To: ${params.fromEmail}`,
+    replyToHeader,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset="UTF-8"',
     'X-Mailer: Kardme Email Marketing',
@@ -126,6 +132,32 @@ export async function POST(req: NextRequest) {
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
     const fromEmail = integration.sender_email || 'me'
 
+    // Resolve sender card name (optional) from broadcast.sender_card_id
+    let senderName: string | null = null
+    try {
+      const { data: bcast } = await supabaseAdmin
+        .from('email_broadcasts')
+        .select('sender_card_id')
+        .eq('id', broadcastId)
+        .eq('user_id', userId)
+        .single()
+
+      const senderCardId = (bcast as any)?.sender_card_id
+      if (senderCardId) {
+        const { data: card } = await supabaseAdmin
+          .from('cards')
+          .select('name, title')
+          .eq('id', senderCardId)
+          .eq('user_id', userId)
+          .single()
+
+        senderName = (card as any)?.name || (card as any)?.title || null
+      }
+    } catch (e) {
+      console.warn('[SEND-BROADCAST] Failed to resolve sender card name:', e)
+    }
+
+
     let sent = 0
     let failed = 0
     const errors: string[] = []
@@ -169,7 +201,7 @@ export async function POST(req: NextRequest) {
           .replace('{UNSUBSCRIBE_URL}', unsubscribeUrl)
           .replace('{MANAGE_PREFERENCES_URL}', managePreferencesUrl)
 
-        const raw = buildRawEmail({ fromEmail, to: recipientEmail, subject, htmlBody: personalizedHtmlBody, unsubscribeUrl })
+        const raw = buildRawEmail({ fromEmail, fromName: senderName, to: recipientEmail, subject, htmlBody: personalizedHtmlBody, unsubscribeUrl })
 
         const res = await gmail.users.messages.send({
           userId: 'me',

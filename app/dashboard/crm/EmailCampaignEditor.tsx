@@ -85,15 +85,47 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   const [manualEmail, setManualEmail] = useState<string>('')
   const [bulkLeadIds, setBulkLeadIds] = useState<string[]>(initialBulkLeadIds || [])
   const [bulkEmailCardId, setBulkEmailCardId] = useState<string>(initialBulkEmailCardId || '')
+  const [senderCards, setSenderCards] = useState<any[]>([])
+  const [loadingSenderCards, setLoadingSenderCards] = useState(false)
   const [bulkSendTiming, setBulkSendTiming] = useState<'now' | 'scheduled'>(initialBulkSendTiming || 'now')
   const [bulkScheduledAt, setBulkScheduledAt] = useState<string>(initialBulkScheduledAt || '')
   const [showBulkLeadSelector, setShowBulkLeadSelector] = useState(false)
   const [bulkLeadSearch, setBulkLeadSearch] = useState('')
   const [leads, setLeads] = useState<any[]>([])
 
+
   useEffect(() => {
     loadData()
   }, [userId, initialBroadcastId])
+
+  // Load cards to select sender
+  useEffect(() => {
+    const loadSenderCards = async () => {
+      setLoadingSenderCards(true)
+      try {
+        const { data, error } = await supabase
+          .from('cards')
+          .select('id, name, title, slug, created_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        const list = (data || []) as any[]
+        setSenderCards(list)
+
+        // If no sender selected yet, preselect most recent card
+        if (!bulkEmailCardId && list.length > 0) {
+          setBulkEmailCardId(list[0].id)
+        }
+      } catch (e) {
+        console.error(e)
+        setSenderCards([])
+      }
+      setLoadingSenderCards(false)
+    }
+
+    loadSenderCards()
+  }, [userId])
 
   // Regenerar preview quando blocks mudam
   useEffect(() => {
@@ -126,6 +158,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           setSubject(data.subject)
           setPreheader(data.preheader || '')
           setNotifyOnVideoOpens(data.notify_on_video_opens || false)
+          setBulkEmailCardId(data.sender_card_id || '')
           setBlocks(data.html_content?.blocks || [])
         }
       }
@@ -234,6 +267,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
             title,
             subject,
             preheader,
+            sender_card_id: bulkEmailCardId || null,
             html_content: htmlContent,
           })
           .select()
@@ -288,6 +322,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           title,
           subject,
           preheader,
+          sender_card_id: bulkEmailCardId || null,
           html_content: htmlContent,
           notify_on_video_opens: notifyOnVideoOpens,
         })
@@ -297,6 +332,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
           title,
           subject,
           preheader,
+          sender_card_id: bulkEmailCardId || null,
           html_content: htmlContent,
           notify_on_video_opens: notifyOnVideoOpens,
         })
@@ -1162,6 +1198,46 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               </div>
             )}
 
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>
+                📨 Remetente (Cartão)
+              </label>
+              <select
+                value={bulkEmailCardId || ''}
+                onChange={(e) => setBulkEmailCardId(e.target.value || '')}
+                disabled={loadingSenderCards}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: '#fff',
+                  fontSize: 14,
+                  height: 42,
+                  lineHeight: '22px',
+                  appearance: 'auto',
+                  opacity: loadingSenderCards ? 0.7 : 1,
+                  cursor: loadingSenderCards ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <option value="">
+                  {loadingSenderCards ? 'A carregar cartões...' : 'Seleciona um cartão'}
+                </option>
+                {senderCards.map((c: any) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || c.title || c.slug || 'Cartão'}
+                  </option>
+                ))}
+              </select>
+
+              {!loadingSenderCards && senderCards.length === 0 && (
+                <p style={{ fontSize: 11, opacity: 0.6, margin: '8px 0 0' }}>
+                  Sem cartões encontrados. Cria um cartão primeiro.
+                </p>
+              )}
+            </div>
+
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => setShowSendModal(false)} disabled={sending} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Cancelar
@@ -1171,7 +1247,8 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                 disabled={sending || 
                   (sendingTo === 'audience' && selectedAudiences.size === 0) || 
                   (sendingTo === 'individual' && !selectedLeadId) ||
-                  (sendingTo === 'manual' && !manualEmail.trim())
+                  (sendingTo === 'manual' && !manualEmail.trim()) ||
+                  !bulkEmailCardId
                 } 
                 style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 700, cursor: 'pointer', opacity: sending ? 0.6 : 1 }}>
                 {sending ? 'A enviar...' : '✉️ Enviar Agora'}

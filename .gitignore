@@ -44,3 +44,6 @@ next-env.d.ts
 *.save
 public/favicon-build/
 public/favicon-source.png
+
+# test endpoints (local)
+app/api/test/
