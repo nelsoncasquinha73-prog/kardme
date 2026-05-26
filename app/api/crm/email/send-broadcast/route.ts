@@ -157,6 +157,8 @@ export async function POST(req: NextRequest) {
       console.warn('[SEND-BROADCAST] Failed to resolve sender card name:', e)
     }
 
+    console.log('[SEND-BROADCAST] fromEmail:', fromEmail, 'senderName:', senderName, 'broadcastId:', broadcastId)
+
 
     let sent = 0
     let failed = 0
