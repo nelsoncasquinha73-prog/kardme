@@ -277,6 +277,20 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
         bcastId = data.id
       }
 
+      // Auto-save: se já existe broadcast, atualiza antes de enviar
+      if (currentBroadcastId) {
+        const htmlContent = { blocks, createdAt: new Date().toISOString() }
+        await updateBroadcast(currentBroadcastId, userId, {
+          title,
+          subject,
+          preheader,
+          sender_card_id: bulkEmailCardId || null,
+          html_content: htmlContent,
+          notify_on_video_opens: notifyOnVideoOpens,
+        })
+        bcastId = currentBroadcastId
+      }
+
       if (!bcastId) {
         throw new Error('Broadcast inválido')
       }
