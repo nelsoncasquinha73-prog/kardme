@@ -21,6 +21,18 @@ function toBase64Url(str: string) {
     .replace(/=+$/g, '')
 }
 
+function buildFromHeader(fromName: string | null | undefined, senderEmail: string) {
+  const raw = (fromName ? String(fromName) : '').trim()
+  if (!raw) return senderEmail
+
+  // remove CR/LF e aspas para evitar header injection / formato inválido
+  const cleaned = raw.replace(/[\r\n]/g, ' ').replace(/"/g, "'").trim()
+
+  const encoded = encodeFromNameRFC2047(cleaned)
+  // formato mais compatível: "Nome" <email>
+  return `"${encoded}" <${senderEmail}>`
+}
+
 function encodeFromNameRFC2047(name: string) {
   if (!name) return ''
   if (/^[ -~]*$/.test(name)) return name
@@ -205,8 +217,7 @@ export async function POST(req: NextRequest) {
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
 
     const senderEmail = integration.sender_email || 'me'
-    const safeFromName = fromName ? encodeFromNameRFC2047(String(fromName)) : ''
-    const fromEmail = safeFromName ? `${safeFromName} <${senderEmail}>` : senderEmail
+    const fromEmail = buildFromHeader(fromName, senderEmail)
 
     const raw = buildRawEmail({
       fromEmail,
