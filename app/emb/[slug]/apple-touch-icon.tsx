@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { supabaseServer } from '@/lib/supabaseServer'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
 
