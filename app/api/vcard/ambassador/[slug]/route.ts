@@ -41,10 +41,10 @@ export async function GET(
     if (ambassador.email) lines.push(`EMAIL:${ambassador.email}`)
     if (ambassador.phone) lines.push(`TEL:${ambassador.phone}`)
 
-    if (ambassador.avatar_url) {
-      const photoLine = await photoLineFromUrl(ambassador.avatar_url)
-      if (photoLine) lines.push(photoLine)
-    }
+    // Usar o apple-touch-icon (180x180) para manter o vCard leve e rápido no iPhone
+    const iconUrl = `https://www.kardme.com/emb/${slug}/apple-touch-icon.png`
+    const photoLine = await photoLineFromUrl(iconUrl)
+    if (photoLine) lines.push(photoLine)
 
     if (ambassador.bio) lines.push(`NOTE:${ambassador.bio.replace(/\n/g, '\\n')}`)
 
