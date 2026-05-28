@@ -180,8 +180,7 @@ export async function POST(req: Request) {
         const customerId = session.customer as string | null
 
         if (userId && subscriptionId && customerId) {
-          const subRes = await stripe.subscriptions.retrieve(subscriptionId)
-          const sub: Stripe.Subscription = ((subRes as any).data ?? subRes) as any
+          const sub = (await stripe.subscriptions.retrieve(subscriptionId)) as Stripe.Subscription
           const plan = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
 
           if (session.customer_details?.email) {
@@ -197,6 +196,10 @@ export async function POST(req: Request) {
             plan,
             status: sub.status,
             cancel_at_period_end: sub.cancel_at_period_end,
+            current_period_start: (sub as any).current_period_start
+              ? new Date((sub as any).current_period_start * 1000).toISOString()
+              : null,
+
             next_billing_date: (sub as any).current_period_end
               ? new Date((sub as any).current_period_end * 1000).toISOString()
               : null,
@@ -307,8 +310,7 @@ export async function POST(req: Request) {
           let currentPeriodEnd: string | null = null
           if (subscriptionId) {
             try {
-              const subRes = await stripe.subscriptions.retrieve(subscriptionId)
-          const sub: Stripe.Subscription = ((subRes as any).data ?? subRes) as any
+              const sub = (await stripe.subscriptions.retrieve(subscriptionId)) as Stripe.Subscription
               currentPeriodEnd = new Date((sub as any).current_period_end * 1000).toISOString()
             } catch (e) {
               console.error('Error retrieving subscription period end:', e)
