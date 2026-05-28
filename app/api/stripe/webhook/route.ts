@@ -196,11 +196,11 @@ export async function POST(req: Request) {
             plan,
             status: sub.status,
             cancel_at_period_end: sub.cancel_at_period_end,
-            next_billing_date: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
+            next_billing_date: sub.current_period_end
+              ? new Date(sub.current_period_end * 1000).toISOString()
               : null,
-            current_period_end: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
+            current_period_end: sub.current_period_end
+              ? new Date(sub.current_period_end * 1000).toISOString()
               : null,
             billing_email: session.customer_details?.email || null,
             updated_at: new Date().toISOString(),
@@ -307,7 +307,7 @@ export async function POST(req: Request) {
           if (subscriptionId) {
             try {
               const sub = await stripe.subscriptions.retrieve(subscriptionId)
-              currentPeriodEnd = new Date((sub as any).current_period_end * 1000).toISOString()
+              currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString()
             } catch (e) {
               console.error('Error retrieving subscription period end:', e)
             }
@@ -490,14 +490,14 @@ export async function POST(req: Request) {
             status: sub.status,
             plan_type: planType,
             cancel_at_period_end: sub.cancel_at_period_end,
-            current_period_start: (sub as any).current_period_start
-              ? new Date((sub as any).current_period_start * 1000).toISOString()
+            current_period_start: sub.current_period_start
+              ? new Date(sub.current_period_start * 1000).toISOString()
               : null,
-            next_billing_date: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
+            next_billing_date: sub.current_period_end
+              ? new Date(sub.current_period_end * 1000).toISOString()
               : null,
-            current_period_end: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
+            current_period_end: sub.current_period_end
+              ? new Date(sub.current_period_end * 1000).toISOString()
               : null,
             updated_at: new Date().toISOString(),
           })
