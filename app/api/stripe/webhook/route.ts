@@ -488,23 +488,26 @@ export async function POST(req: Request) {
         const interval = sub.items?.data?.[0]?.price?.recurring?.interval || null
         const planType = interval === 'year' ? 'yearly' : interval === 'month' ? 'monthly' : null
 
+        const updateData: any = {
+          status: sub.status,
+          plan_type: planType,
+          cancel_at_period_end: sub.cancel_at_period_end,
+          updated_at: new Date().toISOString(),
+        }
+
+        if ((sub as any).current_period_start) {
+          updateData.current_period_start = new Date((sub as any).current_period_start * 1000).toISOString()
+        }
+
+        if ((sub as any).current_period_end) {
+          const endIso = new Date((sub as any).current_period_end * 1000).toISOString()
+          updateData.current_period_end = endIso
+          updateData.next_billing_date = endIso
+        }
+
         await supabaseAdmin
           .from('user_subscriptions')
-          .update({
-            status: sub.status,
-            plan_type: planType,
-            cancel_at_period_end: sub.cancel_at_period_end,
-            current_period_start: (sub as any).current_period_start
-              ? new Date((sub as any).current_period_start * 1000).toISOString()
-              : null,
-            next_billing_date: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
-              : null,
-            current_period_end: (sub as any).current_period_end
-              ? new Date((sub as any).current_period_end * 1000).toISOString()
-              : null,
-            updated_at: new Date().toISOString(),
-          })
+          .update(updateData)
           .eq('user_id', row.user_id)
       }
     }
