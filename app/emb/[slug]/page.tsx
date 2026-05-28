@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${ambassador.name} — Kardme`,
     description: ambassador.bio || 'Cartão de embaixador Kardme',
+    manifest: `/api/manifest/${slug}`,
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',
