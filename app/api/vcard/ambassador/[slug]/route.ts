@@ -1,5 +1,25 @@
 import { getAmbassadorBySlugPublic } from '@/lib/ambassadors/ambassadorServiceServer'
 
+async function photoLineFromUrl(url: string) {
+  try {
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) return null
+
+    const contentType = (res.headers.get('content-type') || '').toLowerCase()
+    const imageType =
+      contentType.includes('png') ? 'PNG' :
+      contentType.includes('webp') ? 'WEBP' :
+      'JPEG'
+
+    const buf = Buffer.from(await res.arrayBuffer())
+    const base64 = buf.toString('base64')
+
+    return `PHOTO;ENCODING=b;TYPE=${imageType}:${base64}`
+  } catch {
+    return null
+  }
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
@@ -12,8 +32,7 @@ export async function GET(
       return new Response('Ambassador not found', { status: 404 })
     }
 
-    // Gerar vCard
-    const lines = [
+    const lines: string[] = [
       'BEGIN:VCARD',
       'VERSION:3.0',
       `FN:${ambassador.name || 'Embaixador'}`,
@@ -21,7 +40,12 @@ export async function GET(
 
     if (ambassador.email) lines.push(`EMAIL:${ambassador.email}`)
     if (ambassador.phone) lines.push(`TEL:${ambassador.phone}`)
-    if (ambassador.avatar_url) lines.push(`PHOTO;VALUE=URI:${ambassador.avatar_url}`)
+
+    if (ambassador.avatar_url) {
+      const photoLine = await photoLineFromUrl(ambassador.avatar_url)
+      if (photoLine) lines.push(photoLine)
+    }
+
     if (ambassador.bio) lines.push(`NOTE:${ambassador.bio.replace(/\n/g, '\\n')}`)
 
     lines.push(`URL:https://kardme.com/emb/${slug}`)
