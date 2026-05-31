@@ -39,7 +39,7 @@ export async function proxy(req: NextRequest) {
       })
     }
 
-    const res = await fetch(`${baseUrl}/api/public/resolve-domain?host=${encodeURIComponent(cleanHost)}`, {
+    const res = await fetch(`https://kardme.com/api/public/resolve-domain?host=${encodeURIComponent(cleanHost)}`, {
       cache: 'no-store',
     })
 
