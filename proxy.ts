@@ -21,7 +21,7 @@ export async function proxy(req: NextRequest) {
   }
 
   const url = req.nextUrl.clone()
-  const baseUrl = `${url.protocol}//${hostHeader}`
+  const baseUrl = `https://${cleanHost}`
   const cleanHost = host.replace(/^www\./, '')
 
   try {
