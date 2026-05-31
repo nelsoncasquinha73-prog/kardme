@@ -57,10 +57,9 @@ export async function proxy(req: NextRequest) {
       return undefined
     }
 
-    url.pathname = `/${slug}`
     return new Response(null, {
-      status: 307,
-      headers: { location: url.toString() },
+      status: 308,
+      headers: { location: `https://kardme.com/${slug}` },
     })
   } catch {
     return undefined
