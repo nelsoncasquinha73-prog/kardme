@@ -16,6 +16,14 @@ export async function proxy(req: NextRequest) {
     })
   }
 
+  // HOTFIX evento: redirect sempre para o canonical
+  if (host === 'monica.viome.pt' || host === 'www.monica.viome.pt') {
+    return new Response(null, {
+      status: 308,
+      headers: { location: 'https://kardme.com/drmonica' },
+    })
+  }
+
   // ✅ Não interferir com domínios principais, localhost, ou previews
   if (
     !host ||
