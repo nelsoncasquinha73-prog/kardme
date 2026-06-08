@@ -750,7 +750,7 @@ $(function() {
 function generateAutoReply() {
     // Add your logic here to generate a dynamically generated auto-reply
     // For simplicity, let's just echo a placeholder message
-    return `AiWave: I'm a dynamic chat bot!`;
+    return `Kardme: I'm a dynamic chat bot!`;
   }
 
   function sendMessage() {
@@ -770,12 +770,12 @@ function generateAutoReply() {
     appendMessage(userMessageElement);
 
     if (welcomeMessageIndex < welcomeMessages.length) {
-      const welcomeMessageElement = createMessageWithReactions('AiWave', welcomeMessages[welcomeMessageIndex], 'ai-speech', 'assets/images/team/avater.png');
+      const welcomeMessageElement = createMessageWithReactions('Kardme', welcomeMessages[welcomeMessageIndex], 'ai-speech', 'assets/images/bannkard.png');
       appendMessage(welcomeMessageElement);
       welcomeMessageIndex++;
     } else {
       const autoReply = generateAutoReply();
-      const autoReplyElement = createMessageWithReactions('AiWave', autoReply, 'ai-speech', 'assets/images/team/avater.png');
+      const autoReplyElement = createMessageWithReactions('Kardme', autoReply, 'ai-speech', 'assets/images/bannkard.png');
       appendMessage(autoReplyElement);
     }
 
@@ -874,7 +874,7 @@ function generateAutoReply() {
 
     // Regenerate a new message
     const regeneratedMessage = generateAutoReply();
-    const regeneratedMessageElement = createMessageWithReactions('AiWave', regeneratedMessage, 'ai-speech', 'assets/images/team/avater.png');
+    const regeneratedMessageElement = createMessageWithReactions('Kardme', regeneratedMessage, 'ai-speech', 'assets/images/bannkard.png');
     appendMessage(regeneratedMessageElement);
   }
 
@@ -887,7 +887,7 @@ function generateAutoReply() {
 
   function regenerateMessage() {
     const regeneratedMessage = generateAutoReply();
-    const regeneratedMessageElement = createMessageWithReactions('AiWave', regeneratedMessage, 'ai-speech', 'assets/images/team/avater.png');
+    const regeneratedMessageElement = createMessageWithReactions('Kardme', regeneratedMessage, 'ai-speech', 'assets/images/bannkard.png');
     appendMessage(regeneratedMessageElement);
   }
 
