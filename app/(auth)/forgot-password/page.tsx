@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      const redirectTo = `${window.location.origin}/reset-password`
+      const redirectTo = `https://kardme.com/reset-password`
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
