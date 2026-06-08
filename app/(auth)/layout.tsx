@@ -6,7 +6,6 @@ import '@/styles/plugins/slick.css'
 import '@/styles/plugins/slick-theme.css'
 import '@/styles/plugins/bootstrap-select.min.css'
 import '@/styles/plugins/prism.css'
-import '@/styles/style.css'
 
 import { LanguageProvider } from '@/components/language/LanguageProvider'
 
