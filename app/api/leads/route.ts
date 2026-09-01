@@ -65,6 +65,8 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { cardId, name, email, phone, message, zone, consentGiven, marketingOptIn, consentTimestamp, consentVersion } = body || {}
 
+    const normalizedEmail = String(email || '').toLowerCase().trim()
+
     if (!cardId || !name || !email) {
       return NextResponse.json(
         { error: 'Campos obrigatórios em falta (cardId, name, email).' },
@@ -77,7 +79,7 @@ export async function POST(req: Request) {
       {
         card_id: cardId,
         name,
-        email,
+        email: normalizedEmail,
         phone: phone || null,
         message: message || null,
         zone: zone || null,
@@ -85,6 +87,7 @@ export async function POST(req: Request) {
         marketing_opt_in: marketingOptIn ?? false,
         consent_timestamp: consentTimestamp || new Date().toISOString(),
         consent_version: consentVersion || '1.0',
+        lead_source: 'Cartão',
       },
     ]).select('id')
 
@@ -96,21 +99,32 @@ export async function POST(req: Request) {
 
     // Email confirmation (Lead) - só se vamos enviar welcome email
     let confirmUrl: string | null = null
-    if (marketingOptIn && leadId && email) {
-      const token = crypto.randomBytes(24).toString('hex')
-      const { error: tokenErr } = await supabaseAdmin
+    if (marketingOptIn && leadId && normalizedEmail) {
+      const { data: leadRow } = await supabaseAdmin
         .from('leads')
-        .update({ email_confirm_token: token })
+        .select('email_confirmed_at, email_confirm_token')
         .eq('id', leadId)
+        .maybeSingle()
 
-      if (!tokenErr) {
-        const origin =
-          req.headers.get('origin') ||
-          process.env.NEXT_PUBLIC_APP_URL ||
-          'https://www.kardme.com'
-        confirmUrl = `${origin}/api/confirm-email?token=${token}`
-      } else {
-        console.error('Erro ao guardar email_confirm_token:', tokenErr)
+      const alreadyConfirmed = !!leadRow?.email_confirmed_at
+      const alreadyHasToken = !!leadRow?.email_confirm_token
+
+      if (!alreadyConfirmed && !alreadyHasToken) {
+        const token = crypto.randomBytes(24).toString('hex')
+        const { error: tokenErr } = await supabaseAdmin
+          .from('leads')
+          .update({ email_confirm_token: token })
+          .eq('id', leadId)
+
+        if (!tokenErr) {
+          const origin =
+            req.headers.get('origin') ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            'https://www.kardme.com'
+          confirmUrl = `${origin}/api/confirm-email?token=${token}`
+        } else {
+          console.error('Erro ao guardar email_confirm_token:', tokenErr)
+        }
       }
     }
 
@@ -149,7 +163,7 @@ export async function POST(req: Request) {
             leadId,
             ownerEmail: ownerData.email,
             leadName: name,
-            leadEmail: email,
+            leadEmail: normalizedEmail,
             cardTitle: safeCardTitle,
           })
 
@@ -162,12 +176,12 @@ export async function POST(req: Request) {
             
             const renderedSubject = renderWelcomeMessage(customSubject, {
               nome: name,
-              email,
+              email: normalizedEmail,
               cardTitle: safeCardTitle,
             })
             const renderedBody = renderWelcomeMessage(customBody, {
               nome: name,
-              email,
+              email: normalizedEmail,
               cardTitle: safeCardTitle,
             })
 
@@ -178,7 +192,7 @@ export async function POST(req: Request) {
             welcomeRes = await sendWelcomeEmail({
               userId: cardData.user_id,
               leadId,
-              toEmail: email,
+              toEmail: normalizedEmail,
               leadName: name,
               cardTitle: safeCardTitle,
               subject: renderedSubject,
