@@ -30,6 +30,37 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   const [creatingNew, setCreatingNew] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
+  async function hydrateCounts(baseMagnets: LeadMagnet[]) {
+    try {
+      const ids = (baseMagnets || []).map(m => m.id).filter(Boolean)
+      if (ids.length === 0) return baseMagnets
+
+      // Contar leads por campanha (source of truth: public.leads)
+      const { data: leadAgg, error: leadErr } = await supabase
+        .from('leads')
+        .select('lead_magnet_id')
+        .in('lead_magnet_id', ids)
+
+      if (leadErr) throw leadErr
+
+      const counts = new Map<string, number>()
+      for (const row of (leadAgg || []) as any[]) {
+        const k = row?.lead_magnet_id
+        if (!k) continue
+        counts.set(k, (counts.get(k) || 0) + 1)
+      }
+
+      return baseMagnets.map(m => ({
+        ...m,
+        leads_count: counts.get(m.id) || 0,
+      }))
+    } catch (e) {
+      console.error('hydrateCounts error:', e)
+      return baseMagnets
+    }
+  }
+
+
   async function loadCards() {
     try {
       const { data, error } = await supabase
@@ -49,7 +80,9 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
   async function load() { 
     setLoading(true)
     try { 
-      setMagnets(await getLeadMagnets(userId)) 
+      const base = await getLeadMagnets(userId)
+      const hydrated = await hydrateCounts(base)
+      setMagnets(hydrated)
     } catch(e) { 
       console.error(e) 
     } 
