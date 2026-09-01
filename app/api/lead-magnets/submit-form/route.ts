@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabaseServer'
 import { sendEmail } from '@/lib/email'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -163,7 +164,7 @@ export async function POST(request: Request) {
     let confirmUrl: string | null = null
     if (leadId && leadEmail) {
       const token = crypto.randomBytes(24).toString('hex')
-      const { error: tokenErr } = await supabase
+      const { error: tokenErr } = await supabaseAdmin
         .from('leads')
         .update({ email_confirm_token: token })
         .eq('id', leadId)

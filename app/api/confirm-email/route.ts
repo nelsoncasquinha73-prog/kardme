@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabaseServer'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export const runtime = 'nodejs'
 
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL('/lm/confirmacao-invalida', url.origin))
   }
 
-  const supabase = supabaseServer
+  const supabase = supabaseAdmin
 
   const { data: lead, error } = await supabase
     .from('leads')
