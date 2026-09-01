@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -93,6 +94,26 @@ export async function POST(req: Request) {
 
     const leadId = leadData?.[0]?.id
 
+    // Email confirmation (Lead) - só se vamos enviar welcome email
+    let confirmUrl: string | null = null
+    if (marketingOptIn && leadId && email) {
+      const token = crypto.randomBytes(24).toString('hex')
+      const { error: tokenErr } = await supabaseAdmin
+        .from('leads')
+        .update({ email_confirm_token: token })
+        .eq('id', leadId)
+
+      if (!tokenErr) {
+        const origin =
+          req.headers.get('origin') ||
+          process.env.NEXT_PUBLIC_APP_URL ||
+          'https://www.kardme.com'
+        confirmUrl = `${origin}/api/confirm-email?token=${token}`
+      } else {
+        console.error('Erro ao guardar email_confirm_token:', tokenErr)
+      }
+    }
+
     // Buscar card owner e verificar CRM Pro
     const { data: cardData } = await supabaseAdmin
       .from('cards')
@@ -150,6 +171,10 @@ export async function POST(req: Request) {
               cardTitle: safeCardTitle,
             })
 
+            const finalBody = confirmUrl
+              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
+              : renderedBody
+
             welcomeRes = await sendWelcomeEmail({
               userId: cardData.user_id,
               leadId,
@@ -157,7 +182,7 @@ export async function POST(req: Request) {
               leadName: name,
               cardTitle: safeCardTitle,
               subject: renderedSubject,
-              body: renderedBody,
+              body: finalBody,
             })
           }
 
