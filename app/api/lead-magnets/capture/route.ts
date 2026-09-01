@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 
 
@@ -15,11 +16,6 @@ function normalizeEmailBody(body: string): string {
   return htmlParagraphs.join("")
 }
 
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function POST(req: Request) {
   try {
@@ -99,6 +95,34 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: leadError.message }, { status: 500 })
       }
       leadId = leadData?.[0]?.id
+    }
+
+    // Email confirmation (Lead) - só se vamos enviar email
+    let confirmUrl: string | null = null
+    if (marketing_opt_in && leadId && email) {
+      const { data: leadRow } = await supabaseAdmin
+        .from('leads')
+        .select('email_confirmed_at')
+        .eq('id', leadId)
+        .maybeSingle()
+
+      if (!leadRow?.email_confirmed_at) {
+        const token = crypto.randomBytes(24).toString('hex')
+        const { error: tokenErr } = await supabaseAdmin
+          .from('leads')
+          .update({ email_confirm_token: token })
+          .eq('id', leadId)
+
+        if (!tokenErr) {
+          const origin =
+            req.headers.get('origin') ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            'https://www.kardme.com'
+          confirmUrl = `${origin}/api/confirm-email?token=${token}`
+        } else {
+          console.error('Erro ao guardar email_confirm_token:', tokenErr)
+        }
+      }
     }
 
     // Registar atividade no histórico
@@ -186,6 +210,15 @@ export async function POST(req: Request) {
         
         // Normaliza o body para HTML com parágrafos
         emailBody = normalizeEmailBody(emailBody)
+
+        // Anexar botão de confirmação de email (se aplicável)
+        if (confirmUrl) {
+          emailBody += `
+<p style="margin-top:16px">Para receberes o conteúdo e futuras atualizações, confirma o teu email:</p>
+<p><a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a></p>
+<p style="font-size:12px;opacity:0.7">Se não conseguires clicar, copia e cola este link no browser:<br/>${confirmUrl}</p>
+`
+        }
 
         // Se for sorteio e o número não estiver no body, adiciona no final
         if (isRaffle && number_chosen && !emailBody.includes(String(number_chosen))) {
