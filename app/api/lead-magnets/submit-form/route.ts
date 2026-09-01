@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabaseServer'
 import { sendEmail } from '@/lib/email'
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 
 // Helper: mapear fieldId para label usando form_fields do magnet
@@ -158,6 +159,24 @@ export async function POST(request: Request) {
 
     const leadId = leadData?.[0]?.id
 
+    // Email confirmation (Lead)
+    let confirmUrl: string | null = null
+    if (leadId && leadEmail) {
+      const token = crypto.randomBytes(24).toString('hex')
+      const { error: tokenErr } = await supabase
+        .from('leads')
+        .update({ email_confirm_token: token })
+        .eq('id', leadId)
+
+      if (!tokenErr) {
+        const origin = request.headers.get('origin') || ''
+        if (origin) confirmUrl = `${origin}/api/confirm-email?token=${token}`
+      } else {
+        console.error('Erro ao guardar email_confirm_token:', tokenErr)
+      }
+    }
+
+
     // 4) Buscar owner email (do cartão se existir, senão do user do magnet)
     let ownerEmail = null
     let ownerUserId = magnet.user_id
@@ -251,10 +270,20 @@ export async function POST(request: Request) {
           .replace(/\{\{?\s*numero\s*\}?\}|$\s*numero\s*$/gi, '')
           .replace(/\{\{?\s*premio\s*\}?\}|$\s*premio\s*$/gi, '')
 
+        const htmlBody =
+          normalizeEmailBody(body) +
+          (confirmUrl
+            ? `
+<p style="margin-top:16px">Para receberes o conteúdo e futuras atualizações, confirma o teu email:</p>
+<p><a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a></p>
+<p style="font-size:12px;opacity:0.7">Se não conseguires clicar, copia e cola este link no browser:<br/>${confirmUrl}</p>
+`
+            : '')
+
         leadEmailRes = await sendEmail({
           to: leadEmail,
           subject,
-          html: normalizeEmailBody(body),
+          html: htmlBody,
           fromName: cardName,
         })
       } catch (err: any) {
