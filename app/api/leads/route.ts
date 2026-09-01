@@ -186,7 +186,7 @@ export async function POST(req: Request) {
             })
 
             const finalBody = confirmUrl
-              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
+              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n\n<a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a>\n\nSe não conseguires clicar, copia e cola este link no browser:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
               : renderedBody
 
             welcomeRes = await sendWelcomeEmail({
