@@ -70,8 +70,21 @@ type Card = {
   user_id: string | null
 }
 
+type NetworkStats = {
+  card_id: string
+  category_id: number
+  category_name: string
+  rank_position: number
+  category_total: number
+  views_30d: number
+  clicks_30d: number
+  leads_30d: number
+  network_score: number
+}
+
 export default function DashboardPage() {
   const [cards, setCards] = useState<Card[]>([])
+  const [networkStats, setNetworkStats] = useState<NetworkStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -139,6 +152,16 @@ export default function DashboardPage() {
       setCards([])
     } else {
       setCards((data || []) as Card[])
+
+      const { data: statsData, error: statsErr } =
+        await supabase.rpc('get_my_kardme_network_stats')
+
+      if (statsErr) {
+        console.error('Erro Kardme Network stats:', statsErr)
+        setNetworkStats([])
+      } else {
+        setNetworkStats((statsData || []) as NetworkStats[])
+      }
     }
 
     setLoading(false)
@@ -340,7 +363,12 @@ export default function DashboardPage() {
 
       {hasCards && (
         <div className="cards-grid">
-          {cards.map((card) => (
+          {cards.map((card) => {
+            const stats = networkStats.find(
+              (item) => item.card_id === card.id
+            )
+
+            return (
             <div key={card.id} className="card-tile-premium">
               <div className="card-tile-top">
                 <div className="card-tile-titleWrap">
@@ -386,9 +414,67 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {stats ? (
+                <div className="network-rank-panel">
+                  <div className="network-rank-header">
+                    <span>🌐 Kardme Network</span>
+
+                    <span className="network-rank-badge">
+                      {stats.rank_position === 1
+                        ? '🥇 Mais ativo'
+                        : `🏆 #${stats.rank_position}`}
+                    </span>
+                  </div>
+
+                  <div className="network-rank-category">
+                    {stats.rank_position === 1
+                      ? `Mais ativo em ${stats.category_name}`
+                      : `#${stats.rank_position} de ${stats.category_total} em ${stats.category_name}`}
+                  </div>
+
+                  <div className="network-rank-metrics">
+                    <span>👁 {stats.views_30d} visualizações</span>
+                    <span>🖱 {stats.clicks_30d} cliques</span>
+                    <span>🎯 {stats.leads_30d} leads</span>
+                  </div>
+
+                  <div className="network-rank-period">
+                    Últimos 30 dias
+                  </div>
+
+                  <div className="network-rank-tip">
+                    🔥 Quanto mais utilizar e partilhar o seu Kardme,
+                    maior poderá ser a sua visibilidade.
+                  </div>
+                </div>
+              ) : (
+                <div className="network-rank-panel network-rank-inactive">
+                  <div className="network-rank-header">
+                    <span>🌐 Kardme Network</span>
+                  </div>
+
+                  <div className="network-rank-category">
+                    Este cartão ainda não faz parte do Network.
+                  </div>
+
+                  <div className="network-rank-tip">
+                    Aumente a sua visibilidade e seja encontrado por
+                    potenciais clientes e outros profissionais.
+                  </div>
+
+                  <Link
+                    href={`/dashboard/cards/${card.id}/network`}
+                    className="network-join-link"
+                  >
+                    Fazer parte do Network →
+                  </Link>
+                </div>
+              )}
+
               <div className="card-link">kardme.com/{card.slug}</div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

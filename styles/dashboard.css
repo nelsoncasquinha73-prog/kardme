@@ -254,3 +254,161 @@
 @media (max-width: 520px){
   .catalog-grid{ grid-template-columns: 1fr; }
 }
+
+/* Kardme Network ranking */
+.network-rank-panel {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(56,189,248,0.18);
+  background:
+    linear-gradient(135deg, rgba(14,165,233,0.08), rgba(124,58,237,0.08));
+}
+
+.network-rank-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: rgba(255,255,255,0.95);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.network-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(245,158,11,0.13);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.network-rank-category {
+  margin-top: 9px;
+  color: #7dd3fc;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.network-rank-metrics {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: rgba(255,255,255,0.82);
+  font-size: 12px;
+}
+
+.network-rank-period {
+  margin-top: 5px;
+  color: rgba(255,255,255,0.42);
+  font-size: 10px;
+}
+
+.network-rank-tip {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.58);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.network-rank-inactive {
+  border-color: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.025);
+}
+
+.network-join-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.network-join-link:hover {
+  text-decoration: underline;
+}
+
+/* Kardme Network ranking */
+.network-rank-panel {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(56,189,248,0.18);
+  background:
+    linear-gradient(135deg, rgba(14,165,233,0.08), rgba(124,58,237,0.08));
+}
+
+.network-rank-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: rgba(255,255,255,0.95);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.network-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(245,158,11,0.13);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.network-rank-category {
+  margin-top: 9px;
+  color: #7dd3fc;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.network-rank-metrics {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: rgba(255,255,255,0.82);
+  font-size: 12px;
+}
+
+.network-rank-period {
+  margin-top: 5px;
+  color: rgba(255,255,255,0.42);
+  font-size: 10px;
+}
+
+.network-rank-tip {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.58);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.network-rank-inactive {
+  border-color: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.025);
+}
+
+.network-join-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.network-join-link:hover {
+  text-decoration: underline;
+}
