@@ -94,6 +94,7 @@ export default function NetworkPage() {
           supabase
             .from('subcategories')
             .select('id,category_id,name,slug')
+            .gte('id', 1000)
             .order('sort_order', { ascending: true }),
 
           supabase
