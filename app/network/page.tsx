@@ -22,6 +22,9 @@ type NetworkCard = {
   allow_contact: boolean
   allow_networking: boolean
   views_30d: number
+  clicks_30d: number
+  leads_30d: number
+  network_score: number
   network_created_at: string
 }
 
@@ -164,8 +167,8 @@ export default function KardmeNetworkPage() {
     if (sort === 'active') {
       result.sort(
         (a, b) =>
-          Number(b.views_30d || 0) -
-          Number(a.views_30d || 0)
+          Number(b.network_score || 0) -
+          Number(a.network_score || 0)
       )
     }
 
@@ -553,7 +556,11 @@ export default function KardmeNetworkPage() {
                             fontWeight: 900,
                           }}
                         >
-                          🔥 TOP {index + 1}
+                          {index === 0
+                            ? '🥇 Mais ativo'
+                            : index === 1
+                            ? '🥈 2.º mais ativo'
+                            : '🥉 3.º mais ativo'}
                         </div>
                       )}
 
