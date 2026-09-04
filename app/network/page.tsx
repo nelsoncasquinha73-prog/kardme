@@ -14,6 +14,7 @@ type NetworkCard = {
   category_id: number | null
   category_name: string | null
   subcategory_ids: number[]
+  specialty_names: string[]
   tags: string[]
   country: string | null
   region: string | null
@@ -36,6 +37,7 @@ export default function KardmeNetworkPage() {
 
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todos')
+  const [specialty, setSpecialty] = useState('Todos')
   const [country, setCountry] = useState('Todos')
   const [region, setRegion] = useState('Todos')
   const [city, setCity] = useState('Todos')
@@ -63,6 +65,13 @@ export default function KardmeNetworkPage() {
     load()
   }, [])
 
+  const normalizeText = (value: string) =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+
   const categories = useMemo(() => {
     return Array.from(
       new Set(
@@ -72,6 +81,21 @@ export default function KardmeNetworkPage() {
       )
     ).sort((a, b) => a.localeCompare(b, 'pt'))
   }, [cards])
+
+  const specialties = useMemo(() => {
+    return Array.from(
+      new Set(
+        cards
+          .filter(
+            (c) =>
+              category === 'Todos' ||
+              c.category_name === category
+          )
+          .flatMap((c) => c.specialty_names ?? [])
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b, 'pt'))
+  }, [cards, category])
 
   const countries = useMemo(() => {
     return Array.from(
@@ -116,12 +140,16 @@ export default function KardmeNetworkPage() {
   }, [cards, country, region])
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
+    const q = normalizeText(search)
 
     let result = cards.filter((card) => {
       const matchesCategory =
         category === 'Todos' ||
         card.category_name === category
+
+      const matchesSpecialty =
+        specialty === 'Todos' ||
+        (card.specialty_names ?? []).includes(specialty)
 
       const matchesCountry =
         country === 'Todos' ||
@@ -144,17 +172,20 @@ export default function KardmeNetworkPage() {
         card.region,
         card.city,
         card.short_description,
+        ...(card.specialty_names ?? []),
         ...(card.tags ?? []),
       ]
         .filter(Boolean)
         .join(' ')
-        .toLowerCase()
+
+      const normalizedHaystack = normalizeText(haystack)
 
       const matchesSearch =
-        !q || haystack.includes(q)
+        !q || normalizedHaystack.includes(q)
 
       return (
         matchesCategory &&
+        matchesSpecialty &&
         matchesCountry &&
         matchesRegion &&
         matchesCity &&
@@ -194,6 +225,7 @@ export default function KardmeNetworkPage() {
     cards,
     search,
     category,
+    specialty,
     country,
     region,
     city,
@@ -306,9 +338,10 @@ export default function KardmeNetworkPage() {
               (item) => (
                 <button
                   key={item}
-                  onClick={() =>
+                  onClick={() => {
                     setCategory(item)
-                  }
+                    setSpecialty('Todos')
+                  }}
                   style={{
                     flex: '0 0 auto',
                     borderRadius: 999,
@@ -344,6 +377,20 @@ export default function KardmeNetworkPage() {
               marginTop: 16,
             }}
           >
+            <FilterSelect
+              value={specialty}
+              onChange={setSpecialty}
+              options={specialties}
+              label="Especialidade"
+            />
+
+            <FilterSelect
+              value={specialty}
+              onChange={setSpecialty}
+              options={specialties}
+              label="Especialidade"
+            />
+
             <FilterSelect
               value={country}
               onChange={(v) => {
