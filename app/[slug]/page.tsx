@@ -24,7 +24,7 @@ export const viewport = {
   viewportFit: 'cover',
 } as const
 
-const RESERVED_SLUGS = new Set(['reset-password', 'forgot-password', 'login', 'dashboard', 'api', 'templates'])
+const RESERVED_SLUGS = new Set(['reset-password', 'forgot-password', 'login', 'dashboard', 'api', 'templates', 'network'])
 
 type Props = {
   params: Promise<{ slug: string }>
