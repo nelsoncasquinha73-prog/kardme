@@ -362,6 +362,14 @@ export default function DashboardPage() {
                   <Link className="card-btn card-btn-primary" href={`/dashboard/cards/${card.id}/theme`}>
                     {t('dashboard.edit')}
                   </Link>
+                  <Link
+                    className="card-btn card-btn-ghost"
+                    href={`/dashboard/cards/${card.id}/network`}
+                    title="Configurar Kardme Network"
+                  >
+                    🌐 Network
+                  </Link>
+
                   <Link className="card-btn card-btn-ghost" href={`/${card.slug}`} target="_blank">
                     {t('dashboard.view')}
                   </Link>
