@@ -13,6 +13,8 @@ export const FONT_OPTIONS: FontOption[] = [
   { label: 'Tema (padrão)', value: '', category: 'sans-serif' },
 
   // === SANS-SERIF (Modernas) ===
+
+  { label: 'Arimo', value: 'var(--font-arimo)', category: 'sans-serif' },
   { label: 'Inter', value: 'var(--font-inter)', category: 'sans-serif' },
   { label: 'Poppins', value: 'var(--font-poppins)', category: 'sans-serif' },
   { label: 'Montserrat', value: 'var(--font-montserrat)', category: 'sans-serif' },
