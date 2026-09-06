@@ -16,6 +16,7 @@ type BioStyle = {
   bold?: boolean
   fontSize?: number
   lineHeight?: number
+  letterSpacing?: number
   align?: 'left' | 'center' | 'right' | 'justify'
   container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string; widthMode?: 'full' | 'custom'; customWidthPx?: number }
 }
@@ -67,6 +68,21 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
           <input type="range" min={1.1} max={2.2} step={0.05} value={s.lineHeight ?? 1.6} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} />
           <span style={rightNum}>{(s.lineHeight ?? 1.6).toFixed(2)}</span>
         </Row>
+        <Row label="Espaçamento letras">
+          <input
+            type="range"
+            min={-3}
+            max={12}
+            step={0.25}
+            value={s.letterSpacing ?? 0}
+            onChange={(e) => setStyle({ letterSpacing: Number(e.target.value) })}
+            style={{ flex: 1 }}
+          />
+          <span style={rightNum}>
+            {(s.letterSpacing ?? 0).toFixed(2)}px
+          </span>
+        </Row>
+
         <Row label="Alinhamento">
           <div style={{ display: 'flex', gap: 8 }}>
             <Button onClick={() => setStyle({ align: 'left' })}>Esq.</Button>

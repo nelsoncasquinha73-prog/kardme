@@ -3,6 +3,7 @@ export type ProfileTextStyle = {
   fontWeight?: 400 | 700
   fontStyle?: 'normal' | 'italic'
   fontSizePx?: number
+  letterSpacing?: number
 }
 
 export type ProfileTextLine = {

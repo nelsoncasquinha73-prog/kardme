@@ -315,7 +315,10 @@ export default function ProfileBlock({
               fontStyle: settings.name.style?.fontStyle ?? 'normal',
               fontSize: settings.name.style?.fontSizePx ?? fontSizeFor('name', settings.name.size),
               color: settings.name.color,
-              letterSpacing: '-0.02em',
+              letterSpacing:
+                settings.name.style?.letterSpacing != null
+                  ? `${settings.name.style.letterSpacing}px`
+                  : '-0.02em',
               lineHeight: 1.05,
               textAlign: align,
               width: '100%',
@@ -343,6 +346,10 @@ export default function ProfileBlock({
                 fontStyle: settings.profession.style?.fontStyle ?? 'normal',
                 fontSize: settings.profession.style?.fontSizePx ?? fontSizeFor('sub', settings.profession.size),
                 color: settings.profession.color,
+                letterSpacing:
+                  settings.profession.style?.letterSpacing != null
+                    ? `${settings.profession.style.letterSpacing}px`
+                    : 'normal',
                 opacity: 0.88,
                 lineHeight: 1.35,
                 textAlign: align,
@@ -363,7 +370,10 @@ export default function ProfileBlock({
               fontSize: settings.company.style?.fontSizePx ?? fontSizeFor('sub', settings.company.size),
               color: settings.company.color,
               opacity: 0.72,
-              letterSpacing: '0.01em',
+              letterSpacing:
+                settings.company.style?.letterSpacing != null
+                  ? `${settings.company.style.letterSpacing}px`
+                  : '0.01em',
               lineHeight: 1.35,
               textAlign: align,
               width: '100%',

@@ -50,6 +50,7 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.name?.style?.fontWeight ?? 700,
         fontStyle: input.name?.style?.fontStyle ?? 'normal',
         fontSizePx: input.name?.style?.fontSizePx,
+        letterSpacing: input.name?.style?.letterSpacing,
       },
     },
     profession: {
@@ -62,6 +63,7 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.profession?.style?.fontWeight ?? 400,
         fontStyle: input.profession?.style?.fontStyle ?? 'normal',
         fontSizePx: input.profession?.style?.fontSizePx,
+        letterSpacing: input.profession?.style?.letterSpacing,
       },
     },
     company: {
@@ -74,6 +76,7 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
         fontWeight: input.company?.style?.fontWeight ?? 400,
         fontStyle: input.company?.style?.fontStyle ?? 'normal',
         fontSizePx: input.company?.style?.fontSizePx,
+        letterSpacing: input.company?.style?.letterSpacing,
       },
     },
     typography: {
@@ -496,6 +499,61 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             })}>
               Auto
             </Button>
+          </Row>
+
+          <Row label="Espaçamento letras">
+            <input
+              type="range"
+              min={-3}
+              max={12}
+              step={0.25}
+              value={local.name?.style?.letterSpacing ?? 0}
+              onChange={(e) => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.letterSpacing = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>
+              {(local.name?.style?.letterSpacing ?? 0).toFixed(2)}px
+            </span>
+          </Row>
+
+          <Row label="Espaçamento letras">
+            <input
+              type="range"
+              min={-3}
+              max={12}
+              step={0.25}
+              value={local.profession?.style?.letterSpacing ?? 0}
+              onChange={(e) => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.letterSpacing = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>
+              {(local.profession?.style?.letterSpacing ?? 0).toFixed(2)}px
+            </span>
+          </Row>
+
+          <Row label="Espaçamento letras">
+            <input
+              type="range"
+              min={-3}
+              max={12}
+              step={0.25}
+              value={local.company?.style?.letterSpacing ?? 0}
+              onChange={(e) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.letterSpacing = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>
+              {(local.company?.style?.letterSpacing ?? 0).toFixed(2)}px
+            </span>
           </Row>
 
           <Row label={t('profile_editor.label_color')}>

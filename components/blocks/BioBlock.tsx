@@ -18,6 +18,7 @@ type BioStyle = {
   bold?: boolean
   fontSize?: number
   lineHeight?: number
+  letterSpacing?: number
   align?: 'left' | 'center' | 'right' | 'justify'
 
   container?: {
@@ -75,6 +76,7 @@ export default function BioBlock({ settings, style }: Props) {
     fontWeight: style?.bold ? 700 : 400,
     fontSize: style?.fontSize != null ? `${style.fontSize}px` : '15px',
     lineHeight: style?.lineHeight ?? 1.6,
+    letterSpacing: `${style?.letterSpacing ?? 0}px`,
     textAlign: style?.align ?? 'center',
   }
 
@@ -93,7 +95,10 @@ export default function BioBlock({ settings, style }: Props) {
         >
           <style>{`
             [data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }
-            .bio-rich-text, .bio-rich-text p, .bio-rich-text div, .bio-rich-text li, .bio-rich-text span { color: ${bioTextColor} !important; }
+            .bio-rich-text, .bio-rich-text p, .bio-rich-text div, .bio-rich-text li, .bio-rich-text span {
+                color: ${bioTextColor} !important;
+                letter-spacing: ${style?.letterSpacing ?? 0}px !important;
+              }
             .bio-rich-text span[data-keep-color] { color: inherit !important; }
           `}</style>
           <div className="bio-rich-text" dangerouslySetInnerHTML={{ __html: settings.text }} />
