@@ -1,6 +1,8 @@
 export type ProfileTextStyle = {
   fontFamily?: string // 'Inter' | 'Poppins' | ...
   fontWeight?: 400 | 700
+  fontStyle?: 'normal' | 'italic'
+  fontSizePx?: number
 }
 
 export type ProfileTextLine = {

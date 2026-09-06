@@ -312,7 +312,8 @@ export default function ProfileBlock({
             style={{
               fontFamily: lineFontFamily(settings.name, globalFontFamily),
               fontWeight: lineFontWeight(settings.name, 700),
-              fontSize: fontSizeFor('name', settings.name.size),
+              fontStyle: settings.name.style?.fontStyle ?? 'normal',
+              fontSize: settings.name.style?.fontSizePx ?? fontSizeFor('name', settings.name.size),
               color: settings.name.color,
               letterSpacing: '-0.02em',
               lineHeight: 1.05,
@@ -339,7 +340,8 @@ export default function ProfileBlock({
               style={{
                 fontFamily: lineFontFamily(settings.profession, globalFontFamily),
                 fontWeight: lineFontWeight(settings.profession, 400),
-                fontSize: fontSizeFor('sub', settings.profession.size),
+                fontStyle: settings.profession.style?.fontStyle ?? 'normal',
+                fontSize: settings.profession.style?.fontSizePx ?? fontSizeFor('sub', settings.profession.size),
                 color: settings.profession.color,
                 opacity: 0.88,
                 lineHeight: 1.35,
@@ -357,7 +359,8 @@ export default function ProfileBlock({
             style={{
               fontFamily: lineFontFamily(settings.company, globalFontFamily),
               fontWeight: lineFontWeight(settings.company, 400),
-              fontSize: fontSizeFor('sub', settings.company.size),
+              fontStyle: settings.company.style?.fontStyle ?? 'normal',
+              fontSize: settings.company.style?.fontSizePx ?? fontSizeFor('sub', settings.company.size),
               color: settings.company.color,
               opacity: 0.72,
               letterSpacing: '0.01em',

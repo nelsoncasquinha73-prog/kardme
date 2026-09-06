@@ -48,6 +48,8 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       style: {
         fontFamily: input.name?.style?.fontFamily,
         fontWeight: input.name?.style?.fontWeight ?? 700,
+        fontStyle: input.name?.style?.fontStyle ?? 'normal',
+        fontSizePx: input.name?.style?.fontSizePx,
       },
     },
     profession: {
@@ -58,6 +60,8 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       style: {
         fontFamily: input.profession?.style?.fontFamily,
         fontWeight: input.profession?.style?.fontWeight ?? 400,
+        fontStyle: input.profession?.style?.fontStyle ?? 'normal',
+        fontSizePx: input.profession?.style?.fontSizePx,
       },
     },
     company: {
@@ -68,6 +72,8 @@ function normalize(input: Partial<ProfileSettings>): ProfileSettings {
       style: {
         fontFamily: input.company?.style?.fontFamily,
         fontWeight: input.company?.style?.fontWeight ?? 400,
+        fontStyle: input.company?.style?.fontStyle ?? 'normal',
+        fontSizePx: input.company?.style?.fontSizePx,
       },
     },
     typography: {
@@ -457,7 +463,40 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             >
               B
             </MiniButton>
+
+            <MiniButton
+              active={(local.name?.style?.fontStyle ?? 'normal') === 'italic'}
+              onClick={() => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.fontStyle =
+                  d.name.style.fontStyle === 'italic' ? 'normal' : 'italic'
+              })}
+            >
+              I
+            </MiniButton>
           </div>
+
+          <Row label="Tamanho personalizado">
+            <input
+              type="range"
+              min={18}
+              max={120}
+              step={1}
+              value={local.name?.style?.fontSizePx ?? 28}
+              onChange={(e) => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.fontSizePx = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>{local.name?.style?.fontSizePx ?? 28}px</span>
+            <Button onClick={() => patch((d) => {
+              d.name.style = d.name.style || {}
+              d.name.style.fontSizePx = undefined
+            })}>
+              Auto
+            </Button>
+          </Row>
 
           <Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
@@ -505,7 +544,40 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             >
               B
             </MiniButton>
+
+            <MiniButton
+              active={(local.profession?.style?.fontStyle ?? 'normal') === 'italic'}
+              onClick={() => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.fontStyle =
+                  d.profession.style.fontStyle === 'italic' ? 'normal' : 'italic'
+              })}
+            >
+              I
+            </MiniButton>
           </div>
+
+          <Row label="Tamanho personalizado">
+            <input
+              type="range"
+              min={10}
+              max={80}
+              step={1}
+              value={local.profession?.style?.fontSizePx ?? 16}
+              onChange={(e) => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.fontSizePx = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>{local.profession?.style?.fontSizePx ?? 16}px</span>
+            <Button onClick={() => patch((d) => {
+              d.profession.style = d.profession.style || {}
+              d.profession.style.fontSizePx = undefined
+            })}>
+              Auto
+            </Button>
+          </Row>
 
           <Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
@@ -561,7 +633,43 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             >
               B
             </MiniButton>
+
+            <MiniButton
+              active={(local.company?.style?.fontStyle ?? 'normal') === 'italic'}
+              onClick={() => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.fontStyle =
+                  d.company.style.fontStyle === 'italic' ? 'normal' : 'italic'
+              })}
+            >
+              I
+            </MiniButton>
           </div>
+
+          <Row label="Tamanho personalizado">
+            <input
+              type="range"
+              min={10}
+              max={80}
+              step={1}
+              value={local.company?.style?.fontSizePx ?? 16}
+              onChange={(e) => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.fontSizePx = Number(e.target.value)
+              })}
+              style={{ flex: 1 }}
+            />
+            <span style={rightNum}>{local.company?.style?.fontSizePx ?? 16}px</span>
+            <Button onClick={() => patch((d) => {
+              d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+              d.company.style = d.company.style || {}
+              d.company.style.fontSizePx = undefined
+            })}>
+              Auto
+            </Button>
+          </Row>
 
           <Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
