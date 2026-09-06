@@ -321,6 +321,7 @@ export default function ProfileBlock({
                   : '-0.02em',
               lineHeight: 1.05,
               textAlign: align,
+              whiteSpace: 'pre-wrap',
               width: '100%',
             }}
           >
@@ -353,6 +354,7 @@ export default function ProfileBlock({
                 opacity: 0.88,
                 lineHeight: 1.35,
                 textAlign: align,
+                whiteSpace: 'pre-wrap',
                 width: '100%',
               }}
             >
@@ -376,6 +378,7 @@ export default function ProfileBlock({
                   : '0.01em',
               lineHeight: 1.35,
               textAlign: align,
+              whiteSpace: 'pre-wrap',
               width: '100%',
             }}
           >
