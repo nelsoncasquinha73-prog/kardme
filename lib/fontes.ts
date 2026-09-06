@@ -39,6 +39,7 @@ export const FONT_OPTIONS: FontOption[] = [
   { label: 'Merriweather', value: 'var(--font-merriweather)', category: 'serif' },
   { label: 'Lora', value: 'var(--font-lora)', category: 'serif' },
   { label: 'Cormorant', value: 'var(--font-cormorant)', category: 'serif' },
+  { label: 'Cormorant Italic', value: "'Cormorant', serif", category: 'serif' },
   { label: 'Libre Baskerville', value: 'var(--font-libre-baskerville)', category: 'serif' },
   { label: 'Crimson Text', value: 'var(--font-crimson-text)', category: 'serif' },
   { label: 'Source Serif Pro', value: 'var(--font-source-serif)', category: 'serif' },

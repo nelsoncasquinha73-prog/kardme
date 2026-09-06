@@ -35,7 +35,7 @@ type CtaButton = {
     libraryName?: string
     uploadUrl?: string
     sizePx?: number
-    position?: 'left' | 'right'
+    position?: 'left' | 'center' | 'right'
   }
 }
 
@@ -53,6 +53,7 @@ type CTAButtonsStyle = {
     heightPx?: number
     radius?: number
     bgColor?: string
+    transparentBg?: boolean
     textColor?: string
     fontFamily?: string
     fontSize?: number
@@ -564,7 +565,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                   <input
                     type="range"
                     min={12}
-                    max={40}
+                    max={100}
                     step={1}
                     value={icon.sizePx ?? 18}
                     onChange={(e) => updateButton(b.id, { icon: { ...icon, sizePx: Number(e.target.value) } })}
@@ -575,6 +576,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                 <Row label={t('cta_editor.label_position')}>
                   <select value={icon.position ?? 'left'} onChange={(e) => updateButton(b.id, { icon: { ...icon, position: e.target.value as any } })} style={select}>
                     <option value="left">{t('cta_editor.option_left')}</option>
+                    <option value="center">{t('cta_editor.option_center')}</option>
                     <option value="right">{t('cta_editor.option_right')}</option>
                   </select>
                 </Row>
@@ -595,6 +597,14 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
           <span style={rightNum}>{btn.radius ?? 14}px</span>
         </Row>
 
+        <Row label="Fundo do botão">
+          <Toggle
+            active={btn.transparentBg !== true}
+            onClick={() => updateBtnStyle({ transparentBg: !(btn.transparentBg === true) })}
+          />
+        </Row>
+
+        {btn.transparentBg !== true && (
         <Row label={t('cta_editor.label_bg_color')}>
           <ColorPickerProUnified
             value={btn.bgColor ?? '#111827'}
@@ -604,6 +614,7 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
             
           />
         </Row>
+        )}
 
         <Row label={t('cta_editor.label_text_color')}>
           <ColorPickerProUnified

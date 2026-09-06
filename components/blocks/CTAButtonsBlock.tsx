@@ -30,7 +30,7 @@ type CtaButton = {
     libraryName?: string
     uploadUrl?: string
     sizePx?: number
-    position?: 'left' | 'right'
+    position?: 'left' | 'center' | 'right'
   }
 }
 
@@ -47,6 +47,7 @@ type CTAButtonsStyle = {
     heightPx?: number
     radius?: number
     bgColor?: string
+    transparentBg?: boolean
     textColor?: string
     fontFamily?: string
     fontSize?: number
@@ -259,7 +260,7 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
   const baseBtn: React.CSSProperties = {
     height: btn.heightPx ?? 44,
     borderRadius: btn.radius ?? 14,
-    background: btn.bgColor ?? '#111827',
+    background: btn.transparentBg === true ? 'transparent' : (btn.bgColor ?? '#111827'),
     color: btn.textColor ?? '#ffffff',
     border: (btn.borderWidth ?? 0) > 0 ? `${btn.borderWidth}px solid ${btn.borderColor ?? 'rgba(255,255,255,0.25)'}` : 'none',
     boxShadow: btn.shadow ? '0 18px 50px rgba(0,0,0,0.18)' : undefined,
@@ -283,7 +284,20 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
     const size = ic.sizePx ?? 18
     if (ic.mode === 'upload' && ic.uploadUrl) {
       return (
-        <img src={ic.uploadUrl} alt="" style={{ width: size, height: size, objectFit: 'contain', display: 'block' }} data-no-block-select="1" />
+        <img
+          src={ic.uploadUrl}
+          alt=""
+          style={{
+            width: size,
+            height: size,
+            minWidth: size,
+            maxWidth: 'none',
+            objectFit: 'contain',
+            display: 'block',
+            flexShrink: 0,
+          }}
+          data-no-block-select="1"
+        />
       )
     }
     return null
@@ -303,7 +317,19 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
         const icon = renderIcon(b)
         const iconPos = b.icon?.position ?? 'left'
 
-        const btnStyle: React.CSSProperties = { ...baseBtn, width: getButtonWidth(b) }
+        const btnStyle: React.CSSProperties = {
+          ...baseBtn,
+          width: getButtonWidth(b),
+          ...(iconPos === 'center'
+            ? {
+                height: 'auto',
+                minHeight: btn.heightPx ?? 44,
+                paddingTop: 10,
+                paddingBottom: 10,
+                overflow: 'visible',
+              }
+            : {}),
+        }
 
         const isAttention = attention !== 'none' && !!attentionButtonId && b.id === attentionButtonId
         if (isAttention) {
@@ -330,7 +356,14 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
           return (
             <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
               {iconPos === 'left' && (<><span style={iconContainerStyle}>{icon}</span><span style={{ width: iconGapPx, flexShrink: 0 }} /></>)}
-              <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
+              {iconPos === 'center' ? (
+                <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: iconGapPx }}>
+                  <span style={iconContainerStyle}>{icon}</span>
+                  {b.label ? <span style={{ lineHeight: 1.1, textAlign: 'center' }}>{b.label}</span> : null}
+                </span>
+              ) : (
+                <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
+              )}
               {iconPos === 'right' && (<><span style={{ width: iconGapPx, flexShrink: 0 }} /><span style={iconContainerStyle}>{icon}</span></>)}
             </a>
           )
@@ -338,9 +371,18 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
 
         return (
           <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
-            {icon && iconPos === 'left' ? icon : null}
-            <span style={{ lineHeight: 1.1 }}>{b.label || 'Botão'}</span>
-            {icon && iconPos === 'right' ? icon : null}
+            {iconPos === 'center' ? (
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: iconGapPx }}>
+                {icon}
+                {b.label ? <span style={{ lineHeight: 1.1, textAlign: 'center' }}>{b.label}</span> : null}
+              </span>
+            ) : (
+              <>
+                {icon && iconPos === 'left' ? icon : null}
+                <span style={{ lineHeight: 1.1 }}>{b.label || 'Botão'}</span>
+                {icon && iconPos === 'right' ? icon : null}
+              </>
+            )}
           </a>
         )
       })}
