@@ -17,13 +17,13 @@ type FreeTextStyle = {
   titleFontFamily?: string
   titleBold?: boolean
   titleFontSize?: number
-  titleAlign?: 'left' | 'center' | 'right'
+  titleAlign?: 'left' | 'center' | 'right' | 'justify'
   textColor?: string
   fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right' | 'justify'
   compact?: boolean
   container?: {
     bgColor?: string
@@ -154,7 +154,24 @@ export default function FreeTextBlock({ settings, style }: Props) {
           isHtml ? (
             <div id={htmlScopeId} style={textStyle} onClickCapture={handleClick} data-no-block-select="1">
               <style>{`
-                #${htmlScopeId} { color: ${st.textColor ?? '#111827'}; }
+                #${htmlScopeId} { 
+                  color: ${st.textColor ?? '#111827'};
+                  text-align: ${st.align ?? 'left'} !important;
+                }
+                #${htmlScopeId} p,
+                #${htmlScopeId} div,
+                #${htmlScopeId} li,
+                #${htmlScopeId} blockquote,
+                #${htmlScopeId} h1,
+                #${htmlScopeId} h2,
+                #${htmlScopeId} h3,
+                #${htmlScopeId} h4,
+                #${htmlScopeId} h5,
+                #${htmlScopeId} h6 {
+                  text-align: ${st.align ?? 'left'} !important;
+                  text-justify: inter-word;
+                  ${st.align === 'justify' ? 'text-align-last: justify;' : ''}
+                }
                 #${htmlScopeId} * { color: inherit; }
                 #${htmlScopeId} a { color: inherit; text-decoration: underline; cursor: pointer; }
                 #${htmlScopeId} span[data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }

@@ -14,13 +14,13 @@ type FreeTextStyle = {
   titleFontFamily?: string
   titleBold?: boolean
   titleFontSize?: number
-  titleAlign?: 'left' | 'center' | 'right'
+  titleAlign?: 'left' | 'center' | 'right' | 'justify'
   textColor?: string
   fontFamily?: string
   bold?: boolean
   fontSize?: number
   lineHeight?: number
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right' | 'justify'
   compact?: boolean
   container?: { bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string }
 }
@@ -131,8 +131,14 @@ export default function FreeTextBlockEditor({ settings, style, onChangeSettings,
         <Row label="Altura linha"><input type="range" min={1.1} max={2.0} step={0.05} value={st.lineHeight ?? 1.5} onChange={(e) => setStyle({ lineHeight: Number(e.target.value) })} style={{ flex: 1 }} /><span style={rightNum}>{(st.lineHeight ?? 1.5).toFixed(2)}</span></Row>
         <Row label="Alinhamento">
           <div style={{ display: 'flex', gap: 6 }}>
-            {(['left', 'center', 'right'] as const).map((a) => (
-              <MiniButton key={a} active={(st.align ?? 'left') === a} onClick={() => setStyle({ align: a })}>{a === 'left' ? 'E' : a === 'center' ? 'C' : 'D'}</MiniButton>
+            {(['left', 'center', 'right', 'justify'] as const).map((a) => (
+              <MiniButton
+                key={a}
+                active={(st.align ?? 'left') === a}
+                onClick={() => setStyle({ align: a })}
+              >
+                {a === 'left' ? 'E' : a === 'center' ? 'C' : a === 'right' ? 'D' : 'J'}
+              </MiniButton>
             ))}
           </div>
         </Row>

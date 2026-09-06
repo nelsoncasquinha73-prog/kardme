@@ -18,7 +18,7 @@ type BioStyle = {
   bold?: boolean
   fontSize?: number
   lineHeight?: number
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right' | 'justify'
 
   container?: {
     enabled?: boolean

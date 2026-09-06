@@ -16,7 +16,7 @@ type BioStyle = {
   bold?: boolean
   fontSize?: number
   lineHeight?: number
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right' | 'justify'
   container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; shadow?: boolean; borderWidth?: number; borderColor?: string; widthMode?: 'full' | 'custom'; customWidthPx?: number }
 }
 type Props = { settings: BioSettings; style?: BioStyle; onChangeSettings: (s: BioSettings) => void; onChangeStyle: (s: BioStyle) => void }
@@ -30,7 +30,6 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
   const modals = settings.modals || {}
   const setSettings = (patch: Partial<BioSettings>) => onChangeSettings({ ...settings, ...patch })
   const upsertModal = (id: string, patch: Partial<ModalItem>) => {
-  const { openPicker } = useColorPicker()
     const prev = modals[id] || { label: '', content: '' }
     setSettings({ modals: { ...modals, [id]: { ...prev, ...patch } } })
   }
@@ -73,6 +72,7 @@ export default function BioBlockEditor({ settings, style, onChangeSettings, onCh
             <Button onClick={() => setStyle({ align: 'left' })}>Esq.</Button>
             <Button onClick={() => setStyle({ align: 'center' })}>Centro</Button>
             <Button onClick={() => setStyle({ align: 'right' })}>Dir.</Button>
+            <Button onClick={() => setStyle({ align: 'justify' })}>Just.</Button>
           </div>
         </Row>
       </CollapsibleSection>
