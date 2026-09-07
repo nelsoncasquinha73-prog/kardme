@@ -63,26 +63,65 @@ async function sendOwnerNotification(params: { userId: string; leadId: string; o
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { cardId, name, email, phone, message, zone, consentGiven, marketingOptIn, consentTimestamp, consentVersion } = body || {}
+    const {
+      cardId,
+      name,
+      email,
+      phone,
+      message,
+      zone,
+      requiredFields,
+      customFields,
+      consentGiven,
+      marketingOptIn,
+      consentTimestamp,
+      consentVersion,
+    } = body || {}
 
     const normalizedEmail = String(email || '').toLowerCase().trim()
 
-    if (!cardId || !name || !email) {
+    if (!cardId) {
       return NextResponse.json(
-        { error: 'Campos obrigatórios em falta (cardId, name, email).' },
+        { error: 'cardId em falta.' },
         { status: 400 }
       )
+    }
+
+    const required = requiredFields || {}
+
+    if (required.name && !String(name || '').trim()) {
+      return NextResponse.json({ error: 'Nome obrigatório.' }, { status: 400 })
+    }
+
+    if (required.email && !normalizedEmail) {
+      return NextResponse.json({ error: 'Email obrigatório.' }, { status: 400 })
+    }
+
+    if (required.phone && !String(phone || '').trim()) {
+      return NextResponse.json({ error: 'Telefone obrigatório.' }, { status: 400 })
+    }
+
+    if (required.message && !String(message || '').trim()) {
+      return NextResponse.json({ error: 'Mensagem obrigatória.' }, { status: 400 })
+    }
+
+    if (required.zone && !String(zone || '').trim()) {
+      return NextResponse.json({ error: 'Zona obrigatória.' }, { status: 400 })
     }
 
     // Inserir lead
     const { data: leadData, error: leadError } = await supabaseAdmin.from('leads').insert([
       {
         card_id: cardId,
-        name,
+        name: String(name || '').trim() || 'Sem nome',
         email: normalizedEmail,
         phone: phone || null,
         message: message || null,
         zone: zone || null,
+        custom_fields:
+          customFields && typeof customFields === 'object' && !Array.isArray(customFields)
+            ? customFields
+            : {},
         consent_given: consentGiven ?? true,
         marketing_opt_in: marketingOptIn ?? false,
         consent_timestamp: consentTimestamp || new Date().toISOString(),
@@ -162,8 +201,8 @@ export async function POST(req: Request) {
             userId: cardData.user_id,
             leadId,
             ownerEmail: ownerData.email,
-            leadName: name,
-            leadEmail: normalizedEmail,
+            leadName: String(name || '').trim() || 'Sem nome',
+            leadEmail: normalizedEmail || 'Sem email',
             cardTitle: safeCardTitle,
           })
 

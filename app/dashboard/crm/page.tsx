@@ -66,6 +66,11 @@ type Lead = {
   lead_source: string | null
   country: string | null
   audience_ids: string[]
+  custom_fields?: Record<string, {
+    label?: string
+    value?: any
+    type?: string
+  }> | null
   isUnsubscribed?: boolean
 }
 
@@ -529,7 +534,7 @@ Melhores cumprimentos,
       .from('leads')
       .select(`
         id, name, email, phone, zone, message, marketing_opt_in, consent_given, consent_timestamp, consent_version,
-        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country, audience_ids,
+        step, notes, created_at, contacted, card_id, user_id, lead_type_id, lead_source, lead_magnet_id, country, audience_ids, custom_fields,
         cards ( user_id, name, slug )
       `)
       .eq('user_id', user.id)
@@ -2860,10 +2865,56 @@ const { data, error } = await supabase.from('leads').insert({
                     <td style={td}>
                       <div style={{ position: 'relative' }}>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
                             const dropdownId = `dropdown-${lead.id}`
                             const dropdown = document.getElementById(dropdownId)
-                            if (dropdown) dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
+                            if (!dropdown) return
+
+                            const wasOpen = dropdown.style.display === 'block'
+
+                            // Fechar outros menus abertos
+                            document
+                              .querySelectorAll<HTMLElement>('[id^="dropdown-"]')
+                              .forEach((el) => {
+                                if (el.id !== dropdownId) el.style.display = 'none'
+                              })
+
+                            if (wasOpen) {
+                              dropdown.style.display = 'none'
+                              return
+                            }
+
+                            const rect = e.currentTarget.getBoundingClientRect()
+
+                            dropdown.style.display = 'block'
+                            dropdown.style.position = 'fixed'
+                            dropdown.style.zIndex = '99999'
+                            dropdown.style.right = 'auto'
+                            dropdown.style.bottom = 'auto'
+
+                            const menuWidth = 200
+                            const left = Math.max(
+                              8,
+                              Math.min(
+                                rect.right - menuWidth,
+                                window.innerWidth - menuWidth - 8
+                              )
+                            )
+
+                            dropdown.style.left = `${left}px`
+                            dropdown.style.top = `${rect.bottom + 6}px`
+
+                            requestAnimationFrame(() => {
+                              const menuRect = dropdown.getBoundingClientRect()
+
+                              // Se não couber em baixo, abre para cima
+                              if (menuRect.bottom > window.innerHeight - 8) {
+                                dropdown.style.top = `${Math.max(
+                                  8,
+                                  rect.top - menuRect.height - 6
+                                )}px`
+                              }
+                            })
                           }}
                           style={{
                             padding: '8px 12px',
@@ -2885,16 +2936,15 @@ const { data, error } = await supabase.from('leads').insert({
                           id={`dropdown-${lead.id}`}
                           style={{
                             display: 'none',
-                            position: 'absolute',
-                            top: '100%',
-                            right: 0,
-                            marginTop: 6,
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
                             background: (__kmIsLight() ? '#ffffff' : '#0f172a'),
                             border: (__kmIsLight() ? '1px solid rgba(15,23,42,0.10)' : '1px solid rgba(255,255,255,0.10)'),
                             borderRadius: 8,
                             minWidth: 200,
                             boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            zIndex: 1000,
+                            zIndex: 99999,
                           }}
                         >
                           <button
@@ -3902,6 +3952,60 @@ const { data, error } = await supabase.from('leads').insert({
                 <p style={{ margin: 0, fontSize: 13 }}>{new Date(selectedLeadForView.created_at).toLocaleString('pt-PT')}</p>
               </div>
             </div>
+
+            {selectedLeadForView.custom_fields &&
+              Object.keys(selectedLeadForView.custom_fields).length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{
+                    fontSize: 14,
+                    fontWeight: 900,
+                    marginBottom: 12
+                  }}>
+                    Informação adicional
+                  </h3>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: 12
+                  }}>
+                    {Object.entries(selectedLeadForView.custom_fields).map(([key, field]: [string, any]) => (
+                      <div
+                        key={key}
+                        style={{
+                          padding: 12,
+                          background: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 10
+                        }}
+                      >
+                        <label style={{
+                          display: 'block',
+                          fontSize: 11,
+                          fontWeight: 900,
+                          opacity: 0.7,
+                          marginBottom: 5
+                        }}>
+                          {field?.label || key}
+                        </label>
+
+                        <p style={{
+                          margin: 0,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          wordBreak: 'break-word'
+                        }}>
+                          {field?.value !== undefined &&
+                           field?.value !== null &&
+                           String(field.value).trim() !== ''
+                            ? String(field.value)
+                            : '—'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {selectedLeadForView.message && (
               <div style={{ marginBottom: 16 }}>

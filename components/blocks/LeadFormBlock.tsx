@@ -4,6 +4,15 @@ import React, { useMemo, useState } from 'react'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { trackEvent } from '@/lib/trackEvent'
 
+type CustomLeadField = {
+  id: string
+  label: string
+  placeholder?: string
+  type: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea'
+  required?: boolean
+  enabled?: boolean
+}
+
 type LeadFormSettings = {
   title?: string
   description?: string
@@ -15,6 +24,17 @@ type LeadFormSettings = {
     zone?: boolean
   }
   buttonLabel?: string
+  requiredFields?: {
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    message?: boolean
+    zone?: boolean
+  }
+
+  customFields?: CustomLeadField[]
+  fieldOrder?: string[]
+
   consentCheckboxEnabled?: boolean
   consentCheckboxText?: string
   marketingCheckboxEnabled?: boolean
@@ -112,6 +132,38 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
     [s.fields]
   )
 
+  const requiredFields = {
+    name: s.requiredFields?.name ?? true,
+    email: s.requiredFields?.email ?? true,
+    phone: s.requiredFields?.phone ?? false,
+    message: s.requiredFields?.message ?? false,
+    zone: s.requiredFields?.zone ?? false,
+  }
+
+  const customFields = (Array.isArray(s.customFields) ? s.customFields : [])
+    .filter((field) => field.enabled !== false)
+
+  const baseFieldIds = ['name', 'email', 'phone', 'message', 'zone']
+
+  const allFieldIds = [
+    ...baseFieldIds,
+    ...customFields.map((field) => field.id),
+  ]
+
+  const requestedFieldOrder =
+    Array.isArray(s.fieldOrder) && s.fieldOrder.length > 0
+      ? s.fieldOrder
+      : baseFieldIds
+
+  const completeFieldOrder = [
+    ...requestedFieldOrder,
+    ...allFieldIds.filter((id) => !requestedFieldOrder.includes(id)),
+  ].filter(
+    (id, index, arr) =>
+      allFieldIds.includes(id) &&
+      arr.indexOf(id) === index
+  )
+
   const labels = {
     name: s.labels?.name ?? 'Nome',
     email: s.labels?.email ?? 'Email',
@@ -129,6 +181,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   }
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '', zone: '' })
+  const [customData, setCustomData] = useState<Record<string, string>>({})
   const [consentChecked, setConsentChecked] = useState(false)
   const [marketingChecked, setMarketingChecked] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
@@ -202,11 +255,12 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
   const marketingText = s.marketingCheckboxText || 'Quero receber novidades e oportunidades por email.'
 
   async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
     if ((s.consentCheckboxEnabled ?? true) && !consentChecked) {
       setErrorMsg('Deve aceitar o tratamento de dados para continuar.')
       return
     }
-    e.preventDefault()
     setStatus('sending')
     setErrorMsg(null)
 
@@ -217,6 +271,17 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
         body: JSON.stringify({
           cardId,
           ...formData,
+          requiredFields,
+          customFields: Object.fromEntries(
+            customFields.map((field) => [
+              field.id,
+              {
+                label: field.label,
+                type: field.type,
+                value: customData[field.id] ?? '',
+              },
+            ])
+          ),
           consentGiven: consentChecked,
           marketingOptIn: marketingChecked,
           consentTimestamp: new Date().toISOString(),
@@ -233,6 +298,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       setStatus('success')
       trackEvent(cardId, 'lead', 'lead_form')
       setFormData({ name: '', email: '', phone: '', message: '', zone: '' })
+      setCustomData({})
       setConsentChecked(false)
       setMarketingChecked(false)
       window.setTimeout(() => setStatus('idle'), 1800)
@@ -263,71 +329,133 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
       )}
 
       <form id={`leadform-${cardId}`} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: 0, padding: 0 }}>
-        {fields.name && (
-          <div>
-            <div style={labelStyle}>{labels.name}</div>
-            <input
-              type="text"
-              placeholder={placeholders.name}
-              value={formData.name}
-              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-              required
-              style={inputStyle}
-            />
-          </div>
-        )}
+        {completeFieldOrder.map((fieldId) => {
+          if (fieldId === 'name') {
+            if (!fields.name) return null
+            return (
+              <div key="name">
+                <div style={labelStyle}>{labels.name}</div>
+                <input
+                  type="text"
+                  placeholder={placeholders.name}
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  required={requiredFields.name}
+                  style={inputStyle}
+                />
+              </div>
+            )
+          }
 
-        {fields.email && (
-          <div>
-            <div style={labelStyle}>{labels.email}</div>
-            <input
-              type="email"
-              placeholder={placeholders.email}
-              value={formData.email}
-              onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-              required
-              style={inputStyle}
-            />
-          </div>
-        )}
+          if (fieldId === 'email') {
+            if (!fields.email) return null
+            return (
+              <div key="email">
+                <div style={labelStyle}>{labels.email}</div>
+                <input
+                  type="email"
+                  placeholder={placeholders.email}
+                  value={formData.email}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                  required={requiredFields.email}
+                  style={inputStyle}
+                />
+              </div>
+            )
+          }
 
-        {fields.phone && (
-          <div>
-            <div style={labelStyle}>{labels.phone}</div>
-            <input
-              type="tel"
-              placeholder={placeholders.phone}
-              value={formData.phone}
-              onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
-        )}
+          if (fieldId === 'phone') {
+            if (!fields.phone) return null
+            return (
+              <div key="phone">
+                <div style={labelStyle}>{labels.phone}</div>
+                <input
+                  type="tel"
+                  placeholder={placeholders.phone}
+                  value={formData.phone}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                  required={requiredFields.phone}
+                  style={inputStyle}
+                />
+              </div>
+            )
+          }
 
-        {fields.zone && (
-          <div>
-            <div style={labelStyle}>{labels.zone}</div>
-            <input
-              type="text"
-              placeholder={placeholders.zone}
-              value={formData.zone}
-              onChange={(e) => setFormData((p) => ({ ...p, zone: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
-        )}
+          if (fieldId === 'zone') {
+            if (!fields.zone) return null
+            return (
+              <div key="zone">
+                <div style={labelStyle}>{labels.zone}</div>
+                <input
+                  type="text"
+                  placeholder={placeholders.zone}
+                  value={formData.zone}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, zone: e.target.value }))}
+                  required={requiredFields.zone}
+                  style={inputStyle}
+                />
+              </div>
+            )
+          }
 
-        {fields.message && (
-          <div>
-            <div style={labelStyle}>{labels.message}</div>
-            <textarea
-              placeholder={placeholders.message}
-              value={formData.message}
-              onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
-              style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
-            />
-          </div>
-        )}
+          if (fieldId === 'message') {
+            if (!fields.message) return null
+            return (
+              <div key="message">
+                <div style={labelStyle}>{labels.message}</div>
+                <textarea
+                  placeholder={placeholders.message}
+                  value={formData.message}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                  required={requiredFields.message}
+                  style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
+                />
+              </div>
+            )
+          }
+
+          const customField = customFields.find((field) => field.id === fieldId)
+
+          if (!customField) return null
+
+          return (
+            <div key={customField.id}>
+              <div style={labelStyle}>
+                {customField.label}
+                {customField.required ? ' *' : ''}
+              </div>
+
+              {customField.type === 'textarea' ? (
+                <textarea
+                  placeholder={customField.placeholder ?? ''}
+                  value={customData[customField.id] ?? ''}
+                  onChange={(e) =>
+                    setCustomData((prev) => ({
+                      ...prev,
+                      [customField.id]: e.target.value,
+                    }))
+                  }
+                  required={customField.required === true}
+                  style={{ ...inputStyle, minHeight: 92, resize: 'vertical' }}
+                />
+              ) : (
+                <input
+                  type={customField.type}
+                  placeholder={customField.placeholder ?? ''}
+                  value={customData[customField.id] ?? ''}
+                  onChange={(e) =>
+                    setCustomData((prev) => ({
+                      ...prev,
+                      [customField.id]: e.target.value,
+                    }))
+                  }
+                  required={customField.required === true}
+                  style={inputStyle}
+                />
+              )}
+            </div>
+          )
+        })}
 
         {(s.consentCheckboxEnabled ?? true) && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 4 }}>

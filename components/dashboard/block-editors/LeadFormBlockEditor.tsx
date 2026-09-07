@@ -5,13 +5,27 @@ import { useColorPicker } from '@/components/editor/ColorPickerContext'
 import ColorPickerProUnified from '@/components/editor/ColorPickerProUnified'
 import FontPicker from '@/components/editor/FontPicker'
 
+type CustomLeadField = {
+  id: string
+  label: string
+  placeholder?: string
+  type: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea'
+  required?: boolean
+  enabled?: boolean
+}
+
 type LeadFormSettings = {
   title?: string
   description?: string
   buttonLabel?: string
   fields?: { name?: boolean; email?: boolean; phone?: boolean; message?: boolean; zone?: boolean }
+
+  requiredFields?: { name?: boolean; email?: boolean; phone?: boolean; message?: boolean; zone?: boolean }
   labels?: { name?: string; email?: string; phone?: string; message?: string; zone?: string }
   placeholders?: { name?: string; email?: string; phone?: string; message?: string; zone?: string }
+
+  customFields?: CustomLeadField[]
+  fieldOrder?: string[]
   consentCheckboxEnabled?: boolean
   consentCheckboxText?: string
   marketingCheckboxEnabled?: boolean
@@ -56,8 +70,39 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
   const s = settings || {}
   const st = style || {}
   const fields = s.fields || {}
+  const requiredFields = s.requiredFields || {}
   const labels = s.labels || {}
   const placeholders = s.placeholders || {}
+  const customFields = Array.isArray(s.customFields) ? s.customFields : []
+
+  const baseFieldIds = ['name', 'email', 'phone', 'message', 'zone']
+
+  const allFieldIds = [
+    ...baseFieldIds,
+    ...customFields.map((f) => f.id),
+  ]
+
+  const completeFieldOrder = [
+    ...(Array.isArray(s.fieldOrder) ? s.fieldOrder : baseFieldIds),
+    ...allFieldIds.filter(
+      (id) => !(Array.isArray(s.fieldOrder) ? s.fieldOrder : baseFieldIds).includes(id)
+    ),
+  ].filter((id, index, arr) => allFieldIds.includes(id) && arr.indexOf(id) === index)
+
+  const moveField = (id: string, direction: -1 | 1) => {
+    const current = [...completeFieldOrder]
+    const index = current.indexOf(id)
+
+    if (index < 0) return
+
+    const target = index + direction
+
+    if (target < 0 || target >= current.length) return
+
+    ;[current[index], current[target]] = [current[target], current[index]]
+
+    setSettings({ fieldOrder: current })
+  }
   const heading = st.heading || {}
   const container = st.container || {}
   const inputs = st.inputs || {}
@@ -74,8 +119,39 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
   const consentCheckbox = st.consentCheckbox || {}
   const setConsentCheckbox = (patch: Partial<LeadFormStyle['consentCheckbox']>) => setStyle({ consentCheckbox: { ...consentCheckbox, ...patch } })
   const setFields = (patch: Partial<LeadFormSettings['fields']>) => setSettings({ fields: { ...fields, ...patch } })
+
+  const setRequiredFields = (patch: Partial<LeadFormSettings['requiredFields']>) =>
+    setSettings({ requiredFields: { ...requiredFields, ...patch } })
   const setLabels = (patch: Partial<LeadFormSettings['labels']>) => setSettings({ labels: { ...labels, ...patch } })
   const setPlaceholders = (patch: Partial<LeadFormSettings['placeholders']>) => setSettings({ placeholders: { ...placeholders, ...patch } })
+
+  const addCustomField = () => {
+    const next: CustomLeadField = {
+      id: `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+      label: 'Novo campo',
+      placeholder: '',
+      type: 'text',
+      required: false,
+      enabled: true,
+    }
+    setSettings({
+      customFields: [...customFields, next],
+      fieldOrder: [...completeFieldOrder, next.id],
+    })
+  }
+
+  const updateCustomField = (id: string, patch: Partial<CustomLeadField>) => {
+    setSettings({
+      customFields: customFields.map((f) => (f.id === id ? { ...f, ...patch } : f)),
+    })
+  }
+
+  const removeCustomField = (id: string) => {
+    setSettings({
+      customFields: customFields.filter((f) => f.id !== id),
+      fieldOrder: completeFieldOrder.filter((fieldId) => fieldId !== id),
+    })
+  }
 
   const consentCheckboxSettings = s.consentCheckboxEnabled ?? true
   const marketingCheckboxSettings = s.marketingCheckboxEnabled ?? false
@@ -100,28 +176,263 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
       </CollapsibleSection>
 
       {/* ========== CAMPOS ========== */}
-      <CollapsibleSection title="📋 Campos" subtitle="Ativar/desativar, labels, placeholders" isOpen={activeSection === 'fields'} onToggle={() => setActiveSection(activeSection === 'fields' ? null : 'fields')}>
-        <Row label="Nome"><Toggle active={fields.name !== false} onClick={() => setFields({ name: !(fields.name !== false) })} /></Row>
-        <Row label="Email"><Toggle active={fields.email !== false} onClick={() => setFields({ email: !(fields.email !== false) })} /></Row>
-        <Row label="Telefone"><Toggle active={fields.phone !== false} onClick={() => setFields({ phone: !(fields.phone !== false) })} /></Row>
-        <Row label="Mensagem"><Toggle active={fields.message !== false} onClick={() => setFields({ message: !(fields.message !== false) })} /></Row>
-        <Row label="Zona"><Toggle active={fields.zone === true} onClick={() => setFields({ zone: !(fields.zone === true) })} /></Row>
-        
+      <CollapsibleSection
+        title="📋 Campos"
+        subtitle="Ativar, obrigatórios e campos personalizados"
+        isOpen={activeSection === 'fields'}
+        onToggle={() => setActiveSection(activeSection === 'fields' ? null : 'fields')}
+      >
+        <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>
+          Campos base
+        </div>
+
+        {([
+          ['name', 'Nome'],
+          ['email', 'Email'],
+          ['phone', 'Telefone'],
+          ['message', 'Mensagem'],
+          ['zone', 'Zona'],
+        ] as const).map(([key, title]) => {
+          const enabled =
+            key === 'zone'
+              ? fields[key] === true
+              : fields[key] !== false
+
+          const requiredDefault = key === 'name' || key === 'email'
+
+          return (
+            <div
+              key={key}
+              style={{
+                padding: 10,
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <strong style={{ fontSize: 12 }}>{title}</strong>
+
+                  <button
+                    type="button"
+                    onClick={() => moveField(key, -1)}
+                    disabled={completeFieldOrder.indexOf(key) === 0}
+                    style={orderButtonStyle}
+                    title="Mover para cima"
+                  >
+                    ↑
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => moveField(key, 1)}
+                    disabled={completeFieldOrder.indexOf(key) === completeFieldOrder.length - 1}
+                    style={orderButtonStyle}
+                    title="Mover para baixo"
+                  >
+                    ↓
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, opacity: 0.65 }}>Ativo</span>
+                  <Toggle
+                    active={enabled}
+                    onClick={() => setFields({ [key]: !enabled })}
+                  />
+                </div>
+              </div>
+
+              {enabled && (
+                <>
+                  <Row label="Obrigatório">
+                    <Toggle
+                      active={requiredFields[key] ?? requiredDefault}
+                      onClick={() =>
+                        setRequiredFields({
+                          [key]: !(requiredFields[key] ?? requiredDefault),
+                        })
+                      }
+                    />
+                  </Row>
+
+                  <Row label="Label">
+                    <input
+                      type="text"
+                      value={
+                        labels[key] ??
+                        (key === 'name'
+                          ? 'Nome'
+                          : key === 'email'
+                            ? 'Email'
+                            : key === 'phone'
+                              ? 'Telefone'
+                              : key === 'message'
+                                ? 'Mensagem'
+                                : 'Zona / Localização')
+                      }
+                      onChange={(e) => setLabels({ [key]: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </Row>
+
+                  <Row label="Placeholder">
+                    <input
+                      type="text"
+                      value={placeholders[key] ?? ''}
+                      onChange={(e) => setPlaceholders({ [key]: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </Row>
+                </>
+              )}
+            </div>
+          )
+        })}
+
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
-        
-        <Row label="Label Nome"><input type="text" value={labels.name ?? 'Nome'} onChange={(e) => setLabels({ name: e.target.value })} style={inputStyle} /></Row>
-        <Row label="Label Email"><input type="text" value={labels.email ?? 'Email'} onChange={(e) => setLabels({ email: e.target.value })} style={inputStyle} /></Row>
-        <Row label="Label Telefone"><input type="text" value={labels.phone ?? 'Telefone'} onChange={(e) => setLabels({ phone: e.target.value })} style={inputStyle} /></Row>
-        <Row label="Label Mensagem"><input type="text" value={labels.message ?? 'Mensagem'} onChange={(e) => setLabels({ message: e.target.value })} style={inputStyle} /></Row>
-        <Row label="Label Zona"><input type="text" value={labels.zone ?? "Zona / Localização"} onChange={(e) => setLabels({ zone: e.target.value })} style={inputStyle} /></Row>
-        
-        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
-        
-        <Row label="Placeholder Nome"><input type="text" value={placeholders.name ?? ''} onChange={(e) => setPlaceholders({ name: e.target.value })} placeholder="Ex: Escreve o teu nome" style={inputStyle} /></Row>
-        <Row label="Placeholder Email"><input type="text" value={placeholders.email ?? ''} onChange={(e) => setPlaceholders({ email: e.target.value })} placeholder="Ex: Escreve o teu email" style={inputStyle} /></Row>
-        <Row label="Placeholder Tel"><input type="text" value={placeholders.phone ?? ''} onChange={(e) => setPlaceholders({ phone: e.target.value })} placeholder="Ex: Opcional" style={inputStyle} /></Row>
-        <Row label="Placeholder Msg"><input type="text" value={placeholders.message ?? ''} onChange={(e) => setPlaceholders({ message: e.target.value })} placeholder="Ex: Como posso ajudar?" style={inputStyle} /></Row>
-        <Row label="Placeholder Zona"><input type="text" value={placeholders.zone ?? ""} onChange={(e) => setPlaceholders({ zone: e.target.value })} placeholder="Ex: Lisboa, Oeiras" style={inputStyle} /></Row>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 800 }}>Campos personalizados</div>
+            <div style={{ fontSize: 11, opacity: 0.6 }}>Cria perguntas específicas para cada negócio</div>
+          </div>
+
+          <Button onClick={addCustomField}>+ Adicionar campo</Button>
+        </div>
+
+        {customFields.length === 0 && (
+          <div style={{ fontSize: 12, opacity: 0.55, padding: '8px 0' }}>
+            Ainda não existem campos personalizados.
+          </div>
+        )}
+
+        {customFields.map((field, index) => (
+          <div
+            key={field.id}
+            style={{
+              padding: 12,
+              border: '1px solid rgba(59,130,246,0.18)',
+              background: 'rgba(59,130,246,0.03)',
+              borderRadius: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <strong style={{ fontSize: 12 }}>Campo #{index + 1}</strong>
+
+                <button
+                  type="button"
+                  onClick={() => moveField(field.id, -1)}
+                  disabled={completeFieldOrder.indexOf(field.id) === 0}
+                  style={orderButtonStyle}
+                  title="Mover para cima"
+                >
+                  ↑
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => moveField(field.id, 1)}
+                  disabled={completeFieldOrder.indexOf(field.id) === completeFieldOrder.length - 1}
+                  style={orderButtonStyle}
+                  title="Mover para baixo"
+                >
+                  ↓
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => removeCustomField(field.id)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#dc2626',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  fontWeight: 800,
+                }}
+                title="Eliminar campo"
+              >
+                ×
+              </button>
+            </div>
+
+            <Row label="Tipo">
+              <select
+                value={field.type}
+                onChange={(e) =>
+                  updateCustomField(field.id, {
+                    type: e.target.value as CustomLeadField['type'],
+                  })
+                }
+                style={selectStyle}
+              >
+                <option value="text">Texto curto</option>
+                <option value="textarea">Texto longo</option>
+                <option value="email">Email</option>
+                <option value="tel">Telefone</option>
+                <option value="number">Número</option>
+                <option value="date">Data</option>
+              </select>
+            </Row>
+
+            <Row label="Ativo">
+              <Toggle
+                active={field.enabled !== false}
+                onClick={() =>
+                  updateCustomField(field.id, {
+                    enabled: field.enabled === false,
+                  })
+                }
+              />
+            </Row>
+
+            <Row label="Obrigatório">
+              <Toggle
+                active={field.required === true}
+                onClick={() =>
+                  updateCustomField(field.id, {
+                    required: !(field.required === true),
+                  })
+                }
+              />
+            </Row>
+
+            <Row label="Label">
+              <input
+                type="text"
+                value={field.label}
+                onChange={(e) =>
+                  updateCustomField(field.id, { label: e.target.value })
+                }
+                style={inputStyle}
+                placeholder="Ex: Zona do corpo"
+              />
+            </Row>
+
+            {field.type !== 'date' && (
+              <Row label="Placeholder">
+                <input
+                  type="text"
+                  value={field.placeholder ?? ''}
+                  onChange={(e) =>
+                    updateCustomField(field.id, { placeholder: e.target.value })
+                  }
+                  style={inputStyle}
+                  placeholder="Ex: Braço, costas..."
+                />
+              </Row>
+            )}
+          </div>
+        ))}
       </CollapsibleSection>
 
       {/* ========== TÍTULO (ESTILO) ========== */}
@@ -324,6 +635,21 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
 }
 
 // ===== COMPONENTES AUXILIARES =====
+
+const orderButtonStyle: React.CSSProperties = {
+  width: 26,
+  height: 26,
+  borderRadius: 8,
+  border: '1px solid rgba(0,0,0,0.10)',
+  background: '#fff',
+  cursor: 'pointer',
+  fontWeight: 800,
+  fontSize: 13,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+}
 
 const rightNum: React.CSSProperties = { fontSize: 12, opacity: 0.7, minWidth: 45, textAlign: 'right' }
 const selectStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', fontWeight: 600, fontSize: 12, minWidth: 110 }
