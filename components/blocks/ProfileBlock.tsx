@@ -323,6 +323,7 @@ export default function ProfileBlock({
               textAlign: align,
               whiteSpace: 'pre-wrap',
               width: '100%',
+              transform: `translateY(${settings.name.style?.offsetY ?? 0}px)`,
             }}
           >
             {settings.name.text}
@@ -356,6 +357,7 @@ export default function ProfileBlock({
                 textAlign: align,
                 whiteSpace: 'pre-wrap',
                 width: '100%',
+                transform: `translateY(${settings.profession.style?.offsetY ?? 0}px)`,
               }}
             >
               {settings.profession.text}
@@ -380,6 +382,7 @@ export default function ProfileBlock({
               textAlign: align,
               whiteSpace: 'pre-wrap',
               width: '100%',
+              transform: `translateY(${settings.company.style?.offsetY ?? 0}px)`,
             }}
           >
             {settings.company.text}

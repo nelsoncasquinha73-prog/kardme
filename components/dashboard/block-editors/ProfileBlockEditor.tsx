@@ -556,7 +556,27 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </span>
           </Row>
 
-          <Row label={t('profile_editor.label_color')}>
+                      <Row label="Posição vertical">
+              <input
+                type="range"
+                min={-40}
+                max={40}
+                step={1}
+                value={local.name?.style?.offsetY ?? 0}
+                onChange={(e) => patch((d) => {
+                  d.name.style = d.name.style || {}
+                  d.name.style.offsetY = Number(e.target.value)
+                })}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.name?.style?.offsetY ?? 0}px</span>
+              <Button onClick={() => patch((d) => {
+                d.name.style = d.name.style || {}
+                d.name.style.offsetY = 0
+              })}>Reset</Button>
+            </Row>
+
+<Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
               value={local.name?.color ?? '#0B1220'}
               onChange={(hex) => patch((d) => (d.name.color = hex))}
@@ -637,7 +657,27 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </Button>
           </Row>
 
-          <Row label={t('profile_editor.label_color')}>
+                      <Row label="Posição vertical">
+              <input
+                type="range"
+                min={-40}
+                max={40}
+                step={1}
+                value={local.profession?.style?.offsetY ?? 0}
+                onChange={(e) => patch((d) => {
+                  d.profession.style = d.profession.style || {}
+                  d.profession.style.offsetY = Number(e.target.value)
+                })}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.profession?.style?.offsetY ?? 0}px</span>
+              <Button onClick={() => patch((d) => {
+                d.profession.style = d.profession.style || {}
+                d.profession.style.offsetY = 0
+              })}>Reset</Button>
+            </Row>
+
+<Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
               value={local.profession?.color ?? '#374151'}
               onChange={(hex) => patch((d) => (d.profession.color = hex))}
@@ -729,7 +769,29 @@ export default function ProfileBlockEditor({ cardId, settings, onChange }: Props
             </Button>
           </Row>
 
-          <Row label={t('profile_editor.label_color')}>
+                      <Row label="Posição vertical">
+              <input
+                type="range"
+                min={-40}
+                max={40}
+                step={1}
+                value={local.company?.style?.offsetY ?? 0}
+                onChange={(e) => patch((d) => {
+                  d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                  d.company.style = d.company.style || {}
+                  d.company.style.offsetY = Number(e.target.value)
+                })}
+                style={{ flex: 1 }}
+              />
+              <span style={rightNum}>{local.company?.style?.offsetY ?? 0}px</span>
+              <Button onClick={() => patch((d) => {
+                d.company = d.company || { enabled: true, text: '', size: 'sm', color: '#6B7280' }
+                d.company.style = d.company.style || {}
+                d.company.style.offsetY = 0
+              })}>Reset</Button>
+            </Row>
+
+<Row label={t('profile_editor.label_color')}>
             <ColorPickerProUnified
               value={local.company?.color ?? '#6B7280'}
               onChange={(hex) => patch((d) => {
