@@ -2292,7 +2292,7 @@ const { data, error } = await supabase.from('leads').insert({
         </button>
 
         <button
-          onClick={() => exportCSV()}
+          onClick={handleExportCSV}
           style={{
             padding: '10px 16px',
             height: 42,
