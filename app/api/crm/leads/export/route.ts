@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     // Verify card belongs to user
     const { data: card } = await supabaseAdmin
       .from('cards')
-      .select('id')
+      .select('id, name')
       .eq('id', cardId)
       .eq('user_id', userId)
       .single()
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
     // Fetch leads
     let query = supabaseAdmin
       .from('leads')
-      .select('id, name, email, phone, zone, step, marketing_opt_in, message, custom_fields, notes, created_at')
+      .select('id, name, email, phone, zone, step, lead_source, marketing_opt_in, message, custom_fields, notes, created_at')
       .eq('card_id', cardId)
 
     // Apply sort
@@ -62,7 +62,7 @@ export async function GET(req: Request) {
     if (error) throw error
 
     // Generate CSV
-    const csv = generateCSV(leads || [])
+    const csv = generateCSV((leads || []).map((lead: any) => ({ ...lead, card_name: card.name })))
 
     return new NextResponse(csv, {
       status: 200,
