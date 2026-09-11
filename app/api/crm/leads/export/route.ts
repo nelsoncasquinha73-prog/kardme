@@ -50,7 +50,7 @@ export async function GET(req: Request) {
     // Fetch leads
     let query = supabaseAdmin
       .from('leads')
-      .select('id, name, email, phone, zone, step, marketing_opt_in, notes, created_at')
+      .select('id, name, email, phone, zone, step, marketing_opt_in, message, custom_fields, notes, created_at')
       .eq('card_id', cardId)
 
     // Apply sort

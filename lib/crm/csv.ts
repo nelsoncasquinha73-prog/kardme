@@ -133,7 +133,114 @@ export function mapCSVRowToLead(row: CSVRow): ParsedLead | null {
 export function generateCSV(leads: any[]): string {
   if (leads.length === 0) return ''
 
-  const headers = ['Nome', 'Email', 'Telefone', 'Zona', 'Step', 'Marketing', 'Data', 'Notas']
+  type CustomFieldDescriptor = {
+    key: string
+    label: string
+    header: string
+  }
+
+  const descriptors: CustomFieldDescriptor[] = []
+  const knownKeys = new Set<string>()
+  const usedHeaders = new Map<string, number>()
+
+  const getCustomEntries = (customFields: any) => {
+    if (!customFields) return []
+
+    if (Array.isArray(customFields)) {
+      return customFields.map((field, index) => [
+        String(field?.id || field?.key || index),
+        field,
+      ] as [string, any])
+    }
+
+    if (typeof customFields === 'object') {
+      return Object.entries(customFields) as [string, any][]
+    }
+
+    return []
+  }
+
+  // Descobrir todos os campos personalizados presentes nas leads
+  for (const lead of leads) {
+    for (const [key, field] of getCustomEntries(lead.custom_fields)) {
+      if (knownKeys.has(key)) continue
+
+      const label =
+        typeof field === 'object' && field !== null
+          ? String(field.label || key)
+          : key
+
+      const currentCount = usedHeaders.get(label) || 0
+      const nextCount = currentCount + 1
+      usedHeaders.set(label, nextCount)
+
+      const header = nextCount === 1 ? label : `${label} (${nextCount})`
+
+      descriptors.push({
+        key,
+        label,
+        header,
+      })
+
+      knownKeys.add(key)
+    }
+  }
+
+  const headers = [
+    'Nome',
+    'Email',
+    'Telefone',
+    'Zona',
+    'Step',
+    'Marketing',
+    'Mensagem',
+    ...descriptors.map(field => field.header),
+    'Notas',
+    'Data',
+  ]
+
+  const getCustomValue = (
+    customFields: any,
+    descriptor: CustomFieldDescriptor
+  ): string => {
+    const entries = getCustomEntries(customFields)
+
+    // Primeiro procurar pela chave original
+    let match = entries.find(([key]) => key === descriptor.key)
+
+    // Fallback pelo label
+    if (!match) {
+      match = entries.find(([, field]) => {
+        if (!field || typeof field !== 'object') return false
+        return String(field.label || '') === descriptor.label
+      })
+    }
+
+    if (!match) return ''
+
+    const field = match[1]
+
+    if (field && typeof field === 'object' && 'value' in field) {
+      const value = field.value
+
+      if (Array.isArray(value)) {
+        return value.join(', ')
+      }
+
+      if (value === null || value === undefined) {
+        return ''
+      }
+
+      if (typeof value === 'object') {
+        return JSON.stringify(value)
+      }
+
+      return String(value)
+    }
+
+    return field === null || field === undefined ? '' : String(field)
+  }
+
   const rows = leads.map(lead => [
     lead.name || '',
     lead.email || '',
@@ -141,13 +248,27 @@ export function generateCSV(leads: any[]): string {
     lead.zone || '',
     lead.step || '',
     lead.marketing_opt_in ? 'Sim' : 'Não',
-    new Date(lead.created_at).toLocaleDateString('pt-PT'),
+    lead.message || '',
+
+    ...descriptors.map(descriptor =>
+      getCustomValue(lead.custom_fields, descriptor)
+    ),
+
     lead.notes || '',
+    lead.created_at
+      ? new Date(lead.created_at).toLocaleDateString('pt-PT')
+      : '',
   ])
 
   const csv = [headers, ...rows]
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .map(row =>
+      row
+        .map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`)
+        .join(',')
+    )
     .join('\n')
 
-  return csv
+  // BOM UTF-8 para abrir corretamente no Excel
+  return '\uFEFF' + csv
 }
+
