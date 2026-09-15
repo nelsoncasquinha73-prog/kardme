@@ -334,7 +334,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             if (!fields.name) return null
             return (
               <div key="name">
-                <div style={labelStyle}>{labels.name}</div>
+                <div style={labelStyle}>{labels.name}{requiredFields.name ? ' *' : ''}</div>
                 <input
                   type="text"
                   placeholder={placeholders.name}
@@ -351,7 +351,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             if (!fields.email) return null
             return (
               <div key="email">
-                <div style={labelStyle}>{labels.email}</div>
+                <div style={labelStyle}>{labels.email}{requiredFields.email ? ' *' : ''}</div>
                 <input
                   type="email"
                   placeholder={placeholders.email}
@@ -368,7 +368,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             if (!fields.phone) return null
             return (
               <div key="phone">
-                <div style={labelStyle}>{labels.phone}</div>
+                <div style={labelStyle}>{labels.phone}{requiredFields.phone ? ' *' : ''}</div>
                 <input
                   type="tel"
                   placeholder={placeholders.phone}
@@ -385,7 +385,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             if (!fields.zone) return null
             return (
               <div key="zone">
-                <div style={labelStyle}>{labels.zone}</div>
+                <div style={labelStyle}>{labels.zone}{requiredFields.zone ? ' *' : ''}</div>
                 <input
                   type="text"
                   placeholder={placeholders.zone}
@@ -402,7 +402,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
             if (!fields.message) return null
             return (
               <div key="message">
-                <div style={labelStyle}>{labels.message}</div>
+                <div style={labelStyle}>{labels.message}{requiredFields.message ? ' *' : ''}</div>
                 <textarea
                   placeholder={placeholders.message}
                   value={formData.message}
