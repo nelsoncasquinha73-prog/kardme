@@ -982,16 +982,41 @@ Melhores cumprimentos,
   }, [userId])
 
   const updateStep = async (id: string, newStep: string) => {
-    await supabase
+    const lead = leads.find(l => l.id === id)
+    const oldStep = lead?.step
+
+    // Não fazer nada se não houve alteração
+    if (oldStep === newStep) return
+
+    const { error } = await supabase
       .from('leads')
       .update({ step: newStep })
       .eq('id', id)
+
+    if (error) {
+      console.error('[CRM] Erro ao atualizar step:', error)
+      addToast('Erro ao atualizar o estado da lead', 'error')
+      return
+    }
 
     setLeads(prev =>
       prev.map(l =>
         l.id === id ? { ...l, step: newStep } : l
       )
     )
+
+    if (oldStep && userId) {
+      await logLeadActivity({
+        leadId: id,
+        userId,
+        type: 'step_changed',
+        title: `${oldStep} → ${newStep}`,
+        meta: {
+          from: oldStep,
+          to: newStep,
+        },
+      })
+    }
   }
 
   const applyBulkStep = async (newStep: string) => {
@@ -1139,10 +1164,16 @@ const { data, error } = await supabase.from('leads').insert({
   }
 
   const updateNotes = async (id: string, notes: string) => {
-    await supabase
+    const { error } = await supabase
       .from('leads')
       .update({ notes: notes || null })
       .eq('id', id)
+
+    if (error) {
+      console.error('[CRM] Erro ao atualizar notas:', error)
+      addToast('Erro ao atualizar as notas', 'error')
+      return
+    }
 
     setLeads(prev =>
       prev.map(l =>
@@ -1153,19 +1184,51 @@ const { data, error } = await supabase.from('leads').insert({
     if (selectedLead?.id === id) {
       setSelectedLead({ ...selectedLead, notes: notes || null })
     }
+
+    if (userId) {
+      await logLeadActivity({
+        leadId: id,
+        userId,
+        type: 'note',
+        title: 'Notas atualizadas',
+        body: notes || undefined,
+      })
+    }
   }
 
   const toggleContacted = async (id: string, current: boolean) => {
-    await supabase
+    const newContacted = !current
+
+    const { error } = await supabase
       .from('leads')
-      .update({ contacted: !current })
+      .update({ contacted: newContacted })
       .eq('id', id)
+
+    if (error) {
+      console.error('[CRM] Erro ao atualizar contacto:', error)
+      addToast('Erro ao atualizar o estado do contacto', 'error')
+      return
+    }
 
     setLeads(prev =>
       prev.map(l =>
-        l.id === id ? { ...l, contacted: !current } : l
+        l.id === id ? { ...l, contacted: newContacted } : l
       )
     )
+
+    if (userId) {
+      await logLeadActivity({
+        leadId: id,
+        userId,
+        type: 'contacted_toggled',
+        title: newContacted
+          ? 'Lead marcada como contactada'
+          : 'Lead marcada como não contactada',
+        meta: {
+          contacted: newContacted,
+        },
+      })
+    }
   }
   const loadTasksForLead = async (leadId: string) => {
     if (!userId) return
@@ -1334,6 +1397,7 @@ const { data, error } = await supabase.from('leads').insert({
       .select('*')
       .eq('lead_id', leadId)
       .order('created_at', { ascending: false })
+
     if (!error) setViewLeadActivities(data || [])
   }
 
@@ -2221,13 +2285,18 @@ const { data, error } = await supabase.from('leads').insert({
           filterLeadType={filterLeadType}
           setFilterLeadType={setFilterLeadType}
           updateStep={updateStep}
-          onViewLead={(lead) => {
+          onViewLead={async (lead) => {
             setSelectedLeadForView(lead)
             setShowViewLeadModal(true)
+            await loadLeadActivities(lead.id)
           }}
           onEmailLead={(lead) => {
             setSelectedLeadForEmail(lead)
             setShowEmailModal(true)
+          }}
+          onNotesLead={(lead) => {
+            setSelectedLead(lead)
+            setNoteText(lead.notes || '')
           }}
           onWhatsAppLead={(lead) => {
             const phone = normalizePhone(lead.phone)

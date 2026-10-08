@@ -55,6 +55,7 @@ type PipelineKanbanProps = {
   onViewLead?: (lead: Lead) => void
   onEmailLead?: (lead: Lead) => void
   onWhatsAppLead?: (lead: Lead) => void
+  onNotesLead?: (lead: Lead) => void
 }
 
 const STEPS = ['Novo', 'Contactado', 'Qualificado', 'Fechado', 'Perdido']
@@ -82,6 +83,7 @@ function KanbanColumn({
   onViewLead,
   onEmailLead,
   onWhatsAppLead,
+  onNotesLead,
 }: {
   step: string
   leads: Lead[]
@@ -89,6 +91,7 @@ function KanbanColumn({
   onViewLead?: (lead: Lead) => void
   onEmailLead?: (lead: Lead) => void
   onWhatsAppLead?: (lead: Lead) => void
+  onNotesLead?: (lead: Lead) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: step })
   const colors = stepColor(step)
@@ -157,7 +160,7 @@ function KanbanColumn({
       <SortableContext items={leads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {leads.map((lead) => (
-            <SortableLeadCard key={lead.id} lead={lead} leadTypes={leadTypes} onViewLead={onViewLead} onEmailLead={onEmailLead} onWhatsAppLead={onWhatsAppLead} />
+            <SortableLeadCard key={lead.id} lead={lead} leadTypes={leadTypes} onViewLead={onViewLead} onEmailLead={onEmailLead} onWhatsAppLead={onWhatsAppLead} onNotesLead={onNotesLead} />
           ))}
         </div>
       </SortableContext>
@@ -171,12 +174,14 @@ function SortableLeadCard({
   onViewLead,
   onEmailLead,
   onWhatsAppLead,
+  onNotesLead,
 }: {
   lead: Lead
   leadTypes: LeadType[]
   onViewLead?: (lead: Lead) => void
   onEmailLead?: (lead: Lead) => void
   onWhatsAppLead?: (lead: Lead) => void
+  onNotesLead?: (lead: Lead) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lead.id })
 
@@ -188,7 +193,7 @@ function SortableLeadCard({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <LeadCard lead={lead} leadTypes={leadTypes} dragging={isDragging} onViewLead={onViewLead} onEmailLead={onEmailLead} onWhatsAppLead={onWhatsAppLead} />
+      <LeadCard lead={lead} leadTypes={leadTypes} dragging={isDragging} onViewLead={onViewLead} onEmailLead={onEmailLead} onWhatsAppLead={onWhatsAppLead} onNotesLead={onNotesLead} />
     </div>
   )
 }
@@ -200,6 +205,7 @@ function LeadCard({
   onViewLead,
   onEmailLead,
   onWhatsAppLead,
+  onNotesLead,
 }: {
   lead: Lead
   leadTypes: LeadType[]
@@ -207,6 +213,7 @@ function LeadCard({
   onViewLead?: (lead: Lead) => void
   onEmailLead?: (lead: Lead) => void
   onWhatsAppLead?: (lead: Lead) => void
+  onNotesLead?: (lead: Lead) => void
 }) {
   const leadType = leadTypes.find((t) => t.id === lead.lead_type_id)
 
@@ -318,6 +325,27 @@ function LeadCard({
           </button>
 
           <button
+            onClick={() => onNotesLead?.(lead)}
+            title="Notas"
+            style={{
+              width: 34,
+              height: 34,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(139,92,246,0.16)',
+              border: '1px solid rgba(139,92,246,0.28)',
+              borderRadius: 10,
+              color: '#c4b5fd',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+            }}
+          >
+            📝
+          </button>
+
+          <button
             onClick={() => onWhatsAppLead?.(lead)}
             title="Abrir WhatsApp"
             style={{
@@ -352,6 +380,7 @@ export default function PipelineKanban({
   onViewLead,
   onEmailLead,
   onWhatsAppLead,
+  onNotesLead,
 }: PipelineKanbanProps) {
   const [activeLead, setActiveLead] = useState<Lead | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -481,6 +510,7 @@ export default function PipelineKanban({
               onViewLead={onViewLead}
               onEmailLead={onEmailLead}
               onWhatsAppLead={onWhatsAppLead}
+              onNotesLead={onNotesLead}
             />
           ))}
         </div>
