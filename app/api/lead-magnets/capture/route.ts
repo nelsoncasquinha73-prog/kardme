@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { sendEmail } from '@/lib/email'
 
 
 
@@ -154,16 +155,23 @@ export async function POST(req: Request) {
 
       if (ownerData?.email) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
-        await fetch(baseUrl + '/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: magnet.user_id,
-            leadId: leadId,
-            recipientEmail: ownerData.email,
-            subject: `Nova lead via ${magnet.magnet_type === "raffle" ? "Lead Magnet - Sorteio" : magnet.magnet_type === "form" ? "Lead Magnet - Formulário" : "Lead Magnet"}: ${name}`,
-            body: `Olá,\n\nTens uma nova lead via "${magnet.title}":\n\nNome: ${name}\nEmail: ${email}${phone ? `\nTelefone: ${phone}` : ''}${number_chosen ? `\nNúmero escolhido: 🎰 ${number_chosen}` : ''}${wheel_prize ? `\nPrémio ganho: 🎡 ${wheel_prize}` : ''}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
-          }),
+        const ownerBody = `Olá,
+
+Tens uma nova lead via "${magnet.title}":
+
+Nome: ${name}
+Email: ${email}${phone ? `\nTelefone: ${phone}` : ''}${number_chosen ? `\nNúmero escolhido: 🎰 ${number_chosen}` : ''}${wheel_prize ? `\nPrémio ganho: 🎡 ${wheel_prize}` : ''}
+
+Acede ao CRM Pro para mais detalhes.
+
+Melhores cumprimentos,
+Kardme`
+
+        await sendEmail({
+          to: ownerData.email,
+          subject: `Nova lead via ${magnet.magnet_type === "raffle" ? "Lead Magnet - Sorteio" : magnet.magnet_type === "form" ? "Lead Magnet - Formulário" : "Lead Magnet"}: ${name}`,
+          html: normalizeEmailBody(ownerBody),
+          fromName: 'Kardme',
         })
       }
     } catch (_) {}
@@ -225,26 +233,18 @@ export async function POST(req: Request) {
           emailBody += `\n\nO teu número da sorte é: 🎰 ${number_chosen}`
         }
 
-        const welcomeRes = await fetch(baseUrl + '/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: magnet.user_id,
-            leadId,
-            recipientEmail: email,
-            subject: emailSubject,
-            body: emailBody,
-            fromName: cardName,
-          }),
+        await sendEmail({
+          to: email,
+          subject: emailSubject,
+          html: emailBody,
+          fromName: cardName,
         })
 
         await supabaseAdmin.from('lead_activities').insert([{
           lead_id: leadId,
           user_id: magnet.user_id,
-          type: welcomeRes?.ok ? 'welcome_email_sent' : 'welcome_email_failed',
-          title: welcomeRes?.ok
-            ? '📧 Email de boas-vindas enviado com o recurso'
-            : '❌ Falha ao enviar email de boas-vindas',
+          type: 'welcome_email_sent',
+          title: '📧 Email de boas-vindas enviado com o recurso',
           meta: { magnet_title: magnet.title },
         }])
       } catch (_) {}
