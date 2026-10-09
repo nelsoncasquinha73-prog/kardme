@@ -5,7 +5,7 @@ export const runtime = 'nodejs'
 
 export async function POST() {
   try {
-    const to = 'nelsoncasquinha73@gmail.com'
+    const to = 'drmonica@jejum.pt'
     const subject = 'Teste Kardme (Resend)'
     const html = '<div><h2>Teste OK</h2><p>Se recebeste isto, o Resend está a funcionar.</p></div>'
 

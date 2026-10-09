@@ -20,14 +20,11 @@ export async function POST(req: NextRequest) {
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent',
+      include_granted_scopes: true,
       scope: [
-        'openid',
-
-        'email',
-
         'https://www.googleapis.com/auth/gmail.send',
         // opcional (mas útil para ir buscar o email do "me" no futuro):
-        
+        'https://www.googleapis.com/auth/gmail.readonly',
       ],
       state,
     })
