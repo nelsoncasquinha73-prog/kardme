@@ -42,12 +42,11 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Get Gmail email address (the "me" profile)
-    const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+    // Get connected Google account email without Gmail read access
     oauth2Client.setCredentials(tokens)
-    
-    const { data: profile } = await gmail.users.getProfile({ userId: 'me' })
-    const gmailEmail = profile.emailAddress || 'noreply@kardme.com'
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client })
+    const { data: profile } = await oauth2.userinfo.get()
+    const gmailEmail = profile.email || 'noreply@kardme.com'
 
     const supabaseAdmin = getAdminSupabase()
 
