@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent',
-      include_granted_scopes: true,
       scope: [
         'openid',
 
