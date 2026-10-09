@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
+import { sendEmail } from '@/lib/email'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,44 +19,47 @@ const supabaseAdmin = createClient(
 
 async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string; subject?: string; body?: string }) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
-    const response = await fetch(baseUrl + '/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: params.userId,
-        leadId: params.leadId,
-        recipientEmail: params.toEmail,
-        subject: params.subject || 'Bem-vindo à {cardTitle}! 🎉',
-        body: params.body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}',
-      }),
+    const subject = params.subject || 'Bem-vindo à {cardTitle}! 🎉'
+    const body = params.body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
+
+    const result = await sendEmail({
+      to: params.toEmail,
+      subject,
+      html: body.replace(/\n/g, '<br/>'),
+      fromName: params.cardTitle,
     })
-    const txt = await response.text()
-    if (!response.ok) return { ok: false, details: txt }
-    return { ok: true, details: txt }
+
+    return { ok: true, details: JSON.stringify(result) }
   } catch (err: any) {
+    console.error('RESEND_WELCOME_ERROR', err)
     return { ok: false, details: err?.message || String(err) }
   }
 }
 
 async function sendOwnerNotification(params: { userId: string; leadId: string; ownerEmail: string; leadName: string; leadEmail: string; cardTitle: string }) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
-    const response = await fetch(baseUrl + '/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: params.userId,
-        leadId: params.leadId,
-        recipientEmail: params.ownerEmail,
-        subject: `Nova lead recebida: ${params.leadName}`,
-        body: `Olá,\n\nTens uma nova lead no teu cartão "${params.cardTitle}":\n\nNome: ${params.leadName}\nEmail: ${params.leadEmail}\n\nAcede ao CRM Pro para mais detalhes.\n\nMelhores cumprimentos,\nKardme`,
-      }),
+    const body = `Olá,
+
+Tens uma nova lead no teu cartão "${params.cardTitle}":
+
+Nome: ${params.leadName}
+Email: ${params.leadEmail}
+
+Acede ao CRM Pro para mais detalhes.
+
+Melhores cumprimentos,
+Kardme`
+
+    const result = await sendEmail({
+      to: params.ownerEmail,
+      subject: `Nova lead recebida: ${params.leadName}`,
+      html: body.replace(/\n/g, '<br/>'),
+      fromName: 'Kardme',
     })
-    const txt = await response.text()
-    if (!response.ok) return { ok: false, details: txt }
-    return { ok: true, details: txt }
+
+    return { ok: true, details: JSON.stringify(result) }
   } catch (err: any) {
+    console.error('RESEND_OWNER_ERROR', err)
     return { ok: false, details: err?.message || String(err) }
   }
 }
