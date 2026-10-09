@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
       prompt: 'consent',
       include_granted_scopes: true,
       scope: [
+        'openid',
+
+        'email',
+
         'https://www.googleapis.com/auth/gmail.send',
         // opcional (mas útil para ir buscar o email do "me" no futuro):
         
