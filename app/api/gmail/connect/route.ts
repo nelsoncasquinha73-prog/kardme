@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       scope: [
         'https://www.googleapis.com/auth/gmail.send',
         // opcional (mas útil para ir buscar o email do "me" no futuro):
-        'https://www.googleapis.com/auth/gmail.readonly',
+        
       ],
       state,
     })
