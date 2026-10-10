@@ -134,6 +134,7 @@ export const LEAD_SOURCES_DEFAULT = [
   { value: 'cartão', label: '📇 Cartão' },
   { value: 'importado', label: '📥 Importado' },
   { value: 'lead_form', label: '📋 Lead Form' },
+  { value: 'kardme_referral', label: '🔗 Kardme Referral' },
   { value: 'manual', label: '✍️ Manual' },
   { value: 'Lead Magnet', label: '🧲 Lead Magnet' },
   { value: 'ambassador', label: '👤 Embaixador' },
