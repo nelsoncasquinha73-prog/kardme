@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
+import { sendEmail } from '@/lib/email'
 
 const KARDME_ADMIN_USER_ID = 'aafb4f55-843b-4dd2-b199-70dd9df592a8'
 
@@ -96,6 +97,40 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: leadError.message },
         { status: 500 }
+      )
+    }
+
+    // 5) Notificação interna por email
+    // A lead já está guardada no CRM neste ponto.
+    // Se o email falhar, não afetamos a criação da lead.
+    try {
+      const safeName = String(name).trim()
+      const safeEmail = String(email).trim().toLowerCase()
+      const safePhone = phone ? String(phone).trim() : 'Não indicado'
+      const safeWorkArea = String(workArea).trim()
+
+      const notificationBody = `Nova lead interessada no Kardme.
+
+Nome: ${safeName}
+Email: ${safeEmail}
+Telefone: ${safePhone}
+Área profissional: ${safeWorkArea}
+
+Origem: Kardme Referral
+Cartão de origem: ${sourceLabel}
+
+A lead já está disponível no CRM Kardme.`
+
+      await sendEmail({
+        to: 'admin@kardme.com',
+        subject: `Nova lead Kardme Referral: ${safeName}`,
+        html: notificationBody.replace(/\n/g, '<br/>'),
+        fromName: 'Kardme',
+      })
+    } catch (emailError) {
+      console.error(
+        '[api/kardme-referral] RESEND_NOTIFICATION_ERROR',
+        emailError
       )
     }
 
