@@ -11,6 +11,7 @@ import SocialBlockEditor from '@/components/dashboard/block-editors/SocialBlockE
 import GalleryBlockEditor from '@/components/dashboard/block-editors/GalleryBlockEditor'
 import InfoUtilitiesBlockEditor from '@/components/dashboard/block-editors/InfoUtilitiesBlockEditor'
 import LeadFormBlockEditor from '@/components/dashboard/block-editors/LeadFormBlockEditor'
+import KardmeReferralBlockEditor from '@/components/dashboard/block-editors/KardmeReferralBlockEditor'
 import EmbedBlockEditor from '@/components/dashboard/block-editors/EmbedBlockEditor'
 import ServicesBlockEditor from '@/components/dashboard/block-editors/ServicesBlockEditor'
 import DecorationBlockEditor from '@/components/dashboard/block-editors/DecorationBlockEditor'
@@ -500,6 +501,15 @@ export default function ThemePageClientRight({
 
         {activeBlock?.type === 'lead_form' && (
           <LeadFormBlockEditor
+            settings={activeBlock.settings || {}}
+            style={activeBlock.style || {}}
+            onChangeSettings={onChangeSettings}
+            onChangeStyle={onChangeStyle}
+          />
+        )}
+
+        {activeBlock?.type === 'kardme_referral' && (
+          <KardmeReferralBlockEditor
             settings={activeBlock.settings || {}}
             style={activeBlock.style || {}}
             onChangeSettings={onChangeSettings}

@@ -50,6 +50,28 @@ export default function AddBlockModal({
       { type: 'services', title: 'Serviços', description: 'Lista de serviços', defaultSettings: {}, defaultStyle: {} },
       { type: 'info_utilities', title: 'Info & Utilidades', description: 'Menus, WiFi, horários rápidos', defaultSettings: {}, defaultStyle: {} },
       { type: 'lead_form', title: 'Formulário lead', description: 'Captura de leads', defaultSettings: {}, defaultStyle: {} },
+      {
+        type: 'kardme_referral',
+        title: 'Kardme Referral',
+        description: 'Capta interessados no Kardme através deste cartão',
+        defaultSettings: {
+          title: 'Gostou deste cartão?',
+          description: 'Também pode ter o seu Kardme.',
+          buttonLabel: 'Quero saber mais',
+        },
+        defaultStyle: {
+          align: 'center',
+          button: {
+            bgColor: '#2563eb',
+            textColor: '#ffffff',
+            height: 46,
+            radius: 14,
+            width: 'auto',
+            fontSize: 14,
+            fontWeight: 800,
+          },
+        },
+      },
       { type: 'embed', title: 'Embed', description: 'Iframe / widgets externos', defaultSettings: {}, defaultStyle: {} },
       { type: 'decorations', title: 'Decorações', description: 'PNG/SVG decorativos', defaultSettings: {}, defaultStyle: {} },
       { type: 'business_hours', title: 'Horário', description: 'Horário de funcionamento', defaultSettings: {}, defaultStyle: {} },

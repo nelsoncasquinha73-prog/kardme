@@ -7,6 +7,7 @@ import ProfileBlock from '@/components/blocks/ProfileBlock'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
 import ContactBlock from '@/components/blocks/ContactBlock'
 import LeadFormBlock from '@/components/blocks/LeadFormBlock'
+import KardmeReferralBlock from '@/components/blocks/KardmeReferralBlock'
 import SocialBlock from '@/components/blocks/SocialBlock'
 import DecorationBlock from '@/components/blocks/DecorationBlock'
 import BioBlock from '@/components/blocks/BioBlock'
@@ -243,6 +244,17 @@ export default function CardRenderer({ card, blocks, showTranslations = true, fu
                     return (
                       <div key={block.id} style={wrapStyle}>
                         <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                      </div>
+                    )
+
+                  case 'kardme_referral':
+                    return (
+                      <div key={block.id} style={wrapStyle}>
+                        <KardmeReferralBlock
+                          cardId={card.id}
+                          settings={block.settings}
+                          style={block.style}
+                        />
                       </div>
                     )
 

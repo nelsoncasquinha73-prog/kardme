@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 
 const ServicesBlock = dynamic(() => import('@/components/blocks/ServicesBlock'), { ssr: false })
 const LeadFormBlock = dynamic(() => import('@/components/blocks/LeadFormBlock'), { ssr: false })
+const KardmeReferralBlock = dynamic(() => import('@/components/blocks/KardmeReferralBlock'), { ssr: false })
 const BusinessHoursBlock = dynamic(() => import('@/components/blocks/BusinessHoursBlock'), { ssr: false })
 import DecorationOverlayInteractive from '@/components/blocks/DecorationOverlayInteractive'
 import LanguageSwitcher from '@/components/language/LanguageSwitcher'
@@ -419,6 +420,12 @@ export default function CardPreview({
                       <ServicesBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'lead_form' ? (
                       <LeadFormBlock cardId={card.id} settings={block.settings} style={block.style} />
+                    ) : block.type === 'kardme_referral' ? (
+                      <KardmeReferralBlock
+                        cardId={card.id}
+                        settings={block.settings}
+                        style={block.style}
+                      />
                     ) : block.type === 'business_hours' ? (
                       <BusinessHoursBlock settings={block.settings} style={block.style} />
                     ) : block.type === 'profile' ? (
