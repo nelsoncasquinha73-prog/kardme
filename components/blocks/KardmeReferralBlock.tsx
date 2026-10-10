@@ -38,6 +38,7 @@ export default function KardmeReferralBlock({
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [workArea, setWorkArea] = useState('')
   const [consentGiven, setConsentGiven] = useState(false)
   const [status, setStatus] =
     useState<'idle' | 'sending' | 'success' | 'error'>('idle')
@@ -82,8 +83,8 @@ export default function KardmeReferralBlock({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!name.trim() || !email.trim()) {
-      setErrorMsg('Preencha o nome e o email.')
+    if (!name.trim() || !email.trim() || !workArea.trim()) {
+      setErrorMsg('Preencha o nome, o email e a área em que trabalha.')
       setStatus('error')
       return
     }
@@ -108,6 +109,7 @@ export default function KardmeReferralBlock({
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim(),
+          workArea: workArea.trim(),
           consentGiven,
         }),
       })
@@ -122,6 +124,7 @@ export default function KardmeReferralBlock({
       setName('')
       setEmail('')
       setPhone('')
+      setWorkArea('')
       setConsentGiven(false)
     } catch (err: any) {
       setErrorMsg(err?.message || 'Não foi possível enviar.')
@@ -307,6 +310,15 @@ export default function KardmeReferralBlock({
                     placeholder="Telefone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    style={inputStyle}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Em que área trabalha? *"
+                    value={workArea}
+                    onChange={(e) => setWorkArea(e.target.value)}
+                    required
                     style={inputStyle}
                   />
 

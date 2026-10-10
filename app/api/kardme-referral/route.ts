@@ -12,13 +12,14 @@ export async function POST(req: Request) {
       name,
       email,
       phone,
+      workArea,
       consentGiven,
     } = body || {}
 
     // 1) Validação
-    if (!cardId || !name || !email) {
+    if (!cardId || !name || !email || !workArea) {
       return NextResponse.json(
-        { error: 'Nome e email são obrigatórios.' },
+        { error: 'Nome, email e área profissional são obrigatórios.' },
         { status: 400 }
       )
     }
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
     const leadNotes =
       `Lead interessada no Kardme.\n\n` +
       `Origem: Kardme Referral\n` +
+      `Área profissional: ${String(workArea).trim()}\n` +
       `Cartão de origem: ${sourceLabel}\n` +
       `Card ID: ${sourceCard.id}`
 
