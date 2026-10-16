@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { FiShare2, FiX, FiUpload } from 'react-icons/fi'
+import { FiShare2, FiX, FiDownload } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
-import { HiOutlineUserAdd } from 'react-icons/hi'
-import { IoShareSocial } from 'react-icons/io5'
 import ShareModal from './ShareModal'
 import QRCodeModal from './QRCodeModal'
-import AddToHomeScreenModal from './AddToHomeScreenModal'
 
 type Settings = {
   enabled?: boolean
@@ -29,7 +26,6 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
   const [expanded, setExpanded] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showQR, setShowQR] = useState(false)
-  const [showAddToHome, setShowAddToHome] = useState(false)
 
   // Default: tudo ativo
   const s = {
@@ -100,6 +96,19 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
           zIndex: 1000,
         }}
       >
+        {/* Guardar contacto - sempre visível */}
+        {s.showSaveContact && (
+          <button
+            type="button"
+            onClick={handleSaveContact}
+            style={mainButton}
+            aria-label="Guardar contacto"
+            title="Guardar contacto"
+          >
+            <FiDownload size={25} />
+          </button>
+        )}
+
         {/* Main FAB */}
         <button
           onClick={() => setExpanded(!expanded)}
@@ -140,31 +149,6 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
               </button>
             )}
 
-            {/* Add to Home Screen */}
-            <button
-              onClick={() => {
-                setShowAddToHome(true)
-                setExpanded(false)
-              }}
-              style={secondaryButton}
-              aria-label="Adicionar ao ecrã principal"
-            >
-              <div style={{ width: 26, height: 26, borderRadius: 6, border: `2px solid ${s.buttonColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiUpload size={16} /></div>
-            </button>
-
-            {/* Save Contact */}
-            {s.showSaveContact && (
-              <button
-                onClick={() => {
-                  handleSaveContact()
-                  setExpanded(false)
-                }}
-                style={secondaryButton}
-                aria-label="Guardar contacto"
-              >
-                <HiOutlineUserAdd size={24} />
-              </button>
-            )}
           </>
         )}
       </div>
@@ -186,11 +170,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
         />
       )}
 
-      {showAddToHome && (
-        <AddToHomeScreenModal
-          onClose={() => setShowAddToHome(false)}
-        />
-      )}
+
     </>
   )
 }
