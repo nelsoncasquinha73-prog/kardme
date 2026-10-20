@@ -1172,7 +1172,7 @@ const { data, error } = await supabase.from('leads').insert({
     if (error) {
       console.error('[CRM] Erro ao atualizar notas:', error)
       addToast('Erro ao atualizar as notas', 'error')
-      return
+      return false
     }
 
     setLeads(prev =>
@@ -1194,6 +1194,7 @@ const { data, error } = await supabase.from('leads').insert({
         body: notes || undefined,
       })
     }
+    return true
   }
 
   const toggleContacted = async (id: string, current: boolean) => {
@@ -3270,6 +3271,36 @@ const { data, error } = await supabase.from('leads').insert({
                 }}
               >
                 Guardar
+              </button>
+              <button
+                onClick={async () => {
+                  const lead = selectedLead
+                  if (!lead) return
+                  const saved = await updateNotes(lead.id, noteText)
+                  if (!saved) return
+                  setSelectedLeadForTask(lead)
+                  setSelectedLead(null)
+                  setEditingTaskId(null)
+                  setTaskTitle('')
+                  setTaskDesc('')
+                  setTaskDueDate('')
+                  setTaskDueTime('09:00')
+                  setTaskActionType('follow_up')
+                  setShowTaskModal(true)
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  background: '#059669',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: 13,
+                }}
+              >
+                📅 Guardar e agendar
               </button>
               <button
                 onClick={() => setSelectedLead(null)}
