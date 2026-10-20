@@ -230,9 +230,18 @@ export async function sendBroadcast(
     const recipientLeadIds = recipients.map((r) => r.leadId || null)
     const recipientNames = recipients.map((r) => r.name || null)
 
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const token = sessionData.session?.access_token
+    if (sessionError || !token) {
+      throw new Error('Sessão expirada. Inicia sessão novamente.')
+    }
+
     const res = await fetch('/api/crm/email/send-broadcast', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         userId,
         broadcastId,

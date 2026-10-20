@@ -85,6 +85,30 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getAdminSupabase()
 
+    const authHeader = req.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+
+    if (!token) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !authData?.user || authData.user.id !== userId) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+    }
+
+    const { data: ownedBroadcast, error: broadcastError } = await supabaseAdmin
+      .from('email_broadcasts')
+      .select('id')
+      .eq('id', broadcastId)
+      .eq('user_id', userId)
+      .single()
+
+    if (broadcastError || !ownedBroadcast) {
+      return NextResponse.json({ error: 'Campanha não encontrada' }, { status: 404 })
+    }
+
     const { data: integration, error: integrationError } = await supabaseAdmin
       .from('user_integrations')
       .select('*')
@@ -165,11 +189,21 @@ export async function POST(req: NextRequest) {
     const errors: string[] = []
 
     // Buscar emails unsubscribed
-    const { data: unsubscribed } = await supabaseAdmin
+    const { data: unsubscribed, error: unsubscribeError } = await supabaseAdmin
       .from('email_unsubscribes')
       .select('email')
       .eq('user_id', userId)
-    const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()))
+
+    if (unsubscribeError || !unsubscribed) {
+      console.error('[SEND-BROADCAST] Erro ao verificar cancelamentos:', unsubscribeError)
+      return NextResponse.json(
+        { error: 'Não foi possível verificar os cancelamentos de subscrição' },
+        { status: 500 }
+      )
+    }
+    const unsubscribedEmails = new Set(
+      unsubscribed.map(u => u.email.trim().toLowerCase())
+    )
 
     for (let i = 0; i < recipients.length; i++) {
       const recipientEmail = recipients[i]
@@ -178,8 +212,32 @@ export async function POST(req: NextRequest) {
 
       try {
         // Skip se unsubscribed
-        if (unsubscribedEmails.has(recipientEmail.toLowerCase())) {
+        if (unsubscribedEmails.has(recipientEmail.trim().toLowerCase())) {
           console.log("[SKIP] " + recipientEmail + " is unsubscribed")
+          continue
+        }
+
+        // Validar o consentimento atual para este destinatário.
+        // Não confiar no leadId nem na autorização enviados pelo frontend.
+        const normalizedRecipientEmail = recipientEmail.trim().toLowerCase()
+
+        const { data: matchingLeads, error: consentError } = await supabaseAdmin
+          .from('leads')
+          .select('id, marketing_opt_in')
+          .eq('user_id', userId)
+          .ilike('email', normalizedRecipientEmail)
+          .limit(1001)
+
+        if (consentError || !matchingLeads || matchingLeads.length > 1000) {
+          throw new Error('Não foi possível verificar o consentimento')
+        }
+
+        if (
+          matchingLeads.length === 0 ||
+          matchingLeads.some(l => l.marketing_opt_in !== true) ||
+          (leadId && !matchingLeads.some(l => l.id === leadId))
+        ) {
+          console.log('[SKIP] Destinatário sem autorização válida')
           continue
         }
 

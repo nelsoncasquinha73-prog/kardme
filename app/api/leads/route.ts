@@ -113,10 +113,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Zona obrigatória.' }, { status: 400 })
     }
 
+    // Identificar o proprietário do cartão antes de criar a lead.
+    const { data: leadCard, error: leadCardError } = await supabaseAdmin
+      .from('cards')
+      .select('user_id')
+      .eq('id', cardId)
+      .single()
+
+    if (leadCardError || !leadCard?.user_id) {
+      return NextResponse.json(
+        { error: 'Cartão não encontrado ou sem proprietário.' },
+        { status: 404 }
+      )
+    }
+
+    // Audiência automática para novas leads do cartão Kardme principal.
+    // Não altera o consentimento de marketing.
+    const defaultAudienceIds =
+      cardId === '444fbd9e-75fe-4e78-a59b-385c5325014d' &&
+      leadCard.user_id === 'aafb4f55-843b-4dd2-b199-70dd9df592a8'
+        ? ['6f37b508-e91f-4bd4-9e7a-68260092a645']
+        : []
+
     // Inserir lead
     const { data: leadData, error: leadError } = await supabaseAdmin.from('leads').insert([
       {
         card_id: cardId,
+        user_id: leadCard.user_id,
+        audience_ids: defaultAudienceIds,
         name: String(name || '').trim() || 'Sem nome',
         email: normalizedEmail,
         phone: phone || null,

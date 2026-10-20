@@ -140,7 +140,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
     setLoading(true)
     try {
       const auds = await fetchLeadTypes(userId)
-      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email, audience_ids').eq('user_id', userId)
+      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('id, name, email, audience_ids, marketing_opt_in').eq('user_id', userId)
       setLeads(leadsError ? [] : (leadsData || []))
       setAudiences(auds)
 
@@ -251,8 +251,20 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
         recipients = [{ email: manualEmail.trim() }]
       }
 
+      // Excluir leads sem autorização de marketing.
+      // O servidor volta a validar o consentimento antes do envio.
+      const authorizedEmails = new Set(
+        leads
+          .filter((l: any) => l.marketing_opt_in === true && l.email)
+          .map((l: any) => String(l.email).trim().toLowerCase())
+      )
+
+      recipients = recipients.filter(r =>
+        authorizedEmails.has(r.email.trim().toLowerCase())
+      )
+
       if (recipients.length === 0) {
-        addToast('Sem destinatários selecionados', 'error')
+        addToast('Sem destinatários autorizados para marketing', 'error')
         setSending(false)
         return
       }
