@@ -33,6 +33,7 @@ type LeadFormSettings = {
 }
 
 type LeadFormStyle = {
+  descriptionStyle?: { color?: string }
   offsetY?: number
   heading?: { fontFamily?: string; fontWeight?: number; color?: string; align?: 'left' | 'center' | 'right'; fontSize?: number }
   container?: { enabled?: boolean; bgColor?: string; radius?: number; padding?: number; borderWidth?: number; borderColor?: string; shadow?: boolean; widthMode?: 'full' | 'custom'; customWidthPx?: number }
@@ -103,6 +104,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
 
     setSettings({ fieldOrder: current })
   }
+  const descriptionStyle = st.descriptionStyle || {}
   const heading = st.heading || {}
   const container = st.container || {}
   const inputs = st.inputs || {}
@@ -112,6 +114,7 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
 
   const setSettings = (patch: Partial<LeadFormSettings>) => { onChangeSettings({ ...s, ...patch }); onBlurFlushSave?.() }
   const setStyle = (patch: Partial<LeadFormStyle>) => { onChangeStyle({ ...st, ...patch }); onBlurFlushSave?.() }
+  const setDescriptionStyle = (patch: { color?: string }) => setStyle({ descriptionStyle: { ...descriptionStyle, ...patch } })
   const setHeading = (patch: Partial<LeadFormStyle['heading']>) => setStyle({ heading: { ...heading, ...patch } })
   const setContainer = (patch: Partial<LeadFormStyle['container']>) => setStyle({ container: { ...container, ...patch } })
   const setInputs = (patch: Partial<LeadFormStyle['inputs']>) => setStyle({ inputs: { ...inputs, ...patch } })
@@ -172,6 +175,12 @@ export default function LeadFormBlockEditor({ settings, style, onChangeSettings,
         </Row>
         <Row label="Botão">
           <input type="text" value={s.buttonLabel ?? 'Enviar'} onChange={(e) => setSettings({ buttonLabel: e.target.value })} placeholder="Enviar" style={inputStyle} />
+        </Row>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="🎨 Descrição" subtitle="Cor do texto" isOpen={activeSection === 'descriptionStyle'} onToggle={() => setActiveSection(activeSection === 'descriptionStyle' ? null : 'descriptionStyle')}>
+        <Row label="Cor">
+          <ColorPickerProUnified value={descriptionStyle.color ?? '#374151'} onChange={(hex) => setDescriptionStyle({ color: hex })} onEyedropper={() => pickEyedropper((hex) => setDescriptionStyle({ color: hex }))} />
         </Row>
       </CollapsibleSection>
 

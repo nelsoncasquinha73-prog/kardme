@@ -56,6 +56,7 @@ type LeadFormSettings = {
 }
 
 type LeadFormStyle = {
+  descriptionStyle?: { color?: string }
   offsetY?: number
   heading?: {
     fontFamily?: string
@@ -321,7 +322,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
         <div style={{ marginBottom: 10 }}>
           {isNonEmpty(s.title) && <div style={{ ...headingStyle, display: 'block' }}>{s.title}</div>}
           {isNonEmpty(s.description) && (
-            <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textAlign: headingStyle.textAlign as any }}>
+            <div style={{ fontSize: 12, opacity: st.descriptionStyle?.color ? 1 : 0.7, color: st.descriptionStyle?.color || undefined, marginTop: 6, textAlign: headingStyle.textAlign as any }}>
               {s.description}
             </div>
           )}
