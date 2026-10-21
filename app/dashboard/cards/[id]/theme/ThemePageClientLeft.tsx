@@ -114,7 +114,7 @@ export default function ThemePageClientLeft({
             fontSize: 14,
           }}
         >
-          🎨 {t('editor.theme_decorations')}
+          🔘 Botões Flutuantes
         </button>
       </div>
 

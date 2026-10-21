@@ -412,15 +412,7 @@ export default function ThemePageClientRight({
               settings={floatingActions || {}}
               onChange={(s) => onChangeFloatingActions?.(s)}
             />
-            <div style={{ marginTop: 16 }}>
-              <ThemeDecorationsEditor
-                cardId={card.id}
-                decorations={themeDecorations || []}
-                onChange={(d) => onChangeThemeDecorations?.(d)}
-                activeDecoId={activeDecoId}
-                onSelectDeco={onSelectDeco}
-              />
-            </div>
+
           </>
         )}
 

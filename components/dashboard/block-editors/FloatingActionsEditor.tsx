@@ -11,6 +11,10 @@ export type FloatingActionsSettings = {
   showQR?: boolean
   showSaveContact?: boolean
   buttonColor?: string
+  buttonSize?: number
+  buttonPosition?: 'left' | 'right'
+  buttonBottom?: number
+  buttonSide?: number
 }
 
 type Props = {
@@ -28,6 +32,10 @@ export default function FloatingActionsEditor({ settings, onChange }: Props) {
     showQR: settings.showQR ?? true,
     showSaveContact: settings.showSaveContact ?? true,
     buttonColor: settings.buttonColor ?? '#8B5CF6',
+    buttonSize: settings.buttonSize ?? 56,
+    buttonPosition: settings.buttonPosition ?? 'right',
+    buttonBottom: settings.buttonBottom ?? 24,
+    buttonSide: settings.buttonSide ?? 16,
   }
 
   const update = (partial: Partial<FloatingActionsSettings>) => {
@@ -82,6 +90,26 @@ export default function FloatingActionsEditor({ settings, onChange }: Props) {
                   })
                 }
               />
+            </Row>
+
+            <Row label="Tamanho">
+              <select value={s.buttonSize} onChange={(e) => update({ buttonSize: Number(e.target.value) })}>
+                <option value={36}>Pequeno (36 px)</option>
+                <option value={44}>Médio (44 px)</option>
+                <option value={56}>Grande (56 px)</option>
+              </select>
+            </Row>
+            <Row label="Posição">
+              <select value={s.buttonPosition} onChange={(e) => update({ buttonPosition: e.target.value as 'left' | 'right' })}>
+                <option value="right">Direita</option>
+                <option value="left">Esquerda</option>
+              </select>
+            </Row>
+            <Row label="Margem inferior (px)">
+              <input type="number" min={0} max={150} value={s.buttonBottom} onChange={(e) => update({ buttonBottom: Number(e.target.value) })} style={{ width: 75 }} />
+            </Row>
+            <Row label="Margem lateral (px)">
+              <input type="number" min={0} max={100} value={s.buttonSide} onChange={(e) => update({ buttonSide: Number(e.target.value) })} style={{ width: 75 }} />
             </Row>
           </>
         )}
