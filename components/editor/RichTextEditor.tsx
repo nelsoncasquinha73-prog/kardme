@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Bold from '@tiptap/extension-bold'
@@ -33,7 +33,8 @@ const COLORS = [
 
 export default function RichTextEditor({ value, onChange, onBlur, placeholder = 'Escreve aqui...', minHeight = 100 }: Props) {
   const [showColors, setShowColors] = useState(false)
-  
+  const savedSelection = useRef<{ from: number; to: number } | null>(null)
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false, bold: false, italic: false, strike: false, underline: false, link: false }),
@@ -107,7 +108,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
   const currentColor = editor.getAttributes('textStyle').color || '#000000'
 
   return (
-    <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+    <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, overflow: 'visible', background: '#fff' }}>
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.02)' }}>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
@@ -134,54 +135,103 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
           editor.view.focus()
           editor.chain().focus().toggleStrike().run()
         }} style={btnStyle(editor.isActive('strike'))} title="Riscado"><s>S</s></button>
-        
+
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
-        
-        
+
+
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
-        
+
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={setLink} style={btnStyle(editor.isActive('link'))} title="Link">🔗</button>
         <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={setModalLink} style={btnStyle(false)} title="Modal">🪟</button>
-        
+
         <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.1)', margin: '0 6px' }} />
-        
+
         {/* Color picker */}
         <div style={{ position: 'relative' }}>
-          <button 
-            type="button" 
-            onClick={() => setShowColors(!showColors)} 
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+                if (!showColors) {
+                  const { from, to } = editor.state.selection
+                  savedSelection.current = { from, to }
+                }
+                setShowColors(!showColors)
+              }}
             style={{ ...btnStyle(showColors), display: 'flex', alignItems: 'center', gap: 4 }}
-            title="Cor do texto"
+            title="Cor da seleção"
           >
             <span style={{ width: 14, height: 14, borderRadius: 3, background: currentColor, border: '1px solid rgba(0,0,0,0.2)' }} />
             <span style={{ fontSize: 10 }}>▼</span>
           </button>
-          
+
           {showColors && (
-            <div style={{ 
-              position: 'absolute', 
-              top: '100%', 
-              left: 0, 
-              marginTop: 4, 
-              background: '#fff', 
-              borderRadius: 10, 
-              border: '1px solid rgba(0,0,0,0.1)', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)', 
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: 4,
+              background: '#fff',
+              borderRadius: 10,
+              border: '1px solid rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               padding: 8,
               zIndex: 100,
               display: 'grid',
               gridTemplateColumns: 'repeat(5, 1fr)',
               gap: 4,
             }}>
+              <label
+                title="Cor personalizada"
+                onMouseDown={(e) => e.preventDefault()}
+                style={{
+                  width: 24, height: 24,
+                  position: 'relative',
+                  cursor: 'pointer'
+                }}
+              >
+                <span style={{
+                  width: 24, height: 24,
+                  borderRadius: 6,
+                  border: '1px solid rgba(0,0,0,0.2)',
+                  background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)',
+                  display: 'block'
+                }} />
+                <input
+                  type="color"
+                  defaultValue="#22C55E"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    const selection = savedSelection.current
+                    const chain = editor.chain().focus()
+                    if (selection) chain.setTextSelection(selection)
+                    chain.setColor(e.target.value).run()
+                    savedSelection.current = null
+                    setShowColors(false)
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer'
+                  }}
+                />
+              </label>
               {COLORS.map((color) => (
                 <button
                   key={color.value}
                   type="button"
+                    onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                  console.log('[RTE] Before setColor:', color.value, 'current:', currentColor)
-                  editor.view.focus()
-                  editor.chain().focus().setColor(color.value).run()
-                  console.log('[RTE] After setColor:', editor.getAttributes('textStyle').color)
+
+                  const selection = savedSelection.current
+                    const chain = editor.chain().focus()
+                    if (selection) chain.setTextSelection(selection)
+                    chain.setColor(color.value).run()
+                    savedSelection.current = null
+
                   setShowColors(false)
                 }}
                   style={{
@@ -198,9 +248,13 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
               ))}
               <button
                 type="button"
-                onClick={() => {
-                  editor.view.focus()
-                  editor.chain().focus().unsetColor().run()
+                onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                  const selection = savedSelection.current
+                    const chain = editor.chain().focus()
+                    if (selection) chain.setTextSelection(selection)
+                    chain.unsetColor().run()
+                    savedSelection.current = null
                   setShowColors(false)
                 }}
                 style={{
@@ -218,7 +272,7 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder = 
           )}
         </div>
       </div>
-      
+
       {/* Editor */}
       <div
         data-no-block-select="1"
