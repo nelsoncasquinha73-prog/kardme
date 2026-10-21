@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { FiShare2, FiX, FiDownload } from 'react-icons/fi'
+import { FiShare2, FiX, FiDownload, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import ShareModal from './ShareModal'
 import QRCodeModal from './QRCodeModal'
@@ -32,7 +32,32 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
   const [showQR, setShowQR] = useState(false)
   const [autoCompact, setAutoCompact] = useState(false)
   const [compactOpen, setCompactOpen] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
+
+  // Recolher durante o scroll e regressar 400 ms depois de parar.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let lastY = window.scrollY
+
+    const onScroll = () => {
+      const currentY = window.scrollY
+      if (Math.abs(currentY - lastY) < 2) return
+      lastY = currentY
+
+      setIsScrolling(true)
+      setExpanded(false)
+      setCompactOpen(false)
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => setIsScrolling(false), 400)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (timer) clearTimeout(timer)
+    }
+  }, [])
 
   // Default: tudo ativo
   const s = {
@@ -111,7 +136,7 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
     s.buttonBottom,
   ])
 
-  const compact = autoCompact && !compactOpen
+  const compact = (autoCompact || isScrolling) && !compactOpen
 
   // Se desativado, não renderiza nada
   if (!s.enabled) return null
@@ -216,18 +241,26 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
           }}
           style={{
             ...mainButton,
-            borderRadius: compact ? 12 : '50%',
+            width: compact ? 24 : s.buttonSize,
+            height: compact ? 44 : s.buttonSize,
+            borderRadius: compact
+              ? (s.buttonPosition === 'right' ? '10px 0 0 10px' : '0 10px 10px 0')
+              : '50%',
             transform: compact
-              ? `translateX(${s.buttonPosition === 'right' ? '' : '-'}${Math.max(0, s.buttonSide + s.buttonSize - 18)}px)`
+              ? `translateX(${s.buttonPosition === 'right' ? '' : '-'}${s.buttonSide}px)`
               : 'translateX(0)',
-            transition: 'transform 250ms ease, border-radius 250ms ease',
+            transition: 'transform 250ms ease, width 250ms ease, height 250ms ease, border-radius 250ms ease',
           }}
           aria-label={compact ? 'Mostrar ações do cartão' : expanded || compactOpen ? 'Fechar menu' : 'Abrir menu'}
           title={compact ? 'Mostrar ações' : undefined}
         >
-          {expanded || compactOpen
-            ? <FiX size={Math.round(s.buttonSize * 0.43)} />
-            : <FiShare2 size={Math.round(s.buttonSize * 0.43)} />}
+          {compact
+            ? (s.buttonPosition === 'right'
+                ? <FiChevronLeft size={22} />
+                : <FiChevronRight size={22} />)
+            : expanded || compactOpen
+              ? <FiX size={Math.round(s.buttonSize * 0.43)} />
+              : <FiShare2 size={Math.round(s.buttonSize * 0.43)} />}
         </button>
 
         {/* Ação de guardar no menu compacto */}
