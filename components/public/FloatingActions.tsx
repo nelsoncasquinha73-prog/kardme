@@ -171,34 +171,28 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
           alignItems: 'center',
           gap: 12,
           zIndex: 1000,
+          transition: 'transform 250ms ease, opacity 250ms ease',
+          willChange: 'transform',
         }}
       >
-        {/* Botão compacto automático */}
-        {compact && (
-          <button
-            type="button"
-            onClick={() => {
-              setCompactOpen(true)
-              setExpanded(false)
-            }}
-            style={{
-              ...mainButton,
-              width: Math.max(32, s.buttonSize - 16),
-              height: Math.max(32, s.buttonSize - 16),
-            }}
-            aria-label="Mostrar ações do cartão"
-            title="Mostrar ações"
-          >
-            <FiShare2 size={Math.round(s.buttonSize * 0.35)} />
-          </button>
-        )}
-
-        {/* Guardar contacto - sempre visível */}
-        {!compact && !compactOpen && s.showSaveContact && (
+        {/* Guardar contacto: recolhe juntamente com o botão principal */}
+        {s.showSaveContact && !compactOpen && (
           <button
             type="button"
             onClick={handleSaveContact}
-            style={mainButton}
+            tabIndex={compact ? -1 : 0}
+            aria-hidden={compact}
+            style={{
+              ...mainButton,
+              opacity: compact ? 0 : 1,
+              position: compact ? 'absolute' : 'relative',
+              bottom: compact ? s.buttonSize + 12 : undefined,
+              transform: compact
+                ? `translateX(${s.buttonPosition === 'right' ? '' : '-'}${s.buttonSide + s.buttonSize}px)`
+                : 'translateX(0)',
+              pointerEvents: compact ? 'none' : 'auto',
+              transition: 'transform 250ms ease, opacity 250ms ease',
+            }}
             aria-label="Guardar contacto"
             title="Guardar contacto"
           >
@@ -206,21 +200,35 @@ export default function FloatingActions({ cardUrl, cardTitle, cardId, settings }
           </button>
         )}
 
-        {/* Main FAB */}
-        {!compact && <button
+        {/* Botão principal: desliza para a margem e mantém uma aba acessível */}
+        <button
+          type="button"
           onClick={() => {
-            if (compactOpen) {
+            if (compact) {
+              setCompactOpen(true)
+              setExpanded(false)
+            } else if (compactOpen) {
               setCompactOpen(false)
               setExpanded(false)
             } else {
               setExpanded(!expanded)
             }
           }}
-          style={mainButton}
-          aria-label={expanded ? 'Fechar menu' : 'Abrir menu'}
+          style={{
+            ...mainButton,
+            borderRadius: compact ? 12 : '50%',
+            transform: compact
+              ? `translateX(${s.buttonPosition === 'right' ? '' : '-'}${Math.max(0, s.buttonSide + s.buttonSize - 18)}px)`
+              : 'translateX(0)',
+            transition: 'transform 250ms ease, border-radius 250ms ease',
+          }}
+          aria-label={compact ? 'Mostrar ações do cartão' : expanded || compactOpen ? 'Fechar menu' : 'Abrir menu'}
+          title={compact ? 'Mostrar ações' : undefined}
         >
-          {expanded || compactOpen ? <FiX size={Math.round(s.buttonSize * 0.43)} /> : <FiShare2 size={Math.round(s.buttonSize * 0.43)} />}
-        </button>}
+          {expanded || compactOpen
+            ? <FiX size={Math.round(s.buttonSize * 0.43)} />
+            : <FiShare2 size={Math.round(s.buttonSize * 0.43)} />}
+        </button>
 
         {/* Ação de guardar no menu compacto */}
         {!compact && compactOpen && s.showSaveContact && (
