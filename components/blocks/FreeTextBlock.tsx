@@ -172,7 +172,7 @@ export default function FreeTextBlock({ settings, style }: Props) {
                   text-justify: inter-word;
                   ${st.align === 'justify' ? 'text-align-last: justify;' : ''}
                 }
-                #${htmlScopeId} * { color: inherit; }
+                #${htmlScopeId} *:not(span[data-modal-id]) { color: ${st.textColor ?? '#111827'} !important; }
                 #${htmlScopeId} a { color: inherit; text-decoration: underline; cursor: pointer; }
                 #${htmlScopeId} span[data-modal-id] { text-decoration: underline; cursor: pointer; color: #3b82f6; }
                 #${htmlScopeId} p { margin: 0 0 10px 0; }
