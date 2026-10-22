@@ -11,6 +11,8 @@ type ReferralSettings = {
 }
 
 type ReferralStyle = {
+  titleColor?: string
+  descriptionColor?: string
   align?: 'left' | 'center' | 'right'
   spacing?: {
     top?: number
@@ -139,6 +141,35 @@ export default function KardmeReferralBlockEditor({
             style={inputStyle}
           />
         </Field>
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        title="Texto"
+        subtitle="Cores do título e da descrição"
+        isOpen={activeSection === 'text'}
+        onToggle={() =>
+          setActiveSection(activeSection === 'text' ? null : 'text')
+        }
+      >
+        <Row label="Cor do título">
+          <ColorPickerProUnified
+            value={st.titleColor ?? '#ffffff'}
+            onChange={(hex) => setStyle({ titleColor: hex })}
+            onEyedropper={() =>
+              pickEyedropper((hex) => setStyle({ titleColor: hex }))
+            }
+          />
+        </Row>
+
+        <Row label="Cor da descrição">
+          <ColorPickerProUnified
+            value={st.descriptionColor ?? '#b3b3b3'}
+            onChange={(hex) => setStyle({ descriptionColor: hex })}
+            onEyedropper={() =>
+              pickEyedropper((hex) => setStyle({ descriptionColor: hex }))
+            }
+          />
+        </Row>
       </CollapsibleSection>
 
       <CollapsibleSection

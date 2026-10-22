@@ -11,6 +11,8 @@ type Props = {
   }
   style?: {
     align?: 'left' | 'center' | 'right'
+    titleColor?: string
+    descriptionColor?: string
     spacing?: {
       top?: number
       titleDescription?: number
@@ -162,6 +164,7 @@ export default function KardmeReferralBlock({
           <div
             style={{
               fontSize: 15,
+              color: style?.titleColor ?? 'inherit',
               fontWeight: 800,
               marginBottom: spacing.titleDescription ?? 8,
             }}
@@ -174,7 +177,8 @@ export default function KardmeReferralBlock({
           <div
             style={{
               fontSize: 13,
-              opacity: 0.75,
+              opacity: style?.descriptionColor ? 1 : 0.75,
+              color: style?.descriptionColor ?? 'inherit',
               marginBottom: spacing.descriptionButton ?? 8,
             }}
           >
