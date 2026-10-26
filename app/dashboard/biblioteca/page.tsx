@@ -120,19 +120,23 @@ export default function BibliotecaPage() {
         </p>
       </section>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
-        <div style={{ position: 'relative', flex: '1 1 280px' }}>
-          <FiSearch style={{
-            position: 'absolute', top: 15, left: 14, color: '#64748b'
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24, alignItems: 'stretch' }}>
+        <div style={{ position: 'relative', flex: '1 1 280px', minWidth: 0 }}>
+          <FiSearch size={18} style={{
+            position: 'absolute', top: '50%', left: 15,
+            transform: 'translateY(-50%)',
+            color: '#64748b', zIndex: 2, pointerEvents: 'none'
           }} />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquisar tutoriais..."
             style={{
-              width: '100%', padding: '12px 12px 12px 42px',
+              display: 'block', width: '100%', boxSizing: 'border-box',
+              height: 46, padding: '0 16px 0 46px',
               border: '1px solid #cbd5e1', borderRadius: 12,
               color: '#111827', background: '#fff',
+              fontSize: 14, lineHeight: 'normal',
             }}
           />
         </div>
@@ -141,8 +145,13 @@ export default function BibliotecaPage() {
           value={category}
           onChange={e => setCategory(e.target.value)}
           style={{
-            padding: '12px 16px', borderRadius: 12,
-            border: '1px solid #cbd5e1', background: '#fff', color: '#111827',
+            boxSizing: 'border-box', height: 46,
+            minWidth: 150, maxWidth: '100%',
+            padding: '0 36px 0 14px', borderRadius: 12,
+            border: '1px solid #cbd5e1',
+            background: '#fff', color: '#111827',
+            fontSize: 14, lineHeight: 'normal',
+            cursor: 'pointer',
           }}
         >
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
