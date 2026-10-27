@@ -113,10 +113,8 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
         const list = (data || []) as any[]
         setSenderCards(list)
 
-        // If no sender selected yet, preselect most recent card
-        if (!bulkEmailCardId && list.length > 0) {
-          setBulkEmailCardId(list[0].id)
-        }
+        // O remetente deve ser escolhido explicitamente pelo utilizador.
+        // Nunca selecionar automaticamente o cartão mais recente.
       } catch (e) {
         console.error(e)
         setSenderCards([])
@@ -221,6 +219,11 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
     if (blocks.length === 0) {
       addToast('Adiciona pelo menos um bloco', 'error')
+      return
+    }
+
+    if (!bulkEmailCardId || !senderCards.some((c: any) => c.id === bulkEmailCardId)) {
+      addToast('Confirma primeiro o cartão remetente', 'error')
       return
     }
 
@@ -771,6 +774,8 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                   return
                 }
 
+                // Exigir escolha consciente do remetente em cada envio.
+                setBulkEmailCardId('')
                 setShowSendModal(true)
               }}
               disabled={saving || sending}
@@ -1100,7 +1105,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
       {showSendModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#0f172a', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%', color: '#fff' }}>
+          <div style={{ background: '#0f172a', borderRadius: 12, padding: 24, maxWidth: 500, width: '90%', color: '#fff', maxHeight: '85vh', overflowY: 'auto', boxSizing: 'border-box' }}>
             <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 16 }}>📧 Enviar Campanha</h3>
 
             <div style={{ marginBottom: 20 }}>
@@ -1265,6 +1270,39 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
+              
+              {bulkEmailCardId ? (
+                <div style={{
+                  padding: '12px 14px',
+                  marginBottom: 16,
+                  borderRadius: 10,
+                  background: 'rgba(6,182,212,0.10)',
+                  border: '1px solid rgba(6,182,212,0.35)',
+                  color: '#fff',
+                  fontSize: 13,
+                }}>
+                  📧 O email será enviado em nome de:
+                  <div style={{
+                    fontSize: 17,
+                    fontWeight: 800,
+                    color: '#22d3ee',
+                    marginTop: 6,
+                  }}>
+                    {senderCards.find((c: any) => c.id === bulkEmailCardId)?.name
+                      || senderCards.find((c: any) => c.id === bulkEmailCardId)?.title
+                      || senderCards.find((c: any) => c.id === bulkEmailCardId)?.slug
+                      || 'Cartão'}
+                  </div>
+                  <div style={{ marginTop: 6, opacity: 0.7, fontSize: 11 }}>
+                    Confirma que este é o remetente correto antes de enviar.
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: '#f87171', fontSize: 12, fontWeight: 700 }}>
+                  ⚠️ Escolhe obrigatoriamente o cartão remetente para continuar.
+                </p>
+              )}
+
               <button onClick={() => setShowSendModal(false)} disabled={sending} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Cancelar
               </button>
