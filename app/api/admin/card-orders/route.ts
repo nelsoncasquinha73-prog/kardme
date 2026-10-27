@@ -1,3 +1,4 @@
+import { requireCardOrderAdmin } from '@/lib/requireCardOrderAdmin'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -11,6 +12,9 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 })
 
 export async function GET(_req: NextRequest) {
+  const denied = await requireCardOrderAdmin(_req)
+  if (denied) return denied
+
   const { data, error } = await supabaseAdmin
     .from('card_orders')
     .select('*')

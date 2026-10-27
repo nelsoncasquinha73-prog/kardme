@@ -306,3 +306,69 @@
   font-size: 14px;
   margin-bottom: 16px;
 }
+
+
+/* Kardme Premium Form */
+.container {
+  max-width: 760px;
+  padding: clamp(20px, 4vw, 40px);
+  border: 1px solid #e8edf5;
+  border-radius: 20px;
+  box-shadow: 0 16px 50px rgba(15, 23, 42, 0.07);
+}
+
+.header h1 {
+  font-size: clamp(26px, 4vw, 34px);
+  letter-spacing: -0.8px;
+}
+
+.progressContainer {
+  height: 7px;
+  background: #e8edf5;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #8b5cf6);
+  border-radius: 20px;
+}
+
+.field input,
+.field textarea {
+  border-radius: 10px;
+}
+
+.btnPrimary,
+.btnSecondary,
+.btnSuccess {
+  min-height: 46px;
+  border-radius: 10px;
+}
+
+.btnPrimary {
+  background: linear-gradient(110deg, #2563eb, #6366f1);
+}
+
+.btnSuccess {
+  background: linear-gradient(110deg, #2563eb, #7c3aed);
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .linksGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .linkRow {
+    flex-wrap: wrap;
+  }
+
+  .buttons button {
+    flex: 1;
+  }
+}

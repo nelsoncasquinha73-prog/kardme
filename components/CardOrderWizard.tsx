@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './CardOrderWizard.module.css'
 
@@ -55,30 +55,54 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [unsavedChanges, setUnsavedChanges] = useState(false)
 
-  useEffect(() => {
-    if (!unsavedChanges) return
+  const saveQueue = useRef<Promise<void>>(Promise.resolve())
+  const editVersion = useRef(0)
 
-    const timer = setTimeout(async () => {
+  const saveOrder = (snapshot: CardOrder) => {
+    const version = editVersion.current
+
+    const task = saveQueue.current.catch(() => {}).then(async () => {
       setSaving(true)
       try {
         const res = await fetch(`/api/card-orders/${slug}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order),
+          body: JSON.stringify(snapshot),
         })
-        if (!res.ok) throw new Error('Erro ao guardar')
-        setUnsavedChanges(false)
-      } catch (err) {
-        console.error('Auto-save error:', err)
+
+        if (!res.ok) {
+          const details = await res.json().catch(() => ({}))
+          throw new Error(
+            `Erro ao guardar (HTTP ${res.status}): ${details.error || 'Erro desconhecido'}`
+          )
+        }
+
+        if (editVersion.current === version) {
+          setUnsavedChanges(false)
+        }
       } finally {
         setSaving(false)
       }
+    })
+
+    saveQueue.current = task
+    return task
+  }
+
+  useEffect(() => {
+    if (!unsavedChanges || loading) return
+
+    const timer = setTimeout(() => {
+      void saveOrder(order).catch(err => {
+        console.error('Auto-save error:', err)
+      })
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [order, unsavedChanges, slug])
+  }, [order, unsavedChanges, slug, loading])
 
   const handleChange = (field: string, value: any) => {
+    editVersion.current += 1
     setOrder((prev) => ({ ...prev, [field]: value }))
     setUnsavedChanges(true)
   }
@@ -194,19 +218,30 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
   }
 
   const handleSubmit = async () => {
-    if (!validateStep(4)) return
+    if (!validateStep(4) || uploading || loading) return
 
     setLoading(true)
+    setErrors({})
+
     try {
-      const res = await fetch(`/api/card-orders/${slug}/submit`, {
+      // Aguarda gravações anteriores e guarda a versão mais recente.
+      await saveOrder(order)
+
+      const submitRes = await fetch(`/api/card-orders/${slug}/submit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
       })
-      if (!res.ok) throw new Error('Erro ao submeter')
+
+      if (!submitRes.ok) {
+        throw new Error('Não foi possível submeter o pedido')
+      }
+
+      setUnsavedChanges(false)
       router.push(`/card-orders/${slug}/sucesso`)
     } catch (err) {
       console.error('Submit error:', err)
-      setErrors({ submit: 'Erro ao submeter. Tenta novamente.' })
+      setErrors({
+        submit: 'Não foi possível concluir o pedido. Tenta novamente.',
+      })
     } finally {
       setLoading(false)
     }
@@ -252,7 +287,10 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Pedido de Cartão</h1>
+        <h1>Vamos criar o teu Kardme</h1>
+        <p style={{ color: '#64748b', margin: '8px 0 0', fontSize: 14 }}>
+          Preenche os dados ao teu ritmo. O teu progresso é guardado automaticamente.
+        </p>
         <div className={styles.status}>
           {order.status === 'rascunho' && <span className={styles.badge}>Rascunho</span>}
           {order.status === 'submetido' && <span className={styles.badge + ' ' + styles.submitted}>Submetido</span>}
@@ -326,6 +364,21 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
             <div className={styles.field}>
               <label>WhatsApp</label>
+              <button
+                type="button"
+                onClick={() => handleChange('whatsapp', order.telefone || '')}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#2563eb',
+                  padding: '0 0 10px',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                Usar o mesmo número do telefone
+              </button>
               <input
                 type="tel"
                 value={order.whatsapp || ''}
@@ -554,6 +607,27 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
             <div className={styles.field}>
               <label>Cores (2–3) *</label>
+                <button
+                  type="button"
+                  onClick={() => handleChange(
+                    'notas_estilo',
+                    [order.notas_estilo || '', 'Prefiro que a equipa Kardme escolha as cores.']
+                      .filter(Boolean)
+                      .join('\n')
+                  )}
+                  style={{
+                    border: 'none',
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    marginBottom: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  Prefiro que a equipa Kardme escolha as cores
+                </button>
               <small>
                 Escolhe as cores que gostarias de ver no cartão. A primeira é a cor base/fundo. Clica no quadrado para abrir o seletor de cores e mudar.
               </small>

@@ -1,0 +1,349 @@
+'use client'
+
+import React from 'react'
+
+type IconMode = 'none' | 'library' | 'upload'
+type ActionType = 'link' | 'phone' | 'whatsapp' | 'email' | 'sms' | 'file' | 'maps' | 'calendar'
+
+type CtaButton = {
+  id: string
+  label: string
+  url: string
+  openInNewTab?: boolean
+  actionType?: ActionType
+  phone?: string
+  whatsappMessage?: string
+  email?: string
+  emailSubject?: string
+  emailBody?: string
+  smsMessage?: string
+  fileUrl?: string
+  mapsAddress?: string
+  calendarTitle?: string
+  calendarDate?: string
+  calendarTime?: string
+  calendarDuration?: number
+  widthMode?: '100%' | 'auto' | 'custom'
+  customWidthPx?: number
+  icon?: {
+    mode: IconMode
+    libraryName?: string
+    uploadUrl?: string
+    sizePx?: number
+    position?: 'left' | 'right'
+  }
+}
+
+type CTAButtonsSettings = {
+  buttons: CtaButton[]
+  layout?: 'stack' | 'row'
+  align?: 'left' | 'center' | 'right'
+  gapPx?: number
+}
+
+type CTAButtonsStyle = {
+  offsetY?: number
+  button?: {
+    heightPx?: number
+    radius?: number
+    bgColor?: string
+    textColor?: string
+    fontFamily?: string
+    fontSize?: number
+    bold?: boolean
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+    iconWidthPx?: number
+    iconGapPx?: number
+    widthMode?: '100%' | 'auto' | 'custom'
+    customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
+  }
+  container?: {
+    enabled?: boolean
+    bgColor?: string
+    radius?: number
+    padding?: number
+    borderWidth?: number
+    borderColor?: string
+    shadow?: boolean
+    widthMode?: 'full' | 'custom'
+    customWidthPx?: number
+    attention?: 'none' | 'pulse' | 'glow' | 'wiggle'
+    attentionButtonId?: string | null
+  }
+}
+
+type Props = {
+  cardId?: string
+  settings: CTAButtonsSettings
+  style?: CTAButtonsStyle
+}
+
+function resolveFont(fontFamily?: string) {
+  if (!fontFamily) return undefined
+  return fontFamily
+}
+
+function normalizeUrl(url: string) {
+  const u = (url || '').trim()
+  if (!u) return ''
+  if (u.startsWith('http://') || u.startsWith('https://')) return u
+  if (u.startsWith('mailto:') || u.startsWith('tel:')) return u
+  if (u.startsWith('wa.me/')) return `https://${u}`
+  if (u.startsWith('www.')) return `https://${u}`
+  if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(u)) return `https://${u}`
+  return u
+}
+
+function generateCalendarUrl(b: CtaButton): string {
+  const title = encodeURIComponent(b.calendarTitle || 'Evento')
+  const date = b.calendarDate || ''
+  const time = b.calendarTime || '09:00'
+  const duration = b.calendarDuration || 60
+  
+  if (!date) return '#'
+  
+  // Format: YYYYMMDDTHHMMSS
+  const startDate = date.replace(/-/g, '')
+  const startTime = time.replace(/:/g, '') + '00'
+  const start = `${startDate}T${startTime}`
+  
+  // Calculate end time
+  const [hours, minutes] = time.split(':').map(Number)
+  const endMinutes = hours * 60 + minutes + duration
+  const endHours = Math.floor(endMinutes / 60) % 24
+  const endMins = endMinutes % 60
+  const endTime = `${String(endHours).padStart(2, '0')}${String(endMins).padStart(2, '0')}00`
+  const end = `${startDate}T${endTime}`
+  
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}`
+}
+
+function getButtonHref(b: CtaButton): string {
+  const actionType = b.actionType || 'link'
+  
+  switch (actionType) {
+    case 'phone':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
+        return `tel:${cleanPhone}`
+      }
+      return '#'
+      
+    case 'whatsapp':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9]/g, '')
+        const message = b.whatsappMessage ? encodeURIComponent(b.whatsappMessage) : ''
+        return `https://wa.me/${cleanPhone}${message ? '?text=' + message : ''}`
+      }
+      return '#'
+      
+    case 'email':
+      if (b.email) {
+        let mailto = `mailto:${b.email}`
+        const params: string[] = []
+        if (b.emailSubject) params.push(`subject=${encodeURIComponent(b.emailSubject)}`)
+        if (b.emailBody) params.push(`body=${encodeURIComponent(b.emailBody)}`)
+        if (params.length > 0) mailto += '?' + params.join('&')
+        return mailto
+      }
+      return '#'
+      
+    case 'sms':
+      if (b.phone) {
+        const cleanPhone = b.phone.replace(/[^0-9+]/g, '')
+        const message = b.smsMessage ? encodeURIComponent(b.smsMessage) : ''
+        // sms: protocol with body parameter
+        return `sms:${cleanPhone}${message ? '?body=' + message : ''}`
+      }
+      return '#'
+      
+    case 'file':
+      return b.fileUrl || '#'
+      
+    case 'maps':
+      if (b.url) {
+        return b.url
+      }
+      return '#'
+      
+    case 'calendar':
+      return generateCalendarUrl(b)
+      
+    case 'link':
+    default:
+      return normalizeUrl(b.url || '')
+  }
+}
+
+function mapAlign(align?: 'left' | 'center' | 'right') {
+  if (align === 'left') return 'flex-start'
+  if (align === 'right') return 'flex-end'
+  return 'center'
+}
+
+export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
+  const s: CTAButtonsSettings = settings || { buttons: [] }
+  const st: CTAButtonsStyle = style || {}
+  const btn = st.button || {}
+  const c = st.container || {}
+
+  const attention = btn.attention ?? 'none'
+  const attentionButtonId = btn.attentionButtonId ?? null
+
+  const attentionCss = `
+@media (prefers-reduced-motion: reduce) {
+  .kardme-cta-attention {
+    animation: none !important;
+    filter: brightness(1.06);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.26);
+  }
+}
+
+@keyframes kardmeCtaPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.035); filter: brightness(1.06); }
+}
+
+@keyframes kardmeCtaGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(96,165,250,0.0); }
+  50% { box-shadow: 0 0 18px rgba(96,165,250,0.55); }
+}
+
+@keyframes kardmeCtaWiggle {
+  0%, 92%, 100% { transform: rotate(0deg); }
+  94% { transform: rotate(-1.2deg); }
+  96% { transform: rotate(1.2deg); }
+  98% { transform: rotate(-0.8deg); }
+}
+`
+
+  const buttons = Array.isArray(s.buttons) ? s.buttons : []
+  if (buttons.length === 0) {
+    return <div style={{ opacity: 0.6, fontSize: 13 }}>Sem botões — adiciona o primeiro CTA</div>
+  }
+
+  const layout = s.layout ?? 'stack'
+  const gap = s.gapPx ?? 10
+
+  const wrap: React.CSSProperties = {
+    transform: st.offsetY ? `translateY(${st.offsetY}px)` : undefined,
+    padding: c.padding ?? 0,
+    display: 'flex',
+    flexDirection: layout === 'row' ? 'row' : 'column',
+    gap,
+    alignItems: mapAlign(s.align),
+    background: c.enabled !== false ? (c.bgColor ?? 'transparent') : 'transparent',
+    borderRadius: c.radius ?? 0,
+    border: (c.borderWidth ?? 0) > 0 ? `${c.borderWidth}px solid ${c.borderColor ?? 'rgba(0,0,0,0.12)'}` : undefined,
+    boxShadow: c.shadow ? '0 14px 40px rgba(0,0,0,0.12)' : undefined,
+    width: c.widthMode === 'custom' && c.customWidthPx ? c.customWidthPx : undefined,
+    maxWidth: c.widthMode === 'custom' ? '100%' : undefined,
+    alignSelf: c.widthMode === 'custom' ? 'center' : undefined,
+    boxSizing: 'border-box',
+  }
+
+  const getButtonWidth = (b: CtaButton): string | number | undefined => {
+    const mode = b.widthMode ?? btn.widthMode ?? '100%'
+    if (mode === 'custom') return b.customWidthPx ?? btn.customWidthPx ?? 200
+    if (mode === 'auto') return 'auto'
+    return layout === 'row' ? 'auto' : '100%'
+  }
+
+  const iconWidthPx = btn.iconWidthPx ?? 0
+  const iconGapPx = btn.iconGapPx ?? 10
+
+  const baseBtn: React.CSSProperties = {
+    height: btn.heightPx ?? 44,
+    borderRadius: btn.radius ?? 14,
+    background: btn.bgColor ?? '#111827',
+    color: btn.textColor ?? '#ffffff',
+    border: (btn.borderWidth ?? 0) > 0 ? `${btn.borderWidth}px solid ${btn.borderColor ?? 'rgba(255,255,255,0.25)'}` : 'none',
+    boxShadow: btn.shadow ? '0 18px 50px rgba(0,0,0,0.18)' : undefined,
+    padding: '0 14px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: iconWidthPx > 0 ? 0 : iconGapPx,
+    textDecoration: 'none',
+    fontFamily: resolveFont(btn.fontFamily),
+    fontSize: btn.fontSize ?? 14,
+    fontWeight: btn.bold ? 800 : 700,
+    cursor: 'pointer',
+    userSelect: 'none',
+    boxSizing: 'border-box',
+  }
+
+  const renderIcon = (b: CtaButton) => {
+    const ic = b.icon
+    if (!ic || ic.mode === 'none') return null
+    const size = ic.sizePx ?? 18
+    if (ic.mode === 'upload' && ic.uploadUrl) {
+      return (
+        <img src={ic.uploadUrl} alt="" style={{ width: size, height: size, objectFit: 'contain', display: 'block' }} data-no-block-select="1" />
+      )
+    }
+    return null
+  }
+
+  return (
+    <div style={wrap}>
+      <style>{attentionCss}</style>
+      {buttons.map((b) => {
+        const href = getButtonHref(b)
+        const actionType = b.actionType || 'link'
+        const isExternal = href.startsWith('http://') || href.startsWith('https://')
+        const shouldOpenNewTab = actionType === 'link' ? b.openInNewTab : ['file', 'maps', 'calendar'].includes(actionType)
+        const target = shouldOpenNewTab && isExternal ? '_blank' : undefined
+        const rel = target ? 'noreferrer' : undefined
+
+        const icon = renderIcon(b)
+        const iconPos = b.icon?.position ?? 'left'
+
+        const btnStyle: React.CSSProperties = { ...baseBtn, width: getButtonWidth(b) }
+
+        const isAttention = attention !== 'none' && !!attentionButtonId && b.id === attentionButtonId
+        if (isAttention) {
+          btnStyle.animation =
+            attention === 'pulse'
+              ? 'kardmeCtaPulse 1.8s ease-in-out infinite'
+              : attention === 'glow'
+                ? 'kardmeCtaGlow 1.8s ease-in-out infinite'
+                : attention === 'wiggle'
+                  ? 'kardmeCtaWiggle 6.5s ease-in-out infinite'
+                  : undefined
+        }
+
+        if (iconWidthPx > 0) {
+          const iconContainerStyle: React.CSSProperties = {
+            width: iconWidthPx,
+            minWidth: iconWidthPx,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }
+
+          return (
+            <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
+              {iconPos === 'left' && (<><span style={iconContainerStyle}>{icon}</span><span style={{ width: iconGapPx, flexShrink: 0 }} /></>)}
+              <span style={{ lineHeight: 1.1, flex: 1, textAlign: iconPos === 'left' ? 'left' : 'right' }}>{b.label || 'Botão'}</span>
+              {iconPos === 'right' && (<><span style={{ width: iconGapPx, flexShrink: 0 }} /><span style={iconContainerStyle}>{icon}</span></>)}
+            </a>
+          )
+        }
+
+        return (
+          <a key={b.id} href={href || '#'} target={target} rel={rel} style={btnStyle} className={isAttention ? 'kardme-cta-attention' : undefined} data-no-block-select="1" onClick={(e) => { if (!href || href === '#') e.preventDefault(); void cardId }}>
+            {icon && iconPos === 'left' ? icon : null}
+            <span style={{ lineHeight: 1.1 }}>{b.label || 'Botão'}</span>
+            {icon && iconPos === 'right' ? icon : null}
+          </a>
+        )
+      })}
+    </div>
+  )
+}

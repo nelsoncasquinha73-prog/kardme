@@ -1,0 +1,210 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+import { FiBookOpen, FiPlayCircle, FiSearch } from 'react-icons/fi'
+
+type Tutorial = {
+  id: string
+  title: string
+  description: string | null
+  category: string
+  youtube_url: string
+  sort_order: number
+}
+
+function youtubeId(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname.toLowerCase()
+
+    if (host === 'youtu.be' || host === 'www.youtu.be') {
+      return parsed.pathname.slice(1).split('/')[0] || null
+    }
+
+    if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(host)) {
+      if (parsed.pathname === '/watch') return parsed.searchParams.get('v')
+      if (parsed.pathname.startsWith('/embed/')) {
+        return parsed.pathname.split('/')[2] || null
+      }
+    }
+  } catch {
+    return null
+  }
+  return null
+}
+
+export default function BibliotecaPage() {
+  const [tutorials, setTutorials] = useState<Tutorial[]>([])
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('Todos')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+
+    async function load() {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+
+      if (!token) {
+        if (active) {
+          setError('Inicia sessão para consultar a biblioteca.')
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        const response = await fetch('/api/academy/tutorials', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const json = await response.json()
+
+        if (!response.ok) {
+          throw new Error(json.error || 'Erro ao carregar tutoriais.')
+        }
+
+        if (active) setTutorials(json.tutorials || [])
+      } catch (err) {
+        if (active) {
+          setError(err instanceof Error ? err.message : 'Erro inesperado.')
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { active = false }
+  }, [])
+
+  const categories = useMemo(
+    () => ['Todos', ...Array.from(new Set(tutorials.map(t => t.category)))],
+    [tutorials]
+  )
+
+  const filtered = useMemo(() => tutorials.filter(t => {
+    const matchesCategory = category === 'Todos' || t.category === category
+    const query = search.toLocaleLowerCase('pt-PT')
+    const matchesSearch =
+      t.title.toLocaleLowerCase('pt-PT').includes(query) ||
+      (t.description || '').toLocaleLowerCase('pt-PT').includes(query)
+
+    return matchesCategory && matchesSearch
+  }), [tutorials, category, search])
+
+  return (
+    <main style={{ maxWidth: 1040, margin: '0 auto', padding: '30px 20px' }}>
+      <section style={{
+        padding: '36px 30px',
+        borderRadius: 22,
+        background: 'linear-gradient(120deg,#091329,#162253,#43207b)',
+        color: 'white',
+        marginBottom: 28,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <FiBookOpen size={28} color="#38d9f5" />
+          <span style={{ color: '#67e8f9', fontWeight: 700 }}>
+            KARDME ACADEMY
+          </span>
+        </div>
+        <h1 style={{ fontSize: 34, fontWeight: 800, margin: '14px 0' }}>
+          Aprende a tirar o máximo partido do Kardme
+        </h1>
+        <p style={{ opacity: .85, maxWidth: 700 }}>
+          Tutoriais rápidos e práticos para configurares o teu cartão digital
+          e aproveitares todas as funcionalidades da plataforma.
+        </p>
+      </section>
+
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
+        <div style={{ position: 'relative', flex: '1 1 280px' }}>
+          <FiSearch style={{
+            position: 'absolute', top: 15, left: 14, color: '#64748b'
+          }} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Pesquisar tutoriais..."
+            style={{
+              width: '100%', padding: '12px 12px 12px 42px',
+              border: '1px solid #cbd5e1', borderRadius: 12,
+              color: '#111827', background: '#fff',
+            }}
+          />
+        </div>
+
+        <select
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+          style={{
+            padding: '12px 16px', borderRadius: 12,
+            border: '1px solid #cbd5e1', background: '#fff', color: '#111827',
+          }}
+        >
+          {categories.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+
+      {loading && <p>A carregar tutoriais...</p>}
+      {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+
+      {!loading && !error && filtered.length === 0 && (
+        <p>Ainda não existem tutoriais nesta categoria.</p>
+      )}
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+        gap: 22,
+      }}>
+        {filtered.map(t => {
+          const id = youtubeId(t.youtube_url)
+          return (
+            <article key={t.id} style={{
+              borderRadius: 18, overflow: 'hidden',
+              background: '#101a35', color: 'white',
+              border: '1px solid #29365c',
+            }}>
+              {id ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`}
+                  title={t.title}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  style={{
+                    width: '100%', aspectRatio: '16 / 9',
+                    border: 0, display: 'block',
+                  }}
+                />
+              ) : (
+                <div style={{
+                  aspectRatio: '16 / 9', display: 'grid',
+                  placeItems: 'center', background: '#172554',
+                }}>
+                  <FiPlayCircle size={42} />
+                </div>
+              )}
+
+              <div style={{ padding: 20 }}>
+                <span style={{ color: '#67e8f9', fontSize: 12, fontWeight: 700 }}>
+                  {t.category}
+                </span>
+                <h2 style={{ fontSize: 19, margin: '9px 0', fontWeight: 700 }}>
+                  {t.title}
+                </h2>
+                <p style={{ color: '#cbd5e1', fontSize: 14, lineHeight: 1.6 }}>
+                  {t.description}
+                </p>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </main>
+  )
+}

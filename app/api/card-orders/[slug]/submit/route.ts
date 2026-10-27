@@ -21,6 +21,7 @@ export async function POST(
         submitted_at: new Date().toISOString(),
       })
       .eq('slug', slug)
+      .eq('status', 'rascunho')
       .select('*')
       .single()
 

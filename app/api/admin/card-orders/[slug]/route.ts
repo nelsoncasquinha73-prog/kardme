@@ -1,3 +1,4 @@
+import { requireCardOrderAdmin } from '@/lib/requireCardOrderAdmin'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,6 +15,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const denied = await requireCardOrderAdmin(_req)
+  if (denied) return denied
+
   const { slug } = await params
 
   const { data, error } = await supabaseAdmin
@@ -33,6 +37,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const denied = await requireCardOrderAdmin(_req)
+  if (denied) return denied
+
   const { slug } = await params
 
   const { error } = await supabaseAdmin
@@ -45,4 +52,55 @@ export async function DELETE(
   }
 
   return NextResponse.json({ ok: true })
+}
+
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const denied = await requireCardOrderAdmin(req)
+  if (denied) return denied
+
+  try {
+    const { slug } = await params
+    const body = await req.json()
+    const status = body?.status
+
+    const allowedStatuses = [
+      'rascunho',
+      'submetido',
+      'em_producao',
+      'concluido',
+    ]
+
+    if (!allowedStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Estado inválido' },
+        { status: 400 }
+      )
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('card_orders')
+      .update({ status })
+      .eq('slug', slug)
+      .select('*')
+      .single()
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(data)
+  } catch (err) {
+    console.error('Erro ao atualizar pedido:', err)
+    return NextResponse.json(
+      { error: 'Erro interno' },
+      { status: 500 }
+    )
+  }
 }

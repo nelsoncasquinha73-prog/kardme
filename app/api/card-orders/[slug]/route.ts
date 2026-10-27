@@ -15,15 +15,26 @@ export async function POST(
     const { slug } = await params
     const body = await req.json()
 
-    // Segurança mínima: nunca deixamos mudar slug/id via payload
-    const payload = { ...body }
-    delete payload.id
-    delete payload.slug
+    // Apenas os campos do formulário podem ser alterados.
+    const allowedFields = [
+      'nome', 'empresa', 'cargo', 'email', 'telefone',
+      'whatsapp', 'instagram', 'facebook', 'tiktok',
+      'linkedin', 'youtube', 'website', 'outros_links',
+      'bio', 'slogan', 'foto_perfil', 'fotos_galeria',
+      'cores_preferidas', 'notas_estilo',
+    ]
+
+    const payload = Object.fromEntries(
+      allowedFields
+        .filter(field => Object.prototype.hasOwnProperty.call(body, field))
+        .map(field => [field, body[field]])
+    )
 
     const { data, error } = await supabaseAdmin
       .from('card_orders')
       .update(payload)
       .eq('slug', slug)
+      .eq('status', 'rascunho')
       .select('*')
       .single()
 

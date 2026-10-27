@@ -1,5 +1,7 @@
 'use client'
 
+import { cardOrderAdminFetch } from '@/lib/cardOrderAdminFetch'
+
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import styles from './CardOrderDetail.module.css'
@@ -57,6 +59,7 @@ export default function CardOrderDetailPage() {
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [modalImage, setModalImage] = useState<string | null>(null)
+  const [downloadingZip, setDownloadingZip] = useState(false)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   const copyField = async (key: string, value?: string) => {
@@ -113,7 +116,7 @@ export default function CardOrderDetailPage() {
         setError(null)
         setNotFound(false)
 
-        const res = await fetch(`/api/admin/card-orders/${slug}`)
+        const res = await cardOrderAdminFetch(`/api/admin/card-orders/${slug}`)
         if (res.status === 404) {
           setNotFound(true)
           setOrder(null)
@@ -136,7 +139,7 @@ export default function CardOrderDetailPage() {
 
   const handleStatusChange = async (newStatus: Status) => {
     try {
-      const res = await fetch(`/api/admin/card-orders/${slug}`, {
+      const res = await cardOrderAdminFetch(`/api/admin/card-orders/${slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -151,13 +154,61 @@ export default function CardOrderDetailPage() {
     }
   }
 
-  const downloadImage = (url: string, filename: string) => {
+  const saveBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = filename
     document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  const downloadImage = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Erro ao obter imagem')
+
+      const blob = await response.blob()
+      const pathname = new URL(url).pathname
+      const originalName = decodeURIComponent(pathname.split('/').pop() || '')
+      const extension = originalName.match(/\\.(png|jpe?g|webp|gif|heic|avif)$/i)?.[0]
+        || (blob.type === 'image/png' ? '.png' :
+            blob.type === 'image/webp' ? '.webp' :
+            blob.type === 'image/gif' ? '.gif' :
+            blob.type === 'image/heic' ? '.heic' : '.jpg')
+
+      saveBlob(blob, filename.replace(/\\.[^.]+$/, '') + extension)
+    } catch (err) {
+      console.error('Erro no download:', err)
+      alert('Não foi possível descarregar a imagem.')
+    }
+  }
+
+  const downloadCompleteZip = async () => {
+    if (!order) return
+
+    try {
+      setDownloadingZip(true)
+
+      const response = await cardOrderAdminFetch(
+        `/api/admin/card-orders/${encodeURIComponent(order.slug)}/download-zip`
+      )
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.error || 'Erro ao gerar ZIP')
+      }
+
+      const blob = await response.blob()
+      saveBlob(blob, `pedido-${order.slug}-completo.zip`)
+    } catch (err) {
+      console.error('Erro no ZIP:', err)
+      alert(err instanceof Error ? err.message : 'Erro ao descarregar ZIP.')
+    } finally {
+      setDownloadingZip(false)
+    }
   }
 
   if (loading) {
@@ -191,6 +242,24 @@ export default function CardOrderDetailPage() {
             {order.email || '—'} • {order.slug}
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={downloadCompleteZip}
+          disabled={downloadingZip}
+          style={{
+            padding: '11px 16px',
+            borderRadius: 10,
+            border: 'none',
+            background: 'linear-gradient(110deg, #2563eb, #7c3aed)',
+            color: 'white',
+            fontWeight: 700,
+            cursor: downloadingZip ? 'wait' : 'pointer',
+            opacity: downloadingZip ? 0.65 : 1,
+          }}
+        >
+          {downloadingZip ? 'A preparar ZIP...' : '⬇ Descarregar pedido completo'}
+        </button>
 
         <div style={{
           padding: '6px 10px',

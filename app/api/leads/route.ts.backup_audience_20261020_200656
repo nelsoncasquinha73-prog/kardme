@@ -1,0 +1,298 @@
+import { NextResponse } from 'next/server'
+import crypto from 'crypto'
+import { createClient } from '@supabase/supabase-js'
+import { sendEmail } from '@/lib/email'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+
+  const renderWelcomeMessage = (template: string, vars: { nome: string; email: string; cardTitle: string }) => {
+    return template
+      .replace(/{nome}/g, vars.nome)
+      .replace(/{email}/g, vars.email)
+      .replace(/{cardTitle}/g, vars.cardTitle)
+  }
+
+
+async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string; subject?: string; body?: string }) {
+  try {
+    const subject = params.subject || 'Bem-vindo à {cardTitle}! 🎉'
+    const body = params.body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
+
+    const result = await sendEmail({
+      to: params.toEmail,
+      subject,
+      html: body.replace(/\n/g, '<br/>'),
+      fromName: params.cardTitle,
+    })
+
+    return { ok: true, details: JSON.stringify(result) }
+  } catch (err: any) {
+    console.error('RESEND_WELCOME_ERROR', err)
+    return { ok: false, details: err?.message || String(err) }
+  }
+}
+
+async function sendOwnerNotification(params: { userId: string; leadId: string; ownerEmail: string; leadName: string; leadEmail: string; cardTitle: string }) {
+  try {
+    const body = `Olá,
+
+Tens uma nova lead no teu cartão "${params.cardTitle}":
+
+Nome: ${params.leadName}
+Email: ${params.leadEmail}
+
+Acede ao CRM Pro para mais detalhes.
+
+Melhores cumprimentos,
+Kardme`
+
+    const result = await sendEmail({
+      to: params.ownerEmail,
+      subject: `Nova lead recebida: ${params.leadName}`,
+      html: body.replace(/\n/g, '<br/>'),
+      fromName: 'Kardme',
+    })
+
+    return { ok: true, details: JSON.stringify(result) }
+  } catch (err: any) {
+    console.error('RESEND_OWNER_ERROR', err)
+    return { ok: false, details: err?.message || String(err) }
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json()
+    const {
+      cardId,
+      name,
+      email,
+      phone,
+      message,
+      zone,
+      requiredFields,
+      customFields,
+      consentGiven,
+      marketingOptIn,
+      consentTimestamp,
+      consentVersion,
+    } = body || {}
+
+    const normalizedEmail = String(email || '').toLowerCase().trim()
+
+    if (!cardId) {
+      return NextResponse.json(
+        { error: 'cardId em falta.' },
+        { status: 400 }
+      )
+    }
+
+    const required = requiredFields || {}
+
+    if (required.name && !String(name || '').trim()) {
+      return NextResponse.json({ error: 'Nome obrigatório.' }, { status: 400 })
+    }
+
+    if (required.email && !normalizedEmail) {
+      return NextResponse.json({ error: 'Email obrigatório.' }, { status: 400 })
+    }
+
+    if (required.phone && !String(phone || '').trim()) {
+      return NextResponse.json({ error: 'Telefone obrigatório.' }, { status: 400 })
+    }
+
+    if (required.message && !String(message || '').trim()) {
+      return NextResponse.json({ error: 'Mensagem obrigatória.' }, { status: 400 })
+    }
+
+    if (required.zone && !String(zone || '').trim()) {
+      return NextResponse.json({ error: 'Zona obrigatória.' }, { status: 400 })
+    }
+
+    // Identificar o proprietário do cartão antes de criar a lead.
+    const { data: leadCard, error: leadCardError } = await supabaseAdmin
+      .from('cards')
+      .select('user_id')
+      .eq('id', cardId)
+      .single()
+
+    if (leadCardError || !leadCard?.user_id) {
+      return NextResponse.json(
+        { error: 'Cartão não encontrado ou sem proprietário.' },
+        { status: 404 }
+      )
+    }
+
+    // Inserir lead
+    const { data: leadData, error: leadError } = await supabaseAdmin.from('leads').insert([
+      {
+        card_id: cardId,
+        user_id: leadCard.user_id,
+        name: String(name || '').trim() || 'Sem nome',
+        email: normalizedEmail,
+        phone: phone || null,
+        message: message || null,
+        zone: zone || null,
+        custom_fields:
+          customFields && typeof customFields === 'object' && !Array.isArray(customFields)
+            ? customFields
+            : {},
+        consent_given: consentGiven ?? true,
+        marketing_opt_in: marketingOptIn ?? false,
+        consent_timestamp: consentTimestamp || new Date().toISOString(),
+        consent_version: consentVersion || '1.0',
+        lead_source: 'Cartão',
+      },
+    ]).select('id')
+
+    if (leadError) {
+      return NextResponse.json({ error: leadError.message }, { status: 500 })
+    }
+
+    const leadId = leadData?.[0]?.id
+
+    // Email confirmation (Lead) - só se vamos enviar welcome email
+    let confirmUrl: string | null = null
+    if (marketingOptIn && leadId && normalizedEmail) {
+      const { data: leadRow } = await supabaseAdmin
+        .from('leads')
+        .select('email_confirmed_at, email_confirm_token')
+        .eq('id', leadId)
+        .maybeSingle()
+
+      const alreadyConfirmed = !!leadRow?.email_confirmed_at
+      const alreadyHasToken = !!leadRow?.email_confirm_token
+
+      if (!alreadyConfirmed && !alreadyHasToken) {
+        const token = crypto.randomBytes(24).toString('hex')
+        const { error: tokenErr } = await supabaseAdmin
+          .from('leads')
+          .update({ email_confirm_token: token })
+          .eq('id', leadId)
+
+        if (!tokenErr) {
+          const origin =
+            req.headers.get('origin') ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            'https://www.kardme.com'
+          confirmUrl = `${origin}/api/confirm-email?token=${token}`
+        } else {
+          console.error('Erro ao guardar email_confirm_token:', tokenErr)
+        }
+      }
+    }
+
+    // Buscar card owner e verificar CRM Pro
+    const { data: cardData } = await supabaseAdmin
+      .from('cards')
+      .select('user_id, name, crm_pro_welcome_subject, crm_pro_welcome_body')
+      .eq('id', cardId)
+      .single()
+
+    const safeCardTitle =
+      (cardData?.name && String(cardData.name).trim().length > 0)
+        ? String(cardData.name).trim()
+        : 'o meu cartão digital'
+
+    if (cardData?.user_id) {
+      // Verificar se owner tem CRM Pro
+      const { data: addonData } = await supabaseAdmin
+        .from('user_addons')
+        .select('crm_pro_active')
+        .eq('user_id', cardData.user_id)
+        .single()
+
+      if (addonData?.crm_pro_active) {
+        // Owner tem CRM Pro — enviar notificações
+        const { data: ownerData } = await supabaseAdmin
+          .from('profiles')
+          .select('email')
+          .eq('id', cardData.user_id)
+          .single()
+
+        if (ownerData?.email) {
+          // Enviar email ao owner (sempre)
+          const ownerRes = await sendOwnerNotification({
+            userId: cardData.user_id,
+            leadId,
+            ownerEmail: ownerData.email,
+            leadName: String(name || '').trim() || 'Sem nome',
+            leadEmail: normalizedEmail || 'Sem email',
+            cardTitle: safeCardTitle,
+          })
+
+          // Enviar email ao lead (só se opt-in)
+          let welcomeRes: any = null
+          if (marketingOptIn && email) {
+            // Preparar subject e body com replace de variáveis
+            const customSubject = cardData.crm_pro_welcome_subject || 'Bem-vindo à {cardTitle}! 🎉'
+            const customBody = cardData.crm_pro_welcome_body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
+            
+            const renderedSubject = renderWelcomeMessage(customSubject, {
+              nome: name,
+              email: normalizedEmail,
+              cardTitle: safeCardTitle,
+            })
+            const renderedBody = renderWelcomeMessage(customBody, {
+              nome: name,
+              email: normalizedEmail,
+              cardTitle: safeCardTitle,
+            })
+
+            const finalBody = confirmUrl
+              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n\n<a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a>\n\nSe não conseguires clicar, copia e cola este link no browser:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
+              : renderedBody
+
+            welcomeRes = await sendWelcomeEmail({
+              userId: cardData.user_id,
+              leadId,
+              toEmail: normalizedEmail,
+              leadName: name,
+              cardTitle: safeCardTitle,
+              subject: renderedSubject,
+              body: finalBody,
+            })
+          }
+
+          // Log activities (sucesso/falha)
+          if (leadId) {
+            await supabaseAdmin.from('lead_activities').insert([
+              {
+                lead_id: leadId,
+                user_id: cardData.user_id,
+                type: ownerRes?.ok ? 'owner_notified_email' : 'owner_email_failed',
+                title: ownerRes?.ok
+                  ? 'Email de notificação enviado ao owner'
+                  : 'Falha ao enviar email de notificação ao owner',
+                meta: { details: ownerRes?.details || null },
+              },
+            ])
+
+            if (marketingOptIn && email) {
+              await supabaseAdmin.from('lead_activities').insert([
+                {
+                  lead_id: leadId,
+                  user_id: cardData.user_id,
+                  type: welcomeRes?.ok ? 'welcome_email_sent' : 'welcome_email_failed',
+                  title: welcomeRes?.ok
+                    ? 'Email de boas-vindas enviado ao lead'
+                    : 'Falha ao enviar email de boas-vindas ao lead',
+                  meta: { details: welcomeRes?.details || null },
+                },
+              ])
+            }
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200 })
+  } catch (e: any) {
+    console.error('Error in POST /api/leads:', e)
+    return NextResponse.json({ error: e?.message || 'Erro interno' }, { status: 500 })
+  }
+}

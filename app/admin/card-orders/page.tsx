@@ -1,4 +1,7 @@
+
 'use client'
+
+import { cardOrderAdminFetch } from '@/lib/cardOrderAdminFetch'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -27,7 +30,7 @@ export default function CardOrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/admin/card-orders')
+      const res = await cardOrderAdminFetch('/api/admin/card-orders')
       if (!res.ok) throw new Error('Erro ao carregar')
       const data = await res.json()
       setOrders(Array.isArray(data) ? data : [])
@@ -47,7 +50,7 @@ export default function CardOrdersPage() {
 
     try {
       setCreating(true)
-      const res = await fetch('/api/admin/card-orders/create', {
+      const res = await cardOrderAdminFetch('/api/admin/card-orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -60,7 +63,7 @@ export default function CardOrdersPage() {
       }
 
       const newOrder = await res.json()
-      const link = `\${window.location.origin}/card-orders/\${newOrder.slug}`
+      const link = `\https://kardme.com/card-orders/\${newOrder.slug}`
       setCreatedLink(link)
       setOrders([newOrder, ...orders])
       setFormData({ nome: '', email: '', telefone: '' })
@@ -85,7 +88,7 @@ export default function CardOrdersPage() {
     if (!ok) return
 
     try {
-      const res = await fetch('/api/admin/card-orders/' + slug, { method: 'DELETE' })
+      const res = await cardOrderAdminFetch('/api/admin/card-orders/' + slug, { method: 'DELETE' })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         alert('Erro ao eliminar: ' + (err.error || 'unknown'))
@@ -192,7 +195,7 @@ export default function CardOrdersPage() {
                       </Link>
 
                       <button
-                        onClick={() => copyToClipboard(`${window.location.origin}/card-orders/${order.slug}`)}
+                        onClick={() => copyToClipboard(`https://kardme.com/card-orders/${order.slug}`)}
                         style={{
                           padding: '6px 10px',
                           background: '#f3f4f6',
@@ -269,8 +272,7 @@ export default function CardOrdersPage() {
                 </div>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(createdLink)
-                    alert('Link copiado!')
+                    void copyToClipboard(createdLink)
                   }}
                   style={{
                     width: '100%',
