@@ -63,7 +63,7 @@ export default function CardOrdersPage() {
       }
 
       const newOrder = await res.json()
-      const link = `\https://kardme.com/card-orders/\${newOrder.slug}`
+      const link = 'https:' + String.fromCharCode(47,47) + 'kardme.com/card-orders/' + newOrder.slug
       setCreatedLink(link)
       setOrders([newOrder, ...orders])
       setFormData({ nome: '', email: '', telefone: '' })
@@ -195,7 +195,7 @@ export default function CardOrdersPage() {
                       </Link>
 
                       <button
-                        onClick={() => copyToClipboard(`https://kardme.com/card-orders/${order.slug}`)}
+                        onClick={() => copyToClipboard('https:' + String.fromCharCode(47,47) + 'kardme.com/card-orders/' + order.slug)}
                         style={{
                           padding: '6px 10px',
                           background: '#f3f4f6',
