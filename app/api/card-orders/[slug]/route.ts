@@ -1,3 +1,4 @@
+import { requireCardOrderAccess } from '@/lib/requireCardOrderAccess'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -13,6 +14,10 @@ export async function POST(
 ) {
   try {
     const { slug } = await params
+
+    const denied = await requireCardOrderAccess(req, slug)
+    if (denied) return denied
+
     const body = await req.json()
 
     // Apenas os campos do formulário podem ser alterados.

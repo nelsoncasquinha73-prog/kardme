@@ -61,7 +61,25 @@ export async function sendEmail(params: {
     }
 
     const result = await resend.emails.send(emailPayload)
-    console.log('RESEND_SEND_SUCCESS', result)
+
+    if (result.error) {
+      console.error('RESEND_SEND_ERROR', {
+        message: result.error.message,
+        name: result.error.name,
+        to: params.to,
+      })
+      throw new Error(result.error.message)
+    }
+
+    if (!result.data?.id) {
+      throw new Error('Resend não confirmou o envio do email')
+    }
+
+    console.log('RESEND_SEND_SUCCESS', {
+      id: result.data.id,
+      to: params.to,
+    })
+
     return result
   } catch (err: any) {
     console.error('RESEND_SEND_ERROR', {

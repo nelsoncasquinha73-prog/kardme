@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   { label: 'Analytics Global', href: '/admin/analytics', icon: FiBarChart2 },
   { label: 'Clientes', href: '/admin/clientes', icon: FiUsers },
   { label: 'Pedidos de Cartão', href: '/admin/card-orders', icon: FiShoppingCart },
+  { label: 'Gestão de Equipas', href: '/admin/teams', icon: FiUsers },
   { label: 'Gerir Templates', href: '/admin/templates', icon: FiLayout },
   { label: 'Loja de Templates', href: '/admin/template-shop', icon: FiTag },
   { label: 'Cupões', href: '/admin/coupons', icon: FiGift },
@@ -43,6 +44,7 @@ const getPageTitle = (pathname: string | null) => {
   const path = pathname.split('/').filter(Boolean)
   if (path[0] === 'admin') {
     if (path[1] === 'card-orders') return 'Pedidos de Cartão'
+    if (path[1] === 'teams') return 'Gestão de Equipas'
     if (path[1] === 'templates') return 'Gerir Templates'
     if (path[1] === 'template-shop') return 'Loja de Templates'
     if (path[1] === 'coupons') return 'Cupões'

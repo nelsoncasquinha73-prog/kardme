@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './CardOrderWizard.module.css'
+import { cardOrderTranslations } from '@/lib/i18n/cardOrder'
 
 interface CardOrder {
   id: string
@@ -29,12 +30,32 @@ interface CardOrder {
   notas_estilo?: string
 }
 
+type Language = 'pt-PT' | 'pt-BR' | 'en' | 'it' | 'de' | 'es' | 'fr' | 'ar'
+
 interface Props {
   slug: string
   initialOrder?: CardOrder
+  accessToken?: string
+  language?: string
 }
 
-export default function CardOrderWizard({ slug, initialOrder }: Props) {
+export default function CardOrderWizard({
+  slug,
+  initialOrder,
+  accessToken,
+  language = 'pt-PT',
+}: Props) {
+  const initialLanguage: Language =
+    (['pt-PT', 'pt-BR', 'en', 'it', 'de', 'es', 'fr', 'ar'] as string[])
+      .includes(language)
+      ? language as Language
+      : 'pt-PT'
+
+  const [currentLanguage, setCurrentLanguage] =
+    useState<Language>(initialLanguage)
+  const t = cardOrderTranslations[
+    currentLanguage === 'it' ? 'it' : 'pt-PT'
+  ]
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -49,7 +70,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
       foto_perfil: undefined,
       outros_links: [],
       fotos_galeria: [],
-      cores_preferidas: { colors: ['#0b1220', '#3b82f6', '#ffffff'], pantone: '' },
+      cores_preferidas: { colors: [], pantone: '' },
     }
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -66,7 +87,10 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
       try {
         const res = await fetch(`/api/card-orders/${slug}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken ? { 'x-card-order-token': accessToken } : {}),
+          },
           body: JSON.stringify(snapshot),
         })
 
@@ -123,13 +147,13 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
       if (!res.ok) {
         const { error } = await res.json()
-        throw new Error(error || 'Erro ao fazer upload')
+        throw new Error(error || t.uploadError)
       }
 
       const { url } = await res.json()
       handleChange('foto_perfil', url)
     } catch (err: any) {
-      setUploadError(err.message || 'Erro ao fazer upload')
+      setUploadError(err.message || t.uploadError)
     } finally {
       setUploading(false)
     }
@@ -151,13 +175,13 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
       if (!res.ok) {
         const { error } = await res.json()
-        throw new Error(error || 'Erro ao fazer upload')
+        throw new Error(error || t.uploadError)
       }
 
       const { url } = await res.json()
       handleChange('fotos_galeria', [...(order.fotos_galeria || []), url])
     } catch (err: any) {
-      setUploadError(err.message || 'Erro ao fazer upload')
+      setUploadError(err.message || t.uploadError)
     } finally {
       setUploading(false)
     }
@@ -187,22 +211,19 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
     const newErrors: Record<string, string> = {}
 
     if (stepNum === 1) {
-      if (!order.nome?.trim()) newErrors.nome = 'Nome obrigatório'
-      if (!order.email?.trim()) newErrors.email = 'Email obrigatório'
-      if (order.email && !order.email.includes('@')) newErrors.email = 'Email inválido'
+      if (!order.nome?.trim()) newErrors.nome = t.requiredName
+      if (!order.email?.trim()) newErrors.email = t.requiredEmail
+      if (order.email && !order.email.includes('@')) newErrors.email = t.invalidEmail
     }
 
     if (stepNum === 3) {
-      if ((order.bio || '').length > 600) newErrors.bio = 'Bio muito longa (máx 600 caracteres)'
-      if ((order.slogan || '').length > 120) newErrors.slogan = 'Slogan muito longo (máx 120 caracteres)'
+      if ((order.bio || '').length > 600) newErrors.bio = t.bioTooLong
+      if ((order.slogan || '').length > 120) newErrors.slogan = t.sloganTooLong
     }
 
     if (stepNum === 4) {
-      if (!order.foto_perfil) newErrors.foto_perfil = 'Foto de perfil obrigatória'
-      const colors = order.cores_preferidas?.colors || []
-      if (!colors[0]) newErrors.color0 = 'Cor de fundo obrigatória'
-      if (!colors[1]) newErrors.color1 = 'Cor de destaque obrigatória'
-      if (!colors[2]) newErrors.color2 = 'Cor de texto obrigatória'
+      if (!order.foto_perfil) newErrors.foto_perfil = t.requiredPhoto
+
     }
 
     setErrors(newErrors)
@@ -229,18 +250,23 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
       const submitRes = await fetch(`/api/card-orders/${slug}/submit`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'x-card-order-token': accessToken } : {}),
+        },
+        body: JSON.stringify({ language: currentLanguage }),
       })
 
-      if (!submitRes.ok) {
-        throw new Error('Não foi possível submeter o pedido')
+            if (!submitRes.ok) {
+        throw new Error(t.submitError)
       }
 
       setUnsavedChanges(false)
-      router.push(`/card-orders/${slug}/sucesso`)
+      router.push(`/card-orders/${slug}/sucesso?lang=${encodeURIComponent(currentLanguage)}`)
     } catch (err) {
       console.error('Submit error:', err)
       setErrors({
-        submit: 'Não foi possível concluir o pedido. Tenta novamente.',
+        submit: t.submitError,
       })
     } finally {
       setLoading(false)
@@ -259,101 +285,135 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
   }, [unsavedChanges])
 
   const progressPercent = (step / 4) * 100
-  const colors = order.cores_preferidas?.colors || ['#0b1220', '#3b82f6', '#ffffff']
+  const colors = order.cores_preferidas?.colors || []
 
   const setColorAt = (index: number, value: string) => {
-    const next = [...colors]
+    const next = [
+      colors[0] || '#0b1220',
+      colors[1] || '#3b82f6',
+      colors[2] || '#ffffff',
+    ]
     next[index] = value
     handleChange('cores_preferidas', { ...order.cores_preferidas, colors: next })
   }
 
   const socialExamples: Record<string, string> = {
-    instagram: '@sofia.ferreira',
-    facebook: 'Sofia Ferreira',
-    tiktok: '@sofiaferreira',
-    linkedin: 'linkedin.com/in/sofiaferreira',
-    youtube: '@sofiaferreira',
-    website: 'https://sofiaferreira.com',
+    instagram: '@nome.profissional',
+    facebook: 'Nome Profissional',
+    tiktok: '@nomeprofissional',
+    linkedin: 'linkedin.com/in/nome-profissional',
+    youtube: '@nomeprofissional',
+    website: 'https://exemplo.com',
   }
 
   const colorPresets = [
-    { name: 'Clássico', colors: ['#0b1220', '#3b82f6', '#ffffff'] },
-    { name: 'Quente', colors: ['#fef3c7', '#dc2626', '#1f2937'] },
-    { name: 'Fresco', colors: ['#e0f2fe', '#0284c7', '#0f172a'] },
-    { name: 'Minimalista', colors: ['#ffffff', '#000000', '#6b7280'] },
+    { name: currentLanguage === 'it' ? 'Classico' : 'Clássico', colors: ['#0b1220', '#3b82f6', '#ffffff'] },
+    { name: currentLanguage === 'it' ? 'Caldo' : 'Quente', colors: ['#fef3c7', '#dc2626', '#1f2937'] },
+    { name: currentLanguage === 'it' ? 'Fresco' : 'Fresco', colors: ['#e0f2fe', '#0284c7', '#0f172a'] },
+    { name: currentLanguage === 'it' ? 'Minimalista' : 'Minimalista', colors: ['#ffffff', '#000000', '#6b7280'] },
     { name: 'Premium', colors: ['#1f2937', '#fbbf24', '#f3f4f6'] },
   ]
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Vamos criar o teu Kardme</h1>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: 16,
+        }}>
+          <select
+            aria-label="Idioma / Language"
+            value={currentLanguage}
+            onChange={(e) =>
+              setCurrentLanguage(e.target.value as Language)
+            }
+            style={{
+              padding: '9px 12px',
+              borderRadius: 8,
+              border: '1px solid #cbd5e1',
+              background: '#fff',
+              color: '#1e293b',
+              fontSize: 14,
+            }}
+          >
+            <option value="pt-PT">🇵🇹 Português</option>
+            <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+        <h1>{t.title}</h1>
         <p style={{ color: '#64748b', margin: '8px 0 0', fontSize: 14 }}>
-          Preenche os dados ao teu ritmo. O teu progresso é guardado automaticamente.
+          {t.subtitle}
         </p>
         <div className={styles.status}>
-          {order.status === 'rascunho' && <span className={styles.badge}>Rascunho</span>}
-          {order.status === 'submetido' && <span className={styles.badge + ' ' + styles.submitted}>Submetido</span>}
-          {saving && <span className={styles.saving}>A guardar...</span>}
+          {order.status === 'rascunho' && <span className={styles.badge}>{t.draft}</span>}
+          {order.status === 'submetido' && <span className={styles.badge + ' ' + styles.submitted}>{t.submitted}</span>}
+          {saving && <span className={styles.saving}>{t.saving}</span>}
         </div>
       </div>
 
       <div className={styles.progressContainer}>
         <div className={styles.progressBar} style={{ width: `${progressPercent}%` }} />
       </div>
-      <p className={styles.stepIndicator}>Passo {step} de 4</p>
+      <p className={styles.stepIndicator}>{t.step} {step} {t.of} 4</p>
 
       <div className={styles.content}>
         {step === 1 && (
           <div className={styles.step}>
-            <h2>Identidade</h2>
+            <h2>{t.identity}</h2>
 
             <div className={styles.field}>
-              <label>Nome *</label>
+              <label>{t.name} *</label>
               <input
                 type="text"
                 value={order.nome || ''}
                 onChange={(e) => handleChange('nome', e.target.value)}
-                placeholder="Sofia Ferreira"
+                placeholder="Nome completo"
                 className={errors.nome ? styles.error : ''}
               />
               {errors.nome && <span className={styles.errorMsg}>{errors.nome}</span>}
             </div>
 
             <div className={styles.field}>
-              <label>Empresa</label>
+              <label>{t.company}</label>
               <input
                 type="text"
                 value={order.empresa || ''}
                 onChange={(e) => handleChange('empresa', e.target.value)}
-                placeholder="Century 21 Lisboa"
+                placeholder={t.companyPlaceholder}
               />
             </div>
 
             <div className={styles.field}>
-              <label>Cargo / Profissão</label>
+              <label>{t.role}</label>
               <input
                 type="text"
                 value={order.cargo || ''}
                 onChange={(e) => handleChange('cargo', e.target.value)}
-                placeholder="Consultora Imobiliária"
+                placeholder={t.rolePlaceholder}
               />
             </div>
 
             <div className={styles.field}>
-              <label>Email *</label>
+              <label>{t.email} *</label>
               <input
                 type="email"
                 value={order.email || ''}
                 onChange={(e) => handleChange('email', e.target.value)}
-                placeholder="sofia@century21.pt"
+                placeholder="nome@exemplo.com"
                 className={errors.email ? styles.error : ''}
               />
               {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
             </div>
 
             <div className={styles.field}>
-              <label>Telefone</label>
+              <label>{t.phone}</label>
               <input
                 type="tel"
                 value={order.telefone || ''}
@@ -377,7 +437,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                   fontWeight: 600,
                 }}
               >
-                Usar o mesmo número do telefone
+                {t.samePhone}
               </button>
               <input
                 type="tel"
@@ -385,14 +445,14 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                 onChange={(e) => handleChange('whatsapp', e.target.value)}
                 placeholder="+351 912 345 678"
               />
-              <small>O WhatsApp é o melhor contacto para dúvidas durante a produção.</small>
+              <small>{t.whatsappHelp}</small>
             </div>
           </div>
         )}
 
         {step === 2 && (
           <div className={styles.step}>
-            <h2>Links</h2>
+            <h2>{t.links}</h2>
 
             <div className={styles.linksGrid}>
               {['instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'website'].map((field) => (
@@ -404,18 +464,18 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                     onChange={(e) => handleChange(field, e.target.value)}
                     placeholder={socialExamples[field]}
                   />
-                  <small>Se não tiveres, deixa em branco.</small>
+                  <small>{t.optionalLink}</small>
                 </div>
               ))}
             </div>
 
             <div className={styles.field}>
-              <label>Outros Links</label>
+              <label>{t.otherLinks}</label>
               {(order.outros_links || []).map((link, idx) => (
                 <div key={idx} className={styles.linkRow}>
                   <input
                     type="text"
-                    placeholder="Catálogo, Portfólio, etc"
+                    placeholder={t.linkPlaceholder}
                     value={link.label}
                     onChange={(e) => handleOtrosLinksChange(idx, 'label', e.target.value)}
                   />
@@ -431,7 +491,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                 </div>
               ))}
               <button onClick={addOutroLink} className={styles.addBtn} type="button">
-                + Adicionar link
+                + {t.addLink}
               </button>
             </div>
           </div>
@@ -439,38 +499,38 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
         {step === 3 && (
           <div className={styles.step}>
-            <h2>Texto</h2>
+            <h2>{t.text}</h2>
 
             <div className={styles.field}>
               <label>Bio</label>
               <small>
-                Texto curto para aparecer no cartão. Diz quem és, o que fazes e para quem (em 2–4 frases). Opcional.
+                {t.bioHelp}
               </small>
               <textarea
                 value={order.bio || ''}
                 onChange={(e) => handleChange('bio', e.target.value.slice(0, 600))}
-                placeholder="Ajudo famílias a encontrar a casa certa em Lisboa, com acompanhamento completo do início ao fim. Atendimento rápido por WhatsApp."
+                placeholder={t.bioPlaceholder}
                 rows={5}
                 className={errors.bio ? styles.error : ''}
               />
-              <div className={styles.counter}>{(order.bio || '').length} / 600 caracteres</div>
+              <div className={styles.counter}>{(order.bio || '').length} / 600 {t.characters}</div>
               {errors.bio && <span className={styles.errorMsg}>{errors.bio}</span>}
             </div>
 
             <div className={styles.field}>
-              <label>Slogan / Quote</label>
+              <label>{t.sloganHelp.split(" — ")[0]}</label>
               <small>
-                Frase curta de impacto (opcional). Pode ser promessa, posicionamento ou lema.
+                {t.sloganHelp}
               </small>
               <input
                 type="text"
                 value={order.slogan || ''}
                 onChange={(e) => handleChange('slogan', e.target.value.slice(0, 120))}
-                placeholder="A tua próxima casa começa aqui."
+                placeholder={t.sloganPlaceholder}
                 maxLength={120}
                 className={errors.slogan ? styles.error : ''}
               />
-              <div className={styles.counter}>{(order.slogan || '').length} / 120 caracteres</div>
+              <div className={styles.counter}>{(order.slogan || '').length} / 120 {t.characters}</div>
               {errors.slogan && <span className={styles.errorMsg}>{errors.slogan}</span>}
             </div>
           </div>
@@ -478,7 +538,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
 
         {step === 4 && (
           <div className={styles.step}>
-            <h2>Fotos + Cores</h2>
+            <h2>{t.photosColors}</h2>
 
             {uploadError && (
               <div style={{ background: '#fee2e2', color: '#991b1b', padding: '12px 16px', borderRadius: 6, marginBottom: 20, fontSize: 14 }}>
@@ -487,8 +547,8 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
             )}
 
             <div className={styles.field}>
-              <label>Foto de Perfil / Logotipo *</label>
-              <small>Recomendado: foto nítida, de frente, fundo simples. Se for logotipo, envia em boa qualidade.</small>
+              <label>{t.profilePhoto} *</label>
+              <small>{t.profileHelp}</small>
               <div className={styles.uploadArea}>
                 <input
                   type="file"
@@ -497,7 +557,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                   className={styles.fileInput}
                   disabled={uploading}
                 />
-                <p>{uploading ? 'A enviar...' : 'Clica para selecionar'}</p>
+                <p>{uploading ? t.uploading : t.selectFile}</p>
               </div>
               {order.foto_perfil && (
                 <div style={{ marginTop: 16 }}>
@@ -541,15 +601,15 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                       ✕
                     </button>
                   </div>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginTop: 8 }}>✓ Foto enviada com sucesso</p>
+                  <p style={{ fontSize: 12, color: '#6b7280', marginTop: 8 }}>✓ {t.photoSuccess}</p>
                 </div>
               )}
               {errors.foto_perfil && <span className={styles.errorMsg}>{errors.foto_perfil}</span>}
             </div>
 
             <div className={styles.field}>
-              <label>Fotos para Galeria</label>
-              <small>Até 10 fotos (opcional). Ex: imóveis, equipa, espaço, produtos, etc.</small>
+              <label>{t.gallery}</label>
+              <small>{t.galleryHelp}</small>
               <div className={styles.uploadArea}>
                 <input
                   type="file"
@@ -558,12 +618,12 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                   className={styles.fileInput}
                   disabled={uploading}
                 />
-                <p>{uploading ? 'A enviar...' : 'Clica para selecionar'}</p>
+                <p>{uploading ? t.uploading : t.selectFile}</p>
               </div>
 
               {(order.fotos_galeria || []).length > 0 && (
                 <div style={{ marginTop: 16 }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Fotos enviadas ({order.fotos_galeria?.length || 0}/10):</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.uploadedPhotos} ({order.fotos_galeria?.length || 0}/10):</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 8 }}>
                     {(order.fotos_galeria || []).map((url, idx) => (
                       <div key={idx} style={{ position: 'relative' }}>
@@ -606,14 +666,17 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
             </div>
 
             <div className={styles.field}>
-              <label>Cores (2–3) *</label>
+              <label>{t.colors} *</label>
                 <button
                   type="button"
                   onClick={() => handleChange(
                     'notas_estilo',
-                    [order.notas_estilo || '', 'Prefiro que a equipa Kardme escolha as cores.']
-                      .filter(Boolean)
-                      .join('\n')
+                    [
+                      order.notas_estilo || '',
+                      ...(order.notas_estilo || '').includes(t.chooseForMeNote)
+                        ? []
+                        : [t.chooseForMeNote],
+                    ].filter(Boolean).join('\n')
                   )}
                   style={{
                     border: 'none',
@@ -626,52 +689,52 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
                     fontWeight: 600,
                   }}
                 >
-                  Prefiro que a equipa Kardme escolha as cores
+                  {t.chooseForMe}
                 </button>
               <small>
-                Escolhe as cores que gostarias de ver no cartão. A primeira é a cor base/fundo. Clica no quadrado para abrir o seletor de cores e mudar.
+                {t.colorsHelp}
               </small>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 10 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600 }}>Fundo/Base</label>
+                  <label style={{ fontSize: 12, fontWeight: 600 }}>{t.background}</label>
                   <input 
                     type="color" 
-                    value={colors[0]} 
+                    value={colors[0] || '#0b1220'}
                     onChange={(e) => setColorAt(0, e.target.value)}
                     style={{ cursor: 'pointer', width: '100%', height: 50, border: '1px solid #d1d5db', borderRadius: 6 }}
-                    title="Clica para mudar a cor"
+                    title={t.colorPicker}
                   />
                   {errors.color0 && <span className={styles.errorMsg}>{errors.color0}</span>}
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600 }}>Destaque</label>
+                  <label style={{ fontSize: 12, fontWeight: 600 }}>{t.accent}</label>
                   <input 
                     type="color" 
-                    value={colors[1]} 
+                    value={colors[1] || '#3b82f6'}
                     onChange={(e) => setColorAt(1, e.target.value)}
                     style={{ cursor: 'pointer', width: '100%', height: 50, border: '1px solid #d1d5db', borderRadius: 6 }}
-                    title="Clica para mudar a cor"
+                    title={t.colorPicker}
                   />
                   {errors.color1 && <span className={styles.errorMsg}>{errors.color1}</span>}
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600 }}>Texto/Neutro</label>
+                  <label style={{ fontSize: 12, fontWeight: 600 }}>{t.neutral}</label>
                   <input 
                     type="color" 
-                    value={colors[2]} 
+                    value={colors[2] || '#ffffff'}
                     onChange={(e) => setColorAt(2, e.target.value)}
                     style={{ cursor: 'pointer', width: '100%', height: 50, border: '1px solid #d1d5db', borderRadius: 6 }}
-                    title="Clica para mudar a cor"
+                    title={t.colorPicker}
                   />
                   {errors.color2 && <span className={styles.errorMsg}>{errors.color2}</span>}
                 </div>
               </div>
 
               <div style={{ marginTop: 16 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Ou escolhe um preset:</p>
+                <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.preset}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
                   {colorPresets.map((preset) => (
                     <button
@@ -719,7 +782,7 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
             </div>
 
             <div className={styles.field}>
-              <label>Pantone (opcional)</label>
+              <label>{t.pantone}</label>
               <input
                 type="text"
                 value={(order.cores_preferidas?.pantone || '')}
@@ -734,13 +797,13 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
             </div>
 
             <div className={styles.field}>
-              <label>Notas de estilo (opcional)</label>
-              <small>Se tens referências (ex: "minimalista", "luxo", "clean", "dark", "cores suaves"), escreve aqui.</small>
+              <label>{t.styleNotes}</label>
+              <small>{t.styleHelp}</small>
               <textarea
                 value={order.notas_estilo || ''}
                 onChange={(e) => handleChange('notas_estilo', e.target.value)}
                 rows={3}
-                placeholder="Ex: estilo premium, fundo escuro, detalhes em azul, tipografia moderna."
+                placeholder={t.stylePlaceholder}
               />
             </div>
           </div>
@@ -752,16 +815,16 @@ export default function CardOrderWizard({ slug, initialOrder }: Props) {
       <div className={styles.buttons}>
         {step > 1 && (
           <button onClick={handleBack} className={styles.btnSecondary} disabled={loading || uploading}>
-            ← Voltar
+            ← {t.back}
           </button>
         )}
         {step < 4 && (
           <button onClick={handleNext} className={styles.btnPrimary} disabled={loading || saving || uploading}>
-            Continuar →
+            {t.next} →
           </button>
         )}
         {step === 4 && (
-          <button onClick={handleSubmit} className={styles.btnSuccess} disabled={loading || saving || uploading}>{loading ? 'A submeter...' : 'Submeter Pedido'}
+          <button onClick={handleSubmit} className={styles.btnSuccess} disabled={loading || saving || uploading}>{loading ? t.submitting : t.submit}
           </button>
         )}
       </div>

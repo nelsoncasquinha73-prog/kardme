@@ -1,6 +1,8 @@
+import { requireCardOrderAccess } from '@/lib/requireCardOrderAccess'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
+import convert from 'heic-convert'
 
 export const runtime = 'nodejs'
 
@@ -76,6 +78,9 @@ export async function POST(req: Request) {
       )
     }
 
+    const denied = await requireCardOrderAccess(req, slug)
+    if (denied) return denied
+
     if (order.status !== 'rascunho') {
       return NextResponse.json(
         { error: 'Este pedido já não aceita fotografias' },
@@ -90,12 +95,67 @@ export async function POST(req: Request) {
       )
     }
 
-    const bytes = new Uint8Array(await file.arrayBuffer())
-    const detected = detectImage(bytes)
+    const inputBytes = new Uint8Array(await file.arrayBuffer())
+    const originalName = file.name.toLowerCase()
+    const isHeic =
+      /\.(heic|heif)$/.test(originalName) ||
+      ['image/heic', 'image/heif', 'image/heic-sequence',
+       'image/heif-sequence'].includes(file.type.toLowerCase())
 
-    if (!detected || file.type !== detected.mime) {
+    let bytes: Uint8Array
+    let detected: { mime: string; ext: string } | null
+
+    if (isHeic) {
+      try {
+        const converted = await convert({
+          buffer: Buffer.from(inputBytes),
+          format: 'JPEG',
+          quality: 0.85,
+        })
+
+        bytes = new Uint8Array(Buffer.from(converted))
+        detected = detectImage(bytes)
+
+        if (!detected || detected.mime !== 'image/jpeg') {
+          throw new Error('Invalid converted JPEG')
+        }
+      } catch {
+        return NextResponse.json(
+          { error: 'Não foi possível converter esta imagem HEIC/HEIF. Experimenta guardá-la como JPEG.' },
+          { status: 400 }
+        )
+      }
+    } else {
+      bytes = inputBytes
+      detected = detectImage(bytes)
+
+      if (!detected || file.type !== detected.mime) {
+        return NextResponse.json(
+          { error: 'Utiliza uma imagem JPEG, PNG, WebP ou HEIC/HEIF válida' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validar novamente os bytes e limitar dimensões para evitar
+    // imagens malformadas ou excessivamente grandes.
+    try {
+      const sharp = (await import('sharp')).default
+      const metadata = await sharp(bytes, {
+        limitInputPixels: 40_000_000,
+        failOn: 'error',
+      }).metadata()
+
+      if (
+        !metadata.width ||
+        !metadata.height ||
+        metadata.width * metadata.height > 40_000_000
+      ) {
+        throw new Error('Invalid image dimensions')
+      }
+    } catch {
       return NextResponse.json(
-        { error: 'Utiliza uma imagem JPEG, PNG ou WebP válida' },
+        { error: 'O ficheiro não contém uma imagem válida ou suportada' },
         { status: 400 }
       )
     }
