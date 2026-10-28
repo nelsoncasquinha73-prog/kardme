@@ -95,6 +95,55 @@ export default function AdminTeamsPage() {
     }
   }
 
+  const [updatingTeamId, setUpdatingTeamId] = useState<string | null>(null)
+
+  async function manageTeam(team: Team, action: 'toggle' | 'delete') {
+    if (updatingTeamId) return
+
+    const deleting = action === 'delete'
+    const confirmed = window.confirm(
+      deleting
+        ? `Eliminar definitivamente a equipa "${team.name}"? Só será possível se não tiver inscrições.`
+        : `${team.active ? 'Desativar' : 'Reativar'} a equipa "${team.name}"?`
+    )
+
+    if (!confirmed) return
+
+    setUpdatingTeamId(team.id)
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await cardOrderAdminFetch(
+        `/api/admin/teams/${encodeURIComponent(team.id)}`,
+        deleting
+          ? { method: 'DELETE' }
+          : {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ active: !team.active }),
+            }
+      )
+
+      const json = await res.json()
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Não foi possível atualizar a equipa.')
+      }
+
+      await loadTeams()
+      setMessage(
+        deleting
+          ? `Equipa "${team.name}" eliminada.`
+          : `Equipa "${team.name}" ${team.active ? 'desativada' : 'reativada'}.`
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado')
+    } finally {
+      setUpdatingTeamId(null)
+    }
+  }
+
   const inputStyle: React.CSSProperties = {
     width: '100%',
     minHeight: 48,
@@ -236,6 +285,33 @@ export default function AdminTeamsPage() {
                   >
                     Abrir formulário
                   </a>
+                  <button
+                    type="button"
+                    disabled={updatingTeamId !== null}
+                    onClick={() => void manageTeam(team, 'toggle')}
+                    style={{
+                      padding: '9px 12px',
+                      border: '1px solid #64748b',
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {team.active ? 'Desativar' : 'Reativar'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={updatingTeamId !== null}
+                    onClick={() => void manageTeam(team, 'delete')}
+                    style={{
+                      padding: '9px 12px',
+                      border: '1px solid #dc2626',
+                      borderRadius: 8,
+                      color: '#dc2626',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Eliminar
+                  </button>
                   <button
                     type="button"
                     onClick={async () => {
