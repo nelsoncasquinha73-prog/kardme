@@ -28,6 +28,34 @@ type CtaButton = {
   calendarDuration?: number
   id: string
   label: string
+  description?: string
+  actionLabel?: string
+
+  typography?: {
+    title?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+      align?: 'left' | 'center' | 'right'
+    }
+    description?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+      align?: 'left' | 'center' | 'right'
+    }
+    action?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+    }
+  }
   url: string
   openInNewTab?: boolean
   icon?: {
@@ -41,6 +69,7 @@ type CtaButton = {
 
 type CTAButtonsSettings = {
   buttons: CtaButton[]
+  displayMode?: 'classic' | 'cards'
   layout?: 'stack' | 'row'
   align?: 'left' | 'center' | 'right'
   gapPx?: number
@@ -267,6 +296,18 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
       <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={onPdfChange} style={{ display: 'none' }} />
 
       <Section title={t('cta_editor.section_buttons')}>
+          <Row label="Estilo de apresentação">
+            <select
+              value={s.displayMode ?? 'classic'}
+              onChange={(e) => updateSettings({
+                displayMode: e.target.value as 'classic' | 'cards'
+              })}
+              style={select}
+            >
+              <option value="classic">Botões normais</option>
+              <option value="cards">Cartões com descrição</option>
+            </select>
+          </Row>
         <Row label={t('cta_editor.label_layout')}>
           <select value={s.layout ?? 'stack'} onChange={(e) => updateSettings({ layout: e.target.value as any })} style={select}>
             <option value="stack">{t('cta_editor.option_vertical')}</option>
@@ -367,7 +408,133 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                 <input value={b.label ?? ''} onChange={(e) => updateButton(b.id, { label: e.target.value })} style={input} placeholder={t('cta_editor.placeholder_button_text')} />
               </Row>
 
-              <Row label="Destacar este botão">
+              {s.displayMode === 'cards' && (
+                  <>
+                    <Row label="Descrição">
+                      <textarea
+                        value={b.description ?? ''}
+                        onChange={(e) => updateButton(b.id, { description: e.target.value })}
+                        placeholder="Descrição desta área"
+                        rows={3}
+                        style={{ ...input, height: 'auto', minHeight: 72, padding: 10 }}
+                      />
+                    </Row>
+                    <Row label="Texto da ação">
+                      <input
+                        value={b.actionLabel ?? ''}
+                        onChange={(e) => updateButton(b.id, { actionLabel: e.target.value })}
+                        placeholder="Saber mais"
+                        style={input}
+                      />
+                    </Row>
+                  </>
+                )}
+
+
+                {s.displayMode === 'cards' && (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 16,
+                    padding: 12,
+                    borderRadius: 12,
+                    background: 'rgba(128,128,128,0.07)'
+                  }}>
+                    <strong>Tipografia do cartão</strong>
+                    {(['title', 'description', 'action'] as const).map((part) => {
+                      const labels = {
+                        title: 'Título',
+                        description: 'Descrição',
+                        action: 'Botão de ação'
+                      }
+                      const current: {
+                        fontFamily?: string
+                        fontSize?: number
+                        color?: string
+                        bold?: boolean
+                        italic?: boolean
+                        align?: 'left' | 'center' | 'right'
+                      } = b.typography?.[part] || {}
+                      const updateTypography = (patch: typeof current) => {
+                        updateButton(b.id, {
+                          typography: {
+                            ...b.typography,
+                            [part]: { ...current, ...patch }
+                          }
+                        })
+                      }
+
+                      return (
+                        <div key={part} style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 9,
+                          paddingBottom: 12,
+                          borderBottom: '1px solid rgba(128,128,128,0.15)'
+                        }}>
+                          <strong style={{ fontSize: 12 }}>{labels[part]}</strong>
+                          <Row label="Fonte">
+                            <FontPicker
+                              value={current.fontFamily ?? ''}
+                              onChange={(v) => updateTypography({ fontFamily: v || undefined })}
+                            />
+                          </Row>
+                          <Row label="Tamanho">
+                            <input
+                              type="number"
+                              min={10}
+                              max={40}
+                              value={current.fontSize ?? (part === 'title' ? 17 : 14)}
+                              onChange={(e) => updateTypography({
+                                fontSize: Math.max(10, Math.min(40, Number(e.target.value) || 14))
+                              })}
+                              style={input}
+                            />
+                          </Row>
+                          <Row label="Cor">
+                            <input
+                              type="color"
+                              value={current.color?.match(/^#[0-9a-fA-F]{6}$/)
+                                ? current.color
+                                : '#ffffff'}
+                              onChange={(e) => updateTypography({ color: e.target.value })}
+                              style={{ width: 55, height: 34, cursor: 'pointer' }}
+                            />
+                          </Row>
+                          <Row label="Negrito">
+                            <Toggle
+                              active={current.bold === true}
+                              onClick={() => updateTypography({ bold: !(current.bold === true) })}
+                            />
+                          </Row>
+                          <Row label="Itálico">
+                            <Toggle
+                              active={current.italic === true}
+                              onClick={() => updateTypography({ italic: !(current.italic === true) })}
+                            />
+                          </Row>
+                          {part !== 'action' && (
+                            <Row label="Alinhamento">
+                              <select
+                                value={current.align ?? 'center'}
+                                onChange={(e) => updateTypography({
+                                  align: e.target.value as 'left' | 'center' | 'right'
+                                })}
+                                style={select}
+                              >
+                                <option value="left">Esquerda</option>
+                                <option value="center">Centro</option>
+                                <option value="right">Direita</option>
+                              </select>
+                            </Row>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                <Row label="Destacar este botão">
                 <Toggle
                   active={(st.button as any)?.attentionButtonId === b.id}
                   onClick={() => {

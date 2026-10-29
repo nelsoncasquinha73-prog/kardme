@@ -8,6 +8,34 @@ type ActionType = 'link' | 'phone' | 'whatsapp' | 'email' | 'sms' | 'file' | 'ma
 type CtaButton = {
   id: string
   label: string
+  description?: string
+  actionLabel?: string
+
+  typography?: {
+    title?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+      align?: 'left' | 'center' | 'right'
+    }
+    description?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+      align?: 'left' | 'center' | 'right'
+    }
+    action?: {
+      fontFamily?: string
+      fontSize?: number
+      color?: string
+      bold?: boolean
+      italic?: boolean
+    }
+  }
   url: string
   openInNewTab?: boolean
   actionType?: ActionType
@@ -36,6 +64,7 @@ type CtaButton = {
 
 type CTAButtonsSettings = {
   buttons: CtaButton[]
+  displayMode?: 'classic' | 'cards'
   layout?: 'stack' | 'row'
   align?: 'left' | 'center' | 'right'
   gapPx?: number
@@ -341,6 +370,92 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
                 : attention === 'wiggle'
                   ? 'kardmeCtaWiggle 6.5s ease-in-out infinite'
                   : undefined
+        }
+
+        if (s.displayMode === 'cards') {
+          const cardStyle: React.CSSProperties = {
+            width: layout === 'row' ? 'min(100%, 260px)' : '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+            padding: 18,
+            borderRadius: Math.max(btn.radius ?? 14, 12),
+            background: c.bgColor && c.bgColor !== 'transparent'
+              ? c.bgColor
+              : 'rgba(255,255,255,0.08)',
+            border: `1px solid ${btn.borderColor ?? 'rgba(255,255,255,0.25)'}`,
+            boxShadow: btn.shadow ? '0 12px 32px rgba(0,0,0,0.16)' : undefined,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            gap: 12,
+            color: btn.textColor ?? '#ffffff',
+            fontFamily: resolveFont(btn.fontFamily),
+          }
+
+          return (
+            <div key={b.id} style={cardStyle}>
+              {icon && (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  {icon}
+                </div>
+              )}
+              <div style={{
+                fontFamily: b.typography?.title?.fontFamily || resolveFont(btn.fontFamily),
+                fontSize: b.typography?.title?.fontSize ?? (btn.fontSize ?? 14) + 3,
+                color: b.typography?.title?.color ?? btn.textColor ?? '#ffffff',
+                fontWeight: b.typography?.title?.bold === false ? 400 : 800,
+                fontStyle: b.typography?.title?.italic ? 'italic' : 'normal',
+                textAlign: b.typography?.title?.align ?? 'center',
+                overflowWrap: 'anywhere'
+              }}>
+                {b.label || 'Área de atuação'}
+              </div>
+              {b.description && (
+                <div style={{
+                  fontFamily: b.typography?.description?.fontFamily || resolveFont(btn.fontFamily),
+                  fontSize: b.typography?.description?.fontSize ?? btn.fontSize ?? 14,
+                  color: b.typography?.description?.color ?? btn.textColor ?? '#ffffff',
+                  fontWeight: b.typography?.description?.bold ? 700 : 400,
+                  fontStyle: b.typography?.description?.italic ? 'italic' : 'normal',
+                  lineHeight: 1.5,
+                  textAlign: b.typography?.description?.align ?? 'center',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'anywhere'
+                }}>
+                  {b.description}
+                </div>
+              )}
+              <a
+                href={href || '#'}
+                target={target}
+                rel={rel}
+                style={{
+                  ...baseBtn,
+                  width: '100%',
+                  minHeight: btn.heightPx ?? 44,
+                  height: 'auto',
+                  padding: '10px 14px',
+                  textAlign: 'center',
+                  overflowWrap: 'anywhere',
+                  marginTop: 'auto',
+                  animation: isAttention ? btnStyle.animation : undefined,
+                  fontFamily: b.typography?.action?.fontFamily || resolveFont(btn.fontFamily),
+                  fontSize: b.typography?.action?.fontSize ?? btn.fontSize ?? 14,
+                  color: b.typography?.action?.color ?? btn.textColor ?? '#ffffff',
+                  fontWeight: b.typography?.action?.bold === false ? 400 : 700,
+                  fontStyle: b.typography?.action?.italic ? 'italic' : 'normal'
+                }}
+                className={isAttention ? 'kardme-cta-attention' : undefined}
+                data-no-block-select="1"
+                onClick={(e) => {
+                  if (!href || href === '#') e.preventDefault()
+                  void cardId
+                }}
+              >
+                {b.actionLabel?.trim() || 'Saber mais'}
+              </a>
+            </div>
+          )
         }
 
         if (iconWidthPx > 0) {
