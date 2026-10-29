@@ -30,6 +30,7 @@ type CtaButton = {
   label: string
   description?: string
   actionLabel?: string
+  cardBgColor?: string
 
   typography?: {
     title?: {
@@ -532,6 +533,57 @@ export default function CTAButtonsBlockEditor({ cardId, settings, style, onChang
                       )
                     })}
                   </div>
+                )}
+
+                {s.displayMode === 'cards' && (
+                  <Row label="Cor de fundo deste cartão">
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      width: '100%'
+                    }}>
+                      <input
+                        type="color"
+                        value={b.cardBgColor?.match(/^#[0-9a-fA-F]{6}$/)
+                          ? b.cardBgColor
+                          : '#145B49'}
+                        onChange={(e) => updateButton(b.id, {
+                          cardBgColor: e.target.value
+                        })}
+                        style={{
+                          width: 48,
+                          height: 34,
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={b.cardBgColor ?? ''}
+                        placeholder="Herdar fundo do bloco"
+                        onChange={(e) => updateButton(b.id, {
+                          cardBgColor: e.target.value
+                        })}
+                        style={{ ...input, flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateButton(b.id, {
+                          cardBgColor: undefined
+                        })}
+                        title="Repor cor herdada"
+                        style={{
+                          padding: '7px 9px',
+                          borderRadius: 8,
+                          border: '1px solid #ddd',
+                          background: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ↺
+                      </button>
+                    </div>
+                  </Row>
                 )}
 
                 <Row label="Destacar este botão">

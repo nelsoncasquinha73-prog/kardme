@@ -10,6 +10,7 @@ type CtaButton = {
   label: string
   description?: string
   actionLabel?: string
+  cardBgColor?: string
 
   typography?: {
     title?: {
@@ -379,9 +380,10 @@ export default function CTAButtonsBlock({ cardId, settings, style }: Props) {
             boxSizing: 'border-box',
             padding: 18,
             borderRadius: Math.max(btn.radius ?? 14, 12),
-            background: c.bgColor && c.bgColor !== 'transparent'
-              ? c.bgColor
-              : 'rgba(255,255,255,0.08)',
+            background: b.cardBgColor?.trim()
+              || (c.bgColor && c.bgColor !== 'transparent'
+                ? c.bgColor
+                : 'rgba(255,255,255,0.08)'),
             border: `1px solid ${btn.borderColor ?? 'rgba(255,255,255,0.25)'}`,
             boxShadow: btn.shadow ? '0 12px 32px rgba(0,0,0,0.16)' : undefined,
             display: 'flex',
