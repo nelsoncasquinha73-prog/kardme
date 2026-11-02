@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'node:crypto'
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
@@ -31,7 +32,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing code or state' }, { status: 400 })
     }
 
-    const userId = Buffer.from(state, 'base64').toString('utf-8')
+    const supabaseAdmin = getAdminSupabase()
+    const stateHash = createHash('sha256').update(state).digest('hex')
+
+    const { data: userId, error: stateError } = await supabaseAdmin
+      .rpc('consume_gmail_oauth_state', { p_state_hash: stateHash })
+
+    if (stateError || !userId) {
+      return NextResponse.json(
+        { error: 'Autorização Gmail inválida ou expirada' },
+        { status: 400 }
+      )
+    }
 
     const { tokens } = await oauth2Client.getToken(code)
 
@@ -46,9 +58,34 @@ export async function GET(req: NextRequest) {
     oauth2Client.setCredentials(tokens)
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client })
     const { data: profile } = await oauth2.userinfo.get()
-    const gmailEmail = profile.email || 'noreply@kardme.com'
+    const gmailEmail = profile.email
 
-    const supabaseAdmin = getAdminSupabase()
+    if (!gmailEmail || profile.verified_email !== true) {
+      return NextResponse.json(
+        { error: 'Não foi possível confirmar o email Google' },
+        { status: 400 }
+      )
+    }
+
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('user_integrations')
+      .select('refresh_token')
+      .eq('user_id', userId)
+      .eq('integration_type', 'gmail')
+      .maybeSingle()
+
+    if (existingError) {
+      throw existingError
+    }
+
+    const refreshToken = tokens.refresh_token || existing?.refresh_token
+
+    if (!refreshToken) {
+      return NextResponse.json(
+        { error: 'A Google não forneceu autorização de acesso permanente. Volta a ligar o Gmail.' },
+        { status: 400 }
+      )
+    }
 
     const { error } = await supabaseAdmin
       .from('user_integrations')
@@ -57,7 +94,7 @@ export async function GET(req: NextRequest) {
           user_id: userId,
           integration_type: 'gmail',
           access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token || null,
+          refresh_token: refreshToken,
           token_expires_at: tokens.expiry_date
             ? new Date(tokens.expiry_date).toISOString()
             : null,

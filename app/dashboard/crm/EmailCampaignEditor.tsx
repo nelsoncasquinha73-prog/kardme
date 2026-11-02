@@ -79,6 +79,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [showSendModal, setShowSendModal] = useState(false)
+  const [sendingTest, setSendingTest] = useState(false)
   const [sending, setSending] = useState(false)
   const [sendingTo, setSendingTo] = useState<'audience' | 'all' | 'individual' | 'manual'>(preSelectedLeadIds && preSelectedLeadIds.length === 1 ? 'individual' : preSelectedLeadIds && preSelectedLeadIds.length > 1 ? 'all' : 'audience')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(preSelectedLeadIds?.length === 1 ? preSelectedLeadIds[0] : null)
@@ -209,6 +210,63 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
     const swapIndex = direction === 'up' ? index - 1 : index + 1
     ;[newBlocks[index], newBlocks[swapIndex]] = [newBlocks[swapIndex], newBlocks[index]]
     setBlocks(newBlocks)
+  }
+
+  async function handleSendTest() {
+    if (sendingTest || sending) return
+
+    if (!subject.trim() || blocks.length === 0) {
+      addToast('Preenche o assunto e adiciona pelo menos um bloco', 'error')
+      return
+    }
+
+    if (!bulkEmailCardId || !senderCards.some((c: any) => c.id === bulkEmailCardId)) {
+      addToast('Seleciona primeiro o cartão remetente', 'error')
+      return
+    }
+
+    setSendingTest(true)
+
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+
+      if (error || !token) {
+        throw new Error('Sessão expirada. Inicia sessão novamente.')
+      }
+
+      const htmlBody = generateEmailHtmlBody(
+        blocks,
+        subject,
+        preheader,
+        currentBroadcastId || undefined
+      )
+
+      const response = await fetch('/api/crm/email/send-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          subject: subject.trim(),
+          htmlBody,
+          senderCardId: bulkEmailCardId,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result?.error || 'Não foi possível enviar o teste')
+      }
+
+      addToast(`Teste enviado para ${result.sentTo}`, 'success')
+    } catch (error: any) {
+      addToast(error?.message || 'Erro ao enviar teste', 'error')
+    } finally {
+      setSendingTest(false)
+    }
   }
 
   async function handleSend() {
@@ -1303,6 +1361,24 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                 </p>
               )}
 
+              <button
+                type="button"
+                onClick={handleSendTest}
+                disabled={sendingTest || sending || !bulkEmailCardId}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #22d3ee',
+                  background: 'rgba(34,211,238,0.12)',
+                  color: '#22d3ee',
+                  fontWeight: 700,
+                  cursor: sendingTest ? 'wait' : 'pointer',
+                  opacity: sendingTest || sending || !bulkEmailCardId ? 0.5 : 1,
+                }}
+              >
+                {sendingTest ? 'A enviar teste...' : '🧪 Enviar teste'}
+              </button>
               <button onClick={() => setShowSendModal(false)} disabled={sending} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Cancelar
               </button>

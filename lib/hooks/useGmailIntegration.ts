@@ -20,13 +20,27 @@ export function useGmailIntegration(userId: string) {
   }
 
   const connectGmail = async () => {
+    const { data, error } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+
+    if (error || !token) {
+      throw new Error('Sessão expirada. Inicia sessão novamente.')
+    }
+
     const response = await fetch('/api/gmail/connect', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
     })
+
     const json = await response.json()
-    if (!response.ok) throw new Error(json?.error || 'Failed')
+
+    if (!response.ok) {
+      throw new Error(json?.error || 'Não foi possível ligar o Gmail')
+    }
+
     window.location.href = json.authUrl
   }
 
@@ -39,9 +53,21 @@ export function useGmailIntegration(userId: string) {
     attachments?: AttachmentPayload[]
   ) => {
     try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession()
+
+      const token = sessionData.session?.access_token
+
+      if (sessionError || !token) {
+        throw new Error('Sessão expirada. Inicia sessão novamente.')
+      }
+
       const response = await fetch('/api/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           userId,
           leadId,
