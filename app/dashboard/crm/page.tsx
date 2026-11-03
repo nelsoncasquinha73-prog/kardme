@@ -26,6 +26,7 @@ import VideoNotificationCenter from './VideoNotificationCenter'
 import VideoOpensModal from './VideoOpensModal'
 
 import { supabase } from '@/lib/supabaseClient'
+import { parseCSV, mapCSVRowToLead } from '@/lib/crm/csv'
 import { useGmailIntegration } from '@/lib/hooks/useGmailIntegration'
 import { useChatGPT } from '@/lib/hooks/useChatGPT'
 import { createScheduledTask } from '@/lib/crm/scheduledTasks'
@@ -884,15 +885,36 @@ Melhores cumprimentos,
     }
   }
 
-  const handleImportPreview = () => {
-    const text = importCSVText.trim()
-    if (!text) {
+  const handleImportPreview = (csvContent?: string) => {
+    const text = typeof csvContent === 'string'
+      ? csvContent
+      : importCSVText
+
+    if (!text.trim()) {
       setImportPreview([])
       return
     }
-    const lines = text.split('\n').slice(0, 11)
-    const preview = lines.map(l => l.split(',').map(c => c.trim()))
-    setImportPreview(preview)
+
+    try {
+      const rows = parseCSV(text)
+      const validLeads = rows
+        .map(mapCSVRowToLead)
+        .filter((lead): lead is NonNullable<typeof lead> => lead !== null)
+
+      setImportPreview([
+        ['Nome', 'Email', 'Telefone', 'Localidade', 'Observações'],
+        ...validLeads.slice(0, 10).map(lead => [
+          lead.name,
+          lead.email || 'Sem email',
+          lead.phone || 'Sem telefone',
+          lead.zone || '',
+          lead.notes || '',
+        ]),
+      ])
+    } catch (error: any) {
+      alert('Erro ao interpretar CSV: ' + (error?.message || String(error)))
+      setImportPreview([])
+    }
   }
 
   const handleImportCSV = async () => {
@@ -902,9 +924,23 @@ Melhores cumprimentos,
       if (!importCSVText.trim()) return alert('Cola o CSV primeiro.')
 
       setImporting(true)
+
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession()
+
+      const token = sessionData.session?.access_token
+
+      if (sessionError || !token) {
+        alert('Sessão expirada. Inicia sessão novamente.')
+        return
+      }
+
       const res = await fetch('/api/crm/leads/import', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           userId,
           cardId: selectedCardId,
@@ -1335,14 +1371,23 @@ const { data, error } = await supabase.from('leads').insert({
 
   const deleteLeadTask = async (taskId: string) => {
     if (!confirm('Tens a certeza que queres apagar esta tarefa?')) return
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('lead_tasks')
       .delete()
       .eq('id', taskId)
+      .eq('user_id', userId)
+      .select('id')
     if (error) {
       alert('Erro ao apagar tarefa: ' + error.message)
       return
     }
+    if (!data || data.length === 0) {
+      alert('Não foi possível eliminar a tarefa.')
+      return
+    }
+
+    setCalendarTasks(prev => prev.filter(t => t.id !== taskId))
+    setSelectedCalendarTask(prev => prev?.id === taskId ? null : prev)
     addToast('✅ Tarefa apagada', 'success')
     // Recarregar tarefas se o modal está aberto
     if (showLeadTasksModal && selectedLeadForTasks) {
@@ -1363,7 +1408,8 @@ const { data, error } = await supabase.from('leads').insert({
   const filteredLeads = leads.filter(l => {
     const matchesSearch = searchTerm === '' ||
       l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (l.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (l.phone || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (l.zone && l.zone.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesType = filterLeadType === null || l.lead_type_id === filterLeadType
     const matchesSource = filterLeadSource === null || (l.lead_source || 'cartão') === filterLeadSource
@@ -3384,6 +3430,12 @@ const { data, error } = await supabase.from('leads').insert({
                 </button>
               </div>
               <button
+                onClick={() => deleteLeadTask(task.id)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: 800, cursor: 'pointer', fontSize: 13, marginBottom: 10 }}
+              >
+                🗑️ Eliminar tarefa
+              </button>
+              <button
                 onClick={() => setSelectedCalendarTask(null)}
                 style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: '#f3f4f6', color: '#374151', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
               >
@@ -4319,7 +4371,7 @@ const { data, error } = await supabase.from('leads').insert({
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 760, width: '92%', maxHeight: '85vh', overflowY: 'auto', color: '#111827' }}>
             <h2 style={{ marginBottom: 10, fontSize: 18, fontWeight: 900 }}>⬆️ Importar Leads (CSV)</h2>
             <p style={{ fontSize: 13, opacity: 0.75, marginBottom: 14 }}>
-              Importação é feita para o cartão selecionado. Dedupe automático por <strong>(cartão + email)</strong>.
+              Importação é feita para o cartão selecionado. Duplicados identificados por email ou telefone dentro do cartão.
             </p>
 
             <div style={{ background: '#f3f4f6', padding: 12, borderRadius: 12, marginBottom: 14, fontSize: 12 }}>
@@ -4355,10 +4407,8 @@ const { data, error } = await supabase.from('leads').insert({
                 reader.onload = () => {
                   const text = String(reader.result || '')
                   setImportCSVText(text)
-                  // gerar preview automaticamente
-                  setTimeout(() => {
-                    try { handleImportPreview() } catch {}
-                  }, 0)
+                  // Gerar preview com o conteúdo acabado de ler
+                  handleImportPreview(text)
                 }
                 reader.readAsText(file)
               }}
@@ -4366,7 +4416,7 @@ const { data, error } = await supabase.from('leads').insert({
 
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
               <button
-                onClick={handleImportPreview}
+                onClick={() => handleImportPreview()}
                 style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
                 👀 Preview

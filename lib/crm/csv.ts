@@ -1,3 +1,5 @@
+import Papa from 'papaparse'
+
 /**
  * CSV utilities for CRM Pro import/export
  * Supports:
@@ -19,108 +21,145 @@ export interface ParsedLead {
   step?: string
 }
 
-function stripQuotes(v: string): string {
-  const t = (v ?? '').trim()
-  if (!t) return ''
-  // remove surrounding quotes if present
-  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
-    return t.slice(1, -1).trim()
-  }
-  return t
+function normalizeCSVHeader(header: string): string {
+  return header
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s_-]+/g, ' ')
+    .trim()
 }
 
-function detectSeparator(headerLine: string): ',' | ';' {
-  // naive but effective: choose the one that appears more
-  const commas = (headerLine.match(/,/g) || []).length
-  const semis = (headerLine.match(/;/g) || []).length
-  return semis > commas ? ';' : ','
-}
-
-/**
- * Split a CSV line respecting simple quotes.
- * (Good enough for typical exports; not a full RFC parser.)
- */
-function splitLine(line: string, sep: ',' | ';'): string[] {
-  const out: string[] = []
-  let cur = ''
-  let inQuotes = false
-
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (ch === '"') {
-      inQuotes = !inQuotes
-      cur += ch
-      continue
-    }
-    if (ch === sep && !inQuotes) {
-      out.push(cur)
-      cur = ''
-      continue
-    }
-    cur += ch
-  }
-  out.push(cur)
-  return out
-}
-
-/**
- * Parse CSV string into rows
- */
 export function parseCSV(csvText: string): CSVRow[] {
-  const text = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
-  const lines = text.split('\n').filter(Boolean)
-  if (lines.length < 2) return []
+  const result = Papa.parse<string[]>(csvText.replace(/^\\uFEFF/, ''), {
+    skipEmptyLines: 'greedy',
+    delimiter: '',
+  })
 
-  const sep = detectSeparator(lines[0])
-  const rawHeaders = splitLine(lines[0], sep).map(h => stripQuotes(h).toLowerCase())
-
-  const rows: CSVRow[] = []
-  for (let i = 1; i < lines.length; i++) {
-    const rawValues = splitLine(lines[i], sep)
-    const row: CSVRow = {}
-    rawHeaders.forEach((header, idx) => {
-      row[header] = stripQuotes(rawValues[idx] ?? '')
-    })
-    rows.push(row)
+  if (result.errors.length > 0) {
+    const firstError = result.errors[0]
+    throw new Error(
+      `CSV inválido na linha ${(firstError.row ?? 0) + 1}: ${firstError.message}`
+    )
   }
-  return rows
+
+  // Procurar a linha de cabeçalhos, ignorando títulos anteriores
+  const knownHeaders = new Set([
+    'name', 'nome', 'full name', 'fullname',
+    'contact name', 'nome completo', 'first name',
+    'primeiro nome', 'contacto',
+    'email', 'e mail', 'email address',
+    'endereco de email', 'endereco eletronico',
+    'phone', 'telefone', 'tel', 'telemovel',
+    'mobile', 'celular', 'phone number',
+    'numero de telefone', 'numero de telemovel',
+    'zone', 'zona', 'city', 'cidade',
+    'localidade', 'location',
+    'notes', 'notas', 'comentarios',
+    'comments', 'observacoes', 'description',
+    'step', 'stage', 'status', 'etapa'
+  ])
+
+  const headerIndex = result.data.findIndex(values => {
+    const normalized = values.map(normalizeCSVHeader)
+    const matches = normalized.filter(value => knownHeaders.has(value))
+    const hasContactField = normalized.some(value =>
+      ['email', 'e mail', 'telefone', 'telemovel', 'phone',
+       'mobile', 'celular', 'tel', 'phone number',
+       'numero de telefone', 'numero de telemovel'].includes(value)
+    )
+    return matches.length >= 2 && hasContactField
+  })
+
+  if (headerIndex === -1) {
+    throw new Error('Não foi possível identificar os cabeçalhos do CSV')
+  }
+
+  const rawHeaders = result.data[headerIndex]
+  const dataRows = result.data.slice(headerIndex + 1)
+
+  if (dataRows.length === 0) return []
+
+  const headers = rawHeaders.map(normalizeCSVHeader)
+
+  return dataRows.map(values => {
+    const row: CSVRow = {}
+
+    headers.forEach((header, index) => {
+      if (header) row[header] = (values[index] || '').trim()
+    })
+
+    return row
+  })
 }
 
 function findKey(row: CSVRow, keys: string[]): string | null {
-  const rowKeys = Object.keys(row).map(k => k.toLowerCase())
-  for (const k of keys) {
-    const idx = rowKeys.indexOf(k.toLowerCase())
-    if (idx >= 0) return Object.keys(row)[idx]
+  const rowKeys = Object.keys(row)
+
+  for (const key of keys) {
+    const normalized = normalizeCSVHeader(key)
+    const found = rowKeys.find(k => normalizeCSVHeader(k) === normalized)
+    if (found) return found
   }
+
   return null
 }
 
-/**
- * Map CSV row to Lead object (with flexible column names)
- */
 export function mapCSVRowToLead(row: CSVRow): ParsedLead | null {
-  const nameKey = findKey(row, ['name', 'nome', 'full_name', 'fullname'])
-  const emailKey = findKey(row, ['email', 'e-mail'])
-  const phoneKey = findKey(row, ['phone', 'telefone', 'tel', 'telemovel', 'telemóvel', 'mobile', 'celular'])
-  const zoneKey = findKey(row, ['zone', 'zona', 'city', 'cidade', 'localidade', 'location'])
-  const notesKey = findKey(row, ['notes', 'notas', 'comentarios', 'comentários', 'comments', 'observacoes', 'observações'])
-  const stepKey = findKey(row, ['step', 'stage', 'status', 'etapa'])
+  const nameKey = findKey(row, [
+    'name', 'nome', 'full name', 'fullname',
+    'contact name', 'nome completo', 'first name',
+    'primeiro nome', 'contacto'
+  ])
 
-  const emailRaw = (emailKey ? row[emailKey] : '') || ''
-  const email = emailRaw.trim().toLowerCase()
+  const emailKey = findKey(row, [
+    'email', 'e-mail', 'email address',
+    'endereco de email', 'endereco eletronico'
+  ])
 
-  if (!email) return null
+  const phoneKey = findKey(row, [
+    'phone', 'telefone', 'tel', 'telemovel',
+    'mobile', 'celular', 'phone number',
+    'numero de telefone', 'numero de telemovel'
+  ])
 
-  const nameRaw = (nameKey ? row[nameKey] : '') || ''
-  const name = nameRaw.trim() || email.split('@')[0]
+  const zoneKey = findKey(row, [
+    'zone', 'zona', 'city', 'cidade',
+    'localidade', 'location'
+  ])
 
-  const stepRaw = (stepKey ? row[stepKey] : '') || ''
-  const step = stepRaw.trim() || 'Novo'
+  const notesKey = findKey(row, [
+    'notes', 'notas', 'comentarios',
+    'comments', 'observacoes', 'description'
+  ])
+
+  const stepKey = findKey(row, [
+    'step', 'stage', 'status', 'etapa'
+  ])
+
+  const email = ((emailKey && row[emailKey]) || '').trim().toLowerCase()
+
+  const phone = ((phoneKey && row[phoneKey]) || '').trim()
+  const phoneDigits = phone.replace(/\D/g, '')
+
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const validPhone = phoneDigits.length >= 7 && phoneDigits.length <= 15
+
+  // Um contacto precisa de pelo menos um canal válido
+  if (!validEmail && !validPhone) return null
+
+  const name = ((nameKey && row[nameKey]) || '').trim()
+    || (validEmail ? email.split('@')[0] : phone)
+
+  const step = ((stepKey && row[stepKey]) || '').trim() || 'Novo'
 
   return {
     name,
-    email,
-    phone: phoneKey ? row[phoneKey]?.trim() : undefined,
+    email: validEmail ? email : '',
+    phone: validPhone ? phone : undefined,
     zone: zoneKey ? row[zoneKey]?.trim() : undefined,
     notes: notesKey ? row[notesKey]?.trim() : undefined,
     step,
