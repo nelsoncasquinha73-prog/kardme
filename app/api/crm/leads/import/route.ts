@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkCRMProActive } from '@/lib/crm/crmProGate'
 import { parseCSV, mapCSVRowToLead } from '@/lib/crm/csv'
+import {
+  CSV_DECLARATION_VERSION,
+  CSV_DECLARATION_TEXT,
+} from '@/lib/crm/csvImportDeclaration'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +15,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { userId, cardId, csvText } = body
+    const { userId, cardId, csvText, declarationAccepted, declarationVersion } = body
 
     if (!userId || !cardId || !csvText) {
       return NextResponse.json(
@@ -40,6 +44,17 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 403 }
+      )
+    }
+
+    // A declaração deve ser aceite explicitamente em cada importação.
+    if (
+      declarationAccepted !== true ||
+      declarationVersion !== CSV_DECLARATION_VERSION
+    ) {
+      return NextResponse.json(
+        { error: 'É obrigatório aceitar a declaração de responsabilidade.' },
+        { status: 400 }
       )
     }
 
@@ -80,6 +95,26 @@ export async function POST(req: Request) {
       )
     }
 
+    // Guardar a aceitação antes de iniciar a importação.
+    const { data: declaration, error: declarationError } = await supabaseAdmin
+      .from('crm_csv_import_declarations')
+      .insert({
+        user_id: userId,
+        card_id: cardId,
+        declaration_version: CSV_DECLARATION_VERSION,
+        declaration_text: CSV_DECLARATION_TEXT,
+      })
+      .select('id')
+      .single()
+
+    if (declarationError || !declaration) {
+      console.error('Erro ao registar declaração:', declarationError)
+      return NextResponse.json(
+        { error: 'Não foi possível registar a declaração. Importação cancelada.' },
+        { status: 500 }
+      )
+    }
+
     // Consultar contactos existentes no cartão
     const existingLeads: Array<{ email: string | null; phone: string | null }> = []
     const pageSize = 500
@@ -94,6 +129,16 @@ export async function POST(req: Request) {
 
       if (error) {
         console.error('Erro ao consultar contactos existentes:', error)
+
+        const { error: auditError } = await supabaseAdmin
+          .from('crm_csv_import_declarations')
+          .update({ status: 'interrupted' })
+          .eq('id', declaration.id)
+
+        if (auditError) {
+          console.error('Erro ao registar interrupção CSV:', auditError)
+        }
+
         return NextResponse.json(
           { error: 'Não foi possível verificar os contactos existentes. Importação cancelada.' },
           { status: 500 }
@@ -152,6 +197,19 @@ export async function POST(req: Request) {
     const duplicates = parsedLeads.length - newLeads.length
 
     if (newLeads.length === 0) {
+      const { error: auditError } = await supabaseAdmin
+        .from('crm_csv_import_declarations')
+        .update({ duplicate_count: duplicates, status: 'completed' })
+        .eq('id', declaration.id)
+
+      if (auditError) {
+        console.error('Erro ao atualizar auditoria CSV:', auditError)
+        return NextResponse.json(
+          { error: 'Não foi possível finalizar o registo da importação.' },
+          { status: 500 }
+        )
+      }
+
       return NextResponse.json(
         { imported: 0, duplicates, failed: 0, message: 'Todas as leads já existem' },
         { status: 200 }
@@ -190,6 +248,52 @@ export async function POST(req: Request) {
       } else {
         imported += batch.length
       }
+
+      // Guardar o progresso após cada lote.
+      const { error: progressError } = await supabaseAdmin
+        .from('crm_csv_import_declarations')
+        .update({
+          imported_count: imported,
+          duplicate_count: duplicates,
+          failed_count: failed,
+        })
+        .eq('id', declaration.id)
+
+      if (progressError) {
+        console.error('Erro ao guardar progresso CSV:', progressError)
+        return NextResponse.json(
+          {
+            error: 'Importação interrompida: não foi possível guardar o progresso da auditoria.',
+            imported,
+            duplicates,
+            failed,
+          },
+          { status: 500 }
+        )
+      }
+    }
+
+    const { error: auditError } = await supabaseAdmin
+      .from('crm_csv_import_declarations')
+      .update({
+        imported_count: imported,
+        duplicate_count: duplicates,
+        failed_count: failed,
+        status: failed > 0 ? 'completed_with_errors' : 'completed',
+      })
+      .eq('id', declaration.id)
+
+    if (auditError) {
+      console.error('Erro ao atualizar auditoria CSV:', auditError)
+      return NextResponse.json(
+        {
+          error: 'Contactos processados, mas ocorreu um erro ao atualizar o registo de auditoria.',
+          imported,
+          duplicates,
+          failed,
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
