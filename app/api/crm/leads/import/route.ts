@@ -6,6 +6,7 @@ import {
   CSV_DECLARATION_VERSION,
   CSV_DECLARATION_TEXT,
   isValidCSVImportDeclaration,
+  saveCSVImportDeclaration,
 } from '@/lib/crm/csvImportDeclaration'
 
 const supabaseAdmin = createClient(
@@ -96,19 +97,19 @@ export async function POST(req: Request) {
     }
 
     // Guardar a aceitação antes de iniciar a importação.
-    const { data: declaration, error: declarationError } = await supabaseAdmin
-      .from('crm_csv_import_declarations')
-      .insert({
-        user_id: userId,
-        card_id: cardId,
-        declaration_version: CSV_DECLARATION_VERSION,
-        declaration_text: CSV_DECLARATION_TEXT,
-      })
-      .select('id')
-      .single()
+    const declarationId = await saveCSVImportDeclaration(
+      (record) =>
+        supabaseAdmin
+          .from('crm_csv_import_declarations')
+          .insert(record)
+          .select('id')
+          .single(),
+      userId,
+      cardId
+    )
 
-    if (declarationError || !declaration) {
-      console.error('Erro ao registar declaração:', declarationError)
+    if (!declarationId) {
+      console.error('Não foi possível registar a declaração CSV')
       return NextResponse.json(
         { error: 'Não foi possível registar a declaração. Importação cancelada.' },
         { status: 500 }
@@ -133,7 +134,7 @@ export async function POST(req: Request) {
         const { error: auditError } = await supabaseAdmin
           .from('crm_csv_import_declarations')
           .update({ status: 'interrupted' })
-          .eq('id', declaration.id)
+          .eq('id', declarationId)
 
         if (auditError) {
           console.error('Erro ao registar interrupção CSV:', auditError)
@@ -200,7 +201,7 @@ export async function POST(req: Request) {
       const { error: auditError } = await supabaseAdmin
         .from('crm_csv_import_declarations')
         .update({ duplicate_count: duplicates, status: 'completed' })
-        .eq('id', declaration.id)
+        .eq('id', declarationId)
 
       if (auditError) {
         console.error('Erro ao atualizar auditoria CSV:', auditError)
@@ -257,7 +258,7 @@ export async function POST(req: Request) {
           duplicate_count: duplicates,
           failed_count: failed,
         })
-        .eq('id', declaration.id)
+        .eq('id', declarationId)
 
       if (progressError) {
         console.error('Erro ao guardar progresso CSV:', progressError)
@@ -281,7 +282,7 @@ export async function POST(req: Request) {
         failed_count: failed,
         status: failed > 0 ? 'completed_with_errors' : 'completed',
       })
-      .eq('id', declaration.id)
+      .eq('id', declarationId)
 
     if (auditError) {
       console.error('Erro ao atualizar auditoria CSV:', auditError)

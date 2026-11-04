@@ -29,3 +29,30 @@ export function isValidCSVImportDeclaration(
 ): boolean {
   return accepted === true && version === CSV_DECLARATION_VERSION
 }
+
+export async function saveCSVImportDeclaration(
+  write: (record: {
+    user_id: string
+    card_id: string
+    declaration_version: string
+    declaration_text: string
+  }) => PromiseLike<{
+    data: { id: string } | null
+    error: unknown
+  }>,
+  userId: string,
+  cardId: string
+): Promise<string | null> {
+  try {
+    const { data, error } = await write({
+      user_id: userId,
+      card_id: cardId,
+      declaration_version: CSV_DECLARATION_VERSION,
+      declaration_text: CSV_DECLARATION_TEXT,
+    })
+
+    return error ? null : data?.id ?? null
+  } catch {
+    return null
+  }
+}
