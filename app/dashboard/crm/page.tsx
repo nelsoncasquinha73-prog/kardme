@@ -2,6 +2,14 @@
 
 const __kmIsLight = () => typeof document !== 'undefined' && document.documentElement?.dataset?.theme === 'light'
 
+import {
+  CSV_DECLARATION_VERSION,
+  CSV_DECLARATION_TITLE,
+  CSV_DECLARATION_INTRO,
+  CSV_DECLARATION_CLAUSES,
+  CSV_DECLARATION_ACCEPTANCE,
+} from '@/lib/crm/csvImportDeclaration'
+
 import { useToast } from '@/lib/toast-context'
 import { useLanguage } from '@/components/language/LanguageProvider'
 import { useEffect, useRef, useState } from 'react'
@@ -407,6 +415,7 @@ Melhores cumprimentos,
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const [showImportModal, setShowImportModal] = useState(false)
+  const [importDeclarationAccepted, setImportDeclarationAccepted] = useState(false)
 
 
   const toolbarBtnPrimary: React.CSSProperties = {
@@ -919,6 +928,9 @@ Melhores cumprimentos,
 
   const handleImportCSV = async () => {
     try {
+      if (!importDeclarationAccepted) {
+        return alert('Tens de aceitar a declaração de responsabilidade.')
+      }
       if (!userId) return alert('Sem userId')
       if (selectedCardId === 'all') return alert('Seleciona um cartão para importar.')
       if (!importCSVText.trim()) return alert('Cola o CSV primeiro.')
@@ -945,16 +957,34 @@ Melhores cumprimentos,
           userId,
           cardId: selectedCardId,
           csvText: importCSVText,
+          declarationAccepted: importDeclarationAccepted,
+          declarationVersion: CSV_DECLARATION_VERSION,
         }),
       })
 
       const json = await res.json().catch(() => null)
       if (!res.ok) {
-        return alert('Erro ao importar: ' + (json?.error || 'erro'))
+        const hasCounts =
+          typeof json?.imported === 'number' &&
+          typeof json?.duplicates === 'number' &&
+          typeof json?.failed === 'number'
+
+        const details = hasCounts
+          ? `\n\nContactos importados: ${json.imported}` +
+            `\nDuplicados: ${json.duplicates}` +
+            `\nFalhados: ${json.failed}` +
+            '\n\nVerifica os contactos antes de repetir a importação.'
+          : ''
+
+        alert('Erro ao importar: ' + (json?.error || 'erro') + details)
+
+        await loadLeads()
+        return
       }
 
       alert(json?.message || 'Import concluído')
       setShowImportModal(false)
+      setImportDeclarationAccepted(false)
       setImportCSVText('')
       setImportPreview([])
       await loadLeads()
@@ -2387,7 +2417,10 @@ const { data, error } = await supabase.from('leads').insert({
 
 
         <button
-          onClick={() => setShowImportModal(true)}
+          onClick={() => {
+            setImportDeclarationAccepted(false)
+            setShowImportModal(true)
+          }}
           style={{
             padding: '10px 16px',
             height: 42,
@@ -4414,7 +4447,26 @@ const { data, error } = await supabase.from('leads').insert({
               }}
             />
 
-            <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+            <div style={{ background: '#f3f4f6', padding: 14, borderRadius: 12, marginTop: 16, fontSize: 12, lineHeight: 1.7 }}>
+                <strong>{CSV_DECLARATION_TITLE}</strong>
+                <p>{CSV_DECLARATION_INTRO}</p>
+                <ol style={{ paddingLeft: 20 }}>
+                  {CSV_DECLARATION_CLAUSES.map((clause, index) => (
+                    <li key={index}>{clause}</li>
+                  ))}
+                </ol>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontWeight: 700 }}>
+                  <input
+                    type="checkbox"
+                    checked={importDeclarationAccepted}
+                    onChange={(e) => setImportDeclarationAccepted(e.target.checked)}
+                    style={{ marginTop: 4 }}
+                  />
+                  {CSV_DECLARATION_ACCEPTANCE}
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
               <button
                 onClick={() => handleImportPreview()}
                 style={{ padding: '10px 14px', borderRadius: 10, background: '#111827', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
@@ -4424,8 +4476,8 @@ const { data, error } = await supabase.from('leads').insert({
 
               <button
                 onClick={handleImportCSV}
-                disabled={importing}
-                style={{ padding: '10px 14px', borderRadius: 10, background: importing ? '#a7f3d0' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
+                disabled={importing || !importDeclarationAccepted}
+                style={{ padding: '10px 14px', borderRadius: 10, background: (importing || !importDeclarationAccepted) ? '#9ca3af' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
               >
                 {importing ? 'A importar...' : 'Importar agora'}
               </button>
@@ -4436,6 +4488,7 @@ const { data, error } = await supabase.from('leads').insert({
                   setImportCSVText('')
                   setImportPreview([])
                   setImportFileName('')
+                  setImportDeclarationAccepted(false)
                 }}
                 style={{ padding: '10px 14px', borderRadius: 10, background: '#f3f4f6', color: '#111827', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
