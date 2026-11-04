@@ -5,6 +5,7 @@ import { parseCSV, mapCSVRowToLead } from '@/lib/crm/csv'
 import {
   CSV_DECLARATION_VERSION,
   CSV_DECLARATION_TEXT,
+  isValidCSVImportDeclaration,
 } from '@/lib/crm/csvImportDeclaration'
 
 const supabaseAdmin = createClient(
@@ -49,8 +50,7 @@ export async function POST(req: Request) {
 
     // A declaração deve ser aceite explicitamente em cada importação.
     if (
-      declarationAccepted !== true ||
-      declarationVersion !== CSV_DECLARATION_VERSION
+      !isValidCSVImportDeclaration(declarationAccepted, declarationVersion)
     ) {
       return NextResponse.json(
         { error: 'É obrigatório aceitar a declaração de responsabilidade.' },

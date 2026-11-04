@@ -22,3 +22,10 @@ export const CSV_DECLARATION_TEXT = [
   ...CSV_DECLARATION_CLAUSES.map((clause, index) => `${index + 1}. ${clause}`),
   CSV_DECLARATION_ACCEPTANCE,
 ].join('\n')
+
+export function isValidCSVImportDeclaration(
+  accepted: unknown,
+  version: unknown
+): boolean {
+  return accepted === true && version === CSV_DECLARATION_VERSION
+}
