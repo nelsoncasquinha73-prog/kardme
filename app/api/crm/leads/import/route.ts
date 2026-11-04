@@ -15,6 +15,8 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
+  let declarationId: string | null = null
+
   try {
     const body = await req.json()
     const { userId, cardId, csvText, declarationAccepted, declarationVersion } = body
@@ -97,7 +99,7 @@ export async function POST(req: Request) {
     }
 
     // Guardar a aceitação antes de iniciar a importação.
-    const declarationId = await saveCSVImportDeclaration(
+    declarationId = await saveCSVImportDeclaration(
       (record) =>
         supabaseAdmin
           .from('crm_csv_import_declarations')
@@ -305,6 +307,23 @@ export async function POST(req: Request) {
     })
   } catch (err: any) {
     console.error('Import error:', err)
+
+    if (declarationId) {
+      try {
+        const { error: interruptionError } = await supabaseAdmin
+          .from('crm_csv_import_declarations')
+          .update({ status: 'interrupted' })
+          .eq('id', declarationId)
+          .eq('status', 'processing')
+
+        if (interruptionError) {
+          console.error('Erro ao registar interrupção CSV:', interruptionError)
+        }
+      } catch (auditError) {
+        console.error('Erro inesperado ao atualizar auditoria CSV:', auditError)
+      }
+    }
+
     return NextResponse.json(
       { error: err?.message || 'Erro ao importar' },
       { status: 500 }

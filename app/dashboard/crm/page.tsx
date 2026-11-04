@@ -964,7 +964,22 @@ Melhores cumprimentos,
 
       const json = await res.json().catch(() => null)
       if (!res.ok) {
-        return alert('Erro ao importar: ' + (json?.error || 'erro'))
+        const hasCounts =
+          typeof json?.imported === 'number' &&
+          typeof json?.duplicates === 'number' &&
+          typeof json?.failed === 'number'
+
+        const details = hasCounts
+          ? `\n\nContactos importados: ${json.imported}` +
+            `\nDuplicados: ${json.duplicates}` +
+            `\nFalhados: ${json.failed}` +
+            '\n\nVerifica os contactos antes de repetir a importação.'
+          : ''
+
+        alert('Erro ao importar: ' + (json?.error || 'erro') + details)
+
+        await loadLeads()
+        return
       }
 
       alert(json?.message || 'Import concluído')
