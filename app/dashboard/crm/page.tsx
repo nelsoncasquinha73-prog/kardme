@@ -4462,7 +4462,7 @@ const { data, error } = await supabase.from('leads').insert({
               <button
                 onClick={handleImportCSV}
                 disabled={importing || !importDeclarationAccepted}
-                style={{ padding: '10px 14px', borderRadius: 10, background: importing ? '#a7f3d0' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
+                style={{ padding: '10px 14px', borderRadius: 10, background: (importing || !importDeclarationAccepted) ? '#9ca3af' : '#10b981', color: '#fff', border: 'none', fontWeight: 900, cursor: importing ? 'not-allowed' : 'pointer', fontSize: 13 }}
               >
                 {importing ? 'A importar...' : 'Importar agora'}
               </button>
