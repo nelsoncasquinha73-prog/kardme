@@ -64,7 +64,23 @@ export async function generateMetadata({ params }: Props) {
   const name = profileSettings?.name?.text || card.title || 'Cartão Digital'
   const jobTitle = profileSettings?.profession?.text || ''
   const avatarUrl = profileSettings?.avatar?.image
-  const description = jobTitle ? `${name} - ${jobTitle}` : name
+  // Configurações personalizadas de partilha
+  const sharing = card?.theme?.sharing || {}
+
+  const shareTitle =
+    typeof sharing.title === 'string' && sharing.title.trim()
+      ? sharing.title.trim()
+      : `${name} | Kardme`
+
+  const description =
+    typeof sharing.description === 'string' && sharing.description.trim()
+      ? sharing.description.trim()
+      : jobTitle ? `${name} - ${jobTitle}` : name
+
+  const shareLanguage =
+    typeof sharing.language === 'string' && sharing.language
+      ? sharing.language
+      : 'pt'
 
   const rawBg = card?.theme?.background
   const v1 = migrateCardBg(rawBg)
@@ -82,10 +98,10 @@ export async function generateMetadata({ params }: Props) {
     return v1.browserBarColor ?? '#000000'
   })()
 
-  const baseUrl = 'https://kardme.com'
+  const baseUrl = 'https://www.kardme.com'
 
   return {
-    title: `${name} | Kardme`,
+    title: shareTitle,
     description,
     manifest: `/api/manifest/${slug}`,
     other: {
@@ -98,7 +114,8 @@ export async function generateMetadata({ params }: Props) {
     metadataBase: new URL(baseUrl),
     colorScheme: 'dark',
     openGraph: {
-      title: `${name} | Kardme`,
+      title: shareTitle,
+      ...(shareLanguage && { locale: shareLanguage.replace('-', '_') }),
       description,
       url: `${baseUrl}/${slug}`,
       siteName: 'Kardme',
@@ -116,7 +133,7 @@ export async function generateMetadata({ params }: Props) {
     },
     twitter: {
       card: 'summary',
-      title: `${name} | Kardme`,
+      title: shareTitle,
       description,
       ...(avatarUrl && { images: [avatarUrl] }),
     },

@@ -372,6 +372,13 @@ export default function ThemePageClient({ card, blocks }: Props) {
           slugSaving={slugSaving}
           slugError={slugError}
           saveSlug={saveSlug}
+          sharingSettings={localTheme?.sharing}
+          onChangeSharingSettings={(settings: any) => {
+            setLocalTheme((prev: any) => ({
+              ...(prev || {}),
+              sharing: settings,
+            }))
+          }}
           floatingActions={localTheme?.floatingActions}
           onChangeFloatingActions={(settings: any) => {
             const nextTheme = structuredClone(localTheme || {})

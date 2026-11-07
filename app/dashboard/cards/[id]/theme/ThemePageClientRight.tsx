@@ -21,6 +21,7 @@ import CTAButtonsBlockEditor from '@/components/dashboard/block-editors/CTAButto
 import ShapeCanvasBlockEditor from '@/components/dashboard/block-editors/ShapeCanvasBlockEditor'
 import VideoBlockEditor from '@/components/dashboard/block-editors/VideoBlockEditor'
 import BannerBlockEditor from '@/components/blocks/BannerBlockEditor'
+import SharingSettingsEditor from '@/components/theme/SharingSettingsEditor'
 import FloatingActionsEditor from "@/components/dashboard/block-editors/FloatingActionsEditor"
 import ThemeDecorationsEditor from '@/components/dashboard/block-editors/ThemeDecorationsEditor'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
@@ -55,6 +56,8 @@ type Props = {
   slugError: string | null
   saveSlug: () => void
   onEditingChange?: (isEditing: boolean) => void
+  sharingSettings?: any
+  onChangeSharingSettings?: (settings: any) => void
   floatingActions?: any
   onChangeFloatingActions?: (settings: any) => void
   themeDecorations?: DecorationItem[]
@@ -91,6 +94,8 @@ export default function ThemePageClientRight({
   slugError,
   saveSlug,
   onEditingChange,
+  sharingSettings,
+  onChangeSharingSettings,
   floatingActions,
   onChangeFloatingActions,
   themeDecorations,
@@ -407,6 +412,10 @@ export default function ThemePageClientRight({
                 </div>
               )}
             </div>
+            <SharingSettingsEditor
+              settings={sharingSettings || {}}
+              onChange={(settings) => onChangeSharingSettings?.(settings)}
+            />
 
             <FloatingActionsEditor
               settings={floatingActions || {}}
