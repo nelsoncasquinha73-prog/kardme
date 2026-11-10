@@ -185,7 +185,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 /* Native menus in the dark Email Marketing send modal only. */
-select.email-campaign-native-select {
+select.email-campaign-native-select,
+.editor-ui select.email-campaign-native-select,
+.editor-ui select.email-campaign-native-select:focus,
+.editor-ui select.email-campaign-native-select:disabled {
   color-scheme: dark;
   background-color: #1e293b;
   color: #fff;
@@ -196,15 +199,29 @@ select.email-campaign-native-select option {
   color: #fff;
 }
 
+/* Preserve a visible focus indicator inside the dashboard editor. */
+.editor-ui select.email-campaign-native-select:focus {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
 /* Keep Windows high-contrast colors under user/system control. */
 @media (forced-colors: active) {
   select.email-campaign-native-select,
+  .editor-ui select.email-campaign-native-select,
+  .editor-ui select.email-campaign-native-select:focus,
+  .editor-ui select.email-campaign-native-select:disabled,
   select.email-campaign-native-select option {
     background-color: Canvas;
     color: CanvasText;
   }
 
-  select.email-campaign-native-select:disabled {
+  select.email-campaign-native-select:disabled,
+  .editor-ui select.email-campaign-native-select:disabled {
     color: GrayText;
+  }
+
+  .editor-ui select.email-campaign-native-select:focus {
+    outline-color: Highlight;
   }
 }
