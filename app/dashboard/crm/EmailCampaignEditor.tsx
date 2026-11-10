@@ -1237,6 +1237,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                   Selecionar lead
                 </label>
                 <select
+                  className="email-campaign-native-select"
                   value={selectedLeadId || ''}
                   onChange={(e) => setSelectedLeadId(e.target.value || null)}
                   style={{
@@ -1244,8 +1245,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                     padding: '10px 12px',
                     borderRadius: 8,
                     border: '1px solid rgba(255,255,255,0.15)',
-                    background: 'rgba(255,255,255,0.08)',
-                    color: '#fff',
                     fontSize: 14,
                     maxWidth: '100%',
                     overflow: 'visible',
@@ -1292,6 +1291,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                 📨 Remetente (Cartão)
               </label>
               <select
+                className="email-campaign-native-select"
                 value={bulkEmailCardId || ''}
                 onChange={(e) => setBulkEmailCardId(e.target.value || '')}
                 disabled={loadingSenderCards}
@@ -1300,8 +1300,6 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                   padding: '10px 12px',
                   borderRadius: 8,
                   border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.08)',
-                  color: '#fff',
                   fontSize: 14,
                   height: 42,
                   lineHeight: '22px',

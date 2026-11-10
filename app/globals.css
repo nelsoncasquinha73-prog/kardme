@@ -183,3 +183,28 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   --background: var(--km-bg);
   --foreground: var(--km-text);
 }
+
+/* Native menus in the dark Email Marketing send modal only. */
+select.email-campaign-native-select {
+  color-scheme: dark;
+  background-color: #1e293b;
+  color: #fff;
+}
+
+select.email-campaign-native-select option {
+  background-color: #1e293b;
+  color: #fff;
+}
+
+/* Keep Windows high-contrast colors under user/system control. */
+@media (forced-colors: active) {
+  select.email-campaign-native-select,
+  select.email-campaign-native-select option {
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  select.email-campaign-native-select:disabled {
+    color: GrayText;
+  }
+}
