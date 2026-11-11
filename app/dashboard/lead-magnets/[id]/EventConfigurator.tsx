@@ -57,6 +57,7 @@ export default function EventConfigurator({
             Tipo
           </label>
           <select
+            className="kardme-event-native-select"
             value={evt.eventType}
             onChange={(e) => setField('eventType', e.target.value as any)}
             style={{
@@ -164,6 +165,7 @@ export default function EventConfigurator({
             Local
           </label>
           <select
+            className="kardme-event-native-select"
             value={evt.locationType}
             onChange={(e) => setField('locationType', e.target.value as any)}
             style={{
