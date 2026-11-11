@@ -225,3 +225,22 @@ select.email-campaign-native-select option {
     outline-color: Highlight;
   }
 }
+
+/* Contraste dos menus nativos no editor de eventos */
+select.kardme-event-native-select {
+  color-scheme: dark;
+}
+
+select.kardme-event-native-select option {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+@media (forced-colors: active) {
+  select.kardme-event-native-select,
+  select.kardme-event-native-select option {
+    color-scheme: normal;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
