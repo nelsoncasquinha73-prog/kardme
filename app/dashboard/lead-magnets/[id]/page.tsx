@@ -10,6 +10,7 @@ interface LeadMagnet {
   slug: string
   user_id: string
   title: string
+  internal_name?: string | null
   magnet_type: string
   card_id: string | null
   is_active: boolean

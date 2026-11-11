@@ -1,4 +1,5 @@
 'use client'
+import { getInternalName } from '@/lib/crm/leadMagnetNames'
 
 const __kmIsLight = () => typeof document !== 'undefined' && document.documentElement?.dataset?.theme === 'light'
 
@@ -142,7 +143,7 @@ export default function LeadMagnetsView({ userId }: { userId: string }) {
                 <span style={{position:'absolute',top:10,left:10,padding:'3px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:(__kmIsLight() ? 'rgba(15,23,42,0.65)' : 'rgba(0,0,0,0.6)'),color:'#fff'}}>{MAGNET_TYPE_LABELS[m.magnet_type]}</span>
               </div>
               <div style={{padding:16}}>
-                <h3 style={{fontSize:15,fontWeight:800,color:(__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'),margin:'0 0 6px'}}>{m.title}</h3>
+                <h3 style={{fontSize:15,fontWeight:800,color:(__kmIsLight() ? 'rgba(15,23,42,0.92)' : '#fff'),margin:'0 0 6px'}}>{getInternalName(m)}</h3>
                 {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim())) ? (
                   <p style={{fontSize:12,color:'rgba(255,255,255,0.5)',margin:'0 0 12px',lineHeight:1.5}}>
                     {(((m.capture_page_subtitle || '').trim()) || ((m.description || '').trim()))}
