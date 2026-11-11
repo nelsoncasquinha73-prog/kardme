@@ -52,6 +52,7 @@ export type LeadMagnet = {
   id: string
   user_id: string
   title: string
+  internal_name?: string | null
   description: string | null
   cover_image_url: string | null
   magnet_type: MagnetType

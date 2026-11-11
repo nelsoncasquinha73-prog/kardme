@@ -10,12 +10,14 @@ import WheelConfigurator from '@/components/dashboard/WheelConfigurator'
 import FormConfigurator from './FormConfigurator'
 import ChecklistConfigurator from './ChecklistConfigurator'
 import DiscountConfigurator from './DiscountConfigurator'
+import { getInternalName, webinarUpdatePayload } from '@/lib/crm/leadMagnetNames'
 
 interface LeadMagnet {
   id: string
   slug: string
   user_id: string
   title: string
+  internal_name?: string | null
   magnet_type: string
   card_id: string | null
   is_active: boolean
@@ -26,6 +28,7 @@ interface LeadMagnet {
   capture_page_title: string
   capture_page_subtitle: string
   capture_page_image: string | null
+  cover_image_url?: string | null
   capture_page_button_text: string
   capture_page_success_message: string
   show_download_button: boolean
@@ -166,6 +169,7 @@ interface EditorProps {
 export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack }: EditorProps) {
   const { addToast } = useToast()
   const [magnet, setMagnet] = useState<LeadMagnet>(initialMagnet)
+  const [savedMagnet, setSavedMagnet] = useState<LeadMagnet>(initialMagnet)
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   type CardOption = { id: string; name: string | null }
@@ -185,6 +189,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
     if (initialMagnet && initialMagnet.id !== magnet.id) {
       console.log('SYNCING magnet from initialMagnet')
       setMagnet(initialMagnet)
+      setSavedMagnet(initialMagnet)
     }
   }, [initialMagnet, magnet.id])
 
@@ -245,6 +250,8 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       const isNew = magnet.id === 'NEW'
       const saveData = {
         title: magnet.title,
+        ...(magnet.magnet_type === 'webinar' && magnet.internal_name !== undefined
+          ? { internal_name: magnet.internal_name } : {}),
         magnet_type: magnet.magnet_type,
         card_id: magnet.card_id,
         is_active: magnet.is_active,
@@ -286,7 +293,9 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       } else {
         result = await supabase
           .from('lead_magnets')
-          .update(saveData)
+          .update(magnet.magnet_type === 'webinar'
+            ? webinarUpdatePayload(saveData, savedMagnet)
+            : saveData)
           .eq('id', magnet.id)
           .eq('user_id', userId)
           .select()
@@ -295,6 +304,7 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
 
       if (result.error) throw result.error
 
+      setSavedMagnet(magnet)
       setHasChanges(false)
       addToast('Lead magnet guardado com sucesso', 'success')
       
@@ -350,7 +360,17 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
         .insert({
           user_id: userId,
           slug: await generateUniqueSlug(magnet.title),
-          title: `${magnet.title} (cópia)`,
+          title: magnet.magnet_type === 'webinar' ? magnet.title : `${magnet.title} (cópia)`,
+          ...(magnet.magnet_type === 'webinar' ? {
+            internal_name: `${getInternalName(magnet)} (cópia)`,
+            event_config: magnet.event_config,
+            form_fields: magnet.form_fields,
+            cover_image_url: magnet.cover_image_url,
+            show_download_button: magnet.show_download_button,
+            download_button_text: magnet.download_button_text,
+            success_message: magnet.success_message,
+            show_success_message: magnet.show_success_message,
+          } : {}),
           magnet_type: magnet.magnet_type,
           card_id: magnet.card_id,
           is_active: false,
@@ -401,7 +421,15 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
               <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: '16px', marginBottom: '10px' }}>
                 ← Voltar
               </button>
-              <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 700 }}>🎥 {magnet.title}</h1>
+              <label htmlFor="webinar-internal-name">Nome interno da campanha</label>
+              <input
+                id="webinar-internal-name"
+                type="text"
+                value={getInternalName(magnet)}
+                onChange={(e) => handleChange('internal_name', e.target.value)}
+                className={styles.titleInput}
+                placeholder="Nome da campanha"
+              />
               <p style={{ margin: '5px 0 0 0', color: '#94a3b8', fontSize: '14px' }}>Webinar / Evento</p>
             </div>
             <button onClick={handleSave} disabled={isSaving} style={{ padding: '10px 20px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, opacity: isSaving ? 0.6 : 1 }}>
