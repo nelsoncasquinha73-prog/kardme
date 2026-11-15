@@ -416,6 +416,38 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
     return (
       <div className={styles.container}>
         <div className={styles.editor}>
+
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>💳 Cartão Digital associado à campanha</h3>
+            <div className={styles.field}>
+              <label>Escolhe o cartão digital a que pertence este Webinar ou Evento</label>
+              <select
+                value={magnet.card_id || ''}
+                onChange={(e) => handleChange('card_id', e.target.value || null)}
+                disabled={isLoadingCards}
+                style={{
+                  width: '100%',
+                  minHeight: '48px',
+                  padding: '12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.07)',
+                  color: '#fff',
+                  fontSize: '14px',
+                }}
+              >
+                <option value="">
+                  {isLoadingCards ? 'A carregar cartões...' : '— Selecionar cartão —'}
+                </option>
+                {cards.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || c.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
             <div>
               <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: '16px', marginBottom: '10px' }}>
