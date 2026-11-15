@@ -279,7 +279,15 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
       let result
       if (isNew) {
         // Gera slug único
-        const slug = await generateUniqueSlug(magnet.title)
+        const slugTitle = magnet.magnet_type === 'webinar'
+          ? getInternalName(magnet).trim()
+          : magnet.title
+
+        if (!slugTitle || (magnet.magnet_type === 'webinar' && slugTitle === 'Nova Campanha')) {
+          throw new Error('Define primeiro o nome da campanha')
+        }
+
+        const slug = await generateUniqueSlug(slugTitle)
         result = await supabase
           .from('lead_magnets')
           .insert({
@@ -326,6 +334,8 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
   // Gera slug único: base-123a (3 dígitos + 1 letra)
   const generateUniqueSlug = async (title: string): Promise<string> => {
     const slugify = (str: string) => str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
@@ -359,7 +369,11 @@ export default function LeadMagnetEditor({ magnet: initialMagnet, userId, onBack
         .from('lead_magnets')
         .insert({
           user_id: userId,
-          slug: await generateUniqueSlug(magnet.title),
+          slug: await generateUniqueSlug(
+            magnet.magnet_type === 'webinar'
+              ? `${getInternalName(magnet)} (cópia)`
+              : magnet.title
+          ),
           title: magnet.magnet_type === 'webinar' ? magnet.title : `${magnet.title} (cópia)`,
           ...(magnet.magnet_type === 'webinar' ? {
             internal_name: `${getInternalName(magnet)} (cópia)`,
