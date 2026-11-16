@@ -17,6 +17,7 @@ const supabasePublic = createClient(
 type LeadMagnet = {
   id: string
   title: string
+  capture_page_title?: string | null
   description: string | null
   cover_image_url: string | null
   magnet_type: MagnetType
@@ -55,7 +56,7 @@ export default function LeadMagnetPage() {
   async function loadMagnet() {
     const { data, error } = await supabasePublic
       .from('lead_magnets')
-      .select('id, title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text, capture_page_button_text, capture_page_subtitle')
+      .select('id, title, capture_page_title, description, cover_image_url, magnet_type, file_url, thank_you_message, is_active, show_download_button, download_button_text, capture_page_button_text, capture_page_subtitle')
       .eq('slug', slug)
       .single()
 
@@ -159,7 +160,7 @@ export default function LeadMagnetPage() {
                 marginBottom: 12,
                 lineHeight: 1.3,
               }}>
-                {magnet?.title}
+                {magnet?.capture_page_title?.trim() || magnet?.title}
               </h1>
 
               {magnet?.capture_page_subtitle && (
