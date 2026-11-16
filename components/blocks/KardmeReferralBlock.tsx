@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type Props = {
   cardId: string
@@ -37,6 +38,17 @@ export default function KardmeReferralBlock({
   style,
 }: Props) {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -128,8 +140,10 @@ export default function KardmeReferralBlock({
       setPhone('')
       setWorkArea('')
       setConsentGiven(false)
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Não foi possível enviar.')
+    } catch (err: unknown) {
+      setErrorMsg(
+        err instanceof Error ? err.message : 'Não foi possível enviar.'
+      )
       setStatus('error')
     }
   }
@@ -199,7 +213,7 @@ export default function KardmeReferralBlock({
         </button>
       </div>
 
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <div
           onMouseDown={closeModal}
           style={{
@@ -210,6 +224,8 @@ export default function KardmeReferralBlock({
             display: 'grid',
             placeItems: 'center',
             padding: 20,
+            overflowY: 'auto',
+            boxSizing: 'border-box',
           }}
         >
           <div
@@ -217,6 +233,8 @@ export default function KardmeReferralBlock({
             style={{
               width: '100%',
               maxWidth: 390,
+              maxHeight: 'calc(100dvh - 40px)',
+              overflowY: 'auto',
               background: '#ffffff',
               color: '#111827',
               borderRadius: 20,
@@ -404,7 +422,8 @@ export default function KardmeReferralBlock({
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
