@@ -2,39 +2,14 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
+import { composeLeadWelcomeEmail } from '@/lib/leadWelcomeEmail'
+import { resolveWelcomeLanguage, welcomeTranslations } from '@/lib/i18n/leadWelcomeEmail'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-
-  const renderWelcomeMessage = (template: string, vars: { nome: string; email: string; cardTitle: string }) => {
-    return template
-      .replace(/{nome}/g, vars.nome)
-      .replace(/{email}/g, vars.email)
-      .replace(/{cardTitle}/g, vars.cardTitle)
-  }
-
-
-async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmail: string; leadName: string; cardTitle: string; subject?: string; body?: string }) {
-  try {
-    const subject = params.subject || 'Bem-vindo à {cardTitle}! 🎉'
-    const body = params.body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
-
-    const result = await sendEmail({
-      to: params.toEmail,
-      subject,
-      html: body.replace(/\n/g, '<br/>'),
-      fromName: params.cardTitle,
-    })
-
-    return { ok: true, details: JSON.stringify(result) }
-  } catch (err: any) {
-    console.error('RESEND_WELCOME_ERROR', err)
-    return { ok: false, details: err?.message || String(err) }
-  }
-}
 
 async function sendOwnerNotification(params: { userId: string; leadId: string; ownerEmail: string; leadName: string; leadEmail: string; cardTitle: string }) {
   try {
@@ -80,7 +55,12 @@ export async function POST(req: Request) {
       marketingOptIn,
       consentTimestamp,
       consentVersion,
+      language,
     } = body || {}
+
+    // theme.sharing.language describes social metadata, not the visitor email language.
+    // Legacy forms and unsupported values use English.
+    const emailLanguage = resolveWelcomeLanguage(language)
 
     const normalizedEmail = String(email || '').toLowerCase().trim()
 
@@ -237,34 +217,44 @@ export async function POST(req: Request) {
           // Enviar email ao lead (só se opt-in)
           let welcomeRes: any = null
           if (marketingOptIn && email) {
-            // Preparar subject e body com replace de variáveis
-            const customSubject = cardData.crm_pro_welcome_subject || 'Bem-vindo à {cardTitle}! 🎉'
-            const customBody = cardData.crm_pro_welcome_body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
-            
-            const renderedSubject = renderWelcomeMessage(customSubject, {
-              nome: name,
-              email: normalizedEmail,
-              cardTitle: safeCardTitle,
+            const composed = composeLeadWelcomeEmail({
+              language: emailLanguage,
+              subject: cardData.crm_pro_welcome_subject,
+              body: cardData.crm_pro_welcome_body,
+              variables: {
+                nome: name,
+                email: normalizedEmail,
+                // Preserve the historical variable value for existing custom templates.
+                cardTitle: safeCardTitle,
+              },
+              confirmUrl,
             })
-            const renderedBody = renderWelcomeMessage(customBody, {
-              nome: name,
-              email: normalizedEmail,
-              cardTitle: safeCardTitle,
-            })
-
-            const finalBody = confirmUrl
-              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n\n<a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a>\n\nSe não conseguires clicar, copia e cola este link no browser:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
-              : renderedBody
-
-            welcomeRes = await sendWelcomeEmail({
-              userId: cardData.user_id,
-              leadId,
-              toEmail: normalizedEmail,
-              leadName: name,
-              cardTitle: safeCardTitle,
-              subject: renderedSubject,
-              body: finalBody,
-            })
+            // Only defaults use the localized missing-card-name fallback.
+            if (!cardData.crm_pro_welcome_subject || !cardData.crm_pro_welcome_body) {
+              const defaults = composeLeadWelcomeEmail({
+                language: emailLanguage,
+                variables: {
+                  nome: name,
+                  email: normalizedEmail,
+                  cardTitle: cardData.name?.trim() || welcomeTranslations[emailLanguage].cardFallback,
+                },
+                confirmUrl,
+              })
+              if (!cardData.crm_pro_welcome_subject) composed.subject = defaults.subject
+              if (!cardData.crm_pro_welcome_body) composed.html = defaults.html
+            }
+            try {
+              const result = await sendEmail({
+                to: normalizedEmail,
+                subject: composed.subject,
+                html: composed.html,
+                fromName: safeCardTitle,
+              })
+              welcomeRes = { ok: true, details: JSON.stringify(result) }
+            } catch (err: any) {
+              console.error('RESEND_WELCOME_ERROR', err)
+              welcomeRes = { ok: false, details: err?.message || String(err) }
+            }
           }
 
           // Log activities (sucesso/falha)
