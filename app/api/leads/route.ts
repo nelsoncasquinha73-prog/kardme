@@ -243,6 +243,28 @@ export async function POST(req: Request) {
                 ? configuredLanguage.trim().toLowerCase()
                 : language
 
+            const emailLanguage =
+              typeof preferredLanguage === 'string' &&
+              welcomeLanguages.includes(
+                preferredLanguage.trim().toLowerCase() as typeof welcomeLanguages[number]
+              )
+                ? preferredLanguage.trim().toLowerCase()
+                : 'en'
+
+            let localizedConfirmUrl = confirmUrl
+
+            if (confirmUrl) {
+              const confirmationLink = new URL(confirmUrl)
+
+              if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
+                confirmationLink.protocol = 'https:'
+                confirmationLink.host = process.env.VERCEL_URL
+              }
+
+              confirmationLink.searchParams.set('lang', emailLanguage)
+              localizedConfirmUrl = confirmationLink.toString()
+            }
+
             const composed = composeLeadWelcomeEmail({
               language: preferredLanguage,
               subject: cardData.crm_pro_welcome_subject,
@@ -252,7 +274,7 @@ export async function POST(req: Request) {
                 email: normalizedEmail,
                 cardTitle: safeCardTitle,
               },
-              confirmUrl,
+              confirmUrl: localizedConfirmUrl,
             })
 
             welcomeRes = await sendWelcomeEmail({
