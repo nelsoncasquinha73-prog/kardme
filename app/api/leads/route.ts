@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
 import { composeLeadWelcomeEmail } from '@/lib/leadWelcomeEmail'
+import { welcomeLanguages } from '@/lib/i18n/leadWelcomeEmail'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -196,7 +197,7 @@ export async function POST(req: Request) {
     // Buscar card owner e verificar CRM Pro
     const { data: cardData } = await supabaseAdmin
       .from('cards')
-      .select('user_id, name, crm_pro_welcome_subject, crm_pro_welcome_body')
+      .select('user_id, name, theme, crm_pro_welcome_subject, crm_pro_welcome_body')
       .eq('id', cardId)
       .single()
 
@@ -235,8 +236,15 @@ export async function POST(req: Request) {
           // Enviar email ao lead (só se opt-in)
           let welcomeRes: any = null
           if (marketingOptIn && email) {
+            const configuredLanguage = cardData.theme?.sharing?.language
+            const preferredLanguage =
+              typeof configuredLanguage === 'string' &&
+              welcomeLanguages.includes(configuredLanguage.trim().toLowerCase() as typeof welcomeLanguages[number])
+                ? configuredLanguage.trim().toLowerCase()
+                : language
+
             const composed = composeLeadWelcomeEmail({
-              language,
+              language: preferredLanguage,
               subject: cardData.crm_pro_welcome_subject,
               body: cardData.crm_pro_welcome_body,
               variables: {
