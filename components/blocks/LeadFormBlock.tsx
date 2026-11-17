@@ -287,7 +287,6 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
           marketingOptIn: marketingChecked,
           consentTimestamp: new Date().toISOString(),
           consentVersion: '1.0',
-          language: lang,
         }),
       })
 
