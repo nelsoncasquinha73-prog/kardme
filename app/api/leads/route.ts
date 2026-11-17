@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
+import { composeLeadWelcomeEmail } from '@/lib/leadWelcomeEmail'
+import { welcomeLanguages } from '@/lib/i18n/leadWelcomeEmail'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,7 +27,7 @@ async function sendWelcomeEmail(params: { userId: string; leadId: string; toEmai
     const result = await sendEmail({
       to: params.toEmail,
       subject,
-      html: body.replace(/\n/g, '<br/>'),
+      html: body,
       fromName: params.cardTitle,
     })
 
@@ -69,6 +71,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const {
       cardId,
+      language,
       name,
       email,
       phone,
@@ -184,11 +187,7 @@ export async function POST(req: Request) {
           .eq('id', leadId)
 
         if (!tokenErr) {
-          const origin =
-            req.headers.get('origin') ||
-            process.env.NEXT_PUBLIC_APP_URL ||
-            'https://www.kardme.com'
-          confirmUrl = `${origin}/api/confirm-email?token=${token}`
+          confirmUrl = `https://www.kardme.com/api/confirm-email?token=${encodeURIComponent(token)}`
         } else {
           console.error('Erro ao guardar email_confirm_token:', tokenErr)
         }
@@ -198,7 +197,7 @@ export async function POST(req: Request) {
     // Buscar card owner e verificar CRM Pro
     const { data: cardData } = await supabaseAdmin
       .from('cards')
-      .select('user_id, name, crm_pro_welcome_subject, crm_pro_welcome_body')
+      .select('user_id, name, theme, crm_pro_welcome_subject, crm_pro_welcome_body')
       .eq('id', cardId)
       .single()
 
@@ -237,24 +236,46 @@ export async function POST(req: Request) {
           // Enviar email ao lead (só se opt-in)
           let welcomeRes: any = null
           if (marketingOptIn && email) {
-            // Preparar subject e body com replace de variáveis
-            const customSubject = cardData.crm_pro_welcome_subject || 'Bem-vindo à {cardTitle}! 🎉'
-            const customBody = cardData.crm_pro_welcome_body || 'Olá {nome},\n\nObrigado por se registar e visitar o nosso cartão digital!\n\nEstamos entusiasmados por te ter connosco.\n\nMelhores cumprimentos,\n{cardTitle}'
-            
-            const renderedSubject = renderWelcomeMessage(customSubject, {
-              nome: name,
-              email: normalizedEmail,
-              cardTitle: safeCardTitle,
-            })
-            const renderedBody = renderWelcomeMessage(customBody, {
-              nome: name,
-              email: normalizedEmail,
-              cardTitle: safeCardTitle,
-            })
+            const configuredLanguage = cardData.theme?.sharing?.language
+            const preferredLanguage =
+              typeof configuredLanguage === 'string' &&
+              welcomeLanguages.includes(configuredLanguage.trim().toLowerCase() as typeof welcomeLanguages[number])
+                ? configuredLanguage.trim().toLowerCase()
+                : language
 
-            const finalBody = confirmUrl
-              ? `${renderedBody}\n\nConfirma o teu email para receberes o conteúdo e futuras atualizações:\n\n<a href="${confirmUrl}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#3b82f6;color:#fff;text-decoration:none;font-weight:800">Confirmar email</a>\n\nSe não conseguires clicar, copia e cola este link no browser:\n${confirmUrl}\n\nSe não pediste isto, ignora este email.`
-              : renderedBody
+            const emailLanguage =
+              typeof preferredLanguage === 'string' &&
+              welcomeLanguages.includes(
+                preferredLanguage.trim().toLowerCase() as typeof welcomeLanguages[number]
+              )
+                ? preferredLanguage.trim().toLowerCase()
+                : 'en'
+
+            let localizedConfirmUrl = confirmUrl
+
+            if (confirmUrl) {
+              const confirmationLink = new URL(confirmUrl)
+
+              if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
+                confirmationLink.protocol = 'https:'
+                confirmationLink.host = process.env.VERCEL_URL
+              }
+
+              confirmationLink.searchParams.set('lang', emailLanguage)
+              localizedConfirmUrl = confirmationLink.toString()
+            }
+
+            const composed = composeLeadWelcomeEmail({
+              language: preferredLanguage,
+              subject: cardData.crm_pro_welcome_subject,
+              body: cardData.crm_pro_welcome_body,
+              variables: {
+                nome: String(name || '').trim(),
+                email: normalizedEmail,
+                cardTitle: safeCardTitle,
+              },
+              confirmUrl: localizedConfirmUrl,
+            })
 
             welcomeRes = await sendWelcomeEmail({
               userId: cardData.user_id,
@@ -262,8 +283,8 @@ export async function POST(req: Request) {
               toEmail: normalizedEmail,
               leadName: name,
               cardTitle: safeCardTitle,
-              subject: renderedSubject,
-              body: finalBody,
+              subject: composed.subject,
+              body: composed.html,
             })
           }
 

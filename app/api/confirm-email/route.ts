@@ -1,14 +1,25 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { resolveConfirmationLanguage } from '@/lib/i18n/emailConfirmationPages'
 
 export const runtime = 'nodejs'
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const token = url.searchParams.get('token')
+  const requestedLanguage = url.searchParams.get('lang')
+  const language = resolveConfirmationLanguage(requestedLanguage)
+
+  const confirmationPage = (pathname: string) => {
+    const destination = new URL(pathname, url.origin)
+    if (requestedLanguage) {
+      destination.searchParams.set('lang', language)
+    }
+    return destination
+  }
 
   if (!token) {
-    return NextResponse.redirect(new URL('/lm/confirmacao-invalida', url.origin))
+    return NextResponse.redirect(confirmationPage('/lm/confirmacao-invalida'))
   }
 
   const supabase = supabaseAdmin
@@ -20,7 +31,7 @@ export async function GET(req: Request) {
     .maybeSingle()
 
   if (error || !lead) {
-    return NextResponse.redirect(new URL('/lm/confirmacao-invalida', url.origin))
+    return NextResponse.redirect(confirmationPage('/lm/confirmacao-invalida'))
   }
 
   if (!lead.email_confirmed_at) {
@@ -33,7 +44,7 @@ export async function GET(req: Request) {
       .eq('id', lead.id)
 
     if (updErr) {
-      return NextResponse.redirect(new URL('/lm/confirmacao-invalida', url.origin))
+      return NextResponse.redirect(confirmationPage('/lm/confirmacao-invalida'))
     }
 
 
@@ -72,5 +83,5 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL('/lm/email-confirmado', url.origin))
+  return NextResponse.redirect(confirmationPage('/lm/email-confirmado'))
 }

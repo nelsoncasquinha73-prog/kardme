@@ -271,6 +271,7 @@ export default function LeadFormBlock({ cardId, settings, style }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cardId,
+          language: lang,
           ...formData,
           requiredFields,
           customFields: Object.fromEntries(
