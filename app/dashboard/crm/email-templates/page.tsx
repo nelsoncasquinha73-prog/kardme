@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import EmailCampaignEditor from '../EmailCampaignEditor'
 import { fetchEmailTemplates, createEmailTemplate, updateEmailTemplate, deleteEmailTemplate, type EmailTemplate } from '@/lib/crm/emailTemplates'
 
 export default function EmailTemplatesPage() {
@@ -12,6 +13,7 @@ export default function EmailTemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null)
+  const [visualTemplateId, setVisualTemplateId] = useState<string | null>(null)
   const [formData, setFormData] = useState({ name: '', category: 'Geral', subject: '', body: '' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -114,6 +116,22 @@ export default function EmailTemplatesPage() {
     }
   }
 
+  if (visualTemplateId && userId) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0f172a' }}>
+        <EmailCampaignEditor
+          userId={userId}
+          templateId={visualTemplateId}
+          onClose={() => setVisualTemplateId(null)}
+          onSave={() => {
+            setVisualTemplateId(null)
+            loadTemplates(userId)
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ padding: '24px', maxWidth: 1200, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -144,7 +162,13 @@ export default function EmailTemplatesPage() {
                 <td style={{ padding: '12px 8px', fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{t.category}</td>
                 <td style={{ padding: '12px 8px', fontSize: 13, color: 'rgba(255,255,255,0.8)', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.subject}</td>
                 <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                  <button onClick={() => handleOpenModal(t)} style={{ padding: '6px 12px', borderRadius: 6, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 12, marginRight: 8 }}>Editar</button>
+                  <button onClick={() => {
+                    if (Array.isArray(t.blocks) && t.blocks.length > 0) {
+                      setVisualTemplateId(t.id)
+                    } else {
+                      handleOpenModal(t)
+                    }
+                  }} style={{ padding: '6px 12px', borderRadius: 6, background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 12, marginRight: 8 }}>Editar</button>
                   <button onClick={() => handleDelete(t.id)} style={{ padding: '6px 12px', borderRadius: 6, background: '#ef4444', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 12 }}>Apagar</button>
                 </td>
               </tr>

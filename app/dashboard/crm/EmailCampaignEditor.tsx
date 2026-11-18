@@ -3,6 +3,7 @@ import ImageUploadInput from './ImageUploadInput'
 import VideoUploadInput from './VideoUploadInput'
 
 import { generateEmailHtmlBody } from './emailBlockRenderer'
+import { createEmailTemplate, updateEmailTemplate } from '@/lib/crm/emailTemplates'
 import { parseVideoLink, getVimeoThumbnail } from '@/lib/crm/videoLinkParser'
 import { generateThumbnailFromVideoUrl } from '@/lib/crm/videoThumbnailFromUrl'
 import EmailTextBlockEditor from './EmailTextBlockEditor'
@@ -29,6 +30,7 @@ export type EmailBlock = {
 interface EmailCampaignEditorProps {
   userId: string
   broadcastId?: string
+  templateId?: string
   preSelectedLeadIds?: string[]
   onClose: () => void
   onSave: () => void
@@ -40,7 +42,7 @@ interface EmailCampaignEditorProps {
   onSendBulkEmail?: (cardId: string, timing: 'now' | 'scheduled', scheduledAt?: string) => Promise<void>
 }
 
-export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, preSelectedLeadIds, onClose, onSave, isBulkMode, bulkLeadIds: initialBulkLeadIds, bulkEmailCardId: initialBulkEmailCardId, bulkSendTiming: initialBulkSendTiming, bulkScheduledAt: initialBulkScheduledAt, onSendBulkEmail }: EmailCampaignEditorProps) {
+export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, templateId, preSelectedLeadIds, onClose, onSave, isBulkMode, bulkLeadIds: initialBulkLeadIds, bulkEmailCardId: initialBulkEmailCardId, bulkSendTiming: initialBulkSendTiming, bulkScheduledAt: initialBulkScheduledAt, onSendBulkEmail }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
 
   // Buscar contexto do cartão principal do utilizador para a IA
@@ -58,6 +60,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
     loadCardContext()
   }, [userId])
   const [title, setTitle] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('Geral')
   const [subject, setSubject] = useState('')
   const [preheader, setPreheader] = useState('')
   const [notifyOnVideoOpens, setNotifyOnVideoOpens] = useState(false)
@@ -97,7 +100,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
   useEffect(() => {
     loadData()
-  }, [userId, initialBroadcastId])
+  }, [userId, initialBroadcastId, templateId])
 
   // Load cards to select sender
   useEffect(() => {
@@ -143,7 +146,24 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
       setLeads(leadsError ? [] : (leadsData || []))
       setAudiences(auds)
 
-      if (currentBroadcastId) {
+      if (templateId) {
+        const { data, error } = await supabase
+          .from('email_templates')
+          .select('id, name, category, subject, blocks')
+          .eq('id', templateId)
+          .eq('user_id', userId)
+          .single()
+
+        if (error) throw error
+        if (!data?.blocks || !Array.isArray(data.blocks)) {
+          throw new Error('Template visual sem blocos válidos')
+        }
+
+        setTitle(data.name)
+        setTemplateCategory(data.category || 'Geral')
+        setSubject(data.subject)
+        setBlocks(data.blocks as EmailBlock[])
+      } else if (currentBroadcastId) {
         const { data, error } = await supabase
           .from('email_broadcasts')
           .select('*')
@@ -387,6 +407,36 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
   }
 
   async function handleSave() {
+    if (templateId) {
+      if (!title.trim() || !subject.trim() || blocks.length === 0) {
+        addToast('Preenche o nome, o assunto e o conteúdo do template', 'error')
+        return
+      }
+
+      setSaving(true)
+      try {
+        const { error } = await updateEmailTemplate({
+          templateId,
+          name: title.trim(),
+          category: templateCategory,
+          subject: subject.trim(),
+          body: generateEmailHtmlBody(blocks, subject, preheader),
+          blocks,
+        })
+
+        if (error) throw error
+
+        addToast('Template atualizado com sucesso!', 'success')
+        onSave()
+      } catch (e: any) {
+        console.error('[UPDATE_EMAIL_TEMPLATE]', e)
+        addToast(e?.message || 'Erro ao atualizar template', 'error')
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
+
     if (!title.trim() || !subject.trim()) {
       addToast('Preenche título e assunto', 'error')
       return
@@ -746,7 +796,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
             >
               <FiEye size={14} /> Preview
             </button>
-            <button
+            {!templateId && <button
               onClick={() => window.location.href = '/dashboard/crm/email-templates'}
               style={{
                 padding: '8px 14px',
@@ -764,9 +814,47 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               title="Abrir biblioteca de templates"
             >
               📁 Templates
-            </button>
-            <button
-              onClick={() => alert('Gravar como template — em desenvolvimento')}
+            </button>}
+            {!templateId && <button
+              onClick={async () => {
+                if (!subject.trim() || blocks.length === 0) {
+                  addToast('Preenche o assunto e adiciona conteúdo ao email', 'error')
+                  return
+                }
+
+                const name = window.prompt('Nome do template:', title || subject)
+                if (name === null) return
+                if (!name.trim()) {
+                  addToast('O nome do template é obrigatório', 'error')
+                  return
+                }
+
+                const category = window.prompt('Categoria:', 'Geral')
+                if (category === null) return
+
+                try {
+                  const html = generateEmailHtmlBody(blocks, subject, preheader)
+
+                  const { error } = await createEmailTemplate({
+                    userId,
+                    name: name.trim(),
+                    category: category.trim() || 'Geral',
+                    subject: subject.trim(),
+                    body: html,
+                    blocks,
+                  })
+
+                  if (error) throw error
+
+                  addToast('Template guardado com sucesso!', 'success')
+                } catch (err: any) {
+                  console.error('[SAVE_EMAIL_TEMPLATE]', err)
+                  addToast(
+                    'Erro ao guardar template: ' + (err?.message || 'Erro desconhecido'),
+                    'error'
+                  )
+                }
+              }}
               style={{
                 padding: '8px 14px',
                 borderRadius: 6,
@@ -783,7 +871,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               title="Guardar este email como template"
             >
               💾 Guardar como Template
-            </button>
+            </button>}
             <button
               onClick={onClose}
               style={{
@@ -799,7 +887,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
             >
               Cancelar
             </button>
-            <button
+            {!templateId && <button
               onClick={async () => {
                 if (isBulkMode) {
                   if (!bulkLeadIds || bulkLeadIds.length === 0) {
@@ -850,7 +938,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
               }}
             >
               {sending ? 'A enviar...' : (isBulkMode ? (bulkSendTiming === 'scheduled' ? `⏰ Agendar para ${bulkLeadIds.length} leads` : `✉️ Enviar para ${bulkLeadIds.length} leads`) : '✉️ Enviar')}
-            </button>
+            </button>}
             <button
               onClick={handleSave}
               disabled={saving}
@@ -866,7 +954,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
                 opacity: saving ? 0.6 : 1,
               }}
             >
-              {saving ? 'A guardar...' : 'Guardar'}
+              {saving ? 'A guardar...' : (templateId ? '💾 Guardar alterações ao template' : 'Guardar')}
             </button>
           </div>
         </div>
