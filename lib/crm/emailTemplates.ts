@@ -64,7 +64,7 @@ export async function updateEmailTemplate(params: {
       category: params.category,
       subject: params.subject,
       body: params.body,
-      blocks: params.blocks || null,
+      ...(params.blocks !== undefined ? { blocks: params.blocks } : {}),
     })
     .eq('id', params.templateId)
 }
