@@ -5,7 +5,20 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 20px', lineHeight: 1.8, fontSize: '15px' }}>
+    <main style={{
+      width: '100%',
+      maxWidth: 'none',
+      margin: '0',
+      padding: '40px max(20px, calc((100% - 900px) / 2))',
+      lineHeight: 1.8,
+      fontSize: '15px',
+      backgroundColor: '#ffffff',
+      color: '#111827',
+      position: 'relative',
+      zIndex: 1,
+      minHeight: '100vh',
+      isolation: 'isolate',
+    }}>
       <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>Política de Privacidade — Kardme</h1>
       <p style={{ opacity: 0.6, fontSize: '13px', marginBottom: '32px' }}>Última atualização: 10/03/2026</p>
 
