@@ -31,6 +31,7 @@ interface EmailCampaignEditorProps {
   userId: string
   broadcastId?: string
   templateId?: string
+  sourceTemplateId?: string
   preSelectedLeadIds?: string[]
   onClose: () => void
   onSave: () => void
@@ -42,7 +43,7 @@ interface EmailCampaignEditorProps {
   onSendBulkEmail?: (cardId: string, timing: 'now' | 'scheduled', scheduledAt?: string) => Promise<void>
 }
 
-export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, templateId, preSelectedLeadIds, onClose, onSave, isBulkMode, bulkLeadIds: initialBulkLeadIds, bulkEmailCardId: initialBulkEmailCardId, bulkSendTiming: initialBulkSendTiming, bulkScheduledAt: initialBulkScheduledAt, onSendBulkEmail }: EmailCampaignEditorProps) {
+export default function EmailCampaignEditor({ userId, broadcastId: initialBroadcastId, templateId, sourceTemplateId, preSelectedLeadIds, onClose, onSave, isBulkMode, bulkLeadIds: initialBulkLeadIds, bulkEmailCardId: initialBulkEmailCardId, bulkSendTiming: initialBulkSendTiming, bulkScheduledAt: initialBulkScheduledAt, onSendBulkEmail }: EmailCampaignEditorProps) {
   const { addToast } = useToast()
 
   // Buscar contexto do cartão principal do utilizador para a IA
@@ -100,7 +101,7 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
 
   useEffect(() => {
     loadData()
-  }, [userId, initialBroadcastId, templateId])
+  }, [userId, initialBroadcastId, templateId, sourceTemplateId])
 
   // Load cards to select sender
   useEffect(() => {
@@ -146,11 +147,11 @@ export default function EmailCampaignEditor({ userId, broadcastId: initialBroadc
       setLeads(leadsError ? [] : (leadsData || []))
       setAudiences(auds)
 
-      if (templateId) {
+      if (templateId || (sourceTemplateId && !currentBroadcastId)) {
         const { data, error } = await supabase
           .from('email_templates')
           .select('id, name, category, subject, blocks')
-          .eq('id', templateId)
+          .eq('id', templateId || sourceTemplateId)
           .eq('user_id', userId)
           .single()
 
