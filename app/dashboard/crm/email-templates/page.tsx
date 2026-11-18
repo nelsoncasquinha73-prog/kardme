@@ -162,6 +162,14 @@ export default function EmailTemplatesPage() {
                 <td style={{ padding: '12px 8px', fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{t.category}</td>
                 <td style={{ padding: '12px 8px', fontSize: 13, color: 'rgba(255,255,255,0.8)', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.subject}</td>
                 <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                  {Array.isArray(t.blocks) && t.blocks.length > 0 && (
+                    <button
+                      onClick={() => router.push('/dashboard/email-marketing?templateId=' + encodeURIComponent(t.id))}
+                      style={{ padding: '6px 12px', borderRadius: 6, background: '#10b981', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 12, marginRight: 8 }}
+                    >
+                      Utilizar
+                    </button>
+                  )}
                   <button onClick={() => {
                     if (Array.isArray(t.blocks) && t.blocks.length > 0) {
                       setVisualTemplateId(t.id)

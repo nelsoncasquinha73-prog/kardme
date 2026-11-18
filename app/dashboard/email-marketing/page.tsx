@@ -6,8 +6,10 @@ import EmailMarketingView from '@/app/dashboard/crm/EmailMarketingView'
 
 export default function EmailMarketingPage() {
   const [userId, setUserId] = useState<string | null>(null)
+  const [sourceTemplateId, setSourceTemplateId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
+    setSourceTemplateId(new URLSearchParams(window.location.search).get('templateId') || undefined)
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user?.id) setUserId(data.session.user.id)
     })
@@ -19,5 +21,5 @@ export default function EmailMarketingPage() {
     </div>
   )
 
-  return <EmailMarketingView userId={userId} />
+  return <EmailMarketingView userId={userId} sourceTemplateId={sourceTemplateId} />
 }

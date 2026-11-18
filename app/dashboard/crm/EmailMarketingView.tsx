@@ -7,12 +7,12 @@ import { fetchLeadTypes, type LeadType } from '@/lib/crm/leadTypes'
 import { FiTrash2 } from 'react-icons/fi'
 import EmailCampaignEditor from './EmailCampaignEditor'
 
-interface EmailMarketingViewProps { userId: string; preSelectedLeadId?: string }
+interface EmailMarketingViewProps { userId: string; preSelectedLeadId?: string; sourceTemplateId?: string }
 type Lead = { id: string; name: string; email: string; step: string; audience_ids: string[] }
 
-export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailMarketingViewProps) {
+export default function EmailMarketingView({ userId, preSelectedLeadId, sourceTemplateId }: EmailMarketingViewProps) {
   const { addToast } = useToast()
-  const [activeTab, setActiveTab] = useState<'audience' | 'broadcasts' | 'unsubscribes'>(preSelectedLeadId ? 'broadcasts' : 'audience')
+  const [activeTab, setActiveTab] = useState<'audience' | 'broadcasts' | 'unsubscribes'>((preSelectedLeadId || sourceTemplateId) ? 'broadcasts' : 'audience')
   const [unsubscribes, setUnsubscribes] = useState<Array<{email: string, unsubscribed_at: string}>>([])
 
   const loadUnsubscribes = async () => {
@@ -32,11 +32,21 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(preSelectedLeadId ? new Set([preSelectedLeadId]) : new Set())
-  const [editorOpen, setEditorOpen] = useState(!!preSelectedLeadId)
+  const [editorOpen, setEditorOpen] = useState(!!preSelectedLeadId || !!sourceTemplateId)
+  const [selectedSourceTemplateId, setSelectedSourceTemplateId] = useState<string | undefined>(sourceTemplateId)
   const [editingBroadcastId, setEditingBroadcastId] = useState<string | undefined>(undefined)
   const [activeAudienceFilter, setActiveAudienceFilter] = useState<string | null>(null)
 
   useEffect(() => { loadData() }, [userId])
+
+  useEffect(() => {
+    if (sourceTemplateId) {
+      setSelectedSourceTemplateId(sourceTemplateId)
+      setActiveTab('broadcasts')
+      setEditingBroadcastId(undefined)
+      setEditorOpen(true)
+    }
+  }, [sourceTemplateId])
 
   async function loadData() {
     setLoading(true)
@@ -316,10 +326,13 @@ export default function EmailMarketingView({ userId, preSelectedLeadId }: EmailM
             <EmailCampaignEditor
               userId={userId}
               broadcastId={editingBroadcastId}
+              sourceTemplateId={editingBroadcastId ? undefined : selectedSourceTemplateId}
               onClose={() => {
                 setEditorOpen(false)
                 setEditingBroadcastId(undefined)
+                setSelectedSourceTemplateId(undefined)
                 setSelectedLeads(new Set())
+                window.history.replaceState(null, '', window.location.pathname)
                 loadData()
               }}
               onSave={() => {
