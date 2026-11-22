@@ -29,6 +29,7 @@ import {
 } from 'react-icons/fi'
 import EditLeadModal from '@/components/crm/EditLeadModal'
 import { updateLeadCard } from '@/lib/crm/cards'
+import { buildWhatsAppUrl, normalizeWhatsAppPhone } from '@/lib/crm/whatsapp'
 import { getLocalActiveCardId, setLocalActiveCardId, saveActiveCardIdToDB, getActiveCardIdFromDB } from '@/lib/crm/activeCard'
 import VideoNotificationCenter from './VideoNotificationCenter'
 import VideoOpensModal from './VideoOpensModal'
@@ -1717,6 +1718,29 @@ const { data, error } = await supabase.from('leads').insert({
   }
 
 
+  const invalidWhatsAppPhone = 'Esta lead não tem um número de WhatsApp válido. Verifica o número e o indicativo internacional.'
+
+  const openWhatsAppModal = (lead: Lead) => {
+    if (!normalizeWhatsAppPhone(lead.phone)) {
+      alert(invalidWhatsAppPhone)
+      return false
+    }
+    setSelectedLeadForWhatsApp(lead)
+    setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
+    setShowWhatsAppModal(true)
+    return true
+  }
+
+  const openWhatsApp = (phone: string | null | undefined, message: string) => {
+    const url = buildWhatsAppUrl(phone, message)
+    if (!url) {
+      alert(invalidWhatsAppPhone)
+      return false
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
+    return true
+  }
+
   const handleTaskAction = (task: LeadTask, lead: Lead | undefined) => {
     const actionType = task.action_type || 'follow_up'
     
@@ -1724,16 +1748,8 @@ const { data, error } = await supabase.from('leads').insert({
       setSelectedLeadForEmail(lead || null)
       setShowEmailModal(true)
     } else if (actionType === 'whatsapp') {
-      const phone = normalizePhone(lead?.phone)
-      if (!phone) {
-        alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
-        return
-      }
-      const msg = (typeof (task as any)?.description === 'string' && (task as any).description.trim().length > 0)
-        ? (task as any).description.trim()
-        : `Olá ${lead?.name || ''}, tudo bem?`
-      const encoded = encodeURIComponent(msg)
-      window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`, '_blank')
+      const description = typeof task.description === 'string' ? task.description.trim() : ''
+      openWhatsApp(lead?.phone, description || `Olá ${lead?.name || ''}, tudo bem?`)
     } else if (actionType === 'call') {
       const phone = normalizePhone(lead?.phone)
       if (!phone) {
@@ -2375,16 +2391,7 @@ const { data, error } = await supabase.from('leads').insert({
             setSelectedLead(lead)
             setNoteText(lead.notes || '')
           }}
-          onWhatsAppLead={(lead) => {
-            const phone = normalizePhone(lead.phone)
-            if (!phone) {
-              alert('Esta lead não tem número de telefone')
-              return
-            }
-            setSelectedLeadForWhatsApp({...lead, phone})
-            setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
-            setShowWhatsAppModal(true)
-          }}
+          onWhatsAppLead={openWhatsAppModal}
         />
       )}
       {activeView === 'scheduled' && <ScheduledTasksView />}
@@ -3124,14 +3131,7 @@ const { data, error } = await supabase.from('leads').insert({
                           </button>
                           <button
                             onClick={() => {
-                              const phone = normalizePhone(lead.phone)
-                              if (!phone) {
-                                alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
-                                return
-                              }
-                              setSelectedLeadForWhatsApp(lead)
-                              setWhatsAppMessage(`Olá ${lead.name}, tudo bem?`)
-                              setShowWhatsAppModal(true)
+                              if (!openWhatsAppModal(lead)) return
                               document.getElementById(`dropdown-${lead.id}`)!.style.display = 'none'
                             }}
                             style={{
@@ -3548,14 +3548,9 @@ const { data, error } = await supabase.from('leads').insert({
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={() => {
-                  const phone = normalizePhone(selectedLeadForWhatsApp.phone)
-                  if (!phone) {
-                    alert('Esta lead não tem número de WhatsApp válido (falta +XX)')
-                    return
+                  if (openWhatsApp(selectedLeadForWhatsApp.phone, whatsAppMessage)) {
+                    setShowWhatsAppModal(false)
                   }
-                  const encoded = encodeURIComponent(whatsAppMessage || '')
-                  window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`, '_blank')
-                  setShowWhatsAppModal(false)
                 }}
                 style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#25d366', color: '#ffffff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 13 }}
               >
