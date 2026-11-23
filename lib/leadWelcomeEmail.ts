@@ -106,13 +106,13 @@ export function composeLeadWelcomeEmail(params: WelcomeParams) {
       <td align="center" style="padding:20px 10px;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
                style="max-width:600px;background:#ffffff;border-radius:12px;">
+          ${confirmation}
           <tr>
             <td dir="${direction}"
                 style="padding:28px;text-align:${alignment};font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#263238;overflow-wrap:anywhere;">
               ${safeMessage}
             </td>
           </tr>
-          ${confirmation}
         </table>
       </td>
     </tr>
