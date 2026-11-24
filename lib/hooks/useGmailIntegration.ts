@@ -46,7 +46,6 @@ export function useGmailIntegration(userId: string) {
 
   const sendEmail = async (
     leadId: string,
-    recipientEmail: string,
     subject: string,
     body: string,
     templateId?: string,
@@ -69,9 +68,7 @@ export function useGmailIntegration(userId: string) {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId,
           leadId,
-          recipientEmail,
           subject,
           body,
           templateId,

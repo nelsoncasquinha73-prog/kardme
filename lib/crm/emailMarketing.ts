@@ -215,7 +215,9 @@ export async function sendBroadcast(
   broadcastId: string,
   recipients: Array<{ email: string; leadId?: string; name?: string | null }>,
   subject: string,
-  htmlBody: string
+  htmlBody: string,
+  attachments?: import('./attachmentHelpers').AttachmentPayload[],
+  legacy?: { templateId?: string }
 ): Promise<{ sent: number; failed: number }> {
   if (recipients.length === 0) {
     throw new Error('Sem destinatários')
@@ -250,6 +252,8 @@ export async function sendBroadcast(
         recipientNames,
         subject,
         htmlBody,
+        attachments,
+        legacy,
       }),
     })
 

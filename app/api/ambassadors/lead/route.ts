@@ -1,25 +1,14 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
 
-async function sendEmail(params: { userId: string; leadId?: string; recipientEmail: string; subject: string; body: string }) {
+import { sendGmail, isMailbox } from '@/lib/server/gmailTransport'
+import { ownsCard } from '@/lib/server/emailAuthorization'
+
+async function notify(params: Parameters<typeof sendGmail>[0]) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kardme.com'
-    const response = await fetch(baseUrl + '/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: params.userId,
-        leadId: params.leadId || null,
-        recipientEmail: params.recipientEmail,
-        subject: params.subject,
-        body: params.body,
-      }),
-    })
-    const txt = await response.text()
-    if (!response.ok) return { ok: false, details: txt }
-    return { ok: true, details: txt }
-  } catch (err: any) {
-    return { ok: false, details: err?.message || String(err) }
+    await sendGmail(params)
+  } catch {
+    console.error('[ambassadors] Failed to send notification')
   }
 }
 
@@ -39,7 +28,7 @@ export async function POST(req: Request) {
     } = body || {}
 
     // Validação de campos obrigatórios
-    if (!slug || !name || !email) {
+    if (typeof slug !== 'string' || typeof name !== 'string' || !isMailbox(email)) {
       return NextResponse.json(
         { error: 'Campos obrigatórios em falta (slug, name, email).' },
         { status: 400 }
@@ -131,6 +120,10 @@ export async function POST(req: Request) {
       }
     }
 
+    if (sourceCardId && !(await ownsCard(ambassador.user_id, sourceCardId))) {
+      return NextResponse.json({ error: 'Cartão indisponível' }, { status: 404 })
+    }
+
     // 5) Inserir lead no CRM (tabela leads)
     const leadSource = `ambassador:${slug}`
 
@@ -160,7 +153,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: leadError.message }, { status: 500 })
     }
 
-    const leadId = leadData?.[0]?.id as string | undefined
+    const leadId = leadData?.[0]?.id as string
 
     // 6) Guardar também em ambassador_leads (para stats/painel do embaixador)
     const { error: ambLeadErr } = await supabaseServer.from('ambassador_leads').insert([
@@ -188,12 +181,12 @@ export async function POST(req: Request) {
       .eq('id', ambassador.id)
 
     // 8) Emails
-    if (ownerEmail) {
-      await sendEmail({
+    if (leadId && ownerEmail) {
+      await notify({
         userId: ownerUserId,
         leadId,
         recipientEmail: ownerEmail,
-        subject: `Nova lead vinda do Embaixador: ${ambassador.name || slug}`,
+        subject: `Nova lead vinda do Embaixador: ${ambassador.name || slug}`.replace(/[\r\n]/g, ' '),
         body:
           `Olá,\n\n` +
           `Recebeste uma nova lead via embaixador.\n\n` +
@@ -207,8 +200,8 @@ export async function POST(req: Request) {
       })
     }
 
-    if (ambassador.email) {
-      await sendEmail({
+    if (leadId && ambassador.email) {
+      await notify({
         userId: ownerUserId,
         leadId,
         recipientEmail: ambassador.email,

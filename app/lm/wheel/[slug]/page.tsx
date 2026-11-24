@@ -178,7 +178,7 @@ export default function WheelPage() {
         if (newCount >= maxSpins) {
           setExhausted(true)
           setStep('result')
-          if (leadId) notifyWinner(winner.label, true)
+          if (leadId) recordWheelResult(winner.label)
         } else {
           setTimeout(() => { setResult(null); setStep('spin') }, 2500)
         }
@@ -223,10 +223,10 @@ export default function WheelPage() {
     setStep('spin')
   }
 
-  async function notifyWinner(prizeLabel: string, final: boolean = false) {
+  async function recordWheelResult(prizeLabel: string) {
     if (!magnet || !leadId) return
     try {
-      await fetch("/api/lead-magnets/wheel-winner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_id: leadId, slug: magnet.slug, prize_label: prizeLabel, final }) })
+      await fetch("/api/lead-magnets/wheel-winner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_id: leadId, slug: magnet.slug, prize_label: prizeLabel }) })
     } catch (e) { console.error(e) }
   }
 
@@ -320,7 +320,7 @@ export default function WheelPage() {
                     <div key={i} className={styles.resultBadge} style={{background:`linear-gradient(135deg, ${p.color}, ${p.color}dd)`,boxShadow:`0 4px 24px ${p.color}66`}}>{p.label}</div>
                   ))}
                 </div>
-                <p className={styles.resultMessage}>{magnet.thank_you_message || 'Os teus prémios foram registados! Entraremos em contacto em breve.'}</p>
+                <p className={styles.resultMessage}>Os emails de prémio estão temporariamente suspensos.</p>
               </>
             ) : (
               <>

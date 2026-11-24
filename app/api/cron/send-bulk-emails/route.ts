@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-function getAdminSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !serviceKey) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
-  }
-
-  return createClient(url, serviceKey, { auth: { persistSession: false } })
-}
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { canSendMarketing, getOwnedLead, isAuthorizedCron } from '@/lib/server/emailAuthorization'
+import { sendGmail, validAttachments } from '@/lib/server/gmailTransport'
 
 export async function POST(req: NextRequest) {
+  if (!isAuthorizedCron(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (process.env.ENABLE_LEGACY_GMAIL_CRON !== 'true') {
+    return NextResponse.json({ error: 'Executor legado por confirmar' }, { status: 503 })
+  }
+
   try {
-    const supabase = getAdminSupabase()
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const supabase = supabaseAdmin
 
     // Fetch pending tasks
     const { data: tasks, error: tasksError } = await supabase
@@ -35,26 +30,26 @@ export async function POST(req: NextRequest) {
 
     for (const task of tasks) {
       try {
-        // Call /api/send-email with correct payload
-        const sendRes = await fetch(`${baseUrl}/api/send-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: task.user_id,
-            leadId: task.lead_id,
-            recipientEmail: task.email_recipient,
-            subject: task.email_subject,
-            body: task.email_body,
-            templateId: task.email_template_id,
-            attachments: task.attachments || [],
-            fromName: task.email_source_type === 'broadcast' ? 'Kardme' : undefined,
-          }),
-        })
-
-        if (!sendRes.ok) {
-          const errorText = await sendRes.text()
-          throw new Error(`Send failed: ${sendRes.status} ${errorText}`)
+        const lead = await getOwnedLead(task.user_id, task.lead_id)
+        const email = lead?.email?.trim()
+        if (!lead || !email || lead.marketing_opt_in !== true || !(await canSendMarketing(task.user_id, email))) {
+          throw new Error('Destinatário sem autorização válida')
         }
+        const attachments = task.attachments ?? []
+        if (!validAttachments(attachments)) throw new Error('Anexos inválidos')
+        let templateId: string | undefined
+        if (task.email_template_id && !task.email_template_id.startsWith('default-')) {
+          const { data: template } = await supabase.from('email_templates').select('id')
+            .eq('id', task.email_template_id).eq('user_id', task.user_id).maybeSingle()
+          if (!template) throw new Error('Modelo indisponível')
+          templateId = template.id
+        }
+        const messageId = await sendGmail({
+          userId: task.user_id, leadId: lead.id, recipientEmail: email, subject: task.email_subject,
+          body: task.email_body, templateId, attachments,
+          fromName: task.email_source_type === 'broadcast' ? 'Kardme' : undefined,
+        })
+        if (!messageId) throw new Error('Entrega Gmail por reconciliar')
 
         // Mark as sent
         const { error: updateError } = await supabase
@@ -101,6 +96,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  if (!isAuthorizedCron(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({
     ok: true,
     message: 'Cron endpoint for bulk email sending. Use POST to trigger.',

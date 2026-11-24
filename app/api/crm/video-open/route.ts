@@ -1,59 +1,70 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { sendGmail } from '@/lib/server/gmailTransport'
+import { getOwnedLead, ownsCard } from '@/lib/server/emailAuthorization'
 
-function getAdminSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !serviceKey) throw new Error('Missing env vars')
-  return createClient(url, serviceKey, { auth: { persistSession: false } })
+function escapeHtml(value: string | null) {
+  return (value || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { previewId, leadId, broadcastId } = await req.json()
-
-    if (!previewId || !leadId) {
-      return NextResponse.json({ error: 'Missing previewId or leadId' }, { status: 400 })
+    const { previewId, leadId, broadcastId } = await request.json().catch(() => ({})) || {}
+    if (typeof previewId !== 'string' || typeof leadId !== 'string' ||
+        (broadcastId != null && typeof broadcastId !== 'string')) {
+      return NextResponse.json({ error: 'Pedido inválido' }, { status: 400 })
     }
 
-    const supabaseAdmin = getAdminSupabase()
+    const { data: preview } = await supabaseAdmin.from('email_video_previews')
+      .select('user_id, broadcast_id').eq('id', previewId).maybeSingle()
+    const lead = preview && await getOwnedLead(preview.user_id, leadId)
+    if (!preview || !lead) return NextResponse.json({ error: 'Evento indisponível' }, { status: 404 })
 
-    const { data: preview, error: previewError } = await supabaseAdmin
-      .from('email_video_previews')
-      .select('user_id')
-      .eq('id', previewId)
-      .single()
-
-    if (previewError || !preview) {
-      return NextResponse.json({ error: 'Preview not found' }, { status: 404 })
-    }
-
-    const { error } = await supabaseAdmin
-      .from('email_video_opens')
-      .insert({
-        preview_id: previewId,
-        lead_id: leadId,
-        broadcast_id: broadcastId || null,
-        opened_at: new Date().toISOString(),
-        user_id: preview.user_id,
-      })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
-    }
-
-    // Trigger notification (await to ensure it runs on serverless)
+    let campaign
     if (broadcastId) {
-      await fetch(new URL('/api/crm/video-open-notify', req.url), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ broadcastId, leadId }),
-      }).catch(() => {})
+      const { data } = await supabaseAdmin.from('email_broadcasts')
+        .select('subject, html_content, notify_on_video_opens, sender_card_id')
+        .eq('id', broadcastId).eq('user_id', preview.user_id).maybeSingle()
+      const blocks = data?.html_content?.blocks
+      const linked = preview.broadcast_id === broadcastId ||
+        (!preview.broadcast_id && Array.isArray(blocks) && blocks.some(block => block?.content?.previewId === previewId))
+      const { data: recipient } = await supabaseAdmin.from('email_broadcast_recipients')
+        .select('lead_id').eq('broadcast_id', broadcastId).eq('lead_id', lead.id)
+        .eq('status', 'sent').limit(1).maybeSingle()
+      if (!data || !linked || !recipient ||
+          (data.sender_card_id && !(await ownsCard(preview.user_id, data.sender_card_id)))) return NextResponse.json({ error: 'Evento indisponível' }, { status: 404 })
+      campaign = data
+    } else if (preview.broadcast_id) {
+      return NextResponse.json({ error: 'Evento indisponível' }, { status: 404 })
     }
 
+    const { error } = await supabaseAdmin.from('email_video_opens').insert({
+      preview_id: previewId, lead_id: lead.id, broadcast_id: broadcastId || null,
+      opened_at: new Date().toISOString(), user_id: preview.user_id,
+    })
+    if (error) return NextResponse.json({ error: 'Erro ao registar evento' }, { status: 500 })
+
+    if (campaign?.notify_on_video_opens) {
+      const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const { data: recent, error: recentError } = await supabaseAdmin.from('email_video_open_notifications')
+        .select('id').eq('broadcast_id', broadcastId).eq('lead_id', lead.id)
+        .gt('sent_at', cutoff).limit(1).maybeSingle()
+      if (!recent && !recentError) {
+        const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(preview.user_id)
+        if (user?.email) {
+          await sendGmail({
+            userId: preview.user_id, leadId: lead.id, recipientEmail: user.email,
+            subject: `Video aberto: ${lead.name || ''}`.replace(/[\r\n]/g, ' '),
+            body: `<p>Olá,</p><p><strong>${escapeHtml(lead.name)}</strong> (${escapeHtml(lead.email)}) abriu o vídeo da sua campanha <strong>"${escapeHtml(campaign.subject)}"</strong> às ${new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })}.</p><p><a href="https://kardme.com/dashboard/crm?lead=${encodeURIComponent(lead.id)}">Ver lead</a></p>`,
+          })
+          await supabaseAdmin.from('email_video_open_notifications').insert({
+            broadcast_id: broadcastId, lead_id: lead.id, sent_at: new Date().toISOString(),
+          })
+        }
+      }
+    }
     return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('[VIDEO-OPEN] error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Erro ao processar evento' }, { status: 500 })
   }
 }

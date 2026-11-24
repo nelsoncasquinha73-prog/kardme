@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
 import { processEmailTemplate } from '@/lib/processEmailTemplate'
 
-const CRON_SECRET = process.env.CRON_SECRET || 'dev-secret'
+import { isAuthorizedCron } from '@/lib/server/emailAuthorization'
 
 function getAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -18,8 +18,7 @@ function getAdminSupabase() {
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization')
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    if (!isAuthorizedCron(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateEmailHtml } from '@/lib/crm/emailHtmlGenerator'
-import { google } from 'googleapis'
+import { isMailbox, openGmail, buildRawEmail, validAttachments } from '@/lib/server/gmailTransport'
+import { canSendMarketing, getOwnedLead } from '@/lib/server/emailAuthorization'
+import { processEmailTemplate } from '@/lib/processEmailTemplate'
 import { createClient } from '@supabase/supabase-js'
 
 function getAdminSupabase() {
@@ -11,46 +12,6 @@ function getAdminSupabase() {
     throw new Error('Missing env vars')
   }
   return createClient(url, serviceKey, { auth: { persistSession: false } })
-}
-
-function toBase64Url(str: string) {
-  return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
-}
-
-function encodeSubjectRFC2047(subject: string) {
-  if (/^[ -~]*$/.test(subject)) return subject
-  const encoded = Buffer.from(subject, 'utf-8').toString('base64')
-  return `=?UTF-8?B?${encoded}?=`
-}
-
-function buildRawEmail(params: {
-  fromEmail: string
-  fromName?: string | null
-  replyTo?: string | null
-  to: string
-  subject: string
-  htmlBody: string
-  unsubscribeUrl?: string
-}) {
-  const safeFromName = (params.fromName || '').replace(/"/g, '\\"')
-  const fromHeader = params.fromName ? `From: "${safeFromName}" <${params.fromEmail}>` : `From: ${params.fromEmail}`
-  const replyToHeader = `Reply-To: ${params.replyTo || params.fromEmail}`
-
-  const headers = [
-    fromHeader,
-    `To: ${params.to}`,
-    `Subject: ${encodeSubjectRFC2047(params.subject)}`,
-    replyToHeader,
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset="UTF-8"',
-    'X-Mailer: Kardme Email Marketing',
-    'X-Priority: 3',
-  ]
-  if (params.unsubscribeUrl) {
-    headers.push(`List-Unsubscribe: <${params.unsubscribeUrl}>`)
-    headers.push('List-Unsubscribe-Post: List-Unsubscribe=One-Click')
-  }
-  return [...headers, '', params.htmlBody].join('\r\n')
 }
 
 function addLeadIdToVideoLinks(htmlBody: string, leadId: string): string {
@@ -71,18 +32,19 @@ function replacePlaceholders(html: string, name: string | null, email?: string):
 }
 
 export async function POST(req: NextRequest) {
-  console.log('[SEND-BROADCAST] request body keys:', Object.keys(await req.clone().json()).join(', '))
   try {
-    const { userId, broadcastId, recipients, recipientNames, subject, htmlBody, recipientLeadIds } = await req.json()
-    console.log('[SEND-BROADCAST] userId:', userId, 'recipients count:', recipients?.length)
+    const { userId, broadcastId, recipients, subject, htmlBody, recipientLeadIds, attachments, legacy } = await req.json()
 
     if (!userId || !broadcastId || !recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-    if (!subject || !htmlBody) {
+    if (typeof subject !== 'string' || !subject.trim() || /[\r\n]/.test(subject) || typeof htmlBody !== 'string' || !htmlBody.trim()) {
       return NextResponse.json({ error: 'Subject and htmlBody required' }, { status: 400 })
     }
 
+    if (!validAttachments(attachments ?? [])) {
+      return NextResponse.json({ error: 'Anexos inválidos' }, { status: 400 })
+    }
     const supabaseAdmin = getAdminSupabase()
 
     const authHeader = req.headers.get('authorization') || ''
@@ -100,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const { data: ownedBroadcast, error: broadcastError } = await supabaseAdmin
       .from('email_broadcasts')
-      .select('id')
+      .select('id, sender_card_id')
       .eq('id', broadcastId)
       .eq('user_id', userId)
       .single()
@@ -109,144 +71,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campanha não encontrada' }, { status: 404 })
     }
 
-    const { data: integration, error: integrationError } = await supabaseAdmin
-      .from('user_integrations')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('integration_type', 'gmail')
-      .single()
-
-    if (integrationError || !integration) {
-      return NextResponse.json({ error: 'Gmail not connected' }, { status: 401 })
-    }
-    if (!integration.refresh_token) {
-      return NextResponse.json({ error: 'Missing refresh token' }, { status: 400 })
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.NEXT_PUBLIC_APP_URL + '/api/gmail/callback'
-    )
-
-    let accessToken = integration.access_token as string | null
-    const expired =
-      integration.token_expires_at &&
-      new Date(integration.token_expires_at) < new Date(Date.now() + 30 * 1000)
-
-    if (!accessToken || expired) {
-      oauth2Client.setCredentials({ refresh_token: integration.refresh_token })
-      const { credentials } = await oauth2Client.refreshAccessToken()
-      accessToken = credentials.access_token || null
-      await supabaseAdmin
-        .from('user_integrations')
-        .update({
-          access_token: accessToken,
-          token_expires_at: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
-        })
-        .eq('id', integration.id)
-    }
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Failed to obtain access token' }, { status: 500 })
-    }
-
-    oauth2Client.setCredentials({ access_token: accessToken, refresh_token: integration.refresh_token })
-
-    const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
-    const fromEmail = integration.sender_email || 'me'
-
-    // Resolve sender card name (optional) from broadcast.sender_card_id
     let senderName: string | null = null
-    try {
-      const { data: bcast } = await supabaseAdmin
-        .from('email_broadcasts')
-        .select('sender_card_id')
-        .eq('id', broadcastId)
-        .eq('user_id', userId)
-        .single()
-
-      const senderCardId = (bcast as any)?.sender_card_id
-      if (senderCardId) {
-        const { data: card } = await supabaseAdmin
-          .from('cards')
-          .select('name, title')
-          .eq('id', senderCardId)
-          .eq('user_id', userId)
-          .single()
-
-        senderName = (card as any)?.name || (card as any)?.title || null
-      }
-    } catch (e) {
-      console.warn('[SEND-BROADCAST] Failed to resolve sender card name:', e)
+    if (ownedBroadcast.sender_card_id) {
+      const { data: card } = await supabaseAdmin.from('cards').select('name, title')
+        .eq('id', ownedBroadcast.sender_card_id).eq('user_id', userId).maybeSingle()
+      if (!card) return NextResponse.json({ error: 'Cartão indisponível' }, { status: 404 })
+      senderName = card.name || card.title || null
     }
-
-    console.log('[SEND-BROADCAST] fromEmail:', fromEmail, 'senderName:', senderName, 'broadcastId:', broadcastId)
-
+    let templateId: string | null = null
+    if (legacy?.templateId && typeof legacy.templateId === 'string' && !legacy.templateId.startsWith('default-')) {
+      const { data: template } = await supabaseAdmin.from('email_templates').select('id')
+        .eq('id', legacy.templateId).eq('user_id', userId).maybeSingle()
+      if (!template) return NextResponse.json({ error: 'Modelo indisponível' }, { status: 404 })
+      templateId = template.id
+    }
+    const gmail = await openGmail(userId)
 
     let sent = 0
     let failed = 0
     const errors: string[] = []
-
-    // Buscar emails unsubscribed
-    const { data: unsubscribed, error: unsubscribeError } = await supabaseAdmin
-      .from('email_unsubscribes')
-      .select('email')
-      .eq('user_id', userId)
-
-    if (unsubscribeError || !unsubscribed) {
-      console.error('[SEND-BROADCAST] Erro ao verificar cancelamentos:', unsubscribeError)
-      return NextResponse.json(
-        { error: 'Não foi possível verificar os cancelamentos de subscrição' },
-        { status: 500 }
-      )
-    }
-    const unsubscribedEmails = new Set(
-      unsubscribed.map(u => u.email.trim().toLowerCase())
-    )
+    const attempted = new Set<string>()
 
     for (let i = 0; i < recipients.length; i++) {
-      const recipientEmail = recipients[i]
+      const requestedEmail = recipients[i]
       const leadId = recipientLeadIds?.[i] || null
-      const leadName = recipientNames?.[i] || null
+      let recipientEmail = ''
 
       try {
-        // Skip se unsubscribed
-        if (unsubscribedEmails.has(recipientEmail.trim().toLowerCase())) {
-          console.log("[SKIP] " + recipientEmail + " is unsubscribed")
-          continue
-        }
+        if (!isMailbox(requestedEmail)) continue
+        const pattern = requestedEmail.toLowerCase().replace(/[\\%_]/g, '\\$&')
+        const { data: reference, error: referenceError } = await supabaseAdmin.from('leads')
+          .select('id').eq('user_id', userId).ilike('email', pattern).limit(1).maybeSingle()
+        if (referenceError) throw referenceError
+        const lead = reference ? await getOwnedLead(userId, leadId || reference.id) : null
+        if (!lead || !isMailbox(lead.email?.trim()) || lead.email.trim().toLowerCase() !== requestedEmail.toLowerCase()) continue
+        recipientEmail = lead.email.trim()
+        const leadName = lead.name
 
-        // Validar o consentimento atual para este destinatário.
-        // Não confiar no leadId nem na autorização enviados pelo frontend.
-        const normalizedRecipientEmail = recipientEmail.trim().toLowerCase()
+        if (lead.marketing_opt_in !== true || !(await canSendMarketing(userId, recipientEmail))) continue
 
-        const { data: matchingLeads, error: consentError } = await supabaseAdmin
-          .from('leads')
-          .select('id, marketing_opt_in')
-          .eq('user_id', userId)
-          .ilike('email', normalizedRecipientEmail)
-          .limit(1001)
+        const normalizedEmail = recipientEmail.toLowerCase()
+        if (attempted.has(normalizedEmail)) continue
+        attempted.add(normalizedEmail)
 
-        if (consentError || !matchingLeads || matchingLeads.length > 1000) {
-          throw new Error('Não foi possível verificar o consentimento')
-        }
-
-        if (
-          matchingLeads.length === 0 ||
-          matchingLeads.some(l => l.marketing_opt_in !== true) ||
-          (leadId && !matchingLeads.some(l => l.id === leadId))
-        ) {
-          console.log('[SKIP] Destinatário sem autorização válida')
-          continue
-        }
-
-        console.log("[SEND] Attempting to send to " + recipientEmail + " (leadId: " + leadId + ", name: " + leadName + ")")
-
-        let personalizedHtmlBody = htmlBody
-
-        // 1. Substituir {{nome}} pelo nome real
-        personalizedHtmlBody = replacePlaceholders(personalizedHtmlBody, leadName, recipientEmail)
+        let personalizedHtmlBody = legacy
+          ? processEmailTemplate(htmlBody, { nome: leadName, email: recipientEmail })
+            .replace('</body>', '<p><a href="{UNSUBSCRIBE_URL}">Cancelar subscrição</a></p></body>')
+          : replacePlaceholders(htmlBody, leadName, recipientEmail)
 
         // 2. Adicionar lead_id aos links de vídeo
         if (leadId) {
@@ -261,14 +132,10 @@ export async function POST(req: NextRequest) {
           .replace('{UNSUBSCRIBE_URL}', unsubscribeUrl)
           .replace('{MANAGE_PREFERENCES_URL}', managePreferencesUrl)
 
-        const raw = buildRawEmail({ fromEmail, fromName: senderName, to: recipientEmail, subject, htmlBody: personalizedHtmlBody, unsubscribeUrl })
-
-        const res = await gmail.users.messages.send({
-          userId: 'me',
-          requestBody: { raw: toBase64Url(raw) },
-        })
-
-        const messageId = res.data.id || null
+        const deliveredSubject = legacy ? subject.replace('{nome}', () => leadName || '').replace(/[\r\n]/g, ' ') : subject
+        const raw = buildRawEmail({ fromEmail: gmail.senderEmail, fromName: senderName, to: recipientEmail,
+          subject: deliveredSubject, htmlBody: personalizedHtmlBody, unsubscribeUrl, attachments })
+        const messageId = await gmail.sendRaw(raw)
         console.log(`[SUCCESS] Email sent to ${recipientEmail}, messageId: ${messageId}`)
 
         const insertPayload: Record<string, any> = { broadcast_id: broadcastId, email: recipientEmail, status: 'sent' }
@@ -283,6 +150,15 @@ export async function POST(req: NextRequest) {
           errors.push(`${recipientEmail}: DB insert failed - ${insertError.message}`)
         } else {
           console.log(`[DB INSERT OK] ${recipientEmail}`)
+        }
+
+        if (legacy && leadId) {
+          const { error } = await supabaseAdmin.from('message_history').insert({
+            user_id: userId, lead_id: leadId, recipient_email: recipientEmail,
+            subject: deliveredSubject, body: personalizedHtmlBody, template_id: templateId,
+            message_id: messageId, sent_at: new Date().toISOString(),
+          })
+          if (error) console.error('[SEND-BROADCAST] Failed to record legacy message history', error.code)
         }
 
         // Registar atividade no CRM (scheduled_task como histórico)

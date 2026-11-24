@@ -7,34 +7,12 @@ export async function recordVideoOpen(
   broadcastId?: string | null
 ) {
   try {
-    const { error } = await supabase
-      .from('email_video_opens')
-      .insert({
-        preview_id: previewId,
-        lead_id: leadId,
-        broadcast_id: broadcastId || null,
-        opened_at: new Date().toISOString(),
-      })
-
-    if (error) {
-      console.error('[VIDEO TRACKING] Erro ao registar abertura:', error)
-      return
-    }
-
-    console.log('[VIDEO TRACKING] Abertura registada:', { previewId, leadId })
-
-    // Se há broadcastId, chamar endpoint de notificação
-    if (broadcastId) {
-      try {
-        await fetch('/api/crm/video-open-notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ broadcastId, leadId }),
-        })
-      } catch (err) {
-        console.error('[VIDEO TRACKING] Erro ao notificar:', err)
-      }
-    }
+    const response = await fetch('/api/crm/video-open', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ previewId, leadId, broadcastId }),
+    })
+    if (!response.ok) throw new Error('Erro ao registar abertura')
   } catch (err) {
     console.error('[VIDEO TRACKING] Erro:', err)
   }

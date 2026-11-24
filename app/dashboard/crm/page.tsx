@@ -51,7 +51,7 @@ import LeadMagnetsView from './LeadMagnetsView'
 import AmbassadorsView from './AmbassadorsView'
 import { ScheduledTasksView } from './ScheduledTasksView'
 import EmailMarketingView from './EmailMarketingView'
-import { getBroadcasts, type EmailBroadcast } from '../../../lib/crm/emailMarketing'
+import { createBroadcast, getBroadcasts, sendBroadcast, type EmailBroadcast } from '../../../lib/crm/emailMarketing'
 import EmailCampaignEditor from './EmailCampaignEditor'
 import PipelineKanban from './PipelineKanban'
 import { processEmailTemplate } from '../../lib/processEmailTemplate'
@@ -1586,71 +1586,34 @@ const { data, error } = await supabase.from('leads').insert({
     }
 
     setBulkSending(true)
-    let sent = 0
-    let failed = 0
-
-    // Limite diário (CRM Pro): 200 emails/dia por utilizador
     try {
+      const recipients = leads.filter(lead => selectedLeadIds.has(lead.id) && lead.email)
+        .map(lead => ({ email: lead.email, leadId: lead.id, name: lead.name }))
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error('Sessão expirada.')
       const usageRes = await fetch('/api/crm/email/usage', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, countToSend: selectedLeadIds.size }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, countToSend: recipients.length }),
       })
-      const usageJson = await usageRes.json().catch(() => null)
-      if (!usageRes.ok) {
-        alert(usageJson?.error || 'Limite diário atingido.')
-        setBulkSending(false)
-        return
-      }
-    } catch (e: any) {
-      alert('Erro ao validar limite diário: ' + (e?.message || String(e)))
+      if (!usageRes.ok) throw new Error((await usageRes.json())?.error || 'Limite diário atingido.')
+
+      const campaign = await createBroadcast(userId, {
+        title: bulkSubject, subject: bulkSubject, sender_card_id: bulkEmailCardId,
+        html_content: { blocks: [], createdAt: new Date().toISOString() },
+      })
+      const { sent, failed } = await sendBroadcast(userId, campaign.id, recipients, bulkSubject, bulkBody, selectedAttachments, { templateId: selectedTemplate?.id })
+      alert(`Enviados: ${sent}, Falhados: ${failed}`)
+      setShowBulkEmailModal(false)
+      setBulkSubject('')
+      setBulkBody('')
+      setSelectedLeadIds(new Set())
+      setSelectedAttachments([])
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao enviar emails')
+    } finally {
       setBulkSending(false)
-      return
     }
-
-    for (const leadId of Array.from(selectedLeadIds)) {
-      const lead = leads.find(l => l.id === leadId)
-      if (!lead) continue
-
-      const personalizedSubject = bulkSubject.replace('{nome}', lead.name)
-      const personalizedBody = processEmailTemplate(bulkBody, { nome: lead.name, email: lead.email })
-
-      try {
-//         await gmail.sendEmail(lead.id, lead.email, personalizedSubject, personalizedBody, selectedTemplate?.id, selectedAttachments)
-        const senderCard = cardsList.find(c => c.id === bulkEmailCardId)
-        const sendRes = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            leadId: lead.id,
-            recipientEmail: lead.email,
-            subject: personalizedSubject,
-            body: personalizedBody,
-            templateId: selectedTemplate?.id,
-            attachments: selectedAttachments || [],
-            fromName: senderCard?.name,
-          }),
-        })
-        if (!sendRes.ok) throw new Error(`Send failed: ${sendRes.status}`)
-        await sendRes.json()
-        sent++
-        await logLeadActivity({ leadId: lead.id, userId, type: 'email_sent', title: `Email em massa enviado: ${personalizedSubject}` })
-      } catch (err) {
-        failed++
-        console.error('Erro ao enviar para', lead.email, err)
-      }
-
-      await new Promise(r => setTimeout(r, 500))
-    }
-
-    alert(`Enviados: ${sent}, Falhados: ${failed}`)
-    setShowBulkEmailModal(false)
-    setBulkSubject('')
-    setBulkBody('')
-    setSelectedLeadIds(new Set())
-    setSelectedAttachments([])
-    setBulkSending(false)
   }
 
   const createBulkTasks = async () => {
@@ -3692,7 +3655,7 @@ const { data, error } = await supabase.from('leads').insert({
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 800, fontSize: 13, color: '#111827' }}>Mensagem</label>
             <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} placeholder="Escreve a tua mensagem aqui…" style={{ width: '100%', minHeight: 200, padding: '12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.18)', fontSize: 13, fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box', background: '#fff', color: '#111827' }} />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { const processedBody = processEmailTemplate(emailBody, { nome: selectedLeadForEmail.name, email: selectedLeadForEmail.email }); await gmail.sendEmail(selectedLeadForEmail.id, selectedLeadForEmail.email, emailSubject, processedBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
+              <button onClick={async () => { if (!emailSubject || !emailBody) { alert('Preenche assunto e mensagem'); return }; setEmailLoading(true); try { const processedBody = processEmailTemplate(emailBody, { nome: selectedLeadForEmail.name, email: selectedLeadForEmail.email }); await gmail.sendEmail(selectedLeadForEmail.id, emailSubject, processedBody, selectedTemplate?.id, selectedAttachments); alert('Email enviado com sucesso!'); setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null); setSelectedTemplate(null); setSelectedAttachments([]) } catch (err: any) { alert('Erro: ' + err.message) } finally { setEmailLoading(false) } }} disabled={emailLoading} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: 'var(--color-primary)', color: '#ffffff', border: 'none', fontWeight: 800, cursor: emailLoading ? 'not-allowed' : 'pointer', fontSize: 13, opacity: emailLoading ? 0.6 : 1 }}>{emailLoading ? 'A enviar…' : 'Enviar Email'}</button>
               <button onClick={() => { setShowEmailModal(false); setEmailSubject(''); setEmailBody(''); setSelectedLeadForEmail(null) }} style={{ flex: 1, padding: '12px 14px', borderRadius: 10, background: '#f3f4f6', border: '1px solid rgba(0,0,0,0.08)', fontWeight: 800, cursor: 'pointer', fontSize: 13, color: '#111827' }}>Cancelar</button>
             </div>
           </div>

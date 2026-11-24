@@ -76,39 +76,12 @@ export default function DiscountPage() {
 
     setSubmitting(true)
     try {
-      // Inserir lead
-      const { data: leadData, error: leadError } = await supabase
-        .from('leads')
-        .insert({
-          lead_magnet_id: magnet?.id,
-          email: formData.email,
-          name: formData.name || 'Sem nome',
-          phone: formData.phone,
-          source: 'discount_magnet',
-          card_id: magnet?.card_id,
-        })
-        .select()
-        .single()
-
-      if (leadError) throw leadError
-
-      // Enviar email de boas-vindas com o código
-      if (magnet?.welcome_email_body && magnet?.discount_config?.code) {
-        const discountCode = magnet.discount_config.code
-        const emailBody = magnet.welcome_email_body.replace('{codigo}', discountCode).replace('{nome}', formData.name || 'Utilizador')
-
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: formData.email,
-            subject: magnet.welcome_email_subject,
-            html: emailBody,
-            fromName: magnet.card_id ? `Kardme - ${magnet.title}` : 'Kardme',
-          }),
-        })
-      }
-
+      const response = await fetch('/api/lead-magnets/discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, ...formData, consent }),
+      })
+      if (!response.ok) throw new Error('Erro ao submeter')
       setSubmitted(true)
     } catch (e) {
       console.error(e)
