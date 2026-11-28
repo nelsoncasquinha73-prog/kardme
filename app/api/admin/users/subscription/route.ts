@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/security/requireAdmin'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -7,6 +8,9 @@ const supabaseAdmin = createClient(
 )
 
 export async function GET(req: NextRequest) {
+  const denied = await requireAdmin(req, supabaseAdmin)
+  if (denied) return denied
+
   const userId = req.nextUrl.searchParams.get('userId')
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 })

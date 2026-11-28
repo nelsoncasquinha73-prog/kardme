@@ -1,5 +1,6 @@
 'use client'
 
+import { adminApiFetch } from '@/lib/admin-api-fetch'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { FiLoader, FiCheck, FiX } from 'react-icons/fi'
@@ -49,7 +50,7 @@ export default function AmbassadorsTab({ userId }: AmbassadorsTabProps) {
   const handleActivate = async (ambassadorId: string, months: number) => {
     setActivating(ambassadorId)
     try {
-      const res = await fetch('/api/admin/ambassadors/activate', {
+      const res = await adminApiFetch(supabase, '/api/admin/ambassadors/activate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +76,7 @@ export default function AmbassadorsTab({ userId }: AmbassadorsTabProps) {
 
     setActivating(ambassadorId)
     try {
-      const res = await fetch('/api/admin/ambassadors/deactivate', {
+      const res = await adminApiFetch(supabase, '/api/admin/ambassadors/deactivate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ambassadorId }),

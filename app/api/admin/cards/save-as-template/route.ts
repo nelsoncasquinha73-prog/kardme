@@ -1,7 +1,11 @@
+import { requireAdmin } from '@/lib/security/requireAdmin'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
 
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req, supabaseServer)
+  if (denied) return denied
+
   try {
     const { cardId, templateName } = await req.json()
 

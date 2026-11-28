@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/security/requireAdmin'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -9,6 +10,9 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin(req, supabaseAdmin)
+  if (denied) return denied
+
   try {
     const body = await req.json()
     const { userId, nome, apelido, phone_country, phone, plan, billing, published_card_limit, plan_started_at, plan_expires_at, plan_auto_renew, disabled, crm_pro_active, crm_pro_expires_at } = body

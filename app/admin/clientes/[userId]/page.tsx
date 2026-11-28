@@ -1,5 +1,6 @@
 "use client";
 
+import { adminApiFetch } from '@/lib/admin-api-fetch'
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -213,8 +214,11 @@ export default function AdminClienteDetailPage() {
       setPlanExpiresAt(profile.plan_expires_at);
       setPlanAutoRenew(profile.plan_auto_renew ?? false);
       // Carregar addons via API (bypassa RLS)
-      fetch(`/api/admin/users/addons?userId=${userId}`)
-        .then(r => r.json())
+      adminApiFetch(supabase, `/api/admin/users/addons?userId=${userId}`)
+        .then(r => {
+          if (!r.ok) throw new Error('Sem acesso aos dados administrativos');
+          return r.json();
+        })
         .then(({ crm_pro_active, crm_pro_expires_at }) => {
           setCrmProActive(crm_pro_active ?? false);
           setCrmProExpiresAt(crm_pro_expires_at ?? null);
@@ -222,8 +226,11 @@ export default function AdminClienteDetailPage() {
         .catch(() => {});
       
       // Carregar subscrição Stripe
-      fetch(`/api/admin/users/subscription?userId=${userId}`)
-        .then(r => r.json())
+      adminApiFetch(supabase, `/api/admin/users/subscription?userId=${userId}`)
+        .then(r => {
+          if (!r.ok) throw new Error('Sem acesso aos dados administrativos');
+          return r.json();
+        })
         .then(({ subscription }) => {
           setStripeSubscription(subscription ?? null);
           if (subscription?.current_period_end) {
@@ -382,7 +389,7 @@ export default function AdminClienteDetailPage() {
   async function saveProfile() {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/users/update", {
+      const res = await adminApiFetch(supabase, "/api/admin/users/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -457,7 +464,7 @@ export default function AdminClienteDetailPage() {
 
   async function toggleCardPublish(cardId: string, publish: boolean) {
     try {
-      const res = await fetch("/api/admin/cards/toggle-publish", {
+      const res = await adminApiFetch(supabase, "/api/admin/cards/toggle-publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cardId, published: publish }),
@@ -475,7 +482,7 @@ export default function AdminClienteDetailPage() {
   async function deleteCard(cardId: string) {
     if (!confirm("Eliminar este cartão? Esta ação é irreversível!")) return;
     try {
-      const res = await fetch("/api/admin/cards/delete", {
+      const res = await adminApiFetch(supabase, "/api/admin/cards/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cardId }),
@@ -493,7 +500,7 @@ export default function AdminClienteDetailPage() {
     const templateName = prompt("Nome do template:", cardTitle + " - Template");
     if (!templateName) return;
     try {
-      const res = await fetch("/api/admin/cards/save-as-template", {
+      const res = await adminApiFetch(supabase, "/api/admin/cards/save-as-template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cardId, templateName }),

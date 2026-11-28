@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/security/requireAdmin'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -9,6 +10,9 @@ const supabaseAdmin = createClient(
 )
 
 export async function GET(req: Request) {
+  const denied = await requireAdmin(req, supabaseAdmin)
+  if (denied) return denied
+
   try {
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('userId')
