@@ -523,7 +523,7 @@ export default function AdminClienteDetailPage() {
       const token = (await supabase.auth.getSession())?.data?.session?.access_token;
       if (!token) throw new Error('Sem autenticação');
 
-      const res = await fetch('/api/admin/users/update-subscription', {
+      const res = await fetch('/api/admin/users/subscription-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
